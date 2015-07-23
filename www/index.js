@@ -1,3 +1,4 @@
+require('babel-core/polyfill')
 var thinkjs = require('thinkjs');
 var path = require('path');
 

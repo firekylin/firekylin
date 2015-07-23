@@ -1,0 +1,12 @@
+@import "../common/mixin";
+
+
+.App {
+  @include flex-container(column);
+  height: 100%;
+
+  & > .main {
+    @include flex-container();
+    flex: 1 0;
+  }
+}

@@ -1,0 +1,15 @@
+@import "../common/mixin";
+
+.PostPage {
+
+  .title {
+    h2 {
+      display: inline-block;
+    }
+
+    .add-post {
+      @extend .button.blue;
+      margin-left: 10px;
+    }
+  }
+}
