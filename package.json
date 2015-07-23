@@ -4,7 +4,9 @@
   "description": "A CMS system based on thinkjs",
   "main": "www/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "gulp serve",
+    "compile": "gulp",
+    "start": "node www/index"
   },
   "repository": {
     "type": "git",
@@ -21,14 +23,15 @@
   },
   "homepage": "https://github.com/welefen/firekylin#readme",
   "devDependencies": {
+    "autobind-decorator": "^1.2.0",
     "babel-core": "^5.7.4",
     "babel-loader": "^5.3.2",
     "browser-sync": "^2.8.0",
     "chalk": "^1.1.0",
+    "del": "^1.2.0",
     "eslint": "^0.24.1",
     "eslint-plugin-react": "^3.0.0",
     "eventemitter3": "^1.1.1",
-    "del": "^1.2.0",
     "flux": "^2.0.3",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^2.3.1",
@@ -48,6 +51,7 @@
     "node-libs-browser": "^0.5.2",
     "qwest": "^2.0.1",
     "react": "^0.13.3",
+    "react-mixin": "^1.6.0",
     "react-router": "^0.13.3",
     "reflux": "^0.2.10",
     "run-sequence": "^1.1.1",
@@ -56,10 +60,5 @@
   "dependencies": {
     "babel-runtime": "^5.7.0",
     "superagent": "^1.2.0"
-  },
-  "scripts": {
-    "serve": "gulp serve",
-    "compile": "gulp",
-    "start": "node www/index"
   }
 }
