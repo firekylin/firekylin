@@ -7,7 +7,7 @@ import App from './components/App';
 import DashBoardPage from './components/DashBoardPage';
 import CategoryPage from './components/CategoryPage';
 import PostPage from './components/PostPage';
-import PostAddPage from './components/PostAddPage';
+import PostEditPage from './components/PostEditPage';
 
 import './stores/WebAPIStores';
 
@@ -21,8 +21,11 @@ let routes = (
 
       <Route path="post">
         <DefaultRoute name="post" handler={PostPage} />
-        <Route name="post/add" path="add" handler={PostAddPage} />
+        <Route name="post/add" path="add" handler={PostEditPage} />
+        <Route name="post/edit" path="edit/:id" handler={PostEditPage} />
       </Route>
+      <Route name="user" path="user" handler={DashBoardPage} />
+      <Route name="setting" path="setting" handler={DashBoardPage} />
     </Route>
     <NotFoundRoute handler={DashBoardPage} />
   </Route>

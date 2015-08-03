@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "babel-runtime": "^5.7.0",
+    "moment": "^2.10.6",
     "superagent": "^1.2.0"
   }
 }

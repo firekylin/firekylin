@@ -5,6 +5,7 @@ export default class extends think.controller.rest {
   init(http) {
     super.init(http);
     http.action = http.method.toLowerCase();
+    this.id = this.get('id');
   }
   /**
    * check user is login
@@ -28,7 +29,7 @@ export default class extends think.controller.rest {
   }
 
   success(data = '', ext = {}) {
-    return this.json({data: data, ...ext})
+    return this.json({status: 200, data: data, ...ext})
   }
 
   fail(statusCode = 400, message = 'Bad Request') {
@@ -36,8 +37,7 @@ export default class extends think.controller.rest {
       message = statusCode;
       statusCode = 400;
     }
-    this.status(statusCode);
-    return this.json({error: message})
+    return this.json({status: statusCode, error: message});
   }
 
   error(error) {

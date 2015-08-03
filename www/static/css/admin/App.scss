@@ -9,4 +9,12 @@
     @include flex-container();
     flex: 1 0;
   }
+
+  .page-wrapper {
+    position: relative;
+    flex: 1 0;
+    padding: 20px;
+
+    overflow: auto;
+  }
 }

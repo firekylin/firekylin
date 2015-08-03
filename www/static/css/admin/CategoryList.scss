@@ -1,0 +1,13 @@
+@import "../common/mixin";
+@import "./BaseList";
+
+.CategoryList {
+  @extend .BaseList;
+
+  col {
+
+    &.colCount {
+      width: 10%;
+    }
+  }
+}

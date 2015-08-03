@@ -1,6 +1,8 @@
 import React from 'react';
 
-export default class UserBox extends React.Component {
+import BaseComponent from './BaseComponent';
+
+export default class UserBox extends BaseComponent {
   render() {
     return (
       <div className="UserBox">

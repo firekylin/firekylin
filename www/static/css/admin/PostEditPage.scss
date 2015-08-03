@@ -1,10 +1,10 @@
 @import "../common/markdown-editor";
 
-.PostAddPage {
+.PostEditPage {
 
   $border: 1px solid #bdc3c7;
   .title-wrapper {
-    margin-bottom: 20px;
+    margin: 20px 0;
     input {
       font-size: 20px;
       padding: 8px;

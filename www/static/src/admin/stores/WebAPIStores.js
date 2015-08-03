@@ -1,8 +1,9 @@
 import Reflux from 'reflux';
 import request from 'superagent';
 
-import CategoryAction from '../actions/CategoryAction';
-import PostAction from '../actions/PostAction';
+import CategoryActions from '../actions/CategoryActions';
+import UserActions from '../actions/UserActions';
+import PostActions from '../actions/PostActions';
 
 
 let buildCallback = function(action) {
@@ -10,43 +11,56 @@ let buildCallback = function(action) {
     if (response.ok) {
       action.completed(response.body);
     } else {
-      action.failed(response.body || response.error);
+      action.failed((response.body && response.body.error) || response.error);
     }
   };
 };
 
-Reflux.createStore({
-  url: '/admin/api/category',
-  listenables: CategoryAction,
 
-  onLoad() {
-    request
-        .get(this.url)
-        .end(buildCallback(CategoryAction.load));
-  },
+let createRestfulStore = function(url, Actions, ext = {}) {
+  return Reflux.createStore(Object.assign({
+    url: url,
+    listenables: Actions,
 
-  onAdd() {
-    request
-        .post(this.url)
-        .end(buildCallback(CategoryAction.add));
-  }
-});
+    getUrl(id) {
+      if (id) {
+        id = Array.isArray(id) ? id.join() : id;
+        return `${this.url}/${id}`;
+      } else {
+        return this.url;
+      }
 
-Reflux.createStore({
-  url: '/admin/api/post',
-  listenables: PostAction,
+    },
 
-  onLoad() {
-    request
-        .get(this.url)
-        .end(buildCallback(PostAction.load));
-  },
+    onLoad(id) {
+      request
+          .get(this.getUrl(id))
+          .end(buildCallback(Actions.load));
+    },
 
-  onAdd(data) {
-    request
-        .post(this.url)
-        .type('form')
-        .send(data)
-        .end(buildCallback(PostAction.add));
-  }
-});
+    onAdd(data) {
+      request
+          .post(this.getUrl())
+          .type('form')
+          .send(data)
+          .end(buildCallback(Actions.add));
+    },
+
+    onUpdate(id, data) {
+      request
+          .put(this.getUrl(id))
+          .type('form')
+          .send(data)
+          .end(buildCallback(Actions.update));
+    },
+
+    onDelete(id) {
+      request
+          .del(this.getUrl(id))
+          .end(buildCallback(Actions.delete));
+    }
+  }, ext));
+};
+
+createRestfulStore('/admin/api/category', CategoryActions);
+createRestfulStore('/admin/api/post', PostActions);

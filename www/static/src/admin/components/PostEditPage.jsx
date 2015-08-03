@@ -3,9 +3,11 @@ import {Navigation} from 'react-router';
 import autobind from 'autobind-decorator';
 import {decorate as mixin} from 'react-mixin';
 
-import PostAction from '../actions/PostAction';
-import CategoryAction from '../actions/CategoryAction';
-import {NewPostStore} from '../stores/PostStores';
+import BaseComponent from './BaseComponent';
+import AlertActions from '../actions/AlertActions';
+import PostActions from '../actions/PostActions';
+import CategoryActions from '../actions/CategoryActions';
+import {PostStatusStore, PostStore} from '../stores/PostStores';
 import {CategoryListStore} from '../stores/CategoryStores';
 
 import Editor from  '../../common/markdown-editor';
@@ -15,53 +17,71 @@ const ADD_CATEGORY = "{add}";
 
 @autobind
 @mixin(Navigation)
-class PostAddPage extends React.Component {
+class PostAddPage extends BaseComponent {
   constructor(props) {
     super(props);
 
     this.state = {
       status: '',
-      categories: []
+      categories: [],
+      title: '',
+      content: '',
+      category: false
     };
 
-    this.subscribes = [];
+    this.id = this.props.params.id;
+    this.new = !this.id;
   }
 
   componentDidMount() {
-    CategoryAction.load();
+    CategoryActions.load();
+    this.new || PostActions.load(this.id);
+
 
     this.editor = new Editor({
       element: this.refs.editor.getDOMNode()
     });
 
+    console.log(this, this.editor);
+
     window.onbeforeunload = function() {
       return this.checkUnload() ? '正在编辑中，未保存的部分可能会丢失\n' : undefined;
     }.bind(this);
 
-    this.subscribes.push(
+    this.subscribe(
         CategoryListStore.listen(this.onCategoryChange),
-        NewPostStore.listen(this.onPostStatusChange)
+        PostStatusStore.listen(this.onPostStatusChange),
+        PostStore.listen(this.onPostChange)
     );
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
+
     window.onbeforeunload = function(){};
-    this.unsubscribe();
+  }
+
+  componentDidUpdate() {
+    this.editor.value(this.state.content);
   }
 
   render() {
 
+    let title = this.new ? '添加文章' : '编辑文章';
     let categories = this.state.categories.map((category) => (
         <option key={category.id} value={category.id}>{category.name}</option>
     ));
 
     return (
-        <div className="PostAddPage page">
+        <div className="PostEditPage page">
+          <div className="title">
+            <h2>{title}</h2>
+          </div>
           <div className="title-wrapper">
-            <input type="text" placeholder="请输入标题" ref="title" />
+            <input type="text" placeholder="请输入标题" ref="title" value={this.state.title} onChange={this.handleTitleChange} />
           </div>
           <div className="category-wrapper">
-            <select ref="category" onChange={this.handleCategoryChange}>
+            <select ref="category" value={this.state.category} onChange={this.handleCategoryChange}>
               <option value={false}>请选择分类</option>
               <option value={ADD_CATEGORY}>添加新分类</option>
               <option value={false} disabled>---</option>
@@ -83,8 +103,19 @@ class PostAddPage extends React.Component {
     )
   }
 
-  unsubscribe() {
-    this.subscribes.forEach(func => func());
+  handleTitleChange(e) {
+    let value = e.target.value;
+    this.setState({
+      title: value
+    });
+  }
+
+  handleCategoryChange(e) {
+    let value = e.target.value;
+    this.setState({
+      category: value,
+      showAddCategory: value == ADD_CATEGORY
+    });
   }
 
   handleSave() {
@@ -93,6 +124,12 @@ class PostAddPage extends React.Component {
     let content = this.editor.value();
     let data = {title, content};
 
+    if (!title) {
+      return AlertActions.warning('请填写标题');
+    } else if (!category) {
+      return AlertActions.warning('请选择分类');
+    }
+
     if (category == ADD_CATEGORY) {
       let newCategory = this.refs.newCategory.getDOMNode().value;
       data['newCategory'] = newCategory;
@@ -100,17 +137,15 @@ class PostAddPage extends React.Component {
       data['category'] = category
     }
 
-    PostAction.add(data);
+    if (this.new) {
+      PostActions.add(data);
+    } else {
+      PostActions.update(this.id, data);
+    }
   }
 
   handleBack() {
     this.transitionTo('post');
-  }
-
-  handleCategoryChange(event) {
-    this.setState({
-      showAddCategory: event.target.value == ADD_CATEGORY
-    })
   }
 
   checkUnload() {
@@ -122,12 +157,22 @@ class PostAddPage extends React.Component {
   }
 
   onPostStatusChange(status) {
+    let type = this.new ? '发布' : '修改';
+
     if (status == 'complete') {
-      alert('发布成功');
+      AlertActions.success(type + '成功');
       this.transitionTo('post');
     } else {
-      alert('发布失败');
+      AlertActions.error(type + '失败');
     }
+  }
+
+  onPostChange(post) {
+    this.setState({
+      title: post.title,
+      content: post.content,
+      category: post.category
+    });
   }
 }
 

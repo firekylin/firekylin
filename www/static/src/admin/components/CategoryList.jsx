@@ -5,32 +5,42 @@ import {decorate as mixin} from 'react-mixin';
 
 import BaseListComponent from './BaseListComponent';
 import AlertActions from '../actions/AlertActions';
-import PostActions from '../actions/PostActions';
-import {PostListStore} from '../stores/PostStores';
+import CategoryActions from '../actions/CategoryActions';
+import {CategoryListStore} from '../stores/CategoryStores';
 
 
 @autobind
 @mixin(Navigation)
-class PostList extends BaseListComponent {
+class CategoryList extends BaseListComponent {
 
   componentDidMount() {
-    PostActions.load();
+    CategoryActions.load();
 
     this.subscribe(
-        PostListStore.listen(this.onListChange)
+        CategoryListStore.listen(this.onListChange)
     );
   }
 
   render() {
-    let trs = this.state.list.map(item => (
+    let trs = this.state.list.map(item => item.id == 0 ? (
+      <tr key={item.id}>
+        <td className="colCheck">
+          <input type="checkbox" disabled={true} />
+        </td>
+        <td className="colTitle">{item.name}</td>
+        <td className="colTitle">{item.count}</td>
+        <td className="colAction">
+          <i className="fa fa-pencil-square-o edit disabled" title="编辑" />
+          <i className="fa fa-trash-o delete disabled" title="删除" />
+        </td>
+      </tr>
+    ) : (
       <tr key={item.id}>
         <td className="colCheck" onClick={this.handleSelect.bind(this, item.id)}>
           <input type="checkbox" title="选择" checked={this.state.selected.includes(item.id)} readOnly />
         </td>
-        <td className="colTitle">{item.title}</td>
-        <td className="colCategory">{item.category}</td>
-        <td className="colAuthor">{item.author}</td>
-        <td className="colDate">{item.modify_date.format('YYYY-MM-DD HH:mm')}</td>
+        <td className="colTitle">{item.name}</td>
+        <td className="colTitle">{item.count}</td>
         <td className="colAction">
           <i className="fa fa-pencil-square-o edit" title="编辑" onClick={this.handleEdit.bind(this, item.id)} />
           <i className="fa fa-trash-o delete" title="删除" onClick={this.handleDelete.bind(this, item.id)} />
@@ -38,14 +48,12 @@ class PostList extends BaseListComponent {
       </tr>
     ));
     return (
-      <div className="PostList">
+      <div className="CategoryList">
         <table>
           <colgroup>
             <col className="colCheck" />
             <col className="colTitle" />
-            <col className="colCategory" />
-            <col className="colAuthor" />
-            <col className="colDate" />
+            <col className="colCount" />
             <col className="colAction" />
           </colgroup>
           <thead>
@@ -53,10 +61,8 @@ class PostList extends BaseListComponent {
               <th className="colCheck" onClick={this.handleSelectAll}>
                 <input type="checkbox" title="全选" checked={this.state.list.length == this.state.selected.length} readOnly />
               </th>
-              <th className="colTitle">标题</th>
-              <th className="colCategory">分类</th>
-              <th className="colAuthor">作者</th>
-              <th className="colDate">更新时间</th>
+              <th className="colTitle">分类名</th>
+              <th className="colCount">文章数</th>
               <th className="colAction">操作</th>
             </tr>
           </thead>
@@ -65,7 +71,6 @@ class PostList extends BaseListComponent {
           </tbody>
         </table>
         <div className="button-wrapper">
-          <Link to="post/add" className="add-post button green small"><i className="fa fa-plus"></i>添加文章</Link>
           <button className="button red small" onClick={this.handleDelete}><i className="fa fa-trash-o"></i>批量删除</button>
         </div>
       </div>
@@ -86,13 +91,13 @@ class PostList extends BaseListComponent {
     }
 
     if (!ids.length) {
-      AlertActions.warning('请勾选要删除的文章');
+      AlertActions.warning('请勾选要删除的分类');
     } else {
-      PostActions.delete(ids);
+      CategoryActions.delete(ids);
     }
 
   }
 
 }
 
-export default PostList
+export default CategoryList;

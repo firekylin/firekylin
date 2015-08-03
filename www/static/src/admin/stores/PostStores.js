@@ -1,14 +1,22 @@
 import Reflux from 'reflux';
-import PostAction from '../actions/PostAction';
+import moment from 'moment';
+
+import PostActions from '../actions/PostActions';
+import CategoryActions from '../actions/CategoryActions';
+import {CategoryListStore} from './CategoryStores';
 
 
 let PostStore = Reflux.createStore({
 
-  listenables: PostAction,
+  listenables: PostActions,
 
   onLoadCompleted(response) {
-    categories = response.data;
-    this.trigger(categories);
+    let data = response.data;
+    if (!Array.isArray(data)) {
+      data.date = moment(data.date);
+      data.modify_date = moment(data.modify_date);
+      this.trigger(data);
+    }
   }
 
 });
@@ -16,28 +24,63 @@ let PostStore = Reflux.createStore({
 
 let PostListStore = Reflux.createStore({
 
-  listenables: PostAction,
+  listenables: PostActions,
   list: [],
+  categoryMap: {},
+
+  init() {
+    CategoryActions.load();
+    this.listenTo(CategoryListStore, 'onCategoryUpdate');
+  },
 
   onLoadCompleted(response) {
-    this.list = response.data;
+    let categoryMap = this.categoryMap;
+
+    if (Array.isArray(response.data)) {
+      this.list = response.data;
+      this.list.forEach(item => {
+        item.date = moment(item.date);
+        item.modify_date = moment(item.modify_date);
+        item.category = categoryMap[item.category];
+      });
+      this.trigger(this.list);
+    }
+  },
+
+  onCategoryUpdate(list) {
+    let categoryMap = this.categoryMap;
+    list.forEach(item => {
+      categoryMap[item.id] = item.name;
+    });
     this.trigger(this.list);
   }
 
 });
 
 
-let NewPostStore = Reflux.createStore({
+let PostStatusStore = Reflux.createStore({
 
-  listenables: PostAction,
+  listenables: PostActions,
   status: 'init',
 
-  onAddCompleted() {
-    this.status = 'complete';
-    this.trigger(this.status);
+  init() {
+    this.listenTo(PostActions.add.completed, this.onCompleted);
+    this.listenTo(PostActions.update.completed, this.onCompleted);
+    this.listenTo(PostActions.delete.completed, this.onCompleted);
+
+    this.listenTo(PostActions.add.failed, this.onFailed);
+    this.listenTo(PostActions.update.failed, this.onFailed);
+    this.listenTo(PostActions.delete.failed, this.onFailed);
   },
 
-  onAddFailed(error) {
+  onCompleted() {
+    this.status = 'complete';
+    this.trigger(this.status);
+
+    PostActions.load();
+  },
+
+  onFailed(error) {
     this.status = 'failed';
     this.trigger(this.status);
   }
@@ -45,4 +88,4 @@ let NewPostStore = Reflux.createStore({
 });
 
 
-export {PostStore, PostListStore, NewPostStore};
+export {PostStore, PostListStore, PostStatusStore};
