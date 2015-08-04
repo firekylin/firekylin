@@ -1,0 +1,434 @@
+$header-height: 30px;
+
+#header{
+	height: $header-height;
+	padding: 30px 0;
+	border-bottom: 1px solid $color-gray04;
+	line-height: $header-height;
+	@media screen and (max-width: 1040px){
+		height: auto;
+		position: relative;
+		padding-bottom: 10px;
+	}
+	a{
+		color: $color-gray01;
+		@include transition(color 0.3s);
+		&:hover{
+			color: $color-main;
+		}
+	}
+	h1{
+		float: left;
+		font-weight: 300;
+		font-size: 30px;
+		@media screen and (max-width: 1040px){
+			float: none;
+		}
+	}
+}
+#main-nav{
+	float: left;
+	margin-left: 30px;
+	@media screen and (max-width: 1040px){
+		float: none;
+		margin-left: 0;
+		margin-top: 15px;
+	}
+	>ul{
+		@media screen and (max-width: 600px){
+			display: none;
+		}
+		>li{
+			margin-left: 50px;
+			@include inline-block;
+			@media screen and (max-width: 1040px){
+				margin-left: 0;
+				margin-right: 50px;
+				&:last-of-type{
+					margin-right: 0;
+				}
+			}
+			&:hover{
+				>a{
+					color: $color-main;
+				}
+			}
+			>a{
+				padding: 38px 0;
+				margin-top: -38px;
+				&:after{
+					content: "\f078";
+					color: $color-gray03;
+					font: 12px $font-icon;
+					padding-left: 10px;
+				}
+				&:only-child{
+					&:after{
+						content: "";
+					}
+				}
+				@media screen and (max-width: 1040px){
+					padding: 18px 0;
+				}
+			}
+		}
+		ul{
+			position: absolute;
+			top: 60px;
+			left: -15px;
+			z-index: 10;
+			white-space: nowrap;
+			background: $color-gray04;
+			border: 1px solid $color-gray03;
+			list-style: none;
+			display: none;
+			@media screen and (max-width: 1040px){
+				top: 40px;
+			}
+			@include box-shadow(0 4px 8px rgba(0,0,0,0.1));
+			@include border-radius(0 0 5px 5px);
+			ul{
+				@include border-radius(0 5px 5px 5px);
+			}
+			li{
+				@include border-shadow($color-background, $color-gray03);
+				&:hover{
+					background: #d5d5d5;
+				}
+				&:first-of-type{
+					border-top: none;
+					ul{
+						@include border-radius(0 0 5px 5px);
+					}
+				}
+				&:last-of-type{
+					border-bottom: none;
+				}
+				>a{
+					display: block;
+					padding: 5px 15px;
+					&:after{
+						content: "\f054";
+						color: $color-gray02;
+						font: 12px $font-icon;
+						padding-left: 10px;
+					}
+					&:hover{
+						color: $color-gray01;
+					}
+					&:only-child{
+						&:after{
+							content: "";
+						}
+					}
+				}
+			}
+			ul{
+				top: 0;
+				left: 100%;
+			}
+		}
+		li{
+			position: relative;
+			&:hover{
+				>ul{
+					display: block;
+				}
+			}
+		}
+	}
+	select{
+		display: none;
+		margin-bottom: 10px;
+		@media screen and (max-width: 600px){
+			display: block;
+		}
+	}
+}
+#mobile-nav{
+	display: none;
+	height: 37px;
+	position: relative;
+	@media screen and (max-width: 600px){
+		display: block;
+	}
+	a{
+		display: block;
+	}
+	.button{
+		cursor: pointer;
+	}
+	.container{
+		display: none;
+	}
+	.menu{
+		position: relative;
+		width: 100%;
+		.button{
+			background: #f2f2f2;
+			border: 1px solid $color-gray04;
+			color: #999;
+			padding: 0 60px 0 10px;
+			position: relative;
+			@include border-radius(5px);
+			&:hover{
+				color: #999;
+			}
+			&.on{
+				color: #666;
+				@include border-radius(5px 5px 5px 0);
+				&:before{
+					content: "\f077";
+				}
+			}
+			&:before{
+				content: "\f078";
+				color: $color-gray04;
+				font: 16px $font-icon;
+				line-height: 30px;
+				position: absolute;
+				top: 0;
+				right: 40px;
+			}
+		}
+		.container{
+			background: #f2f2f2;
+			border: 1px solid #ddd;
+			border-top: none;
+			position: absolute;
+			top: 31px;
+			z-index: 1;
+			@include border-radius(0 0 5px 5px);
+			ul{
+				list-style: none;
+				ul{
+					margin-left: 20px;
+				}
+			}
+			a{
+				padding: 0 10px;
+			}
+		}
+	}
+	.search{
+		position: absolute;
+		top: 0;
+		right: 0;
+		.button{
+			background: $color-gray04;
+			width: 30px;
+			height: 30px;
+			position: absolute;
+			top: 1px;
+			right: -1px;
+			@include border-radius(0 5px 5px 0);
+			&:before{
+				content: "\f002";
+				color: #f2f2f2;
+				font: 20px $font-icon;
+				line-height: 30px;
+				position: absolute;
+				top: 0;
+				left: 7px;
+			}
+			&.on{
+				background: $color-gray03;
+				&:before{
+					content: "\f00d";
+				}
+			}
+		}
+		.container{
+			position: absolute;
+			right: 51px;
+			z-index: 1;
+		}
+		input[type="text"]{
+			background: #fff;
+			border: 1px solid $color-gray04;
+			border-right: none;
+			color: $color-gray02;
+			font: 13px $font-default;
+			height: 30px;
+			width: 100%;
+			padding: 0 10px;
+			@include border-radius(5px 0 0 5px);
+		}
+	}
+}
+#sub-nav{
+	@media screen and (max-width: 1040px){
+		position: absolute;
+		top: 30px;
+		right: 0;
+	}
+	@media screen and (max-width: 600px){
+		display: none;
+	}
+	.search{
+		float: left;
+		margin-top: 1px;
+		position: relative;
+		@media screen and (max-width: 1040px){
+			float: none;
+			margin-top: 15px;
+		}
+		&:before{
+			content: "\f002";
+			color: $color-gray03;
+			font: 18px $font-icon;
+			line-height: 30px;
+			position: absolute;
+			top: 0;
+			right: 125px;
+		}
+		input[type="text"]{
+			background: #f2f2f2;
+			color: $color-gray02;
+			border: 1px solid $color-gray04;
+			font: 13px $font-default;
+			padding: 6px 15px 6px 35px;
+			width: 100px;
+			@include transition(0.3s);
+			@include border-radius(15px);
+			&:focus, &:active{
+				background: #fff;
+				border-top: 1px solid $color-gray03;
+				color: $color-gray01;
+				outline: none;
+			}
+		}
+	}
+	.social{
+		float: left;
+		margin-right: 15px;
+		@media screen and (max-width: 1040px){
+			float: none;
+			margin-right: 0;
+			a:last-of-type{
+				margin-right: 0;
+			}
+		}
+		a{
+			@include border-radius(50%);
+			@include inline-block;
+			text-indent: -9999px;
+			margin: 0 15px 15px 0;
+			opacity: 0.5;
+			@include square(28px);
+			@include transition(0.3s);
+			&:hover{
+				opacity: 1;
+			}
+			&.email{
+				background: image-url('social/email.png') center no-repeat #050505;
+				border: 1px solid #050505;
+				&:hover{
+					border: 1px solid darken(#050505, 10%);
+				}
+			}
+			&.facebook{
+				background: image-url('social/facebook.png') center no-repeat #3B5998;
+				border: 1px solid #3B5998;
+				&:hover{
+					border: 1px solid darken(#3B5998, 10%);
+				}
+			}
+			&.google{
+				background: image-url('social/google.png') center no-repeat #C83D20;
+				border: 1px solid #C83D20;
+				&:hover{
+					border: 1px solid darken(#C83D20, 10%);
+				}
+			}
+			&.twitter{
+				background: image-url('social/twitter.png') center no-repeat #55CFF8;
+				border: 1px solid #55CFF8;
+				&:hover{
+					border: 1px solid darken(#55CFF8, 10%);
+				}
+			}
+			&.github{
+				background: image-url('social/github.png') center no-repeat rgb(175,182,202);
+				border: 1px solid rgb(175,182,202);
+				&:hover{
+					border: 1px solid darken(rgb(175,182,202), 10%);
+				}
+			}
+			&.coderwall{
+				background: image-url('social/coderwall.png') center no-repeat #3E8DCC;
+				border: 1px solid #3E8DCC;
+				&:hover{
+					border: 1px solid darken(#3E8DCC, 10%);
+				}
+			}
+			&.stackoverflow{
+				background: image-url('social/stackoverflow.png') center no-repeat #EF7522;
+				border:1px solid #EF7522;
+				&:hover{
+					border:1px solid #CC7A00;
+				}
+			}
+			&.linkedin{
+				background: image-url('social/linkedin.png') center no-repeat #005A87;
+				border: 1px solid #005A87;
+			}
+			&.pinterest{
+				background: image-url('social/pinterest.png') center no-repeat rgb(190,64,55);
+				border: 1px solid rgb(190,64,55);
+				&:hover{
+					border: 1px solid darken(rgb(190,64,55), 10%);
+				}
+			}
+			&.delicious{
+				background: image-url('social/delicious.png') center no-repeat rgb(50,113,203);
+				border: 1px solid rgb(50,113,203);
+				&:hover{
+					border: 1px solid darken(rgb(50,113,203), 10%);
+				}
+			}
+			&.pinboard{
+			  	background: image-url('social/pinboard.png') center no-repeat rgb(0,102,200);
+			  	border: 1px solid rgb(58,114,159);
+			  	&:hover{
+			    	border: 1px solid darken(rgb(0,102,255), 10%);
+			  	}
+			}
+			&.douban{
+			  	background: image-url('social/douban.png') center no-repeat rgb(0,128,36);
+			  	border: 1px solid rgb(0,128,36);
+			  	&:hover{
+			    	border: 1px solid darken(rgb(0,128,36), 10%);
+			  	}
+			}
+			&.quora{
+				background: image-url('social/quora.png') center no-repeat #a82400;
+				border: 1px solid #a82400;
+				&:hover{
+					border: 1px solid darken(#a82400, 10%);
+			 	}
+			}
+      		&.instagram{
+				background: image-url('social/instagram.png') center no-repeat #517fa4;
+				border: 1px solid #517fa4;
+				&:hover{
+					border: 1px solid darken(#517fa4, 10%);
+			 	}
+			}
+      		&.behance{
+				background: image-url('social/behance.png') center no-repeat #1769ff;
+				border: 1px solid #1769ff;
+				&:hover{
+					border: 1px solid darken(#1769ff, 10%);
+			  	}
+			}
+			&.rss{
+				background: image-url('social/rss.png') center no-repeat #EF7522;
+				border: 1px solid #EF7522;
+				&:hover{
+					border: 1px solid darken(#EF7522, 10%);
+				}
+			}
+		}
+	}
+}
