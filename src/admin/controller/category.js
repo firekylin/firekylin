@@ -3,16 +3,16 @@ import base from './apiBase'
 export default class extends base {
 
   async getAction(){
-    let data;
+    let categories;
     let postModel = this.model('post');
     if (this.id) {
-      data = await this.modelInstance.where({id: this.id}).find();
-      data.count = await postModel.where({category: this.id}).count('*');
+      categories = await this.modelInstance.where({id: this.id}).find();
+      categories.count = await postModel.where({category_id: this.id}).count('*');
     } else {
-      data = await this.modelInstance.order('id').select();
-      let count = await postModel.field(['`category` as id', 'count(`category`) as count']).group('category').order('id').select();
+      categories = await this.modelInstance.order('id').select();
+      let count = await postModel.field(['`category_id` as id', 'count(`category_id`) as count']).group('category_id').order('id').select();
       let countIndex = 0;
-      data.forEach(category => {
+      categories.forEach(category => {
         let countItem = count[countIndex];
         if (countItem && category.id == countItem.id) {
           category.count = countItem.count;
@@ -23,7 +23,7 @@ export default class extends base {
       });
     }
 
-    return this.success(data);
+    return this.success(categories);
   }
 
   async postAction(){

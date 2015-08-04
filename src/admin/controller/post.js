@@ -11,17 +11,17 @@ export default class extends base {
       return this.fail('data is empty');
     }
 
-    let category = data.category;
+    let category_id = data.category;
     if (data.newCategory) {
       let categoryModel = this.model('category');
-      category = categoryModel.add({name: data.newCategory});
+      category_id = categoryModel.add({name: data.newCategory});
     }
 
     let date = moment().format();
     let author = 0;
 
     let insertId = await this.modelInstance.add({
-      category,
+      category_id,
       date,
       author,
       title: data.title,

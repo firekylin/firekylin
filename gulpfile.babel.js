@@ -135,7 +135,7 @@ gulp.task('web styles', () => {
     return DEBUG ? src
       .pipe($.changed('.tmp/styles', {extension: '.css'}))
       .pipe($.sourcemaps.init())
-      .pipe($.sass({ sourceComments: true }).on('error', $.sass.logError))
+      .pipe($.sass({ sourceComments: true, includePaths: ['www/static/css/common'] }).on('error', $.sass.logError))
       .pipe($.autoprefixer({browsers: AUTOPREFIXER_BROWSERS.slice(0, 1)}))
       .pipe($.concat(dist))
       .pipe(gulp.dest('.tmp'))
@@ -143,7 +143,7 @@ gulp.task('web styles', () => {
       .pipe(gulp.dest(webDist))
       .pipe($.size({title: 'web styles'}))
       : src
-      .pipe($.sass({ outputStyle: 'compressed' }).on('error', $.sass.logError))
+      .pipe($.sass({ outputStyle: 'compressed', includePaths: ['www/static/css/common'] }).on('error', $.sass.logError))
       .pipe($.autoprefixer({browsers: AUTOPREFIXER_BROWSERS}))
       .pipe($.concat(dist))
       .pipe(gulp.dest(webDist))

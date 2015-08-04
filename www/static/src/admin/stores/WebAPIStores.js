@@ -4,6 +4,7 @@ import request from 'superagent';
 import CategoryActions from '../actions/CategoryActions';
 import UserActions from '../actions/UserActions';
 import PostActions from '../actions/PostActions';
+import SystemActions from '../actions/SystemActions';
 
 
 let buildCallback = function(action) {
@@ -64,3 +65,4 @@ let createRestfulStore = function(url, Actions, ext = {}) {
 
 createRestfulStore('/admin/api/category', CategoryActions);
 createRestfulStore('/admin/api/post', PostActions);
+createRestfulStore('/admin/api/system', SystemActions);
