@@ -34,7 +34,6 @@ export default class extends think.controller.base {
             }
             lang = lang.toLowerCase();
             if (highlight.getLanguage(lang)){
-              console.log(highlight.highlight(lang, code));
               return highlight.highlight(lang, code).value;
             } else {
               highlight.highlightAuto(code)
