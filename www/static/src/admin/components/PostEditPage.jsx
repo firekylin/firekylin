@@ -42,8 +42,6 @@ class PostAddPage extends BaseComponent {
       element: this.refs.editor.getDOMNode()
     });
 
-    console.log(this, this.editor);
-
     window.onbeforeunload = function() {
       return this.checkUnload() ? '正在编辑中，未保存的部分可能会丢失\n' : undefined;
     }.bind(this);

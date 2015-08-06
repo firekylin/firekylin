@@ -1,18 +1,3 @@
-/*
- Navicat Premium Data Transfer
-
- Source Server         : localhost
- Source Server Type    : MySQL
- Source Server Version : 50542
- Source Host           : localhost
- Source Database       : firekylin
-
- Target Server Type    : MySQL
- Target Server Version : 50542
- File Encoding         : utf-8
-
- Date: 08/06/2015 13:44:35 PM
-*/
 
 SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
