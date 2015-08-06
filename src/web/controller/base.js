@@ -1,11 +1,14 @@
 import moment from 'moment';
+import marked from 'marked';
+import highlight from 'highlight.js';
 
 export default class extends think.controller.base {
 
-  init(http) {
-    super.init(http);
+  async __before() {
 
-    this.assign('site', {});
+    await this.loadConfig();
+
+    this.assign('site', this.siteConfig);
     this.assign('page', {});
     this.assign('root_url', '');
     this.assign('filters', {
@@ -19,8 +22,49 @@ export default class extends think.controller.base {
       },
       excerpt(string, ellipsis) {
         return this.truncate(string, 200, ellipsis);
+      },
+      parseCode(string, object = {}) {
+        return string.replace(/\$\$(\w+)\$\$/g, (_, key) => object[key] || '');
+      },
+      markdown(str, parseCode = true) {
+        marked.setOptions({
+          highlight(code, lang) {
+            if (!parseCode || !lang) {
+              return code;
+            }
+            lang = lang.toLowerCase();
+            if (highlight.getLanguage(lang)){
+              console.log(highlight.highlight(lang, code));
+              return highlight.highlight(lang, code).value;
+            } else {
+              highlight.highlightAuto(code)
+              return highlight.highlightAuto(code).value;
+            }
+          }
+        });
+        return marked(str);
+      },
+      flatHTML(string) {
+        return string.replace(/<.+?>/g, '');
       }
-    })
+    });
+  }
+
+  async loadConfig() {
+    let items = await this.model('config').select();
+    let siteConfig = {};
+
+    items.forEach(item => {
+      let value = item.value;
+      if (value == 'false' || value == 'true') {
+        value = value == 'true';
+      } else if (parseFloat(value) == value) {
+        value = parseFloat(value)
+      }
+      siteConfig[item.key] = value
+    });
+
+    this.siteConfig = siteConfig;
   }
 
   getPaginator(totalCount, currentPage = 1, itemsPerPage = 10) {
@@ -64,7 +108,7 @@ export default class extends think.controller.base {
       });
 
       return Object.assign(post, {
-        url: '/post/' + post.id,
+        url: 'post/' + post.id,
         categories: categories
       });
     }
@@ -86,6 +130,11 @@ export default class extends think.controller.base {
     });
 
     return Object.keys(dateMap).map(key => dateMap[key]);
+  }
+
+  _404Action() {
+    this.status(404); //发送404状态码
+    this.end('not found');
   }
 
 }

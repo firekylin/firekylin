@@ -41,7 +41,7 @@ let PostListStore = Reflux.createStore({
       this.list.forEach(item => {
         item.date = moment(item.date);
         item.modify_date = moment(item.modify_date);
-        item.category = categoryMap[item.category];
+        item.category = categoryMap[item.category_id];
       });
       this.trigger(this.list);
     }

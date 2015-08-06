@@ -24,7 +24,7 @@ class Navigation extends BaseComponent {
         {/*<li className={getClassName('tag')}><Link to="dashboard"><i className="fa fa-tags" />标签管理</Link></li>*/}
         {/*<li className={getClassName('tag')}><Link to="dashboard"><i className="fa fa-tags" />链接管理</Link></li>*/}
         <li className={getClassName('user')}><Link to="dashboard"><i className="fa fa-users" />用户管理</Link></li>
-        <li className={getClassName('setting')}><Link to="setting"><i className="fa fa-wrench" />系统设置</Link></li>
+        <li className={getClassName('config')}><Link to="config"><i className="fa fa-wrench" />系统设置</Link></li>
       </ul>
     )
   }

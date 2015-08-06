@@ -1,4 +1,5 @@
 @import "../common/markdown-editor";
+@import "../common/markdown";
 
 .PostEditPage {
 
@@ -55,5 +56,11 @@
     .button {
       margin-right: 20px;
     }
+  }
+
+  .editor-preview {
+    @extend .markdown;
+    padding: 15px;
+    background: whitesmoke;
   }
 }

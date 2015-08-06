@@ -22,3 +22,7 @@
 	width: $width;
 	height: $height;
 }
+
+@function image-url($src) {
+	@return url('/static/images/' + $src);
+}

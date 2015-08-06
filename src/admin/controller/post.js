@@ -5,6 +5,16 @@ import base from './apiBase';
 
 export default class extends base {
 
+  async getAction(){
+    let data;
+    if (this.id) {
+      data = await this.modelInstance.where({id: this.id}).find();
+      return this.success(data);
+    }
+    data = await this.modelInstance.order('`date` DESC').select();
+    return this.success(data);
+  }
+
   async postAction() {
     let data = this.post();
     if(think.isEmpty(data)){

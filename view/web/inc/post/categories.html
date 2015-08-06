@@ -1,4 +1,4 @@
 <% post.categories.forEach(function(category, index) { %>
-  <a class="category" href="<%= root_url %>/category/<%= category.name %>"><%= category.name %></a>
+  <a class="category" href="<%= site.url %>/category/<%= category.name %>"><%= category.name %></a>
   <%= post.categories.length < index + 1 ? ',' : '' %>
 <% }) %>

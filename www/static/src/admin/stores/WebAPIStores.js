@@ -65,4 +65,13 @@ let createRestfulStore = function(url, Actions, ext = {}) {
 
 createRestfulStore('/admin/api/category', CategoryActions);
 createRestfulStore('/admin/api/post', PostActions);
-createRestfulStore('/admin/api/system', SystemActions);
+createRestfulStore('/admin/api/system', SystemActions, {
+  onUpdate(data) {
+    console.log(data);
+    request
+        .put(this.getUrl())
+        .type('form')
+        .send(data)
+        .end(buildCallback(SystemActions.update));
+  }
+});

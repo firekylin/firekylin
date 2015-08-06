@@ -4,5 +4,8 @@
     </div>
   </div>
   <% include ../custom/after_footer.html %>
+  <% if (site.discuss_on) { %>
+  <%- filters.parseCode(site.discuss_commoncode) %>
+  <% } %>
 </body>
 </html>

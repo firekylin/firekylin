@@ -1,18 +1,24 @@
 <div class="meta">
   <div class="date"><% include post/date.html %></div>
   <div class="tags"><% include post/categories.html %></div>
-  <% if (site.disqus_short_name && site.disqus_show_comment_count == true) { %>
-  <span class="comments"><a href="<%= root_url %><%= post.url %>#disqus_thread">Comments</a></span>
+  <% if (site.discuss_on && site.discuss_numbercode) { %>
+  <div class="comments"><%- filters.parseCode(site.discuss_numbercode, post) %></div>
   <% } %>
 </div>
 <% if (typeof index !== 'undefined') { %>
-<h1 class="title" itemprop="name"><a href="<%= root_url %><%= post.url %>" itemprop="url"><%= post.title %></a></h1>
+<h1 class="title" itemprop="name"><a href="<%= site.url %><%= post.url %>" itemprop="url"><%= post.title %></a></h1>
 <div class="entry-content" itemprop="articleBody">
-  <%= filters.excerpt(post.content) %>
-  <% if (post.content.length > filters.excerpt(post.content).length) { %><a href="<%= root_url %><%= post.url %>" class="more-link">1111<%= site.excerpt_link %></a><% } %>
+  <% var content = filters.flatHTML(filters.markdown(post.content)) %>
+  <%- filters.excerpt(content) %>
+  <% if (content.length > filters.excerpt(content).length) { %><a href="<%= site.url %><%= post.url %>" class="more-link">继续阅读 »</a><% } %>
 </div>
 <% } else { %>
   <h1 class="title" itemprop="name"><%= post.title %></h1>
-  <div class="entry-content" itemprop="articleBody"><%= post.content %></div>
-  <p class="post-info">于 <span class="date">2015-06-07 13:06:55</span> 发表于「<a href="/category/dev.html">WEB 后端</a>」分类下，最后修改于 <span class="date">2015-06-08 13:01:32</span>。</p>
+  <div class="entry-content" itemprop="articleBody">
+    <%- filters.markdown(post.content) %>
+    <% if (site.post_showurl) { %>
+      <p>本文链接：<a href="<%= site.url %><%= post.url %>"><%= site.url %><%= post.url %></a></p>
+    <% } %>
+    <p class="post-info">于 <span class="date"><%= filters.formatDate(post.date, 'YYYY-MM-DD HH:mm:ss') %></span> 发表于「<% include post/categories.html %>」分类下<% if (post.date.toString() != post.modify_date.toString()) { %>，最后修改于 <span class="date"><%= filters.formatDate(post.modify_date, 'YYYY-MM-DD HH:mm:ss') %></span><% } %>。</p>
+  </div>
 <% } %>

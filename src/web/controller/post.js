@@ -19,14 +19,13 @@ export default class extends base {
   }
 
   async listAction() {
-    let self = this;
 
     let page = Number.parseInt(this.get('page')) || 1;
     let count = await this.modelInstance.count('id');
     let paginator = this.getPaginator(count, page, 10);
-    let list = await this.modelInstance.limit(paginator.start, paginator.itemsPerPage).select();
+    let list = await this.modelInstance.order('`date` DESC').limit(paginator.start, paginator.itemsPerPage).select();
 
-    await self.implementPosts(list);
+    await this.implementPosts(list);
 
     this.assign('list', list);
     this.assign('paginator', paginator);
@@ -42,6 +41,7 @@ export default class extends base {
     await this.implementPosts(post);
 
     this.assign('post', post);
+    this.assign('page', post);
 
     return this.display('item');
   }

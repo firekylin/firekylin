@@ -4,10 +4,11 @@ import React from 'react';
 import Router, {Route, DefaultRoute, NotFoundRoute} from 'react-router';
 
 import App from './components/App';
-import DashBoardPage from './components/DashBoardPage';
-import CategoryPage from './components/CategoryPage';
 import PostPage from './components/PostPage';
+import ConfigPage from './components/ConfigPage';
 import PostEditPage from './components/PostEditPage';
+import CategoryPage from './components/CategoryPage';
+import DashBoardPage from './components/DashBoardPage';
 
 import './stores/WebAPIStores';
 
@@ -25,7 +26,7 @@ let routes = (
         <Route name="post/edit" path="edit/:id" handler={PostEditPage} />
       </Route>
       <Route name="user" path="user" handler={DashBoardPage} />
-      <Route name="setting" path="setting" handler={DashBoardPage} />
+      <Route name="config" path="config" handler={ConfigPage} />
     </Route>
     <NotFoundRoute handler={DashBoardPage} />
   </Route>

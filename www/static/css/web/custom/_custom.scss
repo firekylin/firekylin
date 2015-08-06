@@ -1,0 +1,71 @@
+@import "../../common/markdown";
+
+.post-info {
+  margin-top: 15px;
+  font-size: 14px;
+
+  .date {
+    color: #999;
+    font-style: italic
+  }
+}
+
+.container .left-col {
+  background-color: #1e1d3c;
+  background-size: cover;
+  background-image: url(../images/background_2.jpg);
+  background-position: center;
+  -webkit-transform: translateZ(0);
+
+  opacity: .9;
+}
+
+.container .mid-col {
+
+  background: whitesmoke;
+
+  .mid-col-container #content {
+    .entry-content {
+      line-height: 1.6em;
+      font-size: 16px;
+    }
+    .meta .comments::before {
+      position: relative;
+      margin-right: 10px;
+    }
+  }
+}
+
+.share-inner {
+  overflow: hidden;
+  padding-left: 5px;
+
+  .share-to-txt {
+    font-size: 14px!important;
+  }
+}
+
+.container .left-col #header #sub-nav .social a:hover {
+  border-color: rgba(255, 255, 255, .6);
+}
+
+
+
+.container .mid-col .mid-col-container #content article {
+
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #fff;
+  padding: 30px 0;
+
+
+  .entry-content {
+    @extend .markdown;
+    line-height: 1.6em;
+
+
+  }
+}
+
+
+
+

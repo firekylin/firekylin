@@ -3,7 +3,7 @@
 <div itemscope itemtype="http://schema.org/Blog">
 
   <% list.forEach(function(category){ %>
-  <p><a href="<%= root_url %>/category/<%= category.id %>"><%= category.name %>(<%= category.count %>)</a></p>
+  <p><a href="<%= site.url %>/category/<%= category.id %>"><%= category.name %>(<%= category.count %>)</a></p>
   <% })%>
 </div>
 

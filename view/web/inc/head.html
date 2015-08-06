@@ -6,7 +6,7 @@
 <% } %>
 <head>
   <meta charset="utf-8">
-  <title><% if (page.title) { %><%= page.title %> - <% } %><%= site.title %></title>
+  <title><% if (page.title) { %><%= page.title %> | <% } %><%= site.seo_title || site.title %></title>
   <meta name="author" content="<%= site.author %>">
   <meta name="description" content="<%= filters.truncate(page.description, 150) %>">
   <% if (page.keywords) { %><meta name="keywords" content="<%= page.keywords %>"><% } %>

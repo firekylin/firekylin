@@ -1,57 +1,36 @@
 <div class="profilepic">
-  <img src="" alt="Profile Picture" style="width: 160px;" />
+  <img src="<%= site.url %>static/images/logo.jpg" alt="Profile Picture" style="width: 160px;" />
 </div>
 <% include ../custom/header.html %>
 <nav id="main-nav"><% include navigation.html %></nav>
 <nav id="sub-nav">
   <div class="social">
-    <% if (site.email) { %>
-    <a class="email" href="mailto:<%= site.email %>" title="Email">Email</a>
+    <% if (site.sns_email) { %>
+    <a class="email" href="mailto:<%= site.sns_email %>" title="Email">Email</a>
     <% } %>
-    <% if (site.facebook_user) { %>
-    <a class="facebook" href="http://www.facebook.com/<%= site.facebook_user %>" title="Facebook">Facebook</a>
+    <% if (site.sns_facebook) { %>
+    <a class="facebook" href="http://www.facebook.com/<%= site.sns_facebook %>" title="Facebook">Facebook</a>
     <% } %>
-    <% if (site.googleplus_user && site.googleplus_hidden == false) { %>
-    <a class="google" href="https://plus.google.com/<%= site.googleplus_user %>" rel="author" title="Google+">Google+</a>
+    <% if (site.sns_googleplus) { %>
+    <a class="google" href="https://plus.google.com/<%= site.sns_googleplus %>" rel="author" title="Google+">Google+</a>
     <% } %>
-    <% if (site.twitter_user) { %>
-    <a class="twitter" href="http://twitter.com/<%= site.twitter_user %>" title="Twitter">Twitter</a>
+    <% if (site.sns_twitter) { %>
+    <a class="twitter" href="http://twitter.com/<%= site.sns_twitter %>" title="Twitter">Twitter</a>
     <% } %>
-    <% if (site.github_user) { %>
-    <a class="github" href="https://github.com/<%= site.github_user %>" title="GitHub">GitHub</a>
+    <% if (site.sns_github) { %>
+    <a class="github" href="https://github.com/<%= site.sns_github %>" title="GitHub">GitHub</a>
     <% } %>
-    <% if (site.coderwall_user) { %>
-    <a class="coderwall" href="https://coderwall.com/<%= site.coderwall_user %>" title="Coderwall">Coderwall</a>
+    <% if (site.sns_stackoverflow) { %>
+    <a class="stackoverflow" href="http://stackoverflow.com/users/<%=site.sns_stackoverflow%>/<%=site.stackoverflow_user%>" title="StackOverflow"></a>
     <% } %>
-    <% if (site.stackoverflow_user && site.stackoverflow_user_id) { %>
-    <a class="stackoverflow" href="http://stackoverflow.com/users/<%=site.stackoverflow_user_id%>/<%=site.stackoverflow_user%>" title="StackOverflow"></a>
+    <% if (site.sns_douban) { %>
+    <a class="douban" href="https://www.douban.com/people/<%= site.sns_douban %>" title="豆瓣">豆瓣</a>
     <% } %>
-    <% if (site.linkedin_user) { %>
-    <a class="linkedin" href="http://www.linkedin.com/in/<%= site.linkedin_user %>" title="LinkedIn">LinkedIn</a>
+    <% if (site.sns_weibo) { %>
+    <a class="quora" href="https://weibo.com/<%= site.sns_weibo %>" title="微博">微博</a>
     <% } %>
-    <% if (site.pinterest_user) { %>
-    <a class="pinterest" href="https://pinterest.com/<%= site.pinterest_user %>" title="Pinterest">Pinterest</a>
-    <% } %>
-    <% if (site.delicious_user) { %>
-    <a class="delicious" href="http://delicious.com/<%= site.delicious_user %>" title="Delicious">Delicious</a>
-    <% } %>
-    <% if (site.pinboard_user) { %>
-    <a class="pinboard" href="https://pinboard.in/u:<%= site.pinboard_user %>" title="Pinboard">Pinboard</a>
-    <% } %>
-    <% if (site.douban_user) { %>
-    <a class="douban" href="https://www.douban.com/people/<%= site.douban_user %>" title="Douban">Douban</a>
-    <% } %>
-    <% if (site.quora_user) { %>
-    <a class="quora" href="https://quora.com/<%= site.quora_user %>" title="Quora">Quora</a>
-    <% } %>
-    <% if (site.instagram_user) { %>
-    <a class="instagram" href="https://instagram.com/<%= site.instagram_user %>" title="Instagram">Instagram</a>
-    <% } %>
-    <% if (site.behance_user) { %>
-    <a class="behance" href="https://www.behance.net/<%= site.behance_user %>" title="Behance">Behance</a>
-    <% } %>
-    <% if (site.subscribe_rss) { %>
-    <a class="rss" href="<%= site.subscribe_rss %>" title="RSS">RSS</a>
+    <% if (site.rss_on) { %>
+    <a class="rss" href="<%= site.url %>atom.xml" title="RSS">RSS</a>
     <% } %>
   </div>
 </nav>

@@ -5,6 +5,12 @@ import base from './apiBase';
 
 export default class extends base {
 
+  init(http) {
+    super.init(http);
+
+    this.modelInstance = this.model('config');
+  }
+
   async getAction() {
 
     let mysql = await this.modelInstance.query('SELECT VERSION() as version');
@@ -18,11 +24,31 @@ export default class extends base {
       mysqlVersion: mysql[0].version
     };
 
-    return this.success(data);
+    return this.success({
+      versions: data,
+      config: await this.getConfig()
+    });
   }
 
-  putAction() {
-    return this.__call();
+  async putAction() {
+    let model = this.modelInstance;
+    let submitConfig = this.post();
+    let oldConfig = await this.getConfig();
+    let newConfig = Object.keys(submitConfig)
+        .filter(key => submitConfig[key] != oldConfig[key])
+        .map(key => {
+          return {
+            key: key,
+            value: submitConfig[key]
+          }
+        });
+
+    let result = await Promise.all(newConfig.map(configItem => {
+      return model.add(configItem, {}, true);
+      return model.execute('REPLACE INTO __TABLE__ (`key`, `value`) VALUES ("%s", "%s")', ...configItem);
+    }));
+
+    return this.success({result});
   }
 
   postAction() {
@@ -31,6 +57,15 @@ export default class extends base {
 
   deleteAction() {
     return this.__call();
+  }
+
+  async getConfig() {
+    let items = await this.modelInstance.select();
+    let siteConfig = {};
+
+    items.forEach(item => siteConfig[item.key] = item.value);
+
+    return siteConfig;
   }
 
 }

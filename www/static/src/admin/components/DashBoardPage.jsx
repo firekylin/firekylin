@@ -55,7 +55,7 @@ class DashBoardPage extends BaseComponent {
   }
 
   onChange(data) {
-    this.setState(data);
+    this.setState(data.versions);
   }
 }
 

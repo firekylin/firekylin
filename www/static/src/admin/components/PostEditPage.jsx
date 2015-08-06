@@ -26,7 +26,7 @@ class PostAddPage extends BaseComponent {
       categories: [],
       title: '',
       content: '',
-      category: false
+      category: 0
     };
 
     this.id = this.props.params.id;
@@ -81,11 +81,10 @@ class PostAddPage extends BaseComponent {
             <input type="text" placeholder="请输入标题" ref="title" value={this.state.title} onChange={this.handleTitleChange} />
           </div>
           <div className="category-wrapper">
-            <select ref="category" value={this.state.category} onChange={this.handleCategoryChange}>
-              <option value={false}>请选择分类</option>
-              <option value={ADD_CATEGORY}>添加新分类</option>
-              <option value={false} disabled>---</option>
-              {categories}
+            <select ref="category" value={ this.state.category } onChange={this.handleCategoryChange}>
+              { categories }
+              <option value={ false } disabled>---</option>
+              <option value={ ADD_CATEGORY }>添加新分类</option>
             </select>
             <div className="add-category" style={{display: this.state.showAddCategory ? 'inline-block' : 'none'}}>
               <input placeholder="请输入分类名" ref="newCategory" />
