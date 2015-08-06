@@ -49,7 +49,6 @@
   code {
     background: #fee9cc;
     border-radius: 3px;
-    font-family: "Consolas", "Courier New", Courier, mono, serif;
     font-family: "Consolas", "Liberation Mono", Courier, monospace;
     font-size: 80%;
     margin: 0 2px;
@@ -127,21 +126,16 @@
     position: relative;
 
     &:before {
-      content: attr(class);
+      content: attr(lang);
       color: #EAEAEA;
       font-size: 45px;
       line-height: 1;
       pointer-events: none;
       position: absolute;
-      right: -2px;
-      top: -12px;
+      right: -5px;
+      top: -10px;
       overflow: hidden;
-      text-indent: -3em;
       text-transform: uppercase;
-    }
-
-    &.lang-js {
-      //content: 'JS';
     }
   }
 
