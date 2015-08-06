@@ -48,7 +48,7 @@ export default class extends base {
     }
     let postModel = this.model('post');
     let rows = await this.modelInstance.where({id: this.id}).delete();
-    await postModel.where({category: this.id}).update({category: 0});
+    await postModel.where({category_id: this.id}).update({category_id: '0'});
     return this.success({affectedRows: rows});
   }
 
