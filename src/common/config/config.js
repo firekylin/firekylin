@@ -6,5 +6,5 @@ export default {
   default_module: 'web',
   port: 1234,
 
-  resource_reg: /^(static\/.*)$/
+  //resource_reg: /^(static\/.*)$/
 }
