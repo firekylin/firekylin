@@ -42,7 +42,7 @@ export default class extends think.controller.base {
             }
           }
         });
-        return marked(str);
+        return marked(str).replace(/(class="lang-([^"]+)")/g, '$1 lang="$2"');
       },
       flatHTML(string) {
         return string.replace(/<.+?>/g, '');
