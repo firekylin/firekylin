@@ -12,8 +12,8 @@ class formHelper {
 
   get state() {
     return this.stateProps.filter(Boolean).reduce(
-      (object, key) => object[key],
-      this.context.state
+        (object, key) => object[key],
+        this.context.state
     );
   }
 
@@ -39,16 +39,16 @@ class formHelper {
     let fields = this.buildFields(block.fields, block);
 
     return (
-      <div className="block" key={ block.id }>
-        <div className="title">
-          <h3>{ block.name }</h3>
-          { hint }
+        <div className="block" key={ block.id }>
+          <div className="title">
+            <h3>{ block.name }</h3>
+            { hint }
+          </div>
+          <div className="content">
+            { fields }
+          </div>
         </div>
-        <div className="content">
-          { fields }
-        </div>
-      </div>
-    )
+    );
   }
 
   buildFields(config) {
@@ -88,47 +88,47 @@ class formHelper {
 
   buildText(field) {
     return (
-      <input
-        id={ field.id }
-        className="text"
-        type={ field.type || 'text' }
-        placeholder={ field.placeholder || '' }
-        value={ this.state[field.id] }
-        onChange={ this.handleChange.bind(this, field.id) }
-      />
+        <input
+            id={ field.id }
+            className="text"
+            type={ field.type || 'text' }
+            placeholder={ field.placeholder || '' }
+            value={ this.state[field.id] }
+            onChange={ this.handleChange.bind(this, field.id) }
+            />
     );
   }
 
   buildTextarea(field) {
     return (
-      <textarea
-        id={ field.id }
-        cols="30"
-        rows="10"
-        placeholder={ field.placeholder || '' }
-        value={ this.state[field.id] }
-        onChange={ this.handleChange.bind(this, field.id) }
-      />
+        <textarea
+            id={ field.id }
+            cols="30"
+            rows="10"
+            placeholder={ field.placeholder || '' }
+            value={ this.state[field.id] }
+            onChange={ this.handleChange.bind(this, field.id) }
+            />
     );
   }
 
   buildRadio(field) {
     let options = parseOptions(field.options)
-          .map((option, i) => (
+        .map((option, i) => (
             <label key={i}>
               <input
-                type="radio"
-                name={ field.id }
-                value={ option.value }
-                checked={ String(option.value) == this.state[field.id] }
-                onChange={ this.handleChange.bind(this, field.id) }
-              />
+                  type="radio"
+                  name={ field.id }
+                  value={ option.value }
+                  checked={ String(option.value) == this.state[field.id] }
+                  onChange={ this.handleChange.bind(this, field.id) }
+                  />
               { option.name }
             </label>
-          ));
+        ));
 
     return (
-      <span className="input-wrapper">
+        <span className="input-wrapper">
         { options }
       </span>
     );
@@ -153,7 +153,7 @@ class formHelper {
           });
 
       return (
-        <span className="input-wrapper">
+          <span className="input-wrapper">
           { options }
         </span>
       );
@@ -171,9 +171,9 @@ class formHelper {
   buildSelect(field) {
     let options = parseOptions(field.options)
         .map((option, i) => (
-          <option value={ option.value } key={i} >
-            { option.name }
-          </option>
+            <option value={ option.value } key={i} >
+              { option.name }
+            </option>
         ));
 
     return (
