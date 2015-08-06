@@ -1,3 +1,6 @@
+import CodeMirror from 'codemirror';
+
+
 var isMac = /Mac/.test(navigator.platform);
 
 var shortcuts = {
@@ -302,17 +305,23 @@ function _toggleBlock(editor, type, start_chars, end_chars){
 
   var startPoint = cm.getCursor('start');
   var endPoint = cm.getCursor('end');
+  var startRegex, endRegex;
+
   if (stat[type]) {
     text = cm.getLine(startPoint.line);
     start = text.slice(0, startPoint.ch);
     end = text.slice(startPoint.ch);
-    startRegex = new RegExp("/^(.*)?(\*|\_){" + start_chars.length + "}(\S+.*)?$/", "g")
+    startRegex = new RegExp(`^(.*)(\\*|_){${start_chars.length}}(.*)?$`, "g");
     start = start.replace(startRegex, '$1$3');
-    endRegex = new RegExp("/^(.*\S+)?(\*|\_){" + end_chars.length + "}(\s+.*)?$/", "g")
+    endRegex = new RegExp(`^(.*)(\\*|_){${end_chars.length}}(.*)?$`, "g");
     end = end.replace(endRegex, '$1$3');
     startPoint.ch -= start_chars.length;
     endPoint.ch -= end_chars.length;
-    cm.setLine(startPoint.line, start + end);
+    let lineStart = CodeMirror.Pos(startPoint.line, 0);
+    let lineEnd = CodeMirror.Pos(startPoint.line, Infinity);
+
+    cm.replaceRange(start + end, lineStart, lineEnd);
+    //cm.setLine(startPoint.line, start + end);
   } else {
     text = cm.getSelection();
     cm.replaceSelection(start + text + end);
