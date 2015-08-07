@@ -1,6 +1,7 @@
 import moment from 'moment';
 
 import base from './apiBase';
+import pack from '../../../package.json';
 
 
 export default class extends base {
@@ -20,7 +21,7 @@ export default class extends base {
       v8Version: process.versions.v8,
       platform: process.platform,
       thinkjsVersion: think.version,
-      firekylinVersion: this.config('version'),
+      firekylinVersion: pack.version,
       mysqlVersion: mysql[0].version
     };
 
