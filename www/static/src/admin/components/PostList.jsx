@@ -65,7 +65,7 @@ class PostList extends BaseListComponent {
           </tbody>
         </table>
         <div className="button-wrapper">
-          <Link to="post/add" className="add-post button green small"><i className="fa fa-plus"></i>添加文章</Link>
+          <Link to="/admin/post/add" className="add-post button green small"><i className="fa fa-plus"></i>添加文章</Link>
           <button className="button red small" onClick={this.handleDelete}><i className="fa fa-trash-o"></i>批量删除</button>
         </div>
       </div>
@@ -73,7 +73,7 @@ class PostList extends BaseListComponent {
   }
 
   handleEdit(id) {
-    this.transitionTo('post/edit', {id});
+    this.transitionTo('/admin/post/edit/' + id);
   }
 
   handleDelete(id) {
