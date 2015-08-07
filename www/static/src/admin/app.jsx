@@ -1,7 +1,8 @@
 import 'babel-core/polyfill'
 
 import React from 'react';
-import Router, {Route, DefaultRoute, NotFoundRoute} from 'react-router';
+import { Router, Route, Redirect } from 'react-router';
+import { history } from 'react-router/lib/BrowserHistory';
 
 import App from './components/App';
 import UserPage from './components/UserPage';
@@ -15,22 +16,6 @@ import DashBoardPage from './components/DashBoardPage';
 import './stores/WebAPIStores';
 
 
-let routes = (
-  <Route path="/admin" handler={App}>
-    <DefaultRoute name="dashboard" handler={ DashBoardPage } />
-    <Route name="category" path="category" handler={ CategoryPage } />
-    <Route name="post" path="post">
-      <DefaultRoute handler={ PostPage} />
-      <Route name="post/add" path="add" handler={ PostEditPage } />
-      <Route name="post/edit" path="edit/:id" handler={ PostEditPage } />
-    </Route>
-    <Route name="user" path="user" handler={ UserPage } />
-    <Route name="config" path="config" handler={ ConfigPage } />
-    <Route name="login" path="login" handler={ LoginPage } />
-    <NotFoundRoute handler={ DashBoardPage }/>
-  </Route>
-);
-
 new Promise(resolve => {
   if (window.addEventListener) {
     window.addEventListener('DOMContentLoaded', resolve);
@@ -38,7 +23,22 @@ new Promise(resolve => {
     window.attachEvent('onload', resolve);
   }
 }).then(() => {
-  Router.run(routes, Router.HistoryLocation, Root => {
-    React.render(<Root />, document.body);
-  });
+  React.render((
+      <Router history={ history }>
+        <Route path="/admin/login" component={ LoginPage } />
+        <Redirect from="/admin" to="/admin/dashboard" />
+        <Route path="/admin" component={ App } onEnter={ requireAuth }>
+          <Route path="dashboard" component={ DashBoardPage } />
+          <Route path="category" component={ CategoryPage } />
+          <Route path="post" component={ PostPage} />
+          <Route path="post/add" component={ PostEditPage } />
+          <Route path="post/edit/:id" component={ PostEditPage } />
+          <Route path="user" component={ UserPage } />
+          <Route path="config" component={ ConfigPage } />
+          <Redirect from="*" to="/admin/dashboard" />
+        </Route>
+      </Router>
+  ), document.body);
 });
+
+function requireAuth(nextState, transition) {}

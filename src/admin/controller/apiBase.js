@@ -44,6 +44,10 @@ export default class extends think.controller.rest {
     return this.fail(...error);
   }
 
+  encryptPassword(password) {
+    return this.md5(this.md5('fireKylin') + this.md5(password) + this.md5('jedmeng'));
+  }
+
   /**
    * call
    * @return {Promise} []

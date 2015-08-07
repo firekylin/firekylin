@@ -1,5 +1,5 @@
 import React from 'react';
-import {Navigation} from 'react-router';
+import { Link, TransitionHook } from 'react-router';
 import autobind from 'autobind-decorator';
 import {decorate as mixin} from 'react-mixin';
 
@@ -7,8 +7,8 @@ import BaseComponent from './BaseComponent';
 import AlertActions from '../actions/AlertActions';
 import PostActions from '../actions/PostActions';
 import CategoryActions from '../actions/CategoryActions';
-import {PostStatusStore, PostStore} from '../stores/PostStores';
-import {CategoryListStore} from '../stores/CategoryStores';
+import { PostStatusStore, PostStore } from '../stores/PostStores';
+import { CategoryListStore } from '../stores/CategoryStores';
 
 import Editor from  '../../common/markdown-editor';
 
@@ -16,7 +16,7 @@ import Editor from  '../../common/markdown-editor';
 const ADD_CATEGORY = "{add}";
 
 @autobind
-@mixin(Navigation)
+@mixin(TransitionHook)
 class PostAddPage extends BaseComponent {
   constructor(props) {
     super(props);
@@ -34,12 +34,19 @@ class PostAddPage extends BaseComponent {
   }
 
   componentDidMount() {
+    let self = this;
+
     CategoryActions.load();
     this.new || PostActions.load(this.id);
 
 
     this.editor = new Editor({
       element: this.refs.editor.getDOMNode()
+    });
+
+    this.editor.codemirror.on('change', cm => {
+      console.log('change');
+      self.handleContentChange(cm.getValue());
     });
 
     window.onbeforeunload = function() {
@@ -60,7 +67,17 @@ class PostAddPage extends BaseComponent {
   }
 
   componentDidUpdate() {
-    this.editor.value(this.state.content);
+    if (this.editor.value() != this.state.content) {
+      this.editor.value(this.state.content);
+    }
+  }
+
+  routerWillLeave(nextState, router) {
+    if (this.checkUnload()) {
+      if (!confirm('正在编辑中，未保存的部分可能会丢失\n\n确定要离开？')) {
+        router.abort();
+      }
+    }
   }
 
   render() {
@@ -94,10 +111,14 @@ class PostAddPage extends BaseComponent {
           <div className="editor-status">{this.state.status}</div>
           <div className="button-wrapper">
             <button className="button blue" onClick={this.handleSave}>保存</button>
-            <button className="button white" onClick={this.handleBack}>返回</button>
+            <Link to="/admin/post"  className="button white" >返回</Link>
           </div>
         </div>
     )
+  }
+
+  handleContentChange(content) {
+    this.setState({ content })
   }
 
   handleTitleChange(e) {
@@ -139,10 +160,6 @@ class PostAddPage extends BaseComponent {
     } else {
       PostActions.update(this.id, data);
     }
-  }
-
-  handleBack() {
-    this.transitionTo('post');
   }
 
   checkUnload() {
