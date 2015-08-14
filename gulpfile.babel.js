@@ -79,7 +79,7 @@ gulp.task('server script', () => {
     .pipe(gulp.dest(serverDist))
     .pipe($.size({title: 'server'}))
     : src
-    .pipe($.babel())
+    .pipe($.babel({stage: 0, optional: ['runtime']}))
     .pipe(gulp.dest(serverDist))
     .pipe($.size({title: 'server script'}));
 });

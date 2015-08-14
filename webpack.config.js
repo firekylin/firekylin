@@ -23,10 +23,11 @@ const config = {
 			{ test: /\.jsx?$/, loader: 'babel?stage=0', exclude: /node_modules/ }
 		]
 	},
-	plugins: [],
 	devtool: DEBUG ? 'source-map' : false,
-	plugin: DEBUG ? [] : [new webpack.optimize.UglifyJsPlugin()],
+	plugins: [new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)],
 	cache: DEBUG
 };
+
+!DEBUG && config.plugins.push(new webpack.optimize.UglifyJsPlugin());
 
 export default config;
