@@ -46,6 +46,7 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.6",
     "keymirror": "^0.1.1",
+    "md5": "^2.0.0",
     "merge-stream": "^0.1.8",
     "minimist": "^1.1.1",
     "mocha": "^2.2.5",

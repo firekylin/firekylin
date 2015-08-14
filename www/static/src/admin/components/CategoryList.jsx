@@ -1,6 +1,6 @@
 import React from 'react';
 import autobind from 'autobind-decorator';
-import {Link, Navigation} from 'react-router';
+import {Link, Navigation as RouteNavigation } from 'react-router';
 import {decorate as mixin} from 'react-mixin';
 
 import BaseListComponent from './BaseListComponent';
@@ -10,7 +10,7 @@ import {CategoryListStore} from '../stores/CategoryStores';
 
 
 @autobind
-@mixin(Navigation)
+@mixin(RouteNavigation)
 class CategoryList extends BaseListComponent {
 
   componentDidMount() {

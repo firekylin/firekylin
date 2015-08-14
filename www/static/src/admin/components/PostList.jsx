@@ -1,16 +1,16 @@
 import React from 'react';
 import autobind from 'autobind-decorator';
-import {Link, Navigation} from 'react-router';
-import {decorate as mixin} from 'react-mixin';
+import { Link, Navigation as RouteNavigation } from 'react-router';
+import { decorate as mixin } from 'react-mixin';
 
 import BaseListComponent from './BaseListComponent';
 import AlertActions from '../actions/AlertActions';
 import PostActions from '../actions/PostActions';
-import {PostListStore} from '../stores/PostStores';
+import { PostListStore } from '../stores/PostStores';
 
 
 @autobind
-@mixin(Navigation)
+@mixin(RouteNavigation)
 class PostList extends BaseListComponent {
 
   componentDidMount() {

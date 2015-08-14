@@ -90,12 +90,11 @@ export default class extends think.controller.base {
   }
 
   async implementPosts(post) {
-    let self = this;
     let categoryMap = await this.getCategoryMap();
     let categories = [];
 
     if (Array.isArray(post)) {
-      return await post.map(async post => await self.implementPosts(post));
+      return await post.map(async post => await this.implementPosts(post));
     } else {
       String(post.category_id).split(',').forEach(async cid => {
         let category = categoryMap[cid];

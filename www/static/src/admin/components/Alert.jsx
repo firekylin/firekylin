@@ -45,8 +45,6 @@ class Alert extends BaseComponent {
   }
 
   onChange(type, message, opts = {}) {
-    let self = this;
-
     if (message) {
       this.setState({
         show: true,
@@ -58,7 +56,7 @@ class Alert extends BaseComponent {
       clearTimeout(this.timer);
 
       if (!opts.showClose) {
-        this.timer = setTimeout(() => self.handleClose(), opts.timeout || DEFAULT_TIMEOUT);
+        this.timer = setTimeout(() => this.handleClose(), opts.timeout || DEFAULT_TIMEOUT);
       }
 
     }

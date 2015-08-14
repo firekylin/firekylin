@@ -28,7 +28,7 @@ export default class extends base {
     }
 
     let date = moment().format();
-    let author = 0;
+    let author = this.userInfo.id;
 
     let insertId = await this.modelInstance.add({
       category_id,
@@ -55,7 +55,7 @@ export default class extends base {
 
     Object.assign(data, {
       modify_date: moment().format(),
-      modify_user: 0
+      modify_user: this.userInfo.id
     });
     let rows = await this.modelInstance.where({id: this.id}).update(data);
     return this.success({affectedRows: rows});

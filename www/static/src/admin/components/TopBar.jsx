@@ -11,7 +11,7 @@ export default class TopBar extends BaseComponent {
       <div className="TopBar">
         <h1><Link to="dashboard">FireKylin</Link></h1>
         <a className="site-link" href="/" target="_blank"><i className="fa fa-home" />站点</a>
-        <UserBox />
+        <UserBox userInfo={ this.props.userInfo }/>
       </div>
     )
   }

@@ -15,6 +15,8 @@
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <% if (site.rss_on) { %>
+  <link rel="alternate" href="/atom.xml" title="<%= site.title %>" type="application/atom+xml">
+  <% } %>
   <link href="/static/dist/web.css" media="screen, projection" rel="stylesheet" type="text/css">
 </head>

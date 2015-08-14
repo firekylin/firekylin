@@ -36,7 +36,6 @@ class Dialog extends BaseComponent {
   }
 
   onChange(type, message, opts = {}) {
-    let self = this;
 
     if (message) {
       this.setState({
@@ -48,7 +47,7 @@ class Dialog extends BaseComponent {
 
       if (!opts.showClose) {
         setTimeout(() => {
-          self.state.message == message && self.handleClose();
+          this.state.message == message && this.handleClose();
         }, opts.timeout || DEFAULT_TIMEOUT)
       }
 

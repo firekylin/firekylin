@@ -27,7 +27,7 @@ new Promise(resolve => {
       <Router history={ history }>
         <Route path="/admin/login" component={ LoginPage } />
         <Redirect from="/admin" to="/admin/dashboard" />
-        <Route path="/admin" component={ App } onEnter={ requireAuth }>
+        <Route path="/admin" component={ App }>
           <Route path="dashboard" component={ DashBoardPage } />
           <Route path="category" component={ CategoryPage } />
           <Route path="post" component={ PostPage} />
@@ -40,5 +40,3 @@ new Promise(resolve => {
       </Router>
   ), document.body);
 });
-
-function requireAuth(nextState, transition) {}

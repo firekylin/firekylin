@@ -29,15 +29,16 @@ class PostAddPage extends BaseComponent {
       category: 0
     };
 
+    this.savedStated = {};
+
     this.id = this.props.params.id;
-    this.new = !this.id;
+    this.isNew = !this.id;
   }
 
   componentDidMount() {
-    let self = this;
 
     CategoryActions.load();
-    this.new || PostActions.load(this.id);
+    this.isNew || PostActions.load(this.id);
 
 
     this.editor = new Editor({
@@ -45,12 +46,11 @@ class PostAddPage extends BaseComponent {
     });
 
     this.editor.codemirror.on('change', cm => {
-      console.log('change');
-      self.handleContentChange(cm.getValue());
+      this.handleContentChange(cm.getValue());
     });
 
     window.onbeforeunload = function() {
-      return this.checkUnload() ? '正在编辑中，未保存的部分可能会丢失\n' : undefined;
+      return this.isChanged() ? '正在编辑中，未保存的部分可能会丢失\n' : undefined;
     }.bind(this);
 
     this.subscribe(
@@ -73,7 +73,7 @@ class PostAddPage extends BaseComponent {
   }
 
   routerWillLeave(nextState, router) {
-    if (this.checkUnload()) {
+    if (this.isChanged()) {
       if (!confirm('正在编辑中，未保存的部分可能会丢失\n\n确定要离开？')) {
         router.abort();
       }
@@ -81,8 +81,7 @@ class PostAddPage extends BaseComponent {
   }
 
   render() {
-
-    let title = this.new ? '添加文章' : '编辑文章';
+    let title = this.isNew ? '添加文章' : '编辑文章';
     let categories = this.state.categories.map((category) => (
         <option key={category.id} value={category.id}>{category.name}</option>
     ));
@@ -155,15 +154,19 @@ class PostAddPage extends BaseComponent {
       data['category'] = category
     }
 
-    if (this.new) {
+    if (this.isNew) {
       PostActions.add(data);
     } else {
       PostActions.update(this.id, data);
     }
   }
 
-  checkUnload() {
-    return !!this.editor.value();
+  isChanged() {
+    if (this.isNew) {
+      return !!this.editor.value();
+    } else {
+      return Object.keys(this.savedStated).some(key => this.savedStated[key] != this.state[key]);
+    }
   }
 
   onCategoryChange(categories) {
@@ -171,7 +174,7 @@ class PostAddPage extends BaseComponent {
   }
 
   onPostStatusChange(status) {
-    let type = this.new ? '发布' : '修改';
+    let type = this.isNew ? '发布' : '修改';
 
     if (status == 'complete') {
       AlertActions.success(type + '成功');
@@ -182,11 +185,13 @@ class PostAddPage extends BaseComponent {
   }
 
   onPostChange(post) {
-    this.setState({
+    Object.assign(this.savedStated, {
       title: post.title,
       content: post.content,
       category: post.category
     });
+
+    this.setState(this.savedStated);
   }
 }
 

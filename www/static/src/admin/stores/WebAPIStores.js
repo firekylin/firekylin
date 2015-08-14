@@ -1,5 +1,6 @@
 import Reflux from 'reflux';
 import request from 'superagent';
+import md5 from 'md5';
 
 import CategoryActions from '../actions/CategoryActions';
 import UserActions from '../actions/UserActions';
@@ -9,10 +10,18 @@ import SystemActions from '../actions/SystemActions';
 
 let buildCallback = function(action) {
   return function(error, response) {
-    if (response.ok) {
-      action.completed(response.body);
-    } else {
+    if (!response.ok) {
       action.failed((response.body && response.body.error) || response.error);
+    } else if (response.body.status != 200) {
+      action.failed(response.body.error);
+    } else {
+      action.completed(response.body);
+    }
+
+    if (response.body) {
+      if (response.body.status == 401) {
+        UserActions.showLogin();
+      }
     }
   };
 };
@@ -65,13 +74,24 @@ let createRestfulStore = function(url, Actions, ext = {}) {
 
 createRestfulStore('/admin/api/category', CategoryActions);
 createRestfulStore('/admin/api/post', PostActions);
-createRestfulStore('/admin/api/system', SystemActions, {
-  onUpdate(data) {
-    console.log(data);
+createRestfulStore('/admin/api/system', SystemActions);
+createRestfulStore('/admin/api/session', UserActions, {
+  onLogin(username, password, captcha, autoLogin) {
+    password = md5(`~!@#$${password}$#@!~`);
     request
-        .put(this.getUrl())
-        .type('form')
-        .send(data)
-        .end(buildCallback(SystemActions.update));
+      .post(this.getUrl())
+      .type('form')
+      .send({username, password, captcha, autoLogin})
+      .end(buildCallback(UserActions.login));
+  },
+  onLogout() {
+    request
+        .del(this.getUrl())
+        .end(buildCallback(UserActions.logout));
+  },
+  onCheck() {
+    request
+        .get(this.getUrl())
+        .end(buildCallback(UserActions.check));
   }
 });

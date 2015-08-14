@@ -203,19 +203,15 @@ class formHelper {
 
 function parseOptions(options) {
   if (Array.isArray(options)) {
-    return options.map(option => {
-      return {
-        name: option.name || option,
-        value: option.value || option
-      };
-    });
+    return options.map(option => ({
+      name: option.name || option,
+      value: option.value || option
+    }));
   } else if (typeof options == 'object') {
-    return Object.keys(options).map(key => {
-      return {
-        name: key,
-        value: options[key]
-      };
-    });
+    return Object.keys(options).map(key => ({
+      name: key,
+      value: options[key]
+    }));
   } else if (typeof options == 'string') {
     return parseOptions(options.split(','));
   } else {

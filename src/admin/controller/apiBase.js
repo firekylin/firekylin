@@ -11,19 +11,19 @@ export default class extends think.controller.rest {
    * check user is login
    * @return {Promise} []
    */
-  async __before(){
-    let action = this.http.action;
+  async __before(action){
 
-    if (!['index'].includes(action)) {
-      //await this.checkPermission();
+    this.userInfo = await this.session('userInfo');
+
+    if (!['index', 'session'].includes(action.http.controller)) {
+      await this.checkPermission();
     }
 
     this.assign('base.js')
   }
 
   async checkPermission() {
-    let session = await this.session('userInfo');
-    if (think.isEmpty(session)) {
+    if (think.isEmpty(this.userInfo)) {
       throw this.error(ERROR.UNAUTHORIZED)
     }
   }
@@ -44,8 +44,9 @@ export default class extends think.controller.rest {
     return this.fail(...error);
   }
 
-  encryptPassword(password) {
-    return this.md5(this.md5('fireKylin') + this.md5(password) + this.md5('jedmeng'));
+  encryptPassword(password, md5encoded = false) {
+    password = md5encoded ? password : think.md5(password);
+    return think.md5(think.md5('fireKylin') + password + think.md5('jedmeng'));
   }
 
   /**

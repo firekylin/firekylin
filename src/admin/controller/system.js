@@ -37,16 +37,13 @@ export default class extends base {
     let oldConfig = await this.getConfig();
     let newConfig = Object.keys(submitConfig)
         .filter(key => submitConfig[key] != oldConfig[key])
-        .map(key => {
-          return {
-            key: key,
-            value: submitConfig[key]
-          }
-        });
+        .map(key => ({
+          key: key,
+          value: submitConfig[key]
+        }));
 
     let result = await Promise.all(newConfig.map(configItem => {
       return model.add(configItem, {}, true);
-      return model.execute('REPLACE INTO __TABLE__ (`key`, `value`) VALUES ("%s", "%s")', ...configItem);
     }));
 
     return this.success({result});
