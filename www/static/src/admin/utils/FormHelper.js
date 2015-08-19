@@ -199,7 +199,7 @@ class formHelper {
     let value = el.type == 'checkbox' && el.tagName == 'INPUT' ? el.checked.toString() : el.value;
     this.setState(id, value);
   }
-};
+}
 
 function parseOptions(options) {
   if (Array.isArray(options)) {

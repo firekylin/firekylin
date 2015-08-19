@@ -7,11 +7,31 @@ export default class extends base {
 
   async getAction(){
     let data;
+
     if (this.id) {
       data = await this.modelInstance.where({id: this.id}).find();
-      return this.success(data);
+      data.category = await this.model('category').where({id: data.category_id}).getField('name', true);
+    } else {
+      let page = this.get('page') || 1;
+      let pageCount = this.get('page_count') || 20;
+
+      data = await this.modelInstance
+          .alias('post')
+          .field('`post`.*, `category`.`name` as "category", `user`.`username` as "user"')
+          .join([{
+            table: 'category',
+            as: 'category',
+            on: ['`post`.`category_id`', '`category`.`id`']
+          }, {
+            table: 'user',
+            as: 'user',
+            on: ['`post`.`user_id`', '`user`.`id`']
+          }])
+          .order('`date` DESC')
+          .limit((page - 1) * pageCount, pageCount)
+          .select();
     }
-    data = await this.modelInstance.order('`date` DESC').select();
+
     return this.success(data);
   }
 

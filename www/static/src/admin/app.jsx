@@ -13,8 +13,6 @@ import PostEditPage from './components/PostEditPage';
 import CategoryPage from './components/CategoryPage';
 import DashBoardPage from './components/DashBoardPage';
 
-import './stores/WebAPIStores';
-
 
 new Promise(resolve => {
   if (window.addEventListener) {

@@ -44,7 +44,6 @@ class App extends React.Component {
   }
 
   onUserChange(userInfo) {
-    console.log(userInfo);
     if (userInfo) {
       this.setState({ userInfo });
     } else {

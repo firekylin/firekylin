@@ -3,7 +3,8 @@ import autobind from "autobind-decorator";
 
 import BaseComponent from "./BaseComponent";
 import SystemActions from "../actions/SystemActions";
-import { SystemStore } from "../stores/SystemStores";
+import AlertActions from '../actions/AlertActions';
+import { SystemStore, SystemStatusStore } from "../stores/SystemStores";
 import FormHelper from '../utils/FormHelper';
 
 
@@ -14,7 +15,8 @@ class DashBoardPage extends BaseComponent {
     SystemActions.load();
 
     this.subscribe(
-        SystemStore.listen(this.onChange)
+        SystemStore.listen(this.onChange),
+        SystemStatusStore.listen(this.onStatusChange)
     );
   }
 
@@ -116,6 +118,21 @@ class DashBoardPage extends BaseComponent {
 
   onChange(data) {
     this.setState(data.config);
+  }
+
+  onStatusChange(status) {
+
+    if (status.action == 'load' && status.error) {
+      AlertActions.error('配置读取失败：' + status.error);
+    }
+
+    if (status.action == 'update' && !status.loading) {
+      if (status.error) {
+        AlertActions.error('保存失败：' + status.error);
+      } else {
+        AlertActions.success('保存成功');
+      }
+    }
   }
 
   handleSave(event) {

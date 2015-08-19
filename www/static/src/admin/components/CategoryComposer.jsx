@@ -48,12 +48,14 @@ class CategoryComposer extends BaseComponent {
     });
   }
 
-  onStatusChange(status, message) {
-    if (status == 'complete') {
-      AlertActions.success('分类创建成功');
-      this.setState({name: ''})
-    } else {
-      AlertActions.error('分类创建失败: ' + message);
+  onStatusChange(status) {
+    if (status.action == 'add' && !status.loading) {
+      if (status.error) {
+        AlertActions.error('分类创建失败: ' + status.error);
+      } else {
+        AlertActions.success('分类创建成功');
+        this.setState({name: ''})
+      }
     }
   }
 }

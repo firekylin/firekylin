@@ -29,7 +29,7 @@ class PostList extends BaseListComponent {
         </td>
         <td className="colTitle">{item.title}</td>
         <td className="colCategory">{item.category}</td>
-        <td className="colAuthor">{item.author}</td>
+        <td className="colAuthor">{item.user}</td>
         <td className="colDate">{item.modify_date.format('YYYY-MM-DD HH:mm')}</td>
         <td className="colAction">
           <i className="fa fa-pencil-square-o edit" title="编辑" onClick={this.handleEdit.bind(this, item.id)} />

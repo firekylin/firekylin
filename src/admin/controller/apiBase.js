@@ -24,20 +24,20 @@ export default class extends think.controller.rest {
 
   async checkPermission() {
     if (think.isEmpty(this.userInfo)) {
-      throw this.error(ERROR.UNAUTHORIZED)
+      throw this.error(ERROR.NOT_LOGIN)
     }
   }
 
   success(data = '', ext = {}) {
-    return this.json({status: 200, data: data, ...ext})
+    return this.json({errno: ERROR.SUCCESS[0], data: data, ...ext})
   }
 
-  fail(statusCode = 400, message = 'Bad Request') {
-    if (isNaN(statusCode)) {
-      message = statusCode;
-      statusCode = 400;
+  fail(errno, message = 'Bad Request') {
+    if (isNaN(errno)) {
+      message = errno;
+      errno = ERROR.UNKONWN_ERROR[0];
     }
-    return this.json({status: statusCode, error: message});
+    return this.json({errno: errno, error: message});
   }
 
   error(error) {
