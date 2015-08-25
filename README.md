@@ -44,3 +44,4 @@ thinkjs 2.0未发布到npm，所以需要从github拉取
 前台: [http://localhost:3000/](http://localhost:3000/)  
 后台: [http://localhost:3000/admin/](http://localhost:3000/admin/)  
 这样在修改js或css等文件后，会自动进行编译并刷新浏览器
+
