@@ -3,7 +3,7 @@
  */
 export default {
   type: 'mysql',
-  host: '127.0.0.1',
+  host: 'firekylindb.jedm.cn',
   name: 'firekylin',
   user: 'firekylin',
   pwd: 'firekylin',
