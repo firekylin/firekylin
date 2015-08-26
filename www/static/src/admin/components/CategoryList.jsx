@@ -22,7 +22,7 @@ class CategoryList extends BaseListComponent {
   }
 
   render() {
-    let trs = this.state.list.map(item => item.id == 0 ? (
+    let trs = this.state.list.map((item, index) => item.id == 0 ? (
       <tr key={item.id}>
         <td className="colCheck">
           <input type="checkbox" disabled={true} />
@@ -39,10 +39,13 @@ class CategoryList extends BaseListComponent {
         <td className="colCheck" onClick={this.handleSelect.bind(this, item.id)}>
           <input type="checkbox" title="选择" checked={this.state.selected.includes(item.id)} readOnly />
         </td>
-        <td className="colTitle">{item.name}</td>
+        <td className="colTitle">
+          <input value={item.name} disabled={!item.edit} ref={index} className={item.edit ? 'edit': ''} onChange={this.handleEditChange.bind(this, item.id, index)} />
+        </td>
         <td className="colTitle">{item.count}</td>
         <td className="colAction">
-          <i className="fa fa-pencil-square-o edit" title="编辑" onClick={this.handleEdit.bind(this, item.id)} />
+          <i className={item.edit ? 'none fa fa-pencil-square-o edit': 'block fa fa-pencil-square-o edit'} title="编辑" onClick={this.handleEditState.bind(this, item.id, index)} />
+          <i className={item.edit ? 'block fa fa-floppy-o delete': 'none fa fa-floppy-o delete'} title="保存" onClick={this.handleEditSend.bind(this, item.id, index)} />
           <i className="fa fa-trash-o delete" title="删除" onClick={this.handleDelete.bind(this, item.id)} />
         </td>
       </tr>
@@ -77,8 +80,41 @@ class CategoryList extends BaseListComponent {
     );
   }
 
-  handleEdit(id) {
-    this.transitionTo('post/edit', {id});
+  // 编辑分类 - 设置编辑状态
+  handleEditState(id, index) {
+    // PS：感觉这种写法超级烂，求大神指点
+    for (var i = 0; i < this.state.list.length; i++) {
+      this.state.list[i].edit = false;
+    }
+    this.state.list[index].edit = true;
+
+    // 重置数据
+    this.setState({list: this.state.list});
+
+    setTimeout(function () { // 实属无奈之举 如有问题请联系博文 PS：求大神给解决办法~
+      React.findDOMNode(this.refs[index]).focus();
+    }.bind(this), 30);
+  }
+
+  // 取消编辑状态
+  handleUnEditState (index) {
+    this.state.list[index].edit = false;
+    this.setState({list: this.state.list});
+  }
+
+  // 编辑分类 - 编辑数据
+  handleEditChange (id, index) {
+    this.state.list[index].name = this.refs[index].getDOMNode().value;
+    this.setState({list: this.state.list});
+  }
+
+  // 编辑分类 - 发送请求
+  handleEditSend (id, index) {
+    let data = this.state.list[index];
+    CategoryActions.update( id, data );
+
+    // 取消编辑状态
+    this.handleUnEditState(index);
   }
 
   handleDelete(id) {

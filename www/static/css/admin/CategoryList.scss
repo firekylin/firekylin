@@ -4,10 +4,29 @@
 .CategoryList {
   @extend .BaseList;
 
+  .none{display:none;}
+  .block{display:inline-block;}
+
   col {
 
     &.colCount {
       width: 10%;
     }
+  }
+
+  input {
+    border:2px solid transparent;
+    background-color:transparent;
+    width:100%;
+    transition:.15s;
+    padding:5px;
+
+      &.edit {
+        border-color:#5cb85c;
+      }
+
+      &:focus{
+        outline:none;
+      }
   }
 }
