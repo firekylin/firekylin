@@ -40,7 +40,7 @@ class CategoryList extends BaseListComponent {
           <input type="checkbox" title="选择" checked={this.state.selected.includes(item.id)} readOnly />
         </td>
         <td className="colTitle">
-          <input value={item.name} disabled={!item.edit} ref={index} className={item.edit ? 'edit': ''} onChange={this.handleEditChange.bind(this, item.id, index)} />
+          <input value={item.name} disabled={!item.edit} ref={index} className={item.edit ? 'edit': ''} onChange={this.handleEditChange.bind(this, item.id, index)} onKeyUp={this.handleEditKeyUp.bind(this, item.id, index)} />
         </td>
         <td className="colTitle">{item.count}</td>
         <td className="colAction">
@@ -115,6 +115,16 @@ class CategoryList extends BaseListComponent {
 
     // 取消编辑状态
     this.handleUnEditState(index);
+  }
+
+  // Enter键修改
+  handleEditKeyUp (id, index, e) {
+    
+    // 发送请求
+    if (e.keyCode === 13) this.handleEditSend(id, index);
+
+    // 取消编辑状态
+    if (e.keyCode === 27) this.handleUnEditState(index);
   }
 
   handleDelete(id) {
