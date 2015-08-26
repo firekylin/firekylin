@@ -13,6 +13,11 @@ import {CategoryListStore} from '../stores/CategoryStores';
 @mixin(RouteNavigation)
 class CategoryList extends BaseListComponent {
 
+  constructor(props) {
+    super(props);
+    this.cacheName = '';
+  }
+
   componentDidMount() {
     CategoryActions.load();
 
@@ -40,7 +45,7 @@ class CategoryList extends BaseListComponent {
           <input type="checkbox" title="选择" checked={this.state.selected.includes(item.id)} readOnly />
         </td>
         <td className="colTitle">
-          <input value={item.name} disabled={!item.edit} ref={index} className={item.edit ? 'edit': ''} onChange={this.handleEditChange.bind(this, item.id, index)} onKeyUp={this.handleEditKeyUp.bind(this, item.id, index)} />
+          <input value={item.name} disabled={!item.edit} ref={index} className={item.edit ? 'edit': ''} onChange={this.handleEditChange.bind(this, index, null)} onKeyUp={this.handleEditKeyUp.bind(this, item.id, index)} />
         </td>
         <td className="colTitle">{item.count}</td>
         <td className="colAction">
@@ -80,13 +85,14 @@ class CategoryList extends BaseListComponent {
     );
   }
 
-  // 编辑分类 - 设置编辑状态
+  // 设置编辑状态 - 编辑分类
   handleEditState(id, index) {
     // PS：感觉这种写法超级烂，求大神指点
     for (var i = 0; i < this.state.list.length; i++) {
       this.state.list[i].edit = false;
     }
     this.state.list[index].edit = true;
+    this.setState({cacheName: this.state.list[index].name});
 
     // 重置数据
     this.setState({list: this.state.list});
@@ -96,35 +102,40 @@ class CategoryList extends BaseListComponent {
     }.bind(this), 30);
   }
 
-  // 取消编辑状态
+  // 取消编辑状态 - 编辑分类
   handleUnEditState (index) {
     this.state.list[index].edit = false;
     this.setState({list: this.state.list});
   }
 
-  // 编辑分类 - 编辑数据
-  handleEditChange (id, index) {
-    this.state.list[index].name = this.refs[index].getDOMNode().value;
+  // 编辑数据 - 编辑分类
+  handleEditChange (index, text) {
+    this.state.list[index].name = text ? text : this.refs[index].getDOMNode().value;
     this.setState({list: this.state.list});
   }
 
-  // 编辑分类 - 发送请求
+  // 发送请求 - 编辑分类
   handleEditSend (id, index) {
     let data = this.state.list[index];
     CategoryActions.update( id, data );
 
-    // 取消编辑状态
+    // 取消编辑状态 - 编辑分类
     this.handleUnEditState(index);
   }
 
-  // Enter键修改
+  // Enter键修改 - 编辑分类
   handleEditKeyUp (id, index, e) {
     
     // 发送请求
     if (e.keyCode === 13) this.handleEditSend(id, index);
 
     // 取消编辑状态
-    if (e.keyCode === 27) this.handleUnEditState(index);
+    if (e.keyCode === 27) {
+      this.handleUnEditState(index);
+
+      this.handleEditChange(index, this.state.cacheName);
+      this.setState({cacheName: ''})
+    }
   }
 
   handleDelete(id) {
