@@ -84,8 +84,8 @@ class CategoryList extends BaseListComponent {
   // 设置编辑状态 - 编辑分类
   handleEditState(id, index) {
     // PS：感觉这种写法超级烂，求大神指点
-    for (let i = 0; i < this.state.list.length; i++) {
-      this.state.list[i].edit = false;
+    for (let item of this.state.list) {
+      item.edit = false;
     }
     this.state.list[index].edit = true;
     cacheName = this.state.list[index].name;
@@ -135,6 +135,8 @@ class CategoryList extends BaseListComponent {
   }
 
   handleDelete(id) {
+    if (!confirm('确定要删除？')) return;
+
     let ids;
 
     if (Number.isInteger(id)) {
@@ -147,6 +149,7 @@ class CategoryList extends BaseListComponent {
       AlertActions.warning('请勾选要删除的分类');
     } else {
       CategoryActions.delete(ids);
+      this.clearList(ids);
     }
 
   }

@@ -19,6 +19,18 @@ class PostList extends BaseComponent {
     this.setState({list})
   }
 
+  // 清除列表中已删除的分类
+  clearList (ids) {
+
+    for (let id of ids) {
+      for (let i in this.state.list) {
+        if (this.state.list[i].id === id) this.state.list.splice(i, 1);
+      }
+    }
+
+    this.setState({list: this.state.list});
+  }
+
   handleSelect(id) {
     let selected = this.state.selected;
     if (selected.includes(id)) {

@@ -46,8 +46,9 @@ export default class extends base {
     if (!this.id) {
       return this.fail('params error');
     }
+
     let postModel = this.model('post');
-    let rows = await this.modelInstance.where({id: this.id}).delete();
+    let rows = await this.modelInstance.where({id: ['IN', this.id]}).delete();
     await postModel.where({category_id: this.id}).update({category_id: '0'});
     return this.success({affectedRows: rows});
   }
