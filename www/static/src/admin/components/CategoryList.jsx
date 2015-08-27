@@ -8,15 +8,11 @@ import AlertActions from '../actions/AlertActions';
 import CategoryActions from '../actions/CategoryActions';
 import {CategoryListStore} from '../stores/CategoryStores';
 
+let cacheName = '';
 
 @autobind
 @mixin(RouteNavigation)
 class CategoryList extends BaseListComponent {
-
-  constructor(props) {
-    super(props);
-    this.cacheName = '';
-  }
 
   componentDidMount() {
     CategoryActions.load();
@@ -88,11 +84,11 @@ class CategoryList extends BaseListComponent {
   // 设置编辑状态 - 编辑分类
   handleEditState(id, index) {
     // PS：感觉这种写法超级烂，求大神指点
-    for (var i = 0; i < this.state.list.length; i++) {
+    for (let i = 0; i < this.state.list.length; i++) {
       this.state.list[i].edit = false;
     }
     this.state.list[index].edit = true;
-    this.setState({cacheName: this.state.list[index].name});
+    cacheName = this.state.list[index].name;
 
     // 重置数据
     this.setState({list: this.state.list});
@@ -133,8 +129,8 @@ class CategoryList extends BaseListComponent {
     if (e.keyCode === 27) {
       this.handleUnEditState(index);
 
-      this.handleEditChange(index, this.state.cacheName);
-      this.setState({cacheName: ''})
+      this.handleEditChange(index, cacheName);
+      cacheName = '';
     }
   }
 
