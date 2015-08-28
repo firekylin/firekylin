@@ -21,10 +21,10 @@
   a {
     color: #eee;
     text-decoration: none;
+    transition:.15s linear;
 
     &:hover {
       color: #00b9eb;
-      text-decoration: underline;
     }
   }
 
