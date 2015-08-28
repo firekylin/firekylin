@@ -3,7 +3,6 @@
 .BaseList {
   table {
     width: 100%;
-    max-width: 1000px;
     table-layout: fixed;
     border-collapse: collapse;
   }
@@ -36,7 +35,7 @@
   }
 
   td {
-    line-height: 24px;
+    line-height: 34px;
   }
 
   .colCheck,.colAction {
