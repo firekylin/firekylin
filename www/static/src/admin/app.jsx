@@ -28,6 +28,7 @@ new Promise(resolve => {
         <Route path="/admin" component={ App }>
           <Route path="dashboard" component={ DashBoardPage } />
           <Route path="category" component={ CategoryPage } />
+          <Route path="tag" component={ TagPage } />
           <Route path="post" component={ PostPage} />
           <Route path="post/add" component={ PostEditPage } />
           <Route path="post/edit/:id" component={ PostEditPage } />
