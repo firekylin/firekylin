@@ -11,6 +11,7 @@ import LoginPage from './components/LoginPage';
 import ConfigPage from './components/ConfigPage';
 import PostEditPage from './components/PostEditPage';
 import CategoryPage from './components/CategoryPage';
+import TagPage from './components/TagPage';
 import DashBoardPage from './components/DashBoardPage';
 
 
