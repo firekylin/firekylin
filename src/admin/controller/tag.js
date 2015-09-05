@@ -7,19 +7,19 @@ export default class extends base {
         let postModel = this.model('post');
         if (this.id) {
             tags = await this.modelInstance.where({id: this.id}).find();
-            tags.count = await postModel.where({category_id: this.id}).count('*');
+            tags.count = await postModel.where({tag_ids: ['like', '%'+this.id+'%']}).count('*');
         } else {
             tags = await this.modelInstance.order('id').select();
-            let count = await postModel.field(['`category_id` as id', 'count(`category_id`) as count']).group('category_id').order('id').select();
-            let countIndex = 0;
-            tags.forEach(category => {
-                let countItem = count[countIndex];
-                if (countItem && category.id == countItem.id) {
-                    category.count = countItem.count;
-                    countIndex ++;
-                } else {
-                    category.count = 0;
-                }
+            let counts = await postModel.order('id').select();
+
+            tags.forEach(tag => {
+                let countIndex = 0;
+                counts.forEach( count => {
+                    if(count.tag_ids.indexOf(tag.id) > -1) {
+                        countIndex++;
+                    }
+                });
+                tag.count = countIndex;
             });
         }
 
@@ -28,8 +28,10 @@ export default class extends base {
 
     async postAction(){
         let data = this.post();
+        let userId = this.userInfo.id;
+
         if(think.isEmpty(data)){
-            return this.fail('data is empty');
+            return this.fail('数据为空');
         }
         delete data.id;
 
@@ -37,20 +39,9 @@ export default class extends base {
         if (result) {
             return this.fail('标签名已经存在');
         }
-
+        data.user_id = userId;
         let insertId = await this.modelInstance.add(data);
         return this.success({id: insertId});
-    }
-
-    async deleteAction(){
-        if (!this.id) {
-            return this.fail('params error');
-        }
-
-        let postModel = this.model('post');
-        let rows = await this.modelInstance.where({id: ['IN', this.id]}).delete();
-    await postModel.where({category_id: this.id}).update({category_id: '0'});
-        return this.success({affectedRows: rows});
     }
 
 }
