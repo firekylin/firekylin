@@ -9,6 +9,7 @@ import PostActions from '../actions/PostActions';
 import CategoryActions from '../actions/CategoryActions';
 import { PostStatusStore, PostStore } from '../stores/PostStores';
 import { CategoryListStore } from '../stores/CategoryStores';
+import PostAddTags from './PostAddTags';
 
 import Editor from  '../../common/markdown-editor';
 
@@ -108,6 +109,7 @@ class PostAddPage extends BaseComponent {
             <textarea className="editor" ref="editor" />
           </div>
           <div className="editor-status">{this.state.status}</div>
+          <PostAddTags />
           <div className="button-wrapper">
             <button className="button blue" onClick={this.handleSave}>保存</button>
             <Link to="/admin/post"  className="button white" >返回</Link>
