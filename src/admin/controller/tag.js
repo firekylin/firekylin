@@ -3,19 +3,19 @@ import base from './apiBase'
 export default class extends base {
 
     async getAction(){
-        let tags;
-        let postModel = this.model('post');
+        let tags, counts;
+        let postTagModel = this.model('post_tag');
         if (this.id) {
             tags = await this.modelInstance.where({id: this.id}).find();
-            tags.count = await postModel.where({tag_ids: ['like', '%'+this.id+'%']}).count('*');
+            tags.count = await postTagModel.where({tag_id: this.id}).count('*');
         } else {
             tags = await this.modelInstance.order('id').select();
-            let counts = await postModel.order('id').select();
+            counts = await postTagModel.order('id').select();
 
             tags.forEach(tag => {
                 let countIndex = 0;
                 counts.forEach( count => {
-                    if(count.tag_ids.indexOf(tag.id) > -1) {
+                    if(count.tag_id == tag.id) {
                         countIndex++;
                     }
                 });
