@@ -54,7 +54,7 @@
     "qwest": "^2.0.1",
     "react": "^0.13.3",
     "react-mixin": "^1.6.0",
-    "react-router": "^1.0.0-beta3",
+    "react-router": "1.0.0-beta3",
     "reflux": "^0.2.10",
     "run-sequence": "^1.1.1",
     "webpack": "^1.10.1"
