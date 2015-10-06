@@ -44,4 +44,14 @@ export default class extends base {
         return this.success({id: insertId});
     }
 
+    async deleteAction(){
+        if (!this.id) {
+            return this.fail('params error');
+        }
+
+        let postTagModel = this.model('post_tag');
+        let rows = await this.modelInstance.where({id: ['IN', this.id]}).delete();
+        await postTagModel.where({tag_id: this.id}).delete();
+        return this.success({affectedRows: rows});
+    }
 }
