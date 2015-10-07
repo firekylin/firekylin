@@ -178,11 +178,15 @@ class PostAddPage extends BaseComponent {
   onPostStatusChange(status) {
     let type = this.isNew ? '发布' : '修改';
 
-    if (status == 'complete') {
-      AlertActions.success(type + '成功');
-      this.transitionTo('post');
-    } else {
-      AlertActions.error(type + '失败');
+    if(status.action == 'add' || status.action == 'update') {
+      var error = status.response;
+      if (error.errno) {
+        AlertActions.error(type + '失败');
+      } else {
+        AlertActions.success(type + '成功');
+        //跳转到文章列表页异常
+        //this.transitionTo('post');
+      }
     }
   }
 

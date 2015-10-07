@@ -10,7 +10,7 @@ export default class extends base {
 
     if (this.id) {
       data = await this.modelInstance.where({id: this.id}).find();
-      data.category = await this.model('category').where({id: data.category_id}).getField('name', true);
+      data.category = await this.model('category').where({id: data.category_id}).getField('id', true);
     } else {
       let page = this.get('page') || 1;
       let pageCount = this.get('page_count') || 20;
@@ -57,7 +57,7 @@ export default class extends base {
       title: data.title,
       content: data.content,
       modify_date: date,
-      modify_user: author
+      modify_user_id: author
     });
 
     return this.success({id: insertId});
@@ -75,8 +75,11 @@ export default class extends base {
 
     Object.assign(data, {
       modify_date: moment().format(),
-      modify_user: this.userInfo.id
+      modify_user_id: this.userInfo.id,
+      category_id: data.category
     });
+    delete data.category;
+
     let rows = await this.modelInstance.where({id: this.id}).update(data);
     return this.success({affectedRows: rows});
   }
