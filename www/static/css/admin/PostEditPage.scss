@@ -63,4 +63,52 @@
     padding: 15px;
     background: whitesmoke;
   }
+
+  .tag-wrapper{
+    .tag-title{
+      margin:20px 0 10px;
+      padding-bottom: 5px;
+    }
+
+    input {
+      font-size: 20px;
+      padding: 8px;
+      outline: none;
+      border: none;
+      border-bottom: $border;
+      width: 100%;
+    }
+
+    .tag-suggest{
+      margin: 25px 0 0;
+      overflow: hidden;
+      zoom: 1;
+
+      dt{
+        float: left;
+        padding: 5px 8px 0 0;
+        color: #666;
+      }
+
+      dd{
+        float: left;
+        overflow: hidden;
+        zoom: 1;
+        width: 604px;
+
+        a{
+          float: left;
+          margin: 0 10px 10px 0;
+          border: 1px solid #e2e3e5;
+          padding: 0 8px;
+          line-height: 24px;
+          color:#333;
+        }
+
+        a:hover{
+          color:#666;
+        }
+      }
+    }
+  }
 }
