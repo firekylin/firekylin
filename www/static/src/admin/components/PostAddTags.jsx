@@ -12,14 +12,16 @@ class PostAddTags extends BaseComponent {
         super(props);
 
         this.state = {
-            tags: '测试'
+            tags: ''
         };
     }
 
     componentDidMount() {
+        TagActions.load();
+
         this.subscribe(
             TagStatusStore.listen(this.onStatusChange)
-        )
+        );
     }
 
     render() {

@@ -28,7 +28,8 @@ class PostList extends BaseListComponent {
           <input type="checkbox" title="选择" checked={this.state.selected.includes(item.id)} readOnly />
         </td>
         <td className="colTitle">{item.title}</td>
-        <td className="colCategory">{item.category}</td>
+        <td className="colCategory">{item.category ? item.category : '--'}</td>
+        <td className="colTag">{item.tags ? item.tags : '--'}</td>
         <td className="colAuthor">{item.user}</td>
         <td className="colDate">{item.modify_date.format('YYYY-MM-DD HH:mm')}</td>
         <td className="colAction">
@@ -55,6 +56,7 @@ class PostList extends BaseListComponent {
               </th>
               <th className="colTitle">标题</th>
               <th className="colCategory">分类</th>
+              <th className="colTag">标签</th>
               <th className="colAuthor">作者</th>
               <th className="colDate">更新时间</th>
               <th className="colAction">操作</th>

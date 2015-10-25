@@ -7,17 +7,35 @@ export default class extends base {
 
   async getAction(){
     let data;
+    let posts = [];
 
     if (this.id) {
+      let postTags = await this.model('post_tag').where({post_id: this.id}).select();
+      let tags = await this.model('tag').select();
+      let tagCache = '';
+
       data = await this.modelInstance.where({id: this.id}).find();
       data.category = await this.model('category').where({id: data.category_id}).getField('id', true);
-    } else {
+      data.tags = '';
+
+      for(let postTag of postTags) {
+        //获取标签名称
+        for(let tag of tags) {
+          if(tag['id'] == postTag['tag_id']) {
+            data.tags += ' '+tag['name'];
+          }
+        }
+      }
+    }
+    else {
       let page = this.get('page') || 1;
       let pageCount = this.get('page_count') || 20;
+      let titles = [];
+      let tags = await this.model('tag').select();
 
       data = await this.modelInstance
           .alias('post')
-          .field('`post`.*, `category`.`name` as "category", `user`.`username` as "user"')
+          .field('`post`.*, `category`.`name` as "category", `user`.`username` as "user", `pTag`.`tag_id` as `tid`')
           .join([{
             table: 'category',
             as: 'category',
@@ -26,10 +44,38 @@ export default class extends base {
             table: 'user',
             as: 'user',
             on: ['`post`.`user_id`', '`user`.`id`']
+          }, {
+            table: 'post_tag',
+            as: 'pTag',
+            on: ['`post`.`id`', '`pTag`.`post_id`']
           }])
           .order('`date` DESC')
           .limit((page - 1) * pageCount, pageCount)
           .select();
+
+        //获取标签信息
+        for (let post of data) {
+          var tid = post['tid'];
+          //获取标签名称
+          for(let tag of tags) {
+            if(tag['id'] == tid) {
+              post['tags'] = tag['name'];
+            }
+          }
+          //去重
+          if(titles.indexOf(post.title) > -1) {
+            for(let nPost of posts) {
+              if(nPost.title == post.title) {
+                nPost.tags += ' '+post.tags;
+              }
+            }
+          }else {
+            titles.push(post.title);
+            posts.push(post);
+          }
+        }
+
+        data = posts;
     }
 
     return this.success(data);
@@ -92,4 +138,5 @@ export default class extends base {
     let rows = await this.modelInstance.where({id: ['in', ids]}).delete();
     return this.success({affectedRows: rows});
   }
+
 }
