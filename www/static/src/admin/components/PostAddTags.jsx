@@ -12,7 +12,8 @@ class PostAddTags extends BaseComponent {
         super(props);
 
         this.state = {
-            tags: ''
+            tags: '',
+            tagList: []
         };
     }
 
@@ -20,11 +21,14 @@ class PostAddTags extends BaseComponent {
         TagActions.load();
 
         this.subscribe(
-            TagStatusStore.listen(this.onStatusChange)
+            TagStatusStore.listen(this.onTagChange)
         );
     }
 
     render() {
+        let tags = this.state.tagList.map((tag) => (
+            <a href="javascript:;" onClick={this.handleChoose}>{tag.name}</a>
+        ));
 
         return (
             <div className="tag-wrapper">
@@ -36,10 +40,7 @@ class PostAddTags extends BaseComponent {
                     <dl>
                         <dt>常用标签</dt>
                         <dd>
-                            <a href="javascript:;" onClick={this.handleChoose}>标签</a>
-                            <a href="javascript:;" onClick={this.handleChoose}>测试</a>
-                            <a href="javascript:;" onClick={this.handleChoose}>javascript</a>
-                            <a href="javascript:;" onClick={this.handleChoose}>css</a>
+                        {tags}
                         </dd>
                     </dl>
                 </div>
@@ -47,19 +48,10 @@ class PostAddTags extends BaseComponent {
         )
     }
 
-    handleSave(e) {
-        e.preventDefault();
-        TagActions.add({name: this.state.names});
-    }
-
-    onStatusChange(status) {
-        if (status.action == 'add' && !status.loading) {
-            if (status.error) {
-                AlertActions.error('标签创建失败: ' + status.error);
-            } else {
-                AlertActions.success('标签创建成功');
-                this.setState({tags: ''});
-            }
+    onTagChange(data) {
+        let tagList = data.response && data.response.data;
+        if(tagList) {
+            this.setState({ tagList });
         }
     }
 
@@ -83,7 +75,7 @@ class PostAddTags extends BaseComponent {
     }
 
     handleChoose(e) {
-        let tags = this.state.tags.split(/\s+/);
+        let tags = this.state.tags.replace(/(^\s*)|(\s*$)/g,'').split(/\s+/);
         let newTag = e.target.innerHTML;
         if(tags.length >= 3) {
             AlertActions.error('标签最多添加3个');

@@ -12,7 +12,6 @@ export default class extends base {
     if (this.id) {
       let postTags = await this.model('post_tag').where({post_id: this.id}).select();
       let tags = await this.model('tag').select();
-      let tagCache = '';
 
       data = await this.modelInstance.where({id: this.id}).find();
       data.category = await this.model('category').where({id: data.category_id}).getField('id', true);

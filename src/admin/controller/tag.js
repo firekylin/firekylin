@@ -9,8 +9,8 @@ export default class extends base {
             tags = await this.modelInstance.where({id: this.id}).find();
             tags.count = await postTagModel.where({tag_id: this.id}).count('*');
         } else {
-            tags = await this.modelInstance.order('id').select();
-            counts = await postTagModel.order('id').select();
+            tags = await this.modelInstance.order('id desc').select();
+            counts = await postTagModel.select();
 
             tags.forEach(tag => {
                 let countIndex = 0;
