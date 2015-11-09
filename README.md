@@ -1,6 +1,6 @@
 # FireKylin
 
-A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7
+A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015
 
 
 ## install
@@ -28,6 +28,6 @@ npm start
 ```
 
 * home <http://localhost:3000/>
-* admin <http://localhost:1234/admin/>
+* admin <http://localhost:3000/admin/>
 
 
