@@ -6,7 +6,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015
 ## install
 
 ```sh
-git clone https://github.com/75team/thinkjs.git
+git clone https://github.com/75team/firekylin.git
 ```
 
 ## install dependencies
