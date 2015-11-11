@@ -1,12 +1,12 @@
 # FireKylin
 
-A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7
+A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015
 
 
 ## install
 
 ```sh
-git clone https://github.com/75team/thinkjs.git
+git clone https://github.com/75team/firekylin.git
 ```
 
 ## install dependencies
@@ -28,6 +28,6 @@ npm start
 ```
 
 * home <http://localhost:3000/>
-* admin <http://localhost:1234/admin/>
+* admin <http://localhost:3000/admin/>
 
 

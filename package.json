@@ -1,6 +1,6 @@
 {
   "name": "firekylin",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A CMS system based on thinkjs",
   "main": "www/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/welefen/firekylin.git"
+    "url": "git+https://github.com/75team/firekylin.git"
   },
   "keywords": [
     "cms",
@@ -19,9 +19,9 @@
   "author": "jedmeng",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/welefen/firekylin/issues"
+    "url": "https://github.com/75team/firekylin/issues"
   },
-  "homepage": "https://github.com/welefen/firekylin#readme",
+  "homepage": "https://github.com/75team/firekylin#readme",
   "devDependencies": {
     "autobind-decorator": "^1.2.0",
     "babel-core": "^5.7.4",
@@ -65,6 +65,6 @@
     "marked": "^0.3.5",
     "moment": "^2.10.6",
     "superagent": "^1.2.0",
-    "thinkjs": "^2.0.4"
+    "thinkjs": "^2.0.6"
   }
 }
