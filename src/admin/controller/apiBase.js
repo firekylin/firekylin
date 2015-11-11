@@ -48,7 +48,6 @@ export default class extends think.controller.rest {
     password = md5encoded ? password : think.md5(password);
     return think.md5(think.md5('fireKylin') + password + think.md5('jedmeng'));
   }
-
   /**
    * call
    * @return {Promise} []
