@@ -113,6 +113,7 @@ export default class extends base {
       return this.fail('params error');
     }
     let data = this.post();
+    //更新文章内容
     if (think.isEmpty(data)) {
       return this.fail('data is empty');
     }
@@ -126,6 +127,18 @@ export default class extends base {
     delete data.category;
 
     let rows = await this.modelInstance.where({id: this.id}).update(data);
+
+    //更新post_tag关系表
+    let addOpts = [];
+    for(let tag of data.tags.split(',')) {
+      addOpts.push({
+        post_id: this.id,
+        tag_id: tag
+      });
+    }
+    await this.model('post_tag').where({post_id: this.id}).delete();
+    await this.model('post_tag').addMany(addOpts);
+
     return this.success({affectedRows: rows});
   }
 
