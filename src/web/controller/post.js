@@ -28,6 +28,7 @@ export default class extends base {
     await this.implementPosts(list);
 
     this.assign('list', list);
+    this.assign('type', 'list');
     this.assign('paginator', paginator);
 
     return this.display('list');
@@ -38,10 +39,11 @@ export default class extends base {
     let where = {id: param};
     let post =  await this.modelInstance.where(where).find();
 
-    await this.implementPosts(post);
+    await this.implementPosts(post, true);
 
     this.assign('post', post);
     this.assign('page', post);
+    this.assign('type', 'item');
 
     return this.display('item');
   }
