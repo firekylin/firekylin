@@ -38,12 +38,13 @@ class UserPage extends BaseComponent {
     let repeat = form.repeat.value;
 
     let error = [
-      { check: password, name: '密码' },
-      { check: newPassword, name: '新密码' },
-      { check: repeat === newPassword, name: '重复新密码' }
+      { check: password, name: '密码不能为空！'},
+      { check: newPassword, name: '新密码不能为空！'},
+      { check: repeat, name: '重复新密码不能为空！' },
+      { check: repeat === newPassword, name: '重复新密码与新密码不一致！'}
     ].some(field => {
       if (!field.check) {
-        AlertActions.warning(`${field.name}不能为空！`);
+        AlertActions.warning(`${field.name}`);
         return true;
       }
     });

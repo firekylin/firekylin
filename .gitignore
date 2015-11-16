@@ -32,3 +32,6 @@ node_modules
 
 #tmp
 .tmp
+
+#upload images
+www/static/images/upload/*
