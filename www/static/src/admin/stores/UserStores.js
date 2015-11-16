@@ -26,6 +26,15 @@ let UserStatusStore = apiHelper('/admin/api/session', UserActions, {
     request
         .get(this.getUrl())
         .end(this.callback(UserActions.check));
+  },
+  onModifyPsw(password, newPassword) {
+    password = md5(`~!@#$${password}$#@!~`);
+    newPassword = md5(`~!@#$${newPassword}$#@!~`);
+    request
+      .put(this.getUrl())
+      .type('form')
+      .send({password, newPassword})
+      .end(this.callback(UserActions.modifyPsw));
   }
 });
 

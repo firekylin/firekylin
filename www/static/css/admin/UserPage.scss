@@ -1,0 +1,22 @@
+@import "../common/mixin";
+
+.UserPage {
+
+  .title {
+
+    margin-bottom: 20px;
+
+    h2 {
+      display: inline-block;
+    }
+
+    .add-post {
+      @extend .button.blue;
+      margin-left: 10px;
+    }
+  }
+  .dt {
+    color: #999;
+  }
+
+}

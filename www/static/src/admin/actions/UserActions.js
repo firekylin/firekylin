@@ -6,7 +6,8 @@ let Actions = Reflux.createActions({
   login: AsyncConfig,
   logout: AsyncConfig,
   check: AsyncConfig,
-  showLogin: {}
+  showLogin: {},
+  modifyPsw: AsyncConfig
 });
 
 export default Actions;

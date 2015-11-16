@@ -29,14 +29,26 @@ export default class extends base {
     }
   }
 
-  async putAction() {
-    return this.__call();
+  async putAction() {    
+    let userInfo = await this.session('userInfo');
+    let id = userInfo.id;
+    let password = this.param('password');
+    let newPassword = this.param('newPassword');
+    password = this.encryptPassword(password);
+    newPassword = this.encryptPassword(newPassword);
+    let result = await this.modelInstance.where({id, password}).update({password: newPassword});
+ 
+    if (think.isEmpty(result)) {console.log('error');
+      return this.error(ERROR.UNAUTHORIZED);
+    } else {console.log('success');
+      return this.success();
+    }
   }
 
   async postAction() {
     let username = this.post('username');
     let password = this.post('password');
-    let autoLogin = this.post('autoLogin') == 'true';
+    let autoLogin = this.post('autoLogin');
 
     password = this.encryptPassword(password);
 
@@ -45,7 +57,6 @@ export default class extends base {
     if (think.isEmpty(result)) {
       return this.error(ERROR.UNAUTHORIZED);
     } else {
-
       let userInfo = {
         id: result.id,
         username: result.username,
