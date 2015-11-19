@@ -188,12 +188,85 @@ export function drawLink(editor) {
 /**
  * Action for drawing an img.
  */
-export function drawImage(editor) {
-  var cm = editor.codemirror;
-  var stat = getState(cm);
-  _replaceSelection(cm, stat.image, '![', '](http://)');
-}
 
+export function drawImage(editor) {
+  
+  var imgInput = document.getElementById('imgInput');
+  imgInput.addEventListener('change',readFile,false); 
+
+  function readFile() {
+    var self = this;
+    var file = this.files[0];
+
+    this.getConfig = function(name){
+      return config[name];
+    };
+
+    if(!/image\/\w+/.test(file.type)){ 
+        alert("文件必须为图片！"); 
+        return false; 
+    } 
+    var reader = new FileReader();
+    reader.readAsDataURL(file); 
+    reader.onload = function(e) { 
+      upload(file, callback);
+    }
+  }
+
+  function callback(url) {
+    var cm = editor.codemirror;
+    var stat = getState(cm);
+    imgInput.removeEventListener('change',readFile,false); 
+    _replaceSelection(cm, stat.image, '![', '](http://'+url+')');
+    imgInput.value = "";
+  }
+
+}
+/**
+ * upload.
+ */
+export function upload(file, callback){
+    try{
+      var that = this;
+      var fd = new FormData();
+      fd.append('image',file);
+          var uploadXhr = new XMLHttpRequest();
+          // uploadXhr.upload.addEventListener("progress", function(evt){
+          //   if(evt.lengthComputable){
+          //     var file = that.info.queue[0];
+          //     var loaded = evt.loaded;
+          //     if(loaded>file.file.size)
+          //       loaded = file.file.size;
+          //       that.uploadProgress(file.id, loaded, evt.total);
+          //   }
+          // }, false);
+          uploadXhr.addEventListener("load", function(evt, isError){
+            if(!isError){
+                var result = JSON.parse(evt.target.responseText);
+                callback && callback(result.data.path)
+                //that.autoCommit(result);
+                /*
+                  file = that.info.queue[0];
+                that.uploadSuccess(file.id, file.name, false, 0, file.file.size, evt.target.responseText)
+                //yunpan.upload.uploadSuccess(file, result); */     
+            }else{
+              that.uploadError(that.info.queue[0], '对不起，上传失败！');
+            }
+          
+            uploadXhr = null;
+          }, false);
+          uploadXhr.addEventListener("error", function(evt){
+            that.uploadError(that.info.queue[0], '对不起，上传失败！');
+            uploadXhr = null;
+          }, false);
+
+          var uploadUrl = '/admin/api/upload';
+          uploadXhr.open("POST", uploadUrl);
+          uploadXhr.send(fd);
+      }catch(e){
+        throw new Error('YP:upload, ajax jxStartUpload. '+e.message);
+      }
+}
 
 /**
  * Undo action.

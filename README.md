@@ -27,7 +27,7 @@ npm run compile
 npm start
 ```
 
-* home <http://localhost:3000/>
-* admin <http://localhost:3000/admin/>
+* home <http://localhost:1234/>
+* admin <http://localhost:1234/admin/>
 
 

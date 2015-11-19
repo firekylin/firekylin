@@ -109,7 +109,7 @@ class PostAddPage extends BaseComponent {
             <textarea className="editor" ref="editor" />
           </div>
           <div className="editor-status">{this.state.status}</div>
-          <PostAddTags />
+          <PostAddTags ref="tags"/>
           <div className="button-wrapper">
             <button className="button blue" onClick={this.handleSave}>保存</button>
             <Link to="/admin/post"  className="button white" >返回</Link>
@@ -141,7 +141,8 @@ class PostAddPage extends BaseComponent {
     let title = this.refs.title.getDOMNode().value;
     let category = this.refs.category.getDOMNode().value;
     let content = this.editor.value();
-    let data = {title, content};
+    let tags = this.refs.tags.state.tagIds;
+    let data = {title, content, tags};
 
     if (!title) {
       return AlertActions.warning('请填写标题');
@@ -184,8 +185,7 @@ class PostAddPage extends BaseComponent {
         AlertActions.error(type + '失败');
       } else {
         AlertActions.success(type + '成功');
-        //跳转到文章列表页异常
-        //this.transitionTo('post');
+        location.href='/admin/post';
       }
     }
   }

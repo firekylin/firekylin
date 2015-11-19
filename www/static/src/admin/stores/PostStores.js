@@ -31,7 +31,6 @@ let PostListStore = Reflux.createStore({
   list: [],
 
   onLoadCompleted(response) {
-
     if (Array.isArray(response.data)) {
       this.list = response.data;
       this.list.forEach(item => {

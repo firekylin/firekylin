@@ -30,5 +30,11 @@ node_modules
 # IDE config
 .idea
 
+#tmp
+.tmp
+
+#upload images
+www/static/images/upload/*
+
 # Database Config
 src/common/config/db.js

@@ -158,8 +158,16 @@ Editor.prototype.createToolbar = function(items) {
       }
       self.toolbar[item.name || item] = el;
       bar.appendChild(el);
+      if(item.name === "image") {
+          var imgInput = document.createElement('input');
+          imgInput.type = 'file';
+          imgInput.id = 'imgInput';
+          imgInput.className = "imgInput";
+          el.appendChild(imgInput);
+      }
     })(items[i]);
   }
+
 
   var cm = this.codemirror;
   cm.on('cursorActivity', function() {

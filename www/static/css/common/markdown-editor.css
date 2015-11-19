@@ -361,6 +361,17 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   border: 1px solid transparent;
   border-radius: 3px;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.editor-toolbar a .imgInput{
+    position: absolute;
+    top: 2px;
+    left: 0px;
+    width: 52px;
+    height: 20px;
+    padding-left: 28px;
+    cursor: pointer;
 }
 .editor-toolbar a:hover, .editor-toolbar a.active {
   background: #fcfcfc;
@@ -377,6 +388,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   color: transparent;
   text-indent: -10px;
   margin: 0 6px;
+  overflow: hidden;
 }
 .editor-toolbar a.icon-fullscreen {
   float: right;

@@ -55,9 +55,31 @@ export default class extends think.controller.base {
     return this.categoryMap;
   }
 
-  async implementPosts(post) {
+  async getTagMap(forceUpdate) {
+    if (!this.tagMap || forceUpdate) {
+      let map = {};
+      let list = await this.model('tag').select();
+
+      list.forEach(tag => {
+        map[tag.id] = tag;
+      });
+      this.tagMap = map;
+    }
+    return this.tagMap;
+  }
+
+  async getTagsByPostID(pid) {
+    let postTag = await this.model('post_tag').where({post_id: pid}).select();
+    return postTag;
+  }
+
+  async implementPosts(post, needTag) {
     let categoryMap = await this.getCategoryMap();
+    let tagMap = await this.getTagMap();
     let categories = [];
+    let tags = [];
+
+    needTag = needTag == true ? true : false;
 
     if (Array.isArray(post)) {
       return await post.map(async post => await this.implementPosts(post));
@@ -71,9 +93,18 @@ export default class extends think.controller.base {
         categories.push(category);
       });
 
+      if(needTag) {
+        let tagArr = await this.getTagsByPostID(post.id);
+        tagArr.forEach(async tag => {
+          let id = tag.tag_id;
+          tags.push(tagMap[id]);
+        });
+      }
+
       return Object.assign(post, {
         url: 'post/' + post.id,
-        categories: categories
+        categories: categories,
+        tags: tags
       });
     }
   }
