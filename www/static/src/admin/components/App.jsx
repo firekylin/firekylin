@@ -1,6 +1,6 @@
 import React from 'react';
 import autobind from 'autobind-decorator';
-import { Navigation as RouteNavigation } from 'react-router';
+import { History } from 'react-router';
 import { decorate as mixin } from 'react-mixin';
 
 import TopBar from './TopBar';
@@ -11,7 +11,7 @@ import { UserStore } from '../stores/UserStores';
 
 
 @autobind
-@mixin(RouteNavigation)
+@mixin(History)
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -30,7 +30,7 @@ class App extends React.Component {
           <div className="App">
             <TopBar userInfo={ this.state.userInfo }/>
             <div className="main">
-              <Navigation />
+              <Navigation location={ this.props.location } />
               <div className="page-wrapper">
                 <Alert />
                 { this.props.children }
@@ -47,7 +47,7 @@ class App extends React.Component {
     if (userInfo) {
       this.setState({ userInfo });
     } else {
-      this.transitionTo('/admin/login');
+      this.history.replaceState({}, '/admin/login');
     }
   }
 }

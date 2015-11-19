@@ -1,6 +1,6 @@
 import React from 'react';
 import autobind from 'autobind-decorator';
-import {Link, Navigation as RouteNavigation } from 'react-router';
+import {Link, History } from 'react-router';
 import {decorate as mixin} from 'react-mixin';
 
 import BaseListComponent from './BaseListComponent';
@@ -11,7 +11,7 @@ import {TagListStore} from '../stores/TagStores';
 let cacheName = '';
 
 @autobind
-@mixin(RouteNavigation)
+@mixin(History)
 class TagList extends BaseListComponent {
 
     componentDidMount() {

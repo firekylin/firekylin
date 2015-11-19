@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, TransitionHook } from 'react-router';
+import { Link, Lifecycle } from 'react-router';
 import autobind from 'autobind-decorator';
 import {decorate as mixin} from 'react-mixin';
 
@@ -17,7 +17,7 @@ import Editor from  '../../common/markdown-editor';
 const ADD_CATEGORY = "{add}";
 
 @autobind
-@mixin(TransitionHook)
+@mixin(Lifecycle)
 class PostAddPage extends BaseComponent {
   constructor(props) {
     super(props);

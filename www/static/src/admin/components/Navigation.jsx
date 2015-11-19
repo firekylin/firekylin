@@ -1,15 +1,14 @@
 import React from 'react';
 import {Link} from 'react-router';
-import {State as RouterState} from 'react-router';
 import {decorate as mixin} from 'react-mixin';
 
 import BaseComponent from './BaseComponent';
 
 
-@mixin(RouterState)
 class Navigation extends BaseComponent {
   render() {
     let getClassName = function(name) {
+      return name;
       return this.isActive(`/admin/${name}`) ? `${name} active` : name;
     }.bind(this);
     return (
