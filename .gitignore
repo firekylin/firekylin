@@ -35,3 +35,5 @@ node_modules
 
 #upload images
 www/static/images/upload/*
+
+.DS_Store
