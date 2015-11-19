@@ -5,7 +5,7 @@
   "main": "www/index.js",
   "scripts": {
     "serve": "gulp serve",
-    "compile": "gulp",
+    "compile": "gulp && node install.js",
     "start": "node www/index"
   },
   "repository": {
