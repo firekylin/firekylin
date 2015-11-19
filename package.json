@@ -6,7 +6,8 @@
   "scripts": {
     "serve": "gulp serve",
     "compile": "gulp",
-    "start": "node www/index"
+    "start": "node www/index",
+    "install": "gulp install"
   },
   "repository": {
     "type": "git",
@@ -17,15 +18,23 @@
     "thinkjs"
   ],
   "author": "jedmeng",
+  "contributors": [
+    "welefen",
+    "blackMao",
+    "huangxiaolu",
+    "berwin",
+    "songguangyu"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/75team/firekylin/issues"
   },
   "homepage": "https://github.com/75team/firekylin#readme",
-  "devDependencies": {
+  "dependencies": {
     "autobind-decorator": "^1.2.0",
     "babel-core": "^5.7.4",
     "babel-loader": "^5.3.2",
+    "babel-runtime": "^5.7.0",
     "browser-sync": "^2.8.0",
     "chalk": "^1.1.0",
     "codemirror": "^5.5.0",
@@ -45,12 +54,16 @@
     "gulp-size": "^1.2.3",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.6",
+    "highlight.js": "^8.7.0",
     "history": "^1.13.1",
+    "inquirer": "^0.11.0",
     "keymirror": "^0.1.1",
+    "marked": "^0.3.5",
     "md5": "^2.0.0",
     "merge-stream": "^0.1.8",
     "minimist": "^1.1.1",
     "mocha": "^2.2.5",
+    "moment": "^2.10.6",
     "node-libs-browser": "^0.5.2",
     "qwest": "^2.0.1",
     "react": "^0.13.3",
@@ -58,14 +71,8 @@
     "react-router": "^1.0.0",
     "reflux": "^0.2.10",
     "run-sequence": "^1.1.1",
-    "webpack": "^1.10.1"
-  },
-  "dependencies": {
-    "babel-runtime": "^5.7.0",
-    "highlight.js": "^8.7.0",
-    "marked": "^0.3.5",
-    "moment": "^2.10.6",
     "superagent": "^1.2.0",
-    "thinkjs": "^2.0.6"
+    "thinkjs": "^2.0.6",
+    "webpack": "^1.10.1"
   }
 }

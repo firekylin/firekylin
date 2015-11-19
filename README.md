@@ -15,12 +15,6 @@ git clone https://github.com/75team/firekylin.git
 npm install
 ```
 
-## compile
-
-```js
-npm run compile
-```
-
 ## start server
 
 ```js
