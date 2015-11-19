@@ -18,6 +18,8 @@ body {
   color: $color-background;
 }
 
+hgroup{margin-top:20px;}
+
 #header {
 	height: auto;
 	border-bottom: none;
@@ -42,6 +44,8 @@ body {
 	h1 {
 		float: none;
 	}
+
+	h2{font-size:1em;color:#ccc;}
 
 	#main-nav {
 		float: none;
