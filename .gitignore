@@ -13,9 +13,6 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 
-# Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
-
 # node-waf configuration
 .lock-wscript
 
@@ -30,11 +27,14 @@ node_modules
 # IDE config
 .idea
 
-#tmp
+# Temporary folder
 .tmp
 
-#upload images
+# Image upload folder
 www/static/images/upload/*
 
 # Database Config
 src/common/config/db.js
+
+# OS func folder
+.DS_Store
