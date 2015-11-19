@@ -2,7 +2,7 @@ import 'babel-core/polyfill'
 
 import React from 'react';
 import { Router, Route, Redirect } from 'react-router';
-import { history } from 'react-router/lib/BrowserHistory';
+import createBrowserHistory from 'history/lib/createBrowserHistory'
 
 import App from './components/App';
 import UserPage from './components/UserPage';
@@ -14,6 +14,7 @@ import CategoryPage from './components/CategoryPage';
 import TagPage from './components/TagPage';
 import DashBoardPage from './components/DashBoardPage';
 
+const history = createBrowserHistory();
 
 new Promise(resolve => {
   if (window.addEventListener) {

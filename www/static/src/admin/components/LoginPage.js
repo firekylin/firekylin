@@ -1,6 +1,6 @@
 import React from 'react';
 import autobind from 'autobind-decorator';
-import { Navigation as RouteNavigation } from 'react-router';
+import { History } from 'react-router';
 import { decorate as mixin } from 'react-mixin';
 
 import BaseComponent from './BaseComponent';
@@ -11,7 +11,7 @@ import { UserStore } from '../stores/UserStores';
 
 
 @autobind
-@mixin(RouteNavigation)
+@mixin(History)
 class LoginPage extends BaseComponent {
 
   constructor(props) {
@@ -70,7 +70,7 @@ class LoginPage extends BaseComponent {
 
   onUserChange(userInfo) {
     if (userInfo) {
-      this.transitionTo('/admin');
+      this.history.replaceState({}, '/admin');
     }
   }
 
