@@ -45,6 +45,7 @@
     "gulp-size": "^1.2.3",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.6",
+    "history": "^1.13.1",
     "keymirror": "^0.1.1",
     "md5": "^2.0.0",
     "merge-stream": "^0.1.8",
@@ -54,7 +55,7 @@
     "qwest": "^2.0.1",
     "react": "^0.13.3",
     "react-mixin": "^1.6.0",
-    "react-router": "1.0.0-beta3",
+    "react-router": "^1.0.0",
     "reflux": "^0.2.10",
     "run-sequence": "^1.1.1",
     "webpack": "^1.10.1"
