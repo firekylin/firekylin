@@ -28,6 +28,6 @@ npm start
 ```
 
 * home <http://localhost:1234/>
-* admin <http://localhost:1234/admin/>
+* admin <http://localhost:1234/admin/> (帐号密码均为: admin)
 
 
