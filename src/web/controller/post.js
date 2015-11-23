@@ -39,7 +39,7 @@ export default class extends base {
     let where = {id: param};
     let post =  await this.modelInstance.where(where).find();
 
-    await this.implementPosts(post, true);
+    await this.implementPosts(post);
 
     this.assign('post', post);
     this.assign('page', post);

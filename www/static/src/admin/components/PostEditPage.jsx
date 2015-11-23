@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Lifecycle } from 'react-router';
+import { Link, History } from 'react-router';
 import autobind from 'autobind-decorator';
 import {decorate as mixin} from 'react-mixin';
 
@@ -17,7 +17,7 @@ import Editor from  '../../common/markdown-editor';
 const ADD_CATEGORY = "{add}";
 
 @autobind
-@mixin(Lifecycle)
+@mixin(History)
 class PostAddPage extends BaseComponent {
   constructor(props) {
     super(props);
@@ -185,7 +185,7 @@ class PostAddPage extends BaseComponent {
         AlertActions.error(type + '失败');
       } else {
         AlertActions.success(type + '成功');
-        location.href='/admin/post';
+        this.history.pushState(null, '/admin/post');
       }
     }
   }

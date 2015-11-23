@@ -4,8 +4,8 @@
     <br>
     <span class="tags"><% include post/categories.html %></span>
     <% if (site.disqus_short_name && post.comments == true && site.disqus_show_comment_count == true) { %>
-    <span class="comments"><a href="<%= site.url %><%= post.url %>#disqus_thread">Comments</a></span>
+    <span class="comments"><a href="/<%= site.url %><%= post.url %>#disqus_thread">Comments</a></span>
     <% } %>
   </div>
-  <h1 class="title" itemprop="name"><a href="<%= site.url %><%= post.url %>"><%= post.title %></a></h1>
+  <h1 class="title" itemprop="name"><a href="/<%= site.url %><%= post.url %>"><%= post.title %></a></h1>
 </article>

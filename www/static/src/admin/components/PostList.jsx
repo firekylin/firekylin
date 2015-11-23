@@ -75,7 +75,7 @@ class PostList extends BaseListComponent {
   }
 
   handleEdit(id) {
-    this.history.pushState('/admin/post/edit/' + id);
+    this.history.pushState(null, '/admin/post/edit/' + id);
   }
 
   handleDelete(id) {
