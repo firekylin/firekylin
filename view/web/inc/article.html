@@ -1,6 +1,7 @@
 <div class="meta">
   <div class="date"><% include post/date.html %></div>
   <div class="tags"><% include post/categories.html %></div>
+  <div class="tags"><% include post/tags.html %></div>
   <% if (site.discuss_on && site.discuss_numbercode) { %>
   <div class="comments"><%- filters.parseCode(site.discuss_numbercode, post) %></div>
   <% } %>

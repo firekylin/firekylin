@@ -55,7 +55,7 @@ export default class extends think.controller.base {
     return this.categoryMap;
   }
 
-  async getTagMap(forceUpdate) {
+  /*async getTagMap(forceUpdate) {
     if (!this.tagMap || forceUpdate) {
       let map = {};
       let list = await this.model('tag').select();
@@ -71,13 +71,51 @@ export default class extends think.controller.base {
   async getTagsByPostID(pid) {
     let postTag = await this.model('post_tag').where({post_id: pid}).select();
     return postTag;
+  }*/
+
+  async setInitTagMap(pids, forceUpdate) {
+    if (!this.tagMap || forceUpdate){
+      let map = {};
+      let tags = await this.model('post_tag')
+        .join({
+          table : "tag",
+          join : "inner",
+          on : ["tag_id", "id"]
+        })
+        .where({'post_id' : ['IN', pids]})
+        .field('post_id,tag_id,name')
+        .select();
+
+      tags.forEach(details =>{
+        if(map[details.post_id]){
+          map[details.post_id].push({
+            id : details.tag_id,
+            name : details.name
+          });
+        } else {
+          map[details.post_id] = [{
+            id : details.tag_id,
+            name : details.name
+          }];
+        }
+      });
+
+      this.tagMap = map;
+    }
+
+    return this.tagMap;
   }
 
   async implementPosts(post) {
     let categoryMap = await this.getCategoryMap();
     let categories = [];
+    let tags = [];
 
     if (Array.isArray(post)) {
+      let pids = post.map(post => {
+        return post.id;
+      });
+      this.tagMap = await this.setInitTagMap(pids);
       return await post.map(async post => await this.implementPosts(post));
     } else {
       String(post.category_id).split(',').forEach(async cid => {
@@ -89,9 +127,16 @@ export default class extends think.controller.base {
         categories.push(category);
       });
 
+      if(think.isEmpty(this.tagMap)) {
+        this.tagMap = await this.setInitTagMap(post.id);
+      }
+
+      tags = this.tagMap[post.id];
+
       return Object.assign(post, {
         url: 'post/' + post.id,
-        categories: categories
+        categories: categories,
+        tags: tags
       });
     }
   }
