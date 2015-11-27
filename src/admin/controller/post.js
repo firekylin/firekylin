@@ -153,7 +153,7 @@ export default class extends base {
     await this.model('post_tag').where({post_id: this.id}).delete();
     await this.model('post_tag').addMany(addOpts);
 
-    return this.success({affectedRows: rows});
+    return this.success({id: this.id});
   }
 
   async deleteAction() {
@@ -163,7 +163,7 @@ export default class extends base {
     let ids = this.id.toString().split(',');
     let rows = await this.modelInstance.where({id: ['in', ids]}).delete();
     await this.model('post_tag').where({post_id: ['in', ids]}).delete();
-    return this.success({affectedRows: rows});
+    return this.success({id: this.id});
   }
 
 

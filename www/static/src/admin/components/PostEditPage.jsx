@@ -213,6 +213,11 @@ class PostAddPage extends BaseComponent {
 
     if(this.isNew) {
       PostActions.add(data);
+      //修改状态
+      this.isNew = false;
+      this.setState({
+        defaultStatus: 2
+      });
     }else {
       //发布上线
       if(status == 1) {
@@ -258,6 +263,8 @@ class PostAddPage extends BaseComponent {
           this.history.pushState(null, '/admin/post');
           this.clearStatus();
         }else{
+          //更新id
+          this.id = error.data.id;
           this.setState({
             status: '自动保存成功!'
           });
