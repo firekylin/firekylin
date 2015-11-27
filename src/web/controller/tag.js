@@ -22,7 +22,7 @@ export default class extends base {
         let postTagModel = this.model('post_tag');
 
         tags = await this.modelInstance.order('id desc').select();
-        counts = await postTagModel.select();
+        counts = await postTagModel.where({status: 1}).select();
 
         tags.forEach(tag => {
             let countIndex = 0;
@@ -45,7 +45,7 @@ export default class extends base {
         let postIDs = [];
 
         let tag = await this.modelInstance.where(where).find();
-        let postTag = await this.model('post_tag').where({tag_id: tag.id}).select();
+        let postTag = await this.model('post_tag').where({tag_id: tag.id, status: 1}).select();
 
         postTag.forEach(details => {
             postIDs.push(details.post_id);

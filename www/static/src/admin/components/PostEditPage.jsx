@@ -23,6 +23,7 @@ class PostAddPage extends BaseComponent {
     super(props);
 
     this.state = {
+      defaultStatus: '',
       status: '',
       categories: [],
       title: '',
@@ -34,13 +35,47 @@ class PostAddPage extends BaseComponent {
 
     this.id = this.props.params.id;
     this.isNew = !this.id;
+    this.isAutoSave = false;
   }
 
   componentDidMount() {
-
+    let self = this;
     CategoryActions.load();
     this.isNew || PostActions.load(this.id);
 
+    //自动保存
+    self.timer = setInterval(function() {
+      let state = self.state;
+      let savedStated = self.savedStated;
+      let tagIds = self.refs.tags.state.tagIds.join('');
+      let needSave = (state.category && state.title && state.content) &&
+            (state.category != savedStated.category ||
+              state.title != savedStated.title ||
+              state.content != savedStated.content ||
+              tagIds != savedStated.tagIds);
+
+      //重置状态
+      self.setState({
+        status: ''
+      });
+
+      if(needSave) {
+        self.handleSave();
+        Object.assign(self.savedStated, {
+          tagIds: tagIds,
+          defaultStatus: state.status,
+          title: state.title,
+          content: state.content,
+          category: state.category
+        });
+
+        //设置状态
+        self.setState({
+          status: '正在保存...'
+        });
+        self.isAutoSave = true;
+      }
+    }, 2000);
 
     this.editor = new Editor({
       element: this.refs.editor.getDOMNode()
@@ -111,11 +146,20 @@ class PostAddPage extends BaseComponent {
           <div className="editor-status">{this.state.status}</div>
           <PostAddTags ref="tags"/>
           <div className="button-wrapper">
-            <button className="button blue" onClick={this.handleSave}>保存</button>
-            <Link to="/admin/post"  className="button white" >返回</Link>
+            <button className="button blue" onClick={this.handleSave} data-status="1">发布</button>
+            <button className="button blue" onClick={this.handleSave} data-status="2">保存为草稿</button>
+            <Link to="/admin/post" onClick={this.clearStatus} className="button white" >返回</Link>
           </div>
         </div>
     )
+  }
+
+  clearStatus() {
+    clearInterval(this.timer);
+    //需要异步处理，更新数据
+    setTimeout(function() {
+      PostActions.load(false);
+    }, 100);
   }
 
   handleContentChange(content) {
@@ -137,12 +181,20 @@ class PostAddPage extends BaseComponent {
     });
   }
 
-  handleSave() {
+  handleSave(e) {
+    let defaultStatus = this.state.defaultStatus;
     let title = this.refs.title.getDOMNode().value;
     let category = this.refs.category.getDOMNode().value;
     let content = this.editor.value();
     let tags = this.refs.tags.state.tagIds;
     let data = {title, content, tags};
+    let status = 2;
+
+    //手动保存进入这个逻辑
+    if(e) {
+      status = e.target.getAttribute('data-status') == 1 ? 1 : 2;
+      this.isAutoSave = false;
+    }
 
     if (!title) {
       return AlertActions.warning('请填写标题');
@@ -157,10 +209,26 @@ class PostAddPage extends BaseComponent {
       data['category'] = category
     }
 
-    if (this.isNew) {
+    data.status = status; //设置文章状态
+
+    if(this.isNew) {
       PostActions.add(data);
-    } else {
-      PostActions.update(this.id, data);
+    }else {
+      //发布上线
+      if(status == 1) {
+        PostActions.update(this.id, data);
+      }
+      //保存为草稿
+      if(status == 2) {
+        //本身就是草稿
+        if(defaultStatus == 2) {
+          PostActions.update(this.id, data);
+        }
+        //线上文件
+        if(defaultStatus == 1) {
+          PostActions.add(data);
+        }
+      }
     }
   }
 
@@ -177,21 +245,31 @@ class PostAddPage extends BaseComponent {
   }
 
   onPostStatusChange(status) {
+    let isAutoSave = this.isAutoSave;
     let type = this.isNew ? '发布' : '修改';
 
     if(status.action == 'add' || status.action == 'update') {
       var error = status.response;
-      if (error.errno) {
+      if (error && error.errno) {
         AlertActions.error(type + '失败');
       } else {
-        AlertActions.success(type + '成功');
-        this.history.pushState(null, '/admin/post');
+        if(!isAutoSave) {
+          AlertActions.success(type + '成功');
+          this.history.pushState(null, '/admin/post');
+          this.clearStatus();
+        }else{
+          this.setState({
+            status: '自动保存成功!'
+          });
+        }
       }
     }
   }
 
   onPostChange(post) {
     Object.assign(this.savedStated, {
+      tagIds: this.refs.tags.state.tagIds.join(''),
+      defaultStatus: post.status,
       title: post.title,
       content: post.content,
       category: post.category

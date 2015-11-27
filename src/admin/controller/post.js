@@ -29,12 +29,12 @@ export default class extends base {
     else {
       let page = this.get('page') || 1;
       let pageCount = this.get('page_count') || 20;
-      let titles = [];
+      let ids = [];
       let tags = await this.model('tag').select();
 
       data = await this.modelInstance
           .alias('post')
-          .field('`post`.*, `category`.`name` as "category", `user`.`username` as "user", `pTag`.`tag_id` as `tid`')
+          .field('`post`.*, `category`.`name` as "category", `user`.`username` as "user", `pTag`.`tag_id` as "tid"')
           .join([{
             table: 'category',
             as: 'category',
@@ -46,8 +46,9 @@ export default class extends base {
           }, {
             table: 'post_tag',
             as: 'pTag',
-            on: ['`post`.`id`', '`pTag`.`post_id`']
+            on: ['`pTag`.`post_id`', '`post`.`id`']
           }])
+          .where({'post.status': ['IN', '1,2']})
           .order('`date` DESC')
           .limit((page - 1) * pageCount, pageCount)
           .select();
@@ -62,18 +63,17 @@ export default class extends base {
             }
           }
           //去重
-          if(titles.indexOf(post.title) > -1) {
+          if(ids.indexOf(post.id) > -1) {
             for(let nPost of posts) {
-              if(nPost.title == post.title) {
+              if(nPost.id == post.id) {
                 nPost.tags += ' '+post.tags;
               }
             }
           }else {
-            titles.push(post.title);
+            ids.push(post.id);
             posts.push(post);
           }
         }
-
         data = posts;
     }
 
@@ -98,12 +98,24 @@ export default class extends base {
     let insertId = await this.modelInstance.add({
       category_id,
       date,
-      author,
+      status: data.status,
+      user_id: author,
       title: data.title,
       content: data.content,
       modify_date: date,
       modify_user_id: author
     });
+
+    //增加post_tag关系表
+    let addOpts = [];
+    for(let tag of data.tags.split(',')) {
+      addOpts.push({
+        post_id: insertId,
+        tag_id: tag,
+        status: data.status
+      });
+    }
+    await this.model('post_tag').addMany(addOpts);
 
     return this.success({id: insertId});
   }
@@ -133,9 +145,11 @@ export default class extends base {
     for(let tag of data.tags.split(',')) {
       addOpts.push({
         post_id: this.id,
-        tag_id: tag
+        tag_id: tag,
+        status: data.status
       });
     }
+
     await this.model('post_tag').where({post_id: this.id}).delete();
     await this.model('post_tag').addMany(addOpts);
 
@@ -148,6 +162,7 @@ export default class extends base {
     }
     let ids = this.id.toString().split(',');
     let rows = await this.modelInstance.where({id: ['in', ids]}).delete();
+    await this.model('post_tag').where({post_id: ['in', ids]}).delete();
     return this.success({affectedRows: rows});
   }
 

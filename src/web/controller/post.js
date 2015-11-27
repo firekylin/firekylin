@@ -23,7 +23,11 @@ export default class extends base {
     let page = Number.parseInt(this.get('page')) || 1;
     let count = await this.modelInstance.count('id');
     let paginator = this.getPaginator(count, page, 10);
-    let list = await this.modelInstance.order('`date` DESC').limit(paginator.start, paginator.itemsPerPage).select();
+    let list = await this.modelInstance
+          .where({status: 1})
+          .order('`date` DESC')
+          .limit(paginator.start, paginator.itemsPerPage)
+          .select();
 
     await this.implementPosts(list);
 

@@ -31,6 +31,7 @@ class PostList extends BaseListComponent {
         <td className="colCategory">{item.category ? item.category : '--'}</td>
         <td className="colTag">{item.tags ? item.tags : '--'}</td>
         <td className="colAuthor">{item.user}</td>
+        <td className="colStatus">{item.status==1 ? '已上线' : '草稿'}</td>
         <td className="colDate">{item.modify_date.format('YYYY-MM-DD HH:mm')}</td>
         <td className="colAction">
           <i className="fa fa-pencil-square-o edit" title="编辑" onClick={this.handleEdit.bind(this, item.id)} />
@@ -58,6 +59,7 @@ class PostList extends BaseListComponent {
               <th className="colCategory">分类</th>
               <th className="colTag">标签</th>
               <th className="colAuthor">作者</th>
+              <th className="colStatus">状态</th>
               <th className="colDate">更新时间</th>
               <th className="colAction">操作</th>
             </tr>
@@ -91,6 +93,7 @@ class PostList extends BaseListComponent {
       AlertActions.warning('请勾选要删除的文章');
     } else {
       PostActions.delete(ids);
+      this.clearList(ids);
     }
 
   }

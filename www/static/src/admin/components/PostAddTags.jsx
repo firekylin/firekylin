@@ -77,7 +77,8 @@ class PostAddTags extends BaseComponent {
         }
 
         this.setState({
-            tags: tagCache.join(' ')
+            tags: tagCache.join(' '),
+            tagIds: this.tagName2tagId(tags)
         });
     }
 

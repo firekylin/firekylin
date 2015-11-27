@@ -20,7 +20,11 @@ export default class extends base {
   async listAction() {
 
     let categories = await this.modelInstance.order('id').select();
-    let count = await this.model('post').field(['`category_id` as id', 'count(`category_id`) as count']).group('category_id').order('id').select();
+    let count = await this.model('post')
+        .field(['`category_id` as id', 'count(`category_id`) as count'])
+        .where({status: 1})
+        .group('category_id')
+        .order('id').select();
     let countIndex = 0;
     categories.forEach(category => {
       let countItem = count[countIndex];

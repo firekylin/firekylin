@@ -79,7 +79,7 @@ export default class extends think.controller.base {
       let tags = await this.model('post_tag')
         .join({
           table : "tag",
-          join : "inner",
+          join : "left",
           on : ["tag_id", "id"]
         })
         .where({'post_id' : ['IN', pids]})
@@ -131,7 +131,7 @@ export default class extends think.controller.base {
         this.tagMap = await this.setInitTagMap(post.id);
       }
 
-      tags = this.tagMap[post.id];
+      tags = this.tagMap[post.id] || [];
 
       return Object.assign(post, {
         url: 'post/' + post.id,
