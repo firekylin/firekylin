@@ -28,7 +28,7 @@ class PostAddPage extends BaseComponent {
       categories: [],
       title: '',
       content: '',
-      category: 0
+      category: 1
     };
 
     this.savedStated = {};
