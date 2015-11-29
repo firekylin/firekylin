@@ -100,6 +100,9 @@ class PostAddPage extends BaseComponent {
     super.componentWillUnmount();
 
     window.onbeforeunload = function(){};
+
+    //清除状态
+    this.clearStatus();
   }
 
   componentDidUpdate() {
@@ -148,7 +151,7 @@ class PostAddPage extends BaseComponent {
           <div className="button-wrapper">
             <button className="button blue" onClick={this.handleSave} data-status="1">发布</button>
             <button className="button blue" onClick={this.handleSave} data-status="2">保存为草稿</button>
-            <Link to="/admin/post" onClick={this.clearStatus} className="button white" >返回</Link>
+            <Link to="/admin/post" className="button white" >返回</Link>
           </div>
         </div>
     )
