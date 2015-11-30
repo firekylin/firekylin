@@ -92,7 +92,7 @@ export default class extends base {
       category_id = categoryModel.add({name: data.newCategory});
     }
 
-    let date = moment().format();
+    let date = moment().format('YYYY-MM-DD[T]HH:mm:ss');
     let author = this.userInfo.id;
 
     let insertId = await this.modelInstance.add({
@@ -132,7 +132,7 @@ export default class extends base {
     delete data.id;
 
     Object.assign(data, {
-      modify_date: moment().format(),
+      modify_date: moment().format('YYYY-MM-DD[T]HH:mm:ss'),
       modify_user_id: this.userInfo.id,
       category_id: data.category
     });

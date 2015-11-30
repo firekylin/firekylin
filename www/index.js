@@ -7,7 +7,8 @@ var rootPath = path.dirname(__dirname);
 var instance = new thinkjs({
   APP_PATH: rootPath + '/app',
   ROOT_PATH: rootPath,
-  RESOURCE_PATH: __dirname
+  RESOURCE_PATH: __dirname,
+  env: 'production'
 });
 
 instance.run();
