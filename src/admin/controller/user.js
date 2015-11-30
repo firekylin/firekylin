@@ -24,7 +24,7 @@ export default class extends base {
     delete data.id;
 
     Object.assign(data, {
-      modify_date: moment().format(),
+      modify_date: moment().format('YYYY-MM-DD[T]HH:mm:ss'),
       modify_user_id: this.userInfo.id,
       category_id: data.category
     });
