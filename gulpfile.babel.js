@@ -3,6 +3,7 @@ import fs from 'fs';
 import del from 'del';
 import gulp from 'gulp';
 import chalk from 'chalk';
+import mysql from 'mysql';
 import webpack from 'webpack';
 import minimist from 'minimist';
 import inquirer from 'inquirer';
@@ -212,6 +213,22 @@ export default {
 }`;
 
     fs.writeFileSync(configPath, content);
+
+    /** auto import sql **/
+    let sql = fs.readFileSync( './firekylin.sql', 'utf-8' ).replace(/\$\{db\_prefix\}/g, answers.db_prefix);
+    let db = mysql.createConnection({
+      host: answers.db_hostname,
+      port: answers.db_port,
+      user: answers.db_username,
+      password: answers.db_password,
+      database: answers.db_database,
+      multipleStatements: true
+    });
+    db.connect();
+    db.query(sql, function(err) {
+      if(err) console.log(err);
+    });
+    db.end();
 
     runSequence('server script', cb);
 
