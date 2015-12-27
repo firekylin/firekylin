@@ -64,6 +64,7 @@
     "minimist": "^1.1.1",
     "mocha": "^2.2.5",
     "moment": "^2.10.6",
+    "mysql": "^2.10.0",
     "node-libs-browser": "^0.5.2",
     "qwest": "^2.0.1",
     "react": "^0.13.3",
