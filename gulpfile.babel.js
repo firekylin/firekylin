@@ -161,7 +161,7 @@ gulp.task('web styles', () => {
 });
 
 // Install
-gulp.task('install', cb => {
+gulp.task('install', ['default'], cb => {
   const configPath = './src/common/config/db.js';
   let config = {};
   let validator = function(type) {
