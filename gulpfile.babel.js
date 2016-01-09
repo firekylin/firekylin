@@ -178,14 +178,17 @@ gulp.task('release', ['server', 'web'], function() {
   gulp.src( 'package.json' )
   .pipe(through.obj(function(file, encoding, callback) {
     let pack = JSON.parse( file.contents.toString() );
-    ["serve", "compile", "release"].forEach( cmd => (delete pack.scripts[cmd]) );
+    ["serve", "release"].forEach( cmd => (delete pack.scripts[cmd]) );
     for(let module in pack.dependencies) {
-      if(/^(babel-loader|browser-sync|del|eslint.*|eventemitter3|gulp.*|mocha|run-sequence|through2|webpack)$/.test(module))
+      if(/^(babel-core|babel-loader|browser-sync|del|eslint.*|eventemitter3|gulp.*|mocha|run-sequence|through2|webpack)$/.test(module))
       {
         delete pack.dependencies[module];
       }
     }
     pack.scripts.install = "node install.js";
+    pack.scripts.compile = "babel --loose all --optional runtime --stage 0 --modules common src/ --out-dir app/ --retain-lines";
+    pack.scripts.start = "npm run compile && node www/index.js";
+
     file.contents = new Buffer(JSON.stringify(pack, null, '\t'));
     callback(null, file);
   })).pipe(gulp.dest( distPath ));
