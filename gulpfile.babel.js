@@ -189,13 +189,17 @@ gulp.task('install', ['default'], cb => {
     { type: 'input', name: 'url', message: 'Full url of your blog', default: 'http://localhost:1234', validate: validator() },
     { type: 'input', name: 'db_hostname', message: 'Database hostname', default: config.host,  validate: validator('hostname') },
     { type: 'input', name: 'db_port', message: 'Database port', default: parseInt(config.port) || 3306, validate: validator('port') },
-    { type: 'input', name: 'db_database', message: 'Database name', default: config.name, validate: validator() },
+    //{ type: 'input', name: 'db_database', message: 'Database name', default: config.name, validate: validator() },
     { type: 'input', name: 'db_username', message: 'Database username', default: config.user, validate: validator() },
     { type: 'password', name: 'db_password', message: 'Database password', validate: validator() },
-    { type: 'prefix', name: 'db_prefix', message: 'Database table prefix', default: config.prefix, validate: validator() }
+    //{ type: 'prefix', name: 'db_prefix', message: 'Database table prefix', default: config.prefix, validate: validator() }
   ], answers => {
 
     let now = new Date();
+
+    //修正数据库名称和前缀
+    answers.db_database = answers.db_database || 'firekylin';
+    answers.db_prefix = answers.db_prefix || 'fk_';
 
     let content = `/**
  * db config
@@ -216,21 +220,45 @@ export default {
 
     /** auto import sql **/
     let sql = fs.readFileSync( './firekylin.sql', 'utf-8' ).replace(/\$\{db\_prefix\}/g, answers.db_prefix);
-    let db = mysql.createConnection({
-      host: answers.db_hostname,
-      port: answers.db_port,
-      user: answers.db_username,
-      password: answers.db_password,
-      database: answers.db_database,
-      multipleStatements: true
+    let pool = mysql.createPool({
+        host     : answers.db_hostname,
+        user     : answers.db_username,
+        password : answers.db_password
     });
-    db.connect();
-    db.query(sql, function(err) {
-      if(err) console.log(err);
+    pool.getConnection(function(err, connection) {
+      if(err) {
+        console.log(err);
+        return;
+      }
+
+      connection.query('CREATE DATABASE '+answers.db_database, function(err) {
+        if(err) {
+          if(err.errno == 1007) {
+            console.log('\n'+answers.db_database+' database is already existed! Please change your database name.\n');
+          }else {
+            console.log(err);
+          }
+          connection.destroy();
+          return;
+        }
+        connection.destroy();
+
+        let db = mysql.createConnection({
+          host: answers.db_hostname,
+          port: answers.db_port,
+          user: answers.db_username,
+          password: answers.db_password,
+          database: answers.db_database,
+          multipleStatements: true
+        });
+        db.connect();
+        db.query(sql, function(err) {
+          if(err) console.log(err);
+        });
+        db.end();
+        console.log('\n Data import successfully! input commond [npm start] start your blog!\n');
+        runSequence('server script', cb);
+      });
     });
-    db.end();
-
-    runSequence('server script', cb);
-
   });
 });
