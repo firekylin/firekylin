@@ -168,6 +168,7 @@ gulp.task('release', ['server', 'web'], function() {
 
   gulp.src([
     "{src,view,www}/**",
+    "!src/common/config/db.js",
     "!www/static/css/**",
     "!www/static/src/**",
     "firekylin.sql",
@@ -180,7 +181,7 @@ gulp.task('release', ['server', 'web'], function() {
     let pack = JSON.parse( file.contents.toString() );
     ["serve", "release"].forEach( cmd => (delete pack.scripts[cmd]) );
     for(let module in pack.dependencies) {
-      if(/^(babel-core|babel-loader|browser-sync|del|eslint.*|eventemitter3|gulp.*|mocha|run-sequence|through2|webpack)$/.test(module))
+      if(/^(babel-loader|browser-sync|del|eslint.*|eventemitter3|gulp.*|mocha|run-sequence|through2|webpack)$/.test(module))
       {
         delete pack.dependencies[module];
       }
