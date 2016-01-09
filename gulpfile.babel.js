@@ -2,9 +2,11 @@
 import fs from 'fs';
 import del from 'del';
 import gulp from 'gulp';
+import path from 'path';
 import chalk from 'chalk';
 import mysql from 'mysql';
 import webpack from 'webpack';
+import through from 'through2';
 import minimist from 'minimist';
 import inquirer from 'inquirer';
 import merge from 'merge-stream';
@@ -160,105 +162,34 @@ gulp.task('web styles', () => {
   );
 });
 
-// Install
-gulp.task('install', ['default'], cb => {
-  const configPath = './src/common/config/db.js';
-  let config = {};
-  let validator = function(type) {
-    return function(string) {
-      if (string.length == 0) {
-        return 'Field cannot be empty';
+//Release
+gulp.task('release', ['server', 'web'], function() {
+  let distPath = path.join(__dirname, '/release');
+
+  gulp.src([
+    "{src,view,www}/**",
+    "!www/static/css/**",
+    "!www/static/src/**",
+    "firekylin.sql",
+    "install.js",
+    "README.md"
+  ]).pipe(gulp.dest(distPath));
+
+  gulp.src( 'package.json' )
+  .pipe(through.obj(function(file, encoding, callback) {
+    let pack = JSON.parse( file.contents.toString() );
+    ["serve", "release"].forEach( cmd => (delete pack.scripts[cmd]) );
+    for(let module in pack.dependencies) {
+      if(/^(babel-core|babel-loader|browser-sync|del|eslint.*|eventemitter3|gulp.*|mocha|run-sequence|through2|webpack)$/.test(module))
+      {
+        delete pack.dependencies[module];
       }
-      if (type == 'hostname' && !string.match(/(?:\w+\.)+\w/)) {
-        return 'Host should be a validator domain or ip';
-      }
-      if (type == 'port' && (!Number.isInteger(string) || string >65535)) {
-        return 'Port should be a number and small than 65536';
-      }
-      return true;
     }
-  };
+    pack.scripts.install = "node install.js";
+    pack.scripts.compile = "babel --loose all --optional runtime --stage 0 --modules common src/ --out-dir app/ --retain-lines";
+    pack.scripts.start = "npm run compile && node www/index.js";
 
-  try {
-    config = require(configPath);
-  } catch (e) {}
-
-  console.log('\n\nHello, welcome to FireKylin, a free and open-source content \nmanagement system (CMS), based on ThinkJS and Mysql.\n\nYou need do some config work before the program could work.\nThis utility will walk you through.\n');
-
-  inquirer.prompt([
-    { type: 'input', name: 'url', message: 'Full url of your blog', default: 'http://localhost:1234', validate: validator() },
-    { type: 'input', name: 'db_hostname', message: 'Database hostname', default: config.host,  validate: validator('hostname') },
-    { type: 'input', name: 'db_port', message: 'Database port', default: parseInt(config.port) || 3306, validate: validator('port') },
-    //{ type: 'input', name: 'db_database', message: 'Database name', default: config.name, validate: validator() },
-    { type: 'input', name: 'db_username', message: 'Database username', default: config.user, validate: validator() },
-    { type: 'password', name: 'db_password', message: 'Database password', validate: validator() },
-    //{ type: 'prefix', name: 'db_prefix', message: 'Database table prefix', default: config.prefix, validate: validator() }
-  ], answers => {
-
-    let now = new Date();
-
-    //修正数据库名称和前缀
-    answers.db_database = answers.db_database || 'firekylin';
-    answers.db_prefix = answers.db_prefix || 'fk_';
-
-    let content = `/**
- * db config
- * generate by installer
- * ${now}
- */
-export default {
-  type: 'mysql',
-  host: '${answers.db_hostname}',
-  port: '${answers.db_port}',
-  name: '${answers.db_database}',
-  user: '${answers.db_username}',
-  pwd: '${answers.db_password}',
-  prefix: '${answers.db_prefix}'
-}`;
-
-    fs.writeFileSync(configPath, content);
-
-    /** auto import sql **/
-    let sql = fs.readFileSync( './firekylin.sql', 'utf-8' ).replace(/\$\{db\_prefix\}/g, answers.db_prefix);
-    let pool = mysql.createPool({
-        host     : answers.db_hostname,
-        user     : answers.db_username,
-        password : answers.db_password
-    });
-    pool.getConnection(function(err, connection) {
-      if(err) {
-        console.log(err);
-        return;
-      }
-
-      connection.query('CREATE DATABASE '+answers.db_database, function(err) {
-        if(err) {
-          if(err.errno == 1007) {
-            console.log('\n'+answers.db_database+' database is already existed! Please change your database name.\n');
-          }else {
-            console.log(err);
-          }
-          connection.destroy();
-          return;
-        }
-        connection.destroy();
-
-        let db = mysql.createConnection({
-          host: answers.db_hostname,
-          port: answers.db_port,
-          user: answers.db_username,
-          password: answers.db_password,
-          database: answers.db_database,
-          multipleStatements: true
-        });
-        db.connect();
-        db.query(sql, function(err) {
-          if(err) console.log(err);
-        });
-        db.end();
-        console.log('\n Data import successfully! input commond [npm start] start your blog!\n');
-        runSequence('server script', cb);
-      });
-    });
-  });
+    file.contents = new Buffer(JSON.stringify(pack, null, '\t'));
+    callback(null, file);
+  })).pipe(gulp.dest( distPath ));
 });
