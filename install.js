@@ -95,7 +95,7 @@ prefix: '${answers.db_prefix}'
         if(err) console.log(err);
       });
       db.end();
-      console.log('\n Data import successfully! input commond [npm start] start your blog!\n');
+      console.log('\n Data import successfully! input command [npm start] start your blog!\n');
     });
   });
 });
