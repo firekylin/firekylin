@@ -36,5 +36,8 @@ www/static/images/upload/*
 # Database Config
 src/common/config/db.js
 
+# Compiled Release
+release/
+
 # OS func folder
 .DS_Store
