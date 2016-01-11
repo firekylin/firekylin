@@ -10,5 +10,5 @@ var instance = new thinkjs({
   RESOURCE_PATH: __dirname,
   env: 'production'
 });
-
+instance.compile();
 instance.run();
