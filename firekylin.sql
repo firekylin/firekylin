@@ -191,7 +191,7 @@ LOCK TABLES `${db_prefix}tag` WRITE;
 
 INSERT INTO `${db_prefix}tag` (`id`, `name`, `user_id`)
 VALUES
-	(4,'javaScritp',1),
+	(4,'javaScript',1),
 	(5,'css',1);
 
 /*!40000 ALTER TABLE `${db_prefix}tag` ENABLE KEYS */;
