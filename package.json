@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
-    "nunjucks": "^2.2.0",
+    "nunjucks": "^2.3.0",
     "thinkjs": "2.1.x"
   },
   "devDependencies": {
