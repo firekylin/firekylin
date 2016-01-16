@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.19-debug)
 # Database: firekylin
-# Generation Time: 2016-01-16 06:39:53 +0000
+# Generation Time: 2016-01-16 06:42:59 +0000
 # ************************************************************
 
 
@@ -53,6 +53,7 @@ LOCK TABLES `fk_config` WRITE;
 
 INSERT INTO `fk_config` (`key`, `value`, `desc`)
 VALUES
+	('analyze_code',NULL,'统计代码，可以添加百度统计、Google 统计等'),
 	('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
 	('github_blog',NULL,'GitHub blog 地址，如果填了则同步到 GitHub 上'),
 	('github_url',NULL,'GitHub 地址'),
