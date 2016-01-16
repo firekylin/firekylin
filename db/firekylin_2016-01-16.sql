@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.19-debug)
 # Database: firekylin
-# Generation Time: 2016-01-16 06:42:59 +0000
+# Generation Time: 2016-01-16 07:18:33 +0000
 # ************************************************************
 
 
@@ -35,12 +35,12 @@ CREATE TABLE `fk_cate` (
 
 
 
-# Dump of table fk_config
+# Dump of table fk_options
 # ------------------------------------------------------------
 
-DROP TABLE IF EXISTS `fk_config`;
+DROP TABLE IF EXISTS `fk_options`;
 
-CREATE TABLE `fk_config` (
+CREATE TABLE `fk_options` (
   `key` varchar(255) NOT NULL DEFAULT '',
   `value` text,
   `desc` varchar(255) DEFAULT NULL,
@@ -48,10 +48,10 @@ CREATE TABLE `fk_config` (
   UNIQUE KEY `key` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-LOCK TABLES `fk_config` WRITE;
-/*!40000 ALTER TABLE `fk_config` DISABLE KEYS */;
+LOCK TABLES `fk_options` WRITE;
+/*!40000 ALTER TABLE `fk_options` DISABLE KEYS */;
 
-INSERT INTO `fk_config` (`key`, `value`, `desc`)
+INSERT INTO `fk_options` (`key`, `value`, `desc`)
 VALUES
 	('analyze_code',NULL,'统计代码，可以添加百度统计、Google 统计等'),
 	('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
@@ -61,11 +61,12 @@ VALUES
 	('keywords',NULL,'网站关键字'),
 	('logo_url',NULL,'logo 地址'),
 	('miitbeian',NULL,'网站备案号'),
+	('password_salt',NULL,'密码 salt，网站安装的时候随机生成一个'),
 	('title','Firekylin\n','网站标题'),
 	('two_factor_auth','0','是否开启二步验证'),
 	('weibo_url',NULL,'微博地址');
 
-/*!40000 ALTER TABLE `fk_config` ENABLE KEYS */;
+/*!40000 ALTER TABLE `fk_options` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
@@ -77,7 +78,7 @@ DROP TABLE IF EXISTS `fk_post`;
 CREATE TABLE `fk_post` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
-  `type` varchar(11) NOT NULL DEFAULT 'post' COMMENT '类型，post 为文章， page 为页面',
+  `type` varchar(11) NOT NULL DEFAULT '1' COMMENT '类型，1 为文章， 2 为页面',
   `status` tinyint(11) NOT NULL DEFAULT '0' COMMENT '0 为草稿， 1 为已经发布',
   `title` varchar(255) NOT NULL,
   `pathname` varchar(255) NOT NULL DEFAULT '' COMMENT 'URL 的 pathname',

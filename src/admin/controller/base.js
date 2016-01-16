@@ -1,6 +1,8 @@
 'use strict';
 
-export default class extends think.controller.base {
+let Base = think.controller('common/base');
+
+export default class extends Base {
   /**
    * before
    */
