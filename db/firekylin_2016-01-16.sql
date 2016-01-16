@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.19-debug)
 # Database: firekylin
-# Generation Time: 2016-01-16 07:18:33 +0000
+# Generation Time: 2016-01-16 07:19:52 +0000
 # ************************************************************
 
 
@@ -61,6 +61,7 @@ VALUES
 	('keywords',NULL,'网站关键字'),
 	('logo_url',NULL,'logo 地址'),
 	('miitbeian',NULL,'网站备案号'),
+	('num_per_page','10','文章一页显示的条数'),
 	('password_salt',NULL,'密码 salt，网站安装的时候随机生成一个'),
 	('title','Firekylin\n','网站标题'),
 	('two_factor_auth','0','是否开启二步验证'),
