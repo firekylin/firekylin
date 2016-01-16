@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.19-debug)
 # Database: firekylin
-# Generation Time: 2016-01-16 06:37:19 +0000
+# Generation Time: 2016-01-16 06:39:53 +0000
 # ************************************************************
 
 
@@ -59,6 +59,7 @@ VALUES
 	('image_upload',NULL,'图片存放的位置，默认存在放网站上。也可以选择放在七牛或者又拍云等地方'),
 	('keywords',NULL,'网站关键字'),
 	('logo_url',NULL,'logo 地址'),
+	('miitbeian',NULL,'网站备案号'),
 	('title','Firekylin\n','网站标题'),
 	('two_factor_auth','0','是否开启二步验证'),
 	('weibo_url',NULL,'微博地址');
