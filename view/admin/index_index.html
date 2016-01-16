@@ -1,48 +1,295 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>New ThinkJS Application</title>
-<style>
-*{padding: 0;margin: 0;font-size: 16px;line-height: 20px;font-family: arial;}
-a, a:visited{color:#337ab7;text-decoration: none;}
-header{padding: 70px 0 70px 0;background-color: #4A6495}
-h1{font-size: 36px;color:#fff;font-weight: normal;}
-code{  padding: 2px 4px;font-size: 90%;color: #c7254e;background-color: #f9f2f4;border-radius: 4px;}
-.content{width: 1000px;margin: auto}
-.wrap{width: 1000px;margin: auto}
-.content{margin-top: 80px;}
-.list{width: 800px;}
-.list .item{position: relative;padding-left: 70px;margin-top: 50px;}
-.list .item .step{position: absolute;width: 36px;height: 36px;top:-3px;left:0;border: 5px solid #4A6495;border-radius: 23px;text-align: center;line-height: 36px;}
-.list .item h2{font-size: 24px;font-weight: normal;}
-.list .item p{line-height: 30px;margin-top: 10px}
-</style>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title></title>
+  <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <link rel="stylesheet" href="/static/css/icon.css">
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <h1>A New App Created By ThinkJS</h1>
+  <div class="aw-side ps-container" id="aw-side">
+    <div class="mod">
+        <div class="mod-logo">
+            <img class="pull-left" src="http://localhost/wecenter/static/admin/img/logo.png" alt="">
+            <h1>WeCenter</h1>
+        </div>
+
+        <div class="mod-message">
+            <div class="message">
+                <a class="btn btn-sm" href="http://localhost/wecenter" target="_blank" title="首页">
+                    <i class="icon icon-home"></i>
+                </a>
+
+                <a class="btn btn-sm" href="http://localhost/wecenter/?/admin/" title="概述">
+                    <i class="icon icon-ul"></i>
+                </a>
+
+                <a class="btn btn-sm" href="http://localhost/wecenter/?/admin/logout/" title="退出">
+                    <i class="icon icon-logout"></i>
+                </a>
+            </div>
+        </div>
+
+        <ul class="mod-bar">
+            <input type="hidden" id="hide_values" val="0">
+                        <li>
+                <a href="http://localhost/wecenter/?/admin/" class=" icon icon-home active">
+                    <span>概述</span>
+                </a>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-setting" data="icon">
+                    <span>全局设置</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-site">
+                            <span>站点信息</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-register">
+                            <span>注册访问</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-functions">
+                            <span>站点功能</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-contents">
+                            <span>内容设置</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-integral">
+                            <span>威望积分</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-permissions">
+                            <span>用户权限</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-mail">
+                            <span>邮件设置</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-openid">
+                            <span>开放平台</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-cache">
+                            <span>性能优化</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/settings/category-interface">
+                            <span>界面设置</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-reply" data="icon">
+                    <span>内容管理</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/question/question_list/">
+                            <span>问题管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/article/list/">
+                            <span>文章管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/topic/list/">
+                            <span>话题管理</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-user" data="icon">
+                    <span>用户管理</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/user/list/">
+                            <span>用户列表</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/user/group_list/">
+                            <span>用户组</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/user/invites/">
+                            <span>批量邀请</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/user/job_list/">
+                            <span>职位设置</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-report" data="icon">
+                    <span>审核管理</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/approval/list/">
+                            <span>内容审核</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/user/verify_approval_list/">
+                            <span>认证审核</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/user/register_approval_list/">
+                            <span>注册审核</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/question/report_list/">
+                            <span>用户举报</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-signup" data="icon">
+                    <span>内容设置</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/nav_menu/">
+                            <span>导航设置</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/category/list/">
+                            <span>分类管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/feature/list/">
+                            <span>专题管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/page/">
+                            <span>页面管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/help/list/">
+                            <span>帮助中心</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-share" data="icon">
+                    <span>微信微博</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weixin/accounts/">
+                            <span>微信多账号管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weixin/mp_menu/">
+                            <span>微信菜单管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weixin/reply/">
+                            <span>微信自定义回复</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weixin/third_party_access/">
+                            <span>微信第三方接入</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weixin/qr_code/">
+                            <span>微信二维码管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weixin/sent_msgs_list/">
+                            <span>微信消息群发</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/weibo/msg/">
+                            <span>微博消息接收</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/edm/receiving_list/">
+                            <span>邮件导入</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-inbox" data="icon">
+                    <span>邮件群发</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/edm/tasks/">
+                            <span>任务管理</span>
+                        </a>
+                    </li>
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/edm/groups/">
+                            <span>用户群管理</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                        <li>
+                <a href="javascript:;" class=" icon icon-job" data="icon">
+                    <span>工具</span>
+                </a>
+                
+                <ul class="hide">
+                                        <li>
+                        <a href="http://localhost/wecenter/?/admin/tools/">
+                            <span>系统维护</span>
+                        </a>
+                    </li>
+                                    </ul>
+                            </li>
+                    </ul>
     </div>
-  </header>
-  <div class="content">
-    <div class="list">
-      <div class="item">
-        <div class="step">1</div>
-        <h2>Generate Files</h2>
-        <p>Run <code>thinkjs</code> command to create module, controler, model, service and so on. visit <a href="https://thinkjs.org/doc/thinkjs_command.html">https://thinkjs.org/doc/thinkjs_command.html</a> to view more infomation.</p>
-      </div>
-      <div class="item">
-        <div class="step">2</div>
-        <h2>Documatation</h2>
-        <p>ThinkJS has html and pdf documents. visit <a href="https://thinkjs.org/doc.html">https://thinkjs.org/doc.html</a></p>
-      </div>
-      <div class="item">
-        <div class="step">3</div>
-        <h2>WebSocket</h2>
-        <p>ThinkJS support <code>socket.io</code> and <code>sockjs</code> WebSocket client and server node. visit <a href="https://thinkjs.org/doc/adapter_websocket.html">https://thinkjs.org/doc/adapter_websocket.html</a></p>
-      </div>
-    </div>
-  </div>
+<div class="ps-scrollbar-x-rail" style="width: 235px; display: none; left: 0px; bottom: 3px;"><div class="ps-scrollbar-x" style="left: 0px; width: 0px;"></div></div><div class="ps-scrollbar-y-rail" style="top: 0px; height: 912px; display: inherit; right: 0px;"><div class="ps-scrollbar-y" style="top: 0px; height: 864px;"></div></div></div>
 </body>
 </html>
