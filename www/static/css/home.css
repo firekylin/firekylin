@@ -620,7 +620,8 @@ body.side {
   position: relative;
 }
 #page-index article a {
-  color: #323436;
+  color: #222;
+  font-weight: normal;
   text-decoration: none;
   -webkit-transition: color .2s cubic-bezier(.4,.01,.165,.99);
   transition: color .2s cubic-bezier(.4,.01,.165,.99);
@@ -654,7 +655,7 @@ body.side {
 #page-index article .desc {
   font-size: 16px;
   line-height: 1.8;
-  color: #999;
+  color: #777;
 }
 #page-index article p.more {
   margin: 15px 0 0;
