@@ -15,7 +15,7 @@ export default class extends think.model.base {
   cacheOptions = {
     timeout: 30 * 24 * 3600 * 1000,
     type: !think.isMaster ? 'file' : 'memory'
-  }
+  };
   /**
    * get options
    * @return {} []
