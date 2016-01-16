@@ -1,48 +1,133 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>New ThinkJS Application</title>
-<style>
-*{padding: 0;margin: 0;font-size: 16px;line-height: 20px;font-family: arial;}
-a, a:visited{color:#337ab7;text-decoration: none;}
-header{padding: 70px 0 70px 0;background-color: #4A6495}
-h1{font-size: 36px;color:#fff;font-weight: normal;}
-code{  padding: 2px 4px;font-size: 90%;color: #c7254e;background-color: #f9f2f4;border-radius: 4px;}
-.content{width: 1000px;margin: auto}
-.wrap{width: 1000px;margin: auto}
-.content{margin-top: 80px;}
-.list{width: 800px;}
-.list .item{position: relative;padding-left: 70px;margin-top: 50px;}
-.list .item .step{position: absolute;width: 36px;height: 36px;top:-3px;left:0;border: 5px solid #4A6495;border-radius: 23px;text-align: center;line-height: 36px;}
-.list .item h2{font-size: 24px;font-weight: normal;}
-.list .item p{line-height: 30px;margin-top: 10px}
-</style>
-</head>
-<body>
-  <header>
-    <div class="wrap">
-      <h1>A New App Created By ThinkJS</h1>
-    </div>
-  </header>
-  <div class="content">
-    <div class="list">
-      <div class="item">
-        <div class="step">1</div>
-        <h2>Generate Files</h2>
-        <p>Run <code>thinkjs</code> command to create module, controler, model, service and so on. visit <a href="https://thinkjs.org/doc/thinkjs_command.html">https://thinkjs.org/doc/thinkjs_command.html</a> to view more infomation.</p>
-      </div>
-      <div class="item">
-        <div class="step">2</div>
-        <h2>Documatation</h2>
-        <p>ThinkJS has html and pdf documents. visit <a href="https://thinkjs.org/doc.html">https://thinkjs.org/doc.html</a></p>
-      </div>
-      <div class="item">
-        <div class="step">3</div>
-        <h2>WebSocket</h2>
-        <p>ThinkJS support <code>socket.io</code> and <code>sockjs</code> WebSocket client and server node. visit <a href="https://thinkjs.org/doc/adapter_websocket.html">https://thinkjs.org/doc/adapter_websocket.html</a></p>
-      </div>
-    </div>
-  </div>
-</body>
+<html lang="zh_CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+        <meta name="author" content="墨尘/*V5*/">
+        <link rel="icon" href="/static/images/favicon.png">
+        <title>普通的前端小站</title>
+        <link rel="stylesheet" href="/static/css/home.css" type="text/css">
+    </head>
+    <body></body>
 </html>
+<nav id="sidebar" class="behavior_1">
+    <div class="wrap">
+        <div class="profile">
+            <a href="/">
+                <img src="/static/img/firekylin.jpg" alt="Firekylin">
+            </a>
+            <span>Firekylin</span>
+        </div>
+        <ul class="buttons">
+            <li>
+                <a class="" href="/">
+                    <i class="iconfont icon-home" title="首页"></i>
+                    <span>首页</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/archive/">
+                    <i class="iconfont icon-archive" title="归档"></i>
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/tags/">
+                    <i class="iconfont icon-tags" title="标签"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/about/">
+                    <i class="iconfont icon-user" title="关于"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/links/">
+                    <i class="iconfont icon-link" title="友链"></i>
+                    <span>友链</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="buttons">
+            <li>
+                <a target="_blank" class="" href="https://github.com/imochen">
+                    <i class="iconfont icon-github" title="GitHub"></i>
+                    <span>GitHub</span>
+                </a>
+            </li>
+            <li>
+                <a target="_blank" class="" href="http://weibo.com/677612322/">
+                    <i class="iconfont icon-weibo" title="微博"></i>
+                    <span>微博</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="buttons">
+            <li>
+                <a class="" href="/atom.xml">
+                    <i class="iconfont icon-rss" title="RSS"></i>
+                    <span>RSS</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div id="header">
+    <div class="btn-bar">
+        <i></i>
+    </div>
+    <h1>
+        <a href="/">普通的前端小站</a>
+    </h1>
+    <a class="me" href="/about/">
+        <img src="/static/images/gravatar.jpg" alt="墨尘" alt="墨尘">
+    </a>
+</div>
+<div id="sidebar-mask"></div>
+<div id="main">
+    <div class="wrap">
+        <section id="page-index">
+            <article data-url="/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">
+                <div class="meta">
+                    <div class="date">1月 09 , 2016</div>
+                    <div class="tags">
+                        <a href="/tags/Vuejs" data-tag="vuejs">Vuejs</a>
+                         , 
+                        <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
+                         , 
+                        <a href="/tags/组件化" data-tag="组件化">组件化</a>
+                    </div>
+                </div>
+                <h1>
+                    <a href="/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">前端重构之路（组件化）</a>
+                </h1>
+                <div class="desc">距离前端重构之路(技术选型篇)已经过去了近半个月。之前提到说服务端使用ThinkJS已经可以确定了，一些配套模块也都写差不多了。前端还在Vue，Novajs，还是手动实现中徘徊。期间对Novajs，Vuejs进行了大量的调研，也针对业务调整了相关的开发方式。最终确定了使用Vuejs来进行组件开发，也使用Vuejs玩出了一套可按需加载的基础组件开发模式。</div>
+                <p class="more">
+                    <a href="/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">阅读全文 »</a>
+                </p>
+            </article>
+            <article data-url="/2015/12/23/the-path-of-the-front-end-refactoring-technology-selection/index.html">
+                <div class="meta">
+                    <div class="date">12月 23 , 2015</div>
+                    <div class="tags">
+                        <a href="/tags/ThinkJS" data-tag="thinkjs">ThinkJS</a>
+                         , 
+                        <a href="/tags/WebComponent" data-tag="webcomponent">WebComponent</a>
+                         , 
+                        <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
+                    </div>
+                </div>
+                <h1>
+                    <a href="/2015/12/23/the-path-of-the-front-end-refactoring-technology-selection/index.html">前端重构之路（技术选型篇）</a>
+                </h1>
+                <div class="desc">多年以后，你再也不是那个切图仔，而前端也不再是简单的拼页面。从最初我们高举规范化大旗，什么语意化命名，统一规范。到今天，我们对工程化的信仰。每个前端团队也都在为自己的业务不断探索，追求更加完善的工程化解决方案。注：以下文中提到的技术方案每个点均可长篇大论，这里仅做概述。日后根据重构进度逐步更新。</div>
+                <p class="more">
+                    <a href="/2015/12/23/the-path-of-the-front-end-refactoring-technology-selection/index.html">阅读全文 »</a>
+                </p>
+            </article>
+        </section>
+    </div>
+</div>
+<script src="/static/js/meizi.js" type="text/javascript"></script>
