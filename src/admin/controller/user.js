@@ -15,10 +15,11 @@ export default class extends Base {
    * login
    * @return {} []
    */
-  loginAction(){
+  async loginAction(){
     if(this.isGet()){
       return this.display();
     }
-    
+    await this.session('userInfo', {name: 'firekylin'});
+    return this.success();
   }
 }
