@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.19-debug)
 # Database: firekylin
-# Generation Time: 2016-01-16 06:35:49 +0000
+# Generation Time: 2016-01-16 06:37:19 +0000
 # ************************************************************
 
 
@@ -44,7 +44,8 @@ CREATE TABLE `fk_config` (
   `key` varchar(255) NOT NULL DEFAULT '',
   `value` text,
   `desc` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`key`)
+  PRIMARY KEY (`key`),
+  UNIQUE KEY `key` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `fk_config` WRITE;
