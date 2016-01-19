@@ -4,10 +4,17 @@
  */
 export default class extends think.controller.base {
   /**
-   * get website options
-   * @return {Promise} []
+   * before magic method
+   * @return {} []
    */
-  getOptions(){
-    
+  async __before(){
+
+    //get website options
+    let model = this.model('options');
+    let options = await model.getOptions();
+    this.options = options;
+    if(!this.isAjax()){
+      this.assign('options', options);
+    }
   }
 }

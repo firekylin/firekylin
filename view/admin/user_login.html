@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Firekylin</title>
+<title>{{ options.title }}</title>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="format-detection" content="telephone=no">
@@ -30,7 +30,7 @@ a:hover{
   <div class="row">
       <div class="login">
       <h1 class="text-center">
-        <a href="/">Firekylin</a>
+        <a href="/">{{ options.title }}</a>
         </h1>
         <form role="form" action="?" method="post">
         <div class="form-group">
@@ -39,6 +39,11 @@ a:hover{
         <div class="form-group">
           <input type="password" class="form-control" placeholder="密码" name="password">
         </div>
+        {% if options.two_factor_auth == 1 %}
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="二步验证" name="password">
+        </div>
+        {% endif %}
         <button type="submit" class="btn btn-primary btn-lg btn-block">登录</button>
       </form>
       </div>
