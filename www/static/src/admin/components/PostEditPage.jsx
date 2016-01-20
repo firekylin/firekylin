@@ -60,7 +60,6 @@ class PostAddPage extends BaseComponent {
       });
 
       if(needSave) {
-        self.handleSave();
         Object.assign(self.savedStated, {
           tagIds: tagIds,
           defaultStatus: state.status,
@@ -68,7 +67,7 @@ class PostAddPage extends BaseComponent {
           content: state.content,
           category: state.category
         });
-
+        self.handleSave();
         //设置状态
         self.setState({
           status: '正在保存...'
@@ -226,6 +225,7 @@ class PostAddPage extends BaseComponent {
       if(status == 1) {
         PostActions.update(this.id, data);
       }
+
       //保存为草稿
       if(status == 2) {
         //本身就是草稿
@@ -269,6 +269,7 @@ class PostAddPage extends BaseComponent {
           //更新id
           this.id = error.data.id;
           this.setState({
+            defaultStatus: 2,
             status: '自动保存成功!'
           });
         }

@@ -108,13 +108,29 @@ export default class extends base {
 
     //增加post_tag关系表
     let addOpts = [];
-    for(let tag of data.tags.split(',')) {
+    let tags = data.tags;
+    if(typeof tags == "object") {
+      for(let tag of tags) {
+        addOpts.push({
+          post_id: insertId,
+          tag_id: tag,
+          status: data.status
+        });
+      }
+    }else if(typeof tags == "string") {
       addOpts.push({
         post_id: insertId,
-        tag_id: tag,
+        tag_id: tags,
+        status: data.status
+      });
+    }else {
+      addOpts.push({
+        post_id: insertId,
+        tag_id: 0,
         status: data.status
       });
     }
+
     await this.model('post_tag').addMany(addOpts);
 
     return this.success({id: insertId});
@@ -139,13 +155,27 @@ export default class extends base {
     delete data.category;
 
     let rows = await this.modelInstance.where({id: this.id}).update(data);
-
     //更新post_tag关系表
     let addOpts = [];
-    for(let tag of data.tags.split(',')) {
+    let tags = data.tags;
+    if(typeof tags == "object") {
+      for(let tag of tags) {
+        addOpts.push({
+          post_id: this.id,
+          tag_id: tag,
+          status: data.status
+        });
+      }
+    }else if(typeof tags == "string") {
       addOpts.push({
         post_id: this.id,
-        tag_id: tag,
+        tag_id: tags,
+        status: data.status
+      });
+    }else {
+      addOpts.push({
+        post_id: this.id,
+        tag_id: 0,
         status: data.status
       });
     }
