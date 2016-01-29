@@ -17,7 +17,7 @@ export default class extends Base {
     let userInfo = await this.session('userInfo');
     if(think.isEmpty(userInfo)){
       if(this.isAjax()){
-        return this.fail(403, 'not login');
+        return this.fail('NOT_LOGIN');
       }
       return this.redirect('/admin/login');
     }
