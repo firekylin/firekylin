@@ -41,3 +41,5 @@ release/
 
 # OS func folder
 .DS_Store
+
+runtime/
