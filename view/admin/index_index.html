@@ -9,14 +9,14 @@
   <link rel="stylesheet" href="/static/css/icon.css">
 </head>
 <body>
-  <div class="aw-side ps-container" id="aw-side">
+  <div class="fk-side ps-container" id="fk-side">
     <div class="mod">
         <div class="mod-logo">
-            <img class="pull-left" src="http://localhost/wecenter/static/admin/img/logo.png" alt="">
-            <h1>WeCenter</h1>
+           <!--  <img class="pull-left" src="http://localhost/wecenter/static/admin/img/logo.png" alt=""> -->
+            <h1>FireKylin</h1>
         </div>
 
-        <div class="mod-message">
+<!--         <div class="mod-message">
             <div class="message">
                 <a class="btn btn-sm" href="http://localhost/wecenter" target="_blank" title="首页">
                     <i class="icon icon-home"></i>
@@ -30,87 +30,48 @@
                     <i class="icon icon-logout"></i>
                 </a>
             </div>
-        </div>
+        </div> -->
 
-        <ul class="mod-bar">
+        <ul class="mod-bar" style="margin-top:10px;">
             <input type="hidden" id="hide_values" val="0">
                         <li>
-                <a href="http://localhost/wecenter/?/admin/" class=" icon icon-home active">
+                <a href="/admin" class=" icon icon-home active">
                     <span>概述</span>
                 </a>
-                            </li>
+                </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-setting" data="icon">
-                    <span>全局设置</span>
+                    <span>文章管理</span>
                 </a>
                 
                 <ul class="hide">
-                                        <li>
+                    <li>
                         <a href="http://localhost/wecenter/?/admin/settings/category-site">
-                            <span>站点信息</span>
+                            <span>文章列表</span>
                         </a>
                     </li>
                                         <li>
                         <a href="http://localhost/wecenter/?/admin/settings/category-register">
-                            <span>注册访问</span>
+                            <span>添加文章</span>
                         </a>
                     </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-functions">
-                            <span>站点功能</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-contents">
-                            <span>内容设置</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-integral">
-                            <span>威望积分</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-permissions">
-                            <span>用户权限</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-mail">
-                            <span>邮件设置</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-openid">
-                            <span>开放平台</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-cache">
-                            <span>性能优化</span>
-                        </a>
-                    </li>
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/settings/category-interface">
-                            <span>界面设置</span>
-                        </a>
-                    </li>
+                                        
                                     </ul>
                             </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-reply" data="icon">
-                    <span>内容管理</span>
+                    <span>页面管理</span>
                 </a>
                 
                 <ul class="hide">
                                         <li>
                         <a href="http://localhost/wecenter/?/admin/question/question_list/">
-                            <span>问题管理</span>
+                            <span>页面列表</span>
                         </a>
                     </li>
                                         <li>
                         <a href="http://localhost/wecenter/?/admin/article/list/">
-                            <span>文章管理</span>
+                            <span>添加页面</span>
                         </a>
                     </li>
                                         <li>
@@ -122,13 +83,13 @@
                             </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-user" data="icon">
-                    <span>用户管理</span>
+                    <span>分类管理</span>
                 </a>
                 
                 <ul class="hide">
                                         <li>
                         <a href="http://localhost/wecenter/?/admin/user/list/">
-                            <span>用户列表</span>
+                            <span>分类</span>
                         </a>
                     </li>
                                         <li>
@@ -150,7 +111,7 @@
                             </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-report" data="icon">
-                    <span>审核管理</span>
+                    <span>标签管理</span>
                 </a>
                 
                 <ul class="hide">
@@ -178,7 +139,7 @@
                             </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-signup" data="icon">
-                    <span>内容设置</span>
+                    <span>用户管理</span>
                 </a>
                 
                 <ul class="hide">
@@ -211,7 +172,7 @@
                             </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-share" data="icon">
-                    <span>微信微博</span>
+                    <span></span>
                 </a>
                 
                 <ul class="hide">
@@ -259,7 +220,7 @@
                             </li>
                         <li>
                 <a href="javascript:;" class=" icon icon-inbox" data="icon">
-                    <span>邮件群发</span>
+                    <span>系统设置</span>
                 </a>
                 
                 <ul class="hide">
@@ -280,16 +241,55 @@
                     <span>工具</span>
                 </a>
                 
-                <ul class="hide">
-                                        <li>
-                        <a href="http://localhost/wecenter/?/admin/tools/">
-                            <span>系统维护</span>
-                        </a>
-                    </li>
-                                    </ul>
                             </li>
                     </ul>
     </div>
-<div class="ps-scrollbar-x-rail" style="width: 235px; display: none; left: 0px; bottom: 3px;"><div class="ps-scrollbar-x" style="left: 0px; width: 0px;"></div></div><div class="ps-scrollbar-y-rail" style="top: 0px; height: 912px; display: inherit; right: 0px;"><div class="ps-scrollbar-y" style="top: 0px; height: 864px;"></div></div></div>
+</div>
+<div class="fk-content-wrap">
+    <div class="row">
+        <div class="fk-header">
+
+            <div class="mod-header-user">
+                <div class="pull-left">
+                    <ol class="breadcrumb">
+                      <li class="active"> > 概况</li>
+                    </ol>
+                </div>
+                <ul class="pull-right">
+                    
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle mod-bell" data-toggle="dropdown">
+                            <i class="icon icon-bell"></i>
+                                            </a>
+                        <ul class="dropdown-menu mod-chat">
+                                            <p>没有通知</p>
+                                            </ul>
+                    </li>
+
+                    <li class="dropdown username">
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                            <img src="http://localhost/wecenter/static/common/avatar-mid-img.png" class="img-circle" width="30">
+                            admin                    <span class="caret"></span>
+                        </a>
+
+                        <ul class="dropdown-menu pull-right mod-user">
+                            <li>
+                                <a href="http://localhost/wecenter" target="_blank"><i class="icon icon-home"></i>首页</a>
+                            </li>
+
+                            <li>
+                                <a href="http://localhost/wecenter/?/admin/"><i class="icon icon-ul"></i>概述</a>
+                            </li>
+
+                            <li>
+                                <a href="http://localhost/wecenter/?/admin/logout/"><i class="icon icon-logout"></i>退出</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
