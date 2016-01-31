@@ -93,6 +93,9 @@ export default class App extends React.Component {
               </div>
             </div>
           </div>
+          <div className="row">
+            {this.props.children}
+          </div>
         </div>
       </div>
     );
