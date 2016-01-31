@@ -16,10 +16,16 @@
   },
   "devDependencies": {
     "babel-cli": "6.x.x",
-    "babel-preset-es2015-loose": "6.x.x",
-    "babel-preset-stage-1": "6.x.x",
+    "babel-core": "6.x.x",
+    "babel-loader": "^6.2.1",
     "babel-plugin-transform-runtime": "6.x.x",
-    "babel-core": "6.x.x"
+    "babel-preset-es2015-loose": "6.x.x",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-1": "6.x.x",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "react-router": "^1.0.3",
+    "webpack": "^1.12.12"
   },
   "repository": "",
   "license": "MIT"
