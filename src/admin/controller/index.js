@@ -7,7 +7,10 @@ export default class extends Base {
    * index action
    * @return {Promise} []
    */
-  indexAction(){
+  async indexAction(){
+    let model = this.model('options');
+    let options = await model.getOptions();
+    this.assign('options', options);
     //auto render template file index_index.html
     return this.display();
   }

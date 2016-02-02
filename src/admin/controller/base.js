@@ -14,13 +14,16 @@ export default class extends Base {
     if(http.controller === 'user' && http.action === 'login'){
       return;
     }
-    let userInfo = await this.session('userInfo');
+    let userInfo = await this.session('userInfo') || {};
+    userInfo = {id: 1, username: 'welefen'};
     if(think.isEmpty(userInfo)){
       if(this.isAjax()){
         return this.fail('NOT_LOGIN');
       }
-      return this.redirect('/admin/login');
     }
     this.userInfo = userInfo;
+    if(!this.isAjax()){
+      this.assign('userInfo', userInfo);
+    }
   }
 }

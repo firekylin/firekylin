@@ -11,12 +11,10 @@
 .alert{padding:5px 15px;}
 .dropdown-menu .divider{margin: 5px 0;}
 .fk-alert{position: absolute;top: 0;}
-.table tbody form tr td,.table tfoot form tr td{padding: 8px;border-top: 1px solid #ddd;line-height: 1.42857143;}
-/*公共部分*/
-body,a{color:#080808;font:14px/1.5em "microsoft yahei";}
-html,body{height:100%;}
+.table tbody form tr td,
+.table tfoot form tr td{padding: 8px;border-top: 1px solid #ddd;line-height: 1.42857143;}
+html,body{height:100%;overflow: hidden;background:#eff0f4;}
 a:hover,a:focus{text-decoration:none;cursor:pointer;}
-body{background:#eff0f4;}
 ul,ol{padding:0;list-style:none;}
 .middle{line-height:32px;}
 .text-color-999{margin:2px 0 0;color:#999;font-size:11px;}
@@ -25,6 +23,12 @@ ul,ol{padding:0;list-style:none;}
 .textwrap{ word-break: break-all;overflow: hidden}
 .fk-content-wrap .icon{display:inline-block;width:25px;height:25px;border-radius:5px;background:#8bbf61;color:#fff;text-align:center;line-height:25px;}
 .fk-content-wrap .icon.disabled{background-color: #c5c5c5;}
+
+.login{width: 300px;margin: auto;margin-top:180px;}
+.login h1{margin-bottom: 20px;}
+
+
+
 /* 警告提示box */
 .fk-tips-box .modal-dialog, .fk-image-box .modal-dialog, .fk-link-box .modal-dialog, .fk-confirm-box .modal-dialog{width: 370px;}
 .fk-tips-box .modal-body{background: url(../img/warmming.png) no-repeat right 5px;}
