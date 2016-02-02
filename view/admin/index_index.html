@@ -9,7 +9,13 @@
   <link rel="stylesheet" href="/static/css/icon.css">
 </head>
 <body>
-  <div id="app"></div>
-  <script src="/static/dist/admin.bundle.js"></script>
+<script>
+window.SysConfig = {
+  userInfo: {{JSON.stringify(userInfo) | safe}},
+  options: {{JSON.stringify(options) | safe}},
+}
+</script>
+<div id="app"></div>
+<script src="/static/dist/admin.bundle.js"></script>
 </body>
 </html>

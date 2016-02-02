@@ -1,0 +1,11 @@
+{
+  "presets": ["react", "es2015-loose", "stage-0"],
+  "plugins": [
+    ["transform-decorators-legacy"]
+  ],
+  "env": {
+    "development": {
+      
+    }
+  }
+}

@@ -18,9 +18,10 @@ export default {
       {
         test: /\.jsx?$/,
         loader: 'babel',
+        cacheDirectory: true,
         query: {
-          presets: ['react', 'es2015-loose', 'stage-1'],
-          plugins: ['transform-runtime']
+          presets: ['react', 'es2015-loose', 'stage-0'],
+          plugins: ['transform-runtime', 'transform-decorators-legacy']
         },
         exclude: /node_modules/
       }
