@@ -1,17 +1,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router, Route, Redirect, browserHistory} from 'react-router';
+import {Router, Route, Redirect, useRouterHistory, browserHistory} from 'react-router';
+
+import {createHistory} from 'history';
 
 import App from './component/app';
 import Dashboard from './component/dashboard';
 import Post from './component/post';
+import User from './component/user';
+import UserList from './component/user_list';
+
+
+let history = useRouterHistory(createHistory)({
+  basename: '/admin',
+  queryKey: false
+});
 
 ReactDOM.render((
-  <Router history={browserHistory}>
-    <Redirect from="/" to="/dashboard" />
+  <Router history={history}>
+    <Redirect from="/" to="admin/dashboard" />
     <Route path="/" component={App}>
       <Route path="dashboard" component={Dashboard} />
       <Route path="post" component={Post} />
+      <Route path="user" component={User}>
+        <Redirect from="/" to="list" />
+        <Route path="list" component={UserList} />
+      </Route>
     </Route>
   </Router>
   ),

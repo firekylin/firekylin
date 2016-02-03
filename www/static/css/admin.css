@@ -65,8 +65,8 @@ ul,ol{padding:0;list-style:none;}
 .mod-header-user ul li{display:inline-block;margin:10px 0 0;}
 .mod-header-user ul li ul li{margin-top: 0;padding: 0 15px;}
 .mod-header-user ul li ul li:hover,.mod-user li:hover{background: #f6f6f6;}
-.mod-header-user ul li ul li a{line-height: 25px;white-space: normal;padding: 10px 0}
-.mod-header-user ul li ul li a i{margin-right: 10px;}
+/*.mod-header-user ul li ul li a{line-height: 25px;white-space: normal;padding: 10px 0}
+.mod-header-user ul li ul li a i{margin-right: 10px;}*/
 .mod-user{width: 150px;}
 .mod-header-user .mod-user li {display: block;}
 .fk-header ul li.username{margin-right:30px;}

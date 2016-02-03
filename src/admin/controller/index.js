@@ -4,17 +4,6 @@ import Base from './base.js';
 
 export default class extends Base {
   /**
-   * index action
-   * @return {Promise} []
-   */
-  async indexAction(){
-    let model = this.model('options');
-    let options = await model.getOptions();
-    this.assign('options', options);
-    //auto render template file index_index.html
-    return this.display();
-  }
-  /**
    * [summartyAction description]
    * @return {[type]} [description]
    */
