@@ -26,4 +26,17 @@ export default class extends Base {
       this.assign('userInfo', userInfo);
     }
   }
+  /**
+   * call magic method
+   * @return {} []
+   */
+  async __call(){
+    if(this.isAjax()){
+      return this.fail('ACTION_NOT_FOUND');
+    }
+    let model = this.model('options');
+    let options = await model.getOptions();
+    this.assign('options', options);
+    return this.display('index/index');
+  }
 }

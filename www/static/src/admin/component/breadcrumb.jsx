@@ -6,7 +6,7 @@ export default class extends Base {
     return (
       <div className="row">
         <div className="fk-header">
-          <div className="mod-header-user">
+          <div>
             <div className="pull-left">
               <ol className="bradcrumb">
                 <li>概况</li>
@@ -23,12 +23,11 @@ export default class extends Base {
               </li>
               <li className="dropdown username">
                 <a href="" className="dropdown-toggle" data-toggle="dropdown">
-                  admin
+                  {SysConfig.userInfo.username}
                   <span className="caret"></span>
                 </a>
-                <ul className="dropdown-menu pull-right mod-user">
-                  <li><a href="#"><i className="icon icon-home">首页</i></a></li>
-                  <li><a href="#"><i className="icon icon-ul">概述</i></a></li>
+                <ul className="dropdown-menu pull-right" style={{display: 'block'}}>
+                  <li><a href="#"><i className="icon icon-home">修改密码</i></a></li>
                   <li><a href="#"><i className="icon icon-logout">退出</i></a></li>
                 </ul>
               </li>

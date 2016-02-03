@@ -58,6 +58,11 @@ export default class extends think.controller.base {
    * @return {Promise}      []
    */
   _404Action(){
+    //管理端
+    if(this.http.module === 'admin' && !this.isAjax()){
+      let controller = this.controller('admin/index');
+      return controller.invoke('__call');
+    }
     return this.displayError(404);
   }
   /**

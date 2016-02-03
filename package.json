@@ -10,10 +10,9 @@
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
+    "classnames": "^2.2.3",
     "moment": "^2.11.1",
     "nunjucks": "^2.3.0",
-    "react-mixin": "^3.0.3",
-    "reflux": "^0.3.0",
     "thinkjs": "2.1.x"
   },
   "devDependencies": {
@@ -27,8 +26,11 @@
     "babel-preset-stage-0": "6.x.x",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "react-router": "^1.0.3",
-    "webpack": "^1.12.12"
+    "react-router": "^2.0.0-rc5",
+    "webpack": "^1.12.12",
+    "react-mixin": "^3.0.3",
+    "reflux": "^0.3.0",
+    "history": "^1.17.0"
   },
   "repository": "",
   "license": "MIT"
