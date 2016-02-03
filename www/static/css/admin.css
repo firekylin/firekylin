@@ -25,8 +25,9 @@ ul,ol{padding:0;list-style:none;}
 
 .login{width: 300px;margin: auto;margin-top:180px;}
 .login h1{margin-bottom: 20px;}
-.breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px}
-.userinfo{margin-right: 10px;-webkit-user-select:none;}
+.breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px;margin-left: 0px;padding-left: 10px;}
+.userinfo{margin-right: 0px;-webkit-user-select:none;}
+.manage-container{margin-top: 10px;background: #fff;padding: 10px;min-height: 100%;}
 
 
 /* 警告提示box */
@@ -42,7 +43,7 @@ ul,ol{padding:0;list-style:none;}
 #upload-form .file-input{position: absolute;left: 0;top: 0;width: 50px;height: 50px;opacity: 0;filter:alpha(opacity=0);}
 
 /*后台header start*/
-.fk-header{margin-bottom:0;width:100%;height:50px;border:none;border-bottom:1px solid #d5d5d5;background:#fff;}
+.fk-header{height:50px;border:none;border-bottom:1px solid #d5d5d5;background:#fff;}
 .mod-head-btn{padding:0 20px;height:50px;outline:none;border:none;border-right:1px solid #e2e1e1;border-radius:0;background:transparent;color:#676766;font-size: 20px;}
 .mod-head-btn:hover{background:#323232;color:#fff;-webkit-transition:background .4s ease-in, color .3s ease-out;transition:background .4s ease-in, color .3s ease-out;}
 .mod-user{top:38px;right:0;min-width:inherit;border-top:none;}
@@ -95,7 +96,7 @@ ul,ol{padding:0;list-style:none;}
 .fk-side ul li a[data="icon"]:after{position:absolute;right:15px;content:"\e651";}
 
 /*数据内容区域 start*/
-.fk-content-wrap{margin:0px 0 0 235px;padding:0 15px 20px;min-height:100%;height:auto;}
+.fk-content-wrap{margin:0px 0 0 235px;min-height:100%;height:auto;}
 .fk-content-wrap.active{margin-left: 0;}
 .fk-content-wrap .echart-date{margin-top:20px;padding-left:5px;}
 .fk-content-wrap .echart-date .nopadding{padding:0;line-height:36px;}

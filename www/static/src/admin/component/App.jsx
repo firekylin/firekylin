@@ -39,7 +39,7 @@ export default class App extends Base {
         <Sidebar />
         <div className="fk-content-wrap">
           <BreadCrumb />
-          <div className="row">
+          <div className="manage-container">
             {this.props.children}
           </div>
         </div>
