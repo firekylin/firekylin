@@ -60,4 +60,12 @@ export default class extends Base {
     await this.session('userInfo', userInfo);
     return this.success();
   }
+  /**
+   * logout
+   * @return {} 
+   */
+  async logoutAction(){
+    await this.session('userInfo', '');
+    return this.redirect('/');
+  }
 }
