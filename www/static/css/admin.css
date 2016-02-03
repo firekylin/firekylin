@@ -6,7 +6,6 @@
 .radio-inline,label.checkbox-inline{margin:0 15px 0 0;padding:0;}
 .radio-inline + .radio-inline,.checkbox-inline + .checkbox-inline{margin-left:0;}
 .nav > li > a:hover,.nav > li > a:focus{background-color:transparent;}
-.nav .open > a,.nav .open > a:hover,.nav .open > a:focus{background-color:#fff;}
 .table-striped > tbody > tr:nth-child(odd) > td,.table-striped > tbody > tr:nth-child(odd) > th{background-color:#F5F8FA;}
 .alert{padding:5px 15px;}
 .dropdown-menu .divider{margin: 5px 0;}
@@ -26,7 +25,8 @@ ul,ol{padding:0;list-style:none;}
 
 .login{width: 300px;margin: auto;margin-top:180px;}
 .login h1{margin-bottom: 20px;}
-
+.breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px}
+.userinfo{margin-right: 10px;-webkit-user-select:none;}
 
 
 /* 警告提示box */

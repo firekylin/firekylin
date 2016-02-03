@@ -1,34 +1,61 @@
 import React from 'react';
 import Base from '../../common/component/base';
+import classnames from 'classnames';
 
 export default class extends Base {
+
+  constructor(){
+    super();
+    this.state = {
+      userOpen: false
+    }
+    this.bindHandleDocumentClick = this.handleDocumentClick.bind(this);
+  }
+  componentDidMount(){
+    document.addEventListener('click', this.bindHandleDocumentClick, false);
+  }
+
+  componentWillUnmount(){
+    document.removeEventListener('click', this.bindHandleDocumentClick, false);
+  }
+
+  handleDocumentClick(event){
+    if (!React.findDOMNode(this.refs.userinfo).contains(event.target)) {
+      this.setState({
+        userOpen: false
+      });
+    }
+  }
+
+  toggleUser(){
+    this.setState({
+      userOpen: !this.state.userOpen
+    })
+  }
+  getUserClass(){
+    return classnames({
+      dropdown: true,
+      open: this.state.userOpen
+    })
+  }
   render(){
     return (
       <div className="row">
         <div className="fk-header">
           <div>
             <div className="pull-left">
-              <ol className="bradcrumb">
-                <li>概况</li>
+              <ol className="breadcrumb">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Library</a></li>
+                <li className="active">Data</li>
               </ol>
             </div>
-            <ul className="pull-right">
-              <li className="dropdown">
-                <a href="#" className="dropdown-toggle mod-bell" data-toggle="dropdown">
-                  <i className="icon icon-bell"></i>
-                  <ul className="dropdown-menu mod-chat">
-                    <p>没有通知</p>
-                  </ul>
-                </a>
-              </li>
-              <li className="dropdown username">
-                <a href="" className="dropdown-toggle" data-toggle="dropdown">
-                  {SysConfig.userInfo.username}
-                  <span className="caret"></span>
-                </a>
-                <ul className="dropdown-menu pull-right" style={{display: 'block'}}>
-                  <li><a href="#"><i className="icon icon-home">修改密码</i></a></li>
-                  <li><a href="#"><i className="icon icon-logout">退出</i></a></li>
+            <ul className="nav navbar-nav navbar-right userinfo" ref="userinfo">
+              <li className={this.getUserClass()}>
+                <a onClick={this.toggleUser.bind(this)} className="dropdown-toggle" data-toggle="dropdown">{SysConfig.userInfo.username} <b className="caret"></b></a>
+                <ul className="dropdown-menu">
+                  <li><a href="">修改密码</a></li>
+                  <li><a href="/admin/user/logout">退出</a></li>
                 </ul>
               </li>
             </ul>
