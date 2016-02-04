@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router, Route, Redirect, useRouterHistory, browserHistory} from 'react-router';
+import {Router, Route, Redirect, useRouterHistory} from 'react-router';
 
 import {createHistory} from 'history';
 
@@ -9,6 +9,7 @@ import Dashboard from './component/dashboard';
 import Post from './component/post';
 import User from './component/user';
 import UserList from './component/user_list';
+import UserCreate from './component/user_create';
 
 
 let history = useRouterHistory(createHistory)({
@@ -25,6 +26,7 @@ ReactDOM.render((
       <Route path="user" component={User}>
         <Redirect from="/" to="list" />
         <Route path="list" component={UserList} />
+        <Route path="create" component={UserCreate} />
       </Route>
     </Route>
   </Router>

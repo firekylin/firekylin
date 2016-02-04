@@ -17,7 +17,8 @@ export default class extends Base {
         {url: '/page/topic', title: '话题管理'}
       ]},
       {url: '/user', icon: 'user', title: '用户管理', children: [
-        {url: '/user/list', title: '用户列表'}
+        {url: '/user/list', title: '用户列表'},
+        {url: '/user/create', title: '添加用户'}
       ]},
       {url: '/tag', icon: 'report', title: '标签管理', children: [
         {url: '/tag/list', title: '内容审核'},

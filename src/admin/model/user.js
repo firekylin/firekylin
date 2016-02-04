@@ -10,26 +10,55 @@ export default class extends think.model.base {
    * @param  {String} salt     []
    * @return {String}          []
    */
-  getPasswordSalt(create_time, salt){
-    return salt + think.md5(salt + create_time);
+  getEncryptPassword(password, ip, create_time){
+    return think.md5(`${password}$${ip}$${create_time}`);
   }
-
   /**
-   * get user info
-   * @param  {String} username []
-   * @return {Promise}          []
+   * 添加用户
+   * @param {[type]} data [description]
+   * @param {[type]} ip   [description]
    */
-  async getUserInfo(username, salt){
-    let userInfo = this.where({name: username}).find();
-    if(think.isEmpty(userInfo)){
-      return userInfo;
+  addUser(data, ip){
+    let create_time = think.datetime();
+    let encryptPassword = this.getEncryptPassword(data.password, ip, create_time); 
+    return this.where({name: data.username, email: data.email, _logic: 'OR'}).thenAdd({
+      name: data.username,
+      email: data.email,
+      display_name: data.display_name,
+      password: encryptPassword,
+      create_time: create_time,
+      last_login_time: create_time,
+      create_ip: ip,
+      last_login_ip: ip,
+      type: data.type,
+      status: data.status
+    });
+  }
+  /**
+   * 保存用户信息
+   * @param  {[type]} data [description]
+   * @return {[type]}      [description]
+   */
+  async saveUser(data, ip){
+    let info = await this.where({id: data.id}).find();
+    if(think.isEmpty(info)){
+      return Promise.reject(new Error('UESR_NOT_EXIST'));
     }
-    let createTime = formatDateTime(userInfo.create_time);
-    userInfo.create_time = createTime;
-    //generate password salt
-    if(salt){
-      userInfo.salt = this.getPasswordSalt(userInfo.create_time, salt);
+    let password = data.password;
+    if(password){
+      password = this.getEncryptPassword(password, info.create_ip, think.datetime(new Date(info.create_time)));
     }
-    return userInfo;
+    let updateData = {};
+    ['display_name', 'type', 'status'].forEach(item => {
+      if(data[item]){
+        updateData[item] = data[item];
+      }
+    });
+    if(password){
+      updateData.password = password;
+    }
+    updateData.last_login_time = think.datetime();
+    updateData.last_login_ip = ip;
+    return this.where({id: data.id}).update(updateData);
   }
 }
