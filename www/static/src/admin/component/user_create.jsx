@@ -8,6 +8,7 @@ import md5 from 'md5';
 
 import UserAction from '../action/user';
 import UserStore from '../store/user';
+import TipAction from '../../common/action/tip';
 
 export default class extends Base {
   constructor(props){
@@ -17,7 +18,25 @@ export default class extends Base {
     }
   }
   componentDidMount(){
-    this.listenTo(UserStore, () => {});
+    this.listenTo(UserStore, this.handleTrigger.bind(this));
+  }
+  /**
+   * hanle trigger
+   * @param  {[type]} data [description]
+   * @param  {[type]} type [description]
+   * @return {[type]}      [description]
+   */
+  handleTrigger(data, type){
+    switch(type){
+      case 'saveUserFail':
+        this.setState({submitting: false});
+        break;
+      case 'saveUserSuccess':
+        TipAction.success('保存成功');
+        this.setState({submitting: false});
+        setTimeout(() => this.redirect('user/list'), 1000);
+        break;
+    }
   }
   /**
    * save
@@ -29,8 +48,8 @@ export default class extends Base {
     delete values.repassword;
     let password = md5(SysConfig.options.password_salt + values.password);
     values.password = password;
-    let result = UserAction.save(values);
-    console.log(result)
+    this.setState({submitting: true});
+    UserAction.save(values);
   }
   /**
    * handle invalid
@@ -44,6 +63,11 @@ export default class extends Base {
    * @return {} []
    */
   render(){
+    let props = {}
+    if(this.state.submitting){
+      props.disabled = true;
+    }
+
     return (
       <Form 
         className="user-create clearfix" 
@@ -69,14 +93,14 @@ export default class extends Base {
           <div className="form-group">
             <label>邮箱</label>
             <ValidatedInput 
-              type="email" 
+              type="text" 
               validate="required,isEmail" 
               name="email" 
-              ref="email"
+              ref="email" 
               className="form-control" 
-              placeholder="" 
               errorHelp={{
-                required: '请输入邮箱'
+                required: '请输入邮箱',
+                isEmail: '邮箱格式不正确'
               }}
             />
           </div>
@@ -107,7 +131,7 @@ export default class extends Base {
               errorHelp='密码不一致' 
             />
           </div>
-          <button type="submit" className="btn btn-primary">提交</button>
+          <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
         </div>
         <div className="pull-left">
           <div className="form-group">

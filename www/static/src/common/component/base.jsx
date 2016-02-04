@@ -22,7 +22,7 @@ class Base extends React.Component {
   }
 
   componentDidMount(){
-    //window.addEventListener('offline',this.offline,true);
+    
   }
   /**
    * redirect route
@@ -30,7 +30,7 @@ class Base extends React.Component {
    * @return {void}       []
    */
   redirect(route){
-    this.context.router.transitionTo(route)
+    this.context.router.push(route);
   }
 
   _getStoreIndex(store){

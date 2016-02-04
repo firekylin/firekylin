@@ -1,5 +1,7 @@
 'use strict';
 
 export default {
-  USER_EXIST: [100, 'user exist']
+  USER_NOT_LOGIN: [403, 'USER_NOT_LOGIN'],
+  USER_EXIST: [100, 'USER_EXIST'],
+  USER_NO_PERMISSION: [101, 'USER_NO_PERMISSION'],
 };
