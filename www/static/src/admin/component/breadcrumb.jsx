@@ -1,3 +1,4 @@
+import ReactDom from 'react-dom';
 import React from 'react';
 import Base from '../../common/component/base';
 import classnames from 'classnames';
@@ -11,6 +12,7 @@ export default class extends Base {
     }
     this.bindHandleDocumentClick = this.handleDocumentClick.bind(this);
   }
+  
   componentDidMount(){
     document.addEventListener('click', this.bindHandleDocumentClick, false);
   }
@@ -20,7 +22,7 @@ export default class extends Base {
   }
 
   handleDocumentClick(event){
-    if (!React.findDOMNode(this.refs.userinfo).contains(event.target)) {
+    if (!ReactDom.findDOMNode(this.refs.userinfo).contains(event.target)) {
       this.setState({
         userOpen: false
       });

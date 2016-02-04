@@ -1,7 +1,7 @@
 import React from 'react';
 import Base from './base';
 
-import TipStore from '../stores/tip';
+import TipStore from '../store/tip';
 
 /**
  * 通用Tip
@@ -22,10 +22,10 @@ export default class extends Base {
 
   render(){
     if(this.state.isOpen){
-      let className = 'tip ' + this.state.type;
+      let className = 'fk-alert alert alert-' + this.state.type;
       return (
         <div className={className}>
-          <div className="tip-con"><span>{this.state.text}</span></div>
+          {this.state.text}
         </div>
       );
     }else{

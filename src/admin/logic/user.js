@@ -13,16 +13,13 @@ export default class extends think.logic.base {
    
   }
   /**
-   * salt action
+   * 添加或者修改用户
    * @return {} []
    */
-  saltAction(){
+  saveAction(){
     this.allowMethods = 'post';
     this.rules = {
-      username: {
-        required: true,
-        minLength: 4
-      }
+      
     }
   }
   /**

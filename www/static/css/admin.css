@@ -28,6 +28,9 @@ ul,ol{padding:0;list-style:none;}
 .breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px;margin-left: 0px;padding-left: 10px;}
 .userinfo{margin-right: 0px;-webkit-user-select:none;}
 .manage-container{margin-top: 10px;background: #fff;padding: 10px;min-height: 100%;}
+.user-create{width: 700px;}
+.user-create .pull-left{width: 44%;margin-right: 6%}
+.fk-alert{position: fixed;top: 8px;min-width: 200px;left: 50%;margin-left: -100px;text-align: center;}
 
 
 /* 警告提示box */

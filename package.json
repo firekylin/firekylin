@@ -11,8 +11,12 @@
   "dependencies": {
     "babel-runtime": "6.x.x",
     "classnames": "^2.2.3",
+    "md5": "^2.0.0",
     "moment": "^2.11.1",
     "nunjucks": "^2.3.0",
+    "react-bootstrap-validation": "^0.1.10",
+    "superagent": "^1.7.2",
+    "thinkit": "^4.6.0",
     "thinkjs": "2.1.x"
   },
   "devDependencies": {

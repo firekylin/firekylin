@@ -1,8 +1,7 @@
 import Reflux from 'reflux';
 
-import thinkit from 'thinkit';
-
 import TipActions from '../action/tip';
+import firekylin from '../util/firekylin';
 
 
 export default Reflux.createStore({
@@ -14,7 +13,7 @@ export default Reflux.createStore({
     if(this.deferred){
       this.deferred.resolve();
     }
-    let deferred = thinkit.defer();
+    let deferred = firekylin.defer();
     this.timer = setTimeout(() => {
       this.trigger({isOpen: false});
       deferred.resolve();
@@ -43,7 +42,7 @@ export default Reflux.createStore({
    */
   onFail: function(text, timeout){
     this.trigger({
-      type: 'fail',
+      type: 'danger',
       text: text || '操作失败',
       isOpen: true
     });

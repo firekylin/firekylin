@@ -1,16 +1,21 @@
 import React from 'react';
 //import autobind from 'autobind-decorator';
-import { Navigation as RouteNavigation } from 'react-router';
+
 import { decorate as mixin } from 'react-mixin';
 import { ListenerMixin } from 'reflux';
 import ModalActions from '../action/modal';
 
-//@mixin(RouteNavigation)
-// @mixin(ListenerMixin)
+import { Router } from 'react-router';
+
+@mixin(ListenerMixin)
 class Base extends React.Component {
 
-  constructor(props){
-    super(props);
+  static contextTypes = {
+    router: () => React.PropTypes.func.isRequired
+  };
+
+  constructor(props, context){
+    super(props, context);
     this.state = {};
     this.__stores = [];
     this.__listens = [];
@@ -18,6 +23,14 @@ class Base extends React.Component {
 
   componentDidMount(){
     //window.addEventListener('offline',this.offline,true);
+  }
+  /**
+   * redirect route
+   * @param  {String} route []
+   * @return {void}       []
+   */
+  redirect(route){
+    this.context.router.transitionTo(route)
   }
 
   _getStoreIndex(store){
@@ -53,6 +66,7 @@ class Base extends React.Component {
       }
     });
   }
-}
+};
+
 
 export default Base;

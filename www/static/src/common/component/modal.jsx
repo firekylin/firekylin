@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import Base from './base';
 import ModalStore from '../store/modal';
 import ModalActions from '../action/modal';
-import thinkit from 'thinkit';
+import firekylin from '../../common/util/firekylin';
 
 /**
  * 通用弹出层
@@ -74,7 +74,7 @@ export default class extends Base {
           className: 'btn-cancel'
         }, options.buttons];
       }
-      buttons = thinkit.extend([], options.buttons);
+      buttons = firekylin.extend([], options.buttons);
       buttons = buttons.map(item => {
         item.className = item.className || 'btn-ok';
         if(item.callback){
