@@ -1,5 +1,7 @@
 # FireKylin
 
+> 该项目在重写中，预计 3 月初发布
+
 A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015
 
 ## Install
