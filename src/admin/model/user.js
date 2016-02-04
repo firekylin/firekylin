@@ -14,6 +14,22 @@ export default class extends think.model.base {
     return think.md5(`${password}$${ip}$${create_time}`);
   }
   /**
+   * after select
+   * @param  {[type]} data [description]
+   * @return {[type]}      [description]
+   */
+  afterSelect(data){
+    return data.map(item => {
+      if(item.create_time){
+        item.create_time = think.datetime(new Date(item.create_time));
+      }
+      if(item.last_login_time){
+        item.last_login_time = think.datetime(new Date(item.last_login_time));
+      }
+      return item;
+    });
+  }
+  /**
    * 添加用户
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]

@@ -4,29 +4,6 @@ import Base from './base.js';
 
 export default class extends Base {
   /**
-   * index action
-   * @return {Promise} []
-   */
-  indexAction(){
-    //auto render template file index_index.html
-    return this.display();
-  }
-  /**
-   * get password salt
-   * POST Method for safety
-   * @return {String} []
-   */
-  async saltAction(){
-    let username = this.post('username');
-    let model = this.model('user');
-    let salt = this.options.salt;
-    let userInfo = await model.getUserInfo(username, salt);
-    if(think.isEmpty(userInfo)){
-      return this.fail('USER_NOT_EXIST');
-    }
-    return this.success({salt: userInfo.salt});
-  }
-  /**
    * login
    * @return {} []
    */
@@ -59,24 +36,6 @@ export default class extends Base {
 
     await this.session('userInfo', userInfo);
     return this.success();
-  }
-  /**
-   * add or update user
-   * @return {} []
-   */
-  async saveAction(){
-    let data = this.post();
-    let model = this.model('user');
-    if(data.id){
-      await model.saveUser(data, this.ip());
-      return this.success();
-    }else{
-      let result = await model.addUser(data, this.ip());
-      if(result.type === 'exist'){
-        return this.fail('USER_EXIST');
-      }
-      return this.success();
-    }
   }
   /**
    * logout
