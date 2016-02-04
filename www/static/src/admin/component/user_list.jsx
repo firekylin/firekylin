@@ -39,7 +39,7 @@ export default class extends Base {
           <td>{item.create_time}</td>
           <td>{item.last_login_time}</td>
           <td>
-            <Link to={'user/create/' + item.id}>
+            <Link to={'user/edit/' + item.id}>
               <button type="button" className="btn btn-primary btn-xs">
                 <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
               </button>

@@ -18,7 +18,7 @@ export default Reflux.createStore({
     if(id){
       url += '/' + id;
     }
-    let req = superagent.get('/admin/api/user');
+    let req = superagent.get(url);
     return firekylin.request(req).then(data => {
       this.trigger(data, id ? 'getUserInfo' : 'getUserList');
     }).catch(err => {
@@ -31,7 +31,13 @@ export default Reflux.createStore({
    * @return {Promise}      []
    */
   onSave(data){
-    let req = superagent.post('/admin/api/user/save');
+    let id = data.id;
+    delete data.id;
+    let url = '/admin/api/user';
+    if(id){
+      url += '/' + id + '?method=put';
+    }
+    let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(data => {
       this.trigger(data, 'saveUserSuccess');

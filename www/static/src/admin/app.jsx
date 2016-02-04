@@ -27,7 +27,7 @@ ReactDOM.render((
         <Redirect from="/" to="list" />
         <Route path="list" component={UserList} />
         <Route path="create" component={UserCreate} />
-        <Route path="create/:id" component={UserCreate} />
+        <Route path="edit/:id" component={UserCreate} />
       </Route>
     </Route>
   </Router>

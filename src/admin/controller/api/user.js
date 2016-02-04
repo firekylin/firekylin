@@ -12,21 +12,25 @@ export default class extends Base {
     return super.getAction(self);
   }
   /**
-   * add or update user
-   * @return {} []
+   * add user
+   * @return {[type]} [description]
+   */
+  async postAction(){
+    let data = this.post();
+    let insertId = await this.modelInstance.addUser(data, this.ip());
+    return this.success({id: insertId});
+  }
+  /**
+   * update user info
+   * @return {[type]} [description]
    */
   async putAction(){
-    let data = this.post();
-    let model = this.model('user');
-    if(data.id){
-      await model.saveUser(data, this.ip());
-      return this.success();
-    }else{
-      let result = await model.addUser(data, this.ip());
-      if(result.type === 'exist'){
-        return this.fail('USER_EXIST');
-      }
-      return this.success();
+    if (!this.id) {
+      return this.fail('PARAMS_ERROR');
     }
+    let data = this.post();
+    data.id = this.id;
+    let rows = await this.modelInstance.saveUser(data, this.ip());
+    return this.success({affectedRows: rows});
   }
 }

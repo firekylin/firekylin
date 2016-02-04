@@ -73,6 +73,9 @@ export default class extends think.model.base {
     if(password){
       updateData.password = password;
     }
+    if(think.isEmpty(updateData)){
+      return Promise.reject('DATA_EMPTY');
+    }
     updateData.last_login_time = think.datetime();
     updateData.last_login_ip = ip;
     return this.where({id: data.id}).update(updateData);
