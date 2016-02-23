@@ -52,7 +52,9 @@ export default class extends Base {
         </div>
         <ul className="nav navbar-nav navbar-right userinfo" ref="userinfo">
           <li className={this.getUserClass()}>
-            <a onClick={this.toggleUser.bind(this)} className="dropdown-toggle" data-toggle="dropdown">{SysConfig.userInfo.username} <b className="caret"></b></a>
+            <a onClick={this.toggleUser.bind(this)} className="dropdown-toggle" data-toggle="dropdown">
+              {SysConfig.userInfo.username} <b className="caret"></b>
+            </a>
             <ul className="dropdown-menu">
               <li><a href="">修改密码</a></li>
               <li><a href="/admin/user/logout">退出</a></li>
