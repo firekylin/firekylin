@@ -11,12 +11,13 @@ export default class extends Base {
     super(props);
     this.state = {
       loading: true,
-      postList: []
+      postList: [],
+      page: this.props.location.query.page || 1
     }
   }
   componentDidMount(){
     this.listenTo(PostStore, this.handleTrigger.bind(this));
-    PostAction.select();
+    PostAction.selectList(this.state.page);
   }
   handleTrigger(data, type){
     this.setState({postList: data, loading: false});

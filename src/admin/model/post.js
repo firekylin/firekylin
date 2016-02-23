@@ -30,15 +30,15 @@ export default class extends think.model.relation {
    */
   addPost(data){
     let create_time = think.datetime();
-    return this.where({pathname: 'hello-world', _logic: 'OR'}).thenAdd({
-      user_id: 1,
+    return this.where({pathname: data.pathname, _logic: 'OR'}).thenAdd({
+      user_id: 2,
       type: 0,
       status: 0,
       title: data.title,
-      pathname: 'hello-world',
+      pathname: data.pathname,
       summary: 'abc',
       markdown_content: 'abc',
-      content: 'abc',
+      content: data.content,
       allow_comment: 1,
       create_time,
       update_time: create_time,
