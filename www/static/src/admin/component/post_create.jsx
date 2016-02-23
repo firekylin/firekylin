@@ -18,7 +18,8 @@ export default class extends Base {
     }
     this.id = this.props.params.id | 0;
   }
-  componentDidMount(){
+
+  componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
     if(this.id){
       PostAction.select(this.id);
@@ -68,12 +69,30 @@ export default class extends Base {
 
     return (
       <Form
+        model={this.state.postInfo}
         className="post-create clearfix"
         onValidSubmit={this.handleValidSubmit.bind(this)}
       >
         <ValidatedInput
             name="title"
             type="text"
+            label="标题"
+            labelClassName="col-xs-2"
+            wrapperClassName="col-xs-10"
+        />
+        <ValidatedInput
+          name="pathname"
+          type="text"
+          label="URL"
+          labelClassName="col-xs-2"
+          wrapperClassName="col-xs-10"
+        />
+        <ValidatedInput
+          name="content"
+          type="textarea"
+          label="正文"
+          labelClassName="col-xs-2"
+          wrapperClassName="col-xs-10"
         />
         <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
       </Form>

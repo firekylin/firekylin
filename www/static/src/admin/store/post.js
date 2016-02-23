@@ -23,6 +23,11 @@ export default Reflux.createStore({
       data => this.trigger(data, id ? 'getPostInfo' : 'getPostList')
     );
   },
+  onSelectList(page) {
+    return firekylin.request( superagent.get('/admin/api/post?page='+page) ).then(
+      data => this.trigger(data, 'getPostList')
+    );
+  },
   /**
    * save user
    * @param  {Object} data []
