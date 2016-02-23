@@ -24,25 +24,37 @@ export default class extends Base {
         {url: '/tag/list', title: '内容审核'},
         {url: '/tag/verify', title: '认证审核'}
       ]}
-    ],
-    currentRoute: '/dashboard'
+    ]
   };
+  /**
+   * 是否是高亮状态
+   * @param  {[type]}  routeUrl [description]
+   * @return {Boolean}          [description]
+   */
+  isActive(routeUrl){
+    return this.context.router.isActive(routeUrl);
+  }
   getClassName(icon, routeUrl){
-    let active = this.state.currentRoute === routeUrl;
+    let active = this.isActive(routeUrl);
     return classnames({
       icon: true,
       [`icon-${icon}`]: true,
       active: active
     })
   }
-  getSubUrlClassName(routeUrl){
-    if(this.state.currentRoute === routeUrl){
+  getSubUlClassName(routeUrl){
+    if(this.isActive(routeUrl)){
       return 'block';
     }
     return 'hide';
   }
+  getSubLinkClassName(routeUrl){
+    return classnames({
+      active: this.isActive(routeUrl)
+    })
+  }
   open(routeUrl){
-    this.setState({currentRoute: routeUrl});
+    this.context.router.push(routeUrl)
   }
   render(){
     return (
@@ -56,17 +68,19 @@ export default class extends Base {
           <input type="hidden" id="hide_values" val="0" />
           {this.state.routes.map( (route, i) =>
             <li key={i}>
-              {route.children ? <a onClick={this.open.bind(this, route.url)} className={this.getClassName(route.icon, route.url)}><span>{route.title}</span></a>
+              {route.children ? <a onClick={this.open.bind(this, route.children && route.children[0].url || route.url)} className={this.getClassName(route.icon, route.url)}><span>{route.title}</span></a>
               :
-              <Link to={route.url} onClick={this.open.bind(this, route.url)} className={this.getClassName(route.icon, route.url)}>
+              <Link to={route.url} onClick={this.open.bind(this, route.children && route.children[0].url || route.url)} className={this.getClassName(route.icon, route.url)}>
                 <span>{route.title}</span>
               </Link>
               }
               {route.children ?
-                <ul className={this.getSubUrlClassName(route.url)}>
+                <ul className={this.getSubUlClassName(route.url)}>
                   {route.children.map((child, j) =>
                     <li key={j}>
-                      <Link to={child.url}><span>{child.title}</span></Link>
+                      <Link to={child.url} onClick={this.open.bind(this, child.url)} className={this.getSubLinkClassName(child.url)}>
+                        <span>{child.title}</span>
+                      </Link>
                     </li>
                   )}
                 </ul>
