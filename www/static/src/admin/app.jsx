@@ -10,7 +10,8 @@ import Post from './component/post';
 import User from './component/user';
 import UserList from './component/user_list';
 import UserCreate from './component/user_create';
-
+import PostList from './component/post_list';
+import PostCreate from './component/post_create';
 
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
@@ -19,10 +20,15 @@ let history = useRouterHistory(createHistory)({
 
 ReactDOM.render((
   <Router history={history}>
-    <Redirect from="/" to="admin/dashboard" />
+    <Redirect from="/" to="dashboard" />
     <Route path="/" component={App}>
       <Route path="dashboard" component={Dashboard} />
-      <Route path="post" component={Post} />
+      <Route path="post" component={Post}>
+        <Redirect from="/" to="list" />
+        <Route path="list" component={PostList} />
+        <Route path="create" component={PostCreate} />
+        <Route path="edit/:id" component={PostCreate} />
+      </Route>
       <Route path="user" component={User}>
         <Redirect from="/" to="list" />
         <Route path="list" component={UserList} />

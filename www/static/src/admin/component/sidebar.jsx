@@ -9,7 +9,7 @@ export default class extends Base {
       {url: '/dashboard', icon: 'home', title:'概述'},
       {url: '/post', icon: 'setting', title: '文章管理', children: [
         {url: '/post/list', title: '文章列表'},
-        {url: '/post/new', title: '添加文章'}
+        {url: '/post/create', title: '添加文章'}
       ]},
       {url: '/page', icon: 'reply', title: '页面管理', children: [
         {url: '/page/list', title: '页面列表'},
