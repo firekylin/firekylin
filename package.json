@@ -15,6 +15,7 @@
     "moment": "^2.11.1",
     "nunjucks": "^2.3.0",
     "react-bootstrap-validation": "^0.1.10",
+    "speakeasy": "^2.0.0",
     "superagent": "^1.7.2",
     "thinkit": "^4.6.0",
     "thinkjs": "2.1.x"

@@ -26,7 +26,8 @@ export default class extends Base {
       ]},
       {url: '/options', icon: 'report', title: '系统设置', children: [
         {url: '/options/general', title: '基本设置'},
-        {url: '/options/two_factor_auth', title: '二步认证'}
+        {url: '/options/two_factor_auth', title: '二步认证'},
+        {url: '/options/upload', title: '文件上传'}
       ]}
     ]
   };
