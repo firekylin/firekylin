@@ -8,8 +8,6 @@ import md5 from 'md5';
 
 export default class extends Base {
   render(){
-    return (<div>
-      <h3>二步认证</h3>
-    </div>);
+    return <div></div>;
   }
 }

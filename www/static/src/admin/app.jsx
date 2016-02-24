@@ -19,6 +19,7 @@ import PostCreate from './component/post_create';
 import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
+import OptionsUpload from './component/options_upload';
 
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
@@ -45,7 +46,8 @@ ReactDOM.render((
       <Route path="options" component={Options}>
         <Redirect from="/" to="general" />
         <Route path="general" component={OptionsGeneral} />
-        <Route path="2fa" component={Options2fa} />
+        <Route path="two_factor_auth" component={Options2fa} />
+        <Route path="upload" component={OptionsUpload} />
       </Route>
     </Route>
   </Router>
