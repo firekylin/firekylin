@@ -23,6 +23,10 @@ export default class extends Base {
       {url: '/tag', icon: 'report', title: '标签管理', children: [
         {url: '/tag/list', title: '内容审核'},
         {url: '/tag/verify', title: '认证审核'}
+      ]},
+      {url: '/options', icon: 'report', title: '系统设置', children: [
+        {url: '/options/general', title: '基本设置'},
+        {url: '/options/two_factor_auth', title: '二步认证'}
       ]}
     ]
   };
