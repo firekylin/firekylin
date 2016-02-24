@@ -12,13 +12,9 @@ export default class extends think.model.relation {
     super.init(...args);
 
     this.relation = {
-      tag: think.model.MANY_TO_MANY,
-      cate: think.model.MANY_TO_MANY,
-      user: {
-        type: think.model.BELONG_TO,
-        fKey: 'user_id',
-        key: 'display_name',
-        field: 'id,display_name'
+      post_cate: {
+        type: think.model.HAS_MANY,
+        fkey: 'cate_id'
       }
     }
   }
@@ -28,22 +24,8 @@ export default class extends think.model.relation {
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
-  addPost(data){
-    let create_time = think.datetime();
-    return this.where({pathname: data.pathname, _logic: 'OR'}).thenAdd({
-      user_id: data.user_id,
-      type: 0,
-      status: 0,
-      title: data.title,
-      pathname: data.pathname,
-      summary: 'abc',
-      markdown_content: 'abc',
-      content: data.content,
-      allow_comment: 1,
-      create_time,
-      update_time: create_time,
-      is_public: 1
-    });
+  addCate(data){
+    return this.where({name: data.pathname, _logic: 'OR'}).thenAdd(data);
   }
 
   /**

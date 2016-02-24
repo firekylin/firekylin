@@ -8,8 +8,6 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   getAction(self){
-    // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    this.modelInstance.order('create_time DESC').page( this.get('page'), 20 );
     return super.getAction(self);
   }
   /**
@@ -17,11 +15,9 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async postAction(){
-    let userInfo = await this.session('userInfo');
     let data = this.post();
-    data.user_id = userInfo.id;
-    
-    let insertId = await this.modelInstance.addPost(data);
+
+    let insertId = await this.modelInstance.addCate(data);
     return this.success({id: insertId});
   }
   /**

@@ -13,16 +13,18 @@ export default class extends Base {
       ]},
       {url: '/page', icon: 'reply', title: '页面管理', children: [
         {url: '/page/list', title: '页面列表'},
-        {url: '/page/new', title: '添加页面'},
-        {url: '/page/topic', title: '话题管理'}
+        {url: '/page/new', title: '添加页面'}
+      ]},
+      {url: '/cate', icon: 'cate', title: '分类管理', children: [
+        {url: '/cate/list', title: '分类列表'},
+        {url: '/cate/create', title: '添加分类'}
       ]},
       {url: '/user', icon: 'user', title: '用户管理', children: [
         {url: '/user/list', title: '用户列表'},
         {url: '/user/create', title: '添加用户'}
       ]},
       {url: '/tag', icon: 'report', title: '标签管理', children: [
-        {url: '/tag/list', title: '内容审核'},
-        {url: '/tag/verify', title: '认证审核'}
+        {url: '/cate/list', title: '分类管理'}
       ]}
     ]
   };
