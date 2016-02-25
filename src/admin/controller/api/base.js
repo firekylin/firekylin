@@ -17,7 +17,7 @@ export default class extends think.controller.rest {
    */
   async __before(){
     let userInfo = await this.session('userInfo');
-    userInfo = userInfo || {id: 1};
+    userInfo = userInfo || {id: 2};
     if(think.isEmpty(userInfo)){
       return this.fail('USER_NOT_LOGIN');
     }

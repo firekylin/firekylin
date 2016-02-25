@@ -19,7 +19,7 @@ export default class extends Base {
       postInfo: {},
       cateList: []
     }
-    this.post_cate = {};
+    this.cate = {};
     this.id = this.props.params.id | 0;
   }
 
@@ -62,7 +62,7 @@ export default class extends Base {
     if(this.id){
       values.id = this.id;
     }
-    values.cate = Object.keys(this.post_cate).filter(item => this.post_cate[item]);
+    values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     PostAction.save(values);
   }
   /**
@@ -107,7 +107,7 @@ export default class extends Base {
         <div className="col-xs-10">
           {this.state.cateList.map(cate =>
             <label key={cate.id}>
-              <input type="checkbox" name="post_cate" value={cate.id} onChange={()=> this.post_cate[cate.id] = !this.post_cate[cate.id]}/>
+              <input type="checkbox" name="cate" value={cate.id} onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}/>
               {cate.name}
             </label>
           )}
