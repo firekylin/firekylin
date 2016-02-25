@@ -25,14 +25,15 @@ ul,ol{padding:0;list-style:none;}
 
 .login{width: 300px;margin: auto;margin-top:180px;}
 .login h1{margin-bottom: 20px;}
-.breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px;margin-left: 0px;padding-left: 10px;}
+.breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px;margin-left: 0px;padding-left: 20px;}
 .userinfo{margin-right: 0px;-webkit-user-select:none;}
-.manage-container{margin-top: 10px;background: #fff;padding: 10px;min-height: 100%;}
+.manage-container{margin-top: 10px;background: #fff;padding: 10px 20px;min-height: 100%;}
 .user-create{width: 700px;}
 .user-create .pull-left{width: 44%;margin-right: 6%}
 .fk-alert{position: fixed;top: 8px;min-width: 200px;left: 50%;margin-left: -100px;text-align: center;}
+.options-general{max-width: 600px;}
 
-
+#app,.fk{height: 100%;}
 /* 警告提示box */
 .fk-tips-box .modal-dialog, .fk-image-box .modal-dialog, .fk-link-box .modal-dialog, .fk-confirm-box .modal-dialog{width: 370px;}
 .fk-tips-box .modal-body{background: url(../img/warmming.png) no-repeat right 5px;}
@@ -99,7 +100,7 @@ ul,ol{padding:0;list-style:none;}
 .fk-side ul li a[data="icon"]:after{position:absolute;right:15px;content:"\e651";}
 
 /*数据内容区域 start*/
-.fk-content-wrap{margin:0px 0 0 235px;min-height:100%;height:auto;}
+.fk-content-wrap{margin:0px 0 0 235px;min-height:100%;height:100%;}
 .fk-content-wrap.active{margin-left: 0;}
 .fk-content-wrap .echart-date{margin-top:20px;padding-left:5px;}
 .fk-content-wrap .echart-date .nopadding{padding:0;line-height:36px;}

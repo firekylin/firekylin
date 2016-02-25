@@ -6,15 +6,23 @@ import {createHistory} from 'history';
 
 import App from './component/app';
 import Dashboard from './component/dashboard';
-import Post from './component/post';
+
 import User from './component/user';
 import Cate from './component/cate';
 import UserList from './component/user_list';
 import UserCreate from './component/user_create';
+
+import Post from './component/post';
 import PostList from './component/post_list';
 import PostCreate from './component/post_create';
 import CateList from './component/cate_list';
 import CateCreate from './component/cate_create';
+
+
+import Options from './component/options';
+import OptionsGeneral from './component/options_general';
+import Options2fa from './component/options_2fa';
+import OptionsUpload from './component/options_upload';
 
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
@@ -43,6 +51,11 @@ ReactDOM.render((
         <Route path="list" component={CateList} />
         <Route path="create" component={CateCreate} />
         <Route path="edit/:id" component={CateCreate} />
+      <Route path="options" component={Options}>
+        <Redirect from="/" to="general" />
+        <Route path="general" component={OptionsGeneral} />
+        <Route path="two_factor_auth" component={Options2fa} />
+        <Route path="upload" component={OptionsUpload} />
       </Route>
     </Route>
   </Router>
