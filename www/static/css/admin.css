@@ -22,6 +22,8 @@ ul,ol{padding:0;list-style:none;}
 .textwrap{ word-break: break-all;overflow: hidden}
 .fk-content-wrap .icon{display:inline-block;width:25px;height:25px;border-radius:5px;background:#8bbf61;color:#fff;text-align:center;line-height:25px;}
 .fk-content-wrap .icon.disabled{background-color: #c5c5c5;}
+.center{text-align: center;}
+.gray{color: #888}
 
 .login{width: 300px;margin: auto;margin-top:180px;}
 .login h1{margin-bottom: 20px;}
@@ -32,6 +34,8 @@ ul,ol{padding:0;list-style:none;}
 .user-create .pull-left{width: 44%;margin-right: 6%}
 .fk-alert{position: fixed;top: 8px;min-width: 200px;left: 50%;margin-left: -100px;text-align: center;}
 .options-general{max-width: 600px;}
+.options-2fa{max-width: 600px;}
+.options-2fa ul li {list-style-type: disc;margin-left: 18px;}
 
 #app,.fk{height: 100%;}
 /* 警告提示box */
