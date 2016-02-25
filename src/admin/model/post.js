@@ -14,7 +14,6 @@ export default class extends think.model.relation {
     this.relation = {
       tag: think.model.MANY_TO_MANY,
       cate: think.model.MANY_TO_MANY,
-      post_cate: think.model.HAS_MANY,
       user: {
         type: think.model.BELONG_TO,
         fKey: 'user_id',

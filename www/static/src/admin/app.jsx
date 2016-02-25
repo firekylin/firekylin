@@ -51,6 +51,7 @@ ReactDOM.render((
         <Route path="list" component={CateList} />
         <Route path="create" component={CateCreate} />
         <Route path="edit/:id" component={CateCreate} />
+      </Route>
       <Route path="options" component={Options}>
         <Redirect from="/" to="general" />
         <Route path="general" component={OptionsGeneral} />
