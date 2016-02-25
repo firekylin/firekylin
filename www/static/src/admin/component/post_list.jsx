@@ -30,11 +30,12 @@ export default class extends Base {
       return (<tr><td colSpan="8" className="center">暂无文章</td></tr>);
     }
     return this.state.postList.map(item => {
+      let cate = item.cate.map(item => item.name).join(',');
       return (
         <tr key={item.id}>
           <td>{item.title}</td>
           <td>{item.user.display_name}</td>
-          <td>{item.cate}</td>
+          <td>{cate}</td>
           <td>{item.create_time}</td>
         </tr>
       );
