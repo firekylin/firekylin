@@ -7,6 +7,8 @@ import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import PostAction from '../action/post';
 import PostStore from '../store/post';
+import CateAction from '../action/cate';
+import CateStore from '../store/cate';
 import TipAction from '../../common/action/tip';
 
 export default class extends Base {
@@ -14,13 +16,18 @@ export default class extends Base {
     super(props);
     this.state = {
       submitting: false,
-      postInfo: {}
+      postInfo: {},
+      cateList: []
     }
+    this.post_cate = {};
     this.id = this.props.params.id | 0;
   }
 
   componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
+    this.listenTo(CateStore, cateList => this.setState({cateList}));
+
+    CateAction.select();
     if(this.id){
       PostAction.select(this.id);
     }
@@ -55,6 +62,7 @@ export default class extends Base {
     if(this.id){
       values.id = this.id;
     }
+    values.cate = Object.keys(this.post_cate).filter(item => this.post_cate[item]);
     PostAction.save(values);
   }
   /**
@@ -94,6 +102,17 @@ export default class extends Base {
           labelClassName="col-xs-2"
           wrapperClassName="col-xs-10"
         />
+      <div className="form-group">
+        <label className="control-label col-xs-2">分类</label>
+        <div className="col-xs-10">
+          {this.state.cateList.map(cate =>
+            <label key={cate.id}>
+              <input type="checkbox" name="post_cate" value={cate.id} onChange={()=> this.post_cate[cate.id] = !this.post_cate[cate.id]}/>
+              {cate.name}
+            </label>
+          )}
+        </div>
+      </div>
         <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
       </Form>
     );

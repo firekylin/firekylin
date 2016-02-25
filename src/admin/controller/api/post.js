@@ -17,11 +17,11 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async postAction(){
-    let userInfo = await this.session('userInfo');
     let data = this.post();
-    data.user_id = userInfo.id;
-    
+    data.user_id = this.userInfo.id;
+
     let insertId = await this.modelInstance.addPost(data);
+
     return this.success({id: insertId});
   }
   /**
