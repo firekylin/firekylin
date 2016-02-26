@@ -83,6 +83,17 @@ export default class extends Base {
             />
           </div>
           <div className="form-group">
+            <label>LOGO 地址</label>
+            <ValidatedInput 
+              type="text" 
+              name="logo_url" 
+              {...this.getProps('logo_url')}
+              ref="logo_url"
+              className="form-control" 
+            />
+            <p className="help-block">尺寸最好为 140px x 140px。</p>
+          </div>
+          <div className="form-group">
             <label>站点描述</label>
             <ValidatedInput 
               type="text" 
