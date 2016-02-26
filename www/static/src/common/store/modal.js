@@ -1,6 +1,6 @@
 import Reflux from 'reflux';
 
-import ModalActions from '../actions/modal';
+import ModalActions from '../action/modal';
 
 export default Reflux.createStore({
 
