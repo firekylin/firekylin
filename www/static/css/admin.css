@@ -34,6 +34,7 @@ ul,ol{padding:0;list-style:none;}
 .user-create .pull-left{width: 44%;margin-right: 6%}
 .fk-alert{position: fixed;top: 8px;min-width: 200px;left: 50%;margin-left: -100px;text-align: center;}
 .options-general{max-width: 600px;}
+.form-group {overflow: hidden;}
 .options-2fa{max-width: 600px;}
 .options-2fa ul li {list-style-type: disc;margin-left: 18px;}
 
