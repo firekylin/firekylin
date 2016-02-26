@@ -131,12 +131,12 @@ export default class extends Base {
             />
           </div>
           <div className="form-group">
-            <label>微博地址</label>
+            <label>Twitter 地址</label>
             <ValidatedInput 
               type="text" 
-              name="weibo_url" 
-              {...this.getProps('weibo_url')}
-              ref="weibo_url"
+              name="twitter_url" 
+              {...this.getProps('twitter_url')}
+              ref="twitter_url"
               className="form-control" 
             />
           </div>
