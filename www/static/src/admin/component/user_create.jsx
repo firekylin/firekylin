@@ -154,6 +154,7 @@ export default class extends Base {
                 isLength: '长度为4到20个字符'
               }}
             />
+            <p className="help-block">登录时所用的名称，不能重复。</p>
           </div>
           <div className="form-group">
             <label>邮箱</label>
@@ -168,6 +169,7 @@ export default class extends Base {
                 isEmail: '邮箱格式不正确'
               }}
             />
+            <p className="help-block">用户主要联系方式，不能重复。</p>
           </div>
           <div className="form-group">
             <label>密码</label>
@@ -183,6 +185,7 @@ export default class extends Base {
                 isLength: '密码长度为8到30个字符'
               }}
             />
+            <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
           </div>
           <div className="form-group ">
             <label>确认密码</label>
@@ -214,8 +217,8 @@ export default class extends Base {
           <div className="form-group">
             <label>用户组</label>
             <select className="form-control" ref="type">
-              <option value="1" {...this.getOptionProp('type', '1')}>管理员</option>
               <option value="2" {...this.getOptionProp('type', '2')}>编辑</option>
+              <option value="1" {...this.getOptionProp('type', '1')}>管理员</option>
             </select>
           </div>
           <div className="form-group">
