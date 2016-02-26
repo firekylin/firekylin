@@ -32,13 +32,28 @@ export default class extends Base {
     return this.state.postList.map(item => {
       return (
         <tr key={item.id}>
-          <td>{item.title}</td>
+          <td>
+            {item.title}
+            {this.renderStatus(item.status)}
+          </td>
           <td>{item.user.display_name}</td>
           <td>{item.cate.map(c => c.name).join()}</td>
           <td>{item.create_time}</td>
         </tr>
       );
     })
+  }
+  renderStatus(status) {
+    let text = '';
+    switch(status) {
+      case 0: text = '草稿'; break;
+      case 1: text = '待审核'; break;
+      case 2: text = '已拒绝'; break;
+    }
+    if( status !== 3 ) {
+      return <em className="status">{text}</em>;
+    }
+    return null;
   }
   render(){
     return (
