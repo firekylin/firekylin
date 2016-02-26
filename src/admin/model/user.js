@@ -1,17 +1,31 @@
 'use strict';
+
+import {PasswordHash} from 'phpass';
 /**
  * model
  */
 export default class extends think.model.base {
 
   /**
-   * get password salt
+   * get password
    * @param  {String} username []
    * @param  {String} salt     []
    * @return {String}          []
    */
-  getEncryptPassword(password, ip, create_time){
-    return think.md5(`${password}$${ip}$${create_time}`);
+  getEncryptPassword(password){
+    let passwordHash = new PasswordHash();
+    let hash = passwordHash.hashPassword(password);
+    return hash;
+  }
+  /**
+   * check password
+   * @param  {[type]} userInfo [description]
+   * @param  {[type]} password [description]
+   * @return {[type]}          [description]
+   */
+  checkPassword(userInfo, password){
+    let passwordHash = new PasswordHash();
+    return passwordHash.checkPassword(password, userInfo.password);
   }
   /**
    * after select
@@ -28,6 +42,15 @@ export default class extends think.model.base {
       }
       return item;
     });
+  }
+  afterFind(data){
+    if(data.create_time){
+      data.create_time = think.datetime(new Date(data.create_time));
+    }
+    if(data.last_login_time){
+      data.last_login_time = think.datetime(new Date(data.last_login_time));
+    }
+    return data;
   }
   /**
    * 添加用户

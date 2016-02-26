@@ -1,6 +1,7 @@
 'use strict';
 
 import Base from './base.js';
+import speakeasy from 'speakeasy';
 
 export default class extends Base {
   /**
@@ -8,33 +9,43 @@ export default class extends Base {
    * @return {} []
    */
   async loginAction(){
-    if(this.isGet()){
-      return this.display();
+    //二步验证
+    let model = this.model('options');
+    let options = await model.getOptions();
+    if(options.two_factor_auth){
+      let two_factor_auth = this.post('two_factor_auth');
+      let verified = speakeasy.totp.verify({
+        secret: options.two_factor_auth,
+        encoding: 'base32',
+        token: two_factor_auth,
+        window: 2
+      });
+      if(!verified){
+        return this.fail('TWO_FACTOR_AUTH_ERROR');
+      }
     }
 
-    await this.session('userInfo', {name: 'firekylin'});
-
-    return this.redirect('/admin');
-
+    //校验帐号和密码
     let username = this.post('username');
-    let model = this.model('user');
-    let userInfo = await model.getUserInfo(username);
+    let userModel = this.model('user');
+    let userInfo = await userModel.where({name: username}).find();
     if(think.isEmpty(userInfo)){
-      return this.fail('USER_NOT_EXIST');
+      return this.fail('ACCOUNT_ERROR');
     }
 
+    //帐号是否被禁用
+    if((userInfo.status | 0) !== 1){
+      return this.fail('ACCOUNT_FORBIDDEN');
+    }
+
+    //校验密码
     let password = this.post('password');
-    if(password !== userInfo.password){
-      return this.fail('PASSWORD_NOT_CORRECT');
-    }
-
-    //turn on tow factor auth
-    if(this.options.two_factor_auth == 1){
-      let factor = this.post('factor');
-
+    if(!userModel.checkPassword(userInfo, password)){
+      return this.fail('ACCOUNT_ERROR');
     }
 
     await this.session('userInfo', userInfo);
+
     return this.success();
   }
   /**

@@ -44,6 +44,20 @@ export default Reflux.createStore({
     }).catch(err => {
       this.trigger(err, 'saveUserFail');
     })
+  },
+  /**
+   * login
+   * @param  {[type]} data [description]
+   * @return {[type]}      [description]
+   */
+  onLogin(data){
+    let req = superagent.post('/admin/user/login');
+    req.type('form').send(data);
+    return firekylin.request(req).then(data => {
+      this.trigger(data, 'LoginSuccess');
+    }).catch(err => {
+      this.trigger(err, 'LoginFail');
+    })
   }
 
 })
