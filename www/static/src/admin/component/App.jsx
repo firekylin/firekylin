@@ -13,8 +13,12 @@ export default class App extends Base {
   };
 
   render() {
-    if(!SysConfig.userInfo.username){
-      return <Login />;
+    if(!SysConfig.userInfo.name){
+      return (
+      <div className="fk">
+        <Tip />
+        <Login />
+      </div>);
     }
     return (
       <div className="fk">

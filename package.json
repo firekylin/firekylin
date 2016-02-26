@@ -14,6 +14,7 @@
     "md5": "^2.0.0",
     "moment": "^2.11.1",
     "nunjucks": "^2.3.0",
+    "phpass": "^0.1.1",
     "qrcode-react": "^0.1.10",
     "react-bootstrap-validation": "^0.1.10",
     "speakeasy": "^2.0.0",
