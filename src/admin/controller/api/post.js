@@ -26,7 +26,7 @@ export default class extends Base {
     data.summary = data.content.split('<!--more-->')[0];
     data.update_time = think.datetime();
     if(data.create_time === '') data.create_time = data.update_time;
-    
+      
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
   }

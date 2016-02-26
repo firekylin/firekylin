@@ -4,6 +4,7 @@ import Login from './login';
 import Sidebar from './sidebar';
 import BreadCrumb from './breadcrumb';
 import Tip from '../../common/component/tip';
+import ModalManage from '../../common/component/modal_manage';
 
 
 export default class App extends Base {
@@ -18,13 +19,14 @@ export default class App extends Base {
     return (
       <div className="fk">
         <Sidebar />
+        <Tip />
         <div className="fk-content-wrap">
-          <Tip />
           <BreadCrumb />
           <div className="manage-container">
             {this.props.children}
           </div>
         </div>
+        <ModalManage />
       </div>
     );
   }

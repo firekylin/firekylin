@@ -64,8 +64,6 @@ export default class extends Base {
    * @return {}       []
    */
   handleValidSubmit(values){
-    return console.log(values);
-
     if( !this.state.status ) {
       this.setState({draftSubmitting: true});
     } else {
@@ -134,7 +132,7 @@ export default class extends Base {
           </div>
           <div className="col-xs-3">
             <ValidatedInput
-                name="date"
+                name="create_time"
                 type="text"
                 label="发布日期"
                 wrapperClassName="col-xs-12"
