@@ -33,9 +33,6 @@ export default class extends think.model.relation {
     data = Object.assign({
       type: 0,
       status: 0,
-      summary: 'abc',
-      markdown_content: 'abc',
-      allow_comment: 1,
       create_time,
       update_time: create_time,
       is_public: 1

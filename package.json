@@ -11,6 +11,9 @@
   "dependencies": {
     "babel-runtime": "6.x.x",
     "classnames": "^2.2.3",
+    "highlight.js": "^9.2.0",
+    "marked": "^0.3.5",
+    "marked-toc": "^0.3.0",
     "md5": "^2.0.0",
     "moment": "^2.11.1",
     "nunjucks": "^2.3.0",
