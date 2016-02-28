@@ -18,27 +18,28 @@
         <div class="content">
             {{detail.content | safe}}
         </div>
-        <p>
-            -- 
-            <acronym title="End of File">EOF</acronym>
-             --
-        </p>
+        <p>本文链接：<a href="{{pageUrl | safe}}">{{pageUrl | safe}}</a></p>
+        <p>-- <acronym title="End of File">EOF</acronym> --</p>
         <div class="post-info">
-            <p>
-                本文链接：
-                <a href="https://imochen.com/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">https://imochen.com/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html</a>
-            </p>
+            
             <p>
                 发表于
-                <i>2016-01-09 21:58:28</i>
+                <i>{{think.datetime(detail.create_time)}}</i>
+
+                {% if detai.tag.length %}
+
                 ，并被添加「 
-                <a href="/tags/Vuejs" data-tag="vuejs">Vuejs</a>
-                 ， 
-                <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
-                 ， 
-                <a href="/tags/组件化" data-tag="组件化">组件化</a>
-                 」标签，最后修改于
-                <i>2016-01-10 12:47:40</i>
+                {% for tag in detail.tag %}
+                <a href="/tags/{{tag}}" data-tag="{{tag}}">
+                    <code class="notebook">{{tag}}</code>
+                </a>
+                {% endfor %}
+                 」标签
+                 
+                {% endif %}
+
+                ，最后修改于
+                <i>{{think.datetime(detail.update_time)}}</i>
             </p>
         </div>
     </article>
