@@ -1,0 +1,16 @@
+{% extends './layout.html' %}
+
+{% block title %}
+{{page.title}} - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<div id="page-tags">
+  <h1>标签</h1>
+  <section>
+      {% for tag in list %}
+      <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">{{tag.name}}({{tag.count}})</a>
+      {% endfor %}
+  </section>
+</div>
+{% endblock %}
