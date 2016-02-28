@@ -9,10 +9,9 @@ export default class extends Base {
    * @return {Promise} []
    */
   async indexAction(){
-    // let model = this.model('options');
-    // let options = await model.getOptions();
-    // console.log(options)
-    //auto render template file index_index.html
+    let model = this.model('post');
+    let list = await model.getPostList(this.get('page'), {});
+    this.assign('postList', list);
     return this.display();
   }
 }
