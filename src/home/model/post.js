@@ -13,6 +13,19 @@ export default class extends think.model.relation {
     }
   };
   /**
+   * get where condition
+   * @param  {[type]} where [description]
+   * @return {[type]}       [description]
+   */
+  getWhereCondition(where){
+    return think.extend({}, where, {
+      create_time: {'<=': think.datetime()},
+      is_public: 1, //公开
+      type: 0, //文章
+      status: 3 //已经发布
+    })
+  }
+  /**
    * get post list
    * @param  {[type]} page  [description]
    * @param  {[type]} where [description]
@@ -20,12 +33,7 @@ export default class extends think.model.relation {
    */
   async getPostList(page, where){
     let field = 'id,title,pathname,summary';
-    where = think.extend({}, where, {
-      create_time: {'<=': think.datetime()},
-      is_public: 1, //公开
-      type: 0, //文章
-      status: 3 //已经发布
-    });
+    where = this.getWhereCondition(where);
 
     let data = await this.field(field).where(where).countSelect();
     return data;
@@ -35,13 +43,16 @@ export default class extends think.model.relation {
    * @return {[type]} [description]
    */
   async getPostArchive(){
-    let where = {
-      create_time: {'<=': think.datetime()},
-      is_public: 1, //公开
-      type: 0, //文章
-      status: 3 //已经发布
-    }
-    let data = await this.field('title,pathname,create_time').where(where).select();
-    return data;
+    let where = this.getWhereCondition();
+    let data = await this.field('id,title,pathname,create_time').setRelation('tag').where(where).select();
+    let result = {};
+    data.forEach(item => {
+      let yearMonth = think.datetime(item.create_time, 'YYYY年MM月');
+      if(!(yearMonth in result)){
+        result[yearMonth] = [];
+      }
+      result[yearMonth].push(item);
+    });
+    return result;
   }
 }

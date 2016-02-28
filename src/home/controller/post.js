@@ -37,9 +37,21 @@ export default class extends Base {
 
     return this.display();
   }
-
+  /**
+   * post archive
+   * @return {[type]} [description]
+   */
   async archiveAction(){
-
+    let model = this.model('post');
+    let data = await model.getPostArchive();
+    this.assign('list', data);
+    return this.display();
+  }
+  
+  async tagAction(){
+    let model = this.model('tag');
+    let data = await model.getTagArchive();
+    this.assign('list', data);
     return this.display();
   }
 }
