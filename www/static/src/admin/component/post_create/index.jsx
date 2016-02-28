@@ -3,14 +3,19 @@ import ReactDom from 'react-dom';
 import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
+import Datetime from 'react-datetime';
+import 'react-datetime/css/react-datetime.css';
+import moment from 'moment';
 import { Form, ValidatedInput, Radio, RadioGroup} from 'react-bootstrap-validation';
 
-import PostAction from '../action/post';
-import PostStore from '../store/post';
-import CateAction from '../action/cate';
-import CateStore from '../store/cate';
+import PostAction from 'admin/action/post';
+import PostStore from 'admin/store/post';
+import CateAction from 'admin/action/cate';
+import CateStore from 'admin/store/cate';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
+
+import './style.css';
 
 export default class extends Base {
   constructor(props){
@@ -21,6 +26,7 @@ export default class extends Base {
       postInfo: {
         cate: [],
         is_public: "1",
+        create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
         allow_comment: true
       },
       status: 3,
@@ -59,6 +65,7 @@ export default class extends Base {
         setTimeout(() => this.redirect('post/list'), 1000);
         break;
       case 'getPostInfo':
+        data.create_time = moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss');
         this.setState({postInfo: data});
         break;
     }
@@ -110,6 +117,9 @@ export default class extends Base {
       this.state.postInfo.is_public += '';
     }
 
+    //baseUrl
+    let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
+
     return (
       <Form
         model={this.state.postInfo}
@@ -123,12 +133,13 @@ export default class extends Base {
                 type="text"
                 placeholder="标题"
                 validate="required"
+                label={`${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`}
             />
-            <ValidatedInput
-                name="pathname"
-                type="text"
-                validate="required"
-            />
+            <div className="pathname">
+              <span>{baseUrl}</span>
+              <ValidatedInput name="pathname" type="text" validate="required" />
+              <span>.html</span>
+            </div>
             <ValidatedInput
                 name="markdown_content"
                 type="textarea"
@@ -142,6 +153,7 @@ export default class extends Base {
                 className="btn btn-default"
                 onClick={()=> this.state.status = 0}
               >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
+              <span> </span>
               <button
                   type="submit"
                   {...props}
@@ -151,12 +163,17 @@ export default class extends Base {
             </div>
           </div>
           <div className="col-xs-3">
-            <ValidatedInput
-                name="create_time"
-                type="text"
-                label="发布日期"
-                wrapperClassName="col-xs-12"
-            />
+            <div style={{marginBottom: 15}}>
+              <label>发布日期</label>
+              <div>
+                <Datetime
+                  dateFormat="YYYY-MM-DD"
+                  timeFormat="HH:mm:ss"
+                  locale="zh-cn"
+                  defaultValue={this.state.postInfo.create_time}
+                />
+              </div>
+            </div>
             <div className="form-group">
               <label className="control-label">分类</label>
               <ul>

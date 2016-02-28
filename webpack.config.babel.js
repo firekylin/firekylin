@@ -32,7 +32,7 @@ export default {
       },
       {
         test: /\.css?$/,
-        loader: 'style'
+        loader: 'style!css'
       }
     ]
   }

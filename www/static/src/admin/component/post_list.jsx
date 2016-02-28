@@ -67,7 +67,7 @@ export default class extends Base {
                   ModalAction.confirm(
                     '提示',
                     <div className="center">确定删除吗？</div>,
-                    PostAction.delete(PostAction, item.id),
+                    PostAction.delete.bind(PostAction, item.id),
                     'modal-sm'
                   )
                 }
