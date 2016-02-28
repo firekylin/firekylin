@@ -30,7 +30,7 @@ export default class extends Base {
     }
     let data = this.post();
     data.id = this.id;
-    let rows = await this.modelInstance.saveCate(data, this.ip());
+    let rows = await this.modelInstance.saveCate(data);
     return this.success({affectedRows: rows});
   }
 }

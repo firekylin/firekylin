@@ -74,6 +74,13 @@ export default class extends Base {
       props.disabled = true;
     }
     let cateList = [{id:0, name:'不选择'}].concat(this.state.cateList);
+
+    //如果是在编辑状态下在没有拿到数据之前不做渲染
+    //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
+    if( this.id && !this.state.cateInfo.pathname ) {
+      return null;
+    }
+
     return (
       <Form
         model={this.state.cateInfo}
