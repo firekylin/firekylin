@@ -20,12 +20,21 @@ export default class extends think.model.relation {
   }
 
   /**
-   * 添加文章
+   * 添加分类
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
   addCate(data){
     return this.where({name: data.pathname, _logic: 'OR'}).thenAdd(data);
+  }
+
+  async saveCate(data){
+    let info = await this.where({id: data.id}).find();
+    if(think.isEmpty(info)){
+      return Promise.reject(new Error('CATE_NOT_EXIST'));
+    }
+
+    return this.where({id: data.id}).update(data);
   }
 
   /**
