@@ -12,7 +12,11 @@ export default {
   },
   resolve: {
     extensions: ['', '.js', '.jsx'],
-    alias: {}
+    alias: {
+      admin: `${base}/src/admin`,
+      common: `${base}/src/common`,
+      base: `${base}/src/common/component/base`
+    }
   },
   module: {
     loaders: [
@@ -25,6 +29,10 @@ export default {
           plugins: ['transform-runtime', 'transform-decorators-legacy']
         },
         exclude: /node_modules/
+      },
+      {
+        test: /\.css?$/,
+        loader: 'style'
       }
     ]
   }

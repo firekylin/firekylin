@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Base from '../../common/component/base';
+import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
@@ -8,7 +8,7 @@ import md5 from 'md5';
 
 import UserAction from '../action/user';
 import UserStore from '../store/user';
-import TipAction from '../../common/action/tip';
+import TipAction from 'common/action/tip';
 
 export default class extends Base {
   constructor(props){
@@ -67,7 +67,7 @@ export default class extends Base {
    * @return {} []
    */
   handleInvalidSubmit(){
-    
+
   }
   /**
    * change input value
@@ -112,7 +112,7 @@ export default class extends Base {
     }else{
       prop.validate = validates[type];
     }
-    
+
     return prop;
   }
 
@@ -134,19 +134,19 @@ export default class extends Base {
     }
 
     return (
-      <Form 
-        className="user-create clearfix" 
-        onValidSubmit={this.handleValidSubmit.bind(this)} 
+      <Form
+        className="user-create clearfix"
+        onValidSubmit={this.handleValidSubmit.bind(this)}
         onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
       >
         <div className="pull-left">
           <div className="form-group">
             <label>用户名</label>
-            <ValidatedInput 
-              type="text" 
+            <ValidatedInput
+              type="text"
               name="username"
               ref="username"
-              className="form-control" 
+              className="form-control"
               placeholder="4到20个字符"
               {...this.getProps('name')}
               errorHelp={{
@@ -158,11 +158,11 @@ export default class extends Base {
           </div>
           <div className="form-group">
             <label>邮箱</label>
-            <ValidatedInput 
-              type="text" 
-              name="email" 
-              ref="email" 
-              className="form-control" 
+            <ValidatedInput
+              type="text"
+              name="email"
+              ref="email"
+              className="form-control"
               {...this.getProps('email')}
               errorHelp={{
                 required: '请输入邮箱',
@@ -173,11 +173,11 @@ export default class extends Base {
           </div>
           <div className="form-group">
             <label>密码</label>
-            <ValidatedInput 
-              type="password" 
-              name="password" 
+            <ValidatedInput
+              type="password"
+              name="password"
               ref="password"
-              className="form-control" 
+              className="form-control"
               placeholder="8到30个字符"
               {...this.getProps('password')}
               errorHelp={{
@@ -189,14 +189,14 @@ export default class extends Base {
           </div>
           <div className="form-group ">
             <label>确认密码</label>
-            <ValidatedInput 
-              type="password" 
-              name="repassword" 
+            <ValidatedInput
+              type="password"
+              name="repassword"
               ref="repassword"
-              className="form-control" 
-              placeholder="" 
+              className="form-control"
+              placeholder=""
               {...this.getProps('repassword')}
-              errorHelp='密码不一致' 
+              errorHelp='密码不一致'
             />
           </div>
           <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
@@ -204,16 +204,16 @@ export default class extends Base {
         <div className="pull-left">
           <div className="form-group">
             <label>别名</label>
-            <ValidatedInput 
-              type="text" 
-              name="display_name" 
-              ref="display_name" 
-              className="form-control" 
-              placeholder="显示名称" 
+            <ValidatedInput
+              type="text"
+              name="display_name"
+              ref="display_name"
+              className="form-control"
+              placeholder="显示名称"
               {...this.getProps('display_name')}
             />
           </div>
-          
+
           <div className="form-group">
             <label>用户组</label>
             <select className="form-control" ref="type">
