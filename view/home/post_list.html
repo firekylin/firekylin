@@ -1,5 +1,9 @@
 {% extends './layout.html' %}
 
+{% block title %}
+{{options.title}}
+{% endblock %}
+
 {% block content %}
 <section id="page-index">
     {% for post in postList.data %}
