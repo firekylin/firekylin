@@ -6,6 +6,8 @@ import classnames from 'classnames';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 
+import ModalAction from '../../common/action/modal';
+
 export default class extends Base {
   constructor(props){
     super(props);
@@ -20,6 +22,11 @@ export default class extends Base {
   }
   handleTrigger(data, type){
     this.setState({userList: data, loading: false});
+  }
+  handleDelete(){
+    return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br /><p className="gray">删除后无法恢复</p></div>, () => {
+      //OptionsAction.save({two_factor_auth: two_factor_auth});
+    }, 'modal-sm');
   }
   getUserList(){
     if(this.state.loading){
@@ -44,7 +51,7 @@ export default class extends Base {
                 <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
               </button>
             </Link>&nbsp;
-            <button type="button" className="btn btn-danger btn-xs">
+            <button type="button" className="btn btn-danger btn-xs" onClick={this.handleDelete.bind(this, item.id)}>
               <span className="glyphicon glyphicon-remove" aria-hidden="true"></span> 删除
             </button>
           </td>
