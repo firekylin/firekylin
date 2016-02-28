@@ -34,13 +34,14 @@
     "babel-preset-es2015-loose": "6.x.x",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "6.x.x",
+    "history": "^1.17.0",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "react-router": "^2.0.0-rc5",
-    "webpack": "^1.12.12",
     "react-mixin": "^3.0.3",
+    "react-router": "^2.0.0-rc5",
     "reflux": "^0.3.0",
-    "history": "^1.17.0"
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.12"
   },
   "repository": "",
   "license": "MIT"

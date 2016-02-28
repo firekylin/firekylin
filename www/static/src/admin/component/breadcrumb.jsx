@@ -1,6 +1,6 @@
 import ReactDom from 'react-dom';
 import React from 'react';
-import Base from '../../common/component/base';
+import Base from 'base';
 import classnames from 'classnames';
 
 export default class extends Base {
@@ -12,7 +12,7 @@ export default class extends Base {
     }
     this.bindHandleDocumentClick = this.handleDocumentClick.bind(this);
   }
-  
+
   componentDidMount(){
     document.addEventListener('click', this.bindHandleDocumentClick, false);
   }

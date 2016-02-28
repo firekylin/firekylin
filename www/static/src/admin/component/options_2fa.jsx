@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Base from '../../common/component/base';
+import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
@@ -9,8 +9,8 @@ import QRcode from 'qrcode-react';
 
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
-import TipAction from '../../common/action/tip';
-import ModalAction from '../../common/action/modal';
+import TipAction from 'common/action/tip';
+import ModalAction from 'common/action/modal';
 
 export default class extends Base {
   constructor(props){
@@ -65,21 +65,21 @@ export default class extends Base {
       {this.state.options.two_factor_auth ? '' : <p>开启二步验证可以大大提升帐号的安全性，可以通过下面的步骤开启。</p>}
       <h4>下载对应的应用</h4>
       <ul>
-        <li>For Android, iOS, and Blackberry: 
+        <li>For Android, iOS, and Blackberry:
           <a href="https://support.google.com/accounts/answer/1066447?hl=en">Google Authenticator</a>
         </li>
-        <li>For Android and iOS: 
+        <li>For Android and iOS:
           <a href="http://guide.duosecurity.com/third-party-accounts">Duo Mobile</a>
         </li>
-        <li>For Windows Phone: 
+        <li>For Windows Phone:
           <a href="https://www.microsoft.com/en-US/store/apps/Authenticator/9WZDNCRFJ3RJ">Authenticator</a>
         </li>
       </ul>
       <h4>扫描下面的二维码</h4>
       <QRcode value={this.state.qrcode} size={256}/>
-      <Form 
-        className="clearfix" 
-        onValidSubmit={this.handleValidSubmit.bind(this)} 
+      <Form
+        className="clearfix"
+        onValidSubmit={this.handleValidSubmit.bind(this)}
         onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
         >
         <br />

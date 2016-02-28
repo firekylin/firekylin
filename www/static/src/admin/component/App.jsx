@@ -1,15 +1,15 @@
 import React from 'react';
-import Base from '../../common/component/base';
+import Base from 'base';
 import Login from './login';
 import Sidebar from './sidebar';
 import BreadCrumb from './breadcrumb';
-import Tip from '../../common/component/tip';
-import ModalManage from '../../common/component/modal_manage';
+import Tip from 'common/component/tip';
+import ModalManage from 'common/component/modal_manage';
 
 
 export default class App extends Base {
   state = {
-    
+
   };
 
   render() {

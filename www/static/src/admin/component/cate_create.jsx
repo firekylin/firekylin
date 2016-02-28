@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Base from '../../common/component/base';
+import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
-import TipAction from '../../common/action/tip';
+import TipAction from 'common/action/tip';
 
 export default class extends Base {
   constructor(props){

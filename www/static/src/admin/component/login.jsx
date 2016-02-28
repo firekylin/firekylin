@@ -1,5 +1,5 @@
 import React from 'react';
-import Base from '../../common/component/base';
+import Base from 'base';
 import md5 from 'md5';
 
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
@@ -7,7 +7,7 @@ import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 
-import TipAction from '../../common/action/tip';
+import TipAction from 'common/action/tip';
 
 export default class extends Base {
   componentDidMount(){
@@ -29,8 +29,8 @@ export default class extends Base {
     if(SysConfig.options.two_factor_auth){
       return (
         <div className="form-group">
-          <ValidatedInput 
-            type="text" 
+          <ValidatedInput
+            type="text"
             name="two_factor_auth"
             ref="two_factor_auth"
             className="form-control"
@@ -60,14 +60,14 @@ export default class extends Base {
               <h1 className="text-center">
               <a href="/">{SysConfig.options.title}</a>
               </h1>
-              <Form 
-              className="clearfix" 
-              onValidSubmit={this.handleValidSubmit.bind(this)} 
+              <Form
+              className="clearfix"
+              onValidSubmit={this.handleValidSubmit.bind(this)}
               onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
               >
               <div className="form-group">
-                <ValidatedInput 
-                  type="text" 
+                <ValidatedInput
+                  type="text"
                   name="username"
                   ref="username"
                   className="form-control"
@@ -80,12 +80,12 @@ export default class extends Base {
                 />
               </div>
               <div className="form-group">
-                <ValidatedInput 
-                  type="password" 
+                <ValidatedInput
+                  type="password"
                   name="password"
                   ref="password"
                   className="form-control"
-                  validate="required,isLength:8:30" 
+                  validate="required,isLength:8:30"
                   placeholder="密码"
                   errorHelp={{
                     required: '请填写密码',
