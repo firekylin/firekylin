@@ -1,0 +1,56 @@
+{% extends './layout.html' %}
+
+{% block title %}
+{{detail.title}} - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<div id="page-post">
+    <article class="markdown">
+        <h1>{{detail.title}}</h1>
+        <p class="note-tags">
+            {% for tag in detail.tag %}
+            <a href="/tags/{{tag}}" data-tag="{{tag}}">
+                <code class="notebook">{{tag}}</code>
+            </a>
+            {% endfor %}
+        </p>
+        <div class="content">
+            {{detail.content | safe}}
+        </div>
+        <p>本文链接：<a href="{{pageUrl | safe}}">{{pageUrl | safe}}</a></p>
+        <p>-- <acronym title="End of File">EOF</acronym> --</p>
+        <div class="post-info">
+            
+            <p>
+                发表于
+                <i>{{think.datetime(detail.create_time)}}</i>
+
+                {% if detai.tag.length %}
+
+                ，并被添加「 
+                {% for tag in detail.tag %}
+                <a href="/tags/{{tag}}" data-tag="{{tag}}">
+                    <code class="notebook">{{tag}}</code>
+                </a>
+                {% endfor %}
+                 」标签
+                 
+                {% endif %}
+
+                ，最后修改于
+                <i>{{think.datetime(detail.update_time)}}</i>
+            </p>
+        </div>
+    </article>
+    <div id="comments">
+        <h2>Comments</h2>
+        <div id="disqus_thread">
+            评论加载中...
+            <br>
+            <br>
+            注：如果长时间无法加载，请针对 disq.us | disquscdn.com | disqus.com 启用代理。
+        </div>
+    </div>
+</div>
+{% endblock %}

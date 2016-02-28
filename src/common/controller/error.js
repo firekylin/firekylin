@@ -60,7 +60,7 @@ export default class extends think.controller.base {
   _404Action(){
     //管理端
     if(this.http.module === 'admin' && !this.isAjax()){
-      let controller = this.controller('admin/index');
+      let controller = this.controller('admin/base');
       return controller.invoke('__call');
     }
     return this.displayError(404);
