@@ -1,0 +1,55 @@
+{% extends './layout.html' %}
+
+{% block title %}
+{{detail.title}} - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<div id="page-post">
+    <article class="markdown">
+        <h1>{{detail.title}}</h1>
+        <p class="note-tags">
+            {% for tag in detail.tag %}
+            <a href="/tags/{{tag}}" data-tag="{{tag}}">
+                <code class="notebook">{{tag}}</code>
+            </a>
+            {% endfor %}
+        </p>
+        <div class="content">
+            {{detail.content | safe}}
+        </div>
+        <p>
+            -- 
+            <acronym title="End of File">EOF</acronym>
+             --
+        </p>
+        <div class="post-info">
+            <p>
+                本文链接：
+                <a href="https://imochen.com/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">https://imochen.com/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html</a>
+            </p>
+            <p>
+                发表于
+                <i>2016-01-09 21:58:28</i>
+                ，并被添加「 
+                <a href="/tags/Vuejs" data-tag="vuejs">Vuejs</a>
+                 ， 
+                <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
+                 ， 
+                <a href="/tags/组件化" data-tag="组件化">组件化</a>
+                 」标签，最后修改于
+                <i>2016-01-10 12:47:40</i>
+            </p>
+        </div>
+    </article>
+    <div id="comments">
+        <h2>Comments</h2>
+        <div id="disqus_thread">
+            评论加载中...
+            <br>
+            <br>
+            注：如果长时间无法加载，请针对 disq.us | disquscdn.com | disqus.com 启用代理。
+        </div>
+    </div>
+</div>
+{% endblock %}
