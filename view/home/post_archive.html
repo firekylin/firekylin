@@ -1,93 +1,32 @@
 {% extends './layout.html' %}
 
 {% block title %}
-{{options.title}}
+归档 - {{options.title}}
 {% endblock %}
 
 {% block content %}
 <div id="page-archive">
     <h1>归档</h1>
+    {% for yearMonth,data in list%}
     <section>
-        <h1 class="year">2016年01月</h1>
+        <h1 class="year">{{yearMonth}}</h1>
+        {% for item in data %}
         <article>
             <div class="meta">
-                <span class="time">1月 09 , 2016</span>
+                <span class="time">{{think.datetime(item.create_time)}}</span>
                 <span class="tags">
-                    <a href="/tags/Vuejs" data-tag="vuejs">Vuejs</a>
-                     , 
-                    <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
-                     , 
-                    <a href="/tags/组件化" data-tag="组件化">组件化</a>
+                    {% for tag in item.tag %}
+                    <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">{{tag.name}}</a>
+                    {% endfor %}
                 </span>
             </div>
             <h1>
-                <a href="/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">前端重构之路（组件化）</a>
+                <a href="/post/{{item.pathname | safe}}.html">{{item.title}}</a>
             </h1>
         </article>
-        <article>
-            <div class="meta">
-                <span class="time">1月 09 , 2016</span>
-                <span class="tags">
-                    <a href="/tags/Vuejs" data-tag="vuejs">Vuejs</a>
-                     , 
-                    <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
-                     , 
-                    <a href="/tags/组件化" data-tag="组件化">组件化</a>
-                </span>
-            </div>
-            <h1>
-                <a href="/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">前端重构之路（组件化）</a>
-            </h1>
-        </article>
-        <article>
-            <div class="meta">
-                <span class="time">1月 09 , 2016</span>
-                <span class="tags">
-                    <a href="/tags/Vuejs" data-tag="vuejs">Vuejs</a>
-                     , 
-                    <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
-                     , 
-                    <a href="/tags/组件化" data-tag="组件化">组件化</a>
-                </span>
-            </div>
-            <h1>
-                <a href="/2016/01/09/the-path-of-the-front-end-refactoring-componentization/index.html">前端重构之路（组件化）</a>
-            </h1>
-        </article>
+        {% endfor %}
     </section>
-    <section>
-        <h1 class="year">2015年12月</h1>
-        <article>
-            <div class="meta">
-                <span class="time">12月 23 , 2015</span>
-                <span class="tags">
-                    <a href="/tags/ThinkJS" data-tag="thinkjs">ThinkJS</a>
-                     , 
-                    <a href="/tags/WebComponent" data-tag="webcomponent">WebComponent</a>
-                     , 
-                    <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
-                </span>
-            </div>
-            <h1>
-                <a href="/2015/12/23/the-path-of-the-front-end-refactoring-technology-selection/index.html">前端重构之路（技术选型篇）</a>
-            </h1>
-        </article>
-        <article>
-            <div class="meta">
-                <span class="time">12月 23 , 2015</span>
-                <span class="tags">
-                    <a href="/tags/ThinkJS" data-tag="thinkjs">ThinkJS</a>
-                     , 
-                    <a href="/tags/WebComponent" data-tag="webcomponent">WebComponent</a>
-                     , 
-                    <a href="/tags/前端重构" data-tag="前端重构">前端重构</a>
-                </span>
-            </div>
-            <h1>
-                <a href="/2015/12/23/the-path-of-the-front-end-refactoring-technology-selection/index.html">前端重构之路（技术选型篇）</a>
-            </h1>
-        </article>
-    </section>
+    {% endfor %}
 </div>
 {% endblock %}
 

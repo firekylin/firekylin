@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
         <link rel="icon" href="/static/images/favicon.png">
+        <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
         <meta name="keyword" content="{{options.keywords}}">
         <meta name="description" content="{{options.description}}">
         <title>{% block title %}{% endblock %}</title>
@@ -27,7 +28,7 @@
                 </a>
             </li>
             <li>
-                <a class="" href="/archive/">
+                <a class="" href="/archives/">
                     <i class="iconfont icon-archive" title="归档"></i>
                     <span>归档</span>
                 </a>
@@ -64,7 +65,7 @@
         </ul>
         <ul class="buttons">
             <li>
-                <a class="" href="/atom.xml">
+                <a class="" href="/rss.html">
                     <i class="iconfont icon-rss" title="RSS"></i>
                     <span>RSS</span>
                 </a>

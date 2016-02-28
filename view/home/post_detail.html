@@ -10,8 +10,8 @@
         <h1>{{detail.title}}</h1>
         <p class="note-tags">
             {% for tag in detail.tag %}
-            <a href="/tags/{{tag}}" data-tag="{{tag}}">
-                <code class="notebook">{{tag}}</code>
+            <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
+                <code class="notebook">{{tag.name}}</code>
             </a>
             {% endfor %}
         </p>
