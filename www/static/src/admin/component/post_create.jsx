@@ -10,6 +10,7 @@ import PostStore from '../store/post';
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
 import TipAction from 'common/action/tip';
+import firekylin from 'common/util/firekylin';
 
 export default class extends Base {
   constructor(props){
@@ -17,8 +18,11 @@ export default class extends Base {
     this.state = {
       postSubmitting: false,
       draftSubmitting: false,
-      postInfo: {},
-      allow_comment: true,
+      postInfo: {
+        cate: [],
+        is_public: "1",
+        allow_comment: true
+      },
       status: 3,
       cateList: []
     }
@@ -90,6 +94,22 @@ export default class extends Base {
       props.disabled = true;
     }
 
+    //如果是在编辑状态下在没有拿到数据之前不做渲染
+    //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
+    if( this.id && !this.state.postInfo.content ) {
+      return null;
+    }
+
+    let cateInitial = [];
+    if( Array.isArray(this.state.postInfo.cate) ) {
+      cateInitial = this.state.postInfo.cate.map( item => item.id );
+    }
+
+    //针对 RadioGroup 只有在值为字符串才正常的情况做处理
+    if( firekylin.isNumber(this.state.postInfo.is_public) ) {
+      this.state.postInfo.is_public += '';
+    }
+
     return (
       <Form
         model={this.state.postInfo}
@@ -143,7 +163,13 @@ export default class extends Base {
                 {this.state.cateList.map(cate =>
                   <li key={cate.id}>
                     <label>
-                      <input type="checkbox" name="cate" value={cate.id} onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}/>
+                      <input
+                          type="checkbox"
+                          name="cate"
+                          value={cate.id}
+                          defaultChecked={cateInitial.includes(cate.id)}
+                          onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}
+                      />
                       {cate.name}
                     </label>
                   </li>
@@ -151,7 +177,6 @@ export default class extends Base {
               </ul>
             </div>
             <RadioGroup
-              value="1"
               name="is_public"
               label="公开度"
               wrapperClassName="col-xs-12"
@@ -166,8 +191,11 @@ export default class extends Base {
                   <input
                       type="checkbox"
                       name="allow_comment"
-                      checked={this.state.allow_comment}
-                      onChange={()=> this.setState({allow_comment: !this.state.allow_comment})}
+                      checked={this.state.postInfo.allow_comment}
+                      onChange={()=> {
+                        this.state.postInfo.allow_comment = !this.state.postInfo.allow_comment;
+                        this.forceUpdate();
+                      }}
                   />
                   允许评论
                 </label>
