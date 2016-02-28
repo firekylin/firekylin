@@ -1,5 +1,5 @@
 import React from 'react';
-import Base from '../../common/component/base';
+import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
