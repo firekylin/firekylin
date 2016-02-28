@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Base from '../../common/component/base';
+import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';

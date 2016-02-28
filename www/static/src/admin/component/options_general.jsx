@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Base from '../../common/component/base';
+import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
@@ -8,7 +8,7 @@ import md5 from 'md5';
 
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
-import TipAction from '../../common/action/tip';
+import TipAction from 'common/action/tip';
 
 export default class extends Base {
   constructor(props){
@@ -64,15 +64,15 @@ export default class extends Base {
     return (
       <div>
         <h3 style={{marginBottom: '20px'}}>基本设置</h3>
-        <Form 
-        className="clearfix options-general" 
-        onValidSubmit={this.handleValidSubmit.bind(this)} 
+        <Form
+        className="clearfix options-general"
+        onValidSubmit={this.handleValidSubmit.bind(this)}
         onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
         >
           <div className="form-group">
             <label>站点名称</label>
-            <ValidatedInput 
-              type="text" 
+            <ValidatedInput
+              type="text"
               name="title"
               ref="title"
               {...this.getProps('title')}
@@ -84,23 +84,23 @@ export default class extends Base {
           </div>
           <div className="form-group">
             <label>LOGO 地址</label>
-            <ValidatedInput 
-              type="text" 
-              name="logo_url" 
+            <ValidatedInput
+              type="text"
+              name="logo_url"
               {...this.getProps('logo_url')}
               ref="logo_url"
-              className="form-control" 
+              className="form-control"
             />
             <p className="help-block">尺寸最好为 140px x 140px。</p>
           </div>
           <div className="form-group">
             <label>站点描述</label>
-            <ValidatedInput 
-              type="text" 
-              name="description" 
+            <ValidatedInput
+              type="text"
+              name="description"
               {...this.getProps('description')}
-              ref="description" 
-              className="form-control" 
+              ref="description"
+              className="form-control"
               errorHelp={{
                 required: '请填写站点描述'
               }}
@@ -108,12 +108,12 @@ export default class extends Base {
           </div>
           <div className="form-group">
             <label>关键词</label>
-            <ValidatedInput 
-              type="text" 
-              name="keywords" 
+            <ValidatedInput
+              type="text"
+              name="keywords"
               {...this.getProps('keywords')}
               ref="keywords"
-              className="form-control" 
+              className="form-control"
               errorHelp={{
                 required: '请填写站点关键词'
               }}
@@ -122,32 +122,32 @@ export default class extends Base {
           </div>
           <div className="form-group">
             <label>GitHub 地址</label>
-            <ValidatedInput 
-              type="text" 
-              name="github_url" 
+            <ValidatedInput
+              type="text"
+              name="github_url"
               {...this.getProps('github_url')}
               ref="github_url"
-              className="form-control" 
+              className="form-control"
             />
           </div>
           <div className="form-group">
             <label>Twitter 地址</label>
-            <ValidatedInput 
-              type="text" 
-              name="twitter_url" 
+            <ValidatedInput
+              type="text"
+              name="twitter_url"
               {...this.getProps('twitter_url')}
               ref="twitter_url"
-              className="form-control" 
+              className="form-control"
             />
           </div>
           <div className="form-group">
             <label>网站备案号</label>
-            <ValidatedInput 
-              type="text" 
-              name="miitbeian" 
+            <ValidatedInput
+              type="text"
+              name="miitbeian"
               {...this.getProps('miitbeian')}
               ref="miitbeian"
-              className="form-control" 
+              className="form-control"
             />
           </div>
           <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
