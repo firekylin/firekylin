@@ -21,5 +21,10 @@ export default class extends think.controller.rest {
       return this.fail('USER_NOT_LOGIN');
     }
     this.userInfo = userInfo;
+    let type = userInfo.type | 0;
+    //not admin
+    if(type !== 1){
+      
+    }
   }
 }

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+        <link rel="icon" href="/static/images/favicon.png">
+        <meta name="keyword" content="{{options.keywords}}">
+        <meta name="description" content="{{options.description}}">
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="/static/css/home.css" type="text/css">
+    </head>
+    <body></body>
+</html>
+<nav id="sidebar" class="behavior_1">
+    <div class="wrap">
+        <div class="profile">
+            <a href="/">
+                <img src="/static/img/firekylin.jpg" alt="{{options.title}}">
+            </a>
+            <span>{{options.title}}</span>
+        </div>
+        <ul class="buttons">
+            <li>
+                <a class="" href="/">
+                    <i class="iconfont icon-home" title="首页"></i>
+                    <span>首页</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/archive/">
+                    <i class="iconfont icon-archive" title="归档"></i>
+                    <span>归档</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/tags/">
+                    <i class="iconfont icon-tags" title="标签"></i>
+                    <span>标签</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/about/">
+                    <i class="iconfont icon-user" title="关于"></i>
+                    <span>关于</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="/links/">
+                    <i class="iconfont icon-link" title="友链"></i>
+                    <span>友链</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="buttons">
+            <li>
+                <a target="_blank" class="" href="https://github.com/imochen">
+                    <i class="iconfont icon-github" title="GitHub"></i>
+                    <span>GitHub</span>
+                </a>
+                <a target="_blank" class="" href="http://weibo.com/677612322/">
+                    <i class="iconfont icon-weibo" title="微博"></i>
+                </a>
+            </li>
+        </ul>
+        <ul class="buttons">
+            <li>
+                <a class="" href="/atom.xml">
+                    <i class="iconfont icon-rss" title="RSS"></i>
+                    <span>RSS</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div id="header">
+    <div class="btn-bar">
+        <i></i>
+    </div>
+    <h1>
+        <a href="/">{{options.title}}</a>
+    </h1>
+    <a class="me" href="/about/">
+        <img src="/static/img/firekylin.jpg" alt="{{options.title}}">
+    </a>
+</div>
+<div id="sidebar-mask"></div>
+<div id="main">
+  <div class="wrap">
+    {% block content %}
+
+    {% endblock %}
+  </div>
+</div>
+<script src="/static/js/meizi.js" type="text/javascript"></script>

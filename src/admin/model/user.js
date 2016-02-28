@@ -34,13 +34,7 @@ export default class extends think.model.base {
    */
   afterSelect(data){
     return data.map(item => {
-      if(item.create_time){
-        item.create_time = think.datetime(new Date(item.create_time));
-      }
-      if(item.last_login_time){
-        item.last_login_time = think.datetime(new Date(item.last_login_time));
-      }
-      return item;
+      return this.afterFind(item);
     });
   }
   afterFind(data){
