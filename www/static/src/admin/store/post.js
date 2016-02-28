@@ -46,6 +46,19 @@ export default Reflux.createStore({
       data => this.trigger(data, 'savePostSuccess'),
       err  => this.trigger(err, 'savePostFail')
     );
+  },
+
+  onDelete(id) {
+    let url = '/admin/api/post';
+    if(id) {
+      url += '/' + id + '?method=delete';
+    }
+
+    let req = superagent.post(url);
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'deletePostSuccess'),
+      err => this.trigger(err, 'deletePostFail')
+    );
   }
 
 })

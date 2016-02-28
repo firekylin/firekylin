@@ -3,6 +3,8 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
+import ModalAction from 'common/action/modal';
+import TipAction from 'common/action/tip';
 import PostAction from '../action/post';
 import PostStore from '../store/post';
 
@@ -20,7 +22,18 @@ export default class extends Base {
     PostAction.selectList(this.state.page);
   }
   handleTrigger(data, type){
-    this.setState({postList: data, loading: false});
+    switch(type){
+      case 'deletePostFail':
+        TipAction.fail(data);
+        break;
+      case 'deletePostSuccess':
+        TipAction.success('删除成功');
+        this.setState({loading: true}, ()=> PostAction.selectList(this.state.page));
+        break;
+      case 'getPostList':
+        this.setState({postList: data, loading: false});
+        break;
+    }
   }
   getPostList(){
     if(this.state.loading){
@@ -33,12 +46,36 @@ export default class extends Base {
       return (
         <tr key={item.id}>
           <td>
-            {item.title}
+            <a href={`/admin/post/edit/${item.id}`} title={item.title}>{item.title}</a>
             {this.renderStatus(item.status)}
           </td>
           <td>{item.user.display_name}</td>
           <td>{item.cate.map(c => c.name).join()}</td>
           <td>{item.create_time}</td>
+          <td>
+            <a href={`/admin/post/edit/${item.id}`} title={item.title}>
+              <button type="button" className="btn btn-primary btn-xs">
+                <span className="glyphicon glyphicon-edit"></span>
+                编辑
+              </button>
+            </a>
+            <span> </span>
+            <button
+                type="button"
+                className="btn btn-danger btn-xs"
+                onClick={()=>
+                  ModalAction.confirm(
+                    '提示',
+                    <div className="center">确定删除吗？</div>,
+                    PostAction.delete(PostAction, item.id),
+                    'modal-sm'
+                  )
+                }
+            >
+              <span className="glyphicon glyphicon-remove"></span>
+              删除
+            </button>
+          </td>
         </tr>
       );
     })
@@ -64,6 +101,7 @@ export default class extends Base {
             <th>作者</th>
             <th>分类</th>
             <th>日期</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
