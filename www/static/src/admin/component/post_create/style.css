@@ -1,0 +1,14 @@
+.pathname {
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+.pathname > span {
+  float: left;
+  line-height: 39px;
+}
+.pathname > .form-group {
+  float: left;
+  width: 200px;
+  margin: 0;
+  display: inline-block;
+}
