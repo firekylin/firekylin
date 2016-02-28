@@ -30,4 +30,18 @@ export default class extends think.model.relation {
     let data = await this.field(field).where(where).countSelect();
     return data;
   }
+  /**
+   * get post archive
+   * @return {[type]} [description]
+   */
+  async getPostArchive(){
+    let where = {
+      create_time: {'<=': think.datetime()},
+      is_public: 1, //公开
+      type: 0, //文章
+      status: 3 //已经发布
+    }
+    let data = await this.field('title,pathname,create_time').where(where).select();
+    return data;
+  }
 }

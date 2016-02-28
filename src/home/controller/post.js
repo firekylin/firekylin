@@ -29,4 +29,17 @@ export default class extends Base {
     
     return this.display();
   }
+
+  async pageAction(){
+    let pathname = this.get('pathname');
+    let detail = await this.model('post').where({pathname: pathname}).find();
+    this.assign('page', detail);
+
+    return this.display();
+  }
+
+  async archiveAction(){
+
+    return this.display();
+  }
 }
