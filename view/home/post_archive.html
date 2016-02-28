@@ -16,7 +16,7 @@
                 <span class="time">{{think.datetime(item.create_time)}}</span>
                 <span class="tags">
                     {% for tag in item.tag %}
-                    <a href="/tags/{{tag}}" data-tag="{{tag}}">{{tag}}</a>
+                    <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">{{tag.name}}</a>
                     {% endfor %}
                 </span>
             </div>
