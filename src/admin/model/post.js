@@ -41,6 +41,15 @@ export default class extends think.model.relation {
     return this.where({pathname: data.pathname, _logic: 'OR'}).thenAdd(data);
   }
 
+  async savePost(data){
+    let info = await this.where({id: data.id}).find();
+    if(think.isEmpty(info)){
+      return Promise.reject(new Error('POST_NOT_EXIST'));
+    }
+    data.update_time = think.datetime();
+    return this.where({id: data.id}).update(data);
+  }
+
   addPostCate(cate_ids) {
 
   }
