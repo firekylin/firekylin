@@ -7,6 +7,7 @@ import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import moment from 'moment';
 import { Form, ValidatedInput, Radio, RadioGroup} from 'react-bootstrap-validation';
+import Editor from 'common/component/editor';
 
 import PostAction from 'admin/action/post';
 import PostStore from 'admin/store/post';
@@ -88,6 +89,7 @@ export default class extends Base {
     values.status = this.state.status;
     values.type = this.type; //type: 0为文章，1为页面
     values.allow_comment = this.state.allow_comment;
+    values.markdown_content = this.state.postInfo.markdown_content;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     PostAction.save(values);
   }
@@ -140,13 +142,16 @@ export default class extends Base {
               <ValidatedInput name="pathname" type="text" validate="required" />
               <span>.html</span>
             </div>
-            <ValidatedInput
-                name="markdown_content"
-                type="textarea"
-                style={{minHeight: 300}}
-                validate="required"
-            />
-            <div className="col-xs-12 text-right">
+            <div className="form-group">
+              <Editor
+                content={this.state.postInfo.markdown_content}
+                onChange={content => {
+                  this.state.postInfo.markdown_content = content;
+                  this.forceUpdate();
+                }}
+              />
+            </div>
+            <div className="text-right">
               <button
                 type="submit"
                 {...props}
