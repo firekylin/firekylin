@@ -35,7 +35,15 @@ export default class extends think.model.relation {
     let field = 'id,title,pathname,summary';
     where = this.getWhereCondition(where);
 
-    let data = await this.field(field).where(where).countSelect();
+    let data = await this.field(field).page(page).where(where).countSelect();
+    return data;
+  }
+
+  async getPostRssList(){
+    let field = 'id,title,pathname,content';
+    let where = this.getWhereCondition();
+
+    let data = await this.field(field).where(where).limit(10).select();
     return data;
   }
   /**
