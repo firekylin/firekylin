@@ -12,7 +12,8 @@
             <div class="date">1月 09 , 2016</div>
             <div class="tags">
                 {% for tag in post.tag %}
-                <a href="/tags/{{tag.name}}">{{tag.name}}</a>, 
+                <a href="/tags/{{tag.name}}">{{tag.name}}</a>
+                {% if not loop.last%}, {% endif %}
                 {% endfor %}
             </div>
         </div>
