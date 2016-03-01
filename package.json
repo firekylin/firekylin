@@ -19,6 +19,7 @@
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
     "qrcode-react": "^0.1.10",
+    "rc-select": "^5.10.0",
     "react-bootstrap-validation": "^0.1.10",
     "speakeasy": "^2.0.0",
     "superagent": "^1.7.2",
