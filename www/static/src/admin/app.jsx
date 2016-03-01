@@ -8,16 +8,20 @@ import App from './component/app';
 import Dashboard from './component/dashboard';
 
 import User from './component/user';
-import Cate from './component/cate';
 import UserList from './component/user_list';
 import UserCreate from './component/user_create';
 
 import Post from './component/post';
 import PostList from './component/post_list';
 import PostCreate from './component/post_create';
+
+import Cate from './component/cate';
 import CateList from './component/cate_list';
 import CateCreate from './component/cate_create';
 
+import Tag from './component/tag';
+import TagList from './component/tag_list';
+import TagCreate from './component/tag_create';
 
 import Options from './component/options';
 import OptionsGeneral from './component/options_general';
@@ -51,6 +55,12 @@ ReactDOM.render((
         <Route path="list" component={CateList} />
         <Route path="create" component={CateCreate} />
         <Route path="edit/:id" component={CateCreate} />
+      </Route>
+      <Route path="tag" component={Tag}>
+        <Redirect from="/" to="list" />
+        <Route path="list" component={TagList} />
+        <Route path="create" component={TagCreate} />
+        <Route path="edit/:id" component={TagCreate} />
       </Route>
       <Route path="options" component={Options}>
         <Redirect from="/" to="general" />
