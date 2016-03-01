@@ -27,6 +27,8 @@ export default class extends Base {
     data.update_time = think.datetime();
     if(data.create_time === '') data.create_time = data.update_time;
 
+    let result = this.model('tag').thenAdd( data.tag.map(tag => ({name: tag, pathname: tag})));
+    
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
   }
