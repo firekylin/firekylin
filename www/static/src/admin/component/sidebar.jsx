@@ -19,13 +19,13 @@ export default class extends Base {
         {url: '/cate/list', title: '分类列表'},
         {url: '/cate/create', title: '添加分类'}
       ]},
+      {url: '/tag', icon: 'report', title: '标签管理', children: [
+        {url: '/tag/list', title: '标签列表'},
+        {url: '/tag/create', title: '添加标签'}
+      ]},
       {url: '/user', icon: 'user', title: '用户管理', children: [
         {url: '/user/list', title: '用户列表'},
         {url: '/user/create', title: '添加用户'}
-      ]},
-      {url: '/tag', icon: 'report', title: '标签管理', children: [
-        {url: '/tag/list', title: '内容审核'},
-        {url: '/tag/verify', title: '认证审核'}
       ]},
       {url: '/options', icon: 'report', title: '系统设置', children: [
         {url: '/options/general', title: '基本设置'},
