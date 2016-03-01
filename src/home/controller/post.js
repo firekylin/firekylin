@@ -54,4 +54,19 @@ export default class extends Base {
     this.assign('list', data);
     return this.display();
   }
+  /**
+   * rss
+   * @return {[type]} [description]
+   */
+  async rssAction(){
+    let model = this.model('post');
+    let list = await model.getPostRssList();
+    this.assign('list', list);
+    this.assign('currentTime', (new Date()).toString());
+    let protocal = this.options.is_https ? 'https://' : 'http://';
+    let host = protocal + this.http.host;
+    this.assign('host', host);
+    this.type('text/xml');
+    return this.display();
+  }
 }
