@@ -6,13 +6,17 @@ import classnames from 'classnames';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import moment from 'moment';
-import { Form, ValidatedInput, Radio, RadioGroup} from 'react-bootstrap-validation';
+import {Form, ValidatedInput, Radio, RadioGroup} from 'react-bootstrap-validation';
 import Editor from 'common/component/editor';
+import Select, {Option} from 'rc-select';
+import 'rc-select/assets/index.css';
 
 import PostAction from 'admin/action/post';
 import PostStore from 'admin/store/post';
 import CateAction from 'admin/action/cate';
 import CateStore from 'admin/store/cate';
+import TagAction from 'admin/action/tag';
+import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
 
@@ -25,13 +29,15 @@ export default class extends Base {
       postSubmitting: false,
       draftSubmitting: false,
       postInfo: {
+        tag: [],
         cate: [],
         is_public: "1",
         create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
         allow_comment: true
       },
       status: 3,
-      cateList: []
+      cateList: [],
+      tagList: []
     }
 
     this.type = 0;
@@ -43,8 +49,10 @@ export default class extends Base {
   componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
     this.listenTo(CateStore, cateList => this.setState({cateList}));
+    this.listenTo(TagStore, tagList => this.setState({tagList}));
 
     CateAction.select();
+    TagAction.select();
     if(this.id){
       PostAction.select(this.id);
     }
@@ -67,6 +75,7 @@ export default class extends Base {
         break;
       case 'getPostInfo':
         data.create_time = moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss');
+        data.tag = data.tag.map(tag => tag.name);
         this.setState({postInfo: data});
         break;
     }
@@ -91,6 +100,8 @@ export default class extends Base {
     values.allow_comment = this.state.allow_comment;
     values.markdown_content = this.state.postInfo.markdown_content;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
+    values.tag = this.state.postInfo.tag;
+    console.log(values.tag);
     PostAction.save(values);
   }
   /**
@@ -108,7 +119,7 @@ export default class extends Base {
     if( this.id && !this.state.postInfo.content ) {
       return null;
     }
-
+    
     let cateInitial = [];
     if( Array.isArray(this.state.postInfo.cate) ) {
       cateInitial = this.state.postInfo.cate.map( item => item.id );
@@ -197,6 +208,22 @@ export default class extends Base {
                   </li>
                 )}
               </ul>
+            </div>
+            <div className="form-group">
+              <label className="control-label">标签</label>
+              <div>
+                <Select
+                    tags
+                    style={{width: '100%'}}
+                    maxTagTextLength={5}
+                    value={this.state.postInfo.tag}
+                    onChange={val => { this.state.postInfo.tag = val; this.forceUpdate(); }}
+                >
+                    {this.state.tagList.map( tag =>
+                      <Option key={tag.name} value={tag.name}>{tag.name}</Option>
+                    )}
+                </Select>
+              </div>
             </div>
             <RadioGroup
               name="is_public"
