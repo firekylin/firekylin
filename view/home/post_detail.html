@@ -8,13 +8,13 @@
 <div id="page-post">
     <article class="markdown">
         <h1>{{detail.title}}</h1>
-        <p class="note-tags">
+<!--         <p class="note-tags">
             {% for tag in detail.tag %}
             <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
                 <code class="notebook">{{tag.name}}</code>
             </a>
             {% endfor %}
-        </p>
+        </p> -->
         <div class="content">
             {{detail.content | safe}}
         </div>

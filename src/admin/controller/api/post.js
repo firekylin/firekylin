@@ -23,7 +23,7 @@ export default class extends Base {
     let data = this.post();
     data.user_id = this.userInfo.id;
     data.content = this.markdownToHtml(data.markdown_content);
-    data.summary = data.content.split('<!--more-->')[0];
+    data.summary = data.content.split('<!--more-->')[0].replace(/<[^<>]+>/g, '');
     data.update_time = think.datetime();
     if(data.create_time === '') data.create_time = data.update_time;
 
