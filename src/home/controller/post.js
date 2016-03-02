@@ -69,4 +69,26 @@ export default class extends Base {
     this.type('text/xml');
     return this.display();
   }
+  /**
+   * search action
+   * @return {[type]} [description]
+   */
+  async searchAction(){
+    let keyword = this.get('keyword').trim();
+    if(keyword){
+      let postModel = this.model('post');
+      let searchResultPromise = await postModel.getPostSearch(keyword, this.get('page'));
+      console.log(searchResultPromise)
+      this.assign('searchData', searchResultPromise);
+    }
+
+    //热门标签
+    let tagModel = this.model('tag');
+    let hotTagsPromise = tagModel.getHotTags();
+    this.assign('hotTags', hotTagsPromise);
+
+
+    this.assign('keyword', keyword);
+    return this.display();
+  }
 }

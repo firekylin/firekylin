@@ -5,6 +5,7 @@ export default [
   [/^tags/, 'post/tag'],
   [/^links/, 'post/page?pathname=links'],
   [/^rss/, 'post/rss'],
+  [/^search/, 'post/search'],
   [/^page\/([^/]+)/, 'post/page?pathname=:1'],
   [/^post\/([^/]+)/, 'post/detail?pathname=:1']  
 ];
