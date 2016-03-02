@@ -24,7 +24,7 @@ export default class extends Base {
     data.user_id = this.userInfo.id;
     data = this.getContentAndSummary(data);
     data = this.getPostTime(data);
-    data.tag = this.getTagIds(data.tag);
+    data.tag = await this.getTagIds(data.tag);
 
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
@@ -41,7 +41,7 @@ export default class extends Base {
     data.id = this.id;
     data = this.getContentAndSummary(data);
     data = this.getPostTime(data);
-    data.tag = this.getTagIds(data.tag);
+    data.tag = await this.getTagIds(data.tag);
 
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
@@ -62,9 +62,12 @@ export default class extends Base {
   }
 
   async getTagIds(tags) {
+    if(!tags){
+      return [];
+    }
     let modelInstance = this.model('tag').setRelation(false), tagIds = [];
     let promises = tags.map(name =>
-      modelInstance.where({name}).thenAdd({name, pathname: encodeURIComponent(name)}).then(data => tagIds.push({tag_id: data.id}))
+      modelInstance.where({name}).thenAdd({name, pathname: encodeURIComponent(name)}).then(data => tagIds.push({tag_id: data.id, name: name}))
     );
     await Promise.all(promises);
     return tagIds;

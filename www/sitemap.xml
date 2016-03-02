@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-      <loc>http://127.0.0.1/post/MongoDB.html</loc>
+      <loc>http://127.0.0.1/post/Service.html</loc>
       <lastmod>2016-03-02</lastmod>
       <priority>0.6</priority>
   </url>
   
   <url>
-      <loc>http://127.0.0.1/post/Service.html</loc>
-      <lastmod>2016-02-28</lastmod>
+      <loc>http://127.0.0.1/post/MongoDB.html</loc>
+      <lastmod>2016-03-02</lastmod>
       <priority>0.6</priority>
   </url>
   
