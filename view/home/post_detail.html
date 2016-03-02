@@ -6,16 +6,15 @@
 
 {% block content %}
 <div id="page-post">
-    <article class="markdown">
-        <h1>{{detail.title}}</h1>
-<!--         <p class="note-tags">
-            {% for tag in detail.tag %}
-            <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
-                <code class="notebook">{{tag.name}}</code>
-            </a>
-            {% endfor %}
-        </p> -->
-        <div class="content">
+    <article class="post detail">
+        <div class="meta">
+            <div class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</div>
+            <div class="comment">
+                <a href="">71 comments</a>
+            </div>
+        </div>
+        <h1 class="title">{{detail.title}}</h1>
+        <div class="entry-content">
             {{detail.content | safe}}
         </div>
         <p>本文链接：<a href="{{pageUrl | safe}}">{{pageUrl | safe}}</a></p>
