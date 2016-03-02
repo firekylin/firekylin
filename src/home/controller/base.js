@@ -36,7 +36,7 @@ export default class extends think.controller.base {
    * @param  {} name []
    * @return {}      []
    */
-  display(name){
-    return super.display(this.THEME_VIEW_PATH + name + '.html');
+  displayView(name){
+    return this.display(this.THEME_VIEW_PATH + name + '.html');
   }
 }
