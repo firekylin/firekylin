@@ -57,7 +57,7 @@ export default class extends Base {
 
   getContentAndSummary(data) {
     data.content = this.markdownToHtml(data.markdown_content);
-    data.summary = data.content.split('<!--more-->')[0];
+    data.summary = data.content.split('<!--more-->')[0].replace(/<[>]*>/g, '');
     return data;
   }
 
