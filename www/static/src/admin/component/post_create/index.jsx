@@ -75,6 +75,7 @@ export default class extends Base {
         break;
       case 'getPostInfo':
         data.create_time = moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss');
+        data.tag = data.tag.map(tag => tag.name);
         this.setState({postInfo: data});
         break;
     }
@@ -118,7 +119,7 @@ export default class extends Base {
     if( this.id && !this.state.postInfo.content ) {
       return null;
     }
-
+    
     let cateInitial = [];
     if( Array.isArray(this.state.postInfo.cate) ) {
       cateInitial = this.state.postInfo.cate.map( item => item.id );
