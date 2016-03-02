@@ -13,7 +13,7 @@
         <ul>
         {% for item in data %}
         <li>
-            <a href="">{{item.title}}</a>&nbsp;
+            <a href="/post/{{item.pathname}}.html" title="{{item.title}}">{{item.title}}</a>&nbsp;
             <span class="date">{{think.datetime(item.create_time, 'YYYY-MM-DD')}}</span>
         </li>
         {% endfor %}
