@@ -8,18 +8,15 @@
 <section id="page-index">
     {% for post in postList.data %}
     <article>
-        <div class="meta">
-            <div class="date">1月 09 , 2016</div>
-            <div class="tags">
-                {% for tag in post.tag %}
-                <a href="/tags/{{tag.name}}">{{tag.name}}</a>
-                {% if not loop.last%}, {% endif %}
-                {% endfor %}
-            </div>
-        </div>
         <h1>
             <a href="/post/{{post.pathname}}.html">{{post.title}}</a>
         </h1>
+        <div class="meta">
+            <div class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</div>
+            <div class="comments">
+                71 comments
+            </div>
+        </div>
         <div class="desc">{{post.summary | safe}}</div>
         <p class="more">
             <a href="/post/{{post.pathname}}.html">阅读全文 »</a>

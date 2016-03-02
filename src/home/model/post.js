@@ -35,7 +35,7 @@ export default class extends think.model.relation {
     let field = 'id,title,pathname,summary';
     where = this.getWhereCondition(where);
 
-    let data = await this.field(field).page(page).where(where).countSelect();
+    let data = await this.field(field).page(page).order('create_time DESC').where(where).countSelect();
     return data;
   }
 
