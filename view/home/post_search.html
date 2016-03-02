@@ -35,7 +35,7 @@
         
         {% for item in searchData.data %}
           <div class="item">
-            <div class="title"><a href="{{ item.link }}">{{ item.title | safe }}</a></div>
+            <div class="title"><a href="/post/{{ item.pathname }}.html">{{ item.title | safe }}</a></div>
             <div class="desc">{{ item.summary |safe }}</div>
           </div>
         {% endfor %}
