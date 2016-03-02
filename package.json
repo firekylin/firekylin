@@ -10,19 +10,12 @@
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
-    "classnames": "^2.2.3",
     "highlight.js": "^9.2.0",
     "marked": "^0.3.5",
     "marked-toc": "^0.3.0",
-    "md5": "^2.0.0",
-    "moment": "^2.11.1",
+    "node-crontab": "0.0.8",
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
-    "qrcode-react": "^0.1.10",
-    "react-bootstrap-validation": "^0.1.10",
-    "react-fontawesome": "^0.3.3",
-    "speakeasy": "^2.0.0",
-    "superagent": "^1.7.2",
     "thinkit": "^4.6.0",
     "thinkjs": "2.1.x"
   },
@@ -46,7 +39,14 @@
     "react-router": "^2.0.0-rc5",
     "reflux": "^0.3.0",
     "style-loader": "^0.13.0",
-    "webpack": "^1.12.12"
+    "webpack": "^1.12.12",
+    "classnames": "^2.2.3",
+    "qrcode-react": "^0.1.10",
+    "react-bootstrap-validation": "^0.1.10",
+    "react-fontawesome": "^0.3.3",
+    "speakeasy": "^2.0.0",
+    "superagent": "^1.7.2",
+    "md5": "^2.0.0"
   },
   "repository": "",
   "license": "MIT"

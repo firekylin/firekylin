@@ -1,6 +1,7 @@
 'use strict';
 
 import Base from './base.js';
+import fs from 'fs';
 
 
 export default class extends Base {
@@ -63,11 +64,22 @@ export default class extends Base {
     let list = await model.getPostRssList();
     this.assign('list', list);
     this.assign('currentTime', (new Date()).toString());
-    let protocal = this.options.is_https ? 'https://' : 'http://';
-    let host = protocal + this.http.host;
-    this.assign('host', host);
+    
     this.type('text/xml');
     return this.display();
+  }
+  /**
+   * sitemap action
+   * @return {[type]} [description]
+   */
+  async sitemapAction(){
+    let model = this.model('post');
+    let list = model.getPostSitemapList();
+    this.assign('list', list);
+    let content = await this.fetch();
+    let filePath = think.RESOURCE_PATH + think.sep + 'sitemap.xml';
+    fs.writeFile(filePath, content);
+    return this.success();
   }
   /**
    * search action
