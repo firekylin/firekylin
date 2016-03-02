@@ -2,26 +2,32 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+      <loc>http://127.0.0.1/post/test-data.html</loc>
+      <lastmod>2016-03-02 13:23:58</lastmod>
+      <priority>0.6</priority>
+  </url>
+  
+  <url>
       <loc>http://127.0.0.1/post/Service.html</loc>
-      <lastmod>2016-03-02</lastmod>
+      <lastmod>2016-02-28 14:14:36</lastmod>
       <priority>0.6</priority>
   </url>
   
   <url>
       <loc>http://127.0.0.1/post/MongoDB.html</loc>
-      <lastmod>2016-03-02</lastmod>
+      <lastmod>2016-02-28 14:14:15</lastmod>
       <priority>0.6</priority>
   </url>
   
   <url>
       <loc>http://127.0.0.1/post/crontab.html</loc>
-      <lastmod>2016-02-28</lastmod>
+      <lastmod>2016-02-28 14:13:38</lastmod>
       <priority>0.6</priority>
   </url>
   
   <url>
       <loc>http://127.0.0.1/post/cache.html</loc>
-      <lastmod>2016-02-28</lastmod>
+      <lastmod>2016-02-28 13:39:36</lastmod>
       <priority>0.6</priority>
   </url>
   

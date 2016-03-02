@@ -101,7 +101,6 @@ export default class extends Base {
     values.markdown_content = this.state.postInfo.markdown_content;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
-    console.log(values.tag);
     PostAction.save(values);
   }
   /**
@@ -119,7 +118,7 @@ export default class extends Base {
     if( this.id && !this.state.postInfo.content ) {
       return null;
     }
-    
+
     let cateInitial = [];
     if( Array.isArray(this.state.postInfo.cate) ) {
       cateInitial = this.state.postInfo.cate.map( item => item.id );
@@ -175,7 +174,7 @@ export default class extends Base {
                   {...props}
                   className="btn btn-primary"
                   onClick={()=> this.state.status = 3}
-              >{this.state.postSubmitting ? '发布中...' : '发布文章'}</button>
+              >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
             </div>
           </div>
           <div className="col-xs-3">
@@ -190,6 +189,7 @@ export default class extends Base {
                 />
               </div>
             </div>
+            {!this.type ?
             <div className="form-group">
               <label className="control-label">分类</label>
               <ul>
@@ -209,6 +209,8 @@ export default class extends Base {
                 )}
               </ul>
             </div>
+            : null}
+            {!this.type ?
             <div className="form-group">
               <label className="control-label">标签</label>
               <div>
@@ -225,6 +227,7 @@ export default class extends Base {
                 </Select>
               </div>
             </div>
+            : null}
             <RadioGroup
               name="is_public"
               label="公开度"
