@@ -22,10 +22,9 @@ export default class extends Base {
   async postAction(){
     let data = this.post();
     data.user_id = this.userInfo.id;
-    data.content = this.markdownToHtml(data.markdown_content);
-    data.summary = data.content.split('<!--more-->')[0].replace(/<[^<>]+>/g, '');
-    data.update_time = think.datetime();
-    if(data.create_time === '') data.create_time = data.update_time;
+    data = this.getContentAndSummary(data);
+    data = this.getPostTime(data);
+    data.tag = this.getTagIds(data.tag);
 
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
@@ -40,8 +39,35 @@ export default class extends Base {
     }
     let data = this.post();
     data.id = this.id;
+    data = this.getContentAndSummary(data);
+    data = this.getPostTime(data);
+    data.tag = this.getTagIds(data.tag);
+
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
+  }
+
+  getPostTime(data) {
+    data.update_time = think.datetime();
+    if( !!data.create_time ) {
+      data.create_time = data.update_time;
+    }
+    return data;
+  }
+
+  getContentAndSummary(data) {
+    data.content = this.markdownToHtml(data.markdown_content);
+    data.summary = data.content.split('<!--more-->')[0];
+    return data;
+  }
+
+  async getTagIds(tags) {
+    let modelInstance = this.model('tag').setRelation(false), tagIds = [];
+    let promises = tags.map(name =>
+      modelInstance.where({name}).thenAdd({name, pathname: encodeURIComponent(name)}).then(data => tagIds.push({tag_id: data.id}))
+    );
+    await Promise.all(promises);
+    return tagIds;
   }
 
   /**
