@@ -90,4 +90,17 @@
 {% block content %}
 
 {% endblock %}
+<footer id="footer" class="inner">
+  &copy; {{ currentYear }}&nbsp;-&nbsp; {{options.title}}
+  {% if options.miitbeian %}
+    &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.miitbeian.gov.cn/">{{options.miitbeian}}</a>
+  {%else%}
+    &nbsp;-&nbsp;<a href="{{ host }}">{{http.hostname}}</a>
+  {% endif %}
+  <br />
+  Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>
+  &nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin</a>
+</footer>
 </div>
+</body>
+</html>
