@@ -13,7 +13,7 @@ export default class extends Base {
     let model = this.model('post');
     let list = await model.getPostList(this.get('page'), {});
     this.assign('postList', list);
-    return this.display('list');
+    return this.displayView('list');
   }
   /**
    * post detail
@@ -28,7 +28,7 @@ export default class extends Base {
     pageUrl += this.http.host + this.http.url;
     this.assign('pageUrl', pageUrl);
     
-    return this.display('detail');
+    return this.displayView('detail');
   }
 
   async pageAction(){
@@ -36,7 +36,7 @@ export default class extends Base {
     let detail = await this.model('post').where({pathname: pathname}).find();
     this.assign('page', detail);
 
-    return this.display('page');
+    return this.displayView('page');
   }
   /**
    * post archive
@@ -46,27 +46,14 @@ export default class extends Base {
     let model = this.model('post');
     let data = await model.getPostArchive();
     this.assign('list', data);
-    return this.display('archive');
+    return this.displayView('archive');
   }
   
   async tagAction(){
     let model = this.model('tag');
     let data = await model.getTagArchive();
     this.assign('list', data);
-    return this.display('tag');
-  }
-  /**
-   * rss
-   * @return {[type]} [description]
-   */
-  async rssAction(){
-    let model = this.model('post');
-    let list = await model.getPostRssList();
-    this.assign('list', list);
-    this.assign('currentTime', (new Date()).toString());
-    
-    this.type('text/xml');
-    return super.display(this.HOME_VIEW_PATH + 'rss.xml');
+    return this.displayView('tag');
   }
   /**
    * search action
@@ -87,6 +74,19 @@ export default class extends Base {
 
 
     this.assign('keyword', keyword);
-    return this.display('search');
+    return this.displayView('search');
+  }
+  /**
+   * rss
+   * @return {[type]} [description]
+   */
+  async rssAction(){
+    let model = this.model('post');
+    let list = await model.getPostRssList();
+    this.assign('list', list);
+    this.assign('currentTime', (new Date()).toString());
+    
+    this.type('text/xml');
+    return super.display(this.HOME_VIEW_PATH + 'rss.xml');
   }
 }
