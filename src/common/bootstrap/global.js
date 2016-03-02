@@ -10,14 +10,3 @@
  *     
  * }
  */
-
-import moment from 'moment';
-
-global.formatDateTime = (dateTime, type) => {
-  if(dateTime && think.isString(dateTime)){
-    dateTime = new Date(dateTime);
-  }
-  dateTime = dateTime || new Date();
-  type = type || 'YYYY-MM-DD HH:mm:ss';
-  return moment(dateTime).format(type);
-}

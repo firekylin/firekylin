@@ -1,6 +1,7 @@
 'use strict';
 
 import Base from './base.js';
+import fs from 'fs';
 
 
 export default class extends Base {
@@ -12,7 +13,7 @@ export default class extends Base {
     let model = this.model('post');
     let list = await model.getPostList(this.get('page'), {});
     this.assign('postList', list);
-    return this.display();
+    return this.display('list');
   }
   /**
    * post detail
@@ -27,7 +28,7 @@ export default class extends Base {
     pageUrl += this.http.host + this.http.url;
     this.assign('pageUrl', pageUrl);
     
-    return this.display();
+    return this.display('detail');
   }
 
   async pageAction(){
@@ -35,7 +36,7 @@ export default class extends Base {
     let detail = await this.model('post').where({pathname: pathname}).find();
     this.assign('page', detail);
 
-    return this.display();
+    return this.display('page');
   }
   /**
    * post archive
@@ -45,14 +46,14 @@ export default class extends Base {
     let model = this.model('post');
     let data = await model.getPostArchive();
     this.assign('list', data);
-    return this.display();
+    return this.display('archive');
   }
   
   async tagAction(){
     let model = this.model('tag');
     let data = await model.getTagArchive();
     this.assign('list', data);
-    return this.display();
+    return this.display('tag');
   }
   /**
    * rss
@@ -63,10 +64,29 @@ export default class extends Base {
     let list = await model.getPostRssList();
     this.assign('list', list);
     this.assign('currentTime', (new Date()).toString());
-    let protocal = this.options.is_https ? 'https://' : 'http://';
-    let host = protocal + this.http.host;
-    this.assign('host', host);
+    
     this.type('text/xml');
-    return this.display();
+    return super.display(this.HOME_VIEW_PATH + 'rss.xml');
+  }
+  /**
+   * search action
+   * @return {[type]} [description]
+   */
+  async searchAction(){
+    let keyword = this.get('keyword').trim();
+    if(keyword){
+      let postModel = this.model('post');
+      let searchResultPromise = postModel.getPostSearch(keyword, this.get('page'));
+      this.assign('searchData', searchResultPromise);
+    }
+
+    //热门标签
+    let tagModel = this.model('tag');
+    let hotTagsPromise = tagModel.getHotTags();
+    this.assign('hotTags', hotTagsPromise);
+
+
+    this.assign('keyword', keyword);
+    return this.display('search');
   }
 }

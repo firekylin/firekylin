@@ -1,0 +1,33 @@
+{% extends './layout.html' %}
+
+{% block title %}
+  {{options.title}}
+{% endblock %}
+
+{% block content %}
+<section id="page-index">
+  {% for post in postList.data %}
+  <article class="post">
+
+    <div class="meta">
+      <div class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</div>
+      <div class="comment">
+          <a href="/post/{{post.pathname}}.html#comments">71 comments</a>
+      </div>
+    </div>
+
+    <h1 class="title">
+      <a href="/post/{{post.pathname}}.html">{{post.title}}</a>
+    </h1>
+    
+    <div class="entry-content">
+      {{post.summary | safe}}
+      <p class="more">
+          <a href="/post/{{post.pathname}}.html">阅读全文 »</a>
+      </p>
+    </div>
+      
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}
