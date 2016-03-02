@@ -63,4 +63,15 @@ export default class extends think.model.relation {
     });
     return result;
   }
+  /**
+   * get post search result
+   * @param  {[type]} keyword [description]
+   * @param  {[type]} page    [description]
+   * @return {[type]}         [description]
+   */
+  async getPostSearch(keyword, page){
+    let where = {'title|content': ['LIKE', `%${keyword}%`]}
+    where = this.getWhereCondition(where);
+    return this.where(where).page(page).setRelation(false).field('title,pathname,summary,create_time').order('create_time DESC').countSelect();
+  }
 }

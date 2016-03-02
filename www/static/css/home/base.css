@@ -1,6 +1,7 @@
 body {
   margin: 0;
   padding: 0;
+  color: #666;
   -webkit-text-size-adjust: none;
   -webkit-transition: -webkit-transform .2s cubic-bezier(.4,.01,.165,.99);
   transition: -webkit-transform .2s cubic-bezier(.4,.01,.165,.99);
@@ -30,7 +31,7 @@ a,a:hover {
   color: #2479CC;
   text-decoration: none;
 }
-ul{padding: 0}
+ul,ol{padding: 0}
 * {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
