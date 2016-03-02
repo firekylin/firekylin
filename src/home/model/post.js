@@ -52,7 +52,7 @@ export default class extends think.model.relation {
    */
   async getPostArchive(){
     let where = this.getWhereCondition();
-    let data = await this.field('id,title,pathname,create_time').setRelation('tag').where(where).select();
+    let data = await this.field('id,title,pathname,create_time').order('create_time DESC').setRelation(false).where(where).select();
     let result = {};
     data.forEach(item => {
       let yearMonth = think.datetime(item.create_time, 'YYYY年MM月');

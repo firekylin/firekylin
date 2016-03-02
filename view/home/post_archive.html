@@ -5,28 +5,21 @@
 {% endblock %}
 
 {% block content %}
-<div id="page-archive">
-    <h1>归档</h1>
+<article class="post archive">
+    <h1 class="title">归档</h1>
     {% for yearMonth,data in list%}
-    <section>
-        <h1 class="year">{{yearMonth}}</h1>
+    <div class="entry-content">
+        <h3>{{yearMonth}} ({{data.length}})</h3>
+        <ul>
         {% for item in data %}
-        <article>
-            <div class="meta">
-                <span class="time">{{think.datetime(item.create_time)}}</span>
-                <span class="tags">
-                    {% for tag in item.tag %}
-                    <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">{{tag.name}}</a>
-                    {% endfor %}
-                </span>
-            </div>
-            <h1>
-                <a href="/post/{{item.pathname | safe}}.html">{{item.title}}</a>
-            </h1>
-        </article>
+        <li>
+            <a href="">{{item.title}}</a>&nbsp;
+            <span class="date">{{think.datetime(item.create_time, 'YYYY-MM-DD')}}</span>
+        </li>
         {% endfor %}
-    </section>
+        </ul>
+    </div>
     {% endfor %}
-</div>
+</article>
 {% endblock %}
 

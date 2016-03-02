@@ -8,8 +8,7 @@
   <meta name="keyword" content="{{options.keywords}}">
   <meta name="description" content="{{options.description}}">
   <title>{% block title %}{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/home.css" type="text/css">
-  <link rel="stylesheet" href="/static/css/highlight.css" type="text/css">
+  <link rel="stylesheet" href="/static/css/home/all.css" type="text/css">
 </head>
 <body>
 <nav id="sidebar" class="behavior_1">
@@ -88,9 +87,7 @@
 </div>
 <div id="sidebar-mask"></div>
 <div id="main">
-  <div class="wrap">
-    {% block content %}
+{% block content %}
 
-    {% endblock %}
-  </div>
+{% endblock %}
 </div>
