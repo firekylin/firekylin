@@ -1,0 +1,68 @@
+{% extends './layout.html' %}
+
+{% block title %}
+站内搜索 - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<article class="post detail">
+  <h1 class="title">站内搜索</h1>
+  
+  <div class="entry-content">
+    <div id="search">
+      <form action="/search.html">
+        <div class="wrapper">
+          <input maxlength="80" placeholder="请输入关键字..." id="keyword" name="keyword" value="{{ keyword }}" type="search" required />
+        </div>
+        <input class="submit" type="submit" value="搜索" />
+      </form>
+    </div>
+
+    {% if keyword %}
+      <div id="searchResult">
+        {% if searchData.count %}
+          <div class="info">
+            本次搜索找到结果 {{ searchData.count }} 条
+          </div>
+        {% endif %}
+        
+        {% if not searchData.count %}
+          <div class="no-result">没有找到任何结果，请更换查询词试试~</div>
+          <div class="item">
+            <div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q={{ ('site: ' + http.hostname + ' ' + keyword)|urlencode }}">site:{{http.hostname}} {{ keyword }}</a></div>
+          </div>
+        {% endif %}
+        
+        {% for item in searchData.data %}
+          <div class="item">
+            <div class="title"><a href="/post/{{ item.pathname }}.html">{{ item.title | safe }}</a></div>
+            <div class="desc">{{ item.summary |safe }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div id="searchResult">
+        <div class="hot-words">
+          热搜词：
+          {% for tag in hotTags %}
+            <a href="?keyword={{ tag.name }}">{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</article>
+
+{% if searchData and searchData.items.length and (searchData.prevPage or searchData.nextPage) %}
+  <nav class="page-navi">
+    {% if searchData.prevPage %}
+      <a href="{{ pagerPath }}start={{ searchData.prevPage }}" class="prev">&laquo; 上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;
+    {% endif %}
+
+    {% if searchData.nextPage %}
+      <a href="{{ pagerPath }}start={{ searchData.nextPage }}" class="next">下一页 &raquo;</a>
+    {% endif %}
+  </nav>
+{% endif %}
+{% endblock %}
+

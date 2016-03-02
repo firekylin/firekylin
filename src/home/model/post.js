@@ -35,7 +35,7 @@ export default class extends think.model.relation {
     let field = 'id,title,pathname,summary';
     where = this.getWhereCondition(where);
 
-    let data = await this.field(field).page(page).where(where).countSelect();
+    let data = await this.field(field).page(page).order('create_time DESC').where(where).countSelect();
     return data;
   }
 
@@ -43,7 +43,15 @@ export default class extends think.model.relation {
     let field = 'id,title,pathname,content';
     let where = this.getWhereCondition();
 
-    let data = await this.field(field).where(where).setRelation(false).limit(10).select();
+    let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
+    return data;
+  }
+
+  async getPostSitemapList(){
+    let field = 'pathname,update_time';
+    let where = this.getWhereCondition();
+
+    let data = await this.field(field).where(where).order('update_time DESC').setRelation(false).select();
     return data;
   }
   /**
@@ -52,7 +60,7 @@ export default class extends think.model.relation {
    */
   async getPostArchive(){
     let where = this.getWhereCondition();
-    let data = await this.field('id,title,pathname,create_time').setRelation('tag').where(where).select();
+    let data = await this.field('id,title,pathname,create_time').order('create_time DESC').setRelation(false).where(where).select();
     let result = {};
     data.forEach(item => {
       let yearMonth = think.datetime(item.create_time, 'YYYY年MM月');
@@ -62,5 +70,16 @@ export default class extends think.model.relation {
       result[yearMonth].push(item);
     });
     return result;
+  }
+  /**
+   * get post search result
+   * @param  {[type]} keyword [description]
+   * @param  {[type]} page    [description]
+   * @return {[type]}         [description]
+   */
+  async getPostSearch(keyword, page){
+    let where = {'title|content': ['LIKE', `%${keyword}%`]}
+    where = this.getWhereCondition(where);
+    return this.where(where).page(page).setRelation(false).field('title,pathname,summary,create_time').order('create_time DESC').countSelect();
   }
 }
