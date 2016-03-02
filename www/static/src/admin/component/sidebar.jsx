@@ -13,7 +13,7 @@ export default class extends Base {
       ]},
       {url: '/page', icon: 'reply', title: '页面管理', children: [
         {url: '/page/list', title: '页面列表'},
-        {url: '/page/new', title: '添加页面'}
+        {url: '/page/create', title: '添加页面'}
       ]},
       {url: '/cate', icon: 'report', title: '分类管理', children: [
         {url: '/cate/list', title: '分类列表'},

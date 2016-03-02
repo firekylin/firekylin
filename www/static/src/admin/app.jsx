@@ -15,6 +15,10 @@ import Post from './component/post';
 import PostList from './component/post_list';
 import PostCreate from './component/post_create';
 
+import Page from './component/page';
+import PageList from './component/page_list';
+import PageCreate from './component/page_create';
+
 import Cate from './component/cate';
 import CateList from './component/cate_list';
 import CateCreate from './component/cate_create';
@@ -43,6 +47,12 @@ ReactDOM.render((
         <Route path="list" component={PostList} />
         <Route path="create" component={PostCreate} />
         <Route path="edit/:id" component={PostCreate} />
+      </Route>
+      <Route path="page" component={Page}>
+        <Redirect from="/" to="list" />
+        <Route path="list" component={PageList} />
+        <Route path="create" component={PageCreate} />
+        <Route path="edit/:id" component={PageCreate} />
       </Route>
       <Route path="user" component={User}>
         <Redirect from="/" to="list" />

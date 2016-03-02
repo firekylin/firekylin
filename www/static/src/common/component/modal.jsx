@@ -15,7 +15,7 @@ export default class extends Base {
   constructor(props){
     super(props);
   }
-  
+
   componentDidMount(){
     window.addEventListener("hashchange", this.hashchange);
     this.listenTo(ModalStore, this.change.bind(this));
@@ -26,7 +26,7 @@ export default class extends Base {
    * @return {[type]}      [description]
    */
   change() {
-    
+
   }
   /**
    * hashchange的时候关闭弹层
@@ -169,8 +169,8 @@ export default class extends Base {
     if(this.data.buttons.length === 0){
       return;
     }
-    let btnList = this.data.buttons.map(item => {
-      return (<a href="###" onClick={item.callback} className={item.className}>{item.text}</a>);
+    let btnList = this.data.buttons.map((item,i) => {
+      return (<a href="###" onClick={item.callback} className={item.className} key={i}>{item.text}</a>);
     });
     return (
       <div className="btn-box">
@@ -191,7 +191,7 @@ export default class extends Base {
         <div className="dialog-content">
             {this.data.content}
         </div>
-        
+
       </div>
     );
   }
