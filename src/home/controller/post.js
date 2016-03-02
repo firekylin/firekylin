@@ -77,8 +77,7 @@ export default class extends Base {
     let keyword = this.get('keyword').trim();
     if(keyword){
       let postModel = this.model('post');
-      let searchResultPromise = await postModel.getPostSearch(keyword, this.get('page'));
-      console.log(searchResultPromise)
+      let searchResultPromise = postModel.getPostSearch(keyword, this.get('page'));
       this.assign('searchData', searchResultPromise);
     }
 
