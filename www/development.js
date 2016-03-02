@@ -13,7 +13,7 @@ var instance = new thinkjs({
 
 //compile src/ to app/
 instance.compile({
-  retainLines: true, 
+  retainLines: false, 
   log: true
 });
 
