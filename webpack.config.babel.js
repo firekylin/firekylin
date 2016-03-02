@@ -2,7 +2,7 @@ import path from 'path';
 
 var base = path.join(__dirname, 'www/static');
 export default {
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   entry: {
     admin: `${base}/src/admin/app.jsx`
   },
