@@ -154,7 +154,7 @@ export default class extends Base {
             />
             <div className="pathname">
               <span>{baseUrl}</span>
-              <ValidatedInput name="pathname" type="text" validate="required" />
+              <ValidatedInput name="pathname" type="text" validate="required" disabled={this.state.postInfo.status === 3}/>
               <span>.html</span>
             </div>
             <div className="form-group">
