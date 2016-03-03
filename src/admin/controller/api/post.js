@@ -12,7 +12,11 @@ export default class extends Base {
    */
   getAction(self){
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    this.modelInstance.order('id DESC').page( this.get('page'), 20 );
+    this.modelInstance.where({type: 0}).order('id DESC').page( this.get('page'), 20 );
+    return super.getAction(self);
+  }
+
+  getBaseAction(self) {
     return super.getAction(self);
   }
   /**

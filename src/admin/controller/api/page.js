@@ -7,7 +7,7 @@ export default class extends Post {
 
   getAction(self){
     this.modelInstance.where({type: 1}).order('id DESC').page( this.get('page'), 20 );
-    return super.getAction(self);
+    return super.getBaseAction(self);
   }
 
   async postAction(){
