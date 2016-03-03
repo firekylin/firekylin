@@ -1,0 +1,11 @@
+<nav class="pagination">
+  {% if postList.currentPage > 1 %}
+    <a href="/post/?page={{ postList.currentPage - 1 }}" class="prev">&laquo; 上一页</a>
+  {% endif %}
+
+  {% if postList.currentPage < postList.totalPages %}
+    <a href="/post/?page={{ postList.currentPage + 1 }}" class="next">下一页 &raquo;</a>
+  {% endif %}
+
+  <div class="center"><a href="/archives.html">博客归档</a></div>
+</nav>

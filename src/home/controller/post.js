@@ -6,6 +6,13 @@ import fs from 'fs';
 
 export default class extends Base {
   /**
+   * index action
+   * @return {[type]} [description]
+   */
+  indexAction(){
+    return this.listAction();
+  }
+  /**
    * post list
    * @return {Promise} []
    */
