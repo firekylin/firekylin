@@ -6,13 +6,14 @@ import markToc from "marked-toc";
 import highlight from 'highlight.js';
 
 export default class extends Base {
+  modelInstance = this.modelInstance.where({type: 0});
   /**
    * get
    * @return {[type]} [description]
    */
   getAction(self){
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    this.modelInstance.where({type: 0}).order('id DESC').page( this.get('page'), 20 );
+    this.modelInstance.order('id DESC').page( this.get('page'), 20 );
     return super.getAction(self);
   }
 
@@ -25,6 +26,12 @@ export default class extends Base {
    */
   async postAction(){
     let data = this.post();
+    //check pathname
+    let post = await this.modelInstance.where({pathname: data.pathname}).select();
+    if( post.length > 0 ) {
+      return this.fail('PATHNAME_EXIST');
+    }
+
     data.user_id = this.userInfo.id;
     data = this.getContentAndSummary(data);
     data = this.getPostTime(data);
