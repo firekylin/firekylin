@@ -96,9 +96,14 @@ export default class extends Base {
     }
 
     values.status = this.state.status;
+    values.markdown_content = this.state.postInfo.markdown_content;
+    if( values.status === 3 && values.markdown_content === '' ) {
+      this.setState({draftSubmitting: false, postSubmitting: false});
+      return TipAction.fail('没有内容不能提交呢！');
+    }
+
     values.type = this.type; //type: 0为文章，1为页面
     values.allow_comment = this.state.allow_comment;
-    values.markdown_content = this.state.postInfo.markdown_content;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
     PostAction.save(values);
