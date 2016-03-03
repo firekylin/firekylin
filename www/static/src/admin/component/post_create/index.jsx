@@ -161,7 +161,9 @@ export default class extends Base {
                 }}
               />
             </div>
-            <div className="text-right">
+          </div>
+          <div className="col-xs-3">
+            <div className="button-group">
               <button
                 type="submit"
                 {...props}
@@ -176,8 +178,6 @@ export default class extends Base {
                   onClick={()=> this.state.status = 3}
               >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
             </div>
-          </div>
-          <div className="col-xs-3">
             <div style={{marginBottom: 15}}>
               <label>发布日期</label>
               <div>

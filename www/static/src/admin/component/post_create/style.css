@@ -12,3 +12,15 @@
   margin: 0;
   display: inline-block;
 }
+
+/** 文章编辑右侧 **/
+.post-create .col-xs-3 > div.button-group {
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+.post-create .col-xs-3 > div.button-group > button {
+  width: 45%;
+}
+.post-create .col-xs-3 > div.button-group > button:last-child {
+  float: right;
+}
