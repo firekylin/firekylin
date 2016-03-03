@@ -580,11 +580,6 @@ article .entry-content dl {
 
 
 /*** page-tag ***/
-article.tags,
-article.archive,
-article.page{
-  border-bottom: 0;
-}
 
 
 article.tags section a {

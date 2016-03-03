@@ -35,6 +35,7 @@ export default class extends Base {
     let pathname = this.get('pathname');
     let detail = await this.model('post').where({pathname: pathname}).find();
     this.assign('page', detail);
+    this.assign('pathname', pathname);
 
     return this.displayView('page');
   }
