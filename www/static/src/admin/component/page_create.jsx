@@ -14,6 +14,8 @@ export default class extends PostCreate {
     if(this.id){
       PageAction.select(this.id);
     }
+
+    this.state.postInfo.pathname = this.props.location.query.pathname;
   }
 
   handleTrigger(data, type){

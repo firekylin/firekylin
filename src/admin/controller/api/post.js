@@ -6,6 +6,7 @@ import markToc from "marked-toc";
 import highlight from 'highlight.js';
 
 export default class extends Base {
+  modelInstance = this.modelInstance.where({type: 0});
   /**
    * get
    * @return {[type]} [description]
@@ -15,12 +16,22 @@ export default class extends Base {
     this.modelInstance.order('id DESC').page( this.get('page'), 20 );
     return super.getAction(self);
   }
+
+  getBaseAction(self) {
+    return super.getAction(self);
+  }
   /**
    * add user
    * @return {[type]} [description]
    */
   async postAction(){
     let data = this.post();
+    //check pathname
+    let post = await this.modelInstance.where({pathname: data.pathname}).select();
+    if( post.length > 0 ) {
+      return this.fail('PATHNAME_EXIST');
+    }
+
     data.user_id = this.userInfo.id;
     data = this.getContentAndSummary(data);
     data = this.getPostTime(data);
