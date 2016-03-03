@@ -23,6 +23,13 @@ export default Reflux.createStore({
       data => this.trigger(data, id ? 'getCateInfo' : 'getCateList')
     );
   },
+  onSelectParent() {
+    let url = '/admin/api/cate?pid=0';
+    let req = superagent.get(url);
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'getCateParent')
+    );
+  },
   /**
    * save user
    * @param  {Object} data []
@@ -38,7 +45,11 @@ export default Reflux.createStore({
     let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(
-      data => this.trigger(data, 'saveCateSuccess'),
+      data => {
+        if(data.id && data.id.type === 'exist') {
+          this.trigger('CATE_EXIST', 'saveCateFail');
+        } else this.trigger(data, 'saveCateSuccess');
+      },
       err  => this.trigger(err, 'saveCateFail')
     );
   },

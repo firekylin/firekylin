@@ -34,6 +34,7 @@ export default class extends Base {
   handleTrigger(data, type){
     switch(type){
       case 'saveTagFail':
+        TipAction.fail(data);
         this.setState({submitting: false});
         break;
       case 'saveTagSuccess':

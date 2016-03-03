@@ -23,7 +23,7 @@ export default class extends Base {
 
   componentWillMount() {
     this.listenTo(CateStore, this.handleTrigger.bind(this));
-    CateAction.select();
+    CateAction.selectParent();
     if(this.id){
       CateAction.select(this.id);
     }
@@ -37,6 +37,7 @@ export default class extends Base {
   handleTrigger(data, type){
     switch(type){
       case 'saveCateFail':
+        TipAction.fail(data);
         this.setState({submitting: false});
         break;
       case 'saveCateSuccess':
@@ -47,7 +48,7 @@ export default class extends Base {
       case 'getCateInfo':
         this.setState({cateInfo: data});
         break;
-      case 'getCateList':
+      case 'getCateParent':
         this.setState({cateList: data});
         break;
     }
