@@ -11,7 +11,12 @@ export default class extends Base {
    */
   async listAction(){
     let model = this.model('post');
-    let list = await model.getPostList(this.get('page'), {});
+    let list = await model.getPostList(this.get('page'), {
+      tag: this.get('tag'),
+      cate: this.get('cate')
+    });
+    this.assign('tag', this.get('tag'));
+    this.assign('cate', this.get('cate'));
     this.assign('postList', list);
     return this.displayView('list');
   }
