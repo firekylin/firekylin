@@ -3,13 +3,22 @@
  * model
  */
 export default class extends think.model.relation {
-
+  /**
+   * relation
+   * @type {Object}
+   */
   relation = {
     cate: {
-      type: think.model.MANY_TO_MANY
+      type: think.model.MANY_TO_MANY,
+      field: 'id,name'
     },
     tag: {
-      type: think.model.MANY_TO_MANY
+      type: think.model.MANY_TO_MANY,
+      field: 'id,name'
+    },
+    user: {
+      type: think.model.BELONG_TO,
+      field: 'id,name,display_name'
     }
   };
   /**
@@ -31,11 +40,25 @@ export default class extends think.model.relation {
    * @param  {[type]} where [description]
    * @return {[type]}       [description]
    */
-  async getPostList(page, where){
-    let field = 'id,title,pathname,summary';
-    where = this.getWhereCondition(where);
+  async getPostList(page, options = {}){
+    let field = options.field || 'id,title,pathname,summary';
+    if(options.tag || options.cate){
+      let name = options.tag ? 'tag' : 'cate';
+      let {id} = await this.model(name).field('id').setRelation(false).where({name: options.tag || options.cate}).find();
+      if(think.isEmpty(id)){
+        return false;
+      }
+      let where = this.getWhereCondition({[`${name}.${name}_id`]: id});
+      return this.join({
+        table: `post_${name}`,
+        as: name,
+        on: ['id', 'post_id']
+      }).where(where).countSelect();
+    }
+    
+    let where = this.getWhereCondition(options.where);
 
-    let data = await this.field(field).page(page).order('create_time DESC').where(where).countSelect();
+    let data = await this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
     return data;
   }
 

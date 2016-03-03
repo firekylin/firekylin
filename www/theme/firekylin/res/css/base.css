@@ -49,3 +49,9 @@ body.side {
   max-width: 1390px;
   -webkit-overflow-scrolling: touch;
 }
+h1.intro{
+    padding: 20px 30px;
+  background-color: #f6f9fa;
+  text-align: center;
+  color: #999;
+}
