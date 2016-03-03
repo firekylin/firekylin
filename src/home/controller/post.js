@@ -21,12 +21,8 @@ export default class extends Base {
    */
   async detailAction(){
     let pathname = this.get('pathname');
-    let detail = await this.model('post').where({pathname: pathname}).find();
+    let detail = await this.model('post').fieldReverse('markdown_content,summary').where({pathname: pathname}).find();
     this.assign('detail', detail);
-
-    let pageUrl = this.options.is_https ? 'https://' : 'http://';
-    pageUrl += this.http.host + this.http.url;
-    this.assign('pageUrl', pageUrl);
     
     return this.displayView('detail');
   }

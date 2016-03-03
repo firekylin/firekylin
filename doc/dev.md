@@ -21,6 +21,7 @@
 * 系统设置 - 基本设置 - LOGO 后面添加个图片上传的按钮
 * 系统设置支持设置 favicon 的功能 
 * 添加页面支持从 url 中读取 pathname，如： /admin/page/create?pathname=about
+* 文章列表里把页面也显示出来了
 
 ### 前台
 

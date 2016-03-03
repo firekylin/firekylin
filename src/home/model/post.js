@@ -10,6 +10,10 @@ export default class extends think.model.relation {
     },
     tag: {
       type: think.model.MANY_TO_MANY
+    },
+    user: {
+      type: think.model.BELONG_TO,
+      field: 'name,display_name,id'
     }
   };
   /**
