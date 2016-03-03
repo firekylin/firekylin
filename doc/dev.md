@@ -4,7 +4,7 @@
 
 * [ ] 顶部的导航条
 * [ ] 概况页面
-* [ ] 创建文章时要校验 pathname 唯一
+* [x] 创建文章时要校验 pathname 唯一
 * [x] 文章内容必填，且必须包含 <!--more--> 来生成 summary
 * [x] 发布文章的按钮放在右上角
 * [ ] 编辑文章时 pathname 不可修改
@@ -20,8 +20,8 @@
 * [ ] 修改帐号信息时修改密码的问题
 * [ ] 系统设置 - 基本设置 - LOGO 后面添加个图片上传的按钮
 * [ ] 系统设置支持设置 favicon 的功能
-* [ ] 添加页面支持从 url 中读取 pathname，如： /admin/page/create?pathname=about
-* [ ] 文章列表里把页面也显示出来了
+* [x] 添加页面支持从 url 中读取 pathname，如： /admin/page/create?pathname=about
+* [x] 文章列表里把页面也显示出来了
 
 ### 前台
 
