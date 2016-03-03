@@ -27,7 +27,11 @@ export default Reflux.createStore({
     let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(
-      data => this.trigger(data, 'saveTagSuccess'),
+      data => {
+        if(data.id && data.id.type === 'exist') {
+          this.trigger('TAG_EXIST', 'saveTagFail');
+        } else this.trigger(data, 'saveTagSuccess');
+      },
       err  => this.trigger(err, 'saveTagFail')
     );
   },

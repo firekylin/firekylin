@@ -8,8 +8,12 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   getAction(self){
+    if(this.get('pid')) {
+      this.modelInstance.where({pid: this.get('pid')});
+    }
     return super.getAction(self);
   }
+
   /**
    * add user
    * @return {[type]} [description]
