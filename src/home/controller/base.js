@@ -24,10 +24,9 @@ export default class extends think.controller.base {
     let theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = `${think.ROOT_PATH}${think.sep}www${think.sep}theme${think.sep}${theme}${think.sep}`;
 
-    //set host
-    let protocal = options.is_https ? 'https://' : 'http://';
-    let host = protocal + this.http.host;
-    this.assign('host', host);
+    //set protocol
+    let protocol = options.is_https ? 'https://' : 'http://';
+    this.assign('protocol', protocol);
 
     this.assign('currentYear', (new Date).getFullYear());
   }

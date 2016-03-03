@@ -17,24 +17,32 @@
         <div class="entry-content">
             {{detail.content | safe}}
         </div>
-        <p>本文链接：<a href="{{pageUrl | safe}}">{{pageUrl | safe}}</a></p>
+        <p>本文链接：<a href="{{protocol + http.host + http.url | safe}}">{{protocol + http.host + http.url | safe}}</a></p>
         <p>-- <acronym title="End of File">EOF</acronym> --</p>
+
         <div class="post-info">
-            
             <p>
                 发表于
                 <i>{{think.datetime(detail.create_time)}}</i>
 
-                {% if detai.tag.length %}
+                {% if detail.cate.length %}
+                ，添加在分类 
+                {% for cate in detail.cate %}
+                <a href="/cate/{{cate.name}}" data-cate="{{cate.name}}">
+                    <code class="notebook">{{cate.name}}</code>
+                </a>
+                {% endfor%}
+                下
+                {% endif %}
 
+                {% if detail.tag.length %}
                 ，并被添加「 
                 {% for tag in detail.tag %}
-                <a href="/tags/{{tag}}" data-tag="{{tag}}">
-                    <code class="notebook">{{tag}}</code>
+                <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
+                    <code class="notebook">{{tag.name}}</code>
                 </a>
                 {% endfor %}
                  」标签
-                 
                 {% endif %}
 
                 ，最后修改于
@@ -42,14 +50,8 @@
             </p>
         </div>
     </article>
-    <div id="comments">
-        <h2>Comments</h2>
-        <div id="disqus_thread">
-            评论加载中...
-            <br>
-            <br>
-            注：如果长时间无法加载，请针对 disq.us | disquscdn.com | disqus.com 启用代理。
-        </div>
-    </div>
+    {% if detail.allow_comment %}
+    {% include "./inc/comment.html" %}
+    {% endif %}
 </div>
 {% endblock %}
