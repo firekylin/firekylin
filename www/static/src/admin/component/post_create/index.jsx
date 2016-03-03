@@ -97,7 +97,7 @@ export default class extends Base {
 
     values.status = this.state.status;
     values.markdown_content = this.state.postInfo.markdown_content;
-    if( values.status === 3 && values.markdown_content === '' ) {
+    if( values.status === 3 && !values.markdown_content ) {
       this.setState({draftSubmitting: false, postSubmitting: false});
       return TipAction.fail('没有内容不能提交呢！');
     }
