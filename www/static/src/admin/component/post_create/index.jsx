@@ -48,7 +48,16 @@ export default class extends Base {
 
   componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
-    this.listenTo(CateStore, cateList => this.setState({cateList}));
+    this.listenTo(CateStore, cateList => {
+      console.log(cateList);
+      let list = cateList.filter(cate => cate.pid === 0);
+      for(let i=0,l=list.length; i<l; i++) {
+        let child = cateList.filter(cate => cate.pid === list[i].id);
+        if( child.length === 0 ) continue;
+        list.splice.apply(list, [i+1,0].concat(child));
+      }
+      this.setState({cateList: list});
+    });
     this.listenTo(TagStore, tagList => this.setState({tagList}));
 
     CateAction.select();
@@ -200,6 +209,7 @@ export default class extends Base {
               <ul>
                 {this.state.cateList.map(cate =>
                   <li key={cate.id}>
+                    {cate.pid !== 0 ? '　' : null}
                     <label>
                       <input
                           type="checkbox"
