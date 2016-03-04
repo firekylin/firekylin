@@ -1,5 +1,5 @@
 //import {Promise} from 'es6-promise';
-
+import moment from 'moment';
 import TipActions from '../action/tip';
 
 let toString = Object.prototype.toString;
@@ -205,7 +205,7 @@ let firekylin = {
       return true;
     }
 
-    
+
     // 7.1. All identical values are equivalent, as determined by ===.
     if (actual === expected) {
       return true;
@@ -241,6 +241,10 @@ let firekylin = {
     } else {
       return objEquiv(actual, expected);
     }
+  },
+
+  formatTime(str) {
+    return moment(new Date(str)).format("YYYY年MM月DD日 HH:mm");
   }
 };
 
