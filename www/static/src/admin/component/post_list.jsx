@@ -9,6 +9,8 @@ import TipAction from 'common/action/tip';
 import PostAction from '../action/post';
 import PostStore from '../store/post';
 
+import firekylin from 'common/util/firekylin';
+
 export default class extends Base {
   constructor(props){
     super(props);
@@ -49,11 +51,11 @@ export default class extends Base {
         <tr key={item.id}>
           <td>
             <a href={`/admin/post/edit/${item.id}`} title={item.title}>{item.title}</a>
-            {this.renderStatus(item.status)}
           </td>
           <td>{item.user.display_name}</td>
-          <td>{item.cate.map(c => c.name).join()}</td>
-          <td>{item.create_time}</td>
+          <td>{this.renderStatus(item.status)}</td>
+          <td>{firekylin.formatTime(item.create_time)}</td>
+          <td>{firekylin.formatTime(item.update_time)}</td>
           <td>
             <a href={`/admin/post/edit/${item.id}`} title={item.title}>
               <button type="button" className="btn btn-primary btn-xs">
@@ -102,8 +104,9 @@ export default class extends Base {
             <tr>
               <th>标题</th>
               <th>作者</th>
-              <th>分类</th>
-              <th>日期</th>
+              <th>状态</th>
+              <th>创建日期</th>
+              <th>修改日期</th>
               <th>操作</th>
             </tr>
           </thead>
