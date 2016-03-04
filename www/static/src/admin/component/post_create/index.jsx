@@ -49,7 +49,6 @@ export default class extends Base {
   componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
     this.listenTo(CateStore, cateList => {
-      console.log(cateList);
       let list = cateList.filter(cate => cate.pid === 0);
       for(let i=0,l=list.length; i<l; i++) {
         let child = cateList.filter(cate => cate.pid === list[i].id);
@@ -145,7 +144,6 @@ export default class extends Base {
 
     //baseUrl
     let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
-
     return (
       <Form
         model={this.state.postInfo}
