@@ -11,10 +11,10 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  getAction(self){
+  async getAction(self){
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    this.modelInstance.order('id DESC').page( this.get('page'), 20 );
-    return super.getAction(self);
+    let data = await this.modelInstance.order('id DESC').page( this.get('page'), 20 ).countSelect();
+    return this.success(data);
   }
 
   getBaseAction(self) {

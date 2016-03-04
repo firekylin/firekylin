@@ -2,6 +2,7 @@ import React from 'react';
 import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
+import {Pagination, Col} from 'react-bootstrap';
 
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
@@ -12,9 +13,10 @@ export default class extends Base {
   constructor(props){
     super(props);
     this.state = {
+      total: 0,
       loading: true,
       postList: [],
-      page: this.props.location.query.page || 1
+      page: this.props.location.query.page/1 || 1
     }
   }
   componentDidMount(){
@@ -31,7 +33,7 @@ export default class extends Base {
         this.setState({loading: true}, ()=> PostAction.selectList(this.state.page));
         break;
       case 'getPostList':
-        this.setState({postList: data, loading: false});
+        this.setState({postList: data.data, total: data.totalPages, loading: false});
         break;
     }
   }
@@ -94,20 +96,37 @@ export default class extends Base {
   }
   render(){
     return (
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>标题</th>
-            <th>作者</th>
-            <th>分类</th>
-            <th>日期</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.getPostList()}
-        </tbody>
-      </table>
+      <div>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>标题</th>
+              <th>作者</th>
+              <th>分类</th>
+              <th>日期</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.getPostList()}
+          </tbody>
+        </table>
+        <div className="col-xs-12" style={{textAlign: 'center'}}>
+          <Pagination
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButton={5}
+              bsSize="small"
+              items={this.state.total}
+              activePage={this.state.page}
+              onSelect={(e, selectEvent) => this.setState({page: selectEvent.eventKey}, ()=> PostAction.selectList(this.state.page))}
+          />
+        </div>
+      </div>
     )
   }
 }
