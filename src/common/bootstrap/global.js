@@ -10,3 +10,14 @@
  *     
  * }
  */
+
+global.firekylin = {
+  POST_PUBLIC: 1,
+  POST_ALLOW_COMMENT: 1,
+  POST_ARTICLE: 0,
+  POST_PAGE: 1,
+  POST_DRAFT: 0,
+  POST_AUDITING: 1,
+  POST_REJECT: 2,
+  POST_PUBLISH: 3
+}
