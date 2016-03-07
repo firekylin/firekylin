@@ -50,8 +50,19 @@
             </p>
         </div>
     </article>
+    {%if prev.title or next.title %}
+        <nav class="pagination">
+            {% if prev.title %}
+                <a href="/post/{{ prev.pathname }}.html" class="prev">&laquo; {{ prev.title }}</a>
+            {% endif %}
+
+            {% if next.title %}
+                <a href="/post/{{ next.pathname }}.html" class="next">{{ next.title }} &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
     {% if detail.allow_comment %}
-    {% include "./inc/comment.html" %}
+        {% include "./inc/comment.html" %}
     {% endif %}
 </div>
 {% endblock %}

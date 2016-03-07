@@ -23,6 +23,8 @@
 * [x] 添加页面支持从 url 中读取 pathname，如： /admin/page/create?pathname=about
 * [x] 文章列表里把页面也显示出来了
 * [ ] 需要支持评论的配置 - disqus 还是多说，并且要配置对应的名字
+* [ ] 安装时从 wordpress 里导入数据
+* [ ] 添加统计代码的配置
 
 ### 前台
 

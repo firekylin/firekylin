@@ -41,7 +41,7 @@ export default class extends think.model.relation {
    * @return {[type]}       [description]
    */
   async getPostList(page, options = {}){
-    let field = options.field || 'id,title,pathname,summary';
+    let field = options.field || 'id,title,pathname,summary,comment_num';
     if(options.tag || options.cate){
       let name = options.tag ? 'tag' : 'cate';
       let {id} = await this.model(name).field('id').setRelation(false).where({name: options.tag || options.cate}).find();
@@ -62,6 +62,26 @@ export default class extends think.model.relation {
     return data;
   }
 
+  /**
+   * get post detail info
+   * @param  {[type]} pathname [description]
+   * @return {[type]}          [description]
+   */
+  async getPostDetail(pathname){
+    let where = this.getWhereCondition({pathname: pathname});
+    let detail = await this.where(where).fieldReverse('markdown_content,summary').find();
+    if(think.isEmpty(detail)){
+      return detail;
+    }
+    let prevPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({id: ['<', detail.id]})).order('create_time DESC').find();
+    let nextPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({id: ['>', detail.id]})).order('create_time ASC').find();
+    let [prev, next] = await Promise.all([prevPromise, nextPromise]);
+    return {
+      detail,
+      prev,
+      next
+    }
+  }
   async getPostRssList(){
     let field = 'id,title,pathname,content';
     let where = this.getWhereCondition();

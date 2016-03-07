@@ -33,8 +33,11 @@ export default class extends Base {
    */
   async detailAction(){
     let pathname = this.get('pathname');
-    let detail = await this.model('post').fieldReverse('markdown_content,summary').where({pathname: pathname}).find();
-    this.assign('detail', detail);
+    let detail = await this.model('post').getPostDetail(pathname);
+    if(think.isEmpty(detail)){
+      return this.redirect('/');
+    }
+    this.assign(detail);
     
     return this.displayView('detail');
   }
