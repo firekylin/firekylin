@@ -2,8 +2,10 @@ import React, { PropTypes as T } from 'react';
 import ReactDOM from 'react-dom';
 import marked from 'marked';
 import classnames from 'classnames';
-import FontAwesome from 'react-fontawesome';
-
+import {Tabs, Tab} from 'react-bootstrap';
+import ModalAction from 'common/action/modal';
+import FileActions from 'common/action/file';
+import FileStore from 'common/store/file';
 import './style.css';
 
 const MdEditor = React.createClass({
@@ -157,7 +159,26 @@ const MdEditor = React.createClass({
     this._preInputText("```\ncode block\n```", 4, 14)
   },
   _pictureText () {
-    this._preInputText("![alt](www.yourlink.com)", 2, 5)
+    ModalAction.confirm(
+      '插入图片',
+      <Tabs defaultActiveKey={1}>
+        <Tab eventKey={1} title="本地上传">
+          <div style={{margin: '20px 0'}}>
+            <input type="file" name="file" onChange={e=> this.setState({file: e.target.files})} />
+          </div>
+        </Tab>
+        <Tab eventKey={2} title="从网络上抓取">
+          <input type="text" name="url" className="form-control" onChange={e=> this.setState({file: e.target.value})} />
+        </Tab>
+      </Tabs>,
+      ()=> {
+        let file = this.state.file[0];
+
+        FileActions.upload(file);
+        return false;
+      }
+    );
+    // this._preInputText("![alt](www.yourlink.com)", 2, 5)
   },
   _listUlText () {
     this._preInputText("- 无序列表项0\n- 无序列表项1", 2, 8)

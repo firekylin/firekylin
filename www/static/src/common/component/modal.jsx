@@ -173,7 +173,7 @@ export default class extends Base {
       return (<a href="###" onClick={item.callback} className={item.className} key={i}>{item.text}</a>);
     });
     return (
-      <div className="btn-box">
+      <div className="btn-box modal-footer">
           {btnList}
       </div>
     );
@@ -187,7 +187,7 @@ export default class extends Base {
     return (
       <div className={className}>
         <a href="###" onClick={this.close.bind(this)} className="close-btn"></a>
-        <h2 className="title">{this.data.title}</h2>
+        {/*<h2 className="title">{this.data.title}</h2>*/}
         <div className="dialog-content">
             {this.data.content}
         </div>

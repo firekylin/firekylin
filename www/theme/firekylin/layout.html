@@ -103,5 +103,8 @@
 </footer>
 </div>
 <script src="/theme/firekylin/res/js/firekylin.js"></script>
+{% if options.analyze_code %}
+  {{options.analyze_code | safe}}
+{% endif %}
 </body>
 </html>

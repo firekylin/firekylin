@@ -79,7 +79,7 @@ export default class extends think.model.base {
     }
     let password = data.password;
     if(password){
-      password = this.getEncryptPassword(password, info.create_ip, think.datetime(new Date(info.create_time)));
+      password = this.getEncryptPassword(password);
     }
     let updateData = {};
     ['display_name', 'type', 'status'].forEach(item => {

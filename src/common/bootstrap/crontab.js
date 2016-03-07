@@ -6,6 +6,7 @@ if(!think.cli){
   }
   crontab.scheduleJob("*/3 * * * *", () => generateSitemap);
 
+  think.http("/crontab/sync_comment", true); 
 
   generateSitemap();
 }
