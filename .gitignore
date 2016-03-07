@@ -43,5 +43,5 @@ release/
 .DS_Store
 
 runtime/
-
+www/static/upload/
 sitemap.xml
