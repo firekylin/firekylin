@@ -16,6 +16,7 @@
     "node-crontab": "0.0.8",
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
+    "request": "^2.69.0",
     "thinkit": "^4.6.0",
     "thinkjs": "2.1.x"
   },
