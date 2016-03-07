@@ -4,9 +4,9 @@ import marked from 'marked';
 import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
 import ModalAction from 'common/action/modal';
-import FileActions from 'common/action/file';
-import FileStore from 'common/store/file';
+import superagent from 'superagent';
 import './style.css';
+
 
 const MdEditor = React.createClass({
   propTypes: {
@@ -159,6 +159,7 @@ const MdEditor = React.createClass({
     this._preInputText("```\ncode block\n```", 4, 14)
   },
   _pictureText () {
+    let preInputText = this._preInputText;
     ModalAction.confirm(
       '插入图片',
       <Tabs defaultActiveKey={1}>
@@ -173,9 +174,16 @@ const MdEditor = React.createClass({
       </Tabs>,
       ()=> {
         let file = this.state.file[0];
-
-        FileActions.upload(file);
-        return false;
+        let form = new FormData();
+        form.append('file', file);
+        let url = '/admin/api/file';
+        let req = superagent.post(url);
+        req.send(form);
+        req.end((result, res) => {
+          if( result ) return false;
+          preInputText(`![alt](${res.body.data})`, 2, 5);
+        });
+        return true;
       }
     );
     // this._preInputText("![alt](www.yourlink.com)", 2, 5)
@@ -189,6 +197,6 @@ const MdEditor = React.createClass({
   _headerText () {
     this._preInputText("## 标题", 3, 5)
   }
-})
+});
 
 export default MdEditor
