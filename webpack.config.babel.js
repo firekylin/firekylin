@@ -7,7 +7,7 @@ export default {
     admin: `${base}/src/admin/app.jsx`
   },
   output: {
-    path: `${base}/dist`,
+    path: `${base}/js`,
     filename: '[name].bundle.js'
   },
   resolve: {
