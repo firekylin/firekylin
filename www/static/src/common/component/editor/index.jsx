@@ -7,6 +7,23 @@ import ModalAction from 'common/action/modal';
 import superagent from 'superagent';
 import './style.css';
 
+function upload(data) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/admin/api/file', true);
+    xhr.onload = function() {
+      try {
+        resolve( JSON.parse(xhr.responseText) );
+      } catch(e) {
+        reject(e);
+      }
+    }
+    xhr.onerror = function() {
+      reject(xhr);
+    }
+    xhr.send(data);
+  });
+}
 
 const MdEditor = React.createClass({
   propTypes: {
@@ -169,24 +186,29 @@ const MdEditor = React.createClass({
           </div>
         </Tab>
         <Tab eventKey={2} title="从网络上抓取">
-          <input type="text" name="url" className="form-control" onChange={e=> this.setState({file: e.target.value})} />
+          <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value})} />
         </Tab>
       </Tabs>,
       ()=> {
-        let file = this.state.file[0];
-        let form = new FormData();
-        form.append('file', file);
-        let url = '/admin/api/file';
-        let req = superagent.post(url);
-        req.send(form);
-        req.end((result, res) => {
-          if( result ) return false;
-          preInputText(`![alt](${res.body.data})`, 2, 5);
-        });
-        return true;
+        if( (this.state.file && this.state.file.length === 0) || !this.state.fileUrl ) {
+          return false;
+        }
+
+        var data;
+        if( this.state.fileUrl ) {
+          data = new FormData();
+          data.append('fileUrl', this.state.fileUrl);
+        } else {
+          data = new FormData();
+          data.append('file', this.state.file[0]);
+        }
+
+        return upload(data).then(
+          res => preInputText(`![alt](${res.data})`, 2, 5),
+          console.log
+        );
       }
     );
-    // this._preInputText("![alt](www.yourlink.com)", 2, 5)
   },
   _listUlText () {
     this._preInputText("- 无序列表项0\n- 无序列表项1", 2, 8)
