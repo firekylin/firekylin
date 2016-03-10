@@ -13,7 +13,12 @@ export default class extends Base {
    */
   async getAction(self){
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    let data = await this.modelInstance.order('id DESC').page( this.get('page'), 15 ).countSelect();
+    let data;
+    if( this.id ) {
+      data = await this.modelInstance.where({id: this.id}).find();
+    } else {
+      data = await this.modelInstance.order('id DESC').page( this.get('page'), 15 ).countSelect();
+    }
     return this.success(data);
   }
 
