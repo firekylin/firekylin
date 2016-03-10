@@ -18,7 +18,7 @@ export default class extends think.model.relation {
         type: think.model.BELONG_TO,
         fKey: 'user_id',
         key: 'display_name',
-        field: 'id,display_name'
+        field: 'id,display_name,name'
       }
     }
   }
