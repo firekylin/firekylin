@@ -19,7 +19,7 @@ export default class extends Base {
 
     let contentType = file.headers['content-type']; //check content-type if you want;
 
-    let basename = path.basename(file.path);
+    let basename = this.post('name') ? this.post('name') + path.extname(file.path) : path.basename(file.path);
     let destDir = moment(new Date).format('YYYYMM');
     let destPath = path.join( think.UPLOAD_PATH, destDir );
     if( !think.isDir(destPath) ) {
@@ -44,7 +44,7 @@ export default class extends Base {
     });
     let writeFile = think.promisify(fs.writeFile, fs);
     let destDir = moment(new Date).format('YYYYMM');
-    let basename = moment(new Date).format('x') + '.jpg';
+    let basename = (this.post('name') ? this.post('name') : think.md5(result)) + path.extname(url);
     let destPath = path.join( think.UPLOAD_PATH, destDir );
     if( !think.isDir(destPath) ) {
       think.mkdir(destPath);

@@ -1,10 +1,11 @@
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
 import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
+import firekylin from 'common/util/firekylin';
 
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
@@ -84,6 +85,7 @@ export default class extends Base {
           </div>
           <div className="form-group">
             <label>LOGO 地址</label>
+            {this.state.options.logo_url ? <img src={this.state.options.logo_url + '?m=' + Date.now()} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
             <ValidatedInput
               type="text"
               name="logo_url"
@@ -91,7 +93,37 @@ export default class extends Base {
               ref="logo_url"
               className="form-control"
             />
-            <p className="help-block">尺寸最好为 140px x 140px。</p>
+            <p className="help-block">
+              尺寸最好为 140px x 140px。
+              <button type="button" className="btn btn-default" onClick={()=> ReactDOM.findDOMNode(this.refs.logoInput).click()}>{this.state.logo_uploading?'正在':''}上传</button>
+              <input
+                  type="file"
+                  ref="logoInput"
+                  style={{display: 'none'}}
+                  accept="image/*"
+                  onChange={e=> {
+                    let file = e.target.files[0];
+                    if( !file ) {
+                      return false;
+                    }
+                    this.state.options.logo_url = '';
+                    this.setState({logo_uploading: true}, ()=> {
+                      var form = new FormData();
+                      form.append('file', file);
+                      form.append('name', 'logo');
+                      firekylin.upload(form).then(
+                        res => {
+                          this.state.options.logo_url = res.data;
+                          this.state.logo_uploading = false;
+                          this.forceUpdate();
+                        },
+                        console.log
+                      );
+
+                    });
+                  }}
+              />
+            </p>
           </div>
           <div className="form-group">
             <label>站点描述</label>
