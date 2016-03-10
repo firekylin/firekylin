@@ -5,6 +5,7 @@ import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
@@ -76,29 +77,34 @@ export default class extends Base {
     }
 
     return (
-      <Form
-        model={this.state.tagInfo}
-        className="tag-create clearfix"
-        onValidSubmit={this.handleValidSubmit.bind(this)}
-      >
-        <ValidatedInput
-            name="name"
-            type="text"
-            label="标签名称"
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-        />
-        <ValidatedInput
-            name="pathname"
-            type="text"
-            label="标签缩略名"
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-        />
-        <div className="form-group col-xs-12">
-          <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <Form
+            model={this.state.tagInfo}
+            className="tag-create clearfix"
+            onValidSubmit={this.handleValidSubmit.bind(this)}
+          >
+            <ValidatedInput
+                name="name"
+                type="text"
+                label="标签名称"
+                labelClassName="col-xs-2"
+                wrapperClassName="col-xs-10"
+            />
+            <ValidatedInput
+                name="pathname"
+                type="text"
+                label="标签缩略名"
+                labelClassName="col-xs-2"
+                wrapperClassName="col-xs-10"
+            />
+            <div className="form-group col-xs-12">
+              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            </div>
+          </Form>
         </div>
-      </Form>
+      </div>
     );
   }
 }
