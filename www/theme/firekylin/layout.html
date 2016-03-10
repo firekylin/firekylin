@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-  <link rel="icon" href="/static/images/favicon.png">
+  <link rel="icon" href="{{options.logo_url |default('/static/img/firekylin.jpg')}}">
+  {% if options.favicon %}
+  <link rel="shortcut icon" href="{{options.favicon}}" type="image/x-icon">
+  {% endif %}
   <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
   <meta name="keyword" content="{{options.keywords}}">
   <meta name="description" content="{{options.description}}">
@@ -15,7 +18,7 @@
   <div class="wrap">
       <div class="profile">
           <a href="/">
-              <img src="/static/img/firekylin.jpg" alt="{{options.title}}">
+              <img src="{{options.logo_url |default('/static/img/firekylin.jpg')}}" alt="{{options.title}}">
           </a>
           <span>{{options.title}}</span>
       </div>

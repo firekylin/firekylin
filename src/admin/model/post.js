@@ -16,9 +16,9 @@ export default class extends think.model.relation {
       cate: think.model.MANY_TO_MANY,
       user: {
         type: think.model.BELONG_TO,
-        fKey: 'user_id',
-        key: 'display_name',
-        field: 'id,display_name'
+        // fKey: 'user_id',
+        // key: 'display_name',
+        field: 'id,name,display_name'
       }
     }
   }
