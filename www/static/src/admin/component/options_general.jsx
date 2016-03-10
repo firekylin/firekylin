@@ -94,7 +94,7 @@ export default class extends Base {
               className="form-control"
             />
             <p className="help-block">
-              尺寸最好为 140px x 140px。
+              尺寸最好为 140x140px。
               <button type="button" className="btn btn-default" onClick={()=> ReactDOM.findDOMNode(this.refs.logoInput).click()}>{this.state.logo_uploading?'正在':''}上传</button>
               <input
                   type="file"
@@ -137,6 +137,48 @@ export default class extends Base {
                 required: '请填写站点描述'
               }}
             />
+          </div>
+          <div className="form-group">
+            <label>Favicon 地址</label>
+            {this.state.options.favicon_url ? <img src={this.state.options.favicon_url + '?m=' + Date.now()} alt="logo" style={{display: 'block', marginBottom: '10px', maxWidth: '128px', maxHeight: '128px'}}/> : null}
+            <ValidatedInput
+              type="text"
+              name="favicon_url"
+              {...this.getProps('favicon_url')}
+              ref="favicon_url"
+              className="form-control"
+            />
+            <p className="help-block">
+              尺寸最好为 128x128px。
+              <button type="button" className="btn btn-default" onClick={()=> ReactDOM.findDOMNode(this.refs.faviconInput).click()}>{this.state.favicon_uploading?'正在':''}上传</button>
+              <input
+                  type="file"
+                  ref="faviconInput"
+                  style={{display: 'none'}}
+                  accept="image/x-icon"
+                  onChange={e=> {
+                    let file = e.target.files[0];
+                    if( !file ) {
+                      return false;
+                    }
+                    this.state.options.favicon_url = '';
+                    this.setState({favicon_uploading: true}, ()=> {
+                      var form = new FormData();
+                      form.append('file', file);
+                      form.append('name', 'favicon');
+                      firekylin.upload(form).then(
+                        res => {
+                          this.state.options.logo_url = res.data;
+                          this.state.favicon_uploading = false;
+                          this.forceUpdate();
+                        },
+                        console.log
+                      );
+
+                    });
+                  }}
+              />
+            </p>
           </div>
           <div className="form-group">
             <label>关键词</label>
