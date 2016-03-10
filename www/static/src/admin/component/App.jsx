@@ -25,7 +25,7 @@ export default class App extends Base {
         <Sidebar />
         <Tip />
         <div className="fk-content-wrap">
-          <BreadCrumb />
+          <BreadCrumb {...this.props}/>
           <div className="manage-container">
             {this.props.children}
           </div>
