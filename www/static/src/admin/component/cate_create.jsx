@@ -5,6 +5,7 @@ import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
 import TipAction from 'common/action/tip';
@@ -83,37 +84,42 @@ export default class extends Base {
     }
 
     return (
-      <Form
-        model={this.state.cateInfo}
-        className="cate-create clearfix"
-        onValidSubmit={this.handleValidSubmit.bind(this)}
-      >
-        <ValidatedInput
-            name="name"
-            type="text"
-            label="分类名称"
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-        />
-        <ValidatedInput
-            name="pathname"
-            type="text"
-            label="分类缩略名"
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-        />
-        <div className="form-group">
-          <label className="control-label col-xs-2">父级分类</label>
-          <div className="col-xs-10">
-            <select className="form-control" onChange={e => this.setState({pid: e.target.value})} defaultValue={this.state.pid}>
-              {cateList.length === 1 ? <option value={cateList[0].id}>{cateList[0].name}</option>
-              : cateList.map(item => <option key={item.id} value={item.id}>{item.name}</option>)
-              }
-            </select>
-          </div>
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <Form
+            model={this.state.cateInfo}
+            className="cate-create clearfix"
+            onValidSubmit={this.handleValidSubmit.bind(this)}
+          >
+            <ValidatedInput
+                name="name"
+                type="text"
+                label="分类名称"
+                labelClassName="col-xs-2"
+                wrapperClassName="col-xs-10"
+            />
+            <ValidatedInput
+                name="pathname"
+                type="text"
+                label="分类缩略名"
+                labelClassName="col-xs-2"
+                wrapperClassName="col-xs-10"
+            />
+            <div className="form-group">
+              <label className="control-label col-xs-2">父级分类</label>
+              <div className="col-xs-10">
+                <select className="form-control" onChange={e => this.setState({pid: e.target.value})} defaultValue={this.state.pid}>
+                  {cateList.length === 1 ? <option value={cateList[0].id}>{cateList[0].name}</option>
+                  : cateList.map(item => <option key={item.id} value={item.id}>{item.name}</option>)
+                  }
+                </select>
+              </div>
+            </div>
+            <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+          </Form>
         </div>
-        <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
-      </Form>
+      </div>
     );
   }
 }
