@@ -4,26 +4,10 @@ import marked from 'marked';
 import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
 import ModalAction from 'common/action/modal';
-import superagent from 'superagent';
+import firekylin from 'common/util/firekylin';
 import './style.css';
 
-function upload(data) {
-  return new Promise(function(resolve, reject) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/admin/api/file', true);
-    xhr.onload = function() {
-      try {
-        resolve( JSON.parse(xhr.responseText) );
-      } catch(e) {
-        reject(e);
-      }
-    }
-    xhr.onerror = function() {
-      reject(xhr);
-    }
-    xhr.send(data);
-  });
-}
+
 
 const MdEditor = React.createClass({
   propTypes: {
@@ -166,8 +150,8 @@ const MdEditor = React.createClass({
   _italicText () {
     this._preInputText("_斜体文字_", 1, 5)
   },
-  _linkText () {
-    this._preInputText("[链接文本](www.yourlink.com)", 1, 5)
+  _linkText (url = 'www.yourlink.com') {
+    this._preInputText(`[链接文本](${url})`, 1, 5)
   },
   _blockquoteText () {
     this._preInputText("> 引用", 2, 4)
@@ -176,7 +160,7 @@ const MdEditor = React.createClass({
     this._preInputText("```\ncode block\n```", 4, 14)
   },
   _pictureText () {
-    let preInputText = this._preInputText;
+    let preInputText = this._preInputText, linkText = this._linkText;
     ModalAction.confirm(
       '插入图片',
       <Tabs defaultActiveKey={1}>
@@ -190,21 +174,25 @@ const MdEditor = React.createClass({
         </Tab>
       </Tabs>,
       ()=> {
-        if( (this.state.file && this.state.file.length === 0) || !this.state.fileUrl ) {
+        if( (this.state.file && this.state.file.length === 0) && !this.state.fileUrl ) {
           return false;
         }
 
-        var data;
+        var data = new FormData();
         if( this.state.fileUrl ) {
-          data = new FormData();
           data.append('fileUrl', this.state.fileUrl);
         } else {
-          data = new FormData();
           data.append('file', this.state.file[0]);
         }
 
-        return upload(data).then(
-          res => preInputText(`![alt](${res.data})`, 2, 5),
+        return firekylin.upload(data).then(
+          res => {
+            if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf)$/i) ) {
+              preInputText(`![alt](${res.data})`, 2, 5);
+            } else {
+              linkText(res.data);
+            }
+          },
           console.log
         );
       }

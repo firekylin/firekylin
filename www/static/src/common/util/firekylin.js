@@ -53,6 +53,23 @@ let firekylin = {
     });
     return deferred.promise;
   },
+  upload: (data) => {
+    return new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/admin/api/file', true);
+      xhr.onload = function() {
+        try {
+          resolve( JSON.parse(xhr.responseText) );
+        } catch(e) {
+          reject(e);
+        }
+      }
+      xhr.onerror = function() {
+        reject(xhr);
+      }
+      xhr.send(data);
+    });
+  },
   /**
    * check object is object
    * @param  {Mixed}  obj []
