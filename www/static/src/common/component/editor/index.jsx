@@ -187,7 +187,7 @@ const MdEditor = React.createClass({
 
         return firekylin.upload(data).then(
           res => {
-            if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf)$/i) ) {
+            if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
               preInputText(`![alt](${res.data})`, 2, 5);
             } else {
               linkText(res.data);
