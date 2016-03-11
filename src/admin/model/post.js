@@ -71,6 +71,11 @@ export default class extends think.model.relation {
    * @return {}      []
    */
   getLatest(nums = 10){
-    return this.order('id DESC').limit(nums).setRelation(false).select();
+    return this.order('id DESC').where({
+      create_time: {'<=': think.datetime()},
+      is_public: 1, //公开
+      type: 0, //文章
+      status: 3 //已经发布
+    }).limit(nums).setRelation(false).select();
   }
 }
