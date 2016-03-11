@@ -91,152 +91,25 @@
 }
 
 @media screen and (max-width:769px) {
-  #page-index h1.search {
-    padding: 10px;
-    font-size: 18px;
-    background-color: #fff;
-    margin-bottom: 5px;
-  }
-  #page-index article {
+  article {
     margin: 5px 5px 0;
     background-color: #fff;
     padding: 10px;
   }
-  #page-index article .meta {
+  article .meta {
     display: none;
   }
-  #page-index article h1 {
+  article h1 {
     font-size: 22px;
     padding: 5px 0 10px;
     margin: 0;
   }
-  #page-index article .desc {
+  article .desc {
     color: #999;
     font-size: 14px;
   }
-  #page-index article p.more {
+  article p.more {
     font-size: 14px;
     margin: 5px 0;
-  }
-}
-
-@media screen and (max-width:769px) {
-  #pagination {
-    height: 50px;
-    padding: 5px 0;
-    margin-top: 5px;
-  }
-  #pagination li {
-    width: 50%;
-  }
-  #pagination a {
-    width: 100%;
-    border-radius: 0;
-    border: none;
-  }
-  #pagination a:first-child {
-    border-right: 1px solid #f6f9fa;
-  }
-}
-
-@media screen and (max-width:769px) {
-  #page-archive {
-    margin: 0;
-    padding: 0;
-  }
-  #page-archive section {
-    margin: 5px;
-    background-color: #fff;
-  }
-  #page-archive section h1.year {
-    width: 100%;
-    position: static;
-    font-size: 24px;
-    height: 50px;
-    line-height: 50px;
-    padding: 0;
-    text-align: center;
-    border-bottom: 1px solid #f6f9fa;
-  }
-  #page-archive section h1.year::before {
-    border: none;
-  }
-  #page-archive section article {
-    padding: 5px;
-    margin: 0 10px 5px;
-    border-bottom: 1px solid #f6f9fa;
-  }
-  #page-archive section article .meta {
-    display: none;
-  }
-  #page-archive section article h1 {
-    font-size: 14px;
-  }
-}
-
-@media screen and (max-width:769px) {
-  #page-about,
-  #page-tags {
-    margin: 5px;
-    padding: 0;
-    background-color: #fff;
-    min-height: -webkit-calc(100% - 10px);
-  }
-  #page-tags {
-    min-height: calc(100% - 10px);
-  }
-  #page-about h1,
-  #page-tags h1 {
-    font-size: 24px;
-    height: 50px;
-    line-height: 50px;
-    text-align: center;
-    margin: 0;
-    border-bottom: 1px solid #f6f9fa;
-  }
-  #page-tags section {
-    padding: 10px 10px 0;
-  }
-  #page-about {
-    min-height: calc(100% - 10px);
-  }
-  #page-about section {
-    padding: 10px;
-  }
-}
-
-@media screen and (max-width:769px) {
-  #page-post {
-    margin: 5px;
-    padding: 10px;
-    background-color: #fff;
-  }
-  #page-post article .meta {
-    display: none;
-  }
-  #page-post article h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-}
-
-@media screen and (max-width:769px) {
-  #page-links {
-    margin: 5px;
-    padding: 0;
-    background-color: #fff;
-    min-height: -webkit-calc(100% - 10px);
-    min-height: calc(100% - 10px);
-  }
-  #page-links h1 {
-    font-size: 24px;
-    height: 50px;
-    line-height: 50px;
-    text-align: center;
-    margin: 0;
-    border-bottom: 1px solid #f6f9fa;
-  }
-  #page-links section {
-    padding: 10px;
   }
 }

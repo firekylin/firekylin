@@ -80,6 +80,12 @@ export default class extends Base {
           })}
         </ol>
       )
+    }else{
+      breadcrumb = (
+        <ol className="breadcrumb">
+          <li>首页</li>
+        </ol>
+      )
     }
     return (
       <div className="fk-header clearfix">

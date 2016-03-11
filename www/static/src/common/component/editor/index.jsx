@@ -7,10 +7,11 @@ import ModalAction from 'common/action/modal';
 import firekylin from 'common/util/firekylin';
 import './style.css';
 
-
+import TipAction from 'common/action/tip';
 
 const MdEditor = React.createClass({
   propTypes: {
+    onFullScreen: T.func,
     content: T.string,
     children: T.node
   },
@@ -134,7 +135,7 @@ const MdEditor = React.createClass({
     }
   },
   _toggleFullScreen (e) {
-    this.setState({ isFullScreen: !this.state.isFullScreen })
+    this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   },
   // default text processors
   _preInputText (text, preStart, preEnd) {
@@ -169,7 +170,7 @@ const MdEditor = React.createClass({
     this._preInputText("```\ncode block\n```", 4, 14)
   },
   _pictureText () {
-    let preInputText = this._preInputText, linkText = this._linkText;
+    let preInputText = this._preInputText, that = this;
     ModalAction.confirm(
       '插入图片',
       <Tabs defaultActiveKey={1}>
@@ -187,7 +188,7 @@ const MdEditor = React.createClass({
           return false;
         }
 
-        var data = new FormData();
+        var data = new FormData;
         if( this.state.fileUrl ) {
           data.append('fileUrl', this.state.fileUrl);
         } else {
@@ -199,10 +200,12 @@ const MdEditor = React.createClass({
             if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
               preInputText(`![alt](${res.data})`, 2, 5);
             } else {
-              linkText(res.data);
+              let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
+              preInputText(`[${text}](${res.data})`, 1, text.length + 1);
             }
-          }
-        ).catch((res)=>{ alert(res.errmsg)});
+          },
+          console.log
+        ).catch(()=> TipAction.fail(res.errmsg));
       }
     );
   },

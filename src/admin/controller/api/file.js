@@ -41,6 +41,7 @@ export default class extends Base {
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36"
       },
+      timeout: 1000,
       encoding: 'binary'
     }).catch(() =>{
       return this.fail("URL参数不合法或者请求失败！");
