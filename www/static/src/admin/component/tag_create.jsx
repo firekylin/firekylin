@@ -90,14 +90,14 @@ export default class extends Base {
                 type="text"
                 label="标签名称"
                 labelClassName="col-xs-2"
-                wrapperClassName="col-xs-10"
+                wrapperClassName="col-xs-3"
             />
             <ValidatedInput
                 name="pathname"
                 type="text"
                 label="标签缩略名"
                 labelClassName="col-xs-2"
-                wrapperClassName="col-xs-10"
+                wrapperClassName="col-xs-3"
             />
             <div className="form-group col-xs-12">
               <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>

@@ -34,6 +34,7 @@ export default class extends Base {
   }
 
   async getFileByUrl(url) {
+
     let fn = think.promisify(request.get);
     let result = await fn({
       url,
@@ -41,7 +42,14 @@ export default class extends Base {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36"
       },
       encoding: 'binary'
+    }).catch(() =>{
+      return this.fail("URL参数不合法或者请求失败！");
     });
+
+    if(result.headers["content-type"] !== "image/jpeg") {
+      return this.fail("请求的资源不是一张图片");
+    };
+
     let writeFile = think.promisify(fs.writeFile, fs);
     let destDir = moment(new Date).format('YYYYMM');
     let basename = (this.post('name') ? this.post('name') : think.md5(result)) + path.extname(url);

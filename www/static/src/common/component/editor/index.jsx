@@ -24,8 +24,16 @@ const MdEditor = React.createClass({
   },
   componentDidMount () {
     // cache dom node
-    this.textControl = ReactDOM.findDOMNode(this.refs.editor)
-    this.previewControl = ReactDOM.findDOMNode(this.refs.preview)
+    this.textControl = ReactDOM.findDOMNode(this.refs.editor);
+    this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
+    if(localStorage['unsavepage']) {
+        ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
+          this.textControl.value = localStorage['unsavepage'];
+          this.setState({ result: marked(this.textControl.value) });
+          this.props.onChange(this.textControl.value);
+        })
+
+    }
   },
   componentWillUnmount () {
     this.textControl = null
@@ -115,6 +123,7 @@ const MdEditor = React.createClass({
 
     this._ltr = setTimeout(() => {
       this.setState({ result: marked(this.textControl.value) }) // change state
+      localStorage['unsavepage'] = this.textControl.value;
     }, 300);
 
     this.props.onChange(e.target.value);
@@ -192,9 +201,8 @@ const MdEditor = React.createClass({
             } else {
               linkText(res.data);
             }
-          },
-          console.log
-        );
+          }
+        ).catch((res)=>{ alert(res.errmsg)});
       }
     );
   },
