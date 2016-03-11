@@ -11,6 +11,7 @@ import TipAction from 'common/action/tip';
 
 const MdEditor = React.createClass({
   propTypes: {
+    onFullScreen: T.func,
     content: T.string,
     children: T.node
   },
@@ -125,7 +126,7 @@ const MdEditor = React.createClass({
     }
   },
   _toggleFullScreen (e) {
-    this.setState({ isFullScreen: !this.state.isFullScreen })
+    this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   },
   // default text processors
   _preInputText (text, preStart, preEnd) {

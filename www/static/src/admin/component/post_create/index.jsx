@@ -155,7 +155,7 @@ export default class extends Base {
             onValidSubmit={this.handleValidSubmit.bind(this)}
           >
             <div className="row">
-              <div className="col-xs-9">
+              <div className={classnames({'col-xs-9': !this.state.isFullScreen})}>
                 <ValidatedInput
                     name="title"
                     type="text"
@@ -163,7 +163,7 @@ export default class extends Base {
                     validate="required"
                     label={`${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`}
                 />
-                <div className="pathname">
+                <div className={classnames('pathname')}>
                   <span>{baseUrl}</span>
                   <ValidatedInput name="pathname" type="text" validate="required" disabled={this.state.postInfo.status === 3}/>
                   <span>.html</span>
@@ -175,10 +175,11 @@ export default class extends Base {
                       this.state.postInfo.markdown_content = content;
                       this.forceUpdate();
                     }}
+                    onFullScreen={isFullScreen => this.setState({isFullScreen})}
                   />
                 </div>
               </div>
-              <div className="col-xs-3">
+              <div className={classnames('col-xs-3')}>
                 <div className="button-group">
                   <button
                     type="submit"
