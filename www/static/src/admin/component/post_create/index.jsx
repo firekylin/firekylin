@@ -44,7 +44,6 @@ export default class extends Base {
     this.type = 0;
     this.cate = {};
     this.id = this.props.params.id | 0;
-
   }
 
   componentWillMount() {
@@ -176,6 +175,7 @@ export default class extends Base {
                       this.forceUpdate();
                     }}
                     onFullScreen={isFullScreen => this.setState({isFullScreen})}
+                    info = {{id: this.id,type: this.type}}
                   />
                 </div>
               </div>
@@ -185,14 +185,14 @@ export default class extends Base {
                     type="submit"
                     {...props}
                     className="btn btn-default"
-                    onClick={()=> {this.state.status = 0;localStorage['unsavepage'] = ""}}
+                    onClick={()=> {this.state.status = 0;localStorage['unsavetype'+this.type+'id'+this.id+''] = ""}}
                   >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
                   <span> </span>
                   <button
                       type="submit"
                       {...props}
                       className="btn btn-primary"
-                      onClick={()=>{this.state.status = 3;localStorage['unsavepage'] = ""}}
+                      onClick={()=>{this.state.status = 3;localStorage['unsavetype'+this.type+'id'+this.id+''] = ""}}
                   >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
                 </div>
                 <div style={{marginBottom: 15}}>
