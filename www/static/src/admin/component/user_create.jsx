@@ -55,8 +55,12 @@ export default class extends Base {
     values.type = ReactDom.findDOMNode(this.refs.type).value;
     values.status = ReactDom.findDOMNode(this.refs.status).value;
     delete values.repassword;
-    let password = md5(SysConfig.options.password_salt + values.password);
-    values.password = password;
+    if( this.id && values.password === '' ) {
+      delete values.password;
+    } else {
+      let password = md5(SysConfig.options.password_salt + values.password);
+      values.password = password;
+    }
     this.setState({submitting: true});
     if(this.id){
       values.id = this.id;
@@ -118,6 +122,8 @@ export default class extends Base {
         if( val.length < 8 || val.length > 30 ) {
           return '密码长度为8到30个字符';
         }
+
+        return true;
       },
       repassword: (val, context) => val === context.password
     }

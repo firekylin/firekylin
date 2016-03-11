@@ -227,6 +227,17 @@ export default class extends Base {
                 className="form-control"
               />
             </div>
+            <div className="form-group">
+              <label>网站统计代码</label>
+              <ValidatedInput
+                  type="textarea"
+                  name="statistics"
+                  {...this.getProps('statistics')}
+                  ref="statistics"
+                  className="form-control"
+                  style={{height: 150}}
+              />
+            </div>
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>
