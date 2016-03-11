@@ -11,6 +11,7 @@ import Editor from 'common/component/editor';
 import Select, {Option} from 'rc-select';
 import 'rc-select/assets/index.css';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import PostAction from 'admin/action/post';
 import PostStore from 'admin/store/post';
 import CateAction from 'admin/action/cate';
@@ -145,130 +146,135 @@ export default class extends Base {
     //baseUrl
     let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
     return (
-      <Form
-        model={this.state.postInfo}
-        className="post-create clearfix"
-        onValidSubmit={this.handleValidSubmit.bind(this)}
-      >
-        <div className="row">
-          <div className="col-xs-9">
-            <ValidatedInput
-                name="title"
-                type="text"
-                placeholder="标题"
-                validate="required"
-                label={`${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`}
-            />
-            <div className="pathname">
-              <span>{baseUrl}</span>
-              <ValidatedInput name="pathname" type="text" validate="required" disabled={this.state.postInfo.status === 3}/>
-              <span>.html</span>
-            </div>
-            <div className="form-group">
-              <Editor
-                content={this.state.postInfo.markdown_content}
-                onChange={content => {
-                  this.state.postInfo.markdown_content = content;
-                  this.forceUpdate();
-                }}
-              />
-            </div>
-          </div>
-          <div className="col-xs-3">
-            <div className="button-group">
-              <button
-                type="submit"
-                {...props}
-                className="btn btn-default"
-                onClick={()=> this.state.status = 0}
-              >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
-              <span> </span>
-              <button
-                  type="submit"
-                  {...props}
-                  className="btn btn-primary"
-                  onClick={()=> this.state.status = 3}
-              >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
-            </div>
-            <div style={{marginBottom: 15}}>
-              <label>发布日期</label>
-              <div>
-                <Datetime
-                  dateFormat="YYYY-MM-DD"
-                  timeFormat="HH:mm:ss"
-                  locale="zh-cn"
-                  defaultValue={this.state.postInfo.create_time}
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <Form
+            model={this.state.postInfo}
+            className="post-create clearfix"
+            onValidSubmit={this.handleValidSubmit.bind(this)}
+          >
+            <div className="row">
+              <div className="col-xs-9">
+                <ValidatedInput
+                    name="title"
+                    type="text"
+                    placeholder="标题"
+                    validate="required"
+                    label={`${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`}
                 />
+                <div className="pathname">
+                  <span>{baseUrl}</span>
+                  <ValidatedInput name="pathname" type="text" validate="required" disabled={this.state.postInfo.status === 3}/>
+                  <span>.html</span>
+                </div>
+                <div className="form-group">
+                  <Editor
+                    content={this.state.postInfo.markdown_content}
+                    onChange={content => {
+                      this.state.postInfo.markdown_content = content;
+                      this.forceUpdate();
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-            {!this.type ?
-            <div className="form-group">
-              <label className="control-label">分类</label>
-              <ul>
-                {this.state.cateList.map(cate =>
-                  <li key={cate.id}>
-                    {cate.pid !== 0 ? '　' : null}
+              <div className="col-xs-3">
+                <div className="button-group">
+                  <button
+                    type="submit"
+                    {...props}
+                    className="btn btn-default"
+                    onClick={()=> this.state.status = 0}
+                  >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
+                  <span> </span>
+                  <button
+                      type="submit"
+                      {...props}
+                      className="btn btn-primary"
+                      onClick={()=> this.state.status = 3}
+                  >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
+                </div>
+                <div style={{marginBottom: 15}}>
+                  <label>发布日期</label>
+                  <div>
+                    <Datetime
+                      dateFormat="YYYY-MM-DD"
+                      timeFormat="HH:mm:ss"
+                      locale="zh-cn"
+                      defaultValue={this.state.postInfo.create_time}
+                    />
+                  </div>
+                </div>
+                {!this.type ?
+                <div className="form-group">
+                  <label className="control-label">分类</label>
+                  <ul>
+                    {this.state.cateList.map(cate =>
+                      <li key={cate.id}>
+                        {cate.pid !== 0 ? '　' : null}
+                        <label>
+                          <input
+                              type="checkbox"
+                              name="cate"
+                              value={cate.id}
+                              defaultChecked={cateInitial.includes(cate.id)}
+                              onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}
+                          />
+                          {cate.name}
+                        </label>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                : null}
+                {!this.type ?
+                <div className="form-group">
+                  <label className="control-label">标签</label>
+                  <div>
+                    <Select
+                        tags
+                        style={{width: '100%'}}
+                        maxTagTextLength={5}
+                        value={this.state.postInfo.tag}
+                        onChange={val => { this.state.postInfo.tag = val; this.forceUpdate(); }}
+                    >
+                        {this.state.tagList.map( tag =>
+                          <Option key={tag.name} value={tag.name}>{tag.name}</Option>
+                        )}
+                    </Select>
+                  </div>
+                </div>
+                : null}
+                <RadioGroup
+                  name="is_public"
+                  label="公开度"
+                  wrapperClassName="col-xs-12"
+                >
+                  <Radio value="1" label="公开" />
+                  <Radio value="0" label="不公开" />
+                </RadioGroup>
+                <div className="form-group">
+                  <label className="control-label">权限控制</label>
+                  <div>
                     <label>
                       <input
                           type="checkbox"
-                          name="cate"
-                          value={cate.id}
-                          defaultChecked={cateInitial.includes(cate.id)}
-                          onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}
+                          name="allow_comment"
+                          checked={this.state.postInfo.allow_comment}
+                          onChange={()=> {
+                            this.state.postInfo.allow_comment = !this.state.postInfo.allow_comment;
+                            this.forceUpdate();
+                          }}
                       />
-                      {cate.name}
+                      允许评论
                     </label>
-                  </li>
-                )}
-              </ul>
-            </div>
-            : null}
-            {!this.type ?
-            <div className="form-group">
-              <label className="control-label">标签</label>
-              <div>
-                <Select
-                    tags
-                    style={{width: '100%'}}
-                    maxTagTextLength={5}
-                    value={this.state.postInfo.tag}
-                    onChange={val => { this.state.postInfo.tag = val; this.forceUpdate(); }}
-                >
-                    {this.state.tagList.map( tag =>
-                      <Option key={tag.name} value={tag.name}>{tag.name}</Option>
-                    )}
-                </Select>
+                  </div>
+                </div>
               </div>
             </div>
-            : null}
-            <RadioGroup
-              name="is_public"
-              label="公开度"
-              wrapperClassName="col-xs-12"
-            >
-              <Radio value="1" label="公开" />
-              <Radio value="0" label="不公开" />
-            </RadioGroup>
-            <div className="form-group">
-              <label className="control-label">权限控制</label>
-              <div>
-                <label>
-                  <input
-                      type="checkbox"
-                      name="allow_comment"
-                      checked={this.state.postInfo.allow_comment}
-                      onChange={()=> {
-                        this.state.postInfo.allow_comment = !this.state.postInfo.allow_comment;
-                        this.forceUpdate();
-                      }}
-                  />
-                  允许评论
-                </label>
-              </div>
-            </div>
-          </div>
+          </Form>
         </div>
-      </Form>
+      </div>
     );
   }
 }

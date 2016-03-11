@@ -3,6 +3,7 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 
@@ -61,23 +62,28 @@ export default class extends Base {
   }
   render(){
     return (
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>用户名</th>
-            <th>邮箱</th>
-            <th>用户组</th>
-            <th>有效</th>
-            <th>注册时间</th>
-            <th>最后登录时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.getUserList()}
-        </tbody>
-      </table>
-    )
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>邮箱</th>
+                <th>用户组</th>
+                <th>有效</th>
+                <th>注册时间</th>
+                <th>最后登录时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.getUserList()}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 }
