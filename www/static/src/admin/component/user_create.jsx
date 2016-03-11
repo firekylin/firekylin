@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 import TipAction from 'common/action/tip';
@@ -134,102 +135,107 @@ export default class extends Base {
     }
 
     return (
-      <Form
-        className="user-create clearfix"
-        onValidSubmit={this.handleValidSubmit.bind(this)}
-        onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
-      >
-        <div className="pull-left">
-          <div className="form-group">
-            <label>用户名</label>
-            <ValidatedInput
-              type="text"
-              name="username"
-              ref="username"
-              className="form-control"
-              placeholder="4到20个字符"
-              {...this.getProps('name')}
-              errorHelp={{
-                required: '请输入用户名',
-                isLength: '长度为4到20个字符'
-              }}
-            />
-            <p className="help-block">登录时所用的名称，不能重复。</p>
-          </div>
-          <div className="form-group">
-            <label>邮箱</label>
-            <ValidatedInput
-              type="text"
-              name="email"
-              ref="email"
-              className="form-control"
-              {...this.getProps('email')}
-              errorHelp={{
-                required: '请输入邮箱',
-                isEmail: '邮箱格式不正确'
-              }}
-            />
-            <p className="help-block">用户主要联系方式，不能重复。</p>
-          </div>
-          <div className="form-group">
-            <label>密码</label>
-            <ValidatedInput
-              type="password"
-              name="password"
-              ref="password"
-              className="form-control"
-              placeholder="8到30个字符"
-              {...this.getProps('password')}
-              errorHelp={{
-                required: '请输入密码',
-                isLength: '密码长度为8到30个字符'
-              }}
-            />
-            <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
-          </div>
-          <div className="form-group ">
-            <label>确认密码</label>
-            <ValidatedInput
-              type="password"
-              name="repassword"
-              ref="repassword"
-              className="form-control"
-              placeholder=""
-              {...this.getProps('repassword')}
-              errorHelp='密码不一致'
-            />
-          </div>
-          <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
-        </div>
-        <div className="pull-left">
-          <div className="form-group">
-            <label>别名</label>
-            <ValidatedInput
-              type="text"
-              name="display_name"
-              ref="display_name"
-              className="form-control"
-              placeholder="显示名称"
-              {...this.getProps('display_name')}
-            />
-          </div>
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <Form
+            className="user-create clearfix"
+            onValidSubmit={this.handleValidSubmit.bind(this)}
+            onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
+          >
+            <div className="pull-left">
+              <div className="form-group">
+                <label>用户名</label>
+                <ValidatedInput
+                  type="text"
+                  name="username"
+                  ref="username"
+                  className="form-control"
+                  placeholder="4到20个字符"
+                  {...this.getProps('name')}
+                  errorHelp={{
+                    required: '请输入用户名',
+                    isLength: '长度为4到20个字符'
+                  }}
+                />
+                <p className="help-block">登录时所用的名称，不能重复。</p>
+              </div>
+              <div className="form-group">
+                <label>邮箱</label>
+                <ValidatedInput
+                  type="text"
+                  name="email"
+                  ref="email"
+                  className="form-control"
+                  {...this.getProps('email')}
+                  errorHelp={{
+                    required: '请输入邮箱',
+                    isEmail: '邮箱格式不正确'
+                  }}
+                />
+                <p className="help-block">用户主要联系方式，不能重复。</p>
+              </div>
+              <div className="form-group">
+                <label>密码</label>
+                <ValidatedInput
+                  type="password"
+                  name="password"
+                  ref="password"
+                  className="form-control"
+                  placeholder="8到30个字符"
+                  {...this.getProps('password')}
+                  errorHelp={{
+                    required: '请输入密码',
+                    isLength: '密码长度为8到30个字符'
+                  }}
+                />
+                <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
+              </div>
+              <div className="form-group ">
+                <label>确认密码</label>
+                <ValidatedInput
+                  type="password"
+                  name="repassword"
+                  ref="repassword"
+                  className="form-control"
+                  placeholder=""
+                  {...this.getProps('repassword')}
+                  errorHelp='密码不一致'
+                />
+              </div>
+              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            </div>
+            <div className="pull-left">
+              <div className="form-group">
+                <label>别名</label>
+                <ValidatedInput
+                  type="text"
+                  name="display_name"
+                  ref="display_name"
+                  className="form-control"
+                  placeholder="显示名称"
+                  {...this.getProps('display_name')}
+                />
+              </div>
 
-          <div className="form-group">
-            <label>用户组</label>
-            <select className="form-control" ref="type">
-              <option value="2" {...this.getOptionProp('type', '2')}>编辑</option>
-              <option value="1" {...this.getOptionProp('type', '1')}>管理员</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>状态</label>
-            <select className="form-control" ref="status">
-              <option value="1" {...this.getOptionProp('status', '1')}>有效</option>
-              <option value="2" {...this.getOptionProp('status', '2')}>禁用</option>
-            </select>
-          </div>
+              <div className="form-group">
+                <label>用户组</label>
+                <select className="form-control" ref="type">
+                  <option value="2" {...this.getOptionProp('type', '2')}>编辑</option>
+                  <option value="1" {...this.getOptionProp('type', '1')}>管理员</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>状态</label>
+                <select className="form-control" ref="status">
+                  <option value="1" {...this.getOptionProp('status', '1')}>有效</option>
+                  <option value="2" {...this.getOptionProp('status', '2')}>禁用</option>
+                </select>
+              </div>
+            </div>
+          </Form>
         </div>
-      </Form>
+      </div>
     );
   }
 }

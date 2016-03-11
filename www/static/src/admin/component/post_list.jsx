@@ -4,6 +4,7 @@ import {Link} from 'react-router';
 import classnames from 'classnames';
 import {Pagination, Col} from 'react-bootstrap';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
 import PostAction from '../action/post';
@@ -99,36 +100,39 @@ export default class extends Base {
   }
   render(){
     return (
-      <div>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>标题</th>
-              <th>作者</th>
-              <th>状态</th>
-              <th>创建日期</th>
-              <th>修改日期</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.getPostList()}
-          </tbody>
-        </table>
-        <div className="col-xs-12" style={{textAlign: 'center'}}>
-          <Pagination
-              prev
-              next
-              first
-              last
-              ellipsis
-              boundaryLinks
-              maxButton={5}
-              bsSize="small"
-              items={this.state.total}
-              activePage={this.state.page}
-              onSelect={(e, selectEvent) => this.setState({page: selectEvent.eventKey}, ()=> PostAction.selectList(this.state.page))}
-          />
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props}/>
+        <div className="manage-container">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>标题</th>
+                <th>作者</th>
+                <th>状态</th>
+                <th>创建日期</th>
+                <th>修改日期</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.getPostList()}
+            </tbody>
+          </table>
+          <div className="col-xs-12" style={{textAlign: 'center'}}>
+            <Pagination
+                prev
+                next
+                first
+                last
+                ellipsis
+                boundaryLinks
+                maxButton={5}
+                bsSize="small"
+                items={this.state.total}
+                activePage={this.state.page}
+                onSelect={(e, selectEvent) => this.setState({page: selectEvent.eventKey}, ()=> PostAction.selectList(this.state.page))}
+            />
+          </div>
         </div>
       </div>
     )
