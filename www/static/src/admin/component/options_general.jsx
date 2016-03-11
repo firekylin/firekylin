@@ -231,9 +231,9 @@ export default class extends Base {
               <label>网站统计代码</label>
               <ValidatedInput
                   type="textarea"
-                  name="statistics"
-                  {...this.getProps('statistics')}
-                  ref="statistics"
+                  name="analyze_code"
+                  {...this.getProps('analyze_code')}
+                  ref="analyze_code"
                   className="form-control"
                   style={{height: 150}}
               />
