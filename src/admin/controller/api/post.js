@@ -65,7 +65,7 @@ export default class extends Base {
   }
 
   async lastest() {
-    let data = await this.modelInstance.getLatest();
+    let data = await this.modelInstance.getLatest(6);
     return this.success(data);
   }
 
