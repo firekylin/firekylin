@@ -64,7 +64,7 @@ export default class extends Base {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
-        <div className="manage">
+        <div className="manage-container">
           <table className="table table-striped">
             <thead>
               <tr>
