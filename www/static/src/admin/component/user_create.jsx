@@ -99,13 +99,26 @@ export default class extends Base {
     }
 
     let validatePrefix = '';
-    if(!this.id && ['name', 'email', 'password'].indexOf(type) > -1){
+    if(!this.id && ['name', 'email'].indexOf(type) > -1){
       validatePrefix = 'required,';
     }
     let validates = {
       name: 'isLength:4:20',
       email: 'isEmail',
-      password: 'isLength:8:30',
+      password: val => {
+        //编辑时可以不用输入用户名
+        if( this.id && val === '' ) {
+          return true;
+        }
+
+        if( val === '' ) {
+          return '请输出密码';
+        }
+
+        if( val.length < 8 || val.length > 30 ) {
+          return '密码长度为8到30个字符';
+        }
+      },
       repassword: (val, context) => val === context.password
     }
     if(typeof validates[type] === 'string'){
@@ -184,10 +197,6 @@ export default class extends Base {
                   className="form-control"
                   placeholder="8到30个字符"
                   {...this.getProps('password')}
-                  errorHelp={{
-                    required: '请输入密码',
-                    isLength: '密码长度为8到30个字符'
-                  }}
                 />
                 <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
               </div>
