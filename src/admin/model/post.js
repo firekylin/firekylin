@@ -70,7 +70,7 @@ export default class extends think.model.relation {
    * @param  {Number} nums []
    * @return {}      []
    */
-  getLatest(nums = 5){
+  getLatest(nums = 10){
     return this.order('id DESC').limit(nums).setRelation(false).select();
   }
 }

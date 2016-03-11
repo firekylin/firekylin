@@ -15,6 +15,7 @@ export default class extends Base {
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
     let data;
     if( this.id ) {
+      if( this.id === 'lastest' ) return this.lastest();
       data = await this.modelInstance.where({id: this.id}).find();
     } else {
       data = await this.modelInstance.order('id DESC').page( this.get('page'), 15 ).countSelect();
@@ -61,6 +62,11 @@ export default class extends Base {
 
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
+  }
+
+  async lastest() {
+    let data = await this.modelInstance.getLatest();
+    return this.success(data);
   }
 
   getPostTime(data) {

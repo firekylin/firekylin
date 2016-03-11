@@ -28,6 +28,12 @@ export default Reflux.createStore({
       data => this.trigger(data, 'getPostList')
     );
   },
+  onSelectLastest() {
+    let req = superagent.get('/admin/api/post/lastest');
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'getPostLastest')
+    );
+  },
   /**
    * save user
    * @param  {Object} data []
