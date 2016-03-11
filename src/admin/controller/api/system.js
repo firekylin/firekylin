@@ -30,7 +30,8 @@ export default class extends base {
       config: await this.getConfig(),
       count: {
         posts: await this.model('post').count(),
-        cates: await this.model('cate').count()
+        cates: await this.model('cate').count(),
+        comments: await this.model('post').sum('comment_num')
       }
     });
   }
