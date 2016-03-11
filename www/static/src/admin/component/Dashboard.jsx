@@ -18,7 +18,11 @@ export default class extends Base {
     thinkjsVersion: '2.1',
     firekylinVersion: '2.0',
     posts: [],
-    count: {}
+    count: {
+      posts: 0,
+      comments: 0,
+      cates: 0
+    }
   };
 
   componentWillMount() {
@@ -36,7 +40,7 @@ export default class extends Base {
         <BreadCrumb {...this.props} />
         <div className="manage-container">
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
-          <p>目前有 {this.state.count.posts} 篇文章, 并有 1 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
+          <p>目前有 {this.state.count.posts} 篇文章, 并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
           <div className="">
             <Link to="/post/create">撰写新文章</Link>
