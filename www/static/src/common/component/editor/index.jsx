@@ -13,7 +13,8 @@ const MdEditor = React.createClass({
   propTypes: {
     onFullScreen: T.func,
     content: T.string,
-    children: T.node
+    children: T.node,
+    info:T.object,
   },
   getInitialState () {
     return {
@@ -24,12 +25,13 @@ const MdEditor = React.createClass({
     }
   },
   componentDidMount () {
+    console.log(this.props.info);
     // cache dom node
     this.textControl = ReactDOM.findDOMNode(this.refs.editor);
     this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
-    if(localStorage['unsavepage']) {
+    if(localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+'']) {
         ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
-          this.textControl.value = localStorage['unsavepage'];
+          this.textControl.value = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''];
           this.setState({ result: marked(this.textControl.value) });
           this.props.onChange(this.textControl.value);
         })
@@ -124,7 +126,7 @@ const MdEditor = React.createClass({
 
     this._ltr = setTimeout(() => {
       this.setState({ result: marked(this.textControl.value) }) // change state
-      localStorage['unsavepage'] = this.textControl.value;
+      localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''] = this.textControl.value;
     }, 300);
 
     this.props.onChange(e.target.value);
@@ -203,9 +205,8 @@ const MdEditor = React.createClass({
               let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
               preInputText(`[${text}](${res.data})`, 1, text.length + 1);
             }
-          },
-          console.log
-        ).catch(()=> TipAction.fail(res.errmsg));
+          }
+        ).catch((res)=> TipAction.fail(res.errmsg));
       }
     );
   },

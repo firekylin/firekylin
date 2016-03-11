@@ -58,7 +58,8 @@ let firekylin = {
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/admin/api/file', true);
       xhr.onload = function() {
-        let res = JSON.parse(xhr.responseText)
+        let res = JSON.parse(xhr.responseText);
+        console.log(res);
         if(res.errno != 0) {
           reject(res);
         } else {
