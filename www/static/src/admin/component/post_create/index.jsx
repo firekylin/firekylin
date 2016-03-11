@@ -20,7 +20,7 @@ import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
-
+import ModalAction from 'common/action/modal';
 import './style.css';
 
 export default class extends Base {
@@ -184,14 +184,14 @@ export default class extends Base {
                     type="submit"
                     {...props}
                     className="btn btn-default"
-                    onClick={()=> this.state.status = 0}
+                    onClick={()=> {this.state.status = 0;localStorage['unsavepage'] = ""}}
                   >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
                   <span> </span>
                   <button
                       type="submit"
                       {...props}
                       className="btn btn-primary"
-                      onClick={()=> this.state.status = 3}
+                      onClick={()=>{this.state.status = 3;localStorage['unsavepage'] = ""}}
                   >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
                 </div>
                 <div style={{marginBottom: 15}}>
