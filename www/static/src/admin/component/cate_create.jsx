@@ -96,19 +96,19 @@ export default class extends Base {
                 name="name"
                 type="text"
                 label="分类名称"
-                labelClassName="col-xs-2"
-                wrapperClassName="col-xs-10"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
             />
             <ValidatedInput
                 name="pathname"
                 type="text"
-                label="分类缩略名"
-                labelClassName="col-xs-2"
-                wrapperClassName="col-xs-10"
+                label="缩略名"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
             />
             <div className="form-group">
-              <label className="control-label col-xs-2">父级分类</label>
-              <div className="col-xs-10">
+              <label className="control-label col-xs-1">父级分类</label>
+              <div className="col-xs-4">
                 <select className="form-control" onChange={e => this.setState({pid: e.target.value})} defaultValue={this.state.pid}>
                   {cateList.length === 1 ? <option value={cateList[0].id}>{cateList[0].name}</option>
                   : cateList.map(item => <option key={item.id} value={item.id}>{item.name}</option>)
