@@ -67,7 +67,7 @@ export default class extends Base {
                 <li><label>V8引擎版本：</label>{this.state.v8Version}</li>
                 <li><label>MySQL版本：</label>{this.state.mysqlVersion}</li>
                 <li><label>ThinkJS版本：</label>{this.state.thinkjsVersion}</li>
-                <li><label>FireKylink版本：</label>{this.state.firekylinVersion}</li>
+                <li><label>FireKylin版本：</label>{this.state.firekylinVersion}</li>
               </ul>
             </div>
             <div className="col-md-4">
