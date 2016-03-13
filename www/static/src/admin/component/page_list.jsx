@@ -50,7 +50,7 @@ export default class extends Base {
             <a href={`/admin/page/edit/${item.id}`} title={item.title}>{item.title}</a>
             {this.renderStatus(item.status)}
           </td>
-          <td>{item.user.display_name}</td>
+          <td>{item.user.display_name || item.user.name}</td>
           <td>
             <a href={`/admin/page/edit/${item.id}`} title={item.title}>
               <button type="button" className="btn btn-primary btn-xs">

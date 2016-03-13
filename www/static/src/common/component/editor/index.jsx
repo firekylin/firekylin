@@ -38,6 +38,7 @@ const MdEditor = React.createClass({
     }
   },
   componentWillReceiveProps(nextProps) {
+    if(nextProps.content === this.props.content) { return; }
     let initialState = this.getInitialState();
     initialState.result = marked(nextProps.content || '');
     this.setState(initialState);
