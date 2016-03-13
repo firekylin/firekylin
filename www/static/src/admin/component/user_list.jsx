@@ -47,7 +47,7 @@ export default class extends Base {
     }
     return this.state.userList.map(item => {
       return (
-        <tr>
+        <tr key={item.id}>
           <td scope="row">{item.id}</td>
           <td>{item.display_name || item.name}</td>
           <td>{item.email}</td>
