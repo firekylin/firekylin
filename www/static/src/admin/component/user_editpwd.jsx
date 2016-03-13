@@ -131,7 +131,7 @@ export default class extends Base {
         <BreadCrumb {...this.props} />
         <div className="manage-container">
           <Form
-            className="user-create clearfix"
+            className="user-editpwd clearfix"
             onValidSubmit={this.handleValidSubmit.bind(this)}
             onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
           >
