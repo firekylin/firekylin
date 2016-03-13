@@ -17,6 +17,7 @@ export default class extends Base {
     form.append('importor', 'wordpress');
     firekylin.upload(form).then(result => {
       TipAction.success(result.data);
+      alert(result.data);
       this.setState({uploading: false});
     }, err => {
       TipAction.fail('IMPORT_FAIL');
