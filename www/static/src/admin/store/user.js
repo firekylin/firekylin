@@ -58,6 +58,17 @@ export default Reflux.createStore({
     }).catch(err => {
       this.trigger(err, 'LoginFail');
     })
+  },
+
+  onDelete(userId){
+    let url = '/admin/api/user/' + userId + '?method=delete';
+    let req = superagent.post(url);
+    req.type('form').send();
+    return firekylin.request(req).then(data => {
+      this.trigger(data, 'deleteUserSuccess');
+    }).catch(err => {
+      this.trigger(err, 'deleteUserFail');
+    })
   }
 
 })
