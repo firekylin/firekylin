@@ -25,7 +25,6 @@ const MdEditor = React.createClass({
     }
   },
   componentDidMount () {
-    console.log(this.props.info);
     // cache dom node
     this.textControl = ReactDOM.findDOMNode(this.refs.editor);
     this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
@@ -37,6 +36,12 @@ const MdEditor = React.createClass({
         })
 
     }
+  },
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.content === this.props.content) { return; }
+    let initialState = this.getInitialState();
+    initialState.result = marked(nextProps.content || '');
+    this.setState(initialState);
   },
   componentWillUnmount () {
     this.textControl = null
@@ -54,7 +59,7 @@ const MdEditor = React.createClass({
           {this._getToolBar()}
         </div>
         <div className={editorClass}>
-          <textarea ref="editor" name="content" onChange={this._onChange} defaultValue={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
+          <textarea ref="editor" name="content" onChange={this._onChange} value={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
         </div>
         <div className={previewClass} ref="preview" dangerouslySetInnerHTML={{ __html: this.state.result }}></div>
         <div className="md-spliter"></div>
