@@ -56,3 +56,4 @@ cp -r app output;
 cp -r nginx.conf output;
 cp -r pm2.json output;
 cp -r www/*.js output/www;
+cp -r db/firekylin.sql output/;
