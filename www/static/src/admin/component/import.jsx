@@ -7,16 +7,21 @@ import BreadCrumb from 'admin/component/breadcrumb';
 import TipAction from 'common/action/tip';
 
 export default class extends Base {
-  async handleValidSubmit(e) {
+  state = {
+    uploading: false
+  }
+  handleValidSubmit(e) {
+    this.setState({uploading: true});
     var form = new FormData();
     form.append('file', e.file[0]);
     form.append('importor', 'wordpress');
-    try {
-      let result = await firekylin.upload(form);
-      TipAction.success(result);
-    } catch(e) {
+    firekylin.upload(form).then(result => {
+      TipAction.success(result.data);
+      this.setState({uploading: false});
+    }, err => {
       TipAction.fail('IMPORT_FAIL');
-    }
+      this.setState({uploading: false});
+    });
   }
   render(){
     return (
@@ -44,7 +49,7 @@ export default class extends Base {
                   }}
                   accept="application/xml"
               />
-              <button type="submit" className="btn btn-primary">上传</button>
+              <button type="submit" className="btn btn-primary">上传{this.state.uploading?'中...':''}</button>
             </Form>
           </div>
         </div>

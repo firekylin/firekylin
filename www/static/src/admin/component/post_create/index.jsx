@@ -24,22 +24,28 @@ import ModalAction from 'common/action/modal';
 import './style.css';
 
 export default class extends Base {
-  constructor(props){
-    super(props);
-    this.state = {
+  initialState() {
+    return Object.assign({
       postSubmitting: false,
       draftSubmitting: false,
       postInfo: {
+        title: '',
+        pathname: '',
+        markdown_content: '',
         tag: [],
         cate: [],
-        is_public: "1",
+        is_public: '1',
         create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
         allow_comment: true
       },
       status: 3,
       cateList: [],
       tagList: []
-    }
+    });
+  }
+  constructor(props){
+    super(props);
+    this.state = this.initialState();
 
     this.type = 0;
     this.cate = {};
@@ -64,6 +70,13 @@ export default class extends Base {
     if(this.id){
       PostAction.select(this.id);
     }
+  }
+  componentWillReceiveProps(nextProps) {
+    this.id = nextProps.params.id | 0;
+    let initialState = this.initialState();
+    initialState.cateList = this.state.cateList;
+    initialState.tagList = this.state.tagList;
+    this.setState(initialState);
   }
   /**
    * hanle trigger
@@ -111,7 +124,7 @@ export default class extends Base {
     }
 
     values.type = this.type; //type: 0为文章，1为页面
-    values.allow_comment = this.state.allow_comment;
+    values.allow_comment = this.state.postInfo.allow_comment;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
     PostAction.save(values);
@@ -161,10 +174,25 @@ export default class extends Base {
                     placeholder="标题"
                     validate="required"
                     label={`${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`}
+                    value={this.state.postInfo.title}
+                    onChange={val => {
+                      this.state.postInfo.title = val;
+                      this.forceUpdate();
+                    }}
                 />
                 <div className={classnames('pathname')}>
                   <span>{baseUrl}</span>
-                  <ValidatedInput name="pathname" type="text" validate="required" disabled={this.state.postInfo.status === 3}/>
+                  <ValidatedInput
+                      name="pathname"
+                      type="text"
+                      validate="required"
+                      disabled={this.state.postInfo.status === 3}
+                      value={this.state.postInfo.pathname}
+                      onChange={val => {
+                        this.state.postInfo.pathname = val;
+                        this.forceUpdate();
+                      }}
+                  />
                   <span>.html</span>
                 </div>
                 <div className="form-group">
@@ -202,7 +230,11 @@ export default class extends Base {
                       dateFormat="YYYY-MM-DD"
                       timeFormat="HH:mm:ss"
                       locale="zh-cn"
-                      defaultValue={this.state.postInfo.create_time}
+                      value={this.state.postInfo.create_time}
+                      onChange={val => {
+                        this.state.postInfo.create_time = val;
+                        this.forceUpdate();
+                      }}
                     />
                   </div>
                 </div>
@@ -218,7 +250,7 @@ export default class extends Base {
                               type="checkbox"
                               name="cate"
                               value={cate.id}
-                              defaultChecked={cateInitial.includes(cate.id)}
+                              checked={cateInitial.includes(cate.id)}
                               onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}
                           />
                           {cate.name}
