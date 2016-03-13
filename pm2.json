@@ -3,7 +3,7 @@
     "name": "firekylin",
     "script": "www/production.js",
     "cwd": "/Users/welefen/Develop/git//Users/welefen/Develop/git/firekylin",
-    "exec_mode": "cluster",
+    "exec_mode": "fork",
     "instances": 0,
     "max_memory_restart": "1G",
     "autorestart": true,
