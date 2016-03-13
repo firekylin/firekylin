@@ -100,6 +100,7 @@ export default class extends Base {
       case 'getPostInfo':
         data.create_time = moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss');
         data.tag = data.tag.map(tag => tag.name);
+        data.cate.forEach(item => this.cate[item.id] = true);
         this.setState({postInfo: data});
         break;
     }
@@ -151,6 +152,7 @@ export default class extends Base {
     let cateInitial = [];
     if( Array.isArray(this.state.postInfo.cate) ) {
       cateInitial = this.state.postInfo.cate.map( item => item.id );
+      console.log(cateInitial);
     }
 
     //针对 RadioGroup 只有在值为字符串才正常的情况做处理
@@ -254,7 +256,11 @@ export default class extends Base {
                               name="cate"
                               value={cate.id}
                               checked={cateInitial.includes(cate.id)}
-                              onChange={()=> this.cate[cate.id] = !this.cate[cate.id]}
+                              onChange={()=>{
+                                this.cate[cate.id] = !this.cate[cate.id];
+                                this.state.postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
+                                this.forceUpdate();
+                              }}
                           />
                           {cate.name}
                         </label>

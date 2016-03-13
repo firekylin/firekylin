@@ -53,7 +53,7 @@ export default class extends Base {
               <ul>
                 {this.state.posts.map(post =>
                   <li key={post.id}>
-                    <label>{moment(new Date(post.create_time)).format('M.DD')}：</label>
+                    <label>{moment(new Date(post.create_time)).format('MM.DD')}：</label>
                     <a href={`/post/${post.pathname}`} target="_blank">{post.title}</a>
                   </li>
                 )}
