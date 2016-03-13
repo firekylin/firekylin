@@ -11,12 +11,18 @@ import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
 
 export default class extends Base {
+  initialState() {
+    return Object.assign({
+      submitting: false,
+      tagInfo: {
+        name: '',
+        pathname: ''
+      }
+    });
+  }
   constructor(props){
     super(props);
-    this.state = {
-      submitting: false,
-      tagInfo: {}
-    }
+    this.state = this.initialState();
     this.id = this.props.params.id | 0;
   }
 
@@ -25,6 +31,14 @@ export default class extends Base {
     if(this.id){
       TagAction.select(this.id);
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.id = nextProps.params.id | 0;
+    if( this.id ) {
+      TagAction.select(this.id);
+    }
+    this.setState(this.initialState());
   }
   /**
    * hanle trigger
@@ -91,6 +105,11 @@ export default class extends Base {
                 label="标签名称"
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
+                value={this.state.tagInfo.name}
+                onChange={name => {
+                  this.state.tagInfo.name = name;
+                  this.forceUpdate();
+                }}
             />
             <ValidatedInput
                 name="pathname"
@@ -98,6 +117,11 @@ export default class extends Base {
                 label="缩略名"
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
+                value={this.state.tagInfo.pathname}
+                onChange={pathname => {
+                  this.state.tagInfo.pathname = name;
+                  this.forceUpdate();
+                }}
             />
             <div className="form-group col-xs-12">
               <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>

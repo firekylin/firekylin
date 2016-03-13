@@ -73,6 +73,9 @@ export default class extends Base {
   }
   componentWillReceiveProps(nextProps) {
     this.id = nextProps.params.id | 0;
+    if(this.id) {
+      PostAction.select(this.id);
+    }
     let initialState = this.initialState();
     initialState.cateList = this.state.cateList;
     initialState.tagList = this.state.tagList;
