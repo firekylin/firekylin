@@ -18,7 +18,12 @@ export default class extends Base {
       if( this.id === 'lastest' ) return this.lastest();
       data = await this.modelInstance.where({id: this.id}).find();
     } else {
-      data = await this.modelInstance.order('id DESC').page( this.get('page'), 15 ).countSelect();
+      let where = {};
+      //不是管理员，只显示个人的文章
+      if(this.userInfo.type !== 1){
+        where.user_id = this.userInfo.id;
+      }
+      data = await this.modelInstance.where(where).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
     return this.success(data);
   }

@@ -119,7 +119,7 @@ export default class extends Base {
             </tbody>
           </table>
           <div className="col-xs-12" style={{textAlign: 'center'}}>
-            <Pagination
+            {this.state.postList.length ? <Pagination
                 prev
                 next
                 first
@@ -132,6 +132,7 @@ export default class extends Base {
                 activePage={this.state.page}
                 onSelect={(e, selectEvent) => this.setState({page: selectEvent.eventKey}, ()=> PostAction.selectList(this.state.page))}
             />
+            : ''}
           </div>
         </div>
       </div>
