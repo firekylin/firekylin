@@ -49,12 +49,12 @@ export default class extends Base {
           <td>{item.pathname}</td>
           <td>{item.post_cate.length}</td>
           <td>
-            <a href={`/admin/cate/edit/${item.id}`} title={item.name}>
+            <Link to={`/cate/edit/${item.id}`} title={item.name}>
               <button type="button" className="btn btn-primary btn-xs">
                 <span className="glyphicon glyphicon-edit"></span>
                 编辑
               </button>
-            </a>
+            </Link>
             <span> </span>
             <button
                 type="button"
