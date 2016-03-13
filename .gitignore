@@ -48,3 +48,4 @@ www/static/upload/
 sitemap.xml
 
 output/
+.installed
