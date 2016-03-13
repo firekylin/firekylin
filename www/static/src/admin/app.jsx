@@ -31,6 +31,8 @@ import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
 
+import Import from './component/import';
+
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
   queryKey: false
@@ -75,6 +77,7 @@ ReactDOM.render((
         <Redirect from="/" to="general" />
         <Route path="general" component={OptionsGeneral} />
         <Route path="two_factor_auth" component={Options2fa} />
+        <Route path="import" component={Import} />
       </Route>
     </Route>
   </Router>
