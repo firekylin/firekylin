@@ -74,7 +74,7 @@ export default class extends Base {
             }
             return (
               <li key={i}>
-                <Link to={item.url}></Link>
+                <Link to={item.url}>{item.title}</Link>
               </li>
             );
           })}
