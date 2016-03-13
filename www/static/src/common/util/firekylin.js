@@ -53,10 +53,10 @@ let firekylin = {
     });
     return deferred.promise;
   },
-  upload: (data) => {
+  upload: (data, url = '/admin/api/file') => {
     return new Promise(function(resolve, reject) {
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/admin/api/file', true);
+      xhr.open('POST', url, true);
       xhr.onload = function() {
         let res = JSON.parse(xhr.responseText);
         console.log(res);
@@ -65,7 +65,7 @@ let firekylin = {
         } else {
           resolve(res);
         }
-        
+
       }
       xhr.onerror = function() {
         reject(xhr);
