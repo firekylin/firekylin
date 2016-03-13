@@ -7,6 +7,8 @@ import BreadCrumb from 'admin/component/breadcrumb';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 
+import TipAction from 'common/action/tip';
+
 import ModalAction from '../../common/action/modal';
 
 export default class extends Base {
@@ -22,11 +24,18 @@ export default class extends Base {
     UserAction.select();
   }
   handleTrigger(data, type){
-    this.setState({userList: data, loading: false});
+    switch(type){
+      case 'deleteUserSuccess':
+        TipAction.success('删除成功');
+        UserAction.select();
+        break;
+      default: 
+        this.setState({userList: data, loading: false});
+    }
   }
-  handleDelete(){
+  handleDelete(userId){
     return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br /><p className="gray">删除后无法恢复</p></div>, () => {
-      //OptionsAction.save({two_factor_auth: two_factor_auth});
+      UserAction.delete(userId);
     }, 'modal-sm');
   }
   getUserList(){
