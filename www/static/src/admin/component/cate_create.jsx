@@ -11,14 +11,20 @@ import CateStore from '../store/cate';
 import TipAction from 'common/action/tip';
 
 export default class extends Base {
+  initialState() {
+    return Object.assign({
+      submitting: false,
+      cateInfo: {
+        name: '',
+        pathname: ''
+      },
+      pid: 0,
+      cateList: []
+    });
+  }
   constructor(props){
     super(props);
-    this.state = {
-      submitting: false,
-      cateInfo: {},
-      cateList: [],
-      pid: 0
-    }
+    this.state = this.initialState();
     this.id = this.props.params.id | 0;
   }
 
@@ -28,6 +34,17 @@ export default class extends Base {
     if(this.id){
       CateAction.select(this.id);
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.id = nextProps.params.id | 0;
+    if( this.id ) {
+      CateAction.select(this.id);
+    }
+
+    let state = this.initialState();
+    state.cateList = this.state.cateList;
+    this.setState(state);
   }
   /**
    * hanle trigger
@@ -98,6 +115,11 @@ export default class extends Base {
                 label="分类名称"
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
+                value={this.state.cateInfo.name}
+                onChange={val => {
+                  this.state.cateInfo.name = val;
+                  this.forceUpdate();
+                }}
             />
             <ValidatedInput
                 name="pathname"
@@ -105,11 +127,16 @@ export default class extends Base {
                 label="缩略名"
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
+                value={this.state.cateInfo.pathname}
+                onChange={val => {
+                  this.state.cateInfo.pathname = val;
+                  this.forceUpdate();
+                }}
             />
             <div className="form-group">
               <label className="control-label col-xs-1">父级分类</label>
               <div className="col-xs-4">
-                <select className="form-control" onChange={e => this.setState({pid: e.target.value})} defaultValue={this.state.pid}>
+                <select className="form-control" onChange={e => this.setState({pid: e.target.value})} value={this.state.pid}>
                   {cateList.length === 1 ? <option value={cateList[0].id}>{cateList[0].name}</option>
                   : cateList.map(item => <option key={item.id} value={item.id}>{item.name}</option>)
                   }

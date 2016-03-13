@@ -14,6 +14,9 @@
 }
 
 
+.md-panel {
+  height: 550px;
+}
 
 /** 文章编辑右侧 **/
 .post-create .col-xs-3 > div.button-group {
