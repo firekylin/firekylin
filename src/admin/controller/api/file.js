@@ -98,16 +98,16 @@ export default class extends Base {
     let categories = channel['wp:category'], cateModelInstance = this.model('cate');
     let categoriesPromise = categories.map(cate => cateModelInstance.addCate({
       name: cate['wp:cat_name'][0],
-      pathname: cate['wp:category_nicename'][0],
+      pathname: decodeURIComponent(cate['wp:category_nicename'][0]),
       pid: 0
     }));
     await Promise.all(categoriesPromise);
 
-    //导入标签
+    // 导入标签
     let tags = channel['wp:tag'], tagModelInstance = this.model('tag');
     let tagsPromise = tags.map(tag => tagModelInstance.addTag({
       name: tag['wp:tag_name'][0],
-      pathname: tag['wp:tag_slug'][0]
+      pathname: decodeURIComponent(tag['wp:tag_slug'][0])
     }));
     await Promise.all(tagsPromise);
 
@@ -127,9 +127,10 @@ export default class extends Base {
       let user = await this.model('user').where({name: item['dc:creator'][0]}).find();
       //查询分类 ID
       let cates = item.category.filter(item => item.$.domain === 'category').map(item => item._);
-      let category = [];
+      let cate = [];
       if( cates.length > 0 ) {
-        category = await this.model('cate').field('id, name').where({name: ["IN", cates]}).select();
+        cate = await this.model('cate').setRelation(false).field('id').where({name: ['IN', cates]}).select();
+        cate = cate.map(item => item.id);
       }
       //摘要有可能是空
       let summary = item['excerpt:encoded'][0];
@@ -139,7 +140,7 @@ export default class extends Base {
 
       let post = {
         title: item.title[0],
-        pathname: item['wp:post_name'][0],
+        pathname: decodeURIComponent(item['wp:post_name'][0]),
         content: item['content:encoded'][0],
         summary,
         create_time: moment(new Date(item.pubDate[0])).format('YYYY-MM-DD HH:mm:ss'),
@@ -150,7 +151,7 @@ export default class extends Base {
         allow_comment: item['wp:comment_status'][0] === 'open',
         is_public: item['wp:status'][0] !== 'private',
         tag: item.category.filter(item => item.$.domain === 'post_tag').map(item => item._),
-        category
+        cate
       };
       post.markdown_content = toMarkdown(post.content);
       await postModelInstance.addPost(post);
@@ -168,7 +169,7 @@ export default class extends Base {
 
       let page = {
         title: item.title[0],
-        pathname: item['wp:post_name'][0],
+        pathname: decodeURIComponent(item['wp:post_name'][0]),
         content: item['content:encoded'][0],
         summary,
         create_time: moment(new Date(item.pubDate[0])).format('YYYY-MM-DD HH:mm:ss'),
