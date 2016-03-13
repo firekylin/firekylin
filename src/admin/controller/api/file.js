@@ -94,7 +94,7 @@ export default class extends Base {
     await Promise.all(authorsPromise);
 
     //导入分类
-    //为了方便不支持子分类导入，默认所有分类为一级分类
+    //为了简单不支持子分类导入，默认所有分类为一级分类
     let categories = channel['wp:category'], cateModelInstance = this.model('cate');
     let categoriesPromise = categories.map(cate => cateModelInstance.addCate({
       name: cate['wp:cat_name'][0],
@@ -183,5 +183,16 @@ export default class extends Base {
       await pageModelInstance.addPost(page);
     });
     this.success(`共导入文章 ${posts.length} 篇，页面 ${pages.length} 页，分类 ${categories.length} 个，标签 ${tags.length} 个`);
+  }
+
+  formatArray(obj) {
+    for(var i in obj) {
+      if( Array.isArray(obj[i]) && obj[i].length === 1 ) {
+        obj[i] = obj[i][0];
+      } else if( typeof(obj[i]) === 'object' ) {
+        obj[i] = this.formatArray(obj[i]);
+      }
+    }
+    return obj;
   }
 }

@@ -59,7 +59,6 @@ let firekylin = {
       xhr.open('POST', url, true);
       xhr.onload = function() {
         let res = JSON.parse(xhr.responseText);
-        console.log(res);
         if(res.errno != 0) {
           reject(res);
         } else {
