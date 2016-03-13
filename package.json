@@ -1,12 +1,13 @@
 {
-  "name": "thinkjs-application",
-  "description": "application created by thinkjs",
+  "name": "Firekylin",
+  "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2005+",
   "version": "1.0.0",
   "scripts": {
     "start": "node www/development.js",
-    "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/ --retain-lines",
+    "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/",
     "watch-compile": "node -e \"console.log('<npm run watch-compile> no longer need, use <npm start> command direct.');console.log();\"",
-    "watch": "npm run watch-compile"
+    "watch": "npm run watch-compile",
+    "copy-package": "node copy_package.js"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
@@ -53,6 +54,6 @@
     "superagent": "^1.7.2",
     "webpack": "^1.12.12"
   },
-  "repository": "",
+  "repository": "https://github.com/75team/firekylin",
   "license": "MIT"
 }
