@@ -45,6 +45,16 @@ export default Reflux.createStore({
       this.trigger(err, 'saveUserFail');
     })
   },
+  onSavepwd(data){
+    let url = '/admin/api/user?method=put&type=savepwd';
+    let req = superagent.post(url);
+    req.type('form').send(data);
+    return firekylin.request(req).then(data => {
+      this.trigger(data, 'saveUserSuccess');
+    }).catch(err => {
+      this.trigger(err, 'saveUserFail');
+    })
+  },
   /**
    * login
    * @param  {[type]} data [description]

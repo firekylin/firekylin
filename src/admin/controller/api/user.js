@@ -25,6 +25,17 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async putAction(){
+    let type = this.get('type');
+    //save password
+    if(type === 'savepwd'){
+      let userInfo = this.userInfo;
+      let rows = await this.modelInstance.saveUser({
+        password: this.post('password'),
+        id: userInfo.id
+      }, this.ip());
+      return this.success(rows);
+    }
+
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }

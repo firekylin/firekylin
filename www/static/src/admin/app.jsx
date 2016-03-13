@@ -10,6 +10,7 @@ import Dashboard from './component/dashboard';
 import User from './component/user';
 import UserList from './component/user_list';
 import UserCreate from './component/user_create';
+import UserEditPwd from './component/user_editpwd.jsx';
 
 import Post from './component/post';
 import PostList from './component/post_list';
@@ -57,6 +58,7 @@ ReactDOM.render((
         <Redirect from="/" to="list" />
         <Route path="list" component={UserList} />
         <Route path="create" component={UserCreate} />
+        <Route path="edit_pwd" component={UserEditPwd} />
         <Route path="edit/:id" component={UserCreate} />
       </Route>
       <Route path="cate" component={Cate}>

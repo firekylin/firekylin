@@ -74,7 +74,7 @@ export default class extends Base {
             }
             return (
               <li key={i}>
-                <Link to={item.url}>{item.title}</Link>
+                <Link to={item.url}></Link>
               </li>
             );
           })}
@@ -98,7 +98,7 @@ export default class extends Base {
               {SysConfig.userInfo.name} <b className="caret"></b>
             </a>
             <ul className="dropdown-menu">
-              <li><a href="">修改密码</a></li>
+              <li><Link to="/user/edit_pwd">修改密码</Link></li>
               <li><a href="/admin/user/logout">退出</a></li>
             </ul>
           </li>
