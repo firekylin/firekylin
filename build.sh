@@ -43,6 +43,7 @@ cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firek
 rm -rf output.theme/www/theme/firekylin.build;
 cp -r output.theme/www/ output/www/
 rm -rf output.theme;
+rm -rf www/theme/firekylin.build/;
 
 
 if [ -f ${path}"/stc.error.log" ]; then

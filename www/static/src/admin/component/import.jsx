@@ -30,7 +30,7 @@ export default class extends Base {
         <div className="manage-container">
           <div className="options-2fa">
             <h3 style={{marginBottom: '20px'}}>上传 WXR 文件</h3>
-            <p>请上传 WordPres 中导出的 .xml 文件</p>
+            <p>请上传 WordPress 中导出的 .xml 文件</p>
             <Form
                 className="clearfix form-horizonal"
                 onValidSubmit={this.handleValidSubmit.bind(this)}
