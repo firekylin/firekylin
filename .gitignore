@@ -50,3 +50,5 @@ sitemap.xml
 output/
 output.theme/
 .version
+
+build/firekylin
