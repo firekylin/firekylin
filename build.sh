@@ -28,8 +28,11 @@ else
     PHP="/usr/bin/php";
 fi
 
-rm -rf www/static/js/admin.bundle.js.map;
+
 webpack;
+
+rm -rf www/static/js/admin.bundle.js.map;
+rm -rf www/static/js/common.js.map;
 
 $PHP $STC_PATH/index.php ${path} test online;
 
@@ -58,3 +61,5 @@ cp -r nginx.conf output;
 cp -r pm2.json output;
 cp -r www/*.js output/www;
 cp -r db/firekylin.sql output/;
+
+rm -r output/app/common/config/db.js;
