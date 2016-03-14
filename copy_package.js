@@ -7,3 +7,4 @@ delete data.scripts['watch-compile'];
 delete data.scripts.watch;
 delete data.scripts['copy-package'];
 fs.writeFileSync('output/package.json', JSON.stringify(data, undefined, 4));
+fs.writeFileSync('.version', data.version);

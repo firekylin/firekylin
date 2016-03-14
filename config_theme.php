@@ -1,7 +1,7 @@
 <?php
 //燕尾服配置文件
 return array (
-	'TPL_ENGINE' => 'nunjucks',  //模版引擎，支持smarty和php，小写
+	'TPL_ENGINE' => 'think.nunjucks',  //模版引擎，支持smarty和php，小写
 	'TPL_LEFT_DELIMITER' => '{%',  //模版左界符
 	'TPL_RIGHT_DELIMITER' => '%}',  //模版右界符
 	'TPL_SUFFIX' => 'html',  //模板文件后缀名
@@ -27,7 +27,9 @@ return array (
 	'MOD_JS_TPL_REPLACE' => false,  //前端模版替换
 	'MOD_EXTERNAL_TO_INLINE' => false,  //外链资源编译为内联资源
 	'MOD_STRING_REPLACE' => false,  //代码替换功能
-	'MOD_STATIC_VERSION' => 1  //静态文件版本号，1或者true为query,2为新文件模式
+	'MOD_STATIC_VERSION' => 1,  //静态文件版本号，1或者true为query,2为新文件模式
+	'MOD_INLINE_TO_LS2' => true,
+	'LS_APP_ID' => '3e988cdb',
 );
 
 
