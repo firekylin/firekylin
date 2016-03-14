@@ -6,7 +6,7 @@ var configPath = './src/common/config/db.js';
 var config = {};
 var validator = function(type) {
   return function(string) {
-    if (string.length == 0) {
+    if (string.length == 0 && type !== 'password' && type !== 'prefix') {
       return 'Field cannot be empty';
     }
     if (type == 'hostname' && !string.match(/(?:\w+\.)+\w/) && string !== 'localhost') {
@@ -30,8 +30,8 @@ inquirer.prompt([
   { type: 'input', name: 'db_port', message: 'Database port', default: parseInt(config.port) || 3306, validate: validator('port') },
   { type: 'input', name: 'db_database', message: 'Database name', default: config.name, validate: validator() },
   { type: 'input', name: 'db_username', message: 'Database username', default: config.user, validate: validator() },
-  { type: 'password', name: 'db_password', message: 'Database password', validate: validator() },
-  { type: 'prefix', name: 'db_prefix', message: 'Database table prefix', default: config.prefix, validate: validator() }
+  { type: 'password', name: 'db_password', message: 'Database password', validate: validator('password') },
+  { type: 'prefix', name: 'db_prefix', message: 'Database table prefix', default: config.prefix, validate: validator('prefix') }
 ], function(answers) {
 
   var now = new Date();
