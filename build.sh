@@ -10,6 +10,8 @@ if [[ $first != '/' ]];then
     path=$(pwd);
 fi
 
+rm -rf firekylin;
+
 if [ -d ${path}"/output" ];then
   rm -rf ${path}"/output";
 fi

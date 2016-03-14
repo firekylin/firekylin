@@ -25,6 +25,13 @@ export default class extends Base {
     if(firekylin.isInstalled){
       return this.fail('SYSTERM_INSTALLED');
     }
+    
+    let errors = this.assign('errors');
+    if(!think.isEmpty(errors)){
+      this.assign('message', errors[Object.keys(errors)[0]]);
+      return this.display();
+    }
+
     let data = this.post();
     let dbInfo = {
       host: data.db_host,
