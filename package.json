@@ -21,7 +21,8 @@
     "thinkit": "^4.6.0",
     "thinkjs": "2.1.x",
     "to-markdown": "^2.0.1",
-    "xml2js": "^0.4.16"
+    "xml2js": "^0.4.16",
+    "speakeasy": "2.0.0"
   },
   "devDependencies": {
     "babel-cli": "6.x.x",
@@ -49,7 +50,6 @@
     "react-mixin": "^3.0.3",
     "react-router": "^2.0.0-rc5",
     "reflux": "^0.3.0",
-    "speakeasy": "^2.0.0",
     "style-loader": "^0.13.0",
     "superagent": "^1.7.2",
     "webpack": "^1.12.12"
