@@ -97,14 +97,18 @@ export default class extends think.service.base {
    * @return {[type]} [description]
    */
   updateConfig(){
-    let dbConfigFile = think.APP_PATH + '/common/config/db.js';
-    let data = require(dbConfigFile);
-    data.default.adapter.mysql = this.dbConfig;
+    let data = {
+      type: 'mysql',
+      adapter: {
+        mysql: this.dbConfig
+      }
+    }
     let content = `
       "use strict";
       exports.__esModule = true;
-      exports.default = ${JSON.stringify(data.default, undefined, 4)}
+      exports.default = ${JSON.stringify(data, undefined, 4)}
     `;
+    let dbConfigFile = think.APP_PATH + '/common/config/db.js';
     fs.writeFileSync(dbConfigFile, content);
     think.config('db', data.default);
   }
