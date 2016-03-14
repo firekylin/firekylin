@@ -10,6 +10,8 @@ if [[ $first != '/' ]];then
     path=$(pwd);
 fi
 
+rm -rf firekylin;
+
 if [ -d ${path}"/output" ];then
   rm -rf ${path}"/output";
 fi
@@ -28,8 +30,12 @@ else
     PHP="/usr/bin/php";
 fi
 
-rm -rf www/static/js/admin.bundle.js.map;
+echo 'webpack start ...';
 webpack;
+echo 'webpack end';
+
+rm -rf www/static/js/admin.bundle.js.map;
+rm -rf www/static/js/common.js.map;
 
 $PHP $STC_PATH/index.php ${path} test online;
 
@@ -54,7 +60,15 @@ fi
 npm run compile;
 npm run copy-package;
 cp -r app output;
-cp -r nginx.conf output;
-cp -r pm2.json output;
+cp -r nginx.conf output/nginx_default.conf;
+cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
 cp -r db/firekylin.sql output/;
+
+rm -r output/app/common/config/db.js;
+mv output firekylin;
+VERSION=`cat .version`;
+TARNAME=firekylin_${VERSION}.tar.gz;
+tar zcf $TARNAME firekylin/;
+mv $TARNAME build;
+rm -rf firekylin/;

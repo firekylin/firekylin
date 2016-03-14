@@ -11,7 +11,8 @@
   <meta name="keyword" content="{{options.keywords}}">
   <meta name="description" content="{{options.description}}">
   <title>{% block title %}{% endblock %}</title>
-  <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css">
+  {% set lscookie = 'lscookie'%}
+  <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
 </head>
 <body>
 <nav id="sidebar" class="behavior_1">
@@ -105,7 +106,7 @@
   &nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin</a>
 </footer>
 </div>
-<script src="/theme/firekylin/res/js/firekylin.js"></script>
+<script src="/theme/firekylin/res/js/firekylin.js" data-ls="js_firekylin"></script>
 {% if options.analyze_code %}
   {{options.analyze_code | safe}}
 {% endif %}
