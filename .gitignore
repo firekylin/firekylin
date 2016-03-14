@@ -48,4 +48,6 @@ www/static/upload/
 sitemap.xml
 
 output/
+output.theme/
 .installed
+.version
