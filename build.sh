@@ -60,8 +60,8 @@ fi
 npm run compile;
 npm run copy-package;
 cp -r app output;
-cp -r nginx.conf output;
-cp -r pm2.json output;
+cp -r nginx.conf output/nginx_default.conf;
+cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
 cp -r db/firekylin.sql output/;
 
