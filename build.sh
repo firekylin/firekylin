@@ -28,8 +28,9 @@ else
     PHP="/usr/bin/php";
 fi
 
-
+echo 'webpack start ...';
 webpack;
+echo 'webpack end';
 
 rm -rf www/static/js/admin.bundle.js.map;
 rm -rf www/static/js/common.js.map;
@@ -63,3 +64,9 @@ cp -r www/*.js output/www;
 cp -r db/firekylin.sql output/;
 
 rm -r output/app/common/config/db.js;
+mv output firekylin;
+VERSION=`cat .version`;
+TARNAME=firekylin_${VERSION}.tar.gz;
+tar zcf $TARNAME firekylin/;
+mv $TARNAME build;
+rm -rf firekylin/;
