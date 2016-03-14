@@ -22,6 +22,7 @@
     "thinkjs": "2.1.x",
     "to-markdown": "^2.0.1",
     "xml2js": "^0.4.16",
+    "moment": "^2.11.2",
     "speakeasy": "2.0.0"
   },
   "devDependencies": {
@@ -38,7 +39,6 @@
     "history": "^1.17.0",
     "marked": "^0.3.5",
     "md5": "^2.0.0",
-    "moment": "^2.11.2",
     "qrcode-react": "^0.1.10",
     "rc-select": "^5.10.0",
     "react": "^0.14.7",

@@ -46,6 +46,9 @@ export default class extends think.service.base {
   async syncFromDisqus(comment){
 
     let postData = await this.getPostData();
+    if(think.isEmpty(postData)){
+      return;
+    }
     let threads = Object.keys(postData).join('&l=');
     let url = `https://${comment.name}.disqus.com/count-data.js?1=${threads}`;
     think.log(`sync comments from ${url}`);
@@ -74,6 +77,9 @@ export default class extends think.service.base {
    */
   async syncFromDuoshuo(comment){
     let postData = await this.getPostData();
+    if(think.isEmpty(postData)){
+      return;
+    }
     let threads = Object.keys(postData).join(',');
     let url = `http://api.duoshuo.com/threads/counts.json?short_name=${comment.name}&threads=${threads}`;
     think.log(`sync comments from ${url}`);
