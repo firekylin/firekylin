@@ -152,7 +152,6 @@ export default class extends Base {
     let cateInitial = [];
     if( Array.isArray(this.state.postInfo.cate) ) {
       cateInitial = this.state.postInfo.cate.map( item => item.id );
-      console.log(cateInitial);
     }
 
     //针对 RadioGroup 只有在值为字符串才正常的情况做处理
@@ -180,8 +179,8 @@ export default class extends Base {
                     validate="required"
                     label={`${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`}
                     value={this.state.postInfo.title}
-                    onChange={val => {
-                      this.state.postInfo.title = val;
+                    onChange={e => {
+                      this.state.postInfo.title = e.target.value;
                       this.forceUpdate();
                     }}
                 />
@@ -193,8 +192,8 @@ export default class extends Base {
                       validate="required"
                       disabled={this.state.postInfo.status === 3}
                       value={this.state.postInfo.pathname}
-                      onChange={val => {
-                        this.state.postInfo.pathname = val;
+                      onChange={e => {
+                        this.state.postInfo.pathname = e.target.value;
                         this.forceUpdate();
                       }}
                   />
