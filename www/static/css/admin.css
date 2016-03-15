@@ -29,7 +29,7 @@ ul,ol{padding:0;list-style:none;}
 .login h1{margin-bottom: 20px;}
 .breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px;margin-left: 0px;padding-left: 20px;}
 .userinfo{margin-right: 0px;-webkit-user-select:none;}
-.manage-container{background: #fff;padding: 10px 20px;position: absolute;top: 60px;bottom: 0;right: 0;left: 0;}
+.manage-container{background: #fff;padding: 10px 20px;position: absolute;top: 60px;bottom: 0;right: 0;left: 0;overflow: auto;}
 .user-create{width: 700px;}
 .user-create .pull-left{width: 44%;margin-right: 6%}
 .fk-alert{position: fixed;top: 8px;min-width: 200px;left: 50%;margin-left: -100px;text-align: center;}
