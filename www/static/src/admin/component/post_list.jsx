@@ -127,7 +127,6 @@ export default class extends Base {
                 ellipsis
                 boundaryLinks
                 maxButton={5}
-                bsSize="small"
                 items={this.state.total}
                 activePage={this.state.page}
                 onSelect={(e, selectEvent) => this.setState({page: selectEvent.eventKey}, ()=> PostAction.selectList(this.state.page))}

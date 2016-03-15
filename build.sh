@@ -72,3 +72,6 @@ TARNAME=firekylin_${VERSION}.tar.gz;
 tar zcf $TARNAME firekylin/;
 mv $TARNAME build;
 rm -rf firekylin/;
+
+#cd build;
+#tar zxvfm $TARNAME;

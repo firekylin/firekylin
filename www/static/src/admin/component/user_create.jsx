@@ -98,7 +98,7 @@ export default class extends Base {
       value: this.state.userInfo[type] || '',
       onChange: this.changeInput.bind(this, type)
     };
-    if(this.id && ['name', 'email'].indexOf(type) > -1){
+    if(this.id && ['name', 'email'].indexOf(type) > -1 && this.state.userInfo[type]){
       prop.readOnly = true;
     }
 

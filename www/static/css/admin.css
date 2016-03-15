@@ -9,7 +9,7 @@
 .table-striped > tbody > tr:nth-child(odd) > td,.table-striped > tbody > tr:nth-child(odd) > th{background-color:#F5F8FA;}
 .alert{padding:5px 15px;}
 .dropdown-menu .divider{margin: 5px 0;}
-.fk-alert{position: absolute;top: 0;}
+.fk-alert{position: fixed;top: 0;z-index: 1000}
 .table tbody form tr td,
 .table tfoot form tr td{padding: 8px;border-top: 1px solid #ddd;line-height: 1.42857143;}
 html,body{height:100%;/*overflow: hidden;*/background:#eff0f4;}
