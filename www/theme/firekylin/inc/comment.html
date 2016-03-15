@@ -1,0 +1,19 @@
+<div id="comments" data-type="{{options.comment.type}}">
+    <h1 class="title">Comments</h1>
+    {% if options.comment.name %}
+
+      {% if options.comment.type == 'disqus' %}
+      <div id="disqus_thread" data-url="{{protocol}}{{http.host}}{{http.url}}" data-identifier="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}">
+          评论加载中...
+          <br>
+          <br>
+          注：如果长时间无法加载，请针对 disq.us | disquscdn.com | disqus.com 启用代理。
+      </div>
+      {% elif options.comment.type == 'duoshuo'%}
+        <div id="ds_thread" class="ds-thread" data-thread-key="{{think.md5(http.get('pathname'))}}" data-url="{{protocol}}{{http.host}}{{http.url}}" data-name="{{options.comment.name}}">
+        </div>
+      {% endif %}
+    {% else %}
+    <p>请在后台配置评论类型和相关的值。</p>
+    {% endif %}
+</div>

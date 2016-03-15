@@ -1,8 +1,0 @@
-<%if (post.tags.length) {%>
-<% post.tags.forEach(function(tag, index) { %>
-<a class="category" href="<%= site.url %>/tag/<%= tag.name %>"><%= tag.name %></a>
-<%= post.tags.length < index + 1 ? ',' : '' %>
-<% }) %>
-<%} else {%>
-<a class="category" href="<%= site.url %>/tag">无</a>
-<%}%>

@@ -1,14 +1,22 @@
+<!DOCTYPE html>
 <html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FireKylin</title>  
-    <link rel="shortcut icon" href="/static/favicon.ico">
-    <!--<link rel="stylesheet" type="text/css" href="/static/node_modules/bootstrap/dist/css/bootstrap.css" />-->
-    <link rel="stylesheet" type="text/css" href="/static/dist/admin.css" />
-    <script src="/static/dist/admin.bundle.js"></script>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{options.title}}</title>
+  <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <link rel="stylesheet" href="/static/css/icon.css">
 </head>
 <body>
+<script>
+window.SysConfig = {
+  userInfo: {{JSON.stringify(userInfo) | safe}},
+  options: {{JSON.stringify(options) | safe}},
+}
+</script>
+<div id="app"></div>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/admin.bundle.js"></script>
 </body>
 </html>

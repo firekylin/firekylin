@@ -1,0 +1,40 @@
+{% extends './layout.html' %}
+
+{% block title %}
+  {{options.title}}
+{% endblock %}
+
+{% block content %}
+<section id="page-index">
+
+  {% if tag %}
+  <h1 class="intro">标签<a href="{{protocol}}{{http.host}}{{http.url}}">{{tag}}</a>下的文章</h1>
+  {% elif cate %}
+  <h1 class="intro">分类<a href="{{protocol}}{{http.host}}{{http.url}}">{{cate}}</a>下的文章</h1>
+  {% endif %}
+
+  {% for post in postList.data %}
+  <article class="post">
+    <div class="meta">
+      <div class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</div>
+      <div class="comment">
+          <a href="/post/{{post.pathname}}.html#comments">{{post.comment_num}} comments</a>
+      </div>
+    </div>
+
+    <h1 class="title">
+      <a href="/post/{{post.pathname}}.html">{{post.title}}</a>
+    </h1>
+    
+    <div class="entry-content">
+      {{post.summary | safe}}
+      <p class="more">
+          <a href="/post/{{post.pathname}}.html">阅读全文 »</a>
+      </p>
+    </div>
+      
+  </article>
+  {% endfor %}
+  {% include "./inc/pagination.html" %}
+</section>
+{% endblock %}

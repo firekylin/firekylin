@@ -1,7 +1,10 @@
-/**
- * local: en
- */
+'use strict';
+
 export default {
-  username: 'username',
-  password: 'password'
-}
+  USER_NOT_LOGIN: [403, 'USER_NOT_LOGIN'],
+  USER_EXIST: [100, 'USER_EXIST'],
+  USER_NO_PERMISSION: [101, 'USER_NO_PERMISSION'],
+  PARAMS_ERROR: [102, 'PARAMS_ERROR'],
+  DATA_EMPTY: [103, 'DATA_EMPTY'],
+  ACCOUNT_ERROR: [104, 'ACCOUNT_ERROR']
+};

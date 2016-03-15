@@ -1,0 +1,25 @@
+{% extends './layout.html' %}
+
+{% block title %}
+归档 - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<article class="post archive">
+    <h1 class="title">归档</h1>
+    {% for yearMonth,data in list%}
+    <div class="entry-content">
+        <h3>{{yearMonth}} ({{data.length}})</h3>
+        <ul>
+        {% for item in data %}
+        <li>
+            <a href="/post/{{item.pathname}}.html" title="{{item.title}}">{{item.title}}</a>&nbsp;
+            <span class="date">{{think.datetime(item.create_time, 'YYYY-MM-DD')}}</span>
+        </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</article>
+{% endblock %}
+
