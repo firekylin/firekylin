@@ -52,4 +52,4 @@ sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
 
 安装包里的代码都是编译后的（如：React 代码已经编译，HTML、JS、CSS 都已经压缩，并且使用了 LocalStorage 等优化技术）。如果想贡献代码，可以直接 clone 项目代码。
 
-如果开发请见[这里](https://github.com/75team/firekylin/wiki/%E5%A6%82%E4%BD%95%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81%EF%BC%9F)。
+如何开发请见[这里](https://github.com/75team/firekylin/wiki/%E5%A6%82%E4%BD%95%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81%EF%BC%9F)。
