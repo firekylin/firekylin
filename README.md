@@ -1,6 +1,6 @@
 ## FireKylin
 
-A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2005+
+A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 ## 安装
 
