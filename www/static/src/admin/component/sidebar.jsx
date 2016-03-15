@@ -7,7 +7,7 @@ export default class extends Base {
   state = {
     routes: [
       {url: '/dashboard', icon: 'home', title:'概述'},
-      {url: '/post', icon: 'setting', title: '文章管理', children: [
+      {url: '/post', icon: 'topic', title: '文章管理', children: [
         {url: '/post/list', title: '文章列表'},
         {url: '/post/create', title: '添加文章'}
       ]},
@@ -28,7 +28,7 @@ export default class extends Base {
         {url: '/user/create', title: '添加用户'},
          {url: '/user/edit_pwd', title: '修改密码'},
       ]},
-      {url: '/options', icon: 'report', title: '系统设置', type: 1, children: [
+      {url: '/options', icon: 'setting', title: '系统设置', type: 1, children: [
         {url: '/options/general', title: '基本设置'},
         {url: '/options/two_factor_auth', title: '二步验证'},
         {url: '/options/import', title: '导入数据'}
