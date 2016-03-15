@@ -87,7 +87,7 @@
 <div id="header">
   <div class="btn-bar"><i></i></div>
   <h1><a href="/">{{options.title}}</a></h1>
-  <a class="me" href="/about/"><img src="/static/img/firekylin.jpg" alt="{{options.title}}"></a>
+  <a class="me" href="/about/"><img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}" alt="{{options.title}}"></a>
 </div>
 <div id="sidebar-mask"></div>
 <div id="main">

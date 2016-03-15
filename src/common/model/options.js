@@ -31,13 +31,15 @@ export default class extends think.model.base {
         result[item.key] = item.value;
       });
       //comment type
-      //console.log(result)
-      //if(result.comment){
-      //  result.comment = JSON.parse(result.comment);
-      //}else{
-      //  result.comment = {type: 'disqus'};
-      //}
-      //console.log(result.comment);
+      if(result.comment){
+        try{
+          result.comment = JSON.parse(result.comment);
+        }catch(e){
+          result.comment = {type: 'disqus'};
+        }
+      }else{
+        result.comment = {type: 'disqus'};
+      }
       return result;
     }, this.cacheOptions);
   }
