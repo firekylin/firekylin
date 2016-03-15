@@ -29,6 +29,15 @@ export default Reflux.createStore({
     }).catch(err => {
       this.trigger(err, 'getQrcodeFail');
     })
+  },
+  onComment(data){
+    let req = superagent.post('/admin/api/options?method=put');
+    req.type('form').send({'comment': JSON.stringify(data)});
+    return firekylin.request(req).then(data => {
+      this.trigger(data, 'saveCommentSuccess');
+    }).catch(err => {
+      this.trigger(err, 'saveCommentFail');
+    });
   }
 
 })
