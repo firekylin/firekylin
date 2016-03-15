@@ -8,9 +8,14 @@
 }
 .pathname > .form-group {
   float: left;
-  width: 200px;
-  margin: 0;
+  min-width: 320px;
+  margin: 0 5px;
   display: inline-block;
+}
+
+
+.md-panel {
+  height: 550px;
 }
 
 /** 文章编辑右侧 **/

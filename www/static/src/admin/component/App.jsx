@@ -24,12 +24,7 @@ export default class App extends Base {
       <div className="fk">
         <Sidebar />
         <Tip />
-        <div className="fk-content-wrap">
-          <BreadCrumb />
-          <div className="manage-container">
-            {this.props.children}
-          </div>
-        </div>
+        {this.props.children}
         <ModalManage />
       </div>
     );

@@ -3,8 +3,11 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
+
+import TipAction from 'common/action/tip';
 
 import ModalAction from '../../common/action/modal';
 
@@ -21,11 +24,18 @@ export default class extends Base {
     UserAction.select();
   }
   handleTrigger(data, type){
-    this.setState({userList: data, loading: false});
+    switch(type){
+      case 'deleteUserSuccess':
+        TipAction.success('删除成功');
+        UserAction.select();
+        break;
+      default: 
+        this.setState({userList: data, loading: false});
+    }
   }
-  handleDelete(){
+  handleDelete(userId){
     return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br /><p className="gray">删除后无法恢复</p></div>, () => {
-      //OptionsAction.save({two_factor_auth: two_factor_auth});
+      UserAction.delete(userId);
     }, 'modal-sm');
   }
   getUserList(){
@@ -61,23 +71,28 @@ export default class extends Base {
   }
   render(){
     return (
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>用户名</th>
-            <th>邮箱</th>
-            <th>用户组</th>
-            <th>有效</th>
-            <th>注册时间</th>
-            <th>最后登录时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.getUserList()}
-        </tbody>
-      </table>
-    )
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>邮箱</th>
+                <th>用户组</th>
+                <th>有效</th>
+                <th>注册时间</th>
+                <th>最后登录时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.getUserList()}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 }

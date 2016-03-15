@@ -53,7 +53,7 @@ export default class extends think.model.base {
    */
   addUser(data, ip){
     let create_time = think.datetime();
-    let encryptPassword = this.getEncryptPassword(data.password, ip, create_time); 
+    let encryptPassword = this.getEncryptPassword(data.password); 
     return this.where({name: data.username, email: data.email, _logic: 'OR'}).thenAdd({
       name: data.username,
       email: data.email,

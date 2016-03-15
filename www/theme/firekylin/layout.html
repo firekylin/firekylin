@@ -3,19 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
-  <link rel="icon" href="/static/images/favicon.png">
+  <link rel="icon" href="{{options.logo_url |default('/static/img/firekylin.jpg')}}">
+  {% if options.favicon %}
+  <link rel="shortcut icon" href="{{options.favicon}}" type="image/x-icon">
+  {% endif %}
   <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
   <meta name="keyword" content="{{options.keywords}}">
   <meta name="description" content="{{options.description}}">
   <title>{% block title %}{% endblock %}</title>
-  <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css">
+  {% set lscookie = 'lscookie'%}
+  <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
 </head>
 <body>
 <nav id="sidebar" class="behavior_1">
   <div class="wrap">
       <div class="profile">
           <a href="/">
-              <img src="/static/img/firekylin.jpg" alt="{{options.title}}">
+              <img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}" alt="{{options.title}}">
           </a>
           <span>{{options.title}}</span>
       </div>
@@ -95,14 +99,14 @@
   {% if options.miitbeian %}
     &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.miitbeian.gov.cn/">{{options.miitbeian}}</a>
   {%else%}
-    &nbsp;-&nbsp;<a href="{{ host }}">{{http.hostname}}</a>
+    &nbsp;-&nbsp;<a href="/">{{http.hostname}}</a>
   {% endif %}
   <br />
   Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>
   &nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin</a>
 </footer>
 </div>
-<script src="/theme/firekylin/res/js/firekylin.js"></script>
+<script src="/theme/firekylin/res/js/firekylin.js" data-ls="js_firekylin"></script>
 {% if options.analyze_code %}
   {{options.analyze_code | safe}}
 {% endif %}

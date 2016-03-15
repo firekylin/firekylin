@@ -5,17 +5,24 @@ import {Link} from 'react-router';
 import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
 
 export default class extends Base {
+  initialState() {
+    return Object.assign({
+      submitting: false,
+      tagInfo: {
+        name: '',
+        pathname: ''
+      }
+    });
+  }
   constructor(props){
     super(props);
-    this.state = {
-      submitting: false,
-      tagInfo: {}
-    }
+    this.state = this.initialState();
     this.id = this.props.params.id | 0;
   }
 
@@ -24,6 +31,14 @@ export default class extends Base {
     if(this.id){
       TagAction.select(this.id);
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.id = nextProps.params.id | 0;
+    if( this.id ) {
+      TagAction.select(this.id);
+    }
+    this.setState(this.initialState());
   }
   /**
    * hanle trigger
@@ -76,29 +91,44 @@ export default class extends Base {
     }
 
     return (
-      <Form
-        model={this.state.tagInfo}
-        className="tag-create clearfix"
-        onValidSubmit={this.handleValidSubmit.bind(this)}
-      >
-        <ValidatedInput
-            name="name"
-            type="text"
-            label="标签名称"
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-        />
-        <ValidatedInput
-            name="pathname"
-            type="text"
-            label="标签缩略名"
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-        />
-        <div className="form-group col-xs-12">
-          <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <Form
+            model={this.state.tagInfo}
+            className="tag-create clearfix"
+            onValidSubmit={this.handleValidSubmit.bind(this)}
+          >
+            <ValidatedInput
+                name="name"
+                type="text"
+                label="标签名称"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
+                value={this.state.tagInfo.name}
+                onChange={name => {
+                  this.state.tagInfo.name = name;
+                  this.forceUpdate();
+                }}
+            />
+            <ValidatedInput
+                name="pathname"
+                type="text"
+                label="缩略名"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
+                value={this.state.tagInfo.pathname}
+                onChange={pathname => {
+                  this.state.tagInfo.pathname = name;
+                  this.forceUpdate();
+                }}
+            />
+            <div className="form-group col-xs-12">
+              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            </div>
+          </Form>
         </div>
-      </Form>
+      </div>
     );
   }
 }
