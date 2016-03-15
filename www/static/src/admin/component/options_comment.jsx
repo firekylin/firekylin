@@ -17,9 +17,13 @@ import TipAction from 'common/action/tip';
 export default class extends Base {
   constructor(props){
     super(props);
+    let comment = SysConfig.options.comment;
+    if(typeof comment === 'string'){
+      comment = JSON.parse(comment);
+    }
     this.state = {
       submitting: false,
-      comment: JSON.parse(SysConfig.options.comment)
+      comment: comment
     };
   }
   componentDidMount(){
