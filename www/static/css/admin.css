@@ -203,8 +203,8 @@ textarea{resize:none;}
 .fk-question-list li,.fk-article-list li{overflow: hidden;margin-bottom: 5px;}
 .fk-article-list a,.fk-question-list a{display:block;max-width:600px;}
 
-/*微信菜单页面*/
-.chat-symbol{padding:0;line-height:34px;}
+
+/*.chat-symbol{padding:0;line-height:34px;}
 .fk-wechat-dropdown-box{position:relative;width:230px;height:34px;line-height:34px;}
 .fk-wechat-dropdown-box input{padding-right:30px!important;}
 .fk-wechat-dropdown-box .icon-down{position:absolute;top:5px;right:5px;z-index:2;background:transparent;color:#666;font-size:16px;cursor:pointer;}
@@ -235,34 +235,10 @@ textarea{resize:none;}
 #import .col-xs-8 {margin-top: 13px;}
 #import .col-xs-8  label{margin-right: 10px;}
 #option_last_active .col-xs-8{margin-top: 0}
-/*preview/action-edit  限制附件*/
-.fk-upload-img-list  ul{margin-top: -30px;}
-.fk-upload-img-list img{max-width: 200px;min-height: 150px;max-height: 150px;display: block;margin: 0 auto;}
-.fk-upload-img-list li{text-align: center;display: inline-block;margin: 30px 15px 0 30px;width: 20%;height: 150px;}
-.fk-upload-img-list .btn{margin-top: 15px;}
-.fk-upload-file-list li{display: inline-block;margin: 0px 20px 10px 20px}
-/*编辑用户资料*/
-#remove_user_form label{margin-right:15px;}
-#integral_form span.mod-category-foot{padding:0;text-align:right;line-height:35px;}
-#integral_form .col-sm-6{line-height:35px;}
+*/
 
-/*微信消息群发*/
-.mod-file{position:relative;display:inline-block;overflow:hidden;vertical-align:middle;cursor:pointer;*display:inline;*zoom:1;}
-.mod-file .mod-input-file{ position:absolute; top:0;right:0; height:100%;opacity:0;-ms-filter:"alpha(opacity=0)";filter:alpha(opacity=0);cursor:pointer;_font-size:100px; _font-size:12px;_zoom:10;_height:auto;}
-.filetext{padding-top: 10px;}
-/* 弹窗 */
-.fk-category-move-box .modal-dialog{width:350px;}
-.fk-topic-edit-note-box img{max-width:530px;}
-.fk-topic-edit-note-box #aw_dialog_ajax_data{overflow-y:scroll;max-height:450px;}
-
-/* 微信多账号下拉菜单 */
-.dropdown #dropdownMenu1 .caret{margin-left:5px;}
-.dropdown ul.weixin-dropdown-menu{min-width:100px;}
-
-/*群发消息*/
-#msg_details .msg-que li,#msg_details .msg-arc li{margin-bottom: 10px;}
 /*日期选择控件*/
-.date_selector,.date_selector *{margin:0;padding:0;width:auto;height:auto;border:none;background:none;text-align:left;text-decoration:none;cursor:pointer;}
+/*.date_selector,.date_selector *{margin:0;padding:0;width:auto;height:auto;border:none;background:none;text-align:left;text-decoration:none;cursor:pointer;}
 .date_selector{position:absolute;z-index:100000;display:none;margin:-1px 0 0;padding:10px;border:1px solid #ccc;background:#fbfbfb;-webkit-box-shadow:0 0 5px #aaa;-moz-box-shadow:0 0 5px #aaa;box-shadow:0 0 5px #aaa;}
 .date_selector_ieframe{position:absolute;z-index:99999;display:none;}
 .date_selector .nav{width:17.5em;}
@@ -284,9 +260,9 @@ textarea{resize:none;}
 .date_selector td.selectable_day{cursor:pointer;}
 .date_selector td.selected{background:#4B85D2;color:#fff;font-weight:700;}
 .date_selector td.selectable_day:hover,.date_selector td.selectable_day.hover{background:#F2F8FF;color:#246594;}
-
+*/
 /* 全局通用下拉列表 */
-.fk-dropdown, .fk-category-dropdown{display:none;position:absolute;left:17px;z-index:9999;width:93%;background: #fff;border:1px solid #ccc;box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);}
+/*.fk-dropdown, .fk-category-dropdown{display:none;position:absolute;left:17px;z-index:9999;width:93%;background: #fff;border:1px solid #ccc;box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);}
 .fk-publish-title .fk-dropdown{width: 100%;left: 0}
 .fk-dropdown .i-dropdown-triangle, .fk-category-dropdown .i-dropdown-triangle{position: absolute;top:-6px;left: 15px;}
 .fk-dropdown p, .fk-category-dropdown p{padding:5px 10px;margin:0;}
@@ -310,20 +286,20 @@ textarea{resize:none;}
 .fk-publish-title .dropdown .dropdown-toggle .icon-down{background: transparent;color: #b7b7b7;}
 .fk-publish-title .dropdown i{margin:0;}
 .fk-publish-title .fk-dropdown .fk-dropdown-list a{display:block;padding:5px 10px;max-width: 400px;}
-/* 开放平台设置 */
-.fk-admin-weibo-publish .img,.fk-admin-weibo-answer li img,.fk-admin-email li img{margin-right: 10px;width: 24px;}
+*/
+/*.fk-admin-weibo-publish .img,.fk-admin-weibo-answer li img,.fk-admin-email li img{margin-right: 10px;width: 24px;}
 
-.fk-admin-weibo-publish .btn{margin-left: 5px;}
+.fk-admin-weibo-publish .btn{margin-left: 5px;}*/
 
 /* iCheck plugin */
-.icheckbox_square-blue,
+/*.icheckbox_square-blue,
 .iradio_square-blue{display: inline-block; margin-right:5px; padding: 0; width: 22px; height: 22px; border: none; background: url(../img/blue.png) no-repeat; vertical-align: middle; cursor: pointer; *display: inline;}
 .iradio_square-blue{  border: none; vertical-align: middle; cursor: pointer;*display: inline;}
 .icheckbox_square-blue{background-position: 0 0;} .icheckbox_square-blue.hover{background-position: -24px 0;} .icheckbox_square-blue.checked{background-position: -48px 0;} .icheckbox_square-blue.disabled{background-position: -72px 0; cursor: default;} .icheckbox_square-blue.checked.disabled{background-position: -96px 0;}
 .iradio_square-blue{background-position: -120px 0;} .iradio_square-blue.hover{background-position: -144px 0;} .iradio_square-blue.checked{background-position: -168px 0;} .iradio_square-blue.disabled{background-position: -192px 0; cursor: default;} .iradio_square-blue.checked.disabled{background-position: -216px 0;}
+*/
 
-/*! perfect-scrollbar*/
-.ps-container .ps-scrollbar-x-rail{position:absolute;bottom:3px;height:8px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;opacity:0;filter:alpha(opacity=0);-webkit-transition:background-color .2s linear, opacity .2s linear;-moz-transition:background-color .2s linear, opacity .2s linear;-o-transition:background-color .2s linear, opacity .2s linear;transition:background-color .2s linear, opacity .2s linear;}
+/*.ps-container .ps-scrollbar-x-rail{position:absolute;bottom:3px;height:8px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;opacity:0;filter:alpha(opacity=0);-webkit-transition:background-color .2s linear, opacity .2s linear;-moz-transition:background-color .2s linear, opacity .2s linear;-o-transition:background-color .2s linear, opacity .2s linear;transition:background-color .2s linear, opacity .2s linear;}
 .ps-container .ps-scrollbar-x-rail.in-scrolling{background-color:#eee;opacity:.9;filter:alpha(opacity=90);}
 .ps-container .ps-scrollbar-y-rail{position:absolute;right:0;width:4px;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;opacity:0;filter:alpha(opacity=0);-webkit-transition:background-color .2s linear, opacity .2s linear;-moz-transition:background-color .2s linear, opacity .2s linear;-o-transition:background-color .2s linear, opacity .2s linear;transition:background-color .2s linear, opacity .2s linear;}
 .ps-container .ps-scrollbar-y-rail.in-scrolling{background-color:#2780bb;opacity:.9;filter:alpha(opacity=90);}
@@ -344,52 +320,4 @@ label,.fk-content-wrap .mod-title,.fk-article-list b,.fk-question-list b{font-we
 .fk-content-wrap .mod-head h3,.fk-content-wrap .mod-page,.fk-message-box form,.fk-wechat-dropdown-box .dropdown-menu > .mod-footer ul{margin:0;}
 .fk-content-wrap .editor,.fk-content-wrap .mod-foot-center td{text-align:center;}
 .ps-container:hover .ps-scrollbar-x-rail,.ps-container.hover .ps-scrollbar-x-rail,.ps-container:hover .ps-scrollbar-y-rail,.ps-container.hover .ps-scrollbar-y-rail{opacity:.6;filter:alpha(opacity=60);}
-.ps-container.ie6 .ps-scrollbar-x,.ps-container.ie6 .ps-scrollbar-y{font-size:0;}
-/*响应式兼容start*/
-@media only screen and (max-width: 1024px){
-  .mod-user{top:36px}
-  #integral_form .btn-primary{margin: 20px 0 0 15px}
-  .fk-content-wrap{margin:70px 5px 0 5px;padding:0;}
-  #main2 {clear: both;}
-  .fk-content-wrap .col-xs-offset-1{margin-left: 0;}
-  .fk-side ul li a{padding-left:0;}
-  .fk-content-wrap .mod-double{margin-bottom:10px;}
-  .table-responsive{margin-bottom:0;border:none;}
-  .fk-content-wrap .mod-body,.fk-content-wrap .mod-content{padding:5px 5px 20px;}
-  .pagination > li > a,.pagination > li > span{padding:5px 10px;font-size:12px;}
-  .pagination > li:first-child > a,.pagination > li:first-child > span{border-top-left-radius:3px;border-bottom-left-radius:3px;}
-  .pagination > li:last-child > a,.pagination > li:last-child > span{border-top-right-radius:3px;border-bottom-right-radius:3px;}
-  .fk-content-wrap table tfoot .mod-foot-btn{padding-top:50px;vertical-align:middle;}
-  .radio-inline,.checkbox-inline{margin-bottom:6px;}
-  .fk-footer,.radio-inline + .radio-inline,.checkbox-inline + .checkbox-inline{margin-left:0;}
-  .fk-side,.fk-content-wrap .mod-symbol{display:none;}
-  #approval {height: 166px;}
-  #approval h3 li {text-align: left;width:50%;display: inline-block;}
-  .mod-head .nav-tabs li.active{height: 42px}
-  #add_category_form .col-sm-2{margin-top: 10px;}
-  #add_category_form div{text-align: left;margin-bottom: 10px;}
-  #user_list .mod-head {height:86px}
-  #user_list .mod-head h3 li{display: inline-block;width: 50%}
-  #user_list .pagination{float: left!important;margin-top: 15px;}
-  #tools .col-xs-12{margin-top: 10px;}
-  #tools .col-xs-12 input{margin-left: 73px}
-}
-@media only screen and (min-width: 320px) and (max-width: 640px){
-  .fk-header .pull-right .mod-bell{display:none;}
-  .fk-content-wrap .col-xs-offset-1{margin-left: 0;}
-  .fk-content-wrap .echart-date .col-sm-1{clear: both;margin-right: 22%;text-align: center;}
-  .fk-content-wrap .echart-date .col-xs-offset-3{margin-left: 5%;}
-  .fk-header .username{position:absolute;top:1px;right:0;display:block;}
-  .mod-header-user .username ul.pull-right{width:80px;border:1px solid #d7d7d7;background:#fff;}
-  .fk-content-wrap .mod-site-url li{clear: both;height: 200px;}
-  .fk-content-wrap .tab-content ul p{margin: 0;}
-  .fk-content-wrap .mod-site-rule .help-block{display: none;}
-  .fk-content-wrap .tab-content li > span{width: 100%;}
-}
-@media only screen and (max-width: 321px){
-  .date_selector{left:-40px;}
-  .fk-content-wrap .echart-date .col-sm-1{margin-right: 17%;}
-}
-
-/* HiDPI support */
-@media (-o-min-device-pixel-ratio: 5/4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {.icheckbox_square-blue,.iradio_square-blue { background-image: url(../img/blue-2x.png);-webkit-background-size: 240px 24px; background-size: 240px 24px;}}
+.ps-container.ie6 .ps-scrollbar-x,.ps-container.ie6 .ps-scrollbar-y{font-size:0;}*/
