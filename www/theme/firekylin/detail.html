@@ -1,0 +1,68 @@
+{% extends './layout.html' %}
+
+{% block title %}
+{{detail.title}} - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<div id="page-post">
+    <article class="post detail">
+        <div class="meta">
+            <div class="date">{{think.datetime(detail.create_time, 'MM月DD, YYYY')}}</div>
+            <div class="comment">
+                <a href="">{{detail.comment_num}} comments</a>
+            </div>
+        </div>
+        <h1 class="title">{{detail.title}}</h1>
+        <div class="entry-content">
+            {{detail.content | safe}}
+        </div>
+        <p>本文链接：<a href="{{protocol + http.host + http.url | safe}}">{{protocol + http.host + http.url | safe}}</a></p>
+        <p>-- <acronym title="End of File">EOF</acronym> --</p>
+
+        <div class="post-info">
+            <p>
+                发表于
+                <i>{{think.datetime(detail.create_time)}}</i>
+
+                {% if detail.cate.length %}
+                ，添加在分类 
+                {% for cate in detail.cate %}
+                <a href="/cate/{{cate.name}}" data-cate="{{cate.name}}">
+                    <code class="notebook">{{cate.name}}</code>
+                </a>
+                {% endfor%}
+                下
+                {% endif %}
+
+                {% if detail.tag.length %}
+                ，并被添加「 
+                {% for tag in detail.tag %}
+                <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
+                    <code class="notebook">{{tag.name}}</code>
+                </a>
+                {% endfor %}
+                 」标签
+                {% endif %}
+
+                ，最后修改于
+                <i>{{think.datetime(detail.update_time)}}</i>
+            </p>
+        </div>
+    </article>
+    {%if prev.title or next.title %}
+        <nav class="pagination">
+            {% if prev.title %}
+                <a href="/post/{{ prev.pathname }}.html" class="prev">&laquo; {{ prev.title }}</a>
+            {% endif %}
+
+            {% if next.title %}
+                <a href="/post/{{ next.pathname }}.html" class="next">{{ next.title }} &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+    {% if detail.allow_comment %}
+        {% include "./inc/comment.html" %}
+    {% endif %}
+</div>
+{% endblock %}

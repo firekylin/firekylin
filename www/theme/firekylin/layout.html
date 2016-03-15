@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+  <link rel="icon" href="{{options.logo_url |default('/static/img/firekylin.jpg')}}">
+  {% if options.favicon %}
+  <link rel="shortcut icon" href="{{options.favicon}}" type="image/x-icon">
+  {% endif %}
+  <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
+  <meta name="keyword" content="{{options.keywords}}">
+  <meta name="description" content="{{options.description}}">
+  <title>{% block title %}{% endblock %}</title>
+  {% set lscookie = 'lscookie'%}
+  <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
+</head>
+<body>
+<nav id="sidebar" class="behavior_1">
+  <div class="wrap">
+      <div class="profile">
+          <a href="/">
+              <img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}" alt="{{options.title}}">
+          </a>
+          <span>{{options.title}}</span>
+      </div>
+      <ul class="buttons">
+          <li>
+              <a class="" href="/">
+                  <i class="iconfont icon-home" title="首页"></i>
+                  <span>首页</span>
+              </a>
+          </li>
+          <li>
+              <a class="" href="/archives/">
+                  <i class="iconfont icon-archive" title="归档"></i>
+                  <span>归档</span>
+              </a>
+          </li>
+          <li>
+              <a class="" href="/tags/">
+                  <i class="iconfont icon-tags" title="标签"></i>
+                  <span>标签</span>
+              </a>
+          </li>
+          <li>
+              <a class="" href="/about/">
+                  <i class="iconfont icon-user" title="关于"></i>
+                  <span>关于</span>
+              </a>
+          </li>
+          <li>
+              <a class="" href="/links/">
+                  <i class="iconfont icon-link" title="友链"></i>
+                  <span>友链</span>
+              </a>
+          </li>
+      </ul>
+      <ul class="buttons">
+        <li>
+          {% if options.github_url %}
+          <a class="inline" target="_blank" href="{{options.github_url}}">
+            <i class="iconfont icon-github" title="GitHub"></i>
+          </a>
+          {% endif %}
+          {% if options.twitter_url %}
+            {% if options.twitter_url.indexOf('twitter.com') > -1 %}
+            <a class="inline" target="_blank" href="{{options.twitter_url}}">
+              <i class="iconfont icon-twitter" title="Twitter"></i>
+            </a>
+            {% endif %}
+            {% if options.twitter_url.indexOf('weibo.com') > -1 %}
+            <a class="inline" target="_blank" href="{{options.twitter_url}}">
+              <i class="iconfont icon-weibo" title="weibo"></i>
+            </a>
+            {% endif %}
+          {% endif %}
+          <a class="inline" href="/rss.html">
+            <i class="iconfont icon-rss" title="RSS"></i>
+          </a>
+          <a class="inline" href="/search.html">
+            <i class="iconfont icon-search" title="Search"></i>
+          </a>
+        </li>
+      </ul>
+  </div>
+</nav>
+<div id="header">
+  <div class="btn-bar"><i></i></div>
+  <h1><a href="/">{{options.title}}</a></h1>
+  <a class="me" href="/about/"><img src="/static/img/firekylin.jpg" alt="{{options.title}}"></a>
+</div>
+<div id="sidebar-mask"></div>
+<div id="main">
+{% block content %}
+
+{% endblock %}
+<footer id="footer" class="inner">
+  &copy; {{ currentYear }}&nbsp;-&nbsp; {{options.title}}
+  {% if options.miitbeian %}
+    &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.miitbeian.gov.cn/">{{options.miitbeian}}</a>
+  {%else%}
+    &nbsp;-&nbsp;<a href="/">{{http.hostname}}</a>
+  {% endif %}
+  <br />
+  Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>
+  &nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin</a>
+</footer>
+</div>
+<script src="/theme/firekylin/res/js/firekylin.js" data-ls="js_firekylin"></script>
+{% if options.analyze_code %}
+  {{options.analyze_code | safe}}
+{% endif %}
+</body>
+</html>

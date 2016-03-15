@@ -1,0 +1,22 @@
+{% extends './layout.html' %}
+
+{% block title %}
+{{page.title}} - {{options.title}}
+{% endblock %}
+
+{% block content %}
+<article class="post page">
+  {% if page.title %}
+  <h1 class="title">{{page.title}}</h1>
+  <div class="entry-content">
+      {{page.content | safe}}
+  </div>
+  {% else %}
+  <h1 class="title">提示</h1>
+  <div class="entry-content">
+    <p>未找到相关页面。</p>
+    <p>如果是管理员，请到后台添加地址为 <code>{{pathname}}</code> 的页面，点击<a href="/admin/page/create?pathname={{pathname}}">这里</a>添加。</p>
+  </div>
+  {% endif %}
+</article>
+{% endblock %}

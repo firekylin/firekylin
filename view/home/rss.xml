@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>{{options.title}}</title>
+        <link>{{protocol}}{{http.host}}</link>
+        <description>{{options.description}}</description>
+        <atom:link href="{{protocol}}{{http.host}}/rss.html" rel="self" />
+        <language>zh-cn</language>
+        <lastBuildDate>{{currentTime}}</lastBuildDate>
+        {% for item in list %}
+        <item>
+            <title>{{item.title}}</title>
+            <link>{{protocol}}{{http.host}}/post/{{item.pathname}}.html</link>
+            <description>{{item.content}}</description>
+            <pubDate>{{item.create_time}}</pubDate>
+            <guid>{{protocol}}{{http.host}}/post/{{item.pathname}}.html</guid>
+        </item>
+        {% endfor %}
+    </channel>
+</rss>

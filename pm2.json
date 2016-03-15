@@ -1,0 +1,15 @@
+{
+  "apps": [{
+    "name": "firekylin",
+    "script": "www/production.js",
+    "cwd": "/Users/welefen/Develop/git/firekylin",
+    "exec_mode": "fork",
+    "max_memory_restart": "1G",
+    "autorestart": true,
+    "node_args": [],
+    "args": [],
+    "env": {
+      
+    }
+  }]
+}
