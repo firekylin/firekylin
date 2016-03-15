@@ -73,5 +73,5 @@ tar zcf $TARNAME firekylin/;
 mv $TARNAME build;
 rm -rf firekylin/;
 
-#cd build;
-#tar zxvfm $TARNAME;
+cd build;
+tar zxvfm $TARNAME;

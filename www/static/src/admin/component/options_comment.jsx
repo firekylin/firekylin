@@ -8,6 +8,8 @@ import { Radio, RadioGroup } from 'react-bootstrap-validation';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
+import BreadCrumb from 'admin/component/breadcrumb';
+
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
@@ -27,7 +29,7 @@ export default class extends Base {
     switch(type){
       case 'saveCommentSuccess':
         this.setState({submitting: false});
-        TipAction.success('评论更新成功');
+        TipAction.success('评论设置更新成功');
         let comment = JSON.parse(SysConfig.options.comment);
         SysConfig.options.comment = JSON.stringify({
           "comment": comment
@@ -55,53 +57,34 @@ export default class extends Base {
   }
   render(){
     let comment = this.state.comment;
-    let res;
-    switch (comment.type){
-      case 'duoshuo':
-        res = (
-          <RadioGroup name='type'
-                      value='duoshuo' >
-            <Radio value='disqus' label='disqus' />
-            <Radio value='duoshuo' label='duoshuo' />
-          </RadioGroup>
-        );
-        break;
-      case 'disqus':
-        res = (
-          <RadioGroup name='type'
-                      value='disqus' >
-            <Radio value='disqus' label='disqus' />
-            <Radio value='duoshuo' label='duoshuo' />
-          </RadioGroup>
-        );
-        break;
-    }
+    let res = (
+      <RadioGroup name='type' value={comment.type}>
+        <Radio value='disqus' label='Disqus' />
+        <Radio value='duoshuo' label='多说' />
+      </RadioGroup>
+    );
 
     return (
-      <Form onValidSubmit={this.handleValidSubmit.bind(this)}>
-        <div className="form-group" >
-          <label className="control-label col-xs-1">
-            <span>分类名称: </span>
-          </label>
-          <div className="col-xs-10">
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+        <Form onValidSubmit={this.handleValidSubmit.bind(this)} className="clearfix options-comment">
+          <div className="form-group">
+            <label>评论类型</label>
             { res }
           </div>
-        </div>
 
-        <div className="form-group">
-          <label className="control-label col-xs-1">
-            <span>评论名称: </span>
-          </label>
-          <div className="col-xs-10">
+          <div className="form-group">
+            <label>网站名称</label>
             <ValidatedInput
-              type='text'
-              {...this.getProps('name')}
-              name='name'
-            />
+                type='text'
+                {...this.getProps('name')}
+                name='name'
+              />
           </div>
-        </div>
-        <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
-      </Form>
+          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
+        </Form>
+      </div></div>
     );
   }
 }
