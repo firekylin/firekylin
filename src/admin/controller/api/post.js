@@ -23,7 +23,7 @@ export default class extends Base {
       if(this.userInfo.type !== 1){
         where.user_id = this.userInfo.id;
       }
-      data = await this.modelInstance.where(where).order('id DESC').page( this.get('page'), 15 ).countSelect();
+      data = await this.modelInstance.where(where).order('create_time DESC').page( this.get('page'), 15 ).countSelect();
     }
     return this.success(data);
   }
