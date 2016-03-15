@@ -31,6 +31,7 @@ import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
 import OptionsUpload from './component/options_upload';
+import OptionsComment from './component/Options_comment';
 
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
@@ -77,6 +78,7 @@ ReactDOM.render((
         <Route path="general" component={OptionsGeneral} />
         <Route path="two_factor_auth" component={Options2fa} />
         <Route path="upload" component={OptionsUpload} />
+        <Route path="comment" component={OptionsComment} />
       </Route>
     </Route>
   </Router>
