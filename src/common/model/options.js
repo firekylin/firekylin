@@ -20,7 +20,10 @@ export default class extends think.model.base {
    * get options
    * @return {} []
    */
-  getOptions(){
+  async getOptions(flag){
+    if(flag === true){
+      await think.cache(this.cacheKey, null);
+    }
     return think.cache(this.cacheKey, async () => {
       let data = await this.select();
       let result = {};

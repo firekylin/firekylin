@@ -2,15 +2,33 @@ import ReactDom from 'react-dom';
 import React from 'react';
 import Base from 'base';
 import classnames from 'classnames';
+import Sidebar from './sidebar';
+import {Link} from 'react-router';
 
 export default class extends Base {
 
-  constructor(){
-    super();
+  constructor(props){
+    super(props);
     this.state = {
-      userOpen: false
+      userOpen: false,
+      crumb: []
     }
     this.bindHandleDocumentClick = this.handleDocumentClick.bind(this);
+
+    this.crumbs = {};
+    (new Sidebar).state.routes.forEach(route => {
+      if( !route.children ) { return; }
+      route.children.forEach( child => {
+        this.crumbs[child.url] = [
+          {title: route.title, url: route.url},
+          child
+        ];
+      });
+    });
+
+    if( this.crumbs[this.props.location.pathname] ) {
+      this.state.crumb = this.crumbs[this.props.location.pathname];
+    }
   }
 
   componentDidMount(){
@@ -41,14 +59,38 @@ export default class extends Base {
     })
   }
   render(){
+    let breadcrumb;
+    if( this.state.crumb.length > 0 ) {
+      breadcrumb = (
+        <ol className="breadcrumb">
+          <li>
+              <Link to="/dashboard">首页</Link>
+          </li>
+          {this.state.crumb.map( (item,i) => {
+            if( item.url === this.props.location.pathname ) {
+              return (
+                <li key={i} className="active">{item.title}</li>
+              );
+            }
+            return (
+              <li key={i}>
+                <Link to={item.url}>{item.title}</Link>
+              </li>
+            );
+          })}
+        </ol>
+      )
+    }else{
+      breadcrumb = (
+        <ol className="breadcrumb">
+          <li>首页</li>
+        </ol>
+      )
+    }
     return (
       <div className="fk-header clearfix">
         <div className="pull-left">
-          <ol className="breadcrumb">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Library</a></li>
-            <li className="active">Data</li>
-          </ol>
+          {breadcrumb}
         </div>
         <ul className="nav navbar-nav navbar-right userinfo" ref="userinfo">
           <li className={this.getUserClass()}>
@@ -56,7 +98,7 @@ export default class extends Base {
               {SysConfig.userInfo.name} <b className="caret"></b>
             </a>
             <ul className="dropdown-menu">
-              <li><a href="">修改密码</a></li>
+              <li><Link to="/user/edit_pwd">修改密码</Link></li>
               <li><a href="/admin/user/logout">退出</a></li>
             </ul>
           </li>

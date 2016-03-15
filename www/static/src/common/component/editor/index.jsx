@@ -4,14 +4,17 @@ import marked from 'marked';
 import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
 import ModalAction from 'common/action/modal';
-import superagent from 'superagent';
+import firekylin from 'common/util/firekylin';
 import './style.css';
 
+import TipAction from 'common/action/tip';
 
 const MdEditor = React.createClass({
   propTypes: {
+    onFullScreen: T.func,
     content: T.string,
-    children: T.node
+    children: T.node,
+    info:T.object,
   },
   getInitialState () {
     return {
@@ -23,8 +26,22 @@ const MdEditor = React.createClass({
   },
   componentDidMount () {
     // cache dom node
-    this.textControl = ReactDOM.findDOMNode(this.refs.editor)
-    this.previewControl = ReactDOM.findDOMNode(this.refs.preview)
+    this.textControl = ReactDOM.findDOMNode(this.refs.editor);
+    this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
+    if(localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+'']) {
+        ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
+          this.textControl.value = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''];
+          this.setState({ result: marked(this.textControl.value) });
+          this.props.onChange(this.textControl.value);
+        })
+
+    }
+  },
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.content === this.props.content) { return; }
+    let initialState = this.getInitialState();
+    initialState.result = marked(nextProps.content || '');
+    this.setState(initialState);
   },
   componentWillUnmount () {
     this.textControl = null
@@ -42,7 +59,7 @@ const MdEditor = React.createClass({
           {this._getToolBar()}
         </div>
         <div className={editorClass}>
-          <textarea ref="editor" name="content" onChange={this._onChange} defaultValue={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
+          <textarea ref="editor" name="content" onChange={this._onChange} value={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
         </div>
         <div className={previewClass} ref="preview" dangerouslySetInnerHTML={{ __html: this.state.result }}></div>
         <div className="md-spliter"></div>
@@ -114,6 +131,7 @@ const MdEditor = React.createClass({
 
     this._ltr = setTimeout(() => {
       this.setState({ result: marked(this.textControl.value) }) // change state
+      localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''] = this.textControl.value;
     }, 300);
 
     this.props.onChange(e.target.value);
@@ -124,7 +142,7 @@ const MdEditor = React.createClass({
     }
   },
   _toggleFullScreen (e) {
-    this.setState({ isFullScreen: !this.state.isFullScreen })
+    this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   },
   // default text processors
   _preInputText (text, preStart, preEnd) {
@@ -149,8 +167,8 @@ const MdEditor = React.createClass({
   _italicText () {
     this._preInputText("_斜体文字_", 1, 5)
   },
-  _linkText () {
-    this._preInputText("[链接文本](www.yourlink.com)", 1, 5)
+  _linkText (url = 'www.yourlink.com') {
+    this._preInputText(`[链接文本](${url})`, 1, 5)
   },
   _blockquoteText () {
     this._preInputText("> 引用", 2, 4)
@@ -159,7 +177,7 @@ const MdEditor = React.createClass({
     this._preInputText("```\ncode block\n```", 4, 14)
   },
   _pictureText () {
-    let preInputText = this._preInputText;
+    let preInputText = this._preInputText, that = this;
     ModalAction.confirm(
       '插入图片',
       <Tabs defaultActiveKey={1}>
@@ -169,24 +187,33 @@ const MdEditor = React.createClass({
           </div>
         </Tab>
         <Tab eventKey={2} title="从网络上抓取">
-          <input type="text" name="url" className="form-control" onChange={e=> this.setState({file: e.target.value})} />
+          <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value})} />
         </Tab>
       </Tabs>,
       ()=> {
-        let file = this.state.file[0];
-        let form = new FormData();
-        form.append('file', file);
-        let url = '/admin/api/file';
-        let req = superagent.post(url);
-        req.send(form);
-        req.end((result, res) => {
-          if( result ) return false;
-          preInputText(`![alt](${res.body.data})`, 2, 5);
-        });
-        return true;
+        if( (this.state.file && this.state.file.length === 0) && !this.state.fileUrl ) {
+          return false;
+        }
+
+        var data = new FormData;
+        if( this.state.fileUrl ) {
+          data.append('fileUrl', this.state.fileUrl);
+        } else {
+          data.append('file', this.state.file[0]);
+        }
+
+        return firekylin.upload(data).then(
+          res => {
+            if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
+              preInputText(`![alt](${res.data})`, 2, 5);
+            } else {
+              let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
+              preInputText(`[${text}](${res.data})`, 1, text.length + 1);
+            }
+          }
+        ).catch((res)=> TipAction.fail(res.errmsg));
       }
     );
-    // this._preInputText("![alt](www.yourlink.com)", 2, 5)
   },
   _listUlText () {
     this._preInputText("- 无序列表项0\n- 无序列表项1", 2, 8)

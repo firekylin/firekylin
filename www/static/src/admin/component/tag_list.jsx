@@ -7,6 +7,7 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 import ModalAction from 'common/action/modal';
+import BreadCrumb from 'admin/component/breadcrumb';
 
 export default class extends Base {
   constructor(props){
@@ -50,12 +51,12 @@ export default class extends Base {
           <td>{item.pathname}</td>
           <td>{item.post_tag.length}</td>
           <td>
-            <a href={`/admin/tag/edit/${item.id}`} title={item.name}>
+            <Link to={`/tag/edit/${item.id}`} title={item.name}>
               <button type="button" className="btn btn-primary btn-xs">
                 <span className="glyphicon glyphicon-edit"></span>
                 编辑
               </button>
-            </a>
+            </Link>
             <span> </span>
             <button
                 type="button"
@@ -79,19 +80,24 @@ export default class extends Base {
   }
   render(){
     return (
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>名称</th>
-            <th>缩略名</th>
-            <th>文章数</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.getTagList()}
-        </tbody>
-      </table>
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>缩略名</th>
+                <th>文章数</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.getTagList()}
+            </tbody>
+          </table>
+        </div>
+      </div>
     )
   }
 }

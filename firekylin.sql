@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.6.19-debug)
 # Database: firekylin
-# Generation Time: 2016-02-23 08:18:41 +0000
+# Generation Time: 2016-03-13 10:42:53 +0000
 # ************************************************************
 
 
@@ -29,9 +29,10 @@ CREATE TABLE `fk_cate` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8 NOT NULL,
   `pid` int(11) NOT NULL DEFAULT '0',
+  `pathname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -53,19 +54,21 @@ LOCK TABLES `fk_options` WRITE;
 
 INSERT INTO `fk_options` (`key`, `value`, `desc`)
 VALUES
-	('analyze_code',NULL,'统计代码，可以添加百度统计、Google 统计等'),
-	('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
-	('github_blog','welefen/blog','GitHub blog 地址，如果填了则同步到 GitHub 上'),
-	('github_url',NULL,'GitHub 地址'),
-	('image_upload',NULL,'图片存放的位置，默认存在放网站上。也可以选择放在七牛或者又拍云等地方'),
-	('keywords',NULL,'网站关键字'),
-	('logo_url',NULL,'logo 地址'),
-	('miitbeian',NULL,'网站备案号'),
-	('num_per_page','10','文章一页显示的条数'),
-	('password_salt','firekylin','密码 salt，网站安装的时候随机生成一个'),
-	('title','Firekylin 系统','网站标题'),
-	('two_factor_auth','0','是否开启二步验证'),
-	('weibo_url',NULL,'微博地址');
+  ('analyze_code',NULL,'统计代码，可以添加百度统计、Google 统计等'),
+  ('comment','{\"type\": \"disqus\", \"name\": \"welefen\"}','评论类型'),
+  ('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
+  ('github_blog','welefen/blog','GitHub blog 地址，如果填了则同步到 GitHub 上'),
+  ('github_url','https://github.com/75team/thinkjs','GitHub 地址'),
+  ('image_upload',NULL,'图片存放的位置，默认存在放网站上。也可以选择放在七牛或者又拍云等地方'),
+  ('keywords','','网站关键字'),
+  ('logo_url','','logo 地址'),
+  ('miitbeian','we','网站备案号'),
+  ('num_per_page','10','文章一页显示的条数'),
+  ('password_salt','__PASSWORD_SALT__','密码 salt，网站安装的时候随机生成一个'),
+  ('theme','firekylin','主题名称'),
+  ('title','Firekylin 系统','网站标题'),
+  ('twitter_url','','微博地址'),
+  ('two_factor_auth','','是否开启二步验证');
 
 /*!40000 ALTER TABLE `fk_options` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -83,15 +86,17 @@ CREATE TABLE `fk_post` (
   `status` tinyint(11) NOT NULL DEFAULT '0' COMMENT '0 为草稿，1 为待审核，2 为已拒绝，3 为已经发布',
   `title` varchar(255) CHARACTER SET utf8 NOT NULL,
   `pathname` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '' COMMENT 'URL 的 pathname',
-  `summary` tinytext CHARACTER SET utf8 NOT NULL COMMENT '摘要',
-  `markdown_content` text CHARACTER SET utf8 NOT NULL,
-  `content` text CHARACTER SET utf8 NOT NULL,
+  `summary` longtext CHARACTER SET utf8 NOT NULL COMMENT '摘要',
+  `markdown_content` longtext CHARACTER SET utf8 NOT NULL,
+  `content` longtext CHARACTER SET utf8 NOT NULL,
   `allow_comment` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为允许， 0 为不允许',
   `create_time` datetime NOT NULL,
   `update_time` datetime NOT NULL,
-  `is_pubic` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为公开，0 为不公开',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `is_public` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为公开，0 为不公开',
+  `comment_num` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -106,7 +111,7 @@ CREATE TABLE `fk_post_cate` (
   `cate_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `post_cate` (`post_id`,`cate_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -136,7 +141,7 @@ CREATE TABLE `fk_post_tag` (
   `tag_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `post_tag` (`post_id`,`tag_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -148,9 +153,10 @@ DROP TABLE IF EXISTS `fk_tag`;
 CREATE TABLE `fk_tag` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `pathname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -174,29 +180,8 @@ CREATE TABLE `fk_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4;
 
-LOCK TABLES `fk_user` WRITE;
-/*!40000 ALTER TABLE `fk_user` DISABLE KEYS */;
-
-INSERT INTO `fk_user` (`id`, `name`, `display_name`, `password`, `type`, `email`, `status`, `create_time`, `create_ip`, `last_login_time`, `last_login_ip`)
-VALUES
-	(2,'welefen','老六333wwwwww','1f071b63b5704e6edc2b2b76655ff833',1,'welefen@gmail.com',1,'2016-02-04 13:46:47','127.0.0.1','2016-02-04 17:24:03','127.0.0.1'),
-	(3,'suredy','','dbba66743de48eb5021c6c43208abcc2',1,'suredy@163.com',1,'2016-02-04 15:10:55','127.0.0.1','2016-02-04 15:10:55','127.0.0.1'),
-	(4,'suredy222','','995cb20b0da63a0dde179835d2486996',1,'suredy@1631.com',1,'2016-02-04 15:12:06','127.0.0.1','2016-02-04 15:12:06','127.0.0.1'),
-	(5,'suredy4','','b73f4f879d1d8e9a1fd0f68effe9b44c',1,'suredy44@163.com',1,'2016-02-04 15:13:15','127.0.0.1','2016-02-04 15:13:15','127.0.0.1'),
-	(6,'suredy5','suredy6','7b8f20f2f4b5e72b404a1e1ebdef9980',1,'fasdf@163.com',2,'2016-02-04 15:13:49','127.0.0.1','2016-02-04 17:26:14','127.0.0.1'),
-	(7,'sfadsaf777','','c34e35db20be8061244ae0eba678455a',1,'fasdfsadf@163.com',1,'2016-02-04 15:14:17','127.0.0.1','2016-02-04 15:14:17','127.0.0.1'),
-	(8,'fasdfasdf','','6765e1976fafd3984729aeb92561689f',1,'fasdfasfd@163.com',1,'2016-02-04 15:14:54','127.0.0.1','2016-02-04 15:14:54','127.0.0.1'),
-	(9,'fasdfaswwww','','364b1b445ed82463f81158db29c218ec',1,'fasdfasdf@184.com',1,'2016-02-04 15:15:31','127.0.0.1','2016-02-04 15:15:31','127.0.0.1'),
-	(10,'www898989uiu','','c15209e7dcf69701fdde386f86137e82',1,'fasdfsadwwwf@163.com',1,'2016-02-04 15:17:47','127.0.0.1','2016-02-04 15:17:47','127.0.0.1'),
-	(11,'fwew','','c3d46bb90e2091a8b3acf715a8538329',2,'fasdwwwwwwwf@163.com',1,'2016-02-04 15:18:17','127.0.0.1','2016-02-23 10:17:35','127.0.0.1'),
-	(12,'test0000','','9e1aa29be5561a86834816921d966e0b',1,'test000@163.com',1,'2016-02-04 15:35:08','127.0.0.1','2016-02-04 15:35:08','127.0.0.1'),
-	(13,'test8888','test','9a3db46b7473a9177f976341d4693304',1,'welewerwerfen@gmail.com',1,'2016-02-04 15:35:53','127.0.0.1','2016-02-23 15:28:11','127.0.0.1'),
-	(14,'ddddddd','welefen','81ca50c7046f32f62b9dbc54726f2aaa',1,'itchin2a110@gmail.com',1,'2016-02-04 17:20:57','127.0.0.1','2016-02-23 15:30:03','127.0.0.1');
-
-/*!40000 ALTER TABLE `fk_user` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 

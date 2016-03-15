@@ -18,6 +18,15 @@ export default class extends PostCreate {
     this.state.postInfo.pathname = this.props.location.query.pathname;
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.id = nextProps.params.id | 0;
+    if(this.id) {
+      PageAction.select(this.id);
+    }
+    let initialState = this.initialState();
+    this.setState(initialState);
+  }
+
   handleTrigger(data, type){
     switch(type){
       case 'savePageFail':

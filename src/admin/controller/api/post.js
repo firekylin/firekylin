@@ -13,7 +13,18 @@ export default class extends Base {
    */
   async getAction(self){
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    let data = await this.modelInstance.order('id DESC').page( this.get('page'), 15 ).countSelect();
+    let data;
+    if( this.id ) {
+      if( this.id === 'lastest' ) return this.lastest();
+      data = await this.modelInstance.where({id: this.id}).find();
+    } else {
+      let where = {};
+      //不是管理员，只显示个人的文章
+      if(this.userInfo.type !== 1){
+        where.user_id = this.userInfo.id;
+      }
+      data = await this.modelInstance.where(where).order('create_time DESC').page( this.get('page'), 15 ).countSelect();
+    }
     return this.success(data);
   }
 
@@ -56,6 +67,11 @@ export default class extends Base {
 
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
+  }
+
+  async lastest() {
+    let data = await this.modelInstance.getLatest(6);
+    return this.success(data);
   }
 
   getPostTime(data) {

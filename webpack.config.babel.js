@@ -1,10 +1,22 @@
 import path from 'path';
+import webpack from 'webpack';
 
 var base = path.join(__dirname, 'www/static');
 export default {
   devtool: 'source-map',
   entry: {
-    admin: `${base}/src/admin/app.jsx`
+    admin: `${base}/src/admin/app.jsx`,
+    vendor: [
+      'md5',
+      'react',
+      'moment',
+      'react-dom',
+      'classnames',
+      'react-router',
+      'qrcode-react',
+      'react-bootstrap',
+      'react-bootstrap-validation'
+    ]
   },
   output: {
     path: `${base}/js`,
@@ -35,5 +47,9 @@ export default {
         loader: 'style!css'
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({name: 'vendor', filename: 'common.js'}),
+    new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
+  ]
 };

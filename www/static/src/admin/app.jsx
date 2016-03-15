@@ -10,6 +10,7 @@ import Dashboard from './component/dashboard';
 import User from './component/user';
 import UserList from './component/user_list';
 import UserCreate from './component/user_create';
+import UserEditPwd from './component/user_editpwd.jsx';
 
 import Post from './component/post';
 import PostList from './component/post_list';
@@ -32,6 +33,7 @@ import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
 import OptionsUpload from './component/options_upload';
 import OptionsComment from './component/Options_comment';
+import Import from './component/import';
 
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
@@ -59,6 +61,7 @@ ReactDOM.render((
         <Redirect from="/" to="list" />
         <Route path="list" component={UserList} />
         <Route path="create" component={UserCreate} />
+        <Route path="edit_pwd" component={UserEditPwd} />
         <Route path="edit/:id" component={UserCreate} />
       </Route>
       <Route path="cate" component={Cate}>
@@ -79,6 +82,7 @@ ReactDOM.render((
         <Route path="two_factor_auth" component={Options2fa} />
         <Route path="upload" component={OptionsUpload} />
         <Route path="comment" component={OptionsComment} />
+        <Route path="import" component={Import} />
       </Route>
     </Route>
   </Router>

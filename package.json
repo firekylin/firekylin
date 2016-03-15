@@ -1,12 +1,13 @@
 {
-  "name": "thinkjs-application",
-  "description": "application created by thinkjs",
-  "version": "1.0.0",
+  "name": "Firekylin",
+  "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2005+",
+  "version": "0.1.0",
   "scripts": {
     "start": "node www/development.js",
-    "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/ --retain-lines",
+    "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/",
     "watch-compile": "node -e \"console.log('<npm run watch-compile> no longer need, use <npm start> command direct.');console.log();\"",
-    "watch": "npm run watch-compile"
+    "watch": "npm run watch-compile",
+    "copy-package": "node copy_package.js"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
@@ -18,7 +19,11 @@
     "phpass": "^0.1.1",
     "request": "^2.69.0",
     "thinkit": "^4.6.0",
-    "thinkjs": "2.1.x"
+    "thinkjs": "2.1.x",
+    "to-markdown": "^2.0.1",
+    "xml2js": "^0.4.16",
+    "moment": "^2.11.2",
+    "speakeasy": "2.0.0"
   },
   "devDependencies": {
     "babel-cli": "6.x.x",
@@ -34,7 +39,6 @@
     "history": "^1.17.0",
     "marked": "^0.3.5",
     "md5": "^2.0.0",
-    "moment": "^2.11.2",
     "qrcode-react": "^0.1.10",
     "rc-select": "^5.10.0",
     "react": "^0.14.7",
@@ -46,11 +50,10 @@
     "react-mixin": "^3.0.3",
     "react-router": "^2.0.0-rc5",
     "reflux": "^0.3.0",
-    "speakeasy": "^2.0.0",
     "style-loader": "^0.13.0",
     "superagent": "^1.7.2",
     "webpack": "^1.12.12"
   },
-  "repository": "",
+  "repository": "https://github.com/75team/firekylin",
   "license": "MIT"
 }

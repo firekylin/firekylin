@@ -1,12 +1,21 @@
 import crontab from 'node-crontab';
 
+import './crontab';
+
 if(!think.cli){
-  let generateSitemap = () => {
+
+  crontab.scheduleJob("0 */3 * * *", () => {
+    if(!firekylin.isInstalled){
+      return;
+    }
     think.http("/crontab/sitemap", true); 
-  }
-  crontab.scheduleJob("*/3 * * * *", () => generateSitemap);
+  });
 
-  think.http("/crontab/sync_comment", true); 
+  crontab.scheduleJob("0 */1 * * *", () => {
+    if(!firekylin.isInstalled){
+      return;
+    }
+    think.http("/crontab/sync_comment", true); 
+  });
 
-  generateSitemap();
 }

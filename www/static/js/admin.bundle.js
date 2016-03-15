@@ -78,6 +78,10 @@
 	
 	var _user_create2 = _interopRequireDefault(_user_create);
 	
+	var _user_editpwd = __webpack_require__(938);
+	
+	var _user_editpwd2 = _interopRequireDefault(_user_editpwd);
+	
 	var _post = __webpack_require__(809);
 	
 	var _post2 = _interopRequireDefault(_post);
@@ -138,13 +142,17 @@
 	
 	var _options_2fa2 = _interopRequireDefault(_options_2fa);
 	
-	var _options_upload = __webpack_require__(932);
+	var _options_upload = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./component/options_upload\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 	
 	var _options_upload2 = _interopRequireDefault(_options_upload);
 	
 	var _Options_comment = __webpack_require__(933);
 	
 	var _Options_comment2 = _interopRequireDefault(_Options_comment);
+	
+	var _import = __webpack_require__(939);
+	
+	var _import2 = _interopRequireDefault(_import);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -183,6 +191,7 @@
 	      _react2.default.createElement(_reactRouter.Redirect, { from: '/', to: 'list' }),
 	      _react2.default.createElement(_reactRouter.Route, { path: 'list', component: _user_list2.default }),
 	      _react2.default.createElement(_reactRouter.Route, { path: 'create', component: _user_create2.default }),
+	      _react2.default.createElement(_reactRouter.Route, { path: 'edit_pwd', component: _user_editpwd2.default }),
 	      _react2.default.createElement(_reactRouter.Route, { path: 'edit/:id', component: _user_create2.default })
 	    ),
 	    _react2.default.createElement(
@@ -208,7 +217,8 @@
 	      _react2.default.createElement(_reactRouter.Route, { path: 'general', component: _options_general2.default }),
 	      _react2.default.createElement(_reactRouter.Route, { path: 'two_factor_auth', component: _options_2fa2.default }),
 	      _react2.default.createElement(_reactRouter.Route, { path: 'upload', component: _options_upload2.default }),
-	      _react2.default.createElement(_reactRouter.Route, { path: 'comment', component: _Options_comment2.default })
+	      _react2.default.createElement(_reactRouter.Route, { path: 'comment', component: _Options_comment2.default }),
+	      _react2.default.createElement(_reactRouter.Route, { path: 'import', component: _import2.default })
 	    )
 	  )
 	), document.getElementById('app'));
@@ -27208,16 +27218,7 @@
 	      { className: 'fk' },
 	      _react2.default.createElement(_sidebar2.default, null),
 	      _react2.default.createElement(_tip2.default, null),
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'fk-content-wrap' },
-	        _react2.default.createElement(_breadcrumb2.default, null),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'manage-container' },
-	          this.props.children
-	        )
-	      ),
+	      this.props.children,
 	      _react2.default.createElement(_modal_manage2.default, null)
 	    );
 	  };
@@ -50963,6 +50964,7 @@
 	  select: { children: ['completed', 'failed'] },
 	  delete: { children: ['completed', 'failed'] },
 	  save: { children: ['completed', 'failed'], asyncResult: true },
+	  savepwd: { children: ['completed', 'failed'], asyncResult: true },
 	  login: { children: ['completed', 'failed'], asyncResult: true }
 	});
 
@@ -51035,6 +51037,18 @@
 	      _this2.trigger(err, 'saveUserFail');
 	    });
 	  },
+	  onSavepwd: function onSavepwd(data) {
+	    var _this3 = this;
+	
+	    var url = '/admin/api/user?method=put&type=savepwd';
+	    var req = _superagent2.default.post(url);
+	    req.type('form').send(data);
+	    return _firekylin2.default.request(req).then(function (data) {
+	      _this3.trigger(data, 'saveUserSuccess');
+	    }).catch(function (err) {
+	      _this3.trigger(err, 'saveUserFail');
+	    });
+	  },
 	
 	  /**
 	   * login
@@ -51042,14 +51056,26 @@
 	   * @return {[type]}      [description]
 	   */
 	  onLogin: function onLogin(data) {
-	    var _this3 = this;
+	    var _this4 = this;
 	
 	    var req = _superagent2.default.post('/admin/user/login');
 	    req.type('form').send(data);
 	    return _firekylin2.default.request(req).then(function (data) {
-	      _this3.trigger(data, 'LoginSuccess');
+	      _this4.trigger(data, 'LoginSuccess');
 	    }).catch(function (err) {
-	      _this3.trigger(err, 'LoginFail');
+	      _this4.trigger(err, 'LoginFail');
+	    });
+	  },
+	  onDelete: function onDelete(userId) {
+	    var _this5 = this;
+	
+	    var url = '/admin/api/user/' + userId + '?method=delete';
+	    var req = _superagent2.default.post(url);
+	    req.type('form').send();
+	    return _firekylin2.default.request(req).then(function (data) {
+	      _this5.trigger(data, 'deleteUserSuccess');
+	    }).catch(function (err) {
+	      _this5.trigger(err, 'deleteUserFail');
 	    });
 	  }
 	});
@@ -52532,6 +52558,26 @@
 	      }
 	    });
 	    return deferred.promise;
+	  },
+	  upload: function upload(data) {
+	    var url = arguments.length <= 1 || arguments[1] === undefined ? '/admin/api/file' : arguments[1];
+	
+	    return new _promise2.default(function (resolve, reject) {
+	      var xhr = new XMLHttpRequest();
+	      xhr.open('POST', url, true);
+	      xhr.onload = function () {
+	        var res = JSON.parse(xhr.responseText);
+	        if (res.errno != 0) {
+	          reject(res);
+	        } else {
+	          resolve(res);
+	        }
+	      };
+	      xhr.onerror = function () {
+	        reject(xhr);
+	      };
+	      xhr.send(data);
+	    });
 	  },
 	  /**
 	   * check object is object
@@ -66585,7 +66631,7 @@
 	    }
 	
 	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, _Base.call.apply(_Base, [this].concat(args))), _this), _this.state = {
-	      routes: [{ url: '/dashboard', icon: 'home', title: '概述' }, { url: '/post', icon: 'setting', title: '文章管理', children: [{ url: '/post/list', title: '文章列表' }, { url: '/post/create', title: '添加文章' }] }, { url: '/page', icon: 'reply', title: '页面管理', children: [{ url: '/page/list', title: '页面列表' }, { url: '/page/create', title: '添加页面' }] }, { url: '/cate', icon: 'report', title: '分类管理', children: [{ url: '/cate/list', title: '分类列表' }, { url: '/cate/create', title: '添加分类' }] }, { url: '/tag', icon: 'report', title: '标签管理', children: [{ url: '/tag/list', title: '标签列表' }, { url: '/tag/create', title: '添加标签' }] }, { url: '/user', icon: 'user', title: '用户管理', children: [{ url: '/user/list', title: '用户列表' }, { url: '/user/create', title: '添加用户' }] }, { url: '/options', icon: 'report', title: '系统设置', children: [{ url: '/options/general', title: '基本设置' }, { url: '/options/two_factor_auth', title: '二步验证' }, { url: '/options/upload', title: '文件上传' }, { url: '/options/comment', title: '评论配置' }] }]
+	      routes: [{ url: '/dashboard', icon: 'home', title: '概述' }, { url: '/post', icon: 'topic', title: '文章管理', children: [{ url: '/post/list', title: '文章列表' }, { url: '/post/create', title: '添加文章' }] }, { url: '/page', icon: 'reply', title: '页面管理', type: 1, children: [{ url: '/page/list', title: '页面列表' }, { url: '/page/create', title: '添加页面' }] }, { url: '/cate', icon: 'report', title: '分类管理', type: 1, children: [{ url: '/cate/list', title: '分类列表' }, { url: '/cate/create', title: '添加分类' }] }, { url: '/tag', icon: 'report', title: '标签管理', type: 1, children: [{ url: '/tag/list', title: '标签列表' }, { url: '/tag/create', title: '添加标签' }] }, { url: '/user', icon: 'user', title: '用户管理', type: 1, children: [{ url: '/user/list', title: '用户列表' }, { url: '/user/create', title: '添加用户' }, { url: '/user/edit_pwd', title: '修改密码' }] }, { url: '/options', icon: 'setting', title: '系统设置', type: 1, children: [{ url: '/options/general', title: '基本设置' }, { url: '/options/two_factor_auth', title: '二步验证' }, { url: '/options/upload', title: '文件上传' }, { url: '/options/comment', title: '评论配置' }, { url: '/options/import', title: '导入数据' }] }]
 	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
 	  }
 	
@@ -66628,6 +66674,16 @@
 	  _default.prototype.render = function render() {
 	    var _this2 = this;
 	
+	    var routes = this.state.routes;
+	    var userType = SysConfig.userInfo.type | 0;
+	    routes = routes.filter(function (item) {
+	      if (!item.type) {
+	        return true;
+	      }
+	      if (userType <= item.type) {
+	        return true;
+	      }
+	    });
 	    return _react2.default.createElement(
 	      'div',
 	      { className: 'fk-side ps-container', id: 'fk-side' },
@@ -66652,7 +66708,7 @@
 	        'ul',
 	        { className: 'mod-bar', style: { marginTop: 10 } },
 	        _react2.default.createElement('input', { type: 'hidden', id: 'hide_values', val: '0' }),
-	        this.state.routes.map(function (route, i) {
+	        routes.map(function (route, i) {
 	          return _react2.default.createElement(
 	            'li',
 	            { key: i },
@@ -66740,20 +66796,41 @@
 	
 	var _classnames2 = _interopRequireDefault(_classnames);
 	
+	var _sidebar = __webpack_require__(793);
+	
+	var _sidebar2 = _interopRequireDefault(_sidebar);
+	
+	var _reactRouter = __webpack_require__(159);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var _default = function (_Base) {
 	  (0, _inherits3.default)(_default, _Base);
 	
-	  function _default() {
+	  function _default(props) {
 	    (0, _classCallCheck3.default)(this, _default);
 	
-	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this));
+	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this, props));
 	
 	    _this.state = {
-	      userOpen: false
+	      userOpen: false,
+	      crumb: []
 	    };
 	    _this.bindHandleDocumentClick = _this.handleDocumentClick.bind(_this);
+	
+	    _this.crumbs = {};
+	    new _sidebar2.default().state.routes.forEach(function (route) {
+	      if (!route.children) {
+	        return;
+	      }
+	      route.children.forEach(function (child) {
+	        _this.crumbs[child.url] = [{ title: route.title, url: route.url }, child];
+	      });
+	    });
+	
+	    if (_this.crumbs[_this.props.location.pathname]) {
+	      _this.state.crumb = _this.crumbs[_this.props.location.pathname];
+	    }
 	    return _this;
 	  }
 	
@@ -66787,39 +66864,59 @@
 	  };
 	
 	  _default.prototype.render = function render() {
+	    var _this2 = this;
+	
+	    var breadcrumb = void 0;
+	    if (this.state.crumb.length > 0) {
+	      breadcrumb = _react2.default.createElement(
+	        'ol',
+	        { className: 'breadcrumb' },
+	        _react2.default.createElement(
+	          'li',
+	          null,
+	          _react2.default.createElement(
+	            _reactRouter.Link,
+	            { to: '/dashboard' },
+	            '首页'
+	          )
+	        ),
+	        this.state.crumb.map(function (item, i) {
+	          if (item.url === _this2.props.location.pathname) {
+	            return _react2.default.createElement(
+	              'li',
+	              { key: i, className: 'active' },
+	              item.title
+	            );
+	          }
+	          return _react2.default.createElement(
+	            'li',
+	            { key: i },
+	            _react2.default.createElement(
+	              _reactRouter.Link,
+	              { to: item.url },
+	              item.title
+	            )
+	          );
+	        })
+	      );
+	    } else {
+	      breadcrumb = _react2.default.createElement(
+	        'ol',
+	        { className: 'breadcrumb' },
+	        _react2.default.createElement(
+	          'li',
+	          null,
+	          '首页'
+	        )
+	      );
+	    }
 	    return _react2.default.createElement(
 	      'div',
 	      { className: 'fk-header clearfix' },
 	      _react2.default.createElement(
 	        'div',
 	        { className: 'pull-left' },
-	        _react2.default.createElement(
-	          'ol',
-	          { className: 'breadcrumb' },
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            _react2.default.createElement(
-	              'a',
-	              { href: '#' },
-	              'Home'
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            _react2.default.createElement(
-	              'a',
-	              { href: '#' },
-	              'Library'
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            { className: 'active' },
-	            'Data'
-	          )
-	        )
+	        breadcrumb
 	      ),
 	      _react2.default.createElement(
 	        'ul',
@@ -66841,8 +66938,8 @@
 	              'li',
 	              null,
 	              _react2.default.createElement(
-	                'a',
-	                { href: '' },
+	                _reactRouter.Link,
+	                { to: '/user/edit_pwd' },
 	                '修改密码'
 	              )
 	            ),
@@ -67576,6 +67673,10 @@
 	exports.__esModule = true;
 	exports.default = undefined;
 	
+	var _assign = __webpack_require__(805);
+	
+	var _assign2 = _interopRequireDefault(_assign);
+	
 	var _classCallCheck2 = __webpack_require__(245);
 	
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -67592,111 +67693,315 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _base = __webpack_require__(319);
+	
+	var _base2 = _interopRequireDefault(_base);
+	
+	var _reactRouter = __webpack_require__(159);
+	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
+	var _moment = __webpack_require__(692);
+	
+	var _moment2 = _interopRequireDefault(_moment);
+	
+	var _post = __webpack_require__(811);
+	
+	var _post2 = _interopRequireDefault(_post);
+	
+	var _post3 = __webpack_require__(812);
+	
+	var _post4 = _interopRequireDefault(_post3);
+	
+	var _system = __webpack_require__(936);
+	
+	var _system2 = _interopRequireDefault(_system);
+	
+	var _system3 = __webpack_require__(937);
+	
+	var _system4 = _interopRequireDefault(_system3);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var _default = function (_React$Component) {
-	  (0, _inherits3.default)(_default, _React$Component);
+	var _default = function (_Base) {
+	  (0, _inherits3.default)(_default, _Base);
 	
 	  function _default() {
+	    var _temp, _this, _ret;
+	
 	    (0, _classCallCheck3.default)(this, _default);
-	    return (0, _possibleConstructorReturn3.default)(this, _React$Component.apply(this, arguments));
+	
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	
+	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, _Base.call.apply(_Base, [this].concat(args))), _this), _this.state = {
+	      platform: 'Linux',
+	      nodeVersion: '4.2',
+	      v8Version: '1.1',
+	      mysqlVersion: 'xxx',
+	      thinkjsVersion: '2.1',
+	      firekylinVersion: '2.0',
+	      posts: [],
+	      count: {
+	        posts: 0,
+	        comments: 0,
+	        cates: 0
+	      }
+	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
 	  }
+	
+	  _default.prototype.componentWillMount = function componentWillMount() {
+	    var _this2 = this;
+	
+	    this.listenTo(_post4.default, function (posts) {
+	      return _this2.setState({ posts: posts });
+	    });
+	    this.listenTo(_system4.default, function (data) {
+	      _this2.setState((0, _assign2.default)({}, data.versions, { count: data.count }));
+	    });
+	    _post2.default.selectLastest();
+	    _system2.default.select();
+	  };
 	
 	  _default.prototype.render = function render() {
 	    return _react2.default.createElement(
 	      'div',
-	      null,
-	      _react2.default.createElement(
-	        'h3',
-	        { style: { marginBottom: '30px' } },
-	        '网站概要'
-	      ),
-	      _react2.default.createElement(
-	        'p',
-	        null,
-	        '目前有 1 篇文章, 并有 1 条关于你的评论在 1 个分类中. '
-	      ),
-	      _react2.default.createElement(
-	        'p',
-	        null,
-	        '点击下面的链接快速开始:'
-	      ),
-	      _react2.default.createElement('hr', null),
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
 	        'div',
-	        { className: 'row' },
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'div',
-	          { className: 'col-md-4' },
-	          _react2.default.createElement(
-	            'h4',
-	            null,
-	            '最近发布的文章'
-	          )
+	          'h3',
+	          { style: { marginBottom: '30px' } },
+	          '网站概要'
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '目前有 ',
+	          this.state.count.posts,
+	          ' 篇文章, 并有 ',
+	          this.state.count.comments,
+	          ' 条关于你的评论在 ',
+	          this.state.count.cates,
+	          ' 个分类中. '
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '点击下面的链接快速开始:'
 	        ),
 	        _react2.default.createElement(
 	          'div',
-	          { className: 'col-md-4' },
+	          { className: '' },
 	          _react2.default.createElement(
-	            'h4',
-	            null,
-	            '最近发布的评论'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'col-md-4' },
-	          _react2.default.createElement(
-	            'h4',
-	            null,
-	            '官方最新日志'
+	            _reactRouter.Link,
+	            { to: '/post/create' },
+	            '撰写新文章'
 	          ),
 	          _react2.default.createElement(
-	            'ul',
-	            null,
+	            _reactRouter.Link,
+	            { to: '/options/general', style: { marginLeft: 20 } },
+	            '系统设置'
+	          )
+	        ),
+	        _react2.default.createElement('hr', null),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-md-4' },
 	            _react2.default.createElement(
-	              'li',
+	              'h4',
 	              null,
-	              _react2.default.createElement(
-	                'a',
-	                { href: '' },
-	                ' 参与下一个版本开发方向的投票'
-	              )
+	              '最近发布的文章'
 	            ),
 	            _react2.default.createElement(
-	              'li',
+	              'ul',
 	              null,
-	              _react2.default.createElement(
-	                'a',
-	                { href: '' },
-	                ' 参与下一个版本开发方向的投票'
-	              )
+	              this.state.posts.map(function (post) {
+	                return _react2.default.createElement(
+	                  'li',
+	                  { key: post.id },
+	                  _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    (0, _moment2.default)(new Date(post.create_time)).format('MM.DD'),
+	                    '：'
+	                  ),
+	                  _react2.default.createElement(
+	                    'a',
+	                    { href: '/post/' + post.pathname, target: '_blank' },
+	                    post.title
+	                  )
+	                );
+	              })
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-md-4' },
+	            _react2.default.createElement(
+	              'h4',
+	              null,
+	              '系统概况'
 	            ),
 	            _react2.default.createElement(
-	              'li',
+	              'ul',
 	              null,
 	              _react2.default.createElement(
-	                'a',
-	                { href: '' },
-	                ' 参与下一个版本开发方向的投票'
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '服务器系统：'
+	                ),
+	                this.state.platform
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  'Node.js版本：'
+	                ),
+	                this.state.nodeVersion
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  'V8引擎版本：'
+	                ),
+	                this.state.v8Version
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  'MySQL版本：'
+	                ),
+	                this.state.mysqlVersion
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  'ThinkJS版本：'
+	                ),
+	                this.state.thinkjsVersion
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  'FireKylin版本：'
+	                ),
+	                this.state.firekylinVersion
 	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-md-4' },
+	            _react2.default.createElement(
+	              'h4',
+	              null,
+	              '关于我们'
 	            ),
 	            _react2.default.createElement(
-	              'li',
+	              'ul',
 	              null,
 	              _react2.default.createElement(
-	                'a',
-	                { href: '' },
-	                ' 参与下一个版本开发方向的投票'
-	              )
-	            ),
-	            _react2.default.createElement(
-	              'li',
-	              null,
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '项目主页：'
+	                ),
+	                _react2.default.createElement(
+	                  'a',
+	                  { href: 'http://firekylin.org/', target: '_blank' },
+	                  'http://firekylin.org/'
+	                )
+	              ),
 	              _react2.default.createElement(
-	                'a',
-	                { href: '' },
-	                ' 参与下一个版本开发方向的投票'
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '项目源码：'
+	                ),
+	                _react2.default.createElement(
+	                  'a',
+	                  { href: 'https://github.com/welefen/firekylin' },
+	                  'https://github.com/welefen/firekylin'
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '问题反馈：'
+	                ),
+	                _react2.default.createElement(
+	                  'a',
+	                  { href: 'https://github.com/welefen/firekylin/issues' },
+	                  'https://github.com/welefen/firekylin/issues'
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '团队博客：'
+	                ),
+	                _react2.default.createElement(
+	                  'a',
+	                  { href: 'http://www.75team.com/' },
+	                  'http://www.75team.com/'
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '开发成员：'
+	                ),
+	                _react2.default.createElement(
+	                  'a',
+	                  { href: 'https://github.com/welefen' },
+	                  'Welefen'
+	                ),
+	                '、',
+	                _react2.default.createElement(
+	                  'a',
+	                  { href: 'https://github.com/lizheming' },
+	                  'lizheming'
+	                )
 	              )
 	            )
 	          )
@@ -67704,10 +68009,10 @@
 	      )
 	    );
 	  };
-	
+
 	  return _default;
-	}(_react2.default.Component);
-	
+	}(_base2.default);
+
 	exports.default = _default;
 
 /***/ },
@@ -67803,6 +68108,10 @@
 	
 	var _classnames2 = _interopRequireDefault(_classnames);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _user = __webpack_require__(666);
 	
 	var _user2 = _interopRequireDefault(_user);
@@ -67810,6 +68119,10 @@
 	var _user3 = __webpack_require__(667);
 	
 	var _user4 = _interopRequireDefault(_user3);
+	
+	var _tip = __webpack_require__(792);
+	
+	var _tip2 = _interopRequireDefault(_tip);
 	
 	var _modal = __webpack_require__(342);
 	
@@ -67838,10 +68151,17 @@
 	  };
 	
 	  _default.prototype.handleTrigger = function handleTrigger(data, type) {
-	    this.setState({ userList: data, loading: false });
+	    switch (type) {
+	      case 'deleteUserSuccess':
+	        _tip2.default.success('删除成功');
+	        _user2.default.select();
+	        break;
+	      default:
+	        this.setState({ userList: data, loading: false });
+	    }
 	  };
 	
-	  _default.prototype.handleDelete = function handleDelete() {
+	  _default.prototype.handleDelete = function handleDelete(userId) {
 	    return _modal2.default.confirm('提示', _react2.default.createElement(
 	      'div',
 	      { className: 'center' },
@@ -67853,7 +68173,7 @@
 	        '删除后无法恢复'
 	      )
 	    ), function () {
-	      //OptionsAction.save({two_factor_auth: two_factor_auth});
+	      _user2.default.delete(userId);
 	    }, 'modal-sm');
 	  };
 	
@@ -67956,60 +68276,69 @@
 	
 	  _default.prototype.render = function render() {
 	    return _react2.default.createElement(
-	      'table',
-	      { className: 'table table-striped' },
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'thead',
-	        null,
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'tr',
-	          null,
+	          'table',
+	          { className: 'table table-striped' },
 	          _react2.default.createElement(
-	            'th',
+	            'thead',
 	            null,
-	            'ID'
+	            _react2.default.createElement(
+	              'tr',
+	              null,
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                'ID'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '用户名'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '邮箱'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '用户组'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '有效'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '注册时间'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '最后登录时间'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '操作'
+	              )
+	            )
 	          ),
 	          _react2.default.createElement(
-	            'th',
+	            'tbody',
 	            null,
-	            '用户名'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '邮箱'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '用户组'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '有效'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '注册时间'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '最后登录时间'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '操作'
+	            this.getUserList()
 	          )
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'tbody',
-	        null,
-	        this.getUserList()
 	      )
 	    );
 	  };
@@ -68067,6 +68396,10 @@
 	var _md = __webpack_require__(344);
 	
 	var _md2 = _interopRequireDefault(_md);
+	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
 	
 	var _user = __webpack_require__(666);
 	
@@ -68141,8 +68474,12 @@
 	    values.type = _reactDom2.default.findDOMNode(this.refs.type).value;
 	    values.status = _reactDom2.default.findDOMNode(this.refs.status).value;
 	    delete values.repassword;
-	    var password = (0, _md2.default)(SysConfig.options.password_salt + values.password);
-	    values.password = password;
+	    if (this.id && values.password === '') {
+	      delete values.password;
+	    } else {
+	      var password = (0, _md2.default)(SysConfig.options.password_salt + values.password);
+	      values.password = password;
+	    }
 	    this.setState({ submitting: true });
 	    if (this.id) {
 	      values.id = this.id;
@@ -68180,22 +68517,39 @@
 	
 	
 	  _default.prototype.getProps = function getProps(type) {
+	    var _this3 = this;
+	
 	    var prop = {
 	      value: this.state.userInfo[type] || '',
 	      onChange: this.changeInput.bind(this, type)
 	    };
-	    if (this.id && ['name', 'email'].indexOf(type) > -1) {
+	    if (this.id && ['name', 'email'].indexOf(type) > -1 && this.state.userInfo[type]) {
 	      prop.readOnly = true;
 	    }
 	
 	    var validatePrefix = '';
-	    if (!this.id && ['name', 'email', 'password'].indexOf(type) > -1) {
+	    if (!this.id && ['name', 'email'].indexOf(type) > -1) {
 	      validatePrefix = 'required,';
 	    }
 	    var validates = {
 	      name: 'isLength:4:20',
 	      email: 'isEmail',
-	      password: 'isLength:8:30',
+	      password: function password(val) {
+	        //编辑时可以不用输入用户名
+	        if (_this3.id && val === '') {
+	          return true;
+	        }
+	
+	        if (val === '') {
+	          return '请输出密码';
+	        }
+	
+	        if (val.length < 8 || val.length > 30) {
+	          return '密码长度为8到30个字符';
+	        }
+	
+	        return true;
+	      },
 	      repassword: function repassword(val, context) {
 	        return val === context.password;
 	      }
@@ -68229,178 +68583,182 @@
 	    }
 	
 	    return _react2.default.createElement(
-	      _reactBootstrapValidation.Form,
-	      {
-	        className: 'user-create clearfix',
-	        onValidSubmit: this.handleValidSubmit.bind(this),
-	        onInvalidSubmit: this.handleInvalidSubmit.bind(this)
-	      },
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
 	        'div',
-	        { className: 'pull-left' },
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
+	          _reactBootstrapValidation.Form,
+	          {
+	            className: 'user-create clearfix',
+	            onValidSubmit: this.handleValidSubmit.bind(this),
+	            onInvalidSubmit: this.handleInvalidSubmit.bind(this)
+	          },
 	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '用户名'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'username',
-	            ref: 'username',
-	            className: 'form-control',
-	            placeholder: '4到20个字符'
-	          }, this.getProps('name'), {
-	            errorHelp: {
-	              required: '请输入用户名',
-	              isLength: '长度为4到20个字符'
-	            }
-	          })),
-	          _react2.default.createElement(
-	            'p',
-	            { className: 'help-block' },
-	            '登录时所用的名称，不能重复。'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '邮箱'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'email',
-	            ref: 'email',
-	            className: 'form-control'
-	          }, this.getProps('email'), {
-	            errorHelp: {
-	              required: '请输入邮箱',
-	              isEmail: '邮箱格式不正确'
-	            }
-	          })),
-	          _react2.default.createElement(
-	            'p',
-	            { className: 'help-block' },
-	            '用户主要联系方式，不能重复。'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '密码'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'password',
-	            name: 'password',
-	            ref: 'password',
-	            className: 'form-control',
-	            placeholder: '8到30个字符'
-	          }, this.getProps('password'), {
-	            errorHelp: {
-	              required: '请输入密码',
-	              isLength: '密码长度为8到30个字符'
-	            }
-	          })),
-	          _react2.default.createElement(
-	            'p',
-	            { className: 'help-block' },
-	            '建议使用特殊字符与字母、数字的混编方式，增加安全性。'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group ' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '确认密码'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'password',
-	            name: 'repassword',
-	            ref: 'repassword',
-	            className: 'form-control',
-	            placeholder: ''
-	          }, this.getProps('repassword'), {
-	            errorHelp: '密码不一致'
-	          }))
-	        ),
-	        _react2.default.createElement(
-	          'button',
-	          (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
-	          this.state.submitting ? '提交中...' : '提交'
-	        )
-	      ),
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'pull-left' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '别名'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'display_name',
-	            ref: 'display_name',
-	            className: 'form-control',
-	            placeholder: '显示名称'
-	          }, this.getProps('display_name')))
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '用户组'
-	          ),
-	          _react2.default.createElement(
-	            'select',
-	            { className: 'form-control', ref: 'type' },
+	            'div',
+	            { className: 'pull-left' },
 	            _react2.default.createElement(
-	              'option',
-	              (0, _extends3.default)({ value: '2' }, this.getOptionProp('type', '2')),
-	              '编辑'
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '用户名'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'text',
+	                name: 'username',
+	                ref: 'username',
+	                className: 'form-control',
+	                placeholder: '4到20个字符'
+	              }, this.getProps('name'), {
+	                errorHelp: {
+	                  required: '请输入用户名',
+	                  isLength: '长度为4到20个字符'
+	                }
+	              })),
+	              _react2.default.createElement(
+	                'p',
+	                { className: 'help-block' },
+	                '登录时所用的名称，不能重复。'
+	              )
 	            ),
 	            _react2.default.createElement(
-	              'option',
-	              (0, _extends3.default)({ value: '1' }, this.getOptionProp('type', '1')),
-	              '管理员'
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '邮箱'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'text',
+	                name: 'email',
+	                ref: 'email',
+	                className: 'form-control'
+	              }, this.getProps('email'), {
+	                errorHelp: {
+	                  required: '请输入邮箱',
+	                  isEmail: '邮箱格式不正确'
+	                }
+	              })),
+	              _react2.default.createElement(
+	                'p',
+	                { className: 'help-block' },
+	                '用户主要联系方式，不能重复。'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '密码'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'password',
+	                name: 'password',
+	                ref: 'password',
+	                className: 'form-control',
+	                placeholder: '8到30个字符'
+	              }, this.getProps('password'))),
+	              _react2.default.createElement(
+	                'p',
+	                { className: 'help-block' },
+	                '建议使用特殊字符与字母、数字的混编方式，增加安全性。'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group ' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '确认密码'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'password',
+	                name: 'repassword',
+	                ref: 'repassword',
+	                className: 'form-control',
+	                placeholder: ''
+	              }, this.getProps('repassword'), {
+	                errorHelp: '密码不一致'
+	              }))
+	            ),
+	            _react2.default.createElement(
+	              'button',
+	              (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
+	              this.state.submitting ? '提交中...' : '提交'
 	            )
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '状态'
 	          ),
 	          _react2.default.createElement(
-	            'select',
-	            { className: 'form-control', ref: 'status' },
+	            'div',
+	            { className: 'pull-left' },
 	            _react2.default.createElement(
-	              'option',
-	              (0, _extends3.default)({ value: '1' }, this.getOptionProp('status', '1')),
-	              '有效'
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '别名'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'text',
+	                name: 'display_name',
+	                ref: 'display_name',
+	                className: 'form-control',
+	                placeholder: '显示名称'
+	              }, this.getProps('display_name')))
 	            ),
 	            _react2.default.createElement(
-	              'option',
-	              (0, _extends3.default)({ value: '2' }, this.getOptionProp('status', '2')),
-	              '禁用'
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '用户组'
+	              ),
+	              _react2.default.createElement(
+	                'select',
+	                { className: 'form-control', ref: 'type' },
+	                _react2.default.createElement(
+	                  'option',
+	                  (0, _extends3.default)({ value: '2' }, this.getOptionProp('type', '2')),
+	                  '编辑'
+	                ),
+	                _react2.default.createElement(
+	                  'option',
+	                  (0, _extends3.default)({ value: '1' }, this.getOptionProp('type', '1')),
+	                  '管理员'
+	                )
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '状态'
+	              ),
+	              _react2.default.createElement(
+	                'select',
+	                { className: 'form-control', ref: 'status' },
+	                _react2.default.createElement(
+	                  'option',
+	                  (0, _extends3.default)({ value: '1' }, this.getOptionProp('status', '1')),
+	                  '有效'
+	                ),
+	                _react2.default.createElement(
+	                  'option',
+	                  (0, _extends3.default)({ value: '2' }, this.getOptionProp('status', '2')),
+	                  '禁用'
+	                )
+	              )
 	            )
 	          )
 	        )
@@ -68597,6 +68955,10 @@
 	
 	var _reactBootstrap = __webpack_require__(417);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _modal = __webpack_require__(342);
 	
 	var _modal2 = _interopRequireDefault(_modal);
@@ -68693,15 +69055,15 @@
 	          'td',
 	          null,
 	          _react2.default.createElement(
-	            'a',
-	            { href: '/admin/post/edit/' + item.id, title: item.title },
+	            _reactRouter.Link,
+	            { to: '/post/edit/' + item.id, title: item.title },
 	            item.title
 	          )
 	        ),
 	        _react2.default.createElement(
 	          'td',
 	          null,
-	          item.user.display_name
+	          item.user.display_name || item.user.name
 	        ),
 	        _react2.default.createElement(
 	          'td',
@@ -68722,8 +69084,8 @@
 	          'td',
 	          null,
 	          _react2.default.createElement(
-	            'a',
-	            { href: '/admin/post/edit/' + item.id, title: item.title },
+	            _reactRouter.Link,
+	            { to: '/post/edit/' + item.id, title: item.title },
 	            _react2.default.createElement(
 	              'button',
 	              { type: 'button', className: 'btn btn-primary btn-xs' },
@@ -68766,8 +69128,10 @@
 	        text = '待审核';break;
 	      case 2:
 	        text = '已拒绝';break;
+	      case 3:
+	        text = '已发布';break;
 	    }
-	    if (status !== 3) {
+	    if (status !== '') {
 	      return _react2.default.createElement(
 	        'em',
 	        { className: 'status' },
@@ -68782,74 +69146,78 @@
 	
 	    return _react2.default.createElement(
 	      'div',
-	      null,
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'table',
-	        { className: 'table table-striped' },
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'thead',
-	          null,
+	          'table',
+	          { className: 'table table-striped' },
 	          _react2.default.createElement(
-	            'tr',
+	            'thead',
 	            null,
 	            _react2.default.createElement(
-	              'th',
+	              'tr',
 	              null,
-	              '标题'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              '作者'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              '状态'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              '创建日期'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              '修改日期'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              '操作'
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '标题'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '作者'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '状态'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '创建日期'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '修改日期'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '操作'
+	              )
 	            )
+	          ),
+	          _react2.default.createElement(
+	            'tbody',
+	            null,
+	            this.getPostList()
 	          )
 	        ),
 	        _react2.default.createElement(
-	          'tbody',
-	          null,
-	          this.getPostList()
+	          'div',
+	          { className: 'col-xs-12', style: { textAlign: 'center' } },
+	          this.state.postList.length ? _react2.default.createElement(_reactBootstrap.Pagination, {
+	            prev: true,
+	            next: true,
+	            first: true,
+	            last: true,
+	            ellipsis: true,
+	            boundaryLinks: true,
+	            maxButton: 5,
+	            items: this.state.total,
+	            activePage: this.state.page,
+	            onSelect: function onSelect(e, selectEvent) {
+	              return _this4.setState({ page: selectEvent.eventKey }, function () {
+	                return _post2.default.selectList(_this4.state.page);
+	              });
+	            }
+	          }) : ''
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'div',
-	        { className: 'col-xs-12', style: { textAlign: 'center' } },
-	        _react2.default.createElement(_reactBootstrap.Pagination, {
-	          prev: true,
-	          next: true,
-	          first: true,
-	          last: true,
-	          ellipsis: true,
-	          boundaryLinks: true,
-	          maxButton: 5,
-	          bsSize: 'small',
-	          items: this.state.total,
-	          activePage: this.state.page,
-	          onSelect: function onSelect(e, selectEvent) {
-	            return _this4.setState({ page: selectEvent.eventKey }, function () {
-	              return _post2.default.selectList(_this4.state.page);
-	            });
-	          }
-	        })
 	      )
 	    );
 	  };
@@ -68877,6 +69245,7 @@
 	exports.default = _reflux2.default.createActions({
 	  select: { children: ['completed', 'failed'] },
 	  selectList: { children: ['completed', 'failed'] },
+	  selectLastest: { children: ['completed', 'failed'] },
 	  delete: { children: ['completed', 'failed'] },
 	  save: { children: ['completed', 'failed'], asyncResult: true }
 	});
@@ -68934,6 +69303,14 @@
 	      return _this2.trigger(data, 'getPostList');
 	    });
 	  },
+	  onSelectLastest: function onSelectLastest() {
+	    var _this3 = this;
+	
+	    var req = _superagent2.default.get('/admin/api/post/lastest');
+	    return _firekylin2.default.request(req).then(function (data) {
+	      return _this3.trigger(data, 'getPostLastest');
+	    });
+	  },
 	
 	  /**
 	   * save user
@@ -68941,7 +69318,7 @@
 	   * @return {Promise}      []
 	   */
 	  onSave: function onSave(data) {
-	    var _this3 = this;
+	    var _this4 = this;
 	
 	    var id = data.id;
 	    delete data.id;
@@ -68952,13 +69329,13 @@
 	    var req = _superagent2.default.post(url);
 	    req.type('form').send(data);
 	    return _firekylin2.default.request(req).then(function (data) {
-	      return _this3.trigger(data, 'savePostSuccess');
+	      return _this4.trigger(data, 'savePostSuccess');
 	    }, function (err) {
-	      return _this3.trigger(err, 'savePostFail');
+	      return _this4.trigger(err, 'savePostFail');
 	    });
 	  },
 	  onDelete: function onDelete(id) {
-	    var _this4 = this;
+	    var _this5 = this;
 	
 	    var url = '/admin/api/post';
 	    if (id) {
@@ -68967,9 +69344,9 @@
 	
 	    var req = _superagent2.default.post(url);
 	    return _firekylin2.default.request(req).then(function (data) {
-	      return _this4.trigger(data, 'deletePostSuccess');
+	      return _this5.trigger(data, 'deletePostSuccess');
 	    }, function (err) {
-	      return _this4.trigger(err, 'deletePostFail');
+	      return _this5.trigger(err, 'deletePostFail');
 	    });
 	  }
 	});
@@ -68990,6 +69367,10 @@
 	var _keys = __webpack_require__(672);
 	
 	var _keys2 = _interopRequireDefault(_keys);
+	
+	var _assign = __webpack_require__(805);
+	
+	var _assign2 = _interopRequireDefault(_assign);
 	
 	var _classCallCheck2 = __webpack_require__(245);
 	
@@ -69043,6 +69424,10 @@
 	
 	__webpack_require__(897);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _post = __webpack_require__(811);
 	
 	var _post2 = _interopRequireDefault(_post);
@@ -69075,6 +69460,10 @@
 	
 	var _firekylin2 = _interopRequireDefault(_firekylin);
 	
+	var _modal = __webpack_require__(342);
+	
+	var _modal2 = _interopRequireDefault(_modal);
+	
 	__webpack_require__(903);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -69082,30 +69471,36 @@
 	var _default = function (_Base) {
 	  (0, _inherits3.default)(_default, _Base);
 	
-	  function _default(props) {
-	    (0, _classCallCheck3.default)(this, _default);
-	
-	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this, props));
-	
-	    _this.state = {
+	  _default.prototype.initialState = function initialState() {
+	    return (0, _assign2.default)({
 	      postSubmitting: false,
 	      draftSubmitting: false,
 	      postInfo: {
+	        title: '',
+	        pathname: '',
+	        markdown_content: '',
 	        tag: [],
 	        cate: [],
-	        is_public: "1",
+	        is_public: '1',
 	        create_time: (0, _moment2.default)().format('YYYY-MM-DD HH:mm:ss'),
 	        allow_comment: true
 	      },
 	      status: 3,
 	      cateList: [],
 	      tagList: []
-	    };
+	    });
+	  };
+	
+	  function _default(props) {
+	    (0, _classCallCheck3.default)(this, _default);
+	
+	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this, props));
+	
+	    _this.state = _this.initialState();
 	
 	    _this.type = 0;
 	    _this.cate = {};
 	    _this.id = _this.props.params.id | 0;
-	
 	    return _this;
 	  }
 	
@@ -69143,6 +69538,17 @@
 	      _post2.default.select(this.id);
 	    }
 	  };
+	
+	  _default.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+	    this.id = nextProps.params.id | 0;
+	    if (this.id) {
+	      _post2.default.select(this.id);
+	    }
+	    var initialState = this.initialState();
+	    initialState.cateList = this.state.cateList;
+	    initialState.tagList = this.state.tagList;
+	    this.setState(initialState);
+	  };
 	  /**
 	   * hanle trigger
 	   * @param  {[type]} data [description]
@@ -69169,6 +69575,9 @@
 	        data.create_time = (0, _moment2.default)(new Date(data.create_time)).format('YYYY-MM-DD HH:mm:ss');
 	        data.tag = data.tag.map(function (tag) {
 	          return tag.name;
+	        });
+	        data.cate.forEach(function (item) {
+	          return _this3.cate[item.id] = true;
 	        });
 	        this.setState({ postInfo: data });
 	        break;
@@ -69201,7 +69610,7 @@
 	    }
 	
 	    values.type = this.type; //type: 0为文章，1为页面
-	    values.allow_comment = this.state.allow_comment;
+	    values.allow_comment = this.state.postInfo.allow_comment;
 	    values.cate = (0, _keys2.default)(this.cate).filter(function (item) {
 	      return _this4.cate[item];
 	    });
@@ -69243,207 +69652,243 @@
 	    //baseUrl
 	    var baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
 	    return _react2.default.createElement(
-	      _reactBootstrapValidation.Form,
-	      {
-	        model: this.state.postInfo,
-	        className: 'post-create clearfix',
-	        onValidSubmit: this.handleValidSubmit.bind(this)
-	      },
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
 	        'div',
-	        { className: 'row' },
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'div',
-	          { className: 'col-xs-9' },
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
-	            name: 'title',
-	            type: 'text',
-	            placeholder: '标题',
-	            validate: 'required',
-	            label: '' + (this.id ? '编辑' : '撰写') + (this.type ? '页面' : '文章')
-	          }),
+	          _reactBootstrapValidation.Form,
+	          {
+	            model: this.state.postInfo,
+	            className: 'post-create clearfix',
+	            onValidSubmit: this.handleValidSubmit.bind(this)
+	          },
 	          _react2.default.createElement(
 	            'div',
-	            { className: 'pathname' },
+	            { className: 'row' },
 	            _react2.default.createElement(
-	              'span',
-	              null,
-	              baseUrl
-	            ),
-	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, { name: 'pathname', type: 'text', validate: 'required', disabled: this.state.postInfo.status === 3 }),
-	            _react2.default.createElement(
-	              'span',
-	              null,
-	              '.html'
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(_editor2.default, {
-	              content: this.state.postInfo.markdown_content,
-	              onChange: function onChange(content) {
-	                _this5.state.postInfo.markdown_content = content;
-	                _this5.forceUpdate();
-	              }
-	            })
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'col-xs-3' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'button-group' },
-	            _react2.default.createElement(
-	              'button',
-	              (0, _extends3.default)({
-	                type: 'submit'
-	              }, props, {
-	                className: 'btn btn-default',
-	                onClick: function onClick() {
-	                  return _this5.state.status = 0;
+	              'div',
+	              { className: (0, _classnames2.default)({ 'col-xs-9': !this.state.isFullScreen }) },
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	                name: 'title',
+	                type: 'text',
+	                placeholder: '标题',
+	                validate: 'required',
+	                label: '' + (this.id ? '编辑' : '撰写') + (this.type ? '页面' : '文章'),
+	                value: this.state.postInfo.title,
+	                onChange: function onChange(e) {
+	                  _this5.state.postInfo.title = e.target.value;
+	                  _this5.forceUpdate();
 	                }
 	              }),
-	              this.state.draftSubmitting ? '保存中...' : '保存草稿'
-	            ),
-	            _react2.default.createElement(
-	              'span',
-	              null,
-	              ' '
-	            ),
-	            _react2.default.createElement(
-	              'button',
-	              (0, _extends3.default)({
-	                type: 'submit'
-	              }, props, {
-	                className: 'btn btn-primary',
-	                onClick: function onClick() {
-	                  return _this5.state.status = 3;
-	                }
-	              }),
-	              this.state.postSubmitting ? '发布中...' : '发布' + (this.type ? '页面' : '文章')
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { style: { marginBottom: 15 } },
-	            _react2.default.createElement(
-	              'label',
-	              null,
-	              '发布日期'
+	              _react2.default.createElement(
+	                'div',
+	                { className: (0, _classnames2.default)('pathname') },
+	                _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  baseUrl
+	                ),
+	                _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	                  name: 'pathname',
+	                  type: 'text',
+	                  validate: 'required',
+	                  disabled: this.state.postInfo.status === 3,
+	                  value: this.state.postInfo.pathname,
+	                  onChange: function onChange(e) {
+	                    _this5.state.postInfo.pathname = e.target.value;
+	                    _this5.forceUpdate();
+	                  }
+	                }),
+	                _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  '.html'
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'form-group' },
+	                _react2.default.createElement(_editor2.default, {
+	                  content: this.state.postInfo.markdown_content,
+	                  onChange: function onChange(content) {
+	                    _this5.state.postInfo.markdown_content = content;
+	                    _this5.forceUpdate();
+	                  },
+	                  onFullScreen: function onFullScreen(isFullScreen) {
+	                    return _this5.setState({ isFullScreen: isFullScreen });
+	                  },
+	                  info: { id: this.id, type: this.type }
+	                })
+	              )
 	            ),
 	            _react2.default.createElement(
 	              'div',
-	              null,
-	              _react2.default.createElement(_reactDatetime2.default, {
-	                dateFormat: 'YYYY-MM-DD',
-	                timeFormat: 'HH:mm:ss',
-	                locale: 'zh-cn',
-	                defaultValue: this.state.postInfo.create_time
-	              })
-	            )
-	          ),
-	          !this.type ? _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(
-	              'label',
-	              { className: 'control-label' },
-	              '分类'
-	            ),
-	            _react2.default.createElement(
-	              'ul',
-	              null,
-	              this.state.cateList.map(function (cate) {
-	                return _react2.default.createElement(
-	                  'li',
-	                  { key: cate.id },
-	                  cate.pid !== 0 ? '　' : null,
+	              { className: (0, _classnames2.default)('col-xs-3') },
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'button-group' },
+	                _react2.default.createElement(
+	                  'button',
+	                  (0, _extends3.default)({
+	                    type: 'submit'
+	                  }, props, {
+	                    className: 'btn btn-default',
+	                    onClick: function onClick() {
+	                      _this5.state.status = 0;localStorage.removeItem('unsavetype' + _this5.type + 'id' + _this5.id);
+	                    }
+	                  }),
+	                  this.state.draftSubmitting ? '保存中...' : '保存草稿'
+	                ),
+	                _react2.default.createElement(
+	                  'span',
+	                  null,
+	                  ' '
+	                ),
+	                _react2.default.createElement(
+	                  'button',
+	                  (0, _extends3.default)({
+	                    type: 'submit'
+	                  }, props, {
+	                    className: 'btn btn-primary',
+	                    onClick: function onClick() {
+	                      _this5.state.status = 3;localStorage.removeItem('unsavetype' + _this5.type + 'id' + _this5.id);
+	                    }
+	                  }),
+	                  this.state.postSubmitting ? '发布中...' : '发布' + (this.type ? '页面' : '文章')
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { style: { marginBottom: 15 } },
+	                _react2.default.createElement(
+	                  'label',
+	                  null,
+	                  '发布日期'
+	                ),
+	                _react2.default.createElement(
+	                  'div',
+	                  null,
+	                  _react2.default.createElement(_reactDatetime2.default, {
+	                    dateFormat: 'YYYY-MM-DD',
+	                    timeFormat: 'HH:mm:ss',
+	                    locale: 'zh-cn',
+	                    value: this.state.postInfo.create_time,
+	                    onChange: function onChange(val) {
+	                      _this5.state.postInfo.create_time = val;
+	                      _this5.forceUpdate();
+	                    }
+	                  })
+	                )
+	              ),
+	              !this.type ? _react2.default.createElement(
+	                'div',
+	                { className: 'form-group' },
+	                _react2.default.createElement(
+	                  'label',
+	                  { className: 'control-label' },
+	                  '分类'
+	                ),
+	                _react2.default.createElement(
+	                  'ul',
+	                  null,
+	                  this.state.cateList.map(function (cate) {
+	                    return _react2.default.createElement(
+	                      'li',
+	                      { key: cate.id },
+	                      cate.pid !== 0 ? '　' : null,
+	                      _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        _react2.default.createElement('input', {
+	                          type: 'checkbox',
+	                          name: 'cate',
+	                          value: cate.id,
+	                          checked: cateInitial.includes(cate.id),
+	                          onChange: function onChange() {
+	                            _this5.cate[cate.id] = !_this5.cate[cate.id];
+	                            _this5.state.postInfo.cate = _this5.state.cateList.filter(function (cate) {
+	                              return _this5.cate[cate.id];
+	                            });
+	                            _this5.forceUpdate();
+	                          }
+	                        }),
+	                        cate.name
+	                      )
+	                    );
+	                  })
+	                )
+	              ) : null,
+	              !this.type ? _react2.default.createElement(
+	                'div',
+	                { className: 'form-group' },
+	                _react2.default.createElement(
+	                  'label',
+	                  { className: 'control-label' },
+	                  '标签'
+	                ),
+	                _react2.default.createElement(
+	                  'div',
+	                  null,
+	                  _react2.default.createElement(
+	                    _rcSelect2.default,
+	                    {
+	                      tags: true,
+	                      style: { width: '100%' },
+	                      maxTagTextLength: 5,
+	                      value: this.state.postInfo.tag,
+	                      onChange: function onChange(val) {
+	                        _this5.state.postInfo.tag = val;_this5.forceUpdate();
+	                      }
+	                    },
+	                    this.state.tagList.map(function (tag) {
+	                      return _react2.default.createElement(
+	                        _rcSelect.Option,
+	                        { key: tag.name, value: tag.name },
+	                        tag.name
+	                      );
+	                    })
+	                  )
+	                )
+	              ) : null,
+	              _react2.default.createElement(
+	                _reactBootstrapValidation.RadioGroup,
+	                {
+	                  name: 'is_public',
+	                  label: '公开度',
+	                  wrapperClassName: 'col-xs-12'
+	                },
+	                _react2.default.createElement(_reactBootstrapValidation.Radio, { value: '1', label: '公开' }),
+	                _react2.default.createElement(_reactBootstrapValidation.Radio, { value: '0', label: '不公开' })
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'form-group' },
+	                _react2.default.createElement(
+	                  'label',
+	                  { className: 'control-label' },
+	                  '权限控制'
+	                ),
+	                _react2.default.createElement(
+	                  'div',
+	                  null,
 	                  _react2.default.createElement(
 	                    'label',
 	                    null,
 	                    _react2.default.createElement('input', {
 	                      type: 'checkbox',
-	                      name: 'cate',
-	                      value: cate.id,
-	                      defaultChecked: cateInitial.includes(cate.id),
+	                      name: 'allow_comment',
+	                      checked: this.state.postInfo.allow_comment,
 	                      onChange: function onChange() {
-	                        return _this5.cate[cate.id] = !_this5.cate[cate.id];
+	                        _this5.state.postInfo.allow_comment = !_this5.state.postInfo.allow_comment;
+	                        _this5.forceUpdate();
 	                      }
 	                    }),
-	                    cate.name
+	                    '允许评论'
 	                  )
-	                );
-	              })
-	            )
-	          ) : null,
-	          !this.type ? _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(
-	              'label',
-	              { className: 'control-label' },
-	              '标签'
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              null,
-	              _react2.default.createElement(
-	                _rcSelect2.default,
-	                {
-	                  tags: true,
-	                  style: { width: '100%' },
-	                  maxTagTextLength: 5,
-	                  value: this.state.postInfo.tag,
-	                  onChange: function onChange(val) {
-	                    _this5.state.postInfo.tag = val;_this5.forceUpdate();
-	                  }
-	                },
-	                this.state.tagList.map(function (tag) {
-	                  return _react2.default.createElement(
-	                    _rcSelect.Option,
-	                    { key: tag.name, value: tag.name },
-	                    tag.name
-	                  );
-	                })
-	              )
-	            )
-	          ) : null,
-	          _react2.default.createElement(
-	            _reactBootstrapValidation.RadioGroup,
-	            {
-	              name: 'is_public',
-	              label: '公开度',
-	              wrapperClassName: 'col-xs-12'
-	            },
-	            _react2.default.createElement(_reactBootstrapValidation.Radio, { value: '1', label: '公开' }),
-	            _react2.default.createElement(_reactBootstrapValidation.Radio, { value: '0', label: '不公开' })
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(
-	              'label',
-	              { className: 'control-label' },
-	              '权限控制'
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              null,
-	              _react2.default.createElement(
-	                'label',
-	                null,
-	                _react2.default.createElement('input', {
-	                  type: 'checkbox',
-	                  name: 'allow_comment',
-	                  checked: this.state.postInfo.allow_comment,
-	                  onChange: function onChange() {
-	                    _this5.state.postInfo.allow_comment = !_this5.state.postInfo.allow_comment;
-	                    _this5.forceUpdate();
-	                  }
-	                }),
-	                '允许评论'
+	                )
 	              )
 	            )
 	          )
@@ -70773,11 +71218,15 @@
 	
 	var _modal2 = _interopRequireDefault(_modal);
 	
-	var _superagent = __webpack_require__(668);
+	var _firekylin = __webpack_require__(671);
 	
-	var _superagent2 = _interopRequireDefault(_superagent);
+	var _firekylin2 = _interopRequireDefault(_firekylin);
 	
 	__webpack_require__(827);
+	
+	var _tip = __webpack_require__(792);
+	
+	var _tip2 = _interopRequireDefault(_tip);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -70785,8 +71234,10 @@
 	  displayName: 'MdEditor',
 	
 	  propTypes: {
+	    onFullScreen: _react.PropTypes.func,
 	    content: _react.PropTypes.string,
-	    children: _react.PropTypes.node
+	    children: _react.PropTypes.node,
+	    info: _react.PropTypes.object
 	  },
 	  getInitialState: function getInitialState() {
 	    return {
@@ -70797,9 +71248,26 @@
 	    };
 	  },
 	  componentDidMount: function componentDidMount() {
+	    var _this = this;
+	
 	    // cache dom node
 	    this.textControl = _reactDom2.default.findDOMNode(this.refs.editor);
 	    this.previewControl = _reactDom2.default.findDOMNode(this.refs.preview);
+	    if (localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + '']) {
+	      _modal2.default.confirm('提示', '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章', function () {
+	        _this.textControl.value = localStorage['unsavetype' + _this.props.info.type + 'id' + _this.props.info.id + ''];
+	        _this.setState({ result: (0, _marked2.default)(_this.textControl.value) });
+	        _this.props.onChange(_this.textControl.value);
+	      });
+	    }
+	  },
+	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	    if (nextProps.content === this.props.content) {
+	      return;
+	    }
+	    var initialState = this.getInitialState();
+	    initialState.result = (0, _marked2.default)(nextProps.content || '');
+	    this.setState(initialState);
 	  },
 	  componentWillUnmount: function componentWillUnmount() {
 	    this.textControl = null;
@@ -70822,7 +71290,7 @@
 	      _react2.default.createElement(
 	        'div',
 	        { className: editorClass },
-	        _react2.default.createElement('textarea', { ref: 'editor', name: 'content', onChange: this._onChange, defaultValue: this.props.content })
+	        _react2.default.createElement('textarea', { ref: 'editor', name: 'content', onChange: this._onChange, value: this.props.content })
 	      ),
 	      _react2.default.createElement('div', { className: previewClass, ref: 'preview', dangerouslySetInnerHTML: { __html: this.state.result } }),
 	      _react2.default.createElement('div', { className: 'md-spliter' })
@@ -70944,10 +71412,10 @@
 	    });
 	  },
 	  _getModeBar: function _getModeBar() {
-	    var _this = this;
+	    var _this2 = this;
 	
 	    var checkActive = function checkActive(mode) {
-	      return (0, _classnames2.default)({ active: _this.state.mode === mode });
+	      return (0, _classnames2.default)({ active: _this2.state.mode === mode });
 	    };
 	
 	    return _react2.default.createElement(
@@ -70999,26 +71467,31 @@
 	
 	  // event handlers
 	  _onChange: function _onChange(e) {
-	    var _this2 = this;
+	    var _this3 = this;
 	
 	    this._isDirty = true; // set dirty
 	    if (this._ltr) clearTimeout(this._ltr);
 	
 	    this._ltr = setTimeout(function () {
-	      _this2.setState({ result: (0, _marked2.default)(_this2.textControl.value) }); // change state
+	      _this3.setState({ result: (0, _marked2.default)(_this3.textControl.value) }); // change state
+	      localStorage['unsavetype' + _this3.props.info.type + 'id' + _this3.props.info.id + ''] = _this3.textControl.value;
 	    }, 300);
 	
 	    this.props.onChange(e.target.value);
 	  },
 	  _changeMode: function _changeMode(mode) {
-	    var _this3 = this;
+	    var _this4 = this;
 	
 	    return function (e) {
-	      _this3.setState({ mode: mode });
+	      _this4.setState({ mode: mode });
 	    };
 	  },
 	  _toggleFullScreen: function _toggleFullScreen(e) {
-	    this.setState({ isFullScreen: !this.state.isFullScreen });
+	    var _this5 = this;
+	
+	    this.setState({ isFullScreen: !this.state.isFullScreen }, function () {
+	      return _this5.props.onFullScreen(_this5.state.isFullScreen);
+	    });
 	  },
 	
 	  // default text processors
@@ -71045,7 +71518,9 @@
 	    this._preInputText("_斜体文字_", 1, 5);
 	  },
 	  _linkText: function _linkText() {
-	    this._preInputText("[链接文本](www.yourlink.com)", 1, 5);
+	    var url = arguments.length <= 0 || arguments[0] === undefined ? 'www.yourlink.com' : arguments[0];
+	
+	    this._preInputText('[链接文本](' + url + ')', 1, 5);
 	  },
 	  _blockquoteText: function _blockquoteText() {
 	    this._preInputText("> 引用", 2, 4);
@@ -71054,9 +71529,10 @@
 	    this._preInputText("```\ncode block\n```", 4, 14);
 	  },
 	  _pictureText: function _pictureText() {
-	    var _this4 = this;
+	    var _this6 = this;
 	
-	    var preInputText = this._preInputText;
+	    var preInputText = this._preInputText,
+	        that = this;
 	    _modal2.default.confirm('插入图片', _react2.default.createElement(
 	      _reactBootstrap.Tabs,
 	      { defaultActiveKey: 1 },
@@ -71067,7 +71543,7 @@
 	          'div',
 	          { style: { margin: '20px 0' } },
 	          _react2.default.createElement('input', { type: 'file', name: 'file', onChange: function onChange(e) {
-	              return _this4.setState({ file: e.target.files });
+	              return _this6.setState({ file: e.target.files });
 	            } })
 	        )
 	      ),
@@ -71075,23 +71551,32 @@
 	        _reactBootstrap.Tab,
 	        { eventKey: 2, title: '从网络上抓取' },
 	        _react2.default.createElement('input', { type: 'text', name: 'url', className: 'form-control', onChange: function onChange(e) {
-	            return _this4.setState({ file: e.target.value });
+	            return _this6.setState({ fileUrl: e.target.value });
 	          } })
 	      )
 	    ), function () {
-	      var file = _this4.state.file[0];
-	      var form = new FormData();
-	      form.append('file', file);
-	      var url = '/admin/api/file';
-	      var req = _superagent2.default.post(url);
-	      req.send(form);
-	      req.end(function (result, res) {
-	        if (result) return false;
-	        preInputText('![alt](' + res.body.data + ')', 2, 5);
+	      if (_this6.state.file && _this6.state.file.length === 0 && !_this6.state.fileUrl) {
+	        return false;
+	      }
+	
+	      var data = new FormData();
+	      if (_this6.state.fileUrl) {
+	        data.append('fileUrl', _this6.state.fileUrl);
+	      } else {
+	        data.append('file', _this6.state.file[0]);
+	      }
+	
+	      return _firekylin2.default.upload(data).then(function (res) {
+	        if (res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i)) {
+	          preInputText('![alt](' + res.data + ')', 2, 5);
+	        } else {
+	          var text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
+	          preInputText('[' + text + '](' + res.data + ')', 1, text.length + 1);
+	        }
+	      }).catch(function (res) {
+	        return _tip2.default.fail(res.errmsg);
 	      });
-	      return true;
 	    });
-	    // this._preInputText("![alt](www.yourlink.com)", 2, 5)
 	  },
 	  _listUlText: function _listUlText() {
 	    this._preInputText("- 无序列表项0\n- 无序列表项1", 2, 8);
@@ -72433,7 +72918,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".editor-title{font-size:1pc}.md-editor textarea,.md-preview,.tag-input input{line-height:1.5}.md-panel{display:block;position:relative;border:1px solid #ccc;border-radius:3px;font-size:14px;overflow:hidden}.md-panel.fullscreen{position:absolute;top:0;bottom:0;left:0;right:0;margin:0;z-index:500}.md-panel.fullscreen .md-editor{height:100%}.md-panel.disabled .tb-btn a,.md-panel.disabled textarea{cursor:default}.md-panel.disabled .tb-btn a:hover{color:#aaa;background-color:#fff}.md-panel.disabled .tb-btn a:active{box-shadow:none}.md-menubar{position:absolute;top:0;left:0;width:100%;height:37px;border-bottom:1px solid #ccc;box-shadow:0 0 1px #ccc;z-index:10;background-color:#fff}.md-modebar,.md-toolbar{margin:0}.md-toolbar{padding:0 5px;background-color:#fff}.tb-btn,.tb-func-btn{float:left;font-size:14px;list-style:none;margin:0 2px}.tb-btn.spliter,.tb-func-btn.spliter{border-left:1px solid #ccc;margin:6px 2px;height:24px}.tb-btn a,.tb-func-btn a{display:inline-block;position:relative;width:36px;height:36px;text-align:center;padding:9px 0;cursor:pointer;color:#aaa}.tb-btn a.active,.tb-btn a:hover,.tb-func-btn a.active,.tb-func-btn a:hover{color:#0081ff;background-color:#eee}.tb-btn a:active,.tb-func-btn a:active{box-shadow:inset 0 1px 5px rgba(0,0,0,.2)}.tb-btn input[type=file],.tb-func-btn input[type=file]{display:none}.tb-btn .badge,.tb-func-btn .badge{position:absolute;padding:1px 5px;right:0;bottom:0}.md-editor{width:50%;height:auto;transition:width .3s;background-color:#fff}.md-editor.expand{width:100%}.md-editor textarea{display:block;border-style:none;resize:none;outline:0;height:100%;min-height:450px;width:100%;padding:47px 15px 0}.md-preview{position:absolute;width:50%;height:100%;left:50%;top:0;background-color:#f6f6f6;padding:45px 20px 20px;border-left:1px solid #ccc;overflow:auto;transition:left .3s,width .3s}.md-preview.expand{left:0;width:100%;border-left-style:none}.md-preview.shrink{left:100%;width:0}.md-spliter{position:absolute;top:0;left:50%;height:37px;border-left:1px solid #ccc;z-index:105}.md-btngroup{margin-top:20px}.md-btngroup .help-text{margin-left:15px}.markdown{line-height:1.5}.markdown h1,.markdown h2,.markdown h3,.markdown h4,.markdown h5,.markdown h6{margin:9pt 0}.markdown h1,.markdown h2{margin-top:20px;padding-bottom:8px;border-bottom:1px dotted #ccc}.markdown a{color:#4682b4;text-decoration:none}.markdown a:hover{color:#0081ff}.markdown pre{background-color:#eee;color:#555;border-radius:3px;padding:10px;max-height:700px;overflow:auto;border:none;font-size:.9em;line-height:1.33}.markdown pre code{font-size:inherit;color:inherit;padding:0;background-color:transparent}.markdown code{color:#d82451;background-color:#f6f6f6;font-size:.9em;padding:2px 4px;margin:0 2px}.markdown blockquote{margin:0;padding:5px 10px 5px 15px;border-left:5px solid #4682b4;background-color:#eee}.markdown table{border:1px solid #ccc}.markdown table thead tr{background-color:#eee}.markdown table tbody tr{border-top:1px solid #ccc;background-color:#fff}.markdown table td,.markdown table th{padding:8px;border-left:1px solid #ccc}.markdown hr{border-style:solid;border-color:#ccc}.markdown img{max-width:80%}*{box-sizing:border-box}html{font-size:1pc}body,html{height:100%}body{font-family:Helvetica Neue,Helvetica,Microsoft YaHei,Arial,sans-serif;color:#555;margin:0}a,a:focus,a:hover{text-decoration:none;outline:0}input{outline:0}.pull-right{float:right}\n", ""]);
+	exports.push([module.id, ".editor-title{font-size:1pc}.md-editor textarea,.md-preview,.tag-input input{line-height:1.5}.md-panel{display:block;position:relative;border:1px solid #ccc;border-radius:3px;font-size:14px;overflow:hidden}.md-panel.fullscreen{position:fixed;top:0;bottom:0;left:0;right:0;margin:0;z-index:500}.md-panel.fullscreen .md-editor{height:100%}.md-panel.disabled .tb-btn a,.md-panel.disabled textarea{cursor:default}.md-panel.disabled .tb-btn a:hover{color:#aaa;background-color:#fff}.md-panel.disabled .tb-btn a:active{box-shadow:none}.md-menubar{position:absolute;top:0;left:0;width:100%;height:37px;border-bottom:1px solid #ccc;box-shadow:0 0 1px #ccc;z-index:10;background-color:#fff}.md-modebar,.md-toolbar{margin:0}.md-toolbar{padding:0 5px;background-color:#fff}.tb-btn,.tb-func-btn{float:left;font-size:14px;list-style:none;margin:0 2px}.tb-btn.spliter,.tb-func-btn.spliter{border-left:1px solid #ccc;margin:6px 2px;height:24px}.tb-btn a,.tb-func-btn a{display:inline-block;position:relative;width:36px;height:36px;text-align:center;padding:9px 0;cursor:pointer;color:#aaa}.tb-btn a.active,.tb-btn a:hover,.tb-func-btn a.active,.tb-func-btn a:hover{color:#0081ff;background-color:#eee}.tb-btn a:active,.tb-func-btn a:active{box-shadow:inset 0 1px 5px rgba(0,0,0,.2)}.tb-btn input[type=file],.tb-func-btn input[type=file]{display:none}.tb-btn .badge,.tb-func-btn .badge{position:absolute;padding:1px 5px;right:0;bottom:0}.md-editor{width:50%;height:auto;transition:width .3s;background-color:#fff}.md-editor.expand{width:100%}.md-editor textarea{display:block;border-style:none;resize:none;outline:0;height:100%;min-height:450px;width:100%;padding:47px 15px 0}.md-preview{position:absolute;width:50%;height:100%;left:50%;top:0;background-color:#f6f6f6;padding:45px 20px 20px;border-left:1px solid #ccc;overflow:auto;transition:left .3s,width .3s}.md-preview.expand{left:0;width:100%;border-left-style:none}.md-preview.shrink{left:100%;width:0}.md-spliter{position:absolute;top:0;left:50%;height:37px;border-left:1px solid #ccc;z-index:105}.md-btngroup{margin-top:20px}.md-btngroup .help-text{margin-left:15px}.markdown{line-height:1.5}.markdown h1,.markdown h2,.markdown h3,.markdown h4,.markdown h5,.markdown h6{margin:9pt 0}.markdown h1,.markdown h2{margin-top:20px;padding-bottom:8px;border-bottom:1px dotted #ccc}.markdown a{color:#4682b4;text-decoration:none}.markdown a:hover{color:#0081ff}.markdown pre{background-color:#eee;color:#555;border-radius:3px;padding:10px;max-height:700px;overflow:auto;border:none;font-size:.9em;line-height:1.33}.markdown pre code{font-size:inherit;color:inherit;padding:0;background-color:transparent}.markdown code{color:#d82451;background-color:#f6f6f6;font-size:.9em;padding:2px 4px;margin:0 2px}.markdown blockquote{margin:0;padding:5px 10px 5px 15px;border-left:5px solid #4682b4;background-color:#eee}.markdown table{border:1px solid #ccc}.markdown table thead tr{background-color:#eee}.markdown table tbody tr{border-top:1px solid #ccc;background-color:#fff}.markdown table td,.markdown table th{padding:8px;border-left:1px solid #ccc}.markdown hr{border-style:solid;border-color:#ccc}.markdown img{max-width:80%}*{box-sizing:border-box}html{font-size:1pc}body,html{height:100%}body{font-family:Helvetica Neue,Helvetica,Microsoft YaHei,Arial,sans-serif;color:#555;margin:0}a,a:focus,a:hover{text-decoration:none;outline:0}input{outline:0}.pull-right{float:right}\n", ""]);
 	
 	// exports
 
@@ -81182,7 +81667,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".pathname {\n  overflow: hidden;\n  margin-bottom: 15px;\n}\n.pathname > span {\n  float: left;\n  line-height: 39px;\n}\n.pathname > .form-group {\n  float: left;\n  width: 200px;\n  margin: 0;\n  display: inline-block;\n}\n\n/** 文章编辑右侧 **/\n.post-create .col-xs-3 > div.button-group {\n  margin-top: 25px;\n  margin-bottom: 15px;\n}\n.post-create .col-xs-3 > div.button-group > button {\n  width: 45%;\n}\n.post-create .col-xs-3 > div.button-group > button:last-child {\n  float: right;\n}\n", ""]);
+	exports.push([module.id, ".pathname {\n  overflow: hidden;\n  margin-bottom: 15px;\n}\n.pathname > span {\n  float: left;\n  line-height: 39px;\n}\n.pathname > .form-group {\n  float: left;\n  min-width: 320px;\n  margin: 0 5px;\n  display: inline-block;\n}\n\n\n.md-panel {\n  height: 550px;\n}\n\n/** 文章编辑右侧 **/\n.post-create .col-xs-3 > div.button-group {\n  margin-top: 25px;\n  margin-bottom: 15px;\n}\n.post-create .col-xs-3 > div.button-group > button {\n  width: 45%;\n}\n.post-create .col-xs-3 > div.button-group > button:last-child {\n  float: right;\n}\n", ""]);
 	
 	// exports
 
@@ -81280,6 +81765,10 @@
 	
 	var _classnames2 = _interopRequireDefault(_classnames);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _modal = __webpack_require__(342);
 	
 	var _modal2 = _interopRequireDefault(_modal);
@@ -81371,8 +81860,8 @@
 	          'td',
 	          null,
 	          _react2.default.createElement(
-	            'a',
-	            { href: '/admin/page/edit/' + item.id, title: item.title },
+	            _reactRouter.Link,
+	            { to: '/page/edit/' + item.id, title: item.title },
 	            item.title
 	          ),
 	          _this3.renderStatus(item.status)
@@ -81380,14 +81869,14 @@
 	        _react2.default.createElement(
 	          'td',
 	          null,
-	          item.user.display_name
+	          item.user.display_name || item.user.name
 	        ),
 	        _react2.default.createElement(
 	          'td',
 	          null,
 	          _react2.default.createElement(
-	            'a',
-	            { href: '/admin/page/edit/' + item.id, title: item.title },
+	            _reactRouter.Link,
+	            { to: '/page/edit/' + item.id, title: item.title },
 	            _react2.default.createElement(
 	              'button',
 	              { type: 'button', className: 'btn btn-primary btn-xs' },
@@ -81443,35 +81932,44 @@
 	
 	  _default.prototype.render = function render() {
 	    return _react2.default.createElement(
-	      'table',
-	      { className: 'table table-striped' },
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'thead',
-	        null,
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'tr',
-	          null,
+	          'table',
+	          { className: 'table table-striped' },
 	          _react2.default.createElement(
-	            'th',
+	            'thead',
 	            null,
-	            '标题'
+	            _react2.default.createElement(
+	              'tr',
+	              null,
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '标题'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '作者'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '操作'
+	              )
+	            )
 	          ),
 	          _react2.default.createElement(
-	            'th',
+	            'tbody',
 	            null,
-	            '作者'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '操作'
+	            this.getPageList()
 	          )
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'tbody',
-	        null,
-	        this.getPageList()
 	      )
 	    );
 	  };
@@ -81658,6 +82156,15 @@
 	    this.state.postInfo.pathname = this.props.location.query.pathname;
 	  };
 	
+	  _default.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+	    this.id = nextProps.params.id | 0;
+	    if (this.id) {
+	      _page2.default.select(this.id);
+	    }
+	    var initialState = this.initialState();
+	    this.setState(initialState);
+	  };
+	
 	  _default.prototype.handleTrigger = function handleTrigger(data, type) {
 	    var _this2 = this;
 	
@@ -81795,6 +82302,10 @@
 	
 	var _classnames2 = _interopRequireDefault(_classnames);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _tip = __webpack_require__(792);
 	
 	var _tip2 = _interopRequireDefault(_tip);
@@ -81894,8 +82405,8 @@
 	          'td',
 	          null,
 	          _react2.default.createElement(
-	            'a',
-	            { href: '/admin/cate/edit/' + item.id, title: item.name },
+	            _reactRouter.Link,
+	            { to: '/cate/edit/' + item.id, title: item.name },
 	            _react2.default.createElement(
 	              'button',
 	              { type: 'button', className: 'btn btn-primary btn-xs' },
@@ -81931,40 +82442,49 @@
 	
 	  _default.prototype.render = function render() {
 	    return _react2.default.createElement(
-	      'table',
-	      { className: 'table table-striped' },
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'thead',
-	        null,
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'tr',
-	          null,
+	          'table',
+	          { className: 'table table-striped' },
 	          _react2.default.createElement(
-	            'th',
+	            'thead',
 	            null,
-	            '名称'
+	            _react2.default.createElement(
+	              'tr',
+	              null,
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '名称'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '缩略名'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '文章数'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '操作'
+	              )
+	            )
 	          ),
 	          _react2.default.createElement(
-	            'th',
+	            'tbody',
 	            null,
-	            '缩略名'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '文章数'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '操作'
+	            this.getCateList()
 	          )
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'tbody',
-	        null,
-	        this.getCateList()
 	      )
 	    );
 	  };
@@ -81986,6 +82506,10 @@
 	var _extends2 = __webpack_require__(804);
 	
 	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _assign = __webpack_require__(805);
+	
+	var _assign2 = _interopRequireDefault(_assign);
 	
 	var _classCallCheck2 = __webpack_require__(245);
 	
@@ -82019,6 +82543,10 @@
 	
 	var _reactBootstrapValidation = __webpack_require__(348);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _cate = __webpack_require__(899);
 	
 	var _cate2 = _interopRequireDefault(_cate);
@@ -82036,17 +82564,24 @@
 	var _default = function (_Base) {
 	  (0, _inherits3.default)(_default, _Base);
 	
+	  _default.prototype.initialState = function initialState() {
+	    return (0, _assign2.default)({
+	      submitting: false,
+	      cateInfo: {
+	        name: '',
+	        pathname: ''
+	      },
+	      pid: 0,
+	      cateList: []
+	    });
+	  };
+	
 	  function _default(props) {
 	    (0, _classCallCheck3.default)(this, _default);
 	
 	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this, props));
 	
-	    _this.state = {
-	      submitting: false,
-	      cateInfo: {},
-	      cateList: [],
-	      pid: 0
-	    };
+	    _this.state = _this.initialState();
 	    _this.id = _this.props.params.id | 0;
 	    return _this;
 	  }
@@ -82057,6 +82592,17 @@
 	    if (this.id) {
 	      _cate2.default.select(this.id);
 	    }
+	  };
+	
+	  _default.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+	    this.id = nextProps.params.id | 0;
+	    if (this.id) {
+	      _cate2.default.select(this.id);
+	    }
+	
+	    var state = this.initialState();
+	    state.cateList = this.state.cateList;
+	    this.setState(state);
 	  };
 	  /**
 	   * hanle trigger
@@ -82125,60 +82671,79 @@
 	    }
 	
 	    return _react2.default.createElement(
-	      _reactBootstrapValidation.Form,
-	      {
-	        model: this.state.cateInfo,
-	        className: 'cate-create clearfix',
-	        onValidSubmit: this.handleValidSubmit.bind(this)
-	      },
-	      _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
-	        name: 'name',
-	        type: 'text',
-	        label: '分类名称',
-	        labelClassName: 'col-xs-2',
-	        wrapperClassName: 'col-xs-10'
-	      }),
-	      _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
-	        name: 'pathname',
-	        type: 'text',
-	        label: '分类缩略名',
-	        labelClassName: 'col-xs-2',
-	        wrapperClassName: 'col-xs-10'
-	      }),
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
 	        'div',
-	        { className: 'form-group' },
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'label',
-	          { className: 'control-label col-xs-2' },
-	          '父级分类'
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'col-xs-10' },
+	          _reactBootstrapValidation.Form,
+	          {
+	            model: this.state.cateInfo,
+	            className: 'cate-create clearfix',
+	            onValidSubmit: this.handleValidSubmit.bind(this)
+	          },
+	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	            name: 'name',
+	            type: 'text',
+	            label: '分类名称',
+	            labelClassName: 'col-xs-1',
+	            wrapperClassName: 'col-xs-4',
+	            value: this.state.cateInfo.name,
+	            onChange: function onChange(val) {
+	              _this3.state.cateInfo.name = val;
+	              _this3.forceUpdate();
+	            }
+	          }),
+	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	            name: 'pathname',
+	            type: 'text',
+	            label: '缩略名',
+	            labelClassName: 'col-xs-1',
+	            wrapperClassName: 'col-xs-4',
+	            value: this.state.cateInfo.pathname,
+	            onChange: function onChange(val) {
+	              _this3.state.cateInfo.pathname = val;
+	              _this3.forceUpdate();
+	            }
+	          }),
 	          _react2.default.createElement(
-	            'select',
-	            { className: 'form-control', onChange: function onChange(e) {
-	                return _this3.setState({ pid: e.target.value });
-	              }, defaultValue: this.state.pid },
-	            cateList.length === 1 ? _react2.default.createElement(
-	              'option',
-	              { value: cateList[0].id },
-	              cateList[0].name
-	            ) : cateList.map(function (item) {
-	              return _react2.default.createElement(
-	                'option',
-	                { key: item.id, value: item.id },
-	                item.name
-	              );
-	            })
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              { className: 'control-label col-xs-1' },
+	              '父级分类'
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'col-xs-4' },
+	              _react2.default.createElement(
+	                'select',
+	                { className: 'form-control', onChange: function onChange(e) {
+	                    return _this3.setState({ pid: e.target.value });
+	                  }, value: this.state.pid },
+	                cateList.length === 1 ? _react2.default.createElement(
+	                  'option',
+	                  { value: cateList[0].id },
+	                  cateList[0].name
+	                ) : cateList.map(function (item) {
+	                  return _react2.default.createElement(
+	                    'option',
+	                    { key: item.id, value: item.id },
+	                    item.name
+	                  );
+	                })
+	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
+	            this.state.submitting ? '提交中...' : '提交'
 	          )
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'button',
-	        (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
-	        this.state.submitting ? '提交中...' : '提交'
 	      )
 	    );
 	  };
@@ -82255,6 +82820,10 @@
 	var _modal = __webpack_require__(342);
 	
 	var _modal2 = _interopRequireDefault(_modal);
+	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -82339,8 +82908,8 @@
 	          'td',
 	          null,
 	          _react2.default.createElement(
-	            'a',
-	            { href: '/admin/tag/edit/' + item.id, title: item.name },
+	            _reactRouter.Link,
+	            { to: '/tag/edit/' + item.id, title: item.name },
 	            _react2.default.createElement(
 	              'button',
 	              { type: 'button', className: 'btn btn-primary btn-xs' },
@@ -82376,40 +82945,49 @@
 	
 	  _default.prototype.render = function render() {
 	    return _react2.default.createElement(
-	      'table',
-	      { className: 'table table-striped' },
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'thead',
-	        null,
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'tr',
-	          null,
+	          'table',
+	          { className: 'table table-striped' },
 	          _react2.default.createElement(
-	            'th',
+	            'thead',
 	            null,
-	            '名称'
+	            _react2.default.createElement(
+	              'tr',
+	              null,
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '名称'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '缩略名'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '文章数'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '操作'
+	              )
+	            )
 	          ),
 	          _react2.default.createElement(
-	            'th',
+	            'tbody',
 	            null,
-	            '缩略名'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '文章数'
-	          ),
-	          _react2.default.createElement(
-	            'th',
-	            null,
-	            '操作'
+	            this.getTagList()
 	          )
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'tbody',
-	        null,
-	        this.getTagList()
 	      )
 	    );
 	  };
@@ -82431,6 +83009,10 @@
 	var _extends2 = __webpack_require__(804);
 	
 	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _assign = __webpack_require__(805);
+	
+	var _assign2 = _interopRequireDefault(_assign);
 	
 	var _classCallCheck2 = __webpack_require__(245);
 	
@@ -82464,6 +83046,10 @@
 	
 	var _reactBootstrapValidation = __webpack_require__(348);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _tag = __webpack_require__(901);
 	
 	var _tag2 = _interopRequireDefault(_tag);
@@ -82481,15 +83067,22 @@
 	var _default = function (_Base) {
 	  (0, _inherits3.default)(_default, _Base);
 	
+	  _default.prototype.initialState = function initialState() {
+	    return (0, _assign2.default)({
+	      submitting: false,
+	      tagInfo: {
+	        name: '',
+	        pathname: ''
+	      }
+	    });
+	  };
+	
 	  function _default(props) {
 	    (0, _classCallCheck3.default)(this, _default);
 	
 	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this, props));
 	
-	    _this.state = {
-	      submitting: false,
-	      tagInfo: {}
-	    };
+	    _this.state = _this.initialState();
 	    _this.id = _this.props.params.id | 0;
 	    return _this;
 	  }
@@ -82499,6 +83092,14 @@
 	    if (this.id) {
 	      _tag2.default.select(this.id);
 	    }
+	  };
+	
+	  _default.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
+	    this.id = nextProps.params.id | 0;
+	    if (this.id) {
+	      _tag2.default.select(this.id);
+	    }
+	    this.setState(this.initialState());
 	  };
 	  /**
 	   * hanle trigger
@@ -82549,6 +83150,8 @@
 	
 	
 	  _default.prototype.render = function render() {
+	    var _this3 = this;
+	
 	    var props = {};
 	    if (this.state.submitting) {
 	      props.disabled = true;
@@ -82561,33 +83164,52 @@
 	    }
 	
 	    return _react2.default.createElement(
-	      _reactBootstrapValidation.Form,
-	      {
-	        model: this.state.tagInfo,
-	        className: 'tag-create clearfix',
-	        onValidSubmit: this.handleValidSubmit.bind(this)
-	      },
-	      _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
-	        name: 'name',
-	        type: 'text',
-	        label: '标签名称',
-	        labelClassName: 'col-xs-2',
-	        wrapperClassName: 'col-xs-10'
-	      }),
-	      _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
-	        name: 'pathname',
-	        type: 'text',
-	        label: '标签缩略名',
-	        labelClassName: 'col-xs-2',
-	        wrapperClassName: 'col-xs-10'
-	      }),
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
 	        'div',
-	        { className: 'form-group col-xs-12' },
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'button',
-	          (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
-	          this.state.submitting ? '提交中...' : '提交'
+	          _reactBootstrapValidation.Form,
+	          {
+	            model: this.state.tagInfo,
+	            className: 'tag-create clearfix',
+	            onValidSubmit: this.handleValidSubmit.bind(this)
+	          },
+	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	            name: 'name',
+	            type: 'text',
+	            label: '标签名称',
+	            labelClassName: 'col-xs-1',
+	            wrapperClassName: 'col-xs-4',
+	            value: this.state.tagInfo.name,
+	            onChange: function onChange(name) {
+	              _this3.state.tagInfo.name = name;
+	              _this3.forceUpdate();
+	            }
+	          }),
+	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	            name: 'pathname',
+	            type: 'text',
+	            label: '缩略名',
+	            labelClassName: 'col-xs-1',
+	            wrapperClassName: 'col-xs-4',
+	            value: this.state.tagInfo.pathname,
+	            onChange: function onChange(pathname) {
+	              _this3.state.tagInfo.pathname = name;
+	              _this3.forceUpdate();
+	            }
+	          }),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group col-xs-12' },
+	            _react2.default.createElement(
+	              'button',
+	              (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
+	              this.state.submitting ? '提交中...' : '提交'
+	            )
+	          )
 	        )
 	      )
 	    );
@@ -82705,6 +83327,14 @@
 	
 	var _md2 = _interopRequireDefault(_md);
 	
+	var _firekylin = __webpack_require__(671);
+	
+	var _firekylin2 = _interopRequireDefault(_firekylin);
+	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _options = __webpack_require__(918);
 	
 	var _options2 = _interopRequireDefault(_options);
@@ -82777,160 +83407,269 @@
 	  _default.prototype.handleInvalidSubmit = function handleInvalidSubmit() {};
 	
 	  _default.prototype.render = function render() {
+	    var _this2 = this;
+	
 	    var BtnProps = {};
 	    if (this.state.submitting) {
 	      BtnProps.disabled = true;
 	    }
 	    return _react2.default.createElement(
 	      'div',
-	      null,
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'h3',
-	        { style: { marginBottom: '20px' } },
-	        '基本设置'
-	      ),
-	      _react2.default.createElement(
-	        _reactBootstrapValidation.Form,
-	        {
-	          className: 'clearfix options-general',
-	          onValidSubmit: this.handleValidSubmit.bind(this),
-	          onInvalidSubmit: this.handleInvalidSubmit.bind(this)
-	        },
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '站点名称'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'title',
-	            ref: 'title'
-	          }, this.getProps('title'), {
-	            className: 'form-control',
-	            errorHelp: {
-	              required: '请填写站点名称'
-	            }
-	          }))
+	          'h3',
+	          { style: { marginBottom: '20px' } },
+	          '基本设置'
 	        ),
 	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
+	          _reactBootstrapValidation.Form,
+	          {
+	            className: 'clearfix options-general',
+	            onValidSubmit: this.handleValidSubmit.bind(this),
+	            onInvalidSubmit: this.handleInvalidSubmit.bind(this)
+	          },
 	          _react2.default.createElement(
-	            'label',
-	            null,
-	            'LOGO 地址'
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              '站点名称'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'title',
+	              ref: 'title'
+	            }, this.getProps('title'), {
+	              className: 'form-control',
+	              errorHelp: {
+	                required: '请填写站点名称'
+	              }
+	            }))
 	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'logo_url'
-	          }, this.getProps('logo_url'), {
-	            ref: 'logo_url',
-	            className: 'form-control'
-	          })),
 	          _react2.default.createElement(
-	            'p',
-	            { className: 'help-block' },
-	            '尺寸最好为 140px x 140px。'
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              'LOGO 地址'
+	            ),
+	            this.state.options.logo_url ? _react2.default.createElement('img', { src: this.state.options.logo_url + '?m=' + Date.now(), width: '140px', height: '140px', alt: 'logo', style: { display: 'block', marginBottom: '10px' } }) : null,
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'logo_url'
+	            }, this.getProps('logo_url'), {
+	              ref: 'logo_url',
+	              className: 'form-control'
+	            })),
+	            _react2.default.createElement(
+	              'p',
+	              { className: 'help-block' },
+	              '尺寸最好为 140x140px。',
+	              _react2.default.createElement(
+	                'button',
+	                { type: 'button', className: 'btn btn-default', onClick: function onClick() {
+	                    return _reactDom2.default.findDOMNode(_this2.refs.logoInput).click();
+	                  } },
+	                this.state.logo_uploading ? '正在' : '',
+	                '上传'
+	              ),
+	              _react2.default.createElement('input', {
+	                type: 'file',
+	                ref: 'logoInput',
+	                style: { display: 'none' },
+	                accept: 'image/*',
+	                onChange: function onChange(e) {
+	                  var file = e.target.files[0];
+	                  if (!file) {
+	                    return false;
+	                  }
+	                  _this2.state.options.logo_url = '';
+	                  _this2.setState({ logo_uploading: true }, function () {
+	                    var form = new FormData();
+	                    form.append('file', file);
+	                    form.append('name', 'logo');
+	                    _firekylin2.default.upload(form).then(function (res) {
+	                      _this2.state.options.logo_url = res.data;
+	                      _this2.state.logo_uploading = false;
+	                      _this2.forceUpdate();
+	                    }, console.log);
+	                  });
+	                }
+	              })
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              '站点描述'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'description'
+	            }, this.getProps('description'), {
+	              ref: 'description',
+	              className: 'form-control',
+	              errorHelp: {
+	                required: '请填写站点描述'
+	              }
+	            }))
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              'Favicon 地址'
+	            ),
+	            this.state.options.favicon_url ? _react2.default.createElement('img', { src: this.state.options.favicon_url + '?m=' + Date.now(), alt: 'logo', style: { display: 'block', marginBottom: '10px', maxWidth: '128px', maxHeight: '128px' } }) : null,
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'favicon_url'
+	            }, this.getProps('favicon_url'), {
+	              ref: 'favicon_url',
+	              className: 'form-control'
+	            })),
+	            _react2.default.createElement(
+	              'p',
+	              { className: 'help-block' },
+	              '尺寸最好为 128x128px。',
+	              _react2.default.createElement(
+	                'button',
+	                { type: 'button', className: 'btn btn-default', onClick: function onClick() {
+	                    return _reactDom2.default.findDOMNode(_this2.refs.faviconInput).click();
+	                  } },
+	                this.state.favicon_uploading ? '正在' : '',
+	                '上传'
+	              ),
+	              _react2.default.createElement('input', {
+	                type: 'file',
+	                ref: 'faviconInput',
+	                style: { display: 'none' },
+	                accept: 'image/x-icon',
+	                onChange: function onChange(e) {
+	                  var file = e.target.files[0];
+	                  if (!file) {
+	                    return false;
+	                  }
+	                  _this2.state.options.favicon_url = '';
+	                  _this2.setState({ favicon_uploading: true }, function () {
+	                    var form = new FormData();
+	                    form.append('file', file);
+	                    form.append('name', 'favicon');
+	                    _firekylin2.default.upload(form).then(function (res) {
+	                      _this2.state.options.logo_url = res.data;
+	                      _this2.state.favicon_uploading = false;
+	                      _this2.forceUpdate();
+	                    }, console.log);
+	                  });
+	                }
+	              })
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              '关键词'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'keywords'
+	            }, this.getProps('keywords'), {
+	              ref: 'keywords',
+	              className: 'form-control',
+	              errorHelp: {
+	                required: '请填写站点关键词'
+	              }
+	            })),
+	            _react2.default.createElement(
+	              'p',
+	              { className: 'help-block' },
+	              '请以半角逗号 "," 分割多个关键字.'
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              'GitHub 地址'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'github_url'
+	            }, this.getProps('github_url'), {
+	              ref: 'github_url',
+	              className: 'form-control'
+	            }))
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              'Twitter 地址'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'twitter_url'
+	            }, this.getProps('twitter_url'), {
+	              ref: 'twitter_url',
+	              className: 'form-control'
+	            }))
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              '网站备案号'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'text',
+	              name: 'miitbeian'
+	            }, this.getProps('miitbeian'), {
+	              ref: 'miitbeian',
+	              className: 'form-control'
+	            }))
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'form-group' },
+	            _react2.default.createElement(
+	              'label',
+	              null,
+	              '网站统计代码'
+	            ),
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	              type: 'textarea',
+	              name: 'analyze_code'
+	            }, this.getProps('analyze_code'), {
+	              ref: 'analyze_code',
+	              className: 'form-control',
+	              style: { height: 150 }
+	            }))
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            (0, _extends3.default)({ type: 'submit' }, BtnProps, { className: 'btn btn-primary' }),
+	            this.state.submitting ? '提交中...' : '提交'
 	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '站点描述'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'description'
-	          }, this.getProps('description'), {
-	            ref: 'description',
-	            className: 'form-control',
-	            errorHelp: {
-	              required: '请填写站点描述'
-	            }
-	          }))
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '关键词'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'keywords'
-	          }, this.getProps('keywords'), {
-	            ref: 'keywords',
-	            className: 'form-control',
-	            errorHelp: {
-	              required: '请填写站点关键词'
-	            }
-	          })),
-	          _react2.default.createElement(
-	            'p',
-	            { className: 'help-block' },
-	            '请以半角逗号 "," 分割多个关键字.'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            'GitHub 地址'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'github_url'
-	          }, this.getProps('github_url'), {
-	            ref: 'github_url',
-	            className: 'form-control'
-	          }))
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            'Twitter 地址'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'twitter_url'
-	          }, this.getProps('twitter_url'), {
-	            ref: 'twitter_url',
-	            className: 'form-control'
-	          }))
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'label',
-	            null,
-	            '网站备案号'
-	          ),
-	          _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
-	            type: 'text',
-	            name: 'miitbeian'
-	          }, this.getProps('miitbeian'), {
-	            ref: 'miitbeian',
-	            className: 'form-control'
-	          }))
-	        ),
-	        _react2.default.createElement(
-	          'button',
-	          (0, _extends3.default)({ type: 'submit' }, BtnProps, { className: 'btn btn-primary' }),
-	          this.state.submitting ? '提交中...' : '提交'
 	        )
 	      )
 	    );
@@ -83083,6 +83822,10 @@
 	
 	var _qrcodeReact2 = _interopRequireDefault(_qrcodeReact);
 	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
 	var _options = __webpack_require__(918);
 	
 	var _options2 = _interopRequireDefault(_options);
@@ -83170,77 +83913,86 @@
 	  _default.prototype.render = function render() {
 	    return _react2.default.createElement(
 	      'div',
-	      { className: 'options-2fa' },
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
 	      _react2.default.createElement(
-	        'h3',
-	        { style: { marginBottom: '20px' } },
-	        '二步验证'
-	      ),
-	      this.state.options.two_factor_auth ? '' : _react2.default.createElement(
-	        'p',
-	        null,
-	        '开启二步验证可以大大提升帐号的安全性，可以通过下面的步骤开启。'
-	      ),
-	      _react2.default.createElement(
-	        'h4',
-	        null,
-	        '下载对应的应用'
-	      ),
-	      _react2.default.createElement(
-	        'ul',
-	        null,
+	        'div',
+	        { className: 'manage-container' },
 	        _react2.default.createElement(
-	          'li',
-	          null,
-	          'For Android, iOS, and Blackberry:',
+	          'div',
+	          { className: 'options-2fa' },
 	          _react2.default.createElement(
-	            'a',
-	            { href: 'https://support.google.com/accounts/answer/1066447?hl=en' },
-	            'Google Authenticator'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'li',
-	          null,
-	          'For Android and iOS:',
+	            'h3',
+	            { style: { marginBottom: '20px' } },
+	            '二步验证'
+	          ),
+	          this.state.options.two_factor_auth ? '' : _react2.default.createElement(
+	            'p',
+	            null,
+	            '开启二步验证可以大大提升帐号的安全性，可以通过下面的步骤开启。'
+	          ),
 	          _react2.default.createElement(
-	            'a',
-	            { href: 'http://guide.duosecurity.com/third-party-accounts' },
-	            'Duo Mobile'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'li',
-	          null,
-	          'For Windows Phone:',
+	            'h4',
+	            null,
+	            '下载对应的应用'
+	          ),
 	          _react2.default.createElement(
-	            'a',
-	            { href: 'https://www.microsoft.com/en-US/store/apps/Authenticator/9WZDNCRFJ3RJ' },
-	            'Authenticator'
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'For Android, iOS, and Blackberry:',
+	              _react2.default.createElement(
+	                'a',
+	                { href: 'https://support.google.com/accounts/answer/1066447?hl=en' },
+	                'Google Authenticator'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'For Android and iOS:',
+	              _react2.default.createElement(
+	                'a',
+	                { href: 'http://guide.duosecurity.com/third-party-accounts' },
+	                'Duo Mobile'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'For Windows Phone:',
+	              _react2.default.createElement(
+	                'a',
+	                { href: 'https://www.microsoft.com/en-US/store/apps/Authenticator/9WZDNCRFJ3RJ' },
+	                'Authenticator'
+	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'h4',
+	            null,
+	            '扫描下面的二维码'
+	          ),
+	          _react2.default.createElement(_qrcodeReact2.default, { value: this.state.qrcode, size: 256 }),
+	          _react2.default.createElement(
+	            _reactBootstrapValidation.Form,
+	            {
+	              className: 'clearfix',
+	              onValidSubmit: this.handleValidSubmit.bind(this),
+	              onInvalidSubmit: this.handleInvalidSubmit.bind(this)
+	            },
+	            _react2.default.createElement('br', null),
+	            _react2.default.createElement(
+	              'button',
+	              { type: 'submit', className: 'btn btn-primary' },
+	              this.state.options.two_factor_auth ? '关闭' : '开启',
+	              '二步验证'
+	            ),
+	            _react2.default.createElement('hr', null)
 	          )
 	        )
-	      ),
-	      _react2.default.createElement(
-	        'h4',
-	        null,
-	        '扫描下面的二维码'
-	      ),
-	      _react2.default.createElement(_qrcodeReact2.default, { value: this.state.qrcode, size: 256 }),
-	      _react2.default.createElement(
-	        _reactBootstrapValidation.Form,
-	        {
-	          className: 'clearfix',
-	          onValidSubmit: this.handleValidSubmit.bind(this),
-	          onInvalidSubmit: this.handleInvalidSubmit.bind(this)
-	        },
-	        _react2.default.createElement('br', null),
-	        _react2.default.createElement(
-	          'button',
-	          { type: 'submit', className: 'btn btn-primary' },
-	          this.state.options.two_factor_auth ? '关闭' : '开启',
-	          '二步验证'
-	        ),
-	        _react2.default.createElement('hr', null)
 	      )
 	    );
 	  };
@@ -84664,70 +85416,7 @@
 
 
 /***/ },
-/* 932 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	exports.__esModule = true;
-	exports.default = undefined;
-	
-	var _classCallCheck2 = __webpack_require__(245);
-	
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-	
-	var _possibleConstructorReturn2 = __webpack_require__(246);
-	
-	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-	
-	var _inherits2 = __webpack_require__(311);
-	
-	var _inherits3 = _interopRequireDefault(_inherits2);
-	
-	var _react = __webpack_require__(1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(158);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _base = __webpack_require__(319);
-	
-	var _base2 = _interopRequireDefault(_base);
-	
-	var _reactRouter = __webpack_require__(159);
-	
-	var _classnames = __webpack_require__(453);
-	
-	var _classnames2 = _interopRequireDefault(_classnames);
-	
-	var _reactBootstrapValidation = __webpack_require__(348);
-	
-	var _md = __webpack_require__(344);
-	
-	var _md2 = _interopRequireDefault(_md);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var _default = function (_Base) {
-	  (0, _inherits3.default)(_default, _Base);
-	
-	  function _default() {
-	    (0, _classCallCheck3.default)(this, _default);
-	    return (0, _possibleConstructorReturn3.default)(this, _Base.apply(this, arguments));
-	  }
-	
-	  _default.prototype.render = function render() {
-	    return _react2.default.createElement('div', null);
-	  };
-
-	  return _default;
-	}(_base2.default);
-
-	exports.default = _default;
-
-/***/ },
+/* 932 */,
 /* 933 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -84942,6 +85631,480 @@
 	module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
 	  return $JSON.stringify.apply($JSON, arguments);
 	};
+
+/***/ },
+/* 936 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _reflux = __webpack_require__(323);
+	
+	var _reflux2 = _interopRequireDefault(_reflux);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var AsyncConfig = { asyncResult: true };
+	exports.default = _reflux2.default.createActions({
+	  select: { children: ['completed', 'failed'] }
+	});
+
+/***/ },
+/* 937 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _reflux = __webpack_require__(323);
+	
+	var _reflux2 = _interopRequireDefault(_reflux);
+	
+	var _superagent = __webpack_require__(668);
+	
+	var _superagent2 = _interopRequireDefault(_superagent);
+	
+	var _firekylin = __webpack_require__(671);
+	
+	var _firekylin2 = _interopRequireDefault(_firekylin);
+	
+	var _system = __webpack_require__(936);
+	
+	var _system2 = _interopRequireDefault(_system);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.default = _reflux2.default.createStore({
+	
+	  listenables: _system2.default,
+	  /**
+	   * select user data
+	   * @param  {[type]} id [description]
+	   * @return {[type]}    [description]
+	   */
+	  onSelect: function onSelect() {
+	    var _this = this;
+	
+	    var url = '/admin/api/system';
+	    var req = _superagent2.default.get(url);
+	    return _firekylin2.default.request(req).then(function (data) {
+	      return _this.trigger(data, 'getSystemInfo');
+	    });
+	  }
+	});
+
+/***/ },
+/* 938 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	exports.default = undefined;
+	
+	var _extends2 = __webpack_require__(804);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _classCallCheck2 = __webpack_require__(245);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(246);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(311);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(158);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _base = __webpack_require__(319);
+	
+	var _base2 = _interopRequireDefault(_base);
+	
+	var _reactRouter = __webpack_require__(159);
+	
+	var _classnames = __webpack_require__(453);
+	
+	var _classnames2 = _interopRequireDefault(_classnames);
+	
+	var _reactBootstrapValidation = __webpack_require__(348);
+	
+	var _md = __webpack_require__(344);
+	
+	var _md2 = _interopRequireDefault(_md);
+	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
+	var _user = __webpack_require__(666);
+	
+	var _user2 = _interopRequireDefault(_user);
+	
+	var _user3 = __webpack_require__(667);
+	
+	var _user4 = _interopRequireDefault(_user3);
+	
+	var _tip = __webpack_require__(792);
+	
+	var _tip2 = _interopRequireDefault(_tip);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var _default = function (_Base) {
+	  (0, _inherits3.default)(_default, _Base);
+	
+	  function _default(props) {
+	    (0, _classCallCheck3.default)(this, _default);
+	
+	    var _this = (0, _possibleConstructorReturn3.default)(this, _Base.call(this, props));
+	
+	    _this.state = {
+	      submitting: false,
+	      userInfo: {}
+	    };
+	    return _this;
+	  }
+	
+	  _default.prototype.componentDidMount = function componentDidMount() {
+	    this.listenTo(_user4.default, this.handleTrigger.bind(this));
+	  };
+	  /**
+	   * hanle trigger
+	   * @param  {[type]} data [description]
+	   * @param  {[type]} type [description]
+	   * @return {[type]}      [description]
+	   */
+	
+	
+	  _default.prototype.handleTrigger = function handleTrigger(data, type) {
+	    switch (type) {
+	      case 'saveUserFail':
+	        this.setState({ submitting: false });
+	        break;
+	      case 'saveUserSuccess':
+	        _tip2.default.success('更新成功');
+	        this.setState({ submitting: false });
+	        break;
+	    }
+	  };
+	  /**
+	   * save
+	   * @return {}       []
+	   */
+	
+	
+	  _default.prototype.handleValidSubmit = function handleValidSubmit(values) {
+	    delete values.repassword;
+	    var password = (0, _md2.default)(SysConfig.options.password_salt + values.password);
+	    values.password = password;
+	    this.setState({ submitting: true });
+	    _user2.default.savepwd(values);
+	  };
+	  /**
+	   * handle invalid
+	   * @return {} []
+	   */
+	
+	
+	  _default.prototype.handleInvalidSubmit = function handleInvalidSubmit() {};
+	  /**
+	   * change input value
+	   * @param  {[type]} type  [description]
+	   * @param  {[type]} event [description]
+	   * @return {[type]}       [description]
+	   */
+	
+	
+	  _default.prototype.changeInput = function changeInput(type, event) {
+	    var value = event.target.value;
+	    var userInfo = this.state.userInfo;
+	    userInfo[type] = value;
+	    this.setState({
+	      userInfo: userInfo
+	    });
+	  };
+	  /**
+	   * 获取属性
+	   * @param  {[type]} type [description]
+	   * @return {[type]}      [description]
+	   */
+	
+	
+	  _default.prototype.getProps = function getProps(type) {
+	    var prop = {
+	      value: this.state.userInfo[type] || '',
+	      onChange: this.changeInput.bind(this, type)
+	    };
+	
+	    var validatePrefix = '';
+	    var validates = {
+	      name: 'isLength:4:20',
+	      email: 'isEmail',
+	      password: function password(val) {
+	
+	        if (val === '') {
+	          return '请输出密码';
+	        }
+	
+	        if (val.length < 8 || val.length > 30) {
+	          return '密码长度为8到30个字符';
+	        }
+	
+	        return true;
+	      },
+	      repassword: function repassword(val, context) {
+	        return val === context.password;
+	      }
+	    };
+	    if (typeof validates[type] === 'string') {
+	      prop.validate = validatePrefix + validates[type];
+	    } else {
+	      prop.validate = validates[type];
+	    }
+	
+	    return prop;
+	  };
+	
+	  _default.prototype.getOptionProp = function getOptionProp(type, value) {
+	    var val = this.state.userInfo[type];
+	    if (val == value) {
+	      return { selected: true };
+	    }
+	    return {};
+	  };
+	  /**
+	   * render
+	   * @return {} []
+	   */
+	
+	
+	  _default.prototype.render = function render() {
+	    var props = {};
+	    if (this.state.submitting) {
+	      props.disabled = true;
+	    }
+	
+	    return _react2.default.createElement(
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'manage-container' },
+	        _react2.default.createElement(
+	          _reactBootstrapValidation.Form,
+	          {
+	            className: 'user-editpwd clearfix',
+	            onValidSubmit: this.handleValidSubmit.bind(this),
+	            onInvalidSubmit: this.handleInvalidSubmit.bind(this)
+	          },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'pull-left' },
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '密码'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'password',
+	                name: 'password',
+	                ref: 'password',
+	                className: 'form-control',
+	                placeholder: '8到30个字符'
+	              }, this.getProps('password'))),
+	              _react2.default.createElement(
+	                'p',
+	                { className: 'help-block' },
+	                '建议使用特殊字符与字母、数字的混编方式，增加安全性。'
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group ' },
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                '确认密码'
+	              ),
+	              _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, (0, _extends3.default)({
+	                type: 'password',
+	                name: 'repassword',
+	                ref: 'repassword',
+	                className: 'form-control',
+	                placeholder: ''
+	              }, this.getProps('repassword'), {
+	                errorHelp: '密码不一致'
+	              }))
+	            ),
+	            _react2.default.createElement(
+	              'button',
+	              (0, _extends3.default)({ type: 'submit' }, props, { className: 'btn btn-primary' }),
+	              this.state.submitting ? '提交中...' : '提交'
+	            )
+	          )
+	        )
+	      )
+	    );
+	  };
+
+	  return _default;
+	}(_base2.default);
+
+	exports.default = _default;
+
+/***/ },
+/* 939 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	exports.default = undefined;
+	
+	var _classCallCheck2 = __webpack_require__(245);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(246);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(311);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _base = __webpack_require__(319);
+	
+	var _base2 = _interopRequireDefault(_base);
+	
+	var _reactBootstrapValidation = __webpack_require__(348);
+	
+	var _firekylin = __webpack_require__(671);
+	
+	var _firekylin2 = _interopRequireDefault(_firekylin);
+	
+	var _breadcrumb = __webpack_require__(794);
+	
+	var _breadcrumb2 = _interopRequireDefault(_breadcrumb);
+	
+	var _tip = __webpack_require__(792);
+	
+	var _tip2 = _interopRequireDefault(_tip);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var _default = function (_Base) {
+	  (0, _inherits3.default)(_default, _Base);
+	
+	  function _default() {
+	    var _temp, _this, _ret;
+	
+	    (0, _classCallCheck3.default)(this, _default);
+	
+	    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+	      args[_key] = arguments[_key];
+	    }
+	
+	    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, _Base.call.apply(_Base, [this].concat(args))), _this), _this.state = {
+	      uploading: false
+	    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+	  }
+	
+	  _default.prototype.handleValidSubmit = function handleValidSubmit(e) {
+	    var _this2 = this;
+	
+	    this.setState({ uploading: true });
+	    var form = new FormData();
+	    form.append('file', e.file[0]);
+	    form.append('importor', 'wordpress');
+	    _firekylin2.default.upload(form).then(function (result) {
+	      _tip2.default.success(result.data);
+	      alert(result.data);
+	      _this2.setState({ uploading: false });
+	    }, function (err) {
+	      _tip2.default.fail('IMPORT_FAIL');
+	      _this2.setState({ uploading: false });
+	    });
+	  };
+	
+	  _default.prototype.render = function render() {
+	    return _react2.default.createElement(
+	      'div',
+	      { className: 'fk-content-wrap' },
+	      _react2.default.createElement(_breadcrumb2.default, this.props),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'manage-container' },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'options-2fa' },
+	          _react2.default.createElement(
+	            'h3',
+	            { style: { marginBottom: '20px' } },
+	            '上传 WXR 文件'
+	          ),
+	          _react2.default.createElement(
+	            'p',
+	            null,
+	            '请上传 WordPress 中导出的 .xml 文件'
+	          ),
+	          _react2.default.createElement(
+	            _reactBootstrapValidation.Form,
+	            {
+	              className: 'clearfix form-horizonal',
+	              onValidSubmit: this.handleValidSubmit.bind(this)
+	            },
+	            _react2.default.createElement(_reactBootstrapValidation.ValidatedInput, {
+	              type: 'file',
+	              name: 'file',
+	              label: '上传文件：',
+	              labelClassName: 'col-xs-2',
+	              wrapperClassName: 'col-xs-10',
+	              validate: function validate(files) {
+	                if (_reactBootstrapValidation.FileValidator.isEmpty(files)) {
+	                  return '请上传文件';
+	                }
+	                return true;
+	              },
+	              accept: 'application/xml'
+	            }),
+	            _react2.default.createElement(
+	              'button',
+	              { type: 'submit', className: 'btn btn-primary' },
+	              '上传',
+	              this.state.uploading ? '中...' : ''
+	            )
+	          )
+	        )
+	      )
+	    );
+	  };
+
+	  return _default;
+	}(_base2.default);
+
+	exports.default = _default;
 
 /***/ }
 /******/ ]);

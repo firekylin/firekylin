@@ -3,6 +3,7 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
+import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
 import PageAction from 'admin/action/page';
@@ -46,17 +47,17 @@ export default class extends Base {
       return (
         <tr key={item.id}>
           <td>
-            <a href={`/admin/page/edit/${item.id}`} title={item.title}>{item.title}</a>
+            <Link to={`/page/edit/${item.id}`} title={item.title}>{item.title}</Link>
             {this.renderStatus(item.status)}
           </td>
-          <td>{item.user.display_name}</td>
+          <td>{item.user.display_name || item.user.name}</td>
           <td>
-            <a href={`/admin/page/edit/${item.id}`} title={item.title}>
+            <Link to={`/page/edit/${item.id}`} title={item.title}>
               <button type="button" className="btn btn-primary btn-xs">
                 <span className="glyphicon glyphicon-edit"></span>
                 编辑
               </button>
-            </a>
+            </Link>
             <span> </span>
             <button
                 type="button"
@@ -92,18 +93,23 @@ export default class extends Base {
   }
   render(){
     return (
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>标题</th>
-            <th>作者</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.getPageList()}
-        </tbody>
-      </table>
+      <div className="fk-content-wrap">
+        <BreadCrumb {...this.props} />
+        <div className="manage-container">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>标题</th>
+                <th>作者</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.getPageList()}
+            </tbody>
+          </table>
+          </div>
+      </div>
     )
   }
 }
