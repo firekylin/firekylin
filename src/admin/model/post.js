@@ -76,6 +76,6 @@ export default class extends think.model.relation {
       is_public: 1, //公开
       type: 0, //文章
       status: 3 //已经发布
-    }).limit(nums).setRelation(false).select();
+    }).limit(nums).setRelation(false).order('create_time DESC').select();
   }
 }
