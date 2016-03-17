@@ -26,6 +26,10 @@
   max-height: 200px;
   overflow: hidden;
 }
+
+.is-public-radiogroup {
+  padding: 0 1px;  
+}
 /** 文章编辑右侧 **/
 .post-create .col-xs-3 > div.button-group {
   margin-top: 25px;

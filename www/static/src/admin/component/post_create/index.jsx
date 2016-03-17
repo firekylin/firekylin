@@ -289,7 +289,7 @@ export default class extends Base {
                 <RadioGroup
                   name="is_public"
                   label="公开度"
-                  wrapperClassName="col-xs-12"
+                  wrapperClassName="col-xs-12 is-public-radiogroup"
                 >
                   <Radio value="1" label="公开" />
                   <Radio value="0" label="不公开" />
