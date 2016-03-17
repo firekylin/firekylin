@@ -19,7 +19,7 @@ const MdEditor = React.createClass({
   getInitialState () {
     return {
       panelClass: 'md-panel',
-      mode: 'split',
+      mode: 'edit',
       isFullScreen: false,
       result: marked(this.props.content || '')
     }
@@ -39,9 +39,7 @@ const MdEditor = React.createClass({
   },
   componentWillReceiveProps(nextProps) {
     if(nextProps.content === this.props.content) { return; }
-    let initialState = this.getInitialState();
-    initialState.result = marked(nextProps.content || '');
-    this.setState(initialState);
+    this.setState({result: marked(nextProps.content || '')});
   },
   componentWillUnmount () {
     this.textControl = null
@@ -126,6 +124,7 @@ const MdEditor = React.createClass({
   },
   // event handlers
   _onChange (e) {
+    console.log(this.state);
     this._isDirty = true // set dirty
     if (this._ltr) clearTimeout(this._ltr)
 
