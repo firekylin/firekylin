@@ -116,8 +116,8 @@ export default class extends Base {
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
                 value={this.state.cateInfo.name}
-                onChange={val => {
-                  this.state.cateInfo.name = val;
+                onChange={e => {
+                  this.state.cateInfo.name = e.target.value;
                   this.forceUpdate();
                 }}
             />
