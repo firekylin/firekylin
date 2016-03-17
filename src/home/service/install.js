@@ -51,8 +51,8 @@ export default class extends think.service.base {
     let model = this.getModel(true);
     let dbExist = await model.query("SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`='" + this.dbConfig.database + "'");
     if(think.isEmpty(dbExist)){
-      await model.query('DROP DATABASE IF EXISTS `' + this.dbConfig.database + '`');
-      await model.query('CREATE DATABASE `' + this.dbConfig.database + '`');
+      //忽略错误
+      await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
       model.close();
     }
     let dbFile = think.ROOT_PATH + think.sep + 'firekylin.sql';
