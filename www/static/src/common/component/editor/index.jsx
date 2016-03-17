@@ -86,6 +86,8 @@ const MdEditor = React.createClass({
         <li className="tb-btn"><a title="有序列表" onClick={this._listOlText}><i className="glyphicon glyphicon-list-alt" /></a></li>{/* list-ol */}
         <li className="tb-btn"><a title="无序列表" onClick={this._listUlText}><i className="glyphicon glyphicon-list" /></a></li>{/* list-ul */}
         <li className="tb-btn"><a title="标题" onClick={this._headerText}><i className="glyphicon glyphicon-header" /></a></li>{/* header */}
+        <li className="tb-btn spliter"></li>
+        <li className="tb-btn"><a title="插入 more 标签" onClick={this._insertMore}><i className="glyphicon glyphicon-pushpin" /></a></li>{/* more */}
         {this._getExternalBtn()}
       </ul>
     )
@@ -222,6 +224,9 @@ const MdEditor = React.createClass({
   },
   _headerText () {
     this._preInputText("## 标题", 3, 5)
+  },
+  _insertMore() {
+    this._preInputText("<!--more-->", 0, 0);
   }
 });
 
