@@ -18,6 +18,9 @@
   height: 550px;
 }
 
+.md-panel.fullscreen {
+  height: auto;
+}
 /** 文章编辑右侧 **/
 .post-create .col-xs-3 > div.button-group {
   margin-top: 25px;
