@@ -9,6 +9,8 @@ import TipAction from 'common/action/tip';
 import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 
+import firekylin from 'common/util/firekylin';
+
 export default class extends Base {
   constructor(props){
     super(props);
@@ -48,9 +50,11 @@ export default class extends Base {
         <tr key={item.id}>
           <td>
             <Link to={`/page/edit/${item.id}`} title={item.title}>{item.title}</Link>
-            {this.renderStatus(item.status)}
           </td>
           <td>{item.user.display_name || item.user.name}</td>
+          <td>{this.renderStatus(item.status)}</td>
+          <td>{firekylin.formatTime(item.create_time)}</td>
+          <td>{firekylin.formatTime(item.update_time)}</td>
           <td>
             <Link to={`/page/edit/${item.id}`} title={item.title}>
               <button type="button" className="btn btn-primary btn-xs">
@@ -101,6 +105,9 @@ export default class extends Base {
               <tr>
                 <th>标题</th>
                 <th>作者</th>
+                <th>状态</th>
+                <th>创建日期</th>
+                <th>修改日期</th>
                 <th>操作</th>
               </tr>
             </thead>
