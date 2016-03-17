@@ -1,13 +1,14 @@
 {
   "name": "Firekylin",
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2005+",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/",
     "watch-compile": "node -e \"console.log('<npm run watch-compile> no longer need, use <npm start> command direct.');console.log();\"",
     "watch": "npm run watch-compile",
-    "copy-package": "node copy_package.js"
+    "copy-package": "node copy_package.js",
+    "webpack": "webpack --watch"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",

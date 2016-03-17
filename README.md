@@ -48,6 +48,8 @@ sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
 
 下载最新的安装包，解压覆盖原有的目录即可。
 
+部分版本升级可能需要更新数据表，具体请见[这里](https://github.com/75team/firekylin/wiki/%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7)。
+
 ## 贡献代码
 
 安装包里的代码都是编译后的（如：React 代码已经编译，HTML、JS、CSS 都已经压缩，并且使用了 LocalStorage 等优化技术）。如果想贡献代码，可以直接 clone 项目代码。

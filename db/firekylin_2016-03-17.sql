@@ -5,9 +5,9 @@
 # http://www.sequelpro.com/
 # https://github.com/sequelpro/sequelpro
 #
-# Host: 127.0.0.1 (MySQL 5.6.19-debug)
+# Host: 127.0.0.1 (MySQL 5.7.10)
 # Database: firekylin
-# Generation Time: 2016-03-13 10:42:53 +0000
+# Generation Time: 2016-03-17 04:11:01 +0000
 # ************************************************************
 
 
@@ -32,7 +32,7 @@ CREATE TABLE `fk_cate` (
   `pathname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -49,29 +49,6 @@ CREATE TABLE `fk_options` (
   UNIQUE KEY `key` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-LOCK TABLES `fk_options` WRITE;
-/*!40000 ALTER TABLE `fk_options` DISABLE KEYS */;
-
-INSERT INTO `fk_options` (`key`, `value`, `desc`)
-VALUES
-  ('analyze_code',NULL,'统计代码，可以添加百度统计、Google 统计等'),
-  ('comment','{\"type\": \"disqus\", \"name\": \"welefen\"}','评论类型'),
-  ('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
-  ('github_blog','welefen/blog','GitHub blog 地址，如果填了则同步到 GitHub 上'),
-  ('github_url','https://github.com/75team/thinkjs','GitHub 地址'),
-  ('image_upload',NULL,'图片存放的位置，默认存在放网站上。也可以选择放在七牛或者又拍云等地方'),
-  ('keywords','','网站关键字'),
-  ('logo_url','','logo 地址'),
-  ('miitbeian','we','网站备案号'),
-  ('num_per_page','10','文章一页显示的条数'),
-  ('password_salt','__PASSWORD_SALT__','密码 salt，网站安装的时候随机生成一个'),
-  ('theme','firekylin','主题名称'),
-  ('title','Firekylin 系统','网站标题'),
-  ('twitter_url','','微博地址'),
-  ('two_factor_auth','','是否开启二步验证');
-
-/*!40000 ALTER TABLE `fk_options` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table fk_post
@@ -90,13 +67,13 @@ CREATE TABLE `fk_post` (
   `markdown_content` longtext CHARACTER SET utf8 NOT NULL,
   `content` longtext CHARACTER SET utf8 NOT NULL,
   `allow_comment` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为允许， 0 为不允许',
-  `create_time` datetime,
+  `create_time` datetime DEFAULT NULL,
   `update_time` datetime NOT NULL,
   `is_public` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为公开，0 为不公开',
   `comment_num` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `create_time` (`create_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -111,7 +88,7 @@ CREATE TABLE `fk_post_cate` (
   `cate_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `post_cate` (`post_id`,`cate_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -141,7 +118,7 @@ CREATE TABLE `fk_post_tag` (
   `tag_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `post_tag` (`post_id`,`tag_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -156,7 +133,7 @@ CREATE TABLE `fk_tag` (
   `pathname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -180,7 +157,7 @@ CREATE TABLE `fk_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
