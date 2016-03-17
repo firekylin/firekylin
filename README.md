@@ -8,6 +8,8 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 选择最新的安装包，点击打开，然后点击右上角的 Raw，下载安装包。
 
+linux下 wget https://raw.githubusercontent.com/75team/firekylin/master/build/firekylin_0.1.0.tar.gz
+
 ## 安装依赖
 
 解压安装包，执行 `npm install` 安装对应的依赖（执行之前请确认已有 Node.js 环境，Node.js 版本要大于 4.0）。
