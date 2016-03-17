@@ -187,7 +187,9 @@ const MdEditor = React.createClass({
           </div>
         </Tab>
         <Tab eventKey={2} title="从网络上抓取">
-          <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value})} />
+          <div style={{margin: '20px 0'}}>
+            <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value})} />
+          </div>
         </Tab>
       </Tabs>,
       ()=> {
