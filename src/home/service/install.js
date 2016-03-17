@@ -110,7 +110,7 @@ export default class extends think.service.base {
     `;
     let dbConfigFile = think.APP_PATH + '/common/config/db.js';
     fs.writeFileSync(dbConfigFile, content);
-    think.config('db', data.default);
+    think.config('db', data);
   }
   /**
    * create account
