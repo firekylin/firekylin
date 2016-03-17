@@ -30,9 +30,9 @@ const MdEditor = React.createClass({
     this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
     if(localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+'']) {
         ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
-          this.textControl.value = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''];
-          this.setState({ result: marked(this.textControl.value) });
-          this.props.onChange(this.textControl.value);
+          let content = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''];
+          this.setState({ result: marked(content) });
+          this.props.onChange(content);
         })
 
     }
@@ -128,13 +128,13 @@ const MdEditor = React.createClass({
   _onChange (e) {
     this._isDirty = true // set dirty
     if (this._ltr) clearTimeout(this._ltr)
-
+    let content = e.target.value;
     this._ltr = setTimeout(() => {
-      this.setState({ result: marked(this.textControl.value) }) // change state
-      localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''] = this.textControl.value;
+      this.setState({ result: marked(content) }) // change state
+      localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''] = content;
     }, 300);
 
-    this.props.onChange(e.target.value);
+    this.props.onChange(content);
   },
   _changeMode (mode) {
     return (e) => {
@@ -148,18 +148,18 @@ const MdEditor = React.createClass({
   _preInputText (text, preStart, preEnd) {
     const start = this.textControl.selectionStart
     const end = this.textControl.selectionEnd
-    const origin = this.textControl.value
+    const origin = this.props.content;
 
     if (start !== end) {
       const exist = origin.slice(start, end)
       text = text.slice(0, preStart) + exist + text.slice(preEnd)
       preEnd = preStart + exist.length
     }
-    this.textControl.value = origin.slice(0, start) + text + origin.slice(end)
+    let content = origin.slice(0, start) + text + origin.slice(end);
     // pre-select
-    this.textControl.setSelectionRange(start + preStart, start + preEnd)
-    this.setState({ result: marked(this.textControl.value) }) // change state
-    this.props.onChange( this.textControl.value );
+    this.textControl.setSelectionRange(start + preStart, start + preEnd);
+    this.setState({ result: marked(content) }); // change state
+    this.props.onChange( content );
   },
   _boldText () {
     this._preInputText("**加粗文字**", 2, 6)
