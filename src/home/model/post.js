@@ -41,7 +41,7 @@ export default class extends think.model.relation {
    * @return {[type]}       [description]
    */
   async getPostList(page, options = {}){
-    let field = options.field || 'id,title,pathname,summary,comment_num';
+    let field = options.field || 'id,title,pathname,create_time,summary,comment_num';
     if(options.tag || options.cate){
       let name = options.tag ? 'tag' : 'cate';
       let {id} = await this.model(name).field('id').setRelation(false).where({name: options.tag || options.cate}).find();
