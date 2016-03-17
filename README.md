@@ -44,7 +44,7 @@ sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
 
 ## 升级
 
-下载最新的安装包，解压覆盖原有的目录即可，然后通过 `pm2 restart pm2.json` 重启服务。
+下载最新的安装包，解压覆盖原有的目录，然后通过 `pm2 restart pm2.json` 重启服务。
 
 部分版本升级可能需要更新数据表，具体请见[这里](https://github.com/75team/firekylin/wiki/%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7)。
 
