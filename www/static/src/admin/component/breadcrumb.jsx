@@ -17,10 +17,11 @@ export default class extends Base {
 
     this.crumbs = {};
     (new Sidebar).state.routes.forEach(route => {
+      console.log(route);
       if( !route.children ) { return; }
       route.children.forEach( child => {
         this.crumbs[child.url] = [
-          {title: route.title, url: route.url},
+          {title: route.title, url: route.url, children: route.children},
           child
         ];
       });
@@ -74,7 +75,7 @@ export default class extends Base {
             }
             return (
               <li key={i}>
-                <Link to={item.url}>{item.title}</Link>
+                <Link to={item.children ? item.children[0].url :item.url}>{item.title}</Link>
               </li>
             );
           })}
