@@ -263,7 +263,7 @@ let firekylin = {
   },
 
   formatTime(str) {
-    return moment(new Date(str)).format("YYYY年MM月DD日 HH:mm");
+    return str ? moment(new Date(str)).format("YYYY年MM月DD日 HH:mm") : '';
   }
 };
 

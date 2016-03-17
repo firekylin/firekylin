@@ -126,7 +126,6 @@ const MdEditor = React.createClass({
   },
   // event handlers
   _onChange (e) {
-    console.log(this.state);
     this._isDirty = true // set dirty
     if (this._ltr) clearTimeout(this._ltr)
 

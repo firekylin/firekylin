@@ -35,7 +35,7 @@ export default class extends Base {
         tag: [],
         cate: [],
         is_public: '1',
-        create_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+        create_time: '',
         allow_comment: true
       },
       status: 3,
@@ -118,6 +118,13 @@ export default class extends Base {
 
     if(this.id){
       values.id = this.id;
+    }
+
+    /** 草稿不存创建时间，其它的状态则默认时间为当前时间 **/
+    if( this.state.status === 0 ) {
+      values.create_time = '';
+    } else {
+      values.create_time = this.state.postInfo.create_time || moment().format('YYYY-MM-DD HH:mm:ss');
     }
 
     values.status = this.state.status;
