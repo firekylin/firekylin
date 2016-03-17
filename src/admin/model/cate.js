@@ -25,7 +25,14 @@ export default class extends think.model.relation {
    * @param {[type]} ip   [description]
    */
   addCate(data){
-    return this.where({name: data.pathname, _logic: 'OR'}).thenAdd(data);
+    let where = {
+      name: data.name, 
+      _logic: 'OR'
+    };
+    if(data.pathname){
+      where.pathname = data.pathname;
+    }
+    return this.where(where).thenAdd(data);
   }
 
   async saveCate(data){

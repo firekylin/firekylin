@@ -20,7 +20,14 @@ export default class extends think.model.relation {
   }
 
   addTag(data){
-    return this.where({name: data.name}).thenAdd(data);
+    let where = {
+      name: data.name, 
+      _logic: 'OR'
+    };
+    if(data.pathname){
+      where.pathname = data.pathname;
+    }
+    return this.where(where).thenAdd(data);
   }
 
   async saveTag(data){
