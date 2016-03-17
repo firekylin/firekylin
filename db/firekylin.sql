@@ -90,7 +90,7 @@ CREATE TABLE `fk_post` (
   `markdown_content` longtext CHARACTER SET utf8 NOT NULL,
   `content` longtext CHARACTER SET utf8 NOT NULL,
   `allow_comment` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为允许， 0 为不允许',
-  `create_time` datetime NOT NULL,
+  `create_time` datetime,
   `update_time` datetime NOT NULL,
   `is_public` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为公开，0 为不公开',
   `comment_num` int(11) NOT NULL DEFAULT '0',
