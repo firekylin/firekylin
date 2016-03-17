@@ -77,11 +77,8 @@ export default class extends Base {
   getPostTime(data) {
     data.update_time = think.datetime();
     /**草稿可以没有创建时间**/
-    if( !!data.create_time && data.status != 0) {
-      data.create_time = data.update_time;
-    }
-    if( data.create_time === '' ) {
-      data.create_time = null;
+    if( !data.create_time ) {
+      data.create_time = data.status != 0 ? data.update_time : null;
     }
     return data;
   }
