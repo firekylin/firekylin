@@ -118,8 +118,8 @@ export default class extends Base {
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
                 value={this.state.tagInfo.pathname}
-                onChange={pathname => {
-                  this.state.tagInfo.pathname = name;
+                onChange={e => {
+                  this.state.tagInfo.pathname = e.target.value;
                   this.forceUpdate();
                 }}
             />
