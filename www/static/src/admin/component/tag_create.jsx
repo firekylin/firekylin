@@ -49,7 +49,7 @@ export default class extends Base {
   handleTrigger(data, type){
     switch(type){
       case 'saveTagFail':
-        TipAction.fail(data);
+        TipAction.fail(data.message);
         this.setState({submitting: false});
         break;
       case 'saveTagSuccess':
@@ -106,9 +106,13 @@ export default class extends Base {
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
                 value={this.state.tagInfo.name}
+                validate="required"
                 onChange={e => {
                   this.state.tagInfo.name = e.target.value;
                   this.forceUpdate();
+                }}
+                errorHelp={{
+                    required: '请填写标签名称'
                 }}
             />
             <ValidatedInput
