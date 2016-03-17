@@ -17,8 +17,11 @@ export default class extends Base {
   async postAction(){
     let data = this.post();
 
-    let insertId = await this.modelInstance.addTag(data);
-    return this.success({id: insertId});
+    let ret = await this.modelInstance.addTag(data);
+    if(ret.type === 'exist'){
+      return this.fail('TAG_EXIST');
+    }
+    return this.success({id: ret.id});
   }
   /**
    * update user info

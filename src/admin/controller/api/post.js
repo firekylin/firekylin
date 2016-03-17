@@ -23,7 +23,7 @@ export default class extends Base {
       if(this.userInfo.type !== 1){
         where.user_id = this.userInfo.id;
       }
-      data = await this.modelInstance.where(where).order('create_time DESC').page( this.get('page'), 15 ).countSelect();
+      data = await this.modelInstance.where(where).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
     return this.success(data);
   }
@@ -76,8 +76,9 @@ export default class extends Base {
 
   getPostTime(data) {
     data.update_time = think.datetime();
-    if( !!data.create_time ) {
-      data.create_time = data.update_time;
+    /**草稿可以没有创建时间**/
+    if( !data.create_time ) {
+      data.create_time = data.status != 0 ? data.update_time : null;
     }
     return data;
   }

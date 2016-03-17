@@ -48,13 +48,14 @@ export default class extends Base {
       headers: {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36"
       },
+      strictSSL: false,
       timeout: 1000,
       encoding: 'binary'
     }).catch(() =>{
       return this.fail("URL参数不合法或者请求失败！");
     });
 
-    if(result.headers["content-type"] !== "image/jpeg") {
+    if(result.headers["content-type"].indexOf('image') === -1) {
       return this.fail("请求的资源不是一张图片");
     };
 
@@ -122,7 +123,7 @@ export default class extends Base {
     };
     let posts = channel.item.filter(item => item['wp:post_type'][0] ==='post');
     let postModelInstance = this.model('post');
-    posts.forEach(async item => {
+    let postsPromise = posts.map(async item => {
       //获取用户
       let user = await this.model('user').where({name: item['dc:creator'][0]}).find();
       //查询分类 ID
@@ -156,11 +157,12 @@ export default class extends Base {
       post.markdown_content = toMarkdown(post.content);
       await postModelInstance.addPost(post);
     });
+    Promise.all(postsPromise);
 
     //导入页面
     let pages = channel.item.filter(item => item['wp:post_type'][0] === 'page');
     let pageModelInstance = this.model('page').setRelation('user');
-    pages.forEach(async item => {
+    let pagesPromise = pages.map(async item => {
       let user = await this.model('user').where({name: item['dc:creator'][0]}).find();
       let summary = item['excerpt:encoded'][0];
       if( summary === '' ) {
@@ -183,6 +185,7 @@ export default class extends Base {
       page.markdown_content = toMarkdown(page.content);
       await pageModelInstance.addPost(page);
     });
+    Promise.all(pagesPromise);
     this.success(`共导入文章 ${posts.length} 篇，页面 ${pages.length} 页，分类 ${categories.length} 个，标签 ${tags.length} 个`);
   }
 

@@ -55,7 +55,7 @@ export default class extends Base {
   handleTrigger(data, type){
     switch(type){
       case 'saveCateFail':
-        TipAction.fail(data);
+        TipAction.fail(data.message);
         this.setState({submitting: false});
         break;
       case 'saveCateSuccess':
@@ -116,9 +116,13 @@ export default class extends Base {
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
                 value={this.state.cateInfo.name}
-                onChange={val => {
-                  this.state.cateInfo.name = val;
+                validate="required"
+                onChange={e => {
+                  this.state.cateInfo.name = e.target.value;
                   this.forceUpdate();
+                }}
+                errorHelp={{
+                    required: '请填写分类名称'
                 }}
             />
             <ValidatedInput
@@ -128,8 +132,8 @@ export default class extends Base {
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
                 value={this.state.cateInfo.pathname}
-                onChange={val => {
-                  this.state.cateInfo.pathname = val;
+                onChange={e => {
+                  this.state.cateInfo.pathname = e.target.value;
                   this.forceUpdate();
                 }}
             />
