@@ -52,6 +52,7 @@ export default class extends Base {
       message = err;
     });
     this.assign('message', message);
+    this.assign('data', data);
     this.display();
   }
 }
