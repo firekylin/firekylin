@@ -4,8 +4,8 @@ import {Router, Route, Redirect, useRouterHistory} from 'react-router';
 
 import {createHistory} from 'history';
 
-import App from './component/app';
-import Dashboard from './component/dashboard';
+import App from './component/App';
+import Dashboard from './component/Dashboard';
 
 import User from './component/user';
 import UserList from './component/user_list';
@@ -31,7 +31,7 @@ import TagCreate from './component/tag_create';
 import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
-import OptionsComment from './component/Options_comment';
+import OptionsComment from './component/options_comment';
 import Import from './component/import';
 
 let history = useRouterHistory(createHistory)({
