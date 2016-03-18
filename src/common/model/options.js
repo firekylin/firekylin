@@ -24,24 +24,23 @@ export default class extends think.model.base {
     if(flag === true){
       await think.cache(this.cacheKey, null);
     }
-    return think.cache(this.cacheKey, async () => {
+    let ret = await think.cache(this.cacheKey, async () => {
       let data = await this.select();
       let result = {};
       data.forEach(item => {
         result[item.key] = item.value;
       });
-      //comment type
-      if(result.comment){
-        try{
-          result.comment = JSON.parse(result.comment);
-        }catch(e){
-          result.comment = {type: 'disqus'};
-        }
-      }else{
-        result.comment = {type: 'disqus'};
-      }
       return result;
     }, this.cacheOptions);
+    //comment type
+    if(ret){
+      if(ret.comment && think.isString(ret.comment)){
+        ret.comment = JSON.parse(ret.comment);
+      }else{
+        ret.comment = {type: 'disqus'};
+      }
+    }
+    return ret;
   }
   /**
    * update options
@@ -70,6 +69,7 @@ export default class extends think.model.base {
       let p = this.where({key: key}).update({value: value});
       promises.push(p);
     }
-    return Promise.all(promises);
+    await Promise.all(promises);
+    await this.getOptions(true);
   }
 }

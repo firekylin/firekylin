@@ -34,7 +34,6 @@ export default class extends think.controller.rest {
         return;
       }
       let name = this.http.controller + '/' + this.http.action;
-      console.log(name)
       if(this.allowList.indexOf(name) > -1){
         return;
       }

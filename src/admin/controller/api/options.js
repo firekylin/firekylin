@@ -42,7 +42,6 @@ export default class extends Base {
     if(think.isEmpty(data)){
       return this.fail('DATA_EMPTY');
     }
-    //@TODO 校验权限
     
     let model = this.model('options');
     let result = await model.updateOptions(data);
