@@ -50,11 +50,11 @@
         </div>
         <div class="form-group">
           <label>端口</label>
-          <input type="text" name="db_port" value="{{data.db_port}}" class="form-control" value="3306"  placeholder="数据库端口">
+          <input type="text" name="db_port" value="{{data.db_port|default('3306')}}" class="form-control"  placeholder="数据库端口">
         </div>
         <div class="form-group">
           <label>表前缀</label>
-          <input type="text" name="db_table_prefix" value="{{data.db_table_prefix}}" required class="form-control" value="fk_"  placeholder="数据表前缀">
+          <input type="text" name="db_table_prefix" value="{{data.db_table_prefix|default('fk_')}}" required class="form-control"  placeholder="数据表前缀">
         </div>
       </div>
     </div>
@@ -65,7 +65,7 @@
       <div class="col-md-6">
         <div class="form-group">
           <label>帐号</label>
-          <input type="text" required name="username" value="{{data.username}}" class="form-control" value="admin" placeholder="管理后台帐号">
+          <input type="text" required name="username" value="{{data.username|default('admin')}}" class="form-control" placeholder="管理后台帐号">
         </div>
       </div>
       <div class="col-md-6">
