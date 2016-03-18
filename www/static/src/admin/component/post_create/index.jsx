@@ -268,7 +268,7 @@ export default class extends Base {
                                 this.forceUpdate();
                               }}
                           />
-                          {cate.name}
+                          <span style={{fontWeight: 'normal'}}>{cate.name}</span>
                         </label>
                       </li>
                     )}
