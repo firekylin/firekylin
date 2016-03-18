@@ -147,5 +147,6 @@ export default class extends think.service.base {
     firekylin.setInstalled();
     let optionsModel = this.getModel('options');
     await optionsModel.getOptions(true);
+    optionsModel.close();
   }
 }
