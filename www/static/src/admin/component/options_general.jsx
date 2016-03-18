@@ -119,8 +119,7 @@ export default class extends Base {
                             this.state.options.logo_url = res.data;
                             this.state.logo_uploading = false;
                             this.forceUpdate();
-                          },
-                          console.log
+                          }
                         );
 
                       });
@@ -174,8 +173,7 @@ export default class extends Base {
                             this.state.options.logo_url = res.data;
                             this.state.favicon_uploading = false;
                             this.forceUpdate();
-                          },
-                          console.log
+                          }
                         );
 
                       });
