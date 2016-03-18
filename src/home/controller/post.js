@@ -94,17 +94,4 @@ export default class extends Base {
     this.assign('keyword', keyword);
     return this.displayView('search');
   }
-  /**
-   * rss
-   * @return {[type]} [description]
-   */
-  async rssAction(){
-    let model = this.model('post');
-    let list = await model.getPostRssList();
-    this.assign('list', list);
-    this.assign('currentTime', (new Date()).toString());
-    
-    this.type('text/xml');
-    return super.display(this.HOME_VIEW_PATH + 'rss.xml');
-  }
 }
