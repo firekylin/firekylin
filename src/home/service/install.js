@@ -59,31 +59,45 @@ export default class extends think.service.base {
     if(!think.isFile(dbFile)){
       return Promise.reject('数据库文件（firekylin.sql）不存在，请重新下载');
     }
-    let content = fs.readFileSync(dbFile, 'utf8');
-    content = content.replace(/\#[^\n]*/g, '').replace(/\/\*.*?\*\//g, '').replace(/\n/g, ' ');
-    content = content.replace(/fk_/g, this.dbConfig.prefix || '');
 
+
+    let content = fs.readFileSync(dbFile, 'utf8');
+    content = content.split('\n').filter(item => {
+      if(item[0] === '#'){
+        return false;
+      }
+      return true;
+    }).join(' ');
+    content = content.replace(/\/\*.*?\*\//g, '').replace(/fk_/g, this.dbConfig.prefix || '');
+
+
+    //导入数据
     model = this.getModel();
-    await model.transaction(async () => {
-      content = content.split(';');
+    content = content.split(';');
+    try{
       for(let item of content){
         item = item.trim();
         if(item){
-          await model.query(item);
+          await model.query(item).then(() => {
+            think.log(item);
+          });
         }
       }
-    }).catch(error => {
-      think.log(error);
-      return Promise.reject('导入数据失败，请重试');
-    });
+    }catch(e){
+      return Promise.reject('数据表导入失败，请重试');
+    }
 
+    think.log('before clear data');
+
+
+    //清除已有的数据内容
     let promises = ['cate', 'post', 'post_cate', 'post_tag', 'tag', 'user'].map(item => {
       return this.getModel(item).where('1=1').delete();
     });
     await Promise.all(promises);
 
-    let optionsModel = this.getModel('options');
 
+    let optionsModel = this.getModel('options');
     await optionsModel.where('1=1').update({value: ''});
     let salt = think.uuid(10) + '!@#$%^&*';
     this.password_salt = salt;
