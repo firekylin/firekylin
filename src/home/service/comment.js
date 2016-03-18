@@ -18,10 +18,12 @@ export default class extends think.service.base {
     let optionsModel = this.model('options');
     let options = await optionsModel.getOptions();
     let comment = options.comment;
-    if(comment.type === 'disqus'){
-      return this.syncFromDisqus(comment);
-    }else if(comment.type === 'duoshuo'){
-      return this.syncFromDuoshuo(comment);
+    if(comment.name){
+      if(comment.type === 'disqus'){
+        return this.syncFromDisqus(comment);
+      }else if(comment.type === 'duoshuo'){
+        return this.syncFromDuoshuo(comment);
+      }
     }
   }
   /**

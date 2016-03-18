@@ -91,7 +91,7 @@ export default class extends Base {
                 </li>
                 <li>
                   <label>开发成员：</label>
-                  <a href="https://github.com/welefen">Welefen</a>、<a href="https://github.com/lizheming">lizheming</a>
+                  <a href="https://github.com/welefen">welefen</a>、<a href="https://github.com/lizheming">lizheming</a>、<a href="https://github.com/songguangyu">songguangyu</a>、<a href="https://github.com/showzyl">showzyl</a>
                 </li>
               </ul>
             </div>
