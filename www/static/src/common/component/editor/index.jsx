@@ -78,7 +78,7 @@ const MdEditor = React.createClass({
         <li className="tb-btn"><a title="加粗" onClick={this._boldText}><i className="glyphicon glyphicon-bold" /></a></li>{/* bold */}
         <li className="tb-btn"><a title="斜体" onClick={this._italicText}><i className="glyphicon glyphicon-italic" /></a></li>{/* italic */}
         <li className="tb-btn spliter"></li>
-        <li className="tb-btn"><a title="链接" onClick={this._linkText}><i className="glyphicon glyphicon-link" /></a></li>{/* link */}
+        <li className="tb-btn"><a title="链接" onClick={()=>this._linkText()}><i className="glyphicon glyphicon-link" /></a></li>{/* link */}
         <li className="tb-btn"><a title="引用" onClick={this._blockquoteText}><i className="glyphicon glyphicon-comment" /></a></li>{/* blockquote */}
         <li className="tb-btn"><a title="代码段" onClick={this._codeText}><i className="glyphicon glyphicon-console" /></a></li>{/* code */}
         <li className="tb-btn"><a title="图片" onClick={this._pictureText}><i className="glyphicon glyphicon-picture" /></a></li>{/* picture-o */}
@@ -157,7 +157,7 @@ const MdEditor = React.createClass({
     }
     let content = origin.slice(0, start) + text + origin.slice(end);
     // pre-select
-    this.textControl.setSelectionRange(start + preStart, start + preEnd);
+    setTimeout(()=> this.textControl.setSelectionRange(start + preStart, start + preEnd), 20);
     this.setState({ result: marked(content) }); // change state
     this.props.onChange( content );
   },
