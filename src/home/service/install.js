@@ -91,6 +91,9 @@ export default class extends think.service.base {
     await optionsModel.where({key: 'password_salt'}).update({value: salt});
     await optionsModel.where({key: 'title'}).update({value: 'FireKylin 系统'});
     await optionsModel.where({key: 'logo_url'}).update({value: '/static/img/firekylin.jpg'});
+    await optionsModel.where({key: 'theme'}).update({value: 'firekylin'});
+
+    optionsModel.close();
   }
   /**
    * update config
@@ -129,7 +132,8 @@ export default class extends think.service.base {
       status: 1,
       ip: this.ip
     }
-    return model.addUser(data);
+    await model.addUser(data);
+    model.close();
   }
   /**
    * run
@@ -141,7 +145,7 @@ export default class extends think.service.base {
     await this.createAccount();
     this.updateConfig();
     firekylin.setInstalled();
-    await this.getModel('options').getOptions(true);
-    let  options = await this.getModel('options').getOptions();
+    let optionsModel = this.getModel('options');
+    await optionsModel.getOptions(true);
   }
 }

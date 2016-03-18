@@ -32,6 +32,7 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async detailAction(){
+
     let pathname = this.get('pathname');
     let detail = await this.model('post').getPostDetail(pathname);
     if(think.isEmpty(detail)){
