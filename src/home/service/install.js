@@ -78,14 +78,13 @@ export default class extends think.service.base {
       for(let item of content){
         item = item.trim();
         if(item){
-          await model.query(item).then(() => {
-            think.log(item);
-          });
+          think.log(item);
+          await model.query(item);
         }
       }
     }catch(e){
       think.log(e);
-      return Promise.reject('数据表导入失败，请重试');
+      return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
     }
 
     think.log('before clear data');
