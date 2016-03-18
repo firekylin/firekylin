@@ -84,6 +84,7 @@ export default class extends think.service.base {
         }
       }
     }catch(e){
+      think.log(e);
       return Promise.reject('数据表导入失败，请重试');
     }
 
