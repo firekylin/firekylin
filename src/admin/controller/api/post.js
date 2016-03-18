@@ -79,6 +79,8 @@ export default class extends Base {
     /**草稿可以没有创建时间**/
     if( !data.create_time ) {
       data.create_time = data.status != 0 ? data.update_time : null;
+    }else{
+      data.create_time = think.datetime(data.create_time);
     }
     return data;
   }
