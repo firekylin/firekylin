@@ -83,6 +83,10 @@ export default class extends Base {
             <ValidatedInput
                 type='text'
                 {...this.getProps('name')}
+                validate="required"
+                errorHelp={{
+                    required: '请填写在评论服务里的网站名称'
+                }}
                 name='name'
               />
           </div>
