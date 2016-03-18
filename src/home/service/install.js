@@ -63,8 +63,12 @@ export default class extends think.service.base {
 
     let content = fs.readFileSync(dbFile, 'utf8');
     content = content.split('\n').filter(item => {
-      if(item[0] === '#'){
-        return false;
+      item = item.trim();
+      let ignoreList = ['#', 'LOCK', 'UNLOCK'];
+      for(let it of ignoreList){
+        if(item.indexOf(it) === 0){
+          return false;
+        }
       }
       return true;
     }).join(' ');
