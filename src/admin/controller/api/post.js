@@ -47,6 +47,11 @@ export default class extends Base {
     data = this.getContentAndSummary(data);
     data = this.getPostTime(data);
     data.tag = await this.getTagIds(data.tag);
+    
+    /** 如果是编辑发布文章的话默认状态改为审核中 **/
+    if( data.status == 3 && this.userInfo.type == 2 ) {
+      data.status = 1;
+    }
 
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
