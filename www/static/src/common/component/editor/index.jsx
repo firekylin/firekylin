@@ -82,7 +82,6 @@ class MdEditor extends React.Component {
   componentWillUnmount () {
     this.textControl = null
     this.previewControl = null
-    this.textControl.removeEventListener('keydown', this._bindKey);
   }
 
   render () {
