@@ -23,8 +23,10 @@ export default Reflux.createStore({
       data => this.trigger(data, id ? 'getPostInfo' : 'getPostList')
     );
   },
-  onSelectList(page) {
-    return firekylin.request( superagent.get('/admin/api/post?page='+page) ).then(
+  onSelectList(page, status) {
+    let url = `/admin/api/post?page=${page}`;
+    if(status) { url += `&status=${status}` };
+    return firekylin.request( superagent.get(url) ).then(
       data => this.trigger(data, 'getPostList')
     );
   },
@@ -65,6 +67,14 @@ export default Reflux.createStore({
       data => this.trigger(data, 'deletePostSuccess'),
       err => this.trigger(err, 'deletePostFail')
     );
+  },
+
+  onPass(id) {
+    this.onSave({id, status: 3});
+  },
+
+  onDeny(id) {
+    this.onSave({id, status: 2});
   }
 
 })
