@@ -98,7 +98,7 @@ export default class extends Base {
         setTimeout(() => this.redirect('post/list'), 1000);
         break;
       case 'getPostInfo':
-        data.create_time = moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss');
+        data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
         data.tag = data.tag.map(tag => tag.name);
         data.cate.forEach(item => this.cate[item.id] = true);
         this.setState({postInfo: data});
@@ -152,7 +152,7 @@ export default class extends Base {
 
     //如果是在编辑状态下在没有拿到数据之前不做渲染
     //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if( this.id && !this.state.postInfo.content ) {
+    if( this.id && !this.state.postInfo.title ) {
       return null;
     }
 
