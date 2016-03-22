@@ -55,8 +55,7 @@ export default class extends Base {
     this.state.key = key;
     this.state.page = 1;
 
-    if(key === 4) {return PostAction.selectList(this.state.page);}
-    else {return PostAction.selectList(this.state.page, key);}
+    return PostAction.selectList(this.state.page, key !== 4 ? key : null);
   }
   getPostList(){
     if(this.state.loading){
@@ -81,10 +80,13 @@ export default class extends Base {
     })
   }
   renderBtns(post) {
+    //管理员在审核和拒绝tab上显示更多按钮
     let isAdmin = SysConfig.userInfo.type === 1;
+    let showPassAndDeny = isAdmin && [1,2,3].includes(this.state.key);
+    let showEditAndDel = !isAdmin || this.state.key===4;
     return (
       <td>
-        {isAdmin ?
+        {showPassAndDeny ?
         <button
             type="button"
             className="btn btn-success btn-xs"
@@ -94,8 +96,8 @@ export default class extends Base {
           <span className="glyphicon glyphicon-ok"></span>
           通过
         </button> : null}
-        {isAdmin ? <span> </span> : null}
-        {isAdmin ?
+        {showPassAndDeny ? <span> </span> : null}
+        {showPassAndDeny ?
         <button
             type="button"
             className="btn btn-warning btn-xs"
@@ -105,15 +107,15 @@ export default class extends Base {
           <span className="glyphicon glyphicon-remove"></span>
           拒绝
         </button> : null}
-        {isAdmin ? <span> </span> : null}
-        <Link to={`/post/edit/${post.id}`} title={post.title}>
+        {showPassAndDeny ? <span> </span> : null}
+        {showEditAndDel ? <Link to={`/post/edit/${post.id}`} title={post.title}>
           <button type="button" className="btn btn-primary btn-xs">
             <span className="glyphicon glyphicon-edit"></span>
             编辑
           </button>
-        </Link>
-        <span> </span>
-        <button
+        </Link> : null}
+        {showEditAndDel ? <span> </span> : null}
+        {showEditAndDel ? <button
             type="button"
             className="btn btn-danger btn-xs"
             onClick={()=>
@@ -127,7 +129,7 @@ export default class extends Base {
         >
           <span className="glyphicon glyphicon-trash"></span>
           删除
-        </button>
+        </button> : null}
       </td>
     );
   }
