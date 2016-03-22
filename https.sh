@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+#
+USER=$(whoami);
+if [ $USER != "root" ];then
+	echo "please use sudo to excute";
+	exit;
+fi
+
 currentpath=$(pwd);
 
 opensslpath=`which openssl`;
