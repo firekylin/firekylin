@@ -76,23 +76,22 @@
 
 @media screen and (min-width:768px) and (max-width:1024px) {
   #main {
-    padding-left: 75px;
+    padding-left: 115px;
   }
 }
 
 @media screen and (max-width:769px) {
   #main {
     width: 100%;
-    padding-left: 0;
-    background-color: #eee;
     min-height: 100%;
     padding-top: 50px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 
 @media screen and (max-width:769px) {
   article {
-    margin: 5px 5px 0;
     background-color: #fff;
     padding: 10px;
   }

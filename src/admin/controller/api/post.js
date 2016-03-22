@@ -23,6 +23,9 @@ export default class extends Base {
       if(this.userInfo.type !== 1){
         where.user_id = this.userInfo.id;
       }
+      if(this.get('status')) {
+        where.status = this.get('status');
+      }
       data = await this.modelInstance.where(where).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
     return this.success(data);
@@ -48,6 +51,11 @@ export default class extends Base {
     data = this.getPostTime(data);
     data.tag = await this.getTagIds(data.tag);
 
+    /** 如果是编辑发布文章的话默认状态改为审核中 **/
+    if( data.status == 3 && this.userInfo.type == 2 ) {
+      data.status = 1;
+    }
+
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
   }
@@ -61,10 +69,15 @@ export default class extends Base {
     }
     let data = this.post();
     data.id = this.id;
-    data = this.getContentAndSummary(data);
-    data = this.getPostTime(data);
-    data.tag = await this.getTagIds(data.tag);
-
+    if(data.markdown_content) {
+      data = this.getContentAndSummary(data);
+    }
+    if(data.create_time) {
+      data = this.getPostTime(data);
+    }
+    if(data.tag) {
+      data.tag = await this.getTagIds(data.tag);
+    }
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
   }
@@ -79,6 +92,8 @@ export default class extends Base {
     /**草稿可以没有创建时间**/
     if( !data.create_time ) {
       data.create_time = data.status != 0 ? data.update_time : null;
+    }else{
+      data.create_time = think.datetime(data.create_time);
     }
     return data;
   }
@@ -131,9 +146,9 @@ export default class extends Base {
       }
       return `<h${b} id="${this.generateTocName(c)}"><a class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
     });
-    markedContent = markedContent.replace(/<h(\d)[^<>]*>([^<>]+)<\/h\1>/, (a, b, c) => {
-      return `${a}<div class="toc">${tocContent}</div>`;
-    });
+    // markedContent = markedContent.replace(/<h(\d)[^<>]*>([^<>]+)<\/h\1>/, (a, b, c) => {
+    //   return `${a}<div class="toc">${tocContent}</div>`;
+    // });
 
     let highlightContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
       text = text.replace(/&#39;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\&quot;/g, '"').replace(/\&amp;/g, "&");

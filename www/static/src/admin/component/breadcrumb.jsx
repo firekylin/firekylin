@@ -17,7 +17,7 @@ export default class extends Base {
 
     this.crumbs = {};
     (new Sidebar).state.routes.forEach(route => {
-      console.log(route);
+      //console.log(route);
       if( !route.children ) { return; }
       route.children.forEach( child => {
         this.crumbs[child.url] = [

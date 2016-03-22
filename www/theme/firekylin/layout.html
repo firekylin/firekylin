@@ -59,13 +59,13 @@
         <li>
           {% if options.github_url %}
           <a class="inline" target="_blank" href="{{options.github_url}}">
-            <i class="iconfont icon-github" title="GitHub"></i>
+            <i class="iconfont icon-github-v" title="GitHub"></i>
           </a>
           {% endif %}
           {% if options.twitter_url %}
             {% if options.twitter_url.indexOf('twitter.com') > -1 %}
             <a class="inline" target="_blank" href="{{options.twitter_url}}">
-              <i class="iconfont icon-twitter" title="Twitter"></i>
+              <i class="iconfont icon-twitter-v" title="Twitter"></i>
             </a>
             {% endif %}
             {% if options.twitter_url.indexOf('weibo.com') > -1 %}
@@ -75,7 +75,7 @@
             {% endif %}
           {% endif %}
           <a class="inline" href="/rss.html">
-            <i class="iconfont icon-rss" title="RSS"></i>
+            <i class="iconfont icon-rss-v" title="RSS"></i>
           </a>
           <a class="inline" href="/search.html">
             <i class="iconfont icon-search" title="Search"></i>
@@ -102,8 +102,7 @@
     &nbsp;-&nbsp;<a href="/">{{http.hostname}}</a>
   {% endif %}
   <br />
-  Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>
-  &nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin</a>
+  Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>&nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin</a>
 </footer>
 </div>
 <script src="/theme/firekylin/res/js/firekylin.js" data-ls="js_firekylin"></script>

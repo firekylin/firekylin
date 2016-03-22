@@ -46,6 +46,7 @@ body.side {
 #main {
   background-color: #fff;
   padding-left: 290px;
+  padding-right: 40px;
   max-width: 1390px;
   -webkit-overflow-scrolling: touch;
 }
