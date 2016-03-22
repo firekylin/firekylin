@@ -73,8 +73,9 @@ export default class extends think.model.relation {
     if(think.isEmpty(detail)){
       return detail;
     }
-    let prevPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({id: ['<', detail.id]})).order('create_time DESC').find();
-    let nextPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({id: ['>', detail.id]})).order('create_time ASC').find();
+    let createTime = think.datetime(detail.create_time);
+    let prevPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({create_time: ['<', createTime]})).order('create_time DESC').find();
+    let nextPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({create_time: ['>', createTime]})).order('create_time ASC').find();
     let [prev, next] = await Promise.all([prevPromise, nextPromise]);
     return {
       detail,
