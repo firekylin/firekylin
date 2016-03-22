@@ -37,4 +37,12 @@ export default class extends Base {
     let rows = await this.modelInstance.saveTag(data);
     return this.success({affectedRows: rows});
   }
+
+  async deleteAction() {
+    if(!this.id) {
+      return this.fail('PARAMS_ERROR');
+    }
+    await this.modelInstance.deleteTag(id);
+    return this.success();
+  }
 }

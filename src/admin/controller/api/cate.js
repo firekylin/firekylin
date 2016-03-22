@@ -41,4 +41,12 @@ export default class extends Base {
     let rows = await this.modelInstance.saveCate(data);
     return this.success({affectedRows: rows});
   }
+
+  async deleteAction() {
+    if(!this.id) {
+      return this.fail('PARAMS_ERROR');
+    }
+    await this.modelInstance.deleteCate(this.id);
+    return this.success();
+  }
 }

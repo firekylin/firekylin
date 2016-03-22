@@ -21,7 +21,7 @@ export default class extends think.model.relation {
 
   addTag(data){
     let where = {
-      name: data.name, 
+      name: data.name,
       _logic: 'OR'
     };
     if(data.pathname){
@@ -37,5 +37,10 @@ export default class extends think.model.relation {
     }
 
     return this.where({id: data.id}).update(data);
+  }
+
+  async deleteTag(tag_id) {
+    this.model('post_tag').delete({tag_id});
+    return this.delete({id: tag_id});
   }
 }

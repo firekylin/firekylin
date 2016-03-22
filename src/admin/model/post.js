@@ -50,8 +50,10 @@ export default class extends think.model.relation {
     return this.where({id: data.id}).update(data);
   }
 
-  addPostCate(cate_ids) {
-
+  async deletePost(post_id) {
+    await this.model('post_cate').delete({post_id});
+    await this.model('post_tag').delete({post_id});
+    return this.delete({id: post_id});
   }
 
   /**

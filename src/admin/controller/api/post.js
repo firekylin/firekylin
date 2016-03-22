@@ -82,6 +82,23 @@ export default class extends Base {
     return this.success({affectedRows: rows});
   }
 
+  async deleteAction() {
+    if(!this.id) {
+      return this.fail('PARAMS_ERROR');
+    }
+
+    /** 如果不是管理员且不是本文作者则无权限删除文章 **/
+    if(this.userInfo.type !== 1) {
+      let post = this.modelInstance.where({id}).find();
+      if( post.user_id !== this.userInfo.id ) {
+        return this.fail('ACCESS_ERROR');
+      }
+    }
+
+    await this.modelInstance.deletePost(id);
+    return this.seccuess();
+  }
+
   async lastest() {
     let data = await this.modelInstance.getLatest(6);
     return this.success(data);
