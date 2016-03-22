@@ -216,6 +216,7 @@ export default class extends Base {
                     onFullScreen={isFullScreen => this.setState({isFullScreen})}
                     info = {{id: this.id,type: this.type}}
                   />
+                  <p style={{lineHeight: '30px'}}>文章使用 markdown 格式，格式说明请见<a href="https://guides.github.com/features/mastering-markdown/">这里</a></p>
                 </div>
               </div>
               <div className={classnames('col-xs-3')}>
@@ -268,7 +269,7 @@ export default class extends Base {
                                 this.forceUpdate();
                               }}
                           />
-                          {cate.name}
+                          <span style={{fontWeight: 'normal'}}>{cate.name}</span>
                         </label>
                       </li>
                     )}

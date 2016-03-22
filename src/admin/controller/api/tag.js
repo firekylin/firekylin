@@ -8,6 +8,7 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   getAction(self){
+    //this.modelInstance.setRelation(false);
     return super.getAction(self);
   }
   /**

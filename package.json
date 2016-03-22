@@ -1,7 +1,7 @@
 {
   "name": "Firekylin",
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2005+",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/",
@@ -27,6 +27,7 @@
     "speakeasy": "2.0.0"
   },
   "devDependencies": {
+    "autobind-decorator": "^1.3.3",
     "babel-cli": "6.x.x",
     "babel-core": "6.x.x",
     "babel-loader": "^6.2.1",

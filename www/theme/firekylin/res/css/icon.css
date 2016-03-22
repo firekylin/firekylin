@@ -22,7 +22,7 @@
 .icon-user:before {
   content: "\e602";
 }
-.icon-rss:before {
+.icon-rss-v:before {
   content: "\e603";
 }
 .icon-tags:before {
@@ -43,7 +43,7 @@
 .icon-mail:before {
   content: "\e609";
 }
-.icon-twitter:before {
+.icon-twitter-v:before {
   content: "\e60a";
 }
 .icon-linkedin:before {
@@ -52,7 +52,7 @@
 .icon-stackoverflow:before {
   content: "\e60c";
 }
-.icon-github:before {
+.icon-github-v:before {
   content: "\e60d";
 }
 .icon-facebook:before {

@@ -4,13 +4,6 @@ import './global';
 
 if(!think.cli){
 
-  crontab.scheduleJob("0 */3 * * *", () => {
-    if(!firekylin.isInstalled){
-      return;
-    }
-    think.http("/crontab/sitemap", true); 
-  });
-
   let syncComment = () => {
     if(!firekylin.isInstalled){
       return;

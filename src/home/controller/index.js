@@ -12,6 +12,32 @@ export default class extends Base {
     return this.action('post', 'list');
   }
   /**
+   * rss
+   * @return {[type]} [description]
+   */
+  async rssAction(){
+    let model = this.model('post');
+    let list = await model.getPostRssList();
+    this.assign('list', list);
+    this.assign('currentTime', (new Date()).toString());
+    
+    this.type('text/xml');
+    return super.display(this.HOME_VIEW_PATH + 'rss.xml');
+  }
+
+  /**
+   * sitemap action
+   * @return {[type]} [description]
+   */
+  async sitemapAction(){
+    let model = this.model('post');
+    let list = model.getPostSitemapList();
+    this.assign('list', list);
+
+    this.type('text/xml');
+    return this.display(this.HOME_VIEW_PATH + 'sitemap.xml');
+  }
+  /**
    * install
    * @return {[type]} [description]
    */
