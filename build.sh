@@ -64,6 +64,9 @@ cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
 cp -r db/firekylin.sql output/;
+cp -r auto_build.sh output/;
+cp -r https.js output/;
+cp -r https.sh output/;
 
 rm -r output/app/common/config/db.js;
 mv output firekylin;
