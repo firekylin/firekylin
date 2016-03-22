@@ -26,7 +26,7 @@ export default class extends think.model.relation {
    */
   addCate(data){
     let where = {
-      name: data.name, 
+      name: data.name,
       _logic: 'OR'
     };
     if(data.pathname){
@@ -44,6 +44,10 @@ export default class extends think.model.relation {
     return this.where({id: data.id}).update(data);
   }
 
+  async deleteCate(cate_id) {
+    this.model('post_cate').delete({cate_id});
+    return this.delete({id: cate_id});
+  }
   /**
    * get count posts
    * @param  {Number} userId []
@@ -54,13 +58,5 @@ export default class extends think.model.relation {
       return this.where({user_id: userId}).count();
     }
     return this.count();
-  }
-  /**
-   * get latest posts
-   * @param  {Number} nums []
-   * @return {}      []
-   */
-  getLatest(nums = 5){
-    return this.order('id DESC').limit(nums).setRelation(false).select();
   }
 }
