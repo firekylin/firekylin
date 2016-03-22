@@ -173,7 +173,7 @@ export default class extends Base {
             </tbody>
           </table>
           <div className="col-xs-12" style={{textAlign: 'center'}}>
-            {this.state.postList.length ? <Pagination
+            {this.state.total > 1 ? <Pagination
                 prev
                 next
                 first
