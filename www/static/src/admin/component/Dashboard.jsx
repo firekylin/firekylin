@@ -48,7 +48,7 @@ export default class extends Base {
           </div>
           <hr />
           <div className="row">
-            <div className="col-md-4">
+            <div className="col-md-5">
               <h4>最近发布的文章</h4>
               <ul>
                 {this.state.posts.map(post =>
@@ -59,7 +59,7 @@ export default class extends Base {
                 )}
               </ul>
             </div>
-            <div className="col-md-4">
+            <div className="col-md-3">
               <h4>系统概况</h4>
               <ul>
                 <li><label>服务器系统：</label>{this.state.platform}</li>
