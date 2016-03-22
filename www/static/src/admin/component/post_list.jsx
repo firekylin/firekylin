@@ -73,7 +73,7 @@ export default class extends Base {
           </td>
           <td>{item.user.display_name || item.user.name}</td>
           <td>{this.renderStatus(item.status)}</td>
-          <td>{firekylin.formatTime(item.create_time)}</td>
+          <td>{!item.create_time || item.create_time == '0000-00-00 00:00:00' ? '' : firekylin.formatTime(item.create_time)}</td>
           <td>{firekylin.formatTime(item.update_time)}</td>
           {this.renderBtns(item)}
         </tr>
