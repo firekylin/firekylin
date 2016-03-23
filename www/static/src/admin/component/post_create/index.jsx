@@ -163,6 +163,49 @@ export default class extends Base {
     if( Array.isArray(this.state.postInfo.cate) ) {
       cateInitial = this.state.postInfo.cate.map( item => item.id );
     }
+    let cateList;
+    if( this.state.cateList.length === 1 ) {
+      let cate = this.state.cateList[0];
+      cateList = (
+        <li>
+          {cate.pid !== 0 ? '　' : null}
+          <label>
+            <input
+                type="checkbox"
+                name="cate"
+                value={cate.id}
+                checked={cateInitial.includes(cate.id)}
+                onChange={()=>{
+                  this.cate[cate.id] = !this.cate[cate.id];
+                  this.state.postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
+                  this.forceUpdate();
+                }}
+            />
+            <span style={{fontWeight: 'normal'}}>{cate.name}</span>
+          </label>
+        </li>
+      );
+    } else {
+      cateList = this.state.cateList.map(cate =>
+        <li key={cate.id}>
+          {cate.pid !== 0 ? '　' : null}
+          <label>
+            <input
+                type="checkbox"
+                name="cate"
+                value={cate.id}
+                checked={cateInitial.includes(cate.id)}
+                onChange={()=>{
+                  this.cate[cate.id] = !this.cate[cate.id];
+                  this.state.postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
+                  this.forceUpdate();
+                }}
+            />
+            <span style={{fontWeight: 'normal'}}>{cate.name}</span>
+          </label>
+        </li>
+      );
+    }
 
     //针对 RadioGroup 只有在值为字符串才正常的情况做处理
     if( firekylin.isNumber(this.state.postInfo.is_public) ) {
@@ -257,25 +300,7 @@ export default class extends Base {
                 <div className="form-group">
                   <label className="control-label">分类</label>
                   <ul>
-                    {this.state.cateList.map(cate =>
-                      <li key={cate.id}>
-                        {cate.pid !== 0 ? '　' : null}
-                        <label>
-                          <input
-                              type="checkbox"
-                              name="cate"
-                              value={cate.id}
-                              checked={cateInitial.includes(cate.id)}
-                              onChange={()=>{
-                                this.cate[cate.id] = !this.cate[cate.id];
-                                this.state.postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
-                                this.forceUpdate();
-                              }}
-                          />
-                          <span style={{fontWeight: 'normal'}}>{cate.name}</span>
-                        </label>
-                      </li>
-                    )}
+                    {cateList}
                   </ul>
                 </div>
                 : null}
