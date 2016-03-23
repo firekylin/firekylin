@@ -22,6 +22,15 @@ export default Reflux.createStore({
       this.trigger(err, 'saveOptionsFail');
     })
   },
+  onAuth(data){
+    let req = superagent.post('/admin/api/options?type=2faAuth');
+    req.type('form').send(data);
+    return firekylin.request(req).then(data => {
+      this.trigger(data, 'Auth2FASuccess');
+    }).catch(err => {
+      this.trigger(err, 'Auth2FAFail');
+    })
+  },
   onQrcode(){
     let req = superagent.get('/admin/api/options?type=2fa');
     return firekylin.request(req).then(data => {
