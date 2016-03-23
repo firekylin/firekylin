@@ -29,9 +29,22 @@ export default class extends Base {
           secret: secret.base32
         });
       }
-      
     }
     return this.success();
+  }
+  postAction(){
+    let type = this.get('type');
+    if(type === '2faAuth'){
+      let data = this.post();
+      let verified = speakeasy.totp.verify({
+        secret: data.secret,
+        encoding: 'base32',
+        token: data.code,
+        window: 2
+      });
+      return verified ? this.success() : this.fail('TWO_FACTOR_AUTH_ERROR_DETAIL');
+    }
+    return super.postAction(this);
   }
   /**
    * 更新选项
