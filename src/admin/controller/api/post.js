@@ -95,8 +95,8 @@ export default class extends Base {
       }
     }
 
-    await this.modelInstance.deletePost(id);
-    return this.seccuess();
+    await this.modelInstance.deletePost(this.id);
+    return this.success();
   }
 
   async lastest() {
