@@ -13,5 +13,5 @@ if(!think.cli){
   crontab.scheduleJob("0 */1 * * *", () => syncComment);
   
   //服务启动时同步一次
-  syncComment();
+  //syncComment();
 }
