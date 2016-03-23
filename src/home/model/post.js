@@ -27,12 +27,17 @@ export default class extends think.model.relation {
    * @return {[type]}       [description]
    */
   getWhereCondition(where){
-    return think.extend({}, where, {
-      create_time: {'<=': think.datetime()},
+    where = think.extend({}, where, {
       is_public: 1, //公开
       type: 0, //文章
       status: 3 //已经发布
-    })
+    });
+    if(!where.create_time){
+      where.create_time = {
+        '<=': think.datetime()
+      };
+    }
+    return where;
   }
   /**
    * get post list
@@ -74,8 +79,16 @@ export default class extends think.model.relation {
       return detail;
     }
     let createTime = think.datetime(detail.create_time);
-    let prevPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({create_time: ['<', createTime]})).order('create_time DESC').find();
-    let nextPromise = this.field('title,pathname').setRelation(false).where(this.getWhereCondition({create_time: ['>', createTime]})).order('create_time ASC').find();
+    let prevWhere = this.getWhereCondition({
+      create_time: ['<', createTime],
+      id: ['!=', detail.id]
+    });
+    let prevPromise = this.field('title,pathname').setRelation(false).where(prevWhere).order('create_time DESC').find();
+    let nextWhere = this.getWhereCondition({
+      create_time: ['>', createTime],
+      id: ['!=', detail.id]
+    });
+    let nextPromise = this.field('title,pathname').setRelation(false).where(nextWhere).order('create_time ASC').find();
     let [prev, next] = await Promise.all([prevPromise, nextPromise]);
     return {
       detail,
