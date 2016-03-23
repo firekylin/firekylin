@@ -25,6 +25,12 @@ function read() {
 
 			conf = conf.replace(serverNameReg, server_name);
 
+			var rootReg = /root .*?;/g;
+
+			result = conf.match(rootReg);
+
+			conf = conf.replace(rootReg, result[0]);
+
 			var portReg = /set \$node_port .*?;/g;
 
 			var result2 = conf.match(portReg);
@@ -54,13 +60,6 @@ function read() {
 			str2 =  str2.replace(/#/g, "");
 
 			str = str1+str2;
-			//var httpsReg = /\#http\/2 nginx conf[\s\S]+/m;
-
-			//var str = conf.indexOf('#http/2 nginx conf');
-
-		 //    str = conf.substring(str+19);
-
-		 //    str =  str.replace(/#/g, "");
 
 		    res(str)
 
@@ -80,7 +79,7 @@ function write(data) {
 }
 
 read().then(function(data) {write(data)});
-
+//read().then(function(data) { });
 
 //修改 auto_build.sh 脚本
 
