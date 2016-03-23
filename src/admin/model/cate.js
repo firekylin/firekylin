@@ -14,7 +14,7 @@ export default class extends think.model.relation {
     this.relation = {
       post_cate: {
         type: think.model.HAS_MANY,
-        fkey: 'cate_id'
+        fKey: 'cate_id'
       }
     }
   }
