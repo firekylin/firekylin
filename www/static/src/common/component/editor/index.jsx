@@ -39,9 +39,11 @@ class MdEditor extends React.Component {
     this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
     if(localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+'']) {
         ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
-          let content = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''];
+          let content = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id];
           this.setState({ result: marked(content) });
           this.props.onChange(content);
+        },"","",()=>{
+          localStorage.removeItem('unsavetype'+this.props.info.type+'id'+this.props.info.id)
         })
     }
     this.textControl.addEventListener('keydown', this._bindKey);
