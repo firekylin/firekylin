@@ -42,7 +42,7 @@ export default class extends Base {
     if(!this.id) {
       return this.fail('PARAMS_ERROR');
     }
-    await this.modelInstance.deleteTag(id);
+    await this.modelInstance.deleteTag(this.id);
     return this.success();
   }
 }
