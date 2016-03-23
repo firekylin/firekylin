@@ -45,8 +45,8 @@ export default class extends think.model.relation {
   }
 
   async deleteCate(cate_id) {
-    this.model('post_cate').delete({cate_id});
-    return this.delete({id: cate_id});
+    this.model('post_cate').where({cate_id}).delete();
+    return this.where({id: cate_id}).delete();
   }
   /**
    * get count posts

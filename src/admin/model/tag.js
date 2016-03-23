@@ -40,7 +40,7 @@ export default class extends think.model.relation {
   }
 
   async deleteTag(tag_id) {
-    this.model('post_tag').delete({tag_id});
-    return this.delete({id: tag_id});
+    this.model('post_tag').where({tag_id}).delete();
+    return this.where({id: tag_id}).delete();
   }
 }
