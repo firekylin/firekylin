@@ -1,10 +1,15 @@
 #!/bin/bash
-#
-#
+
+
 USER=$(whoami);
 if [ $USER != "root" ];then
 	echo "please use sudo to excute";
 	exit;
+fi
+
+if [[ -z "$1" && -z "$2" ]];then
+	echo "请输入域名参数如: sh https.sh gyblog.cn www.gyblog.cn";
+	exit 1;
 fi
 
 currentpath=$(pwd);
