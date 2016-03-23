@@ -142,6 +142,12 @@ export default class extends Base {
     event.preventDefault();
     return this.btnClick(this.data.callback);
   }
+  confirmCancel(event){
+   if(this.data.cancelCallback) {
+     this.data.cancelCallback();
+   }
+   this.close(event);
+  }
   /**
    * confirm components
    * @return {[type]} [description]
@@ -161,7 +167,7 @@ export default class extends Base {
   getButtons(){
     if(this.data.type === 'confirm'){
       return (<div className="modal-footer">
-        <button type="button" onClick={this.close.bind(this)} className="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">取消</button>
         <button type="button" onClick={this.confirm.bind(this)} className="btn btn-primary">确定</button>
       </div>);
     }
