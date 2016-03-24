@@ -25,6 +25,7 @@ export default class extends Base {
       total: 0,
       loading: true,
       postList: [],
+      keyword: '',
       page: this.props.location.query.page/1 || 1
     }
   }
@@ -49,18 +50,20 @@ export default class extends Base {
       case 'getPostList':
         this.setState({postList: data.data, total: data.totalPages, loading: false});
         break;
-      case 'search':
-      console.log(data);
-        this.setState({postList: data.data,total:0});
-        break;
     }
   }
   handleSelect(key) {
     this.state.key = key;
     this.state.page = 1;
+    this.state.keyword = '';
 
-    return PostAction.selectList(this.state.page, key !== 4 ? key : null);
+    return PostAction.selectList(this.state.page, key !== 4 ? key : null, this.state.keyword);
   }
+
+  handleSearch() {
+    PostAction.selectList(this.state.page, this.state.key !== 4 ? this.state.key : null, this.state.keyword);
+  }
+
   getPostList(){
     if(this.state.loading){
       return (<tr><td colSpan="8" className="center">加载中。。。</td></tr>);
@@ -151,20 +154,20 @@ export default class extends Base {
     return null;
   }
 
-  handleSearch(ele) {
-    if(ele.keyCode === 13) {
-      let value = this.refs.search.value;
-      PostAction.search({keyword : value ,key: this.state.key});
-    }    
-  }
-
   render(){
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props}/>
         <div className="manage-container">
         <div className="fk-search">
-            <input type="text" className="fk-search-input" placeholder="请输入关键字" onKeyDown={this.handleSearch.bind(this)} ref="search"/>
+            <input
+                type="text"
+                className="fk-search-input"
+                placeholder="请输入关键字"
+                value={this.state.keyword}
+                onChange={e=> this.setState({keyword: e.target.value})}
+                onKeyDown={e=> e.keyCode === 13 && this.handleSearch()}
+            />
             <i className="fk-search-btn icon-search" onClick={this.handleSearch.bind(this)}></i>
         </div>
           <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
