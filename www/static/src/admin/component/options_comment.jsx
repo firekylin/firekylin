@@ -4,8 +4,7 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
-import { Radio, RadioGroup } from 'react-bootstrap-validation';
-import { Form, ValidatedInput } from 'react-bootstrap-validation';
+import { Radio, RadioGroup, Form, ValidatedInput  } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
 import BreadCrumb from 'admin/component/breadcrumb';
@@ -13,6 +12,7 @@ import BreadCrumb from 'admin/component/breadcrumb';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
+import ModalAction from 'common/action/modal';
 
 export default class extends Base {
   constructor(props){
@@ -25,6 +25,7 @@ export default class extends Base {
       submitting: false,
       comment: comment
     };
+    this.commentType = comment.type;
   }
   componentDidMount(){
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
@@ -59,10 +60,21 @@ export default class extends Base {
     comment[type] = value;
     this.setState({comment: comment});
   }
+
+  openDialog(){
+    let url = "/static/img/duoshuo.jpg";
+    if(this.commentType === 'disqus'){
+      url = "/static/img/disqus.jpg";
+    }
+    let content = (<div className="center">
+      <a href={url} target="_blank"><img src={url} style={{maxWidth: '100%'}} /></a>
+    </div>);
+    let instance = ModalAction.alert('提示', content);
+  }
   render(){
     let comment = this.state.comment;
     let res = (
-      <RadioGroup name='type' value={comment.type}>
+      <RadioGroup name='type' value={comment.type} validate={(value) => {this.commentType = value;return true;}}>
         <Radio value='disqus' label='Disqus' />
         <Radio value='duoshuo' label='多说' />
       </RadioGroup>
@@ -79,7 +91,7 @@ export default class extends Base {
           </div>
 
           <div className="form-group">
-            <label>网站名称</label>
+            <label>网站名称（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
             <ValidatedInput
                 type='text'
                 {...this.getProps('name')}
@@ -92,7 +104,8 @@ export default class extends Base {
           </div>
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
         </Form>
-      </div></div>
+      </div>
+    </div>
     );
   }
 }

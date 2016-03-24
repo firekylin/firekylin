@@ -24,8 +24,8 @@ export default class extends Base {
     if(!this.state.list || this.state.list.length === 0){
       return (<div className="modal-list"></div>);
     }
-    let content = this.state.list.map(item => {
-      return (<Modal data={item} />);
+    let content = this.state.list.map((item, index) => {
+      return (<Modal data={item} key={index} />);
     });
 
     return (<div className="modal-list">{content}</div>);
