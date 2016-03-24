@@ -106,14 +106,8 @@ export default class extends Base {
 
   getAlert(){
     return (
-      <div className="dialog-alert anim-modal">
-        <h2 className="title">{this.data.title}</h2>
-        <div className="dialog-content">
-            {this.data.content}
-        </div>
-        <div className="btn-box">
-            <a href="###" onClick={this.close} className="btn-cancel">关闭</a>
-        </div>
+      <div>
+        {this.data.content}
       </div>
     );
   }
@@ -165,6 +159,12 @@ export default class extends Base {
   }
 
   getButtons(){
+
+    if(this.data.type === 'alert'){
+      return (<div className="modal-footer">
+        <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">关闭</button>
+      </div>);
+    }
     if(this.data.type === 'confirm'){
       return (<div className="modal-footer">
         <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">取消</button>
