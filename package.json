@@ -15,16 +15,17 @@
     "highlight.js": "^9.2.0",
     "marked": "^0.3.5",
     "marked-toc": "^0.3.0",
+    "moment": "^2.11.2",
     "node-crontab": "0.0.8",
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
+    "redis": "^2.3.0",
     "request": "^2.69.0",
+    "speakeasy": "2.0.0",
     "thinkit": "^4.6.0",
     "thinkjs": "2.1.x",
     "to-markdown": "^2.0.1",
-    "xml2js": "^0.4.16",
-    "moment": "^2.11.2",
-    "speakeasy": "2.0.0"
+    "xml2js": "^0.4.16"
   },
   "devDependencies": {
     "autobind-decorator": "^1.3.3",

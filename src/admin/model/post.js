@@ -1,8 +1,10 @@
 'use strict';
+
+import Base from './base';
 /**
  * relation model
  */
-export default class extends think.model.relation {
+export default class extends Base {
   /**
    * init
    * @param  {} args []
@@ -79,5 +81,13 @@ export default class extends think.model.relation {
       type: 0, //文章
       status: 3 //已经发布
     }).limit(nums).setRelation(false).order('create_time DESC').select();
+  }
+
+  search(data) {
+    var modelData = {'title|pathname|content':["like",data.keyword]}
+    if(data.key != 4) {
+      modelData.status = data.key;
+    }
+    return this.where(modelData).select();
   }
 }

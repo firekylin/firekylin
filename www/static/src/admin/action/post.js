@@ -8,5 +8,6 @@ export default Reflux.createActions({
   delete: {children: ['completed', 'failed']},
   save: {children: ['completed', 'failed'], asyncResult: true},
   pass: {children: ['completed', 'failed'], asyncResult: true},
-  deny: {children: ['completed', 'failed'], asyncResult: true}
+  deny: {children: ['completed', 'failed'], asyncResult: true},
+  search: {children: ['completed', 'failed'], asyncResult: true}
 });

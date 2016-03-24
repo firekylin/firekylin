@@ -1,10 +1,11 @@
 'use strict';
 
 import {PasswordHash} from 'phpass';
+import Base from './base';
 /**
  * model
  */
-export default class extends think.model.base {
+export default class extends Base {
 
   /**
    * get password

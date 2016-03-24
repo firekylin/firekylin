@@ -175,4 +175,5 @@ export default class extends Base {
 
     return highlightContent;
   }
+
 }

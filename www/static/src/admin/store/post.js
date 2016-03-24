@@ -75,6 +75,16 @@ export default Reflux.createStore({
 
   onDeny(id) {
     this.onSave({id, status: 2});
+  },
+
+  onSearch(data) {
+    let url = '/admin/api/search';
+    let req = superagent.post(url);
+    req.type('form').send(data);
+    return firekylin.request(req).then((data)=>{
+      //PostAction.search.completed(data);
+      this.trigger(data, 'search')
+    });
   }
 
 })

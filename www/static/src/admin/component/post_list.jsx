@@ -49,6 +49,10 @@ export default class extends Base {
       case 'getPostList':
         this.setState({postList: data.data, total: data.totalPages, loading: false});
         break;
+      case 'search':
+      console.log(data);
+        this.setState({postList: data.data,total:0});
+        break;
     }
   }
   handleSelect(key) {
@@ -146,11 +150,23 @@ export default class extends Base {
     }
     return null;
   }
+
+  handleSearch(ele) {
+    if(ele.keyCode === 13) {
+      let value = this.refs.search.value;
+      PostAction.search({keyword : value ,key: this.state.key});
+    }    
+  }
+
   render(){
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props}/>
         <div className="manage-container">
+        <div className="fk-search">
+            <input type="text" className="fk-search-input" placeholder="请输入关键字" onKeyDown={this.handleSearch.bind(this)} ref="search"/>
+            <i className="fk-search-btn icon-search" onClick={this.handleSearch.bind(this)}></i>
+        </div>
           <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
             <Tab eventKey={4} title="全　部"></Tab>
             <Tab eventKey={3} title="已发布"></Tab>
