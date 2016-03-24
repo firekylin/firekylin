@@ -208,12 +208,13 @@ textarea{resize:none;}
 /*右侧搜索*/
 .fk-search{
 	height: 30px;
-	width: 100%;
+	width: 275px;
 	border: 1px solid #c8c8d5;
-    border-radius: 4px;
-    padding: 4px;
-    margin-bottom: 10px;
-    position: relative;
+  border-radius: 4px;
+  padding: 4px;
+  margin-bottom: 10px;
+  position: absolute;
+	right: 20px;
 }
 .fk-search-input{
 	width: 100%;

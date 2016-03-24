@@ -26,6 +26,9 @@ export default class extends Base {
       if(this.get('status')) {
         where.status = this.get('status');
       }
+      if(this.get('keyword')) {
+        where.title = ["like", `%${this.get('keyword')}%`];
+      }
       data = await this.modelInstance.where(where).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
     return this.success(data);
