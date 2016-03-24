@@ -45,7 +45,7 @@
     "rc-select": "^5.10.0",
     "react": "^0.14.7",
     "react-bootstrap": "^0.28.3",
-    "react-bootstrap-validation": "^0.1.10",
+    "react-bootstrap-validation": "^0.1.11",
     "react-datetime": "^2.0.3",
     "react-dom": "^0.14.7",
     "react-fontawesome": "^0.3.3",
