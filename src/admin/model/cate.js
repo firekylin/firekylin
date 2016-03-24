@@ -1,8 +1,10 @@
 'use strict';
+
+import Base from './base';
 /**
  * relation model
  */
-export default class extends think.model.relation {
+export default class extends Base {
   /**
    * init
    * @param  {} args []
