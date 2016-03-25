@@ -19,7 +19,6 @@
     "node-crontab": "0.0.8",
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
-    "redis": "^2.3.0",
     "request": "^2.69.0",
     "speakeasy": "2.0.0",
     "thinkit": "^4.6.0",
