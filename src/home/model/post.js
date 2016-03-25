@@ -58,7 +58,7 @@ export default class extends think.model.relation {
         table: `post_${name}`,
         as: name,
         on: ['id', 'post_id']
-      }).where(where).countSelect();
+      }).where(where).order('create_time DESC').countSelect();
     }
     
     let where = this.getWhereCondition(options.where);
