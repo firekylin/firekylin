@@ -64,8 +64,8 @@ export default class extends think.model.relation {
     let where = this.getWhereCondition(options.where);
     
     let data = await think.cache('page'+(page ? page : 1), () => {
-                        return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
-                      },{timeout:259200});
+      return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
+    },{timeout:259200});
 
     //let data = await this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
     return data;

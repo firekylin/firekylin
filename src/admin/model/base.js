@@ -7,32 +7,32 @@ export default class extends think.model.relation {
 	   super.init(...args);  
 	}
 
-	async afterUpdate() {
-		super.afterUpdate();
-		this.listcount();
+	async afterUpdate(data, options) {
+		await super.afterUpdate(data, options);
+		return this.listcount();
 	}
 
-	async afterDelete() {
-		super.afterDelete();
-		this.listcount();
+	async afterDelete(data, options) {
+		await super.afterDelete(data, options);
+		return this.listcount();
 	}
 
-	async afterAdd() {
-		super.afterAdd();
-		this.listcount();
+	async afterAdd(data, options) {
+		await super.afterAdd(data, options);
+		return this.listcount();
 	}
 
 	async listcount() {
 		//获取文章总数量
 		let count = await this.model("post").where({
-	      is_public: 1, //公开
-	      type: 0, //文章
-	      status: 3 //已经发布
-	    }).count();
+      is_public: 1, //公开
+      type: 0, //文章
+      status: 3 //已经发布
+    }).count();
 		//情况缓存
-	    let length = Math.ceil(count/10);
-	    for(var i = 0 ; i<length ; i++) {
-	    	think.cache('page'+(i ? i : 1), null);
-	    }
+    let length = Math.ceil(count/10);
+    for(var i = 0 ; i<length ; i++) {
+    	await think.cache('page'+(i ? i : 1), null);
+    }
 	}
 }
