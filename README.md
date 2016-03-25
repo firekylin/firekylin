@@ -2,6 +2,15 @@
 
 A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
+使用 FireKylin 构建的博客系统（排名不分先后）：
+
+* http://www.75team.com/
+* http://blog.h5jun.com/
+* http://gyblog.cn/
+* http://welefen.com/
+
+如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
+
 ## 安装
 
 [下载最新的安装包 - v0.4.0](https://raw.githubusercontent.com/75team/firekylin/master/build/firekylin_0.4.0.tar.gz)
