@@ -4,10 +4,10 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 使用 FireKylin 构建的博客系统（排名不分先后）：
 
-* http://www.75team.com/
-* http://blog.h5jun.com/
-* http://gyblog.cn/
-* http://welefen.com/
+* http://www.75team.com/ - 奇舞团博客
+* http://blog.h5jun.com/ - 月影的博客
+* http://gyblog.cn/ - 光宇的博客
+* http://welefen.com/ - welefen 的博客
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 
