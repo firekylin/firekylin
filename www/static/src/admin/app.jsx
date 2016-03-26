@@ -28,6 +28,10 @@ import Tag from './component/tag';
 import TagList from './component/tag_list';
 import TagCreate from './component/tag_create';
 
+import Push from './component/push';
+import PushList from './component/push_list';
+import PushCreate from './component/push_create';
+
 import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
@@ -74,6 +78,12 @@ ReactDOM.render((
         <Route path="list" component={TagList} />
         <Route path="create" component={TagCreate} />
         <Route path="edit/:id" component={TagCreate} />
+      </Route>
+      <Route path="push" component={Push}>
+        <Redirect from="/" to="list" />
+        <Route path="list" component={PushList} />
+        <Route path="create" component={PushCreate} />
+        <Route path="edit/:id" component={PushCreate} />
       </Route>
       <Route path="options" component={Options}>
         <Redirect from="/" to="general" />
