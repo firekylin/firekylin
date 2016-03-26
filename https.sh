@@ -3,7 +3,7 @@
 
 USER=$(whoami);
 if [ $USER != "root" ];then
-	echo "please use sudo to excute";
+	echo "请使用 sudo 来执行";
 	exit;
 fi
 
@@ -16,57 +16,77 @@ currentpath=$(pwd);
 
 opensslpath=`which openssl`;
 if [ -n $opensslpath ];then
-	echo "检测openssl成功";	
+	echo "检测 openssl 成功";	
 else
-	echo "请确保安装了openssl,并且配置到全局的环境变量";
+	echo "请确保安装了 openssl，并且配置到全局的环境变量";
 	exit 1;
 fi	
 
 pythonpath=`which python`;
 if [ -n $pythonpath ];then
-	echo "检测python成功";	
+	echo "检测 python 成功";	
 else
-	echo "请确保安装了python,并且配置到全局的环境变量";
+	echo "请确保安装了 python，并且配置到全局的环境变量";
 	exit 1;
 fi	
 
 if [ ! -f ${currentpath}"/nginx.conf" ];then
-	echo "请把nginx_defult.conf文件更名成 nginx.conf 并且重启nginx";
+	echo "请把 nginx_defult.conf 文件更名成 nginx.conf，并且重启 nginx";
 	exit 1;
 fi
 
-rm -rf ssl;
-
-mkdir "ssl";
-
-cd "ssl";
-
-openssl genrsa 4096 > account.key;
-
-openssl genrsa 4096 > domain.key;
-
-if [ -f /etc/ssl/openssl.cnf ];then
-	cat /etc/ssl/openssl.cnf > allConfig.conf;
-else
-	echo "没有检测到openssl.cnf路径，请输入openssl.cnf路径如（/etc/ssl）：";
-	read path;
-	cat $path/openssl.cnf > allConfig.conf;
+if [ ! -d ssl ]; then
+	mkdir ssl;
 fi
 
-echo "[SAN]\nsubjectAltName=DNS:$1,DNS:$2" >> allConfig.conf;
+cd ssl;
 
-openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config allConfig.conf  > domain.csr;
+if [ ! -f "account.key" ];then
+	openssl genrsa 4096 > account.key;
+fi
+
+if [ ! -f "domain.key" ];then
+	openssl genrsa 4096 > domain.key;
+fi
+
+if [ ! -f domain.csr ]; then
+	if [ -f /etc/ssl/openssl.cnf ];then
+		cat /etc/ssl/openssl.cnf > config.conf;
+	elif [ -f /usr/local/openssl/ssl/openssl.cnf ]; then
+		cat /usr/local/openssl/ssl/openssl.cnf > config.conf;
+	else
+		echo "没有检测到 openssl.cnf 路径，请输入 openssl.cnf 路径如（/etc/ssl）：";
+		read path;
+		if [ ! -f $path/openssl.cnf ]; then
+			echo "$path/openssl.cnf 路径不存在";
+			exit;
+		fi
+		cat $path/openssl.cnf > config.conf;
+	fi
+
+	echo "[SAN]\nsubjectAltName=DNS:$1,DNS:$2" >> config.conf;
+	openssl req -new -sha256 -key domain.key -subj "/" -reqexts SAN -config config.conf  > domain.csr;
+	rm -rf config.conf;
+fi
+
+if [ ! -d challenges ]; then
+	mkdir challenges;
+fi
 
 
-mkdir ./challenges/;
+if [ ! -f  dhparams.pem ]; then
+	openssl dhparam -out dhparams.pem 2048;
+fi
 
-openssl dhparam -out dhparams.pem 2048;
-
-wget https://raw.githubusercontent.com/diafygi/acme-tiny/master/acme_tiny.py;
+if [ ! -f acme_tiny.py ]; then
+	wget https://raw.githubusercontent.com/diafygi/acme-tiny/master/acme_tiny.py;
+fi
 
 python acme_tiny.py --account-key ./account.key --csr ./domain.csr --acme-dir ./challenges/ > ./signed.crt;
 
-wget -O - https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem > intermediate.pem;
+if [ ! -f  intermediate.pem ]; then
+	wget -O - https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem > intermediate.pem;
+fi
 
 cat signed.crt intermediate.pem > chained.pem;
 
