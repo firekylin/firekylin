@@ -81,36 +81,41 @@ export default class extends Base {
     let wxrJSON = await parseString(wxrXML);
     wxrJSON = this.formatArray(wxrJSON);
     let channel = wxrJSON.rss.channel;
-
     // 导入用户
-    let authors = channel['wp:author'], userModelInstance = this.model('user');
-    let authorsPromise = authors.map(author => userModelInstance.addUser({
-      username: author['wp:author_login'][0],
-      email: author['wp:author_email'][0],
-      display_name: author['wp:author_display_name'][0],
-      password: 'admin12345678',
-      type: 2, //默认导入用户都为编辑
-      status: 2, //默认导入用户都处于禁用状态
-    }, '127.0.0.1'));
-    await Promise.all(authorsPromise);
+    if( channel.hasOwnProperty('wp:author') ) {
+      let authors = channel['wp:author'], userModelInstance = this.model('user');
+      let authorsPromise = authors.map(author => userModelInstance.addUser({
+        username: author['wp:author_login'][0],
+        email: author['wp:author_email'][0],
+        display_name: author['wp:author_display_name'][0],
+        password: 'admin12345678',
+        type: 2, //默认导入用户都为编辑
+        status: 2, //默认导入用户都处于禁用状态
+      }, '127.0.0.1'));
+      await Promise.all(authorsPromise);
+    }
 
     //导入分类
     //为了简单不支持子分类导入，默认所有分类为一级分类
     let categories = channel['wp:category'], cateModelInstance = this.model('cate');
-    let categoriesPromise = categories.map(cate => cateModelInstance.addCate({
-      name: cate['wp:cat_name'][0],
-      pathname: decodeURIComponent(cate['wp:category_nicename'][0]),
-      pid: 0
-    }));
-    await Promise.all(categoriesPromise);
+    if( categories ) {
+      let categoriesPromise = categories.map(cate => cateModelInstance.addCate({
+        name: cate['wp:cat_name'][0],
+        pathname: decodeURIComponent(cate['wp:category_nicename'][0]),
+        pid: 0
+      }));
+      await Promise.all(categoriesPromise);
+    }
 
     // 导入标签
     let tags = channel['wp:tag'], tagModelInstance = this.model('tag');
-    let tagsPromise = tags.map(tag => tagModelInstance.addTag({
-      name: tag['wp:tag_name'][0],
-      pathname: decodeURIComponent(tag['wp:tag_slug'][0])
-    }));
-    await Promise.all(tagsPromise);
+    if(tags) {
+      let tagsPromise = tags.map(tag => tagModelInstance.addTag({
+        name: tag['wp:tag_name'][0],
+        pathname: decodeURIComponent(tag['wp:tag_slug'][0])
+      }));
+      await Promise.all(tagsPromise);
+    }
 
     //导入文章
     let postStatus = {
@@ -124,21 +129,25 @@ export default class extends Base {
     let posts = channel.item.filter(item => item['wp:post_type'][0] ==='post');
     let postModelInstance = this.model('post');
     let postsPromise = posts.map(async item => {
+      try{
       //获取用户
       let user = await this.model('user').where({name: item['dc:creator'][0]}).find();
       //查询分类 ID
-      let cates = item.category.filter(item => item.$.domain === 'category').map(item => item._);
       let cate = [];
-      if( cates.length > 0 ) {
-        cate = await this.model('cate').setRelation(false).field('id').where({name: ['IN', cates]}).select();
-        cate = cate.map(item => item.id);
+      if( item.hasOwnProperty('category') ) {
+        let cates = item.category.filter(item => item.$.domain === 'category').map(item => item._);
+        if( Array.isArray(cates) && cates.length > 0 ) {
+          cate = await this.model('cate').setRelation(false).field('id').where({name: ['IN', cates]}).select();
+          cate = cate.map(item => item.id);
+        }
       }
       //摘要有可能是空
-      let summary = item['excerpt:encoded'][0];
-      if( summary === '' ) {
+      let summary;
+      if( item.hasOwnProperty('excerpt:encoded') && item['excerpt:encoded'][0] !== '' ) {
+        summary = item['excerpt:encoded'][0];
+      } else {
         summary = item['content:encoded'][0];
       }
-
       let post = {
         title: item.title[0],
         pathname: decodeURIComponent(item['wp:post_name'][0]),
@@ -151,11 +160,12 @@ export default class extends Base {
         comment_num: 0,
         allow_comment: item['wp:comment_status'][0] === 'open',
         is_public: item['wp:status'][0] !== 'private',
-        tag: item.category.filter(item => item.$.domain === 'post_tag').map(item => item._),
+        tag: item.hasOwnProperty('category') ? item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
         cate
       };
       post.markdown_content = toMarkdown(post.content);
       await postModelInstance.addPost(post);
+      } catch(e) { console.log(e)}
     });
     Promise.all(postsPromise);
 
@@ -186,7 +196,7 @@ export default class extends Base {
       await pageModelInstance.addPost(page);
     });
     Promise.all(pagesPromise);
-    this.success(`共导入文章 ${posts.length} 篇，页面 ${pages.length} 页，分类 ${categories.length} 个，标签 ${tags.length} 个`);
+    this.success(`共导入文章 ${(posts || []).length} 篇，页面 ${(pages || []).length} 页，分类 ${(categories || []).length} 个，标签 ${(tags || []).length} 个`);
   }
 
   formatArray(obj) {
