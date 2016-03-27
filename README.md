@@ -19,6 +19,12 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 解压安装包，执行 `npm install` 安装对应的依赖（执行之前请确认已有 Node.js 环境，Node.js 版本要大于 4.0）。
 
+## 修改端口
+
+默认 Firekylin 用的端口是 `8360`，如果该端口已经被占用或者不想使用该端口，那么可以在项目目录下新建文件 `port` （是的，这个文件没有后缀名），文件内容为端口号。如：
+
+设置文件 `port` 的内容为 `9999`，表示设置的端口为 `9999`。
+
 ## 启动服务
 
 执行 `npm start`，然后访问 `http://127.0.0.1:8360`，根据提示填写相关信息进行安装。
@@ -42,14 +48,6 @@ sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
 ```
 
 需要将 `path.to` 改为当前的项目路径， `www.example.com` 改为对应的域名。
-
-## 修改端口
-
-默认 Firekylin 用的端口是 `8360`，如果该端口已经被占用或者不想使用该端口，那么可以在项目目录下新建文件 `port` （是的，这个文件没有后缀名），文件内容为端口号。如：
-
-设置文件 `port` 的内容为 `9999`，表示设置的端口为 `9999`。
-
-修改端口后需要重启 Node.js 服务，可以通过 `pm2 restart pm2.json` 来重启。
 
 ## 升级
 
