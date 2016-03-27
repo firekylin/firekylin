@@ -45,7 +45,7 @@ sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
 
 ## 修改端口
 
-默认 Firekylin 用的端口是 `8360`，如果该端口已经被占用或者不想使用该端口，那么可以在项目目录下新建文件 `port`，文件内容为端口号。如：
+默认 Firekylin 用的端口是 `8360`，如果该端口已经被占用或者不想使用该端口，那么可以在项目目录下新建文件 `port` （是的，这个文件没有后缀名），文件内容为端口号。如：
 
 设置文件 `port` 的内容为 `9999`，表示设置的端口为 `9999`。
 
