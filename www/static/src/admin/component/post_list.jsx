@@ -76,6 +76,7 @@ export default class extends Base {
         <tr key={item.id}>
           <td>
             <Link to={`/post/edit/${item.id}`} title={item.title}>{item.title}</Link>
+            <a href={`/post/${item.pathname}.html`} target="_blank"><span className="glyphicon glyphicon-link" style={{fontSize: 12, marginLeft: 5, color: '#AAA'}} /></a>
           </td>
           <td>{item.user.display_name || item.user.name}</td>
           <td>{this.renderStatus(item.status)}</td>

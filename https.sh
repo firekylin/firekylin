@@ -85,7 +85,7 @@ fi
 python acme_tiny.py --account-key ./account.key --csr ./domain.csr --acme-dir ./challenges/ > ./signed.crt;
 
 if [ ! -f  intermediate.pem ]; then
-	wget -O - https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem > intermediate.pem;
+	wget -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem > intermediate.pem;
 fi
 
 cat signed.crt intermediate.pem > chained.pem;
