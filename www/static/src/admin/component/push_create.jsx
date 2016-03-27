@@ -69,7 +69,7 @@ export default class extends Base {
   handleValidSubmit(values){
     this.setState({submitting: true});
     if(this.id){
-      values.key = this.id;
+      values.appKey = this.id;
     }
     PushAction.save(values);
   }
@@ -99,34 +99,68 @@ export default class extends Base {
             onValidSubmit={this.handleValidSubmit.bind(this)}
           >
             <ValidatedInput
-                name="key"
-                type="text"
-                label="推送密钥"
-                labelClassName="col-xs-1"
-                wrapperClassName="col-xs-4"
-                value={this.state.pushInfo.key}
-                validate="required"
-                onChange={e => {
-                  this.state.pushInfo.key = e.target.key;
-                  this.forceUpdate();
-                }}
-                errorHelp={{
-                    required: '请填写推送密钥'
-                }}
-            />
-            <ValidatedInput
                 name="title"
                 type="text"
-                label="推送网站"
+                label="网站名称"
                 labelClassName="col-xs-1"
                 wrapperClassName="col-xs-4"
                 value={this.state.pushInfo.title}
+                validate="required"
                 onChange={e => {
                   this.state.pushInfo.title = e.target.value;
                   this.forceUpdate();
                 }}
+                errorHelp={{
+                    required: '请填写网站名称'
+                }}
+            />
+            <ValidatedInput
+                name="url"
+                type="text"
+                label="网站地址"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
+                value={this.state.pushInfo.url}
                 validate="required"
-                errorHelp="请填写推送网站地址"
+                onChange={e => {
+                  this.state.pushInfo.url = e.target.value;
+                  this.forceUpdate();
+                }}
+                errorHelp={{
+                    required: '请填写网站地址'
+                }}
+            />
+            <ValidatedInput
+                name="appKey"
+                type="text"
+                label="推送公钥"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
+                value={this.state.pushInfo.appKey}
+                validate="required"
+                onChange={e => {
+                  this.state.pushInfo.appKey = e.target.value;
+                  this.forceUpdate();
+                }}
+                errorHelp={{
+                    required: '请填写推送公钥'
+                }}
+            />
+            <ValidatedInput
+                name="appSecret"
+                type="text"
+                label="推送秘钥"
+                labelClassName="col-xs-1"
+                wrapperClassName="col-xs-4"
+                value={this.state.pushInfo.appSecret}
+                validate="required"
+                onChange={e => {
+                  this.state.pushInfo.appSecret = e.target.value;
+                  this.forceUpdate();
+                }}
+                errorHelp={{
+                    required: '请填写推送秘钥'
+                }}
             />
             <div className="form-group col-xs-12">
               <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>

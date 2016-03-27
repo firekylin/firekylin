@@ -32,10 +32,7 @@ export default class extends Base {
       }
     } else if(type === 'push') {
       let push_sites = await this.getPushSites();
-      let result = Object.keys(push_sites).map(key => ({key, title: push_sites[key]}));
-      if( this.get('key') ) {
-        result = {key: this.get('key'), title: push_sites[this.get('key')]};
-      }
+      let result = this.get('key') ? push_sites[this.get('key')] : Object.values(push_sites);
       return this.success(result);
     }
     return this.success();
@@ -54,7 +51,7 @@ export default class extends Base {
       return verified ? this.success() : this.fail('TWO_FACTOR_AUTH_ERROR_DETAIL');
     } else if(type === 'push') {
       let data = this.post();
-      return this.setPushSites(data.key, data.title);
+      return this.setPushSites(data.appKey, data);
     }
     return super.postAction(this);
   }
@@ -71,7 +68,7 @@ export default class extends Base {
 
     let model = this.model('options');
     if( type === 'push' ) {
-      return this.setPushSites(data.key, data.title, false);
+      return this.setPushSites(data.appKey, data, false);
     } else {
       let result = await model.updateOptions(data);
       this.success(result);
@@ -85,7 +82,7 @@ export default class extends Base {
       if( think.isEmpty(key) ) {
         return this.fail('KEY_EMPTY');
       }
-      return this.setPushSites( key, null, false );
+      return this.setPushSites(key, null, false);
     } else {
       return super.deleteAction();
     }
@@ -96,17 +93,17 @@ export default class extends Base {
     return options.push_sites ? JSON.parse(options.push_sites) : {};
   }
 
-  async setPushSites(key, title, only = true) {
+  async setPushSites(key, data, only = true) {
     let push_sites = await this.getPushSites();
     if( only && push_sites.hasOwnProperty(key) ) {
       return this.fail('KEY_EXIST');
     }
 
-    if( title === null ) {
+    if( data === null ) {
       delete push_sites[key];
     } else {
       /** 需要增加验证 key 正确性的请求 **/
-      push_sites[key] = title;
+      push_sites[key] = data;
     }
 
     let result = await this.model('options').updateOptions('push_sites', JSON.stringify(push_sites));
