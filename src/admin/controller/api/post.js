@@ -29,7 +29,7 @@ export default class extends Base {
       if(this.get('keyword')) {
         where.title = ["like", `%${this.get('keyword')}%`];
       }
-      let field = ['id', 'title', 'create_time', 'update_time', 'status', 'pathname'];
+      let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname'];
       data = await this.modelInstance.where(where).field(field).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
     return this.success(data);
