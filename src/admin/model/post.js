@@ -82,4 +82,23 @@ export default class extends Base {
       status: 3 //已经发布
     }).limit(nums).setRelation(false).order('create_time DESC').select();
   }
+
+  async afterUpdate(data, options) {
+    await super.afterUpdate(data, options);
+    return this.clearCache();
+  }
+
+  async afterDelete(data, options) {
+    await super.afterDelete(data, options);
+    return this.clearCache();
+  }
+
+  async afterAdd(data, options) {
+    await super.afterAdd(data, options);
+    return this.clearCache();
+  }
+
+  clearCache() {
+    return think.cache('post_1', null);
+  }
 }

@@ -62,13 +62,15 @@ export default class extends think.model.relation {
     }
     
     let where = this.getWhereCondition(options.where);
+    page = page | 0 || 1;
+    //only cache first page post
+    if(page === 1){
+      return think.cache('post_1', () => {
+        return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
+      },{timeout:259200});
+    }
     
-    let data = await think.cache('page'+(page ? page : 1), () => {
-      return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
-    },{timeout:259200});
-
-    //let data = await this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
-    return data;
+    return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
   }
 
   /**
