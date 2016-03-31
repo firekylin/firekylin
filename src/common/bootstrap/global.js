@@ -12,7 +12,10 @@ global.firekylin = {
   POST_DRAFT: 0,
   POST_AUDITING: 1,
   POST_REJECT: 2,
-  POST_PUBLISH: 3
+  POST_PUBLISH: 3,
+  USER_ADMIN: 1,
+  USER_EDITOR: 2,
+  USER_POSTER: 3
 }
 
 /**
@@ -39,4 +42,3 @@ firekylin.setInstalled = () => {
   let installedFile = think.ROOT_PATH + think.sep + '.installed';
   fs.writeFileSync(installedFile, 'firekylin');
 }
-

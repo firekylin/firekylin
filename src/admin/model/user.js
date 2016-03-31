@@ -28,6 +28,11 @@ export default class extends Base {
     let passwordHash = new PasswordHash();
     return passwordHash.checkPassword(password, userInfo.password);
   }
+  
+  generateKey(userId, app_key, app_secret) {
+    this.where({id: userId}).update({app_key, app_secret});
+  }
+
   /**
    * after select
    * @param  {[type]} data [description]
@@ -54,7 +59,7 @@ export default class extends Base {
    */
   addUser(data, ip){
     let create_time = think.datetime();
-    let encryptPassword = this.getEncryptPassword(data.password); 
+    let encryptPassword = this.getEncryptPassword(data.password);
     return this.where({name: data.username, email: data.email, _logic: 'OR'}).thenAdd({
       name: data.username,
       email: data.email,

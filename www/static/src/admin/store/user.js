@@ -5,7 +5,7 @@ import firekylin from '../../common/util/firekylin';
 
 import UserAction from '../action/user';
 
-export default Reflux.createStore({ 
+export default Reflux.createStore({
 
   listenables: UserAction,
   /**
@@ -22,7 +22,7 @@ export default Reflux.createStore({
     return firekylin.request(req).then(data => {
       this.trigger(data, id ? 'getUserInfo' : 'getUserList');
     }).catch(err => {
-      
+
     })
   },
   /**
@@ -79,6 +79,15 @@ export default Reflux.createStore({
     }).catch(err => {
       this.trigger(err, 'deleteUserFail');
     })
-  }
+  },
 
+  onGenerateKey(userId) {
+    let url = '/admin/api/user/' + userId + '?type=key';
+    let req = superagent.post(url);
+    req.type('form').send();
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'getUserInfo'),
+      err => this.trigger(err, 'getUserInfoFailed')
+    );
+  }
 })

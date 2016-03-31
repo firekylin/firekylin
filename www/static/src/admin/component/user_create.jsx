@@ -67,6 +67,10 @@ export default class extends Base {
     }
     UserAction.save(values);
   }
+
+  generateKey() {
+    UserAction.generateKey(this.id);
+  }
   /**
    * handle invalid
    * @return {} []
@@ -247,6 +251,27 @@ export default class extends Base {
                   <option value="2" {...this.getOptionProp('status', '2')}>禁用</option>
                 </select>
               </div>
+              <filedset>
+                <legend>
+                  认证
+                  <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{marginLeft: 15, marginBottom: 5, padding: '3px 5px'}}
+                      onClick={this.generateKey.bind(this)}
+                  >重新生成</button>
+                </legend>
+                <div className="form-group">
+                  <label>App Key</label>
+                  <div>
+                    <input type="text" className="form-control" disabled={true} value={this.state.userInfo.app_key} />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>App Secret</label>
+                  <input type="text" className="form-control" disabled={true} value={this.state.userInfo.app_secret} />
+                </div>
+              </filedset>
             </div>
           </Form>
         </div>
