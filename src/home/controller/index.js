@@ -20,7 +20,7 @@ export default class extends Base {
     let list = await model.getPostRssList();
     this.assign('list', list);
     this.assign('currentTime', (new Date()).toString());
-    
+
     this.type('text/xml');
     return super.display(this.HOME_VIEW_PATH + 'rss.xml');
   }
@@ -51,7 +51,7 @@ export default class extends Base {
     if(firekylin.isInstalled){
       return this.fail('SYSTERM_INSTALLED');
     }
-    
+
     let errors = this.assign('errors');
     if(!think.isEmpty(errors)){
       this.assign('message', errors[Object.keys(errors)[0]]);
@@ -79,6 +79,24 @@ export default class extends Base {
     });
     this.assign('message', message);
     this.assign('data', data);
+    this.display();
+  }
+
+  async contributorAction() {
+    if( this.isGet() ) {
+      return this.display();
+    }
+
+    let user = this.post();
+    user.type = firekylin.USER_CONTRIBUTOR;
+    user.status = firekylin.USER_DISABLED;
+    user.create_time = think.datetime();
+    user.last_login_time = user.create_time;
+    user.create_ip = this.ip();
+    user.last_login_ip = this.ip();
+
+    await this.model('user').where({name: user.name, email: user.email, _logic: 'OR'}).thenAdd(user);
+    this.assign('message', 'success');
     this.display();
   }
 }
