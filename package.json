@@ -36,6 +36,7 @@
     "babel-preset-es2015-loose": "6.x.x",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "6.x.x",
+    "babel-preset-stage-1": "6.x.x",
     "classnames": "^2.2.3",
     "css-loader": "^0.23.1",
     "history": "^1.17.0",
