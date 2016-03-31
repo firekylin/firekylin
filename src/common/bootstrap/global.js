@@ -15,7 +15,9 @@ global.firekylin = {
   POST_PUBLISH: 3,
   USER_ADMIN: 1,
   USER_EDITOR: 2,
-  USER_POSTER: 3
+  USER_CONTRIBUTOR: 3,
+  USER_AVAILABLE: 1,
+  USER_DISABLED: 2
 }
 
 /**
