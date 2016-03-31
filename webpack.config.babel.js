@@ -38,7 +38,7 @@ export default {
         cacheDirectory: true,
         query: {
           presets: ['react', 'es2015-loose', 'stage-0'],
-          plugins: ['transform-runtime']
+          plugins: ['transform-runtime', 'transform-decorators-legacy']
         },
         exclude: /node_modules/
       },
