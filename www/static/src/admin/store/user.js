@@ -13,10 +13,13 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(id){
+  onSelect(id, filter){
     let url = '/admin/api/user';
     if(id){
       url += '/' + id;
+    }
+    if(filter) {
+      url += '?type='+filter;
     }
     let req = superagent.get(url);
     return firekylin.request(req).then(data => {
@@ -79,6 +82,16 @@ export default Reflux.createStore({
     }).catch(err => {
       this.trigger(err, 'deleteUserFail');
     })
+  },
+
+  onPass(userId) {
+    let url = '/admin/api/user/' + userId + '?method=put&type=contributor';
+    let req = superagent.post(url);
+    req.type('form').send();
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'passUserSuccess'),
+      err => this.trigger(err, 'passUserFailed')
+    );
   },
 
   onGenerateKey(userId) {

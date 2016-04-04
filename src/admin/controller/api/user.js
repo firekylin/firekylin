@@ -8,7 +8,17 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   getAction(self){
-    this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
+    let where = {};
+    if( this.id ) {
+      where.id = this.id;
+    } else {
+      if(this.get('type') === 'contributor') {
+        where = {status: 2, type: 3};
+      } else {
+        where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
+      }
+    }
+    this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret').where(where);
     return super.getAction(self);
   }
   /**
@@ -25,24 +35,27 @@ export default class extends Base {
     return this.success({id: insertId});
   }
 
-  async generateKey(self) {
+  async generateKey(self, status) {
     let isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
-    let isMine = this.userInfo.id === this.id;
-    if( !isAdmin && !isMine ) {
+    // let isMine = this.userInfo.id === this.id;
+    if( !isAdmin ) {
       return this.failed();
     }
 
     let app_key = think.uuid();
     let app_secret = think.uuid();
 
-    this.modelInstance.generateKey(this.id, app_key, app_secret);
+    await this.modelInstance.generateKey(this.id, app_key, app_secret, status);
+    //TODO: 增加邮件发送 app_key 和 app_secret 的功能
+
+    this.id = null;
     return await this.getAction(self);
   }
   /**
    * update user info
    * @return {[type]} [description]
    */
-  async putAction(){
+  async putAction(self){
     let type = this.get('type');
     //save password
     if(type === 'savepwd'){
@@ -56,6 +69,10 @@ export default class extends Base {
 
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
+    }
+
+    if(type === 'contributor') {
+      return await this.generateKey(self, 1);
     }
     let data = this.post();
     data.id = this.id;

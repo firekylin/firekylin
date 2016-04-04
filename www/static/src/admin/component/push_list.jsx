@@ -47,10 +47,12 @@ export default class extends Base {
     return this.state.pushList.map(item => {
       return (
         <tr key={item.key}>
-          <td>{item.key}</td>
-          <td>{item.title}</td>
+          <td><a href={item.url} title={item.title} target="_blank">{item.title}</a></td>
+          <td>{item.url}</td>
+          <td>{item.appKey}</td>
+          <td>{item.appSecret}</td>
           <td>
-            <Link to={`/push/edit/${item.key}`} title={item.url}>
+            <Link to={`/push/edit/${item.appKey}`} title={item.title}>
               <button type="button" className="btn btn-primary btn-xs">
                 <span className="glyphicon glyphicon-edit"></span>
                 编辑
@@ -86,8 +88,10 @@ export default class extends Base {
           <table className="table table-striped">
             <thead>
               <tr>
-                <th>推送密钥</th>
-                <th>推送地址</th>
+                <th>网站名称</th>
+                <th>网站地址</th>
+                <th>推送公钥</th>
+                <th>推送秘钥</th>
                 <th>操作</th>
               </tr>
             </thead>

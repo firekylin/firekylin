@@ -28,9 +28,11 @@ export default class extends Base {
     let passwordHash = new PasswordHash();
     return passwordHash.checkPassword(password, userInfo.password);
   }
-  
-  generateKey(userId, app_key, app_secret) {
-    this.where({id: userId}).update({app_key, app_secret});
+
+  generateKey(userId, app_key, app_secret, status) {
+    let data = {app_key, app_secret};
+    if(status) { data.status = status; }
+    this.where({id: userId}).update(data);
   }
 
   /**

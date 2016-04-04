@@ -242,6 +242,7 @@ export default class extends Base {
                 <select className="form-control" ref="type">
                   <option value="2" {...this.getOptionProp('type', '2')}>编辑</option>
                   <option value="1" {...this.getOptionProp('type', '1')}>管理员</option>
+                  <option value="3" {...this.getOptionProp('type', '3')}>投稿者</option>
                 </select>
               </div>
               <div className="form-group">
