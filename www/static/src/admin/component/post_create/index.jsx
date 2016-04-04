@@ -25,6 +25,7 @@ import './style.css';
 
 export default class extends Base {
   initialState() {
+    let push_sites = Object.values(JSON.parse(SysConfig.options.push_sites));
     return Object.assign({
       postSubmitting: false,
       draftSubmitting: false,
@@ -36,11 +37,13 @@ export default class extends Base {
         cate: [],
         is_public: '1',
         create_time: '',
-        allow_comment: true
+        allow_comment: true,
+        push_sites: []
       },
       status: 3,
       cateList: [],
-      tagList: []
+      tagList: [],
+      push_sites
     });
   }
   constructor(props){
@@ -101,6 +104,7 @@ export default class extends Base {
         if(data.create_time === '0000-00-00 00:00:00'){
           data.create_time = '';
         }
+        data.push_sites = [];
         data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
         data.tag = data.tag.map(tag => tag.name);
         data.cate.forEach(item => this.cate[item.id] = true);
@@ -139,6 +143,7 @@ export default class extends Base {
 
     values.type = this.type; //type: 0为文章，1为页面
     values.allow_comment = this.state.postInfo.allow_comment;
+    values.push_sites = this.state.postInfo.push_sites;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
     PostAction.save(values);
@@ -322,6 +327,35 @@ export default class extends Base {
                     </label>
                   </div>
                 </div>
+                {this.state.push_sites.length > 0 ?
+                <div className="form-group">
+                  <label className="control-label">文章推送</label>
+                  <ul>
+                    {this.state.push_sites.map((site, i) =>
+                      <li key={i}>
+                        <label>
+                          <input
+                              type="checkbox"
+                              name="push_sites"
+                              value={site.url}
+                              checked={this.state.postInfo.push_sites.indexOf(site.appKey) > -1}
+                              onChange={()=>{
+                                let push_sites = this.state.postInfo.push_sites;
+                                if( push_sites.indexOf(site.appKey) > -1 ) {
+                                  this.state.postInfo.push_sites = push_sites.filter(appKey => appKey != site.appKey);
+                                } else {
+                                  this.state.postInfo.push_sites.push(site.appKey);
+                                }
+                                this.forceUpdate();
+                              }}
+                          />
+                        <span style={{fontWeight: 'normal'}}>{site.title}</span>
+                        </label>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                : null}
               </div>
             </div>
           </Form>
