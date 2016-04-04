@@ -46,7 +46,7 @@ export default class extends Base {
     }
     return this.state.pushList.map(item => {
       return (
-        <tr key={item.key}>
+        <tr key={item.appKey}>
           <td><a href={item.url} title={item.title} target="_blank">{item.title}</a></td>
           <td>{item.url}</td>
           <td>{item.appKey}</td>
@@ -66,7 +66,7 @@ export default class extends Base {
                   ModalAction.confirm(
                     '提示',
                     <div className="center">确定删除吗？</div>,
-                    PushAction.delete.bind(PushAction, item.key),
+                    ()=> PushAction.delete(item.appKey),
                     'modal-sm'
                   )
                 }

@@ -1,7 +1,8 @@
 'use strict';
-
 import Base from './base.js';
+import request from 'request';
 import speakeasy from 'speakeasy';
+import {PasswordHash} from 'phpass';
 
 
 export default class extends Base {
@@ -103,7 +104,17 @@ export default class extends Base {
       delete push_sites[key];
     } else {
       /** 需要增加验证 key 正确性的请求 **/
-      push_sites[key] = data;
+      let reqInstance = think.promisify(request.get);
+      let {appKey, appSecret} = data;
+      let auth_key = (new PasswordHash).hashPassword(`${appSecret}Firekylin`);
+      let checkUrl = `${data.url}/admin/post_push?app_key=${appKey}&auth_key=${auth_key}`;
+      let result = await reqInstance(checkUrl);
+      result = JSON.parse(result.body);
+      if( !result.errno ) {
+        push_sites[key] = data;
+      } else {
+        return this.fail(result.errmsg);
+      }
     }
 
     let result = await this.model('options').updateOptions('push_sites', JSON.stringify(push_sites));
