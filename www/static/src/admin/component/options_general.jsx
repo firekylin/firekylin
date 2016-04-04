@@ -18,7 +18,9 @@ export default class extends Base {
     this.state = {
       submitting: false,
       options: SysConfig.options
-    }
+    };
+
+    this.state.options.analyze_code = unescape(SysConfig.options.analyze_code);
   }
   componentDidMount(){
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));

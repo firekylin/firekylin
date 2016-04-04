@@ -33,6 +33,7 @@ export default class extends think.controller.base {
     let options = await model.getOptions();
     //不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
+    options.analyze_code = escape(options.analyze_code);
     this.assign('options', options);
     return this.display('index/index');
   }
