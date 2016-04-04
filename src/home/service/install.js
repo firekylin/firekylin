@@ -34,7 +34,7 @@ export default class extends think.service.base {
     }, module)
   }
   /**
-   * 
+   *
    * @return {[type]} [description]
    */
   checkDbInfo(){
@@ -96,7 +96,10 @@ export default class extends think.service.base {
 
     //清除已有的数据内容
     let promises = ['cate', 'post', 'post_cate', 'post_tag', 'tag', 'user'].map(item => {
-      return this.getModel(item).where('1=1').delete();
+      let modelInstance = this.getModel(item);
+      if( modelInstance ) {
+        modelInstance.where('1=1').delete();
+      }
     });
     await Promise.all(promises);
 
