@@ -113,7 +113,7 @@
     }
     window.disqus_config = function(){
       this.page.url = disqus_thread.getAttribute('data-url');
-      this.page.identifier = disqus_thread.getAttribute('data-identifier'); 
+      this.page.identifier = disqus_thread.getAttribute('data-identifier');
     }
     var s = doc.createElement('script');
     s.src = '//' + disqus_thread.getAttribute('data-name') + '.disqus.com/embed.js';
@@ -183,15 +183,6 @@
       eventSecond = 'touchend';
     }
 
-
-    for( var i = 0 ; i < this.$article.length; i++ ){
-      this.$article[i].addEventListener( 'click' , function(){
-        var url = this.getAttribute('data-url');
-        window.location.href = url ;
-      },false);
-    }
-
-
     this.$btn_side.addEventListener( eventSecond ,function(){
 
       if( _this.$body.className.indexOf( body_class_name ) > -1 ){
@@ -210,7 +201,7 @@
       e.preventDefault();
     },false);
 
-    
+
     window.addEventListener('resize',function(){
       _this.$body.className = _this.$body.className.replace( body_class_name , '');
       _this.$sidebar_mask.style.display = 'none';
