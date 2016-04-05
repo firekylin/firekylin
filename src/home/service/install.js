@@ -53,7 +53,7 @@ export default class extends think.service.base {
     if(think.isEmpty(dbExist)){
       //忽略错误
       await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
-      model.close();
+      //model.close();
     }
     let dbFile = think.ROOT_PATH + think.sep + 'firekylin.sql';
     if(!think.isFile(dbFile)){
@@ -114,7 +114,7 @@ export default class extends think.service.base {
     await optionsModel.where({key: 'logo_url'}).update({value: '/static/img/firekylin.jpg'});
     await optionsModel.where({key: 'theme'}).update({value: 'firekylin'});
 
-    optionsModel.close();
+    //optionsModel.close();
   }
   /**
    * update config
@@ -154,7 +154,7 @@ export default class extends think.service.base {
       ip: this.ip
     }
     await model.addUser(data);
-    model.close();
+    //model.close();
   }
   /**
    * run
@@ -168,6 +168,6 @@ export default class extends think.service.base {
     firekylin.setInstalled();
     let optionsModel = this.getModel('options');
     await optionsModel.getOptions(true);
-    optionsModel.close();
+    //optionsModel.close();
   }
 }
