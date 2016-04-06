@@ -54,7 +54,7 @@ rm -rf www/theme/firekylin.build/;
 
 if [ -f ${path}"/stc.error.log" ]; then
     rm -rf ${path}"/stc.error.log";
-    exit 1;
+    #exit 1;
 fi
 
 npm run compile;
@@ -63,7 +63,14 @@ cp -r app output;
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
+
 cp -r db/firekylin.sql output/;
+if [ 0 -eq `grep -c analyze_code  output/firekylin.sql` ];then
+  echo 'missing analyze_code in firekylin.sql';
+  exit;
+fi
+
+
 cp -r auto_build.sh output/;
 cp -r https.js output/;
 cp -r https.sh output/;
