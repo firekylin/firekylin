@@ -25,7 +25,7 @@ import './style.css';
 
 export default class extends Base {
   initialState() {
-    let push_sites = Object.values(JSON.parse(SysConfig.options.push_sites));
+    let push_sites = Object.values(JSON.parse(SysConfig.options.push_sites || '{}'));
     return Object.assign({
       postSubmitting: false,
       draftSubmitting: false,
