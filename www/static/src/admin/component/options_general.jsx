@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
-import { Form, ValidatedInput } from 'react-bootstrap-validation';
+import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
 import md5 from 'md5';
 import firekylin from 'common/util/firekylin';
 
@@ -19,7 +19,9 @@ export default class extends Base {
       submitting: false,
       options: SysConfig.options
     };
-
+    if(!this.state.options.hasOwnProperty('push')) {
+      this.state.options.push = '0';
+    }
     this.state.options.analyze_code = unescape(SysConfig.options.analyze_code);
   }
   componentDidMount(){
@@ -238,6 +240,14 @@ export default class extends Base {
                   style={{height: 150}}
               />
             </div>
+            <RadioGroup
+                name="push"
+                value={this.state.options.push}
+                label="推送申请"
+            >
+                <Radio value="1" label="开启（开启后他人可以将文章推送至本站）" />
+                <Radio value="0" label="关闭" />
+            </RadioGroup>
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>
