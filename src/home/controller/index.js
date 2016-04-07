@@ -83,6 +83,10 @@ export default class extends Base {
   }
 
   async contributorAction() {
+    console.log(this.options.push);
+    if( !this.options.hasOwnProperty('push') || this.options.push == 0) {
+      return this.fail('推送申请功能未开启');
+    }
     if( this.isGet() ) {
       return this.display();
     }
