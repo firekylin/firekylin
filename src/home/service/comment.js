@@ -60,7 +60,7 @@ export default class extends think.service.base {
         return;
       }
       let url = `https://${comment.name}.disqus.com/count-data.js?1=${ths.join('&l=')}`;
-      think.log(`sync comments ${url}`);
+      //think.log(`sync comments ${url}`);
       let fn = think.promisify(request, request);
       let response = await fn(url).catch(() => {});
       if(!response){
@@ -78,8 +78,11 @@ export default class extends think.service.base {
         }
         let id = postData[item.id].id;
         return this.model('post').where({id: id}).update({comment_num: item.comments});
-      })
+      });
       await Promise.all(promises);
+      if(promises.length){
+        await this.clearPostCache();
+      }
     }
   }
   /**
@@ -100,7 +103,7 @@ export default class extends think.service.base {
         return;
       }
       let url = `http://api.duoshuo.com/threads/counts.json?short_name=${comment.name}&threads=${ths.join(',')}`;
-      think.log(`sync comments ${url}`);
+      //think.log(`sync comments ${url}`);
       let fn = think.promisify(request, request);
       let response = await fn(url);
       let data = JSON.parse(response.body).response;
@@ -114,6 +117,13 @@ export default class extends think.service.base {
         promises.push(promise);
       }
       await Promise.all(promises);
+      if(promises.length){
+        await this.clearPostCache();
+      }
     }
+  }
+  clearPostCache(){
+    console.log('clear post cache');
+    return think.cache('post_1', null);
   }
 }
