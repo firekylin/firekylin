@@ -38,7 +38,9 @@ export default class extends Base {
         is_public: '1',
         create_time: '',
         allow_comment: true,
-        push_sites: []
+        options: {
+          push_sites: []
+        }
       },
       status: 3,
       cateList: [],
@@ -108,6 +110,9 @@ export default class extends Base {
         data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
         data.tag = data.tag.map(tag => tag.name);
         data.cate.forEach(item => this.cate[item.id] = true);
+        if(!data.options.push_sites){
+          data.options.push_sites = [];
+        }
         this.setState({postInfo: data});
         break;
     }
@@ -146,6 +151,7 @@ export default class extends Base {
     values.push_sites = this.state.postInfo.push_sites;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
+    values.options = JSON.stringify(this.state.postInfo.options);
     PostAction.save(values);
   }
   /**
@@ -337,14 +343,14 @@ export default class extends Base {
                           <input
                               type="checkbox"
                               name="push_sites"
-                              value={site.url}
-                              checked={this.state.postInfo.push_sites.indexOf(site.appKey) > -1}
+                              value={site.appKey}
+                              checked={this.state.postInfo.options.push_sites.indexOf(site.appKey) > -1}
                               onChange={()=>{
-                                let push_sites = this.state.postInfo.push_sites;
+                                let push_sites = this.state.postInfo.options.push_sites;
                                 if( push_sites.indexOf(site.appKey) > -1 ) {
-                                  this.state.postInfo.push_sites = push_sites.filter(appKey => appKey != site.appKey);
+                                  this.state.postInfo.options.push_sites = push_sites.filter(appKey => appKey != site.appKey);
                                 } else {
-                                  this.state.postInfo.push_sites.push(site.appKey);
+                                  this.state.postInfo.options.push_sites.push(site.appKey);
                                 }
                                 this.forceUpdate();
                               }}
