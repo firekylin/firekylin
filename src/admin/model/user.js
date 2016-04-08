@@ -101,6 +101,12 @@ export default class extends Base {
     if(think.isEmpty(updateData)){
       return Promise.reject('DATA_EMPTY');
     }
+    if(!info.email && data.email){
+      let count = await this.where({email: data.email}).count('email');
+      if(!count){
+        updateData.email = data.email;
+      }
+    }
     updateData.last_login_time = think.datetime();
     updateData.last_login_ip = ip;
     return this.where({id: data.id}).update(updateData);

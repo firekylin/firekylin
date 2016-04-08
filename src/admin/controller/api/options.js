@@ -91,7 +91,7 @@ export default class extends Base {
 
   async getPushSites() {
     let options = await this.model('options').getOptions();
-    return options.push_sites ? JSON.parse(options.push_sites) : {};
+    return options.push_sites || {};
   }
 
   async setPushSites(key, data, only = true) {

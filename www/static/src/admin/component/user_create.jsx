@@ -44,6 +44,7 @@ export default class extends Base {
         break;
       case 'getUserInfo':
         this.setState({userInfo: data});
+        this.hasEmail = !!data.email;
         break;
     }
   }
@@ -102,8 +103,14 @@ export default class extends Base {
       value: this.state.userInfo[type] || '',
       onChange: this.changeInput.bind(this, type)
     };
-    if(this.id && ['name', 'email'].indexOf(type) > -1 && this.state.userInfo[type]){
-      prop.readOnly = true;
+    if(this.id && ['name', 'email'].indexOf(type) > -1){
+      if(type === 'email'){
+        if(this.hasEmail){
+          prop.readOnly = true;
+        }
+      }else{
+        prop.readOnly = true;
+      }
     }
 
     let validatePrefix = '';

@@ -128,7 +128,7 @@ export default class extends Base {
     post.options = JSON.parse(post.options);
 
     let options = await this.model('options').getOptions();
-    let push_sites = options.push_sites ? JSON.parse(options.push_sites) : {};
+    let push_sites = options.push_sites;
     let push_sites_keys = post.options.push_sites;
     let passwordHash = new PasswordHash();
 
