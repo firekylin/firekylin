@@ -38,6 +38,7 @@ import Options2fa from './component/options_2fa';
 import OptionsComment from './component/options_comment';
 import Import from './component/import';
 import OptionsAnalytic from './component/options_analytic';
+import OptionsPush from './component/options_push';
 
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
@@ -92,6 +93,7 @@ ReactDOM.render((
         <Route path="two_factor_auth" component={Options2fa} />
         <Route path="comment" component={OptionsComment} />
         <Route path="analytic" component={OptionsAnalytic} />
+        <Route path="push" component={OptionsPush} />
         <Route path="import" component={Import} />
       </Route>
     </Route>

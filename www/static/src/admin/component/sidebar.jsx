@@ -28,7 +28,7 @@ export default class extends Base {
         {url: '/user/create', title: '添加用户'},
          {url: '/user/edit_pwd', title: '修改密码'},
       ]},
-      {url: '/push', icon: 'share', title: '推送管理', type: 1, children: [
+      {url: '/push', icon: 'share-v', title: '推送管理', type: 1, children: [
         {url: '/push/list', title: '推送列表'},
         {url: '/push/create', title: '新增推送'}
       ]},
@@ -37,6 +37,7 @@ export default class extends Base {
         {url: '/options/two_factor_auth', title: '两步验证'},
         {url: '/options/comment', title: '评论配置'},
         {url: '/options/analytic', title: '统计代码'},
+        {url: '/options/push', title: '推送设置'},
         {url: '/options/import', title: '导入数据'}
       ]}
     ]
