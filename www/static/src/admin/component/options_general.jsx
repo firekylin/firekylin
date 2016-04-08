@@ -229,17 +229,6 @@ export default class extends Base {
                 className="form-control"
               />
             </div>
-            <div className="form-group">
-              <label>网站统计代码</label>
-              <ValidatedInput
-                  type="textarea"
-                  name="analyze_code"
-                  {...this.getProps('analyze_code')}
-                  ref="analyze_code"
-                  className="form-control"
-                  style={{height: 150}}
-              />
-            </div>
             <RadioGroup
                 name="push"
                 value={this.state.options.push}
