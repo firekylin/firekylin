@@ -81,9 +81,11 @@ export default class extends Base {
     this.assign('data', data);
     this.display();
   }
-
+  /**
+   * 申请成为投稿者
+   * @return {[type]} [description]
+   */
   async contributorAction() {
-    console.log(this.options.push);
     if( !this.options.hasOwnProperty('push') || this.options.push == 0) {
       return this.fail('推送申请功能未开启');
     }

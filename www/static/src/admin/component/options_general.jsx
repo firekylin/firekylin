@@ -229,14 +229,7 @@ export default class extends Base {
                 className="form-control"
               />
             </div>
-            <RadioGroup
-                name="push"
-                value={this.state.options.push}
-                label="推送申请"
-            >
-                <Radio value="1" label="开启（开启后他人可以将文章推送至本站）" />
-                <Radio value="0" label="关闭" />
-            </RadioGroup>
+            
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>

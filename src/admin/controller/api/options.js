@@ -109,7 +109,12 @@ export default class extends Base {
       let auth_key = (new PasswordHash).hashPassword(`${appSecret}Firekylin`);
       let checkUrl = `${data.url}/admin/post_push?app_key=${appKey}&auth_key=${auth_key}`;
       let result = await reqInstance(checkUrl);
-      result = JSON.parse(result.body);
+      try{
+        result = JSON.parse(result.body);
+      }catch(e){
+        return this.fail('APP_KEY_SECRET_ERROR');
+      }
+      
       if( !result.errno ) {
         push_sites[key] = data;
       } else {
