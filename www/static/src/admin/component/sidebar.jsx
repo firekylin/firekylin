@@ -35,7 +35,7 @@ export default class extends Base {
       {url: '/options', icon: 'setting', title: '系统设置', type: 1, children: [
         {url: '/options/general', title: '基本设置'},
         {url: '/options/two_factor_auth', title: '两步验证'},
-        {url: '/options/comment', title: '评论配置'},
+        {url: '/options/comment', title: '评论设置'},
         {url: '/options/analytic', title: '统计代码'},
         {url: '/options/push', title: '推送设置'},
         {url: '/options/import', title: '导入数据'}

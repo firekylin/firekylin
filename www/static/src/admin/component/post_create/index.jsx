@@ -142,7 +142,7 @@ export default class extends Base {
     }
 
     values.type = this.type; //type: 0为文章，1为页面
-    values.allow_comment = this.state.postInfo.allow_comment;
+    values.allow_comment = this.state.postInfo.allow_comment ? 1 : 0;
     values.push_sites = this.state.postInfo.push_sites;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
