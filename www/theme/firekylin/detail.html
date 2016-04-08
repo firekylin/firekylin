@@ -17,7 +17,7 @@
         <div class="entry-content">
             {{detail.content | safe}}
         </div>
-        <p>本文链接：<a href="{{protocol + http.host + http.url | safe}}">{{protocol + http.host + http.url | safe}}</a></p>
+        <p>本文链接：<a href="{{site_url + http.url | safe}}">{{site_url + http.url | safe}}</a></p>
         <p>-- <acronym title="End of File">EOF</acronym> --</p>
 
         <div class="post-info">
