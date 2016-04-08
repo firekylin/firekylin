@@ -31,9 +31,12 @@ export default class extends think.controller.base {
     let theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = `${think.ROOT_PATH}${think.sep}www${think.sep}theme${think.sep}${theme}${think.sep}`;
 
-    //set protocol
-    let protocol = options.is_https ? 'https://' : 'http://';
-    this.assign('protocol', protocol);
+    //网站地址
+    let siteUrl = this.options.site_url;
+    if(!siteUrl){
+      siteUrl = 'http://' + this.http.host;
+    }
+    this.assign('site_url', siteUrl);
 
     this.assign('currentYear', (new Date).getFullYear());
   }
