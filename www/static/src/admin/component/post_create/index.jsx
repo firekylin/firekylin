@@ -21,11 +21,12 @@ import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
 import ModalAction from 'common/action/modal';
+import PushStore from 'admin/store/push';
+import PushAction from 'admin/action/push';
 import './style.css';
 
 export default class extends Base {
   initialState() {
-    let push_sites = Object.values(JSON.parse(SysConfig.options.push_sites || '{}'));
     return Object.assign({
       postSubmitting: false,
       draftSubmitting: false,
@@ -45,7 +46,7 @@ export default class extends Base {
       status: 3,
       cateList: [],
       tagList: [],
-      push_sites
+      push_sites: []
     });
   }
   constructor(props){
@@ -59,6 +60,8 @@ export default class extends Base {
 
   componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
+    this.listenTo(PushStore, this.pushHandleTrigger.bind(this));
+
     this.listenTo(CateStore, cateList => {
       let list = cateList.filter(cate => cate.pid === 0);
       for(let i=0,l=list.length; i<l; i++) {
@@ -74,6 +77,15 @@ export default class extends Base {
     TagAction.select();
     if(this.id){
       PostAction.select(this.id);
+    }
+
+    PushAction.select();
+  }
+  pushHandleTrigger(data, type){
+    switch(type){
+      case 'getPushList':
+        this.setState({push_sites: data});
+        break;
     }
   }
   componentWillReceiveProps(nextProps) {

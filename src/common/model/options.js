@@ -36,8 +36,15 @@ export default class extends think.model.base {
     if(ret){
       if(ret.comment && think.isString(ret.comment)){
         ret.comment = JSON.parse(ret.comment);
-      }else{
+      }
+      if(!ret.comment){
         ret.comment = {type: 'disqus'};
+      }
+      if(ret.push_sites && think.isString(ret.push_sites)){
+        ret.push_sites = JSON.parse(ret.push_sites);
+      }
+      if(!ret.push_sites){
+        ret.push_sites = {};
       }
     }
     return ret;
