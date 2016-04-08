@@ -60,7 +60,7 @@ export default class extends think.model.relation {
         on: ['id', 'post_id']
       }).where(where).order('create_time DESC').countSelect();
     }
-    
+
     let where = this.getWhereCondition(options.where);
     page = page | 0 || 1;
     //only cache first page post
@@ -69,7 +69,7 @@ export default class extends think.model.relation {
         return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
       },{timeout:259200});
     }
-    
+
     return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
   }
 
@@ -103,7 +103,7 @@ export default class extends think.model.relation {
     }
   }
   async getPostRssList(){
-    let field = 'id,title,pathname,content';
+    let field = 'id,title,pathname,create_time,content';
     let where = this.getWhereCondition();
 
     let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
