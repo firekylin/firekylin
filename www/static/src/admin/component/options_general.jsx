@@ -23,6 +23,10 @@ export default class extends Base {
       this.state.options.push = '0';
     }
     this.state.options.analyze_code = unescape(SysConfig.options.analyze_code);
+    //网站地址
+    if(!this.state.options.site_url){
+      this.state.options.site_url = location.protocol + '//' + location.host;
+    }
   }
   componentDidMount(){
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
@@ -141,6 +145,19 @@ export default class extends Base {
                 className="form-control"
                 errorHelp={{
                   required: '请填写站点描述'
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label>网站地址</label>
+              <ValidatedInput
+                type="text"
+                name="site_url"
+                {...this.getProps('site_url')}
+                ref="site_url"
+                className="form-control"
+                errorHelp={{
+                  required: '请填写网站地址'
                 }}
               />
             </div>
