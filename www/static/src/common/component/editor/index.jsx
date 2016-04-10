@@ -63,7 +63,7 @@ class MdEditor extends React.Component {
     let keys = {
       B: this._boldText,
       I: this._italicText,
-      L: this._linkText,
+      L: this._linkModal,
       Q: this._blockquoteText,
       K: this._codeText,
       G: this._pictureText,
