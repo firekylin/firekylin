@@ -36,8 +36,15 @@ export default class extends think.model.base {
     if(ret){
       if(ret.comment && think.isString(ret.comment)){
         ret.comment = JSON.parse(ret.comment);
-      }else{
+      }
+      if(!ret.comment){
         ret.comment = {type: 'disqus'};
+      }
+      if(ret.push_sites && think.isString(ret.push_sites)){
+        ret.push_sites = JSON.parse(ret.push_sites);
+      }
+      if(!ret.push_sites){
+        ret.push_sites = {};
       }
     }
     return ret;
@@ -66,7 +73,13 @@ export default class extends think.model.base {
     let promises = [p1];
     for(let key in changedData){
       let value = changedData[key];
-      let p = this.where({key: key}).update({value: value});
+      let exist = await this.where({key: key}).count('key');
+      let p;
+      if(exist){
+        p = this.where({key: key}).update({value: value});
+      }else{
+        p = this.add({key, value});
+      }
       promises.push(p);
     }
     await Promise.all(promises);
