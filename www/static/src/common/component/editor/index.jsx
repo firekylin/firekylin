@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
 import ModalAction from 'common/action/modal';
 import firekylin from 'common/util/firekylin';
+import Search from './search';
 import './style.css';
 
 import TipAction from 'common/action/tip';
@@ -29,7 +30,9 @@ class MdEditor extends React.Component {
       panelClass: 'md-panel',
       mode: 'edit',
       isFullScreen: false,
-      result: marked(this.props.content)
+      result: marked(this.props.content),
+      linkUrl: null,
+      linkText: null
     };
   }
 
@@ -122,7 +125,7 @@ class MdEditor extends React.Component {
         <li className="tb-btn"><a title="加粗(Ctrl + B)" onClick={this._boldText}><i className="glyphicon glyphicon-bold" /></a></li>{/* bold */}
         <li className="tb-btn"><a title="斜体(Ctrl + I)" onClick={this._italicText}><i className="glyphicon glyphicon-italic" /></a></li>{/* italic */}
         <li className="tb-btn spliter"></li>
-        <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={()=>this._linkText()}><i className="glyphicon glyphicon-link" /></a></li>{/* link */}
+        <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={()=>this._linkModal()}><i className="glyphicon glyphicon-link" /></a></li>{/* link */}
         <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={this._blockquoteText}><i className="glyphicon glyphicon-comment" /></a></li>{/* blockquote */}
         <li className="tb-btn"><a title="代码段(Ctrl + K)" onClick={this._codeText}><i className="glyphicon glyphicon-console" /></a></li>{/* code */}
         <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={this._pictureText}><i className="glyphicon glyphicon-picture" /></a></li>{/* picture-o */}
@@ -220,8 +223,8 @@ class MdEditor extends React.Component {
     this._preInputText("_斜体文字_", 1, 5)
   }
 
-  _linkText (url = 'www.yourlink.com') {
-    this._preInputText(`[链接文本](${url})`, 1, 5)
+  _linkText (url = 'www.yourlink.com', text = '链接文本') {
+    this._preInputText(`[${text}](${url})`, 1, 1+text.length);
   }
 
   _blockquoteText () {
@@ -230,6 +233,48 @@ class MdEditor extends React.Component {
 
   _codeText () {
     this._preInputText("\n```\ncode block\n```", 5, 15)
+  }
+
+  _linkModal() {
+    let _linkText = this._linkText;
+    ModalAction.confirm(
+      '插入链接',
+      <Tabs defaultActiveKey={1}>
+        <Tab eventKey={1} title="插入外链">
+          <div style={{margin: '20px 0'}}>
+            <div className="form-group">
+              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接地址：</label>
+              <div style={{display: 'inline-block', width: '80%'}}>
+                <input type="text" className="form-control" onChange={e => this.setState({linkUrl: e.target.value})}/>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接文本：</label>
+              <div style={{display: 'inline-block', width: '80%'}}>
+                <input type="text" className="form-control" onChange={e => this.setState({linkText: e.target.value})}/>
+              </div>
+            </div>
+          </div>
+        </Tab>
+        <Tab eventKey={2} title="插入内链">
+          <div style={{margin: '20px 0'}}>
+            <div className="form-group">
+              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接文本：</label>
+              <div style={{display: 'inline-block', width: '80%'}}>
+                <input type="text" className="form-control" onChange={e => this.setState({linkText: e.target.value})}/>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接地址：</label>
+              <div style={{display: 'inline-block', width: '80%'}}>
+                <Search onSelect={val => this.setState({linkUrl: `${location.origin}/post/${val}.html`})}/>
+              </div>
+            </div>
+          </div>
+        </Tab>
+      </Tabs>,
+      () => _linkText(this.state.linkUrl, this.state.linkText)
+    )
   }
 
   _pictureText () {
