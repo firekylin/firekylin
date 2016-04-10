@@ -103,7 +103,7 @@ export default class extends think.model.relation {
     }
   }
   async getPostRssList(){
-    let field = 'id,title,pathname,create_time,content';
+    let field = 'id,title,pathname,content,create_time';
     let where = this.getWhereCondition();
 
     let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
