@@ -47,7 +47,7 @@ export default class extends Base {
         <tr key={item.id}>
           <td>{item.name}</td>
           <td>{item.pathname}</td>
-          <td>{item.post_cate.length}</td>
+          <td>{item.post_cate}</td>
           <td>
             <Link to={`/cate/edit/${item.id}`} title={item.name}>
               <button type="button" className="btn btn-primary btn-xs">

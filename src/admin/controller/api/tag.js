@@ -7,9 +7,19 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  getAction(self){
-    //this.modelInstance.setRelation(false);
-    return super.getAction(self);
+  async getAction(self){
+    let result;
+    if( this.id ) {
+      result = await this.modelInstance.where({id: this.id}).find();
+      result.post_tag = result.post_tag.length;
+    } else {
+      result = await this.modelInstance.select();
+      result = result.map(item => {
+        item.post_tag = item.post_tag.length;
+        return item;
+      });
+    }
+    return this.success(result);
   }
   /**
    * add user
