@@ -16,8 +16,16 @@ export default class extends Base {
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
     let data;
     if( this.id ) {
-      if( this.id === 'lastest' ) return this.lastest();
+      if( this.id === 'lastest' ) {
+        return this.lastest();
+      }
       data = await this.modelInstance.where({id: this.id}).find();
+      //文章选项
+      if(data.options){
+        data.options = JSON.parse(data.options) || {};
+      }else{
+        data.options = {};
+      }
     } else {
       let where = {};
       //不是管理员，只显示个人的文章
@@ -116,9 +124,12 @@ export default class extends Base {
       return;
     }
 
+    post = think.extend({}, post);
+    post.options = JSON.parse(post.options);
+
     let options = await this.model('options').getOptions();
-    let push_sites = options.push_sites ? JSON.parse(options.push_sites) : {};
-    let push_sites_keys = post.push_sites;
+    let push_sites = options.push_sites;
+    let push_sites_keys = post.options.push_sites;
     let passwordHash = new PasswordHash();
 
     async function push(post, {appKey, appSecret, url}) {
@@ -128,7 +139,7 @@ export default class extends Base {
     }
 
     delete post.cate;
-    delete post.push_sites;
+    delete post.options;
     if(!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys]; }
     let pushes = push_sites_keys.map(key => push(post, push_sites[key]));
     await Promise.all(pushes);
