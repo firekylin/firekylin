@@ -7,12 +7,22 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  getAction(self){
-    //this.modelInstance.setRelation(false);
+  async getAction(self){
+    let result;
     if(this.get('pid')) {
       this.modelInstance.where({pid: this.get('pid')});
     }
-    return super.getAction(self);
+    if(this.id) {
+      result = await this.modelInstance.where({id: this.id}).find();
+      result.post_cate = result.post_cate.length;
+    } else {
+      result = await this.modelInstance.select();
+      result = result.map(item => {
+        item.post_cate = item.post_cate.length;
+        return item;
+      });
+    }
+    return this.success(result);
   }
 
   /**

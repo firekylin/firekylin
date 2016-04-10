@@ -49,7 +49,7 @@ export default class extends Base {
         <tr key={item.id}>
           <td>{item.name}</td>
           <td>{item.pathname}</td>
-          <td>{item.post_tag.length}</td>
+          <td>{item.post_tag}</td>
           <td>
             <Link to={`/tag/edit/${item.id}`} title={item.name}>
               <button type="button" className="btn btn-primary btn-xs">
