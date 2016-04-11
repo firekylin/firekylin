@@ -9,7 +9,7 @@ class Search extends React.Component {
     options: []
   }
   fetchData(value) {
-    let req = superagent.get('/admin/api/post?keyword='+value);
+    let req = superagent.get('/admin/api/post?status=3&keyword='+encodeURIComponent(value));
     firekylin.request(req).then(
       resp => this.setState({options: resp.data}),
     ).catch(err => console.log(err));

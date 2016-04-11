@@ -259,15 +259,18 @@ class MdEditor extends React.Component {
         <Tab eventKey={2} title="插入内链">
           <div style={{margin: '20px 0'}}>
             <div className="form-group">
-              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接文本：</label>
+              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接地址：</label>
               <div style={{display: 'inline-block', width: '80%'}}>
-                <input type="text" className="form-control" onChange={e => this.setState({linkText: e.target.value})}/>
+                <Search onSelect={(val, opt) => {
+                    document.getElementsByClassName('inner-link-text')[0].value = opt.props.children;
+                    this.setState({linkUrl: `${location.origin}/post/${val}.html`, linkText: opt.props.children})
+                }}/>
               </div>
             </div>
             <div className="form-group">
-              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接地址：</label>
+              <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接文本：</label>
               <div style={{display: 'inline-block', width: '80%'}}>
-                <Search onSelect={val => this.setState({linkUrl: `${location.origin}/post/${val}.html`})}/>
+                <input type="text" className="form-control inner-link-text" onChange={e => this.setState({linkText: e.target.value})}/>
               </div>
             </div>
           </div>
