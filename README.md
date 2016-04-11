@@ -8,6 +8,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 * http://blog.h5jun.com/ - 月影的博客
 * http://gyblog.cn/ - 光宇的博客
 * http://welefen.com/ - welefen 的博客
+* https://haozi.me/ - 耗子么
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 
