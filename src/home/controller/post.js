@@ -32,7 +32,7 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async detailAction(){
-
+    this.http.url = decodeURIComponent(this.http.url);
     let pathname = this.get('pathname');
     let detail = await this.model('post').getPostDetail(pathname);
     if(think.isEmpty(detail)){
