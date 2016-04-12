@@ -130,9 +130,10 @@ export default class extends Base {
             type='text'
             validate="required,isLength:6:6"
             errorHelp={{
-              required: '填写6位校验码',
-              isLength: '请填写6位校验码'
+              required: '填写 6 位校验码',
+              isLength: '请填写 6 位校验码'
             }}
+            maxLength="6"
             name='code'
             ref="code"
           />
