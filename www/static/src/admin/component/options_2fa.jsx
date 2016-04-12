@@ -125,7 +125,7 @@ export default class extends Base {
         >
         <br />
         <div className="form-group" style={{width: '256px'}}>
-          <label>填写6位校验码</label>
+          <label>填写 6 位校验码</label>
           <ValidatedInput
             type='text'
             validate="required,isLength:6:6"
@@ -146,7 +146,7 @@ export default class extends Base {
   step4(){
     return (<div>
       <p>验证成功，点击下面的按钮开启二步验证</p>
-      <button type="submit" className="btn btn-primary" onClick={this.open2Fa.bind(this)}>开启二步验证</button>
+      <button type="submit" className="btn btn-primary" onClick={this.open2Fa.bind(this)}>开启两步验证</button>
     </div>);
   }
   getContent(){
