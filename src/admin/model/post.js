@@ -99,6 +99,7 @@ export default class extends Base {
   }
 
   clearCache() {
+    think.log('clear cache');
     return think.cache('post_1', null);
   }
 }
