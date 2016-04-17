@@ -1,6 +1,7 @@
 'use strict';
 
 import Base from './base.js';
+import nodemailer from 'nodemailer';
 
 export default class extends Base {
   /**
@@ -47,6 +48,22 @@ export default class extends Base {
 
     await this.modelInstance.generateKey(this.id, app_key, app_secret, status);
     //TODO: 增加邮件发送 app_key 和 app_secret 的功能
+    let user = await this.modelInstance.where({id: this.id}).find();
+    let options = await this.model('options').getOptions();
+    let transporter = nodemailer.createTransport();
+    let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${http.host}`;
+    transporter.sendMail({
+      from: 'no-reply@firekylin.org',
+      to: user.email,
+      subject: `【${options.title}】网站推送申请成功`,
+      text: `你的推送申请审批通过，请将下面的信息添加到自己的博客中完成最后的推送操作。
+        网站名称：${options.title}
+        网站地址：${site_url}
+        app_key: ${app_key}
+        app_secret: ${app_secret}
+      `
+    });
+
 
     if(status != null) { this.id = null; }
     return await this.getAction(self);

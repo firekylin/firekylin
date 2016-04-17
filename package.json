@@ -17,6 +17,7 @@
     "marked-toc": "^0.3.0",
     "moment": "^2.11.2",
     "node-crontab": "0.0.8",
+    "nodemailer": "^2.3.2",
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
     "request": "^2.69.0",
