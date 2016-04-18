@@ -39,7 +39,7 @@ export default class extends Base {
 
   getTagList(){
     if(this.state.loading){
-      return (<tr><td colSpan="8" className="center">加载中。。。</td></tr>);
+      return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
     if(!this.state.tagList.length){
       return (<tr><td colSpan="8" className="center">暂无标签</td></tr>);

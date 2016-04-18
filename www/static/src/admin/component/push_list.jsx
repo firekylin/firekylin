@@ -39,7 +39,7 @@ export default class extends Base {
   }
   getPushList(){
     if(this.state.loading){
-      return (<tr><td colSpan="8" className="center">加载中。。。</td></tr>);
+      return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
     if(!this.state.pushList.length){
       return (<tr><td colSpan="8" className="center">暂无记录</td></tr>);
