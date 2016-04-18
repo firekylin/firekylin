@@ -66,7 +66,7 @@ export default class extends Base {
 
   getPostList(){
     if(this.state.loading){
-      return (<tr><td colSpan="8" className="center">加载中。。。</td></tr>);
+      return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
     if(!this.state.postList.length){
       return (<tr><td colSpan="8" className="center">暂无文章</td></tr>);

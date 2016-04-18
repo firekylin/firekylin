@@ -70,7 +70,7 @@ export default class extends Base {
 
   getUserList(){
     if(this.state.loading){
-      return (<tr><td colSpan="8" className="center">加载中。。。</td></tr>);
+      return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
     if(!this.state.userList.length){
       return (<tr><td colSpan="8" className="center">无相关用户</td></tr>);
