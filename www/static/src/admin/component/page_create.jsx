@@ -38,7 +38,10 @@ export default class extends PostCreate {
         setTimeout(() => this.redirect('page/list'), 1000);
         break;
       case 'getPageInfo':
-        data.create_time = moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss');
+        if(data.create_time === '0000-00-00 00:00:00'){
+          data.create_time = '';
+        }
+        data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
         this.setState({postInfo: data});
         break;
     }
@@ -55,10 +58,16 @@ export default class extends PostCreate {
       values.id = this.id;
     }
 
+    values.create_time = this.state.postInfo.create_time;
     values.status = this.state.status;
     values.type = this.type; //type: 0为文章，1为页面
     values.allow_comment = Number(this.state.postInfo.allow_comment);
     values.markdown_content = this.state.postInfo.markdown_content;
+    values.options = JSON.stringify(this.state.postInfo.options);
+    if( values.status === 3 && !values.markdown_content ) {
+      this.setState({draftSubmitting: false, postSubmitting: false});
+      return TipAction.fail('没有内容不能提交呢！');
+    }
     PageAction.save(values);
   }
 }
