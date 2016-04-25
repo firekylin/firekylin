@@ -11,6 +11,9 @@
   <div class="entry-content">
       {{page.content | safe}}
   </div>
+  {% if detail.allow_comment %}
+      {% include "./inc/comment.html" %}
+  {% endif %}
   {% else %}
   <h1 class="title">提示</h1>
   <div class="entry-content">
