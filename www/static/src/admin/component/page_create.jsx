@@ -57,7 +57,7 @@ export default class extends PostCreate {
 
     values.status = this.state.status;
     values.type = this.type; //type: 0为文章，1为页面
-    values.allow_comment = this.state.allow_comment;
+    values.allow_comment = Number(this.state.postInfo.allow_comment);
     values.markdown_content = this.state.postInfo.markdown_content;
     PageAction.save(values);
   }
