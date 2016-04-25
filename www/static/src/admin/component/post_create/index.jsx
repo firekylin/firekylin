@@ -145,11 +145,12 @@ export default class extends Base {
     }
 
     /** 草稿不存创建时间，其它的状态则默认时间为当前时间 **/
-    if( this.state.status === 0 ) {
-      values.create_time = '';
-    } else {
-      values.create_time = this.state.postInfo.create_time || moment().format('YYYY-MM-DD HH:mm:ss');
-    }
+    values.create_time = this.state.postInfo.create_time;
+    // if( this.state.status === 0 ) {
+    //   values.create_time = '';
+    // } else {
+    //   values.create_time = this.state.postInfo.create_time || moment().format('YYYY-MM-DD HH:mm:ss');
+    // }
 
     values.status = this.state.status;
     values.markdown_content = this.state.postInfo.markdown_content;
