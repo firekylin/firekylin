@@ -32,12 +32,22 @@ export default class extends Base {
       if(this.userInfo.type !== 1){
         where.user_id = this.userInfo.id;
       }
+
       if(this.get('status')) {
         where.status = this.get('status');
       }
+
       if(this.get('keyword')) {
-        where.title = ["like", `%${this.get('keyword')}%`];
+        let keywords = this.get('keyword').split(/\s+/g);
+        if( keywords.indexOf(':public') > -1 || keywords.indexOf(':private') > -1 ) {
+          where.is_public = Number(keywords.indexOf(':public') > -1);
+          keywords = keywords.filter(word => word !== ':public' && word !== ':private');
+        }
+        if(keywords.length > 0) {
+          where.title = ["like", keywords.map(word => `%${word}%`)];
+        }
       }
+      
       let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname'];
       data = await this.modelInstance.where(where).field(field).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
@@ -86,7 +96,7 @@ export default class extends Base {
     let data = this.post();
     /** 推送文章 **/
     this.pushPost(data);
-    
+
     data.id = this.id;
     if(data.markdown_content) {
       data = this.getContentAndSummary(data);
