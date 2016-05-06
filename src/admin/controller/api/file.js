@@ -61,7 +61,7 @@ export default class extends Base {
 
     let writeFile = think.promisify(fs.writeFile, fs);
     let destDir = moment(new Date).format('YYYYMM');
-    let basename = (this.post('name') ? this.post('name') : think.md5(result)) + path.extname(url);
+    let basename = (this.post('name') ? this.post('name') : think.md5(result.body)) + path.extname(url);
     let destPath = path.join( think.UPLOAD_PATH, destDir );
     if( !think.isDir(destPath) ) {
       think.mkdir(destPath);
