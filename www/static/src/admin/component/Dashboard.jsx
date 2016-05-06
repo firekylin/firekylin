@@ -79,11 +79,11 @@ export default class extends Base {
                 </li>
                 <li>
                   <label>项目源码：</label>
-                  <a href="https://github.com/welefen/firekylin">https://github.com/welefen/firekylin</a>
+                  <a href="https://github.com/75team/firekylin">https://github.com/75team/firekylin</a>
                 </li>
                 <li>
                   <label>问题反馈：</label>
-                  <a href="https://github.com/welefen/firekylin/issues">https://github.com/welefen/firekylin/issues</a>
+                  <a href="https://github.com/75team/firekylin/issues">https://github.com/75team/firekylin/issues</a>
                 </li>
                 <li>
                   <label>团队博客：</label>
