@@ -47,7 +47,7 @@ export default class extends Base {
           where.title = ["like", keywords.map(word => `%${word}%`)];
         }
       }
-      
+
       let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname'];
       data = await this.modelInstance.where(where).field(field).order('id DESC').page( this.get('page'), 15 ).countSelect();
     }
@@ -141,6 +141,14 @@ export default class extends Base {
     let push_sites = options.push_sites;
     let push_sites_keys = post.options.push_sites;
     let passwordHash = new PasswordHash();
+
+    if( post.markdown_content.slice(0, 5) !== '> 原文：') {
+      let options = await this.model('options').getOptions();
+      let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${http.host}`;
+      post.markdown_content = `> 原文：${site_url}/post/${post.pathname}
+
+${post.markdown_content}`;
+    }
 
     async function push(post, {appKey, appSecret, url}) {
       let auth_key = passwordHash.hashPassword(`${appSecret}${post.markdown_content}`);

@@ -123,7 +123,6 @@ export default class extends think.service.base {
     }
   }
   clearPostCache(){
-    console.log('clear post cache');
     return think.cache('post_1', null);
   }
 }
