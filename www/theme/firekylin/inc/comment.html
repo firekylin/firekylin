@@ -1,4 +1,4 @@
-<div id="comments" data-type="{{options.comment.type}}">
+<div id="comments" data-type="{{options.comment.type}}" data-thread-key="{{think.md5(http.get('pathname'))}}" data-url="{{site_url}}{{http.url}}">
     <h1 class="title">Comments</h1>
     {% if options.comment.name %}
 
