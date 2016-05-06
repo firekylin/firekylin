@@ -74,9 +74,18 @@ export default class extends Base {
   render(){
     let comment = this.state.comment;
     let res = (
-      <RadioGroup name='type' value={comment.type} validate={(value) => {this.commentType = value;return true;}}>
+      <RadioGroup
+          name='type'
+          value={comment.type}
+          validate={(value) => {
+            this.commentType = value;
+            this.forceUpdate();
+            return true;
+          }}
+      >
         <Radio value='disqus' label='Disqus' />
         <Radio value='duoshuo' label='多说' />
+        <Radio value='custom' label='自定义' />
       </RadioGroup>
     );
 
@@ -90,6 +99,7 @@ export default class extends Base {
             { res }
           </div>
 
+          {this.commentType != 'custom' ?
           <div className="form-group">
             <label>网站名称（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
             <ValidatedInput
@@ -102,6 +112,16 @@ export default class extends Base {
                 name='name'
               />
           </div>
+          :
+          <ValidatedInput
+              type="textarea"
+              name="name"
+              {...this.getProps('name')}
+              validate="required"
+              errorHelp="请填写评论代码"
+              label="评论代码"
+              style={{height: 240}}
+          />}
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
         </Form>
       </div>
