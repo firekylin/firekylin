@@ -87,7 +87,7 @@ ul,ol{padding:0;list-style:none;}
 .mod-user li a{padding: 0}
 
 /*fk-side start*/
-.fk-side{position:fixed;top:0; z-index:16;display:block;overflow:hidden; width:235px;height:100%;background:#323232;}
+.fk-side{position:fixed;top:0; z-index:16;display:block;overflow-x:hidden; overflow-y: auto; width:235px;height:100%;background:#323232;}
 .fk-side .mod-logo{padding:10px 10px 10px 25px;height:55px;}
 .ps-scrollbar-y-rail{margin-top: 50px;}
 .fk-side .mod-message{padding:8px 5px 0 10px;height:55px;background:#3f3f3f;}
