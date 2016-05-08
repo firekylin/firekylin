@@ -191,7 +191,7 @@ export default class extends Base {
                         form.append('name', 'favicon');
                         firekylin.upload(form).then(
                           res => {
-                            this.state.options.logo_url = res.data;
+                            this.state.options.favicon_url = res.data;
                             this.state.favicon_uploading = false;
                             this.forceUpdate();
                           }
@@ -246,7 +246,7 @@ export default class extends Base {
                 className="form-control"
               />
             </div>
-            
+
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>
