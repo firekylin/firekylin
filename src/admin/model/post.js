@@ -53,8 +53,8 @@ export default class extends Base {
   }
 
   async deletePost(post_id) {
-    await this.model('post_cate').delete({post_id});
-    await this.model('post_tag').delete({post_id});
+    //await this.model('post_cate').delete({post_id});
+    //await this.model('post_tag').delete({post_id});
     return this.where({id: post_id}).delete();
   }
 
