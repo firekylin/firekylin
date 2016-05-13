@@ -119,12 +119,11 @@ export default class extends Base {
         if(data.create_time === '0000-00-00 00:00:00'){
           data.create_time = '';
         }
-        data.push_sites = [];
         data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
         data.tag = data.tag.map(tag => tag.name);
         data.cate.forEach(item => this.cate[item.id] = true);
-        if(!data.options.push_sites){
-          data.options.push_sites = [];
+        if( !data.options ) {
+          data.options = {push_sites: []};
         }
         this.setState({postInfo: data});
         break;
@@ -351,7 +350,7 @@ export default class extends Base {
                     </label>
                   </div>
                 </div>
-                {this.state.push_sites.length > 0 ?
+                {SysConfig.userInfo.type === 1 && this.state.push_sites.length > 0 ?
                 <div className="form-group">
                   <label className="control-label">文章推送</label>
                   <ul>

@@ -86,7 +86,7 @@ export default class extends Base {
     data = this.getContentAndSummary(data);
     data.user_id = this.userInfo.id;
     data = this.getPostTime(data);
-    data.options = JSON.stringify(data.options);
+    data.options = data.options ? JSON.stringify(data.options) : '';
 
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
@@ -105,12 +105,9 @@ export default class extends Base {
     this.pushPost(data);
 
     data.id = this.id;
-    if(data.markdown_content) {
-      data = this.getContentAndSummary(data);
-    }
-    if(data.create_time) {
-      data = this.getPostTime(data);
-    }
+    data = this.getPostTime(data);
+    data = this.getContentAndSummary(data);
+    data.options = data.options ? JSON.stringify(data.options) : '';
     if(data.tag) {
       data.tag = await this.getTagIds(data.tag);
     }
@@ -170,7 +167,8 @@ ${post.markdown_content}`;
   }
 
   async lastest() {
-    let data = await this.modelInstance.getLatest(6);
+    let userId = this.userInfo.type !== 1 ? this.userInfo.id : null;
+    let data = await this.modelInstance.getLatest(userId, 6);
     return this.success(data);
   }
 
