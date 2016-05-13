@@ -70,7 +70,7 @@ export default class extends Base {
     }
 
     /** 如果是编辑发布文章的话默认状态改为审核中 **/
-    if( data.status == 3 && this.userInfo.type == 2 ) {
+    if( data.status == 3 && this.userInfo.type != 1 ) {
       data.status = 1;
     }
 
@@ -81,6 +81,7 @@ export default class extends Base {
     data = this.getContentAndSummary(data);
     data.user_id = this.userInfo.id;
     data = this.getPostTime(data);
+    data.options = JSON.stringify(data.options);
 
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
@@ -94,6 +95,7 @@ export default class extends Base {
       return this.fail('PARAMS_ERROR');
     }
     let data = this.post();
+
     /** 推送文章 **/
     this.pushPost(data);
 
@@ -107,7 +109,6 @@ export default class extends Base {
     if(data.tag) {
       data.tag = await this.getTagIds(data.tag);
     }
-
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
   }
@@ -130,21 +131,21 @@ export default class extends Base {
   }
 
   async pushPost(post) {
-    if( post.status != 3 && data.is_public != 1 && data.push_sites.length == 0 ) {
+    let postOpt = JSON.parse(post.options);
+    let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
+    if( post.status != 3 && post.is_public != 1 && !canPush ) {
       return;
     }
-
     post = think.extend({}, post);
-    post.options = JSON.parse(post.options);
 
     let options = await this.model('options').getOptions();
     let push_sites = options.push_sites;
-    let push_sites_keys = post.options.push_sites;
+    let push_sites_keys = postOpt.push_sites;
     let passwordHash = new PasswordHash();
 
     if( post.markdown_content.slice(0, 5) !== '> 原文：') {
       let options = await this.model('options').getOptions();
-      let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${http.host}`;
+      let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.http.host}`;
       post.markdown_content = `> 原文：${site_url}/post/${post.pathname}
 
 ${post.markdown_content}`;
@@ -153,7 +154,7 @@ ${post.markdown_content}`;
     async function push(post, {appKey, appSecret, url}) {
       let auth_key = passwordHash.hashPassword(`${appSecret}${post.markdown_content}`);
       Object.assign(post, {app_key:appKey, auth_key});
-      request.post({url: url + '/admin/post_push', form: post});
+      request.post({url: url + '/admin/post_push', form: post}, (err, res, body) => console.log(err, res, body));
     }
 
     delete post.cate;

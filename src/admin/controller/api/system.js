@@ -24,14 +24,13 @@ export default class extends base {
       firekylinVersion: pack.version,
       mysqlVersion: mysql[0].version
     };
-
     return this.success({
       versions: data,
       config: await this.getConfig(),
       count: {
-        posts: await this.model('post').count(),
+        posts: await this.model('post').where({user_id: this.userInfo.id}).count(),
         cates: await this.model('cate').count(),
-        comments: await this.model('post').sum('comment_num')
+        comments: await this.model('post').where({user_id: this.userInfo.id}).sum('comment_num')
       }
     });
   }
