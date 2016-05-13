@@ -395,40 +395,7 @@ LOCK TABLES `fk_user` WRITE;
 
 INSERT INTO `fk_user` (`id`, `name`, `display_name`, `password`, `type`, `email`, `status`, `create_time`, `create_ip`, `last_login_time`, `last_login_ip`, `app_key`, `app_secret`)
 VALUES
-	(21,'admin','','$2a$08$A.UC4MCES5LZm.BQnUZZdOq.a0Gy4VrUd4BImz0gld3Y7ZJhFtuM6',1,'admin@firekylin.org',1,'2016-03-18 09:04:47','127.0.0.1','2016-03-18 09:04:47','127.0.0.1',NULL,NULL),
-	(22,'irideas','irideas','$2a$08$u2ao7iU.LmuMKlGBDKxR6.WWeNFUnpavEkpUgBpLFhp1hK8UXirnG',2,'irideas@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(23,'leon82','非主流童话','$2a$08$Q3df.D.U3337BOL9CK734etQjt60rgMVAjB/.3HDmXYD4hEo6Djhm',2,'lgy573@126.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(24,'sunweinan','玮楠','$2a$08$7l2WR/EsX4GK5l7AOMcFUeBP7T1YggS3N.CWxvLZV5/zVQTrcOKoy',2,'sunweinan@360.cn',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(25,'jxp','jxp','$2a$08$gVeJ1gBvGuO7z1IGcjh4T.oyJJVVotGTGUWcMpnz65e7C1y5bAZb6',2,'jxp4531@163.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(26,'lichao','lichao','$2a$08$/dh/rCu4xz.Q5XF50ISpzOiakqTvL4HqOLWZlAaaRpnZ5DC0C3CPG',2,'takumi4@ymail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(27,'zhaoyan860222','赵岩','$2a$08$BLNNKgbz1IJfb2bzPk4cXuj9CBNN8aZ8OC0WW9R6UzfhJ.IZbjQg2',2,'222tarzan@163.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(28,'bower','bower','$2a$08$GYQUfw.2TkIR0v/PGXeczek5fVSTfjrKXltjv7.wy0bUDL7msPXfG',2,'bower.liu@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(29,'JK','JK','$2a$08$cbrmyR4dTItySsvu861/B.dqWqLpFzrrd03/OrnGWmZKbco6A.ABO',2,'jk_10000@yahoo.com.cn',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(30,'celine','celine','$2a$08$Hyacmmq7G.C2MQ0VfeDo7OWNdB0CRPXjCHA.sJeOg0QpyPWt2FK6O',2,'pengyfpengyf@163.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(31,'chevion','Chevion','$2a$08$qToWxCdZsNoOUahlV3r6j.EUV93YhBI/ts66fKs9cKdRaIzzlQdHG',2,'chevionlu@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(32,'panliu888','panliu888','$2a$08$BksI/sxnvgEMzz9ocrQiAud9s0m.C6vCnBhuHTwipDc8tviEDo3ni',2,'panliu888@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(33,'poker','poker','$2a$08$W8N0CqAoMUzwQPuzoIZOq.KpWnj/yu2JGe.1tZA0Ki.qFZnnUtwAW',2,'pengkeliu@163.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(34,'Bug','小强','$2a$08$cxnH/O4INDwKS27cpRsOS.qHJWTosbYQ11.XuhwUwzq1WdmHAGeBG',2,'qiangyf@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(35,'ciih','司晨','$2a$08$Z2BEuzpmV1onisMV4UbaqO/6wpmrPbRbnNLhqSOWNoLsQZ7ySsD2u',2,'ciih@sina.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(36,'doyoe','飘零雾雨','$2a$08$MAGrzWbHpd4i9q8GxG.BqOs0eD7m1blM/8HOijB69vk0dfjVwd9yu',2,'dooyoe@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(37,'lilyH','lilyH','$2a$08$InglUO1kNh23d0Ak5Ql58Ou4TqYXKWB3Cio7qbDvMQTPXdsJK4XVG',2,'hlily871108@gmail.com',2,'2016-03-18 16:50:44','127.0.0.1','2016-03-18 16:50:44','127.0.0.1',NULL,NULL),
-	(38,'yupeng','yupeng','$2a$08$5aeWwxQN77zHg9I3OWbPV.2H9p22yTYT4A0a/NbmJsXOl0nzjIVoK',2,'yupengyp@gmail.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(39,'welefen','welefen','$2a$08$8bb.5hpIWmE3Q.MC.rjvr.DxbZxKIqtxC5NEz/o9kH65GWtalqegq',2,'welefen@gmail.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(40,'webzhao','webzhao','$2a$08$EbSdUsWzhULt6LSpVZqro.EF/wIfc7mvFW50/DHGQPSPkZcMNAEYy',2,'webzhao@gmail.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(41,'hxl','hxl','$2a$08$Hog4GJkXxq8g75m11l8dzeoojqSRZUqeusOj2ls5GvQ1/Aimc/gB2',2,'lu.huang90@gmail.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(42,'icewhite','Ice White','$2a$08$RgDmPUq9Dd4VWdnr5mGKpO9Cme.pgOWpC/OTzP12gHoK.0d9yuMW.',2,'yashiro1899@gmail.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(43,'a4','A4','$2a$08$AzXh.0jZ7trwnF3TNglJ2uxmAKr4fdehEsfVkLYRU0b4s4CTwPzRi',2,'shuo@aerfa.net',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(44,'akira_cn','akira_cn','$2a$08$gR5uev0yXOb7w.t5SsN/cOSTb1qQISIJGE9b.vxnQjK1y3AfJ1Cqm',2,'19511344@qq.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(45,'rekey','rekey','$2a$08$wZeClhkKbyhwdxNOrt08S.qiFfQX.m3YPTm/.wmyOf9Ut7Ee21NAa',2,'rekey@me.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(46,'snadn','snadn','$2a$08$SR0xEns82rVScMAQKEMPKOhvH0FygatTf/y/PBOE2LxDHrw3rb.Be',2,'snadn@snadn.cn',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(47,'chajn','chajn','$2a$08$I0PMLW329R90Ps3dHO55q.08EX3YLn2/DJ069Fv324LQjAFVo3ODS',2,'chajn@126.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(48,'guopei','冰果','$2a$08$/XyLeJ3ZYyuBkpF1ytW3nevEcYT7RmJBYk5V7mTHeYAxe0YaOMvUO',2,'hszy00232@163.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(49,'snow','snow yang','$2a$08$VDqxoSImYv36xJJjuCj69.9dMuYz3q0fkuAtpvUcsTr/p.82xQxm.',2,'260712046@qq.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(50,'melon','melonHuang','$2a$08$NP0/U6hTOjjwdoU3xksCDOap/knqUguXrSkUFACnkPPBnNMkyviEi',2,'228941629@qq.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(51,'yubo','yubo','$2a$08$B8tu3x6U8Lzio0HgQ7iD4OLYhDYty3571j/PJvMiEzrAInE5591Z6',2,'yubo@w3ctech.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(52,'guazilian','瓜子脸','$2a$08$6Zep6mD5swlh7TGwvUv//umZu7SBZe7IviAvDHjl/TpENXkGIhdY6',2,'zhangjingzhuozjz@163.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(53,'KikiAn','跑跑佳','$2a$08$d3D9wG7gDEYUXCtQ5C9ZK.Pyzull2UmH4sZtKGs0CC0qkCvF5rCOq',2,'figure7figure9@gmail.com',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL),
-	(54,'lizheming','公子','$2a$08$52bDbgWJgsbMJbZ1MOoiMecyTZ6mGUJQfcC6iQ7Yj1xz8Q0Nfeafq',2,'lizheming@360.cn',2,'2016-03-18 16:50:45','127.0.0.1','2016-03-18 16:50:45','127.0.0.1',NULL,NULL);
+	(21,'admin','','$2a$08$A.UC4MCES5LZm.BQnUZZdOq.a0Gy4VrUd4BImz0gld3Y7ZJhFtuM6',1,'admin@firekylin.org',1,'2016-03-18 09:04:47','127.0.0.1','2016-03-18 09:04:47','127.0.0.1',NULL,NULL);
 
 /*!40000 ALTER TABLE `fk_user` ENABLE KEYS */;
 UNLOCK TABLES;
