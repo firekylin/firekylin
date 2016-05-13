@@ -87,7 +87,7 @@ export default class extends Base {
    */
   async contributorAction() {
     if( !this.options.hasOwnProperty('push') || this.options.push == 0) {
-      return this.fail('推送申请功能未开启');
+      return this.fail('PUSH_CLOSED');
     }
     if( this.isGet() ) {
       return this.display();
