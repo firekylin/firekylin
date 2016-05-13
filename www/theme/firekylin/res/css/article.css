@@ -81,6 +81,10 @@ article blockquote {
   margin-left: 0;
 }
 
+article blockquote p{
+  margin-bottom: 0;
+}
+
 article code {
     font-family: "Consolas","Courier New",Courier,mono,serif;
   font-size: 80%;
