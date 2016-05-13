@@ -34,7 +34,7 @@ export default class extends Base {
     }
 
     //帐号是否被禁用，且投稿者不允许登录
-    if((userInfo.status | 0) !== 1 || userInfo.type !== 3){
+    if((userInfo.status | 0) !== 1 || userInfo.type === 3){
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 
