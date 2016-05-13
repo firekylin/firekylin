@@ -122,9 +122,9 @@ export default class extends Base {
 
     /** 如果不是管理员且不是本文作者则无权限删除文章 **/
     if(this.userInfo.type !== 1) {
-      let post = this.modelInstance.where({id}).find();
-      if( post.user_id !== this.userInfo.id ) {
-        return this.fail('ACCESS_ERROR');
+      let post = await this.modelInstance.where({id: this.id}).find();
+      if( post.user_id != this.userInfo.id ) {
+        return this.fail('USER_NO_PERMISSION');
       }
     }
 

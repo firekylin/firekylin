@@ -57,11 +57,11 @@ export default class extends Base {
       timeout: 1000,
       encoding: 'binary'
     }).catch(() =>{
-      return this.fail("URL参数不合法或者请求失败！");
+      return this.fail("UPLOAD_URL_ERROR");
     });
 
     if(result.headers["content-type"].indexOf('image') === -1) {
-      return this.fail("请求的资源不是一张图片");
+      return this.fail("UPLOAD_TYPE_ERROR");
     };
 
     let writeFile = think.promisify(fs.writeFile, fs);
