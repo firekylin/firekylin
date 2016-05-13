@@ -4,6 +4,10 @@ import request from 'request';
 import speakeasy from 'speakeasy';
 import {PasswordHash} from 'phpass';
 
+request.defaults({
+  strictSSL: false,
+  rejectUnauthorized: false
+});
 
 export default class extends Base {
   /**
@@ -69,7 +73,8 @@ export default class extends Base {
 
     let model = this.model('options');
     if( type === 'push' ) {
-      return this.setPushSites(data.appKey, data, false);
+      let {id, ...site} = data;
+      return this.setPushSites(id, site);
     } else {
       let result = await model.updateOptions(data);
       this.success(result);
@@ -83,7 +88,7 @@ export default class extends Base {
       if( think.isEmpty(key) ) {
         return this.fail('KEY_EMPTY');
       }
-      return this.setPushSites(key, null, false);
+      return this.setPushSites(key, null);
     } else {
       return super.deleteAction();
     }
@@ -94,29 +99,34 @@ export default class extends Base {
     return options.push_sites || {};
   }
 
-  async setPushSites(key, data, only = true) {
+  async setPushSites(key, data) {
     let push_sites = await this.getPushSites();
-    if( only && push_sites.hasOwnProperty(key) ) {
+
+    /** 新添加的 push_sites 要校验唯一性 **/
+    if( !key && push_sites.hasOwnProperty(data.appKey) ) {
       return this.fail('KEY_EXIST');
     }
 
-    if( data === null ) {
+    /** 无论修改还是删除都把原来的删除掉 **/
+    if( key ) {
       delete push_sites[key];
-    } else {
+    }
+
+    /** 无论是新增还是修改先将新的数据添加进去 **/
+    if( data ) {
       /** 需要增加验证 key 正确性的请求 **/
       let reqInstance = think.promisify(request.get);
-      let {appKey, appSecret} = data;
-      let auth_key = (new PasswordHash).hashPassword(`${appSecret}Firekylin`);
-      let checkUrl = `${data.url}/admin/post_push?app_key=${appKey}&auth_key=${auth_key}`;
+      let auth_key = (new PasswordHash).hashPassword(`${data.appSecret}Firekylin`);
+      let checkUrl = `${data.url}/admin/post_push?app_key=${data.appKey}&auth_key=${auth_key}`;
       let result = await reqInstance(checkUrl);
       try{
         result = JSON.parse(result.body);
       }catch(e){
         return this.fail('APP_KEY_SECRET_ERROR');
       }
-      
+
       if( !result.errno ) {
-        push_sites[key] = data;
+        push_sites[data.appKey] = data;
       } else {
         return this.fail(result.errmsg);
       }

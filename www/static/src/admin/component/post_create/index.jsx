@@ -49,6 +49,7 @@ export default class extends Base {
       push_sites: []
     });
   }
+
   constructor(props){
     super(props);
     this.state = this.initialState();
@@ -164,6 +165,9 @@ export default class extends Base {
     values.push_sites = this.state.postInfo.push_sites;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
+
+    let push_sites = this.state.push_sites.map(({appKey}) => appKey);
+    this.state.postInfo.options.push_sites = this.state.postInfo.options.push_sites.filter(appKey => push_sites.includes(appKey));
     values.options = JSON.stringify(this.state.postInfo.options);
     PostAction.save(values);
   }
@@ -195,6 +199,7 @@ export default class extends Base {
 
     //baseUrl
     let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
+    let push_sites = this.state.postInfo.options.push_sites;
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -357,10 +362,9 @@ export default class extends Base {
                               type="checkbox"
                               name="push_sites"
                               value={site.appKey}
-                              checked={this.state.postInfo.options.push_sites.indexOf(site.appKey) > -1}
+                              checked={push_sites.includes(site.appKey)}
                               onChange={()=>{
-                                let push_sites = this.state.postInfo.options.push_sites;
-                                if( push_sites.indexOf(site.appKey) > -1 ) {
+                                if( push_sites.includes(site.appKey) ) {
                                   this.state.postInfo.options.push_sites = push_sites.filter(appKey => appKey != site.appKey);
                                 } else {
                                   this.state.postInfo.options.push_sites.push(site.appKey);
