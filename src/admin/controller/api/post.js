@@ -6,6 +6,11 @@ import markToc from "marked-toc";
 import {PasswordHash} from 'phpass';
 import highlight from 'highlight.js';
 
+request.defaults({
+  strictSSL: false,
+  rejectUnauthorized: false
+});
+
 export default class extends Base {
   modelInstance = this.modelInstance.where({type: 0});
   /**
