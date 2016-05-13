@@ -6,6 +6,11 @@ import request from 'request';
 import xml2js from 'xml2js';
 import toMarkdown from 'to-markdown';
 
+request.defaults({
+  strictSSL: false,
+  rejectUnauthorized: false
+});
+
 export default class extends Base {
   async postAction() {
     /** 处理远程抓取 **/
