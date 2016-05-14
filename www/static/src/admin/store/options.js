@@ -5,7 +5,7 @@ import firekylin from '../../common/util/firekylin';
 
 import OptionsAction from '../action/options';
 
-export default Reflux.createStore({ 
+export default Reflux.createStore({
 
   listenables: OptionsAction,
   /**
@@ -47,6 +47,20 @@ export default Reflux.createStore({
     }).catch(err => {
       this.trigger(err, 'saveCommentFail');
     });
+  },
+  onDefaultCategory(id){
+    let url = '/admin/api/options?type=defaultCategory', req;
+    if( id ) {
+      url += '&method=put';
+      req = superagent.post(url).type('form').send({id});
+      return firekylin.request(req)
+        .then(data => this.trigger(data, 'saveDefaultCategorySuccess'))
+        .catch(err => this.trigger(err, 'saveDefaultCategoryFailed'));
+    } else {
+      req = superagent.get(url);
+      return firekylin.request(req)
+        .then(data => this.trigger(data, 'getDefaultCategorySuccess'))
+        .catch(err => this.trigger(err, 'getDefaultCategoryFailed'));
+    }
   }
-
 })

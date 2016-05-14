@@ -8,18 +8,23 @@ import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
+import OptionsAction from '../action/options';
+import OptionsStore from '../store/options';
 
 export default class extends Base {
   constructor(props){
     super(props);
     this.state = {
       loading: true,
-      cateList: []
+      cateList: [],
+      defaultCategory: null
     }
   }
   componentDidMount(){
     this.listenTo(CateStore, this.handleTrigger.bind(this));
+    this.listenTo(OptionsStore, this.getOptionTrigger.bind(this));
     CateAction.select();
+    OptionsAction.defaultCategory();
   }
   handleTrigger(data, type){
     switch(type){
@@ -35,6 +40,42 @@ export default class extends Base {
         break;
     }
   }
+  getOptionTrigger(data, type) {
+    switch(type) {
+      case 'getDefaultCategorySuccess':
+        this.setState({defaultCategory: data});
+        break;
+      case 'saveDefaultCategorySuccess':
+        TipAction.success('默认分类设置成功');
+        OptionsAction.defaultCategory();
+        break;
+    }
+  }
+  renderDefaultCategoryBtn(id) {
+    if( this.state.defaultCategory == id ) {
+      return (
+        <button
+            disabled
+            type="button"
+            className="btn btn-success btn-xs"
+        >
+          <span className="glyphicon glyphicon-star"></span>
+          默认
+        </button>
+      );
+    }
+
+    return (
+      <button
+          type="button"
+          className="btn btn-success btn-xs"
+          onClick={()=> OptionsAction.defaultCategory(id)}
+      >
+        <span className="glyphicon glyphicon-star"></span>
+        默认
+      </button>
+    );
+  }
   getCateList(){
     if(this.state.loading){
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
@@ -49,6 +90,8 @@ export default class extends Base {
           <td>{item.pathname}</td>
           <td>{item.post_cate}</td>
           <td>
+            {this.renderDefaultCategoryBtn(item.id)}
+            <span> </span>
             <Link to={`/cate/edit/${item.id}`} title={item.name}>
               <button type="button" className="btn btn-primary btn-xs">
                 <span className="glyphicon glyphicon-edit"></span>

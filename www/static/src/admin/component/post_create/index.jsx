@@ -23,10 +23,14 @@ import firekylin from 'common/util/firekylin';
 import ModalAction from 'common/action/modal';
 import PushStore from 'admin/store/push';
 import PushAction from 'admin/action/push';
+import OptionsAction from 'admin/action/options';
+import OptionsStore from 'admin/store/options';
+
 import './style.css';
 
 export default class extends Base {
   initialState() {
+    OptionsAction.defaultCategory();
     return Object.assign({
       postSubmitting: false,
       draftSubmitting: false,
@@ -62,7 +66,6 @@ export default class extends Base {
   componentWillMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
     this.listenTo(PushStore, this.pushHandleTrigger.bind(this));
-
     this.listenTo(CateStore, cateList => {
       let list = cateList.filter(cate => cate.pid === 0);
       for(let i=0,l=list.length; i<l; i++) {
@@ -73,7 +76,10 @@ export default class extends Base {
       this.setState({cateList: list});
     });
     this.listenTo(TagStore, tagList => this.setState({tagList}));
-
+    this.listenTo(OptionsStore, data => {
+      this.state.postInfo.cate.push( {id: +data} );
+      this.forceUpdate();
+    });
     CateAction.select();
     TagAction.select();
     if(this.id){
@@ -124,6 +130,8 @@ export default class extends Base {
         data.cate.forEach(item => this.cate[item.id] = true);
         if( !data.options ) {
           data.options = {push_sites: []};
+        } else if( typeof(data.options) === 'string' ) {
+          data.options = JSON.parse(data.options);
         }
         this.setState({postInfo: data});
         break;
@@ -199,6 +207,7 @@ export default class extends Base {
     //baseUrl
     let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
     let push_sites = this.state.postInfo.options.push_sites;
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -350,7 +359,7 @@ export default class extends Base {
                     </label>
                   </div>
                 </div>
-                {SysConfig.userInfo.type === 1 && this.state.push_sites.length > 0 ?
+                {SysConfig.userInfo.type == 1 && this.state.push_sites.length > 0 ?
                 <div className="form-group">
                   <label className="control-label">文章推送</label>
                   <ul>
