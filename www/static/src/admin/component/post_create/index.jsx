@@ -103,6 +103,7 @@ export default class extends Base {
     let initialState = this.initialState();
     initialState.cateList = this.state.cateList;
     initialState.tagList = this.state.tagList;
+    initialState.push_sites = this.state.push_sites;
     this.setState(initialState);
   }
   /**
