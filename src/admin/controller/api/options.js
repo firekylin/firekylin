@@ -39,6 +39,8 @@ export default class extends Base {
       let push_sites = await this.getPushSites();
       let result = this.get('key') ? push_sites[this.get('key')] : Object.values(push_sites);
       return this.success(result);
+    } else if(type === 'defaultCategory') {
+      return this.success(options.defaultCategory || '');
     }
     return this.success();
   }
@@ -75,6 +77,9 @@ export default class extends Base {
     if( type === 'push' ) {
       let {id, ...site} = data;
       return this.setPushSites(id, site);
+    } else if( type == 'defaultCategory') {
+      let result = await model.updateOptions('defaultCategory', data.id);
+      this.success(result);
     } else {
       let result = await model.updateOptions(data);
       this.success(result);
