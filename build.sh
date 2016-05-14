@@ -1,6 +1,8 @@
 #!/bin/sh
 if [ -d "/home/q/php/STC" ];then
 STC_PATH="/home/q/php/STC"
+elif [ -d "/Users/lizheming/Desktop/workspace/stc" ]; then
+STC_PATH="/Users/lizheming/Desktop/workspace/stc"
 else
 STC_PATH="/Users/welefen/Develop/git/stc/src"
 fi
