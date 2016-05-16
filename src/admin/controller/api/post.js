@@ -148,7 +148,7 @@ export default class extends Base {
     if( post.markdown_content.slice(0, 5) !== '> 原文：') {
       let options = await this.model('options').getOptions();
       let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.http.host}`;
-      post.markdown_content = `> 原文：${site_url}/post/${post.pathname}
+      post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
 
 ${post.markdown_content}`;
     }
