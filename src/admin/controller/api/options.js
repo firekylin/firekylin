@@ -1,13 +1,7 @@
 'use strict';
 import Base from './base.js';
-import request from 'request';
 import speakeasy from 'speakeasy';
-import {PasswordHash} from 'phpass';
-
-request.defaults({
-  strictSSL: false,
-  rejectUnauthorized: false
-});
+import push2Firekylin from 'push-to-firekylin';
 
 export default class extends Base {
   /**
@@ -120,21 +114,12 @@ export default class extends Base {
     /** 无论是新增还是修改先将新的数据添加进去 **/
     if( data ) {
       /** 需要增加验证 key 正确性的请求 **/
-      let reqInstance = think.promisify(request.get);
-      let auth_key = (new PasswordHash).hashPassword(`${data.appSecret}Firekylin`);
-      let checkUrl = `${data.url}/admin/post_push?app_key=${data.appKey}&auth_key=${auth_key}`;
-      let result = await reqInstance(checkUrl);
-      try{
-        result = JSON.parse(result.body);
-      }catch(e){
-        return this.fail('APP_KEY_SECRET_ERROR');
+      let {url, appKey, appSecret} = data;
+      let result = await (new push2Firekylin(url, appKey, appSecret)).authorize();
+      if( result.errno ) {
+        return this.fail('APP_KEY_SECRET_ERROR', result.errmsg);
       }
-
-      if( !result.errno ) {
-        push_sites[data.appKey] = data;
-      } else {
-        return this.fail(result.errmsg);
-      }
+      push_sites[data.appKey] = data;
     }
 
     let result = await this.model('options').updateOptions('push_sites', JSON.stringify(push_sites));

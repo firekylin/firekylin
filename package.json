@@ -20,6 +20,7 @@
     "nodemailer": "^2.3.2",
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
+    "push-to-firekylin": "^0.2.2",
     "request": "^2.69.0",
     "source-map-support": "^0.4.0",
     "speakeasy": "2.0.0",
