@@ -127,6 +127,7 @@ export default class extends Base {
   }
 
   async pushPost(post) {
+    console.log(post);
     let postOpt = JSON.parse(post.options);
     let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
     if( post.status != 3 && post.is_public != 1 && !canPush ) {
@@ -137,7 +138,6 @@ export default class extends Base {
     let options = await this.model('options').getOptions();
     let push_sites = options.push_sites;
     let push_sites_keys = postOpt.push_sites;
-    let passwordHash = new PasswordHash();
 
     if( post.markdown_content.slice(0, 5) !== '> 原文：') {
       let options = await this.model('options').getOptions();
@@ -155,7 +155,8 @@ ${post.markdown_content}`;
       let p2fk = new push2Firekylin(url, appKey, appSecret);
       return p2fk.push(post);
     });
-    await Promise.all(pushes);
+    let result = await Promise.all(pushes);
+    console.log('push result for debug: ', result);
   }
 
   async lastest() {

@@ -116,6 +116,7 @@ export default class extends Base {
       /** 需要增加验证 key 正确性的请求 **/
       let {url, appKey, appSecret} = data;
       let result = await (new push2Firekylin(url, appKey, appSecret)).authorize();
+      console.log(result);
       if( result.errno ) {
         return this.fail('APP_KEY_SECRET_ERROR', result.errmsg);
       }
