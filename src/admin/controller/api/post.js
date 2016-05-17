@@ -1,15 +1,9 @@
 'use strict';
 import marked from "marked";
 import Base from './base.js';
-import request from 'request';
 import markToc from "marked-toc";
-import {PasswordHash} from 'phpass';
 import highlight from 'highlight.js';
-
-request.defaults({
-  strictSSL: false,
-  rejectUnauthorized: false
-});
+import push2Firekylin from 'push-to-firekylin';
 
 export default class extends Base {
   modelInstance = this.modelInstance.where({type: 0});
@@ -133,6 +127,7 @@ export default class extends Base {
   }
 
   async pushPost(post) {
+    console.log(post);
     let postOpt = JSON.parse(post.options);
     let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
     if( post.status != 3 && post.is_public != 1 && !canPush ) {
@@ -143,7 +138,6 @@ export default class extends Base {
     let options = await this.model('options').getOptions();
     let push_sites = options.push_sites;
     let push_sites_keys = postOpt.push_sites;
-    let passwordHash = new PasswordHash();
 
     if( post.markdown_content.slice(0, 5) !== '> 原文：') {
       let options = await this.model('options').getOptions();
@@ -152,18 +146,17 @@ export default class extends Base {
 
 ${post.markdown_content}`;
     }
-
-    async function push(post, {appKey, appSecret, url}) {
-      let auth_key = passwordHash.hashPassword(`${appSecret}${post.markdown_content}`);
-      Object.assign(post, {app_key:appKey, auth_key});
-      request.post({url: url + '/admin/post_push', form: post}, (err, res, body) => console.log(err, res, body));
-    }
-
     delete post.cate;
     delete post.options;
+
     if(!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys]; }
-    let pushes = push_sites_keys.map(key => push(post, push_sites[key]));
-    await Promise.all(pushes);
+    let pushes = push_sites_keys.map(key => {
+      let {appKey, appSecret, url} = push_sites[key];
+      let p2fk = new push2Firekylin(url, appKey, appSecret);
+      return p2fk.push(post);
+    });
+    let result = await Promise.all(pushes);
+    console.log('push result for debug: ', result);
   }
 
   async lastest() {
