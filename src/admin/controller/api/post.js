@@ -225,12 +225,13 @@ ${post.markdown_content}`;
       return `<a href="#${this.generateTocName(c)}">${c}</a>`;
     });
 
-    let markedContent = marked(content).replace(/<h(\d)[^<>]*>(.*?)<\/h\1>/g, (a, b, c) => {
-      if(b == 2){
-        return `<h${b} id="${this.generateTocName(c)}">${c}</h${b}>`;
-      }
-      return `<h${b} id="${this.generateTocName(c)}"><a class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
-    });
+    let markedContent = marked(content);
+    // markedContent = markedContent.replace(/<h(\d)[^<>]*>(.*?)<\/h\1>/g, (a, b, c) => {
+    //   if(b == 2){
+    //     return `<h${b} id="${this.generateTocName(c)}">${c}</h${b}>`;
+    //   }
+    //   return `<h${b} id="${this.generateTocName(c)}"><a class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
+    // });
     // markedContent = markedContent.replace(/<h(\d)[^<>]*>([^<>]+)<\/h\1>/, (a, b, c) => {
     //   return `${a}<div class="toc">${tocContent}</div>`;
     // });
