@@ -21,6 +21,7 @@ export default class extends Base {
     if(typeof comment === 'string'){
       comment = JSON.parse(comment);
     }
+    comment.name = unescape(comment.name);
     this.state = {
       submitting: false,
       comment: comment
