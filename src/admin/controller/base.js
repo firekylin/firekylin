@@ -34,6 +34,7 @@ export default class extends think.controller.base {
     //不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);
+    options.comment.name = escape(options.comment.name);
     delete options.push_sites; //不显示推送的配置，会有安全问题
     this.assign('options', options);
     return this.display('index/index');
