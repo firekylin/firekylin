@@ -44,7 +44,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 ## 配置 nginx
 
-将项目下的 `nginx_default.conf` 改为 `nginx_conf`，修改文件中的 `server_name`、`root` 和 `set $node_port` 等配置值，然后将该文件软链到 nginx 的配置目录下。
+将项目下的 `nginx_default.conf` 改为 `nginx.conf`，修改文件中的 `server_name`、`root` 和 `set $node_port` 等配置值，然后将该文件软链到 nginx 的配置目录下。
 
 假设 nginx 的配置目录为 `/usr/local/nginx/conf/include`，那么可以通过下面的命令设置软链：
 
