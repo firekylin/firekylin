@@ -207,7 +207,7 @@ export default class extends Base {
 
     //baseUrl
     let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
-    let push_sites = this.state.postInfo.options.push_sites;
+    let push_sites = this.state.postInfo.options.push_sites || [];
 
     return (
       <div className="fk-content-wrap">
