@@ -134,6 +134,7 @@ export default class extends Base {
         } else if( typeof(data.options) === 'string' ) {
           data.options = JSON.parse(data.options);
         }
+        data.options.push_sites = data.options.push_sites || [];
         this.setState({postInfo: data});
         break;
     }
