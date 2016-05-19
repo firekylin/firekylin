@@ -3,6 +3,8 @@ if [ -d "/home/q/php/STC" ];then
 STC_PATH="/home/q/php/STC"
 elif [ -d "/Users/lizheming/Desktop/workspace/stc" ]; then
 STC_PATH="/Users/lizheming/Desktop/workspace/stc"
+elif [ -d "/Users/akira_cn/Workspace/thinkjs/firekylin/stc/src" ]; then
+STC_PATH="/Users/akira_cn/Workspace/thinkjs/firekylin/stc/src"
 else
 STC_PATH="/Users/welefen/Develop/git/stc/src"
 fi
@@ -61,10 +63,12 @@ fi
 
 npm run compile;
 npm run copy-package;
+
 cp -r app output;
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
+
 
 cp -r db/firekylin.sql output/;
 if [ 0 -eq `grep -c analyze_code  output/firekylin.sql` ];then
