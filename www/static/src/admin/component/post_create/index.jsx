@@ -134,6 +134,7 @@ export default class extends Base {
         } else if( typeof(data.options) === 'string' ) {
           data.options = JSON.parse(data.options);
         }
+        data.options.push_sites = data.options.push_sites || [];
         this.setState({postInfo: data});
         break;
     }
@@ -207,7 +208,7 @@ export default class extends Base {
 
     //baseUrl
     let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
-    let push_sites = this.state.postInfo.options.push_sites;
+    let push_sites = this.state.postInfo.options.push_sites || [];
 
     return (
       <div className="fk-content-wrap">
