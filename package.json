@@ -1,6 +1,6 @@
 {
   "name": "Firekylin",
-  "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2005+",
+  "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+",
   "version": "0.11.0",
   "scripts": {
     "start": "node www/development.js",
