@@ -87,3 +87,5 @@ rm -rf firekylin/;
 
 cd build;
 tar zxvfm $TARNAME;
+
+scp build/$TARNAME qiwoo@firekylin.org:/home/qiwoo/www/firekylin.org/www/release;
