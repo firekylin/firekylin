@@ -11,12 +11,12 @@ import SystemStore from 'admin/store/system';
 
 export default class extends Base {
   state = {
-    platform: 'Linux',
-    nodeVersion: '4.2',
-    v8Version: '1.1',
-    mysqlVersion: 'xxx',
-    thinkjsVersion: '2.1',
-    firekylinVersion: '2.0',
+    platform: '',
+    nodeVersion: '',
+    v8Version: '',
+    mysqlVersion: '',
+    thinkjsVersion: '',
+    firekylinVersion: '',
     posts: [],
     count: {
       posts: 0,
@@ -67,7 +67,11 @@ export default class extends Base {
                 <li><label>V8引擎版本：</label>{this.state.v8Version}</li>
                 <li><label>MySQL版本：</label>{this.state.mysqlVersion}</li>
                 <li><label>ThinkJS版本：</label>{this.state.thinkjsVersion}</li>
-                <li><label>FireKylin版本：</label>{this.state.firekylinVersion}</li>
+                <li>
+                  <label>FireKylin版本：</label>
+                  {this.state.firekylinVersion}
+                  {!this.state.isLatest ? <a className="fk-new-verstion" href="http://firekylin.org/release/latest.tar.gz" target="_blank">NEW!</a> : null}
+                </li>
               </ul>
             </div>
             <div className="col-md-4">
