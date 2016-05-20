@@ -74,15 +74,19 @@ article em {
 }
 
 article blockquote {
-  margin-top:10px;
+  margin:10px 0 0 0;
   padding:15px 20px;
   border-left:5px solid #2479CC;
   background-color: #f8f8f8;
-  margin-left: 0;
 }
 
 article blockquote p{
   margin-bottom: 0;
+}
+
+article blockquote a{
+  word-break: break-all;
+  word-wrap: break-word;
 }
 
 article code {
