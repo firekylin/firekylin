@@ -39,6 +39,11 @@ export default class extends Base {
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
         <div className="manage-container">
+          {this.state.needUpdate ?
+            <p className="bg-info" style={{padding: 15, color: '#337ab7'}}>
+              Firekylin {this.state.needUpdate} 已经发布，请立即<a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a>！
+            </p>
+          : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
           <p>目前有 {this.state.count.posts} 篇文章, 并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
@@ -67,11 +72,7 @@ export default class extends Base {
                 <li><label>V8引擎版本：</label>{this.state.v8Version}</li>
                 <li><label>MySQL版本：</label>{this.state.mysqlVersion}</li>
                 <li><label>ThinkJS版本：</label>{this.state.thinkjsVersion}</li>
-                <li>
-                  <label>FireKylin版本：</label>
-                  {this.state.firekylinVersion}
-                  {!this.state.isLatest ? <a className="fk-new-verstion" href="http://firekylin.org/release/latest.tar.gz" target="_blank">NEW!</a> : null}
-                </li>
+                <li><label>FireKylin版本：</label>{this.state.firekylinVersion}</li>
               </ul>
             </div>
             <div className="col-md-4">

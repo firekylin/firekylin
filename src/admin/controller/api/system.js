@@ -20,10 +20,12 @@ export default class extends base {
   }
 
   async getAction() {
-    let isLatest = true;
+    let needUpdate = false;
     try {
       let onlineVersion = await reqIns('http://firekylin.org/release/.latest');
-      isLatest = semver.lte(onlineVersion, pack.version);
+      if( semver.gt(onlineVersion, pack.version) ) {
+        needUpdate = onlineVersion;
+      }
     } catch(e) {
       console.log(e);
     }
@@ -36,7 +38,7 @@ export default class extends base {
       thinkjsVersion: think.version,
       firekylinVersion: pack.version,
       mysqlVersion: mysql[0].version,
-      isLatest
+      needUpdate
     };
     //非管理员只统计当前用户文章
     let where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
