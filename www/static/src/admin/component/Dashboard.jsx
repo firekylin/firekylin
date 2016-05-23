@@ -11,12 +11,12 @@ import SystemStore from 'admin/store/system';
 
 export default class extends Base {
   state = {
-    platform: 'Linux',
-    nodeVersion: '4.2',
-    v8Version: '1.1',
-    mysqlVersion: 'xxx',
-    thinkjsVersion: '2.1',
-    firekylinVersion: '2.0',
+    platform: '',
+    nodeVersion: '',
+    v8Version: '',
+    mysqlVersion: '',
+    thinkjsVersion: '',
+    firekylinVersion: '',
     posts: [],
     count: {
       posts: 0,
@@ -39,6 +39,11 @@ export default class extends Base {
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
         <div className="manage-container">
+          {this.state.needUpdate ?
+            <p className="bg-info" style={{padding: 15, color: '#337ab7'}}>
+              Firekylin {this.state.needUpdate} 已经发布，请立即<a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a>！
+            </p>
+          : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
           <p>目前有 {this.state.count.posts} 篇文章, 并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
