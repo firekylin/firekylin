@@ -153,6 +153,7 @@ export default class extends Base {
       } else {
         summary = item['content:encoded'][0];
       }
+      
       let post = {
         title: item.title[0],
         pathname: decodeURIComponent(item['wp:post_name'][0]),
@@ -163,8 +164,8 @@ export default class extends Base {
         status: postStatus[ item['wp:status'][0] ] || 0,
         user_id: user.id,
         comment_num: 0,
-        allow_comment: item['wp:comment_status'][0] === 'open',
-        is_public: item['wp:status'][0] !== 'private',
+        allow_comment: Number(item['wp:comment_status'][0] === 'open'),
+        is_public: Number(item['wp:status'][0] !== 'private'),
         tag: item.hasOwnProperty('category') ? item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
         cate
       };
