@@ -92,8 +92,8 @@ rm -rf firekylin/;
 cd build;
 tar zxvfm $TARNAME;
 
-HOST=qiwoo@firekylin.org;
-REMOTE_TAR=/home/qiwoo/www/firekylin.org/www/release;
+HOST="qiw""oo@firekylin.org";
+REMOTE_TAR="/home/qiw""oo/www/firekylin.org/www/release";
 scp $TARNAME $HOST:$REMOTE_TAR;
 ssh $HOST cp $REMOTE_TAR/$TARNAME $REMOTE_TAR/latest.tar.gz;
 ssh $HOST "echo $VERSION > $REMOTE_TAR/.latest";
