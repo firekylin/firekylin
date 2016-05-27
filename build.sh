@@ -1,7 +1,5 @@
 #!/bin/sh
-if [ -d "/home/q/php/STC" ];then
-STC_PATH="/home/q/php/STC"
-elif [ -d "/Users/lizheming/Desktop/workspace/stc" ]; then
+if [ -d "/Users/lizheming/Desktop/workspace/stc" ]; then
 STC_PATH="/Users/lizheming/Desktop/workspace/stc"
 elif [ -d "/Users/akira_cn/Workspace/thinkjs/firekylin/stc/src" ]; then
 STC_PATH="/Users/akira_cn/Workspace/thinkjs/firekylin/stc/src"
