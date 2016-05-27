@@ -287,12 +287,12 @@ class MdEditor extends React.Component {
       <Tabs defaultActiveKey={1}>
         <Tab eventKey={1} title="本地上传">
           <div style={{margin: '20px 0'}}>
-            <input type="file" name="file" onChange={e=> this.setState({file: e.target.files})} />
+            <input type="file" name="file" onChange={e=> this.setState({file: e.target.files, fileUrl: null})} />
           </div>
         </Tab>
         <Tab eventKey={2} title="从网络上抓取">
           <div style={{margin: '20px 0'}}>
-            <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value})} />
+            <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value, file: null})} />
           </div>
         </Tab>
       </Tabs>,
