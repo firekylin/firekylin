@@ -29,7 +29,6 @@ return array (
 	'MOD_STRING_REPLACE' => false,  //代码替换功能
 	'MOD_STATIC_VERSION' => 1,  //静态文件版本号，1或者true为query,2为新文件模式
 	'MOD_INLINE_TO_LS2' => true,
+//	'COMPRESS_JS_USE_JINGCHUANG' => false,
 	'LS_APP_ID' => '3e988cdb',
 );
-
-

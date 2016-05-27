@@ -27,7 +27,7 @@ return array (
 	'MOD_JS_TPL_REPLACE' => false,  //前端模版替换
 	'MOD_EXTERNAL_TO_INLINE' => false,  //外链资源编译为内联资源
 	'MOD_STRING_REPLACE' => false,  //代码替换功能
-	'COMPRESS_JS_USE_JINGCHUANG' => false,
+//	'COMPRESS_JS_USE_JINGCHUANG' => false,
 	'MOD_STATIC_VERSION' => 1  //静态文件版本号，1或者true为query,2为新文件模式
 );
 
