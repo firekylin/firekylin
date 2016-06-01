@@ -20,7 +20,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 ## 安装
 
-[下载最新的安装包 - v0.12.0](http://firekylin.org/release/firekylin_0.12.0.tar.gz)
+[下载最新的安装包 - v0.12.2](http://firekylin.org/release/firekylin_0.12.2.tar.gz)
 
 ## 安装依赖
 
