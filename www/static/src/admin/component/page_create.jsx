@@ -42,6 +42,13 @@ export default class extends PostCreate {
           data.create_time = '';
         }
         data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
+        if( !data.options ) {
+          data.options = {push_sites: []};
+        } else if( typeof(data.options) === 'string' ) {
+          data.options = JSON.parse(data.options);
+        } else {
+          data.options.push_sites = data.options.push_sites || [];
+        }
         this.setState({postInfo: data});
         break;
     }

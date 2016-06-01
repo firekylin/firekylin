@@ -113,6 +113,7 @@ export default class extends Base {
    * @return {[type]}      [description]
    */
   handleTrigger(data, type){
+    console.log(type, data);
     switch(type){
       case 'savePostFail':
         this.setState({draftSubmitting: false, postSubmitting: false});
@@ -133,8 +134,9 @@ export default class extends Base {
           data.options = {push_sites: []};
         } else if( typeof(data.options) === 'string' ) {
           data.options = JSON.parse(data.options);
+        } else {
+          data.options.push_sites = data.options.push_sites || [];
         }
-        data.options.push_sites = data.options.push_sites || [];
         this.setState({postInfo: data});
         break;
     }
