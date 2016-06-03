@@ -9,7 +9,7 @@ import TipAction from 'common/action/tip';
 export default class extends Base {
   state = {
     uploading: false
-  }
+  };
   handleValidSubmit(e) {
     this.setState({uploading: true});
     var form = new FormData();
