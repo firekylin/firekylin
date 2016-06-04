@@ -22,11 +22,17 @@
 
         <div class="post-info">
             <p>
+                作者
+                {% set user = detail.user %}
+                <a href="/author/{{user.name}}" data-user="{{user.display_name}}">
+                    <code class="notebook">{% if user.display_name %}{{user.display_name}}{% else %}{{user.name}}{% endif %}</code>
+                </a>
+
                 发表于
                 <i>{{think.datetime(detail.create_time)}}</i>
 
                 {% if detail.cate.length %}
-                ，添加在分类 
+                ，添加在分类
                 {% for cate in detail.cate %}
                 <a href="/cate/{{cate.name}}" data-cate="{{cate.name}}">
                     <code class="notebook">{{cate.name}}</code>
@@ -36,7 +42,7 @@
                 {% endif %}
 
                 {% if detail.tag.length %}
-                ，并被添加「 
+                ，并被添加「
                 {% for tag in detail.tag %}
                 <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
                     <code class="notebook">{{tag.name}}</code>

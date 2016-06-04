@@ -47,6 +47,8 @@ export default class extends think.model.relation {
    */
   async getPostList(page, options = {}){
     let field = options.field || 'id,title,pathname,create_time,summary,comment_num';
+    if( (await this.model('user').count()) > 1 ) { field += ',user_id'; }
+    
     if(options.tag || options.cate){
       let name = options.tag ? 'tag' : 'cate';
       let {id} = await this.model(name).field('id').setRelation(false).where({name: options.tag || options.cate}).find();
@@ -70,7 +72,7 @@ export default class extends think.model.relation {
     //   },{timeout:259200});
     // }
 
-    return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
+    return this.field(field).page(page).setRelation('user').order('create_time DESC').where(where).countSelect();
   }
 
   /**
