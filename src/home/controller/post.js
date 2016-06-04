@@ -18,10 +18,18 @@ export default class extends Base {
    */
   async listAction(){
     let model = this.model('post');
-    let list = await model.getPostList(this.get('page'), {
+    let where = {
       tag: this.get('tag'),
       cate: this.get('cate')
-    });
+    };
+    if( this.get('name') ) {
+      let user = await this.model('user').where({name: this.get('name')}).find();
+      if( !think.isEmpty(user) ) {
+        where.where = {user_id: user.id};
+      }
+    }
+
+    let list = await model.getPostList(this.get('page'), where);
     this.assign('tag', this.get('tag'));
     this.assign('cate', this.get('cate'));
     this.assign('postList', list);
@@ -39,7 +47,7 @@ export default class extends Base {
       return this.redirect('/');
     }
     this.assign(detail);
-    
+
     return this.displayView('detail');
   }
 
@@ -66,7 +74,7 @@ export default class extends Base {
     this.assign('list', data);
     return this.displayView('archive');
   }
-  
+
   async tagAction(){
     let model = this.model('tag');
     let data = await model.getTagArchive();
