@@ -27,6 +27,7 @@ export default class extends think.controller.base {
     this.options = options;
     this.assign('options', options);
     this.assign('navigation', JSON.parse(options.navigation) || '');
+    this.assign('themeConfig', JSON.parse(options.themeConfig) || '');
 
     //set theme view root path
     let theme = options.theme || 'firekylin';

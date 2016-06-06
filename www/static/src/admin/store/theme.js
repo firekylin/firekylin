@@ -20,5 +20,13 @@ export default Reflux.createStore({
       data => this.trigger(data, 'saveThemeSuccess'),
       err => this.trigger(err, 'saveThemeFailed')
     );
+  },
+  onSaveThemeConfig(data) {
+    let req = superagent.post('/admin/api/options?method=put');
+    req.type('form').send({'themeConfig': JSON.stringify(data)});
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'saveThemeConfigSuccess'),
+      err => this.trigger(err, 'saveThemeConfigFailed')
+    );
   }
 })

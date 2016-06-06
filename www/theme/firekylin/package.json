@@ -1,4 +1,24 @@
 {
   "name": "firekylin",
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "configElements": [
+    {
+      "type": "text",
+      "name": "sidebarBackground",
+      "label": "主题左侧背景图片",
+      "help": "在这里，输入您需要在顶部显示的图片的URL地址。 图像宽度应大于 250 像素。 建议宽度 500 像素。 建议高度 1200 像素。"
+    },
+    {
+      "type": "textarea",
+      "name": "customCSS",
+      "label": "自定义 CSS",
+      "help": "设置网站自定义 CSS"
+    },
+    {
+      "type": "textarea",
+      "name": "customJS",
+      "label": "自定义 JS",
+      "help": "设置网站自定义 JS"
+    }
+  ]
 }
