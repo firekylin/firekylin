@@ -13,12 +13,15 @@
   <title>{% block title %}{% endblock %}</title>
   {% set lscookie = 'lscookie'%}
   <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
-  {% if themeConfig.sidebarBackground %}
+  {% if themeConfig.sidebarBackground or themeConfig.customCSS %}
   <style>
+    {% if themeConfig.sidebarBackground %}
     #sidebar {
       background: url({{themeConfig.sidebarBackground}});
       background-size:cover;
     }
+    {% endif %}
+    {% if themeConfig.customCSS %}{{themeConfig.customCSS | safe}}{% endif %}
   </style>
   {% endif %}
 </head>
@@ -95,5 +98,6 @@
 {% if options.analyze_code %}
   {{options.analyze_code | safe}}
 {% endif %}
+{% if themeConfig.customJS %}<script>{{themeConfig.customJS | safe}}</script>{% endif %}
 </body>
 </html>
