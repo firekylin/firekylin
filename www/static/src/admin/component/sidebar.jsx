@@ -32,6 +32,10 @@ export default class extends Base {
         {url: '/push/list', title: '推送列表'},
         {url: '/push/create', title: '新增推送'}
       ]},
+      {url: '/appearance', icon: 'list', title: '外观设置', type: 1, children: [
+        {url: '/appearance/theme', title: '主题管理'},
+        {url: '/appearance/navigation', title: '菜单管理'}
+      ]},
       {url: '/options', icon: 'setting', title: '系统设置', type: 1, children: [
         {url: '/options/general', title: '基本设置'},
         {url: '/options/two_factor_auth', title: '两步验证'},
