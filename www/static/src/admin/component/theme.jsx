@@ -45,7 +45,7 @@ export default class extends Base {
   }
 
   saveThemeConfig(vals) {
-    let data = Object.assign({}, vals, this.state.themeConfig);
+    let data = Object.assign({}, this.state.themeConfig, vals);
     window.SysConfig.options.themeConfig = data;
     ThemeAction.saveThemeConfig(data);
   }
@@ -79,6 +79,7 @@ export default class extends Base {
             <div>
               <select
                   name={element.name}
+                  className="form-control"
                   value={this.state.themeConfig[element.name]}
                   onChange={e => {
                     this.state.themeConfig[element.name] = e.target.value;
@@ -89,6 +90,7 @@ export default class extends Base {
                   <option key={j} value={opt.value ? opt.value : opt}>{opt.label ? opt.label : opt}</option>
                 )}
               </select>
+              <div className="help-block">{element.help ? element.help : ''}</div>
             </div>
           </div>
         );
