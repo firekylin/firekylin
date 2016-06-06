@@ -13,6 +13,14 @@
   <title>{% block title %}{% endblock %}</title>
   {% set lscookie = 'lscookie'%}
   <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
+  {% if themeConfig.sidebarBackground %}
+  <style>
+    #sidebar {
+      background: url({{themeConfig.sidebarBackground}});
+      background-size:cover;
+    }
+  </style>
+  {% endif %}
 </head>
 <body>
 <nav id="sidebar" class="behavior_1">
