@@ -1,11 +1,18 @@
 import Base from 'base';
 import React from 'react';
+import AceEditor from 'react-ace';
 import BreadCrumb from './breadcrumb';
 import TipAction from 'common/action/tip';
 import ThemeStore from 'admin/store/theme';
 import { SketchPicker } from 'react-color';
 import ThemeAction from 'admin/action/theme';
 import {Form, ValidatedInput} from 'react-bootstrap-validation';
+
+import 'brace/mode/javascript';
+import 'brace/mode/html';
+import 'brace/mode/css';
+import 'brace/theme/monokai';
+import 'brace/ext/language_tools';
 
 export default class extends Base {
   state = this.initialState();
@@ -136,25 +143,51 @@ export default class extends Base {
         );
         break;
 
-        case 'color':
-          return (
-            <div className="form-group react-color-picker" key={i}>
-              <label>{element.label}</label>
-              <div>
-                 <div className="swatch" onClick={ ()=> this.setState({[`display${element.name}`]: !this.state[`display${element.name}`]}) }>
-                  <div className="color" style={{backgroundColor: this.state.themeConfig[element.name]}}/>
-                </div>
-                { this.state[`display${element.name}`] ? <div className="popover-color">
-                  <div className="cover" onClick={ ()=> this.setState({[`display${element.name}`]: false}) }/>
-                  <SketchPicker color={ this.state.themeConfig[element.name] } onChangeComplete={color => {
-                    this.state.themeConfig[element.name] = color.hex;
-                    this.forceUpdate();
-                  }} />
-                </div> : null }
+      case 'color':
+        return (
+          <div className="form-group react-color-picker" key={i}>
+            <label>{element.label}</label>
+            <div>
+               <div className="swatch" onClick={ ()=> this.setState({[`display${element.name}`]: !this.state[`display${element.name}`]}) }>
+                <div className="color" style={{backgroundColor: this.state.themeConfig[element.name]}}/>
               </div>
+              { this.state[`display${element.name}`] ? <div className="popover-color">
+                <div className="cover" onClick={ ()=> this.setState({[`display${element.name}`]: false}) }/>
+                <SketchPicker color={ this.state.themeConfig[element.name] } onChangeComplete={color => {
+                  this.state.themeConfig[element.name] = color.hex;
+                  this.forceUpdate();
+                }} />
+              </div> : null }
             </div>
-          );
-          break;
+          </div>
+        );
+        break;
+
+      case 'css':
+      case 'html':
+      case 'javascript':
+        return (
+          <div className="form-group" key={i}>
+            <label>{element.label}</label>
+            <div>
+              <AceEditor
+                  mode={element.type}
+                  theme="monokai"
+                  width="600px"
+                  height="300px"
+                  fontSize="14px"
+                  name={`ace-editor-${element.name}-${element.type}`}
+                  value={this.state.themeConfig[element.name]}
+                  onChange={val => {
+                    this.state.themeConfig[element.name] = val;
+                    this.forceUpdate();
+                  }}
+              />
+              <div className="help-block">{element.help ? element.help : ''}</div>
+            </div>
+          </div>
+        );
+        break;
     }
   }
 

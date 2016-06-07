@@ -9,16 +9,22 @@
       "help": "在这里，输入您需要在顶部显示的图片的URL地址。 图像宽度应大于 250 像素。 建议宽度 500 像素。 建议高度 1200 像素。"
     },
     {
-      "type": "textarea",
+      "type": "css",
       "name": "customCSS",
       "label": "自定义 CSS",
       "help": "设置网站自定义 CSS"
     },
     {
-      "type": "textarea",
+      "type": "javascript",
       "name": "customJS",
       "label": "自定义 JS",
       "help": "设置网站自定义 JS"
+    },
+    {
+      "type": "html",
+      "name": "cc",
+      "label": "版权信息",
+      "help": "在每篇文章之后添加版权信息"
     }
   ]
 }
