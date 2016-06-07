@@ -3,6 +3,7 @@ import React from 'react';
 import BreadCrumb from './breadcrumb';
 import TipAction from 'common/action/tip';
 import ThemeStore from 'admin/store/theme';
+import { SketchPicker } from 'react-color';
 import ThemeAction from 'admin/action/theme';
 import {Form, ValidatedInput} from 'react-bootstrap-validation';
 
@@ -70,6 +71,45 @@ export default class extends Base {
         );
         break;
 
+      case 'checkbox':
+        if(!Array.isArray(element.options)) { return null; }
+
+        return (
+          <div className="form-group" key={i}>
+            <label>{element.label}</label>
+            <div>
+              {element.options.map((opt, j) =>
+                <label>
+                  <input
+                      key={j}
+                      type="checkbox"
+                      className="form-control"
+                      name={`element.name[]`}
+                      value={opt.value ? opt.value : opt}
+                      checked={Array.isArray(this.state.themeConfig[element.name]) && this.state.themeConfig[element.name].includes(opt.value || opt)}
+                      onChange={e => {
+                        let checked = e.target.checked;
+                        let val = opt.value ? opt.value : opt;
+                        if( Array.isArray(this.state.themeConfig[element.name]) ) {
+                          if( checked ) {
+                            this.state.themeConfig[element.name].push(val);
+                          } else {
+                            this.state.themeConfig[element.name] = this.state.themeConfig[element.name].filter(v => v !== val);
+                          }
+                        } else {
+                          this.state.themeConfig[element.name] = [val];
+                        }
+                        return this.forceUpdate();
+                      }}
+                  />
+                  {opt.label ? opt.label : opt}
+                </label>
+              )}
+            </div>
+          </div>
+        );
+        break;
+
       case 'select':
         if(!Array.isArray(element.options)) { return null; }
 
@@ -95,6 +135,26 @@ export default class extends Base {
           </div>
         );
         break;
+
+        case 'color':
+          return (
+            <div className="form-group react-color-picker" key={i}>
+              <label>{element.label}</label>
+              <div>
+                 <div className="swatch" onClick={ ()=> this.setState({[`display${element.name}`]: !this.state[`display${element.name}`]}) }>
+                  <div className="color" style={{backgroundColor: this.state.themeConfig[element.name]}}/>
+                </div>
+                { this.state[`display${element.name}`] ? <div className="popover-color">
+                  <div className="cover" onClick={ ()=> this.setState({[`display${element.name}`]: false}) }/>
+                  <SketchPicker color={ this.state.themeConfig[element.name] } onChangeComplete={color => {
+                    this.state.themeConfig[element.name] = color.hex;
+                    this.forceUpdate();
+                  }} />
+                </div> : null }
+              </div>
+            </div>
+          );
+          break;
     }
   }
 
