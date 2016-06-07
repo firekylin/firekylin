@@ -1,4 +1,5 @@
 'use strict';
+import fs from 'fs';
 
 export default class extends think.controller.base {
   /**
@@ -47,7 +48,11 @@ export default class extends think.controller.base {
    * @param  {} name []
    * @return {}      []
    */
-  displayView(name){
+  async displayView(name, back){
+    let exists = think.promisify(fs.exists);
+    if( !(await exists(this.THEME_VIEW_PATH + name + '.html')) && back ) {
+      name = back;
+    }
     return this.display(this.THEME_VIEW_PATH + name + '.html');
   }
 }
