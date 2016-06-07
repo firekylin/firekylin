@@ -48,11 +48,7 @@ export default class extends think.controller.base {
    * @param  {} name []
    * @return {}      []
    */
-  async displayView(name, back){
-    let exists = think.promisify(fs.exists);
-    if( !(await exists(this.THEME_VIEW_PATH + name + '.html')) && back ) {
-      name = back;
-    }
+  async displayView(name){
     return this.display(this.THEME_VIEW_PATH + name + '.html');
   }
 }
