@@ -13,12 +13,17 @@
   <title>{% block title %}{% endblock %}</title>
   {% set lscookie = 'lscookie'%}
   <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
-  {% if themeConfig.sidebarBackground or themeConfig.customCSS %}
+  {% if themeConfig.sidebarBackground or themeConfig.customCSS or themeConfig.sidebarColor %}
   <style>
     {% if themeConfig.sidebarBackground %}
     #sidebar {
       background: url({{themeConfig.sidebarBackground}});
       background-size:cover;
+    }
+    {% endif %}
+    {% if themeConfig.sidebarColor %}
+    #sidebar .profile span, #sidebar .buttons li a, #sidebar .buttons li a:hover{
+      color: {{themeConfig.sidebarColor}};
     }
     {% endif %}
     {% if themeConfig.customCSS %}{{themeConfig.customCSS | safe}}{% endif %}
