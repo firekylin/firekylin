@@ -54,6 +54,9 @@
                 ，最后修改于
                 <i>{{think.datetime(post.update_time)}}</i>
             </p>
+            {% if themeConfig.cc %}
+            <p>{{themeConfig.cc | safe}}</p>
+            {% endif %}
         </div>
     </article>
     {%if post.prev.title or post.next.title %}
