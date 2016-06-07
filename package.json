@@ -52,6 +52,7 @@
     "react-anything-sortable": "^1.5.0",
     "react-bootstrap": "^0.28.3",
     "react-bootstrap-validation": "^0.1.11",
+    "react-color": "^2.1.0",
     "react-datetime": "^2.0.3",
     "react-dom": "^0.14.7",
     "react-fontawesome": "^0.3.3",
