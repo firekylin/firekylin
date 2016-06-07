@@ -58,18 +58,18 @@
       <ul class="buttons">
         <li>
           {% if options.github_url %}
-          <a class="inline" target="_blank" href="{{options.github_url}}">
+          <a class="inline" rel="nofollow" target="_blank" href="{{options.github_url}}">
             <i class="iconfont icon-github-v" title="GitHub"></i>
           </a>
           {% endif %}
           {% if options.twitter_url %}
             {% if options.twitter_url.indexOf('twitter.com') > -1 %}
-            <a class="inline" target="_blank" href="{{options.twitter_url}}">
+            <a class="inline"  rel="nofollow" target="_blank" href="{{options.twitter_url}}">
               <i class="iconfont icon-twitter-v" title="Twitter"></i>
             </a>
             {% endif %}
             {% if options.twitter_url.indexOf('weibo.com') > -1 %}
-            <a class="inline" target="_blank" href="{{options.twitter_url}}">
+            <a class="inline" rel="nofollow" target="_blank" href="{{options.twitter_url}}">
               <i class="iconfont icon-weibo" title="weibo"></i>
             </a>
             {% endif %}
