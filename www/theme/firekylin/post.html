@@ -1,21 +1,21 @@
 {% extends './layout.html' %}
 
 {% block title %}
-{{detail.title}} - {{options.title}}
+{{post.title}} - {{options.title}}
 {% endblock %}
 
 {% block content %}
 <div id="page-post">
     <article class="post detail">
         <div class="meta">
-            <div class="date">{{think.datetime(detail.create_time, 'MM月DD, YYYY')}}</div>
+            <div class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</div>
             <div class="comment">
-                <a href="#comments">{{detail.comment_num}} comments</a>
+                <a href="#comments">{{post.comment_num}} comments</a>
             </div>
         </div>
-        <h1 class="title">{{detail.title}}</h1>
+        <h1 class="title">{{post.title}}</h1>
         <div class="entry-content">
-            {{detail.content | safe}}
+            {{post.content | safe}}
         </div>
         <p>本文链接：<a href="{{site_url + http.url | safe}}">{{site_url + http.url | safe}}</a></p>
         <p>-- <acronym title="End of File">EOF</acronym> --</p>
@@ -23,17 +23,17 @@
         <div class="post-info">
             <p>
                 作者
-                {% set user = detail.user %}
+                {% set user = post.user %}
                 <a href="/author/{{user.name}}" data-user="{{user.display_name}}">
                     <code class="notebook">{% if user.display_name %}{{user.display_name}}{% else %}{{user.name}}{% endif %}</code>
                 </a>
 
                 发表于
-                <i>{{think.datetime(detail.create_time)}}</i>
+                <i>{{think.datetime(post.create_time)}}</i>
 
-                {% if detail.cate.length %}
+                {% if post.cate.length %}
                 ，添加在分类
-                {% for cate in detail.cate %}
+                {% for cate in post.cate %}
                 <a href="/cate/{{cate.name}}" data-cate="{{cate.name}}">
                     <code class="notebook">{{cate.name}}</code>
                 </a>
@@ -41,9 +41,9 @@
                 下
                 {% endif %}
 
-                {% if detail.tag.length %}
+                {% if post.tag.length %}
                 ，并被添加「
-                {% for tag in detail.tag %}
+                {% for tag in post.tag %}
                 <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
                     <code class="notebook">{{tag.name}}</code>
                 </a>
@@ -52,22 +52,22 @@
                 {% endif %}
 
                 ，最后修改于
-                <i>{{think.datetime(detail.update_time)}}</i>
+                <i>{{think.datetime(post.update_time)}}</i>
             </p>
         </div>
     </article>
-    {%if prev.title or next.title %}
+    {%if post.prev.title or post.next.title %}
         <nav class="pagination">
-            {% if prev.title %}
-                <a href="/post/{{ prev.pathname }}.html" class="prev">&laquo; {{ prev.title }}</a>
+            {% if post.prev.title %}
+                <a href="/post/{{ prev.pathname }}.html" class="prev">&laquo; {{ post.prev.title }}</a>
             {% endif %}
 
-            {% if next.title %}
-                <a href="/post/{{ next.pathname }}.html" class="next">{{ next.title }} &raquo;</a>
+            {% if post.next.title %}
+                <a href="/post/{{ next.pathname }}.html" class="next">{{ post.next.title }} &raquo;</a>
             {% endif %}
         </nav>
     {% endif %}
-    {% if detail.allow_comment %}
+    {% if post.allow_comment %}
         {% include "./inc/comment.html" %}
     {% endif %}
 </div>
