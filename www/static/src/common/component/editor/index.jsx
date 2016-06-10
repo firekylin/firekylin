@@ -14,7 +14,7 @@ import TipAction from 'common/action/tip';
 class MdEditor extends React.Component {
   static defaultProps = {
     content: ''
-  }
+  };
 
   state = this.initialState();
 

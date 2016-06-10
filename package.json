@@ -25,7 +25,7 @@
     "semver": "^5.1.0",
     "source-map-support": "^0.4.0",
     "speakeasy": "2.0.0",
-    "thinkjs": "2.x.x",
+    "thinkjs": "^2.1.5",
     "to-markdown": "^2.0.1",
     "xml2js": "^0.4.16"
   },
