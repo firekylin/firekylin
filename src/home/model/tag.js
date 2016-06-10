@@ -21,13 +21,29 @@ export default class extends think.model.relation {
   }
 
   async getTagArchive(){
-    let data = await this.select();
-    data = data.map(item => {
-      item.count = item.post_tag.length;
-      return item;
-    }).sort((a, b) => {
-      return a.count > b.count ? -1 : 1;
-    })
-    return data;
+    let data = await this.model('post_tag').join({
+      table: 'tag',
+      on: ['tag_id', 'id']
+    }).join({
+      table: 'post',
+      on: ['post_id', 'id']
+    }).where({
+      type: 0,
+      status: 3,
+      is_public: 1
+    }).select();
+    let result = {};
+    for(let tag of data) {
+      if(result[tag.pathname]) {
+        result[tag.pathname].count += 1;
+      } else {
+        result[tag.pathname] = {
+          name: tag.name,
+          pathname: encodeURIComponent(tag.pathname),
+          count: 1
+        };
+      }
+    }
+    return Object.values(result).sort((a,b)=> a.count>b.count ? -1 : 1);
   }
 }
