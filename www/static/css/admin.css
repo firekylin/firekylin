@@ -95,7 +95,7 @@ ul,ol{padding:0;list-style:none;}
 .fk-side .mod-message a:hover{background:#3695D5;}
 .fk-side .mod-logo img{display:block;width:57px;height:36px;}
 .fk-side .mod-logo h1{float:left;margin:0;padding-left:10px;color:#fff;font-size:22px;line-height:40px;}
-.fk-side ul{padding:0;width:235px;list-style:none;}
+.fk-side ul{padding:0;width:235px;list-style:none;overflow:hidden;}
 .fk-side ul li{border-bottom:1px solid #434343;}
 .fk-side .active, .fk-side ul li a.active:hover{border-color:#207fbd;background:#3695D5;color:#fff;}
 .fk-side ul li ul li a{border:none;text-indent:40px;}
@@ -105,6 +105,7 @@ ul,ol{padding:0;list-style:none;}
 .fk-side ul li a:hover, .fk-side ul li ul li a:hover, .fk-side ul li ul li a.active, .fk-side ul li ul li a.active:hover{background:#323232;color:#fff;}
 .fk-side ul li a.active[data="icon"]:after{position:absolute;right:15px;content:"\e621";}
 .fk-side ul li a[data="icon"]:after{position:absolute;right:15px;content:"\e651";}
+.fk-side ul li a+ul { transition: all .5s; }
 
 /*数据内容区域 start*/
 .fk-content-wrap{position: absolute;left: 235px;top: 0;right: 0;bottom: 0;}

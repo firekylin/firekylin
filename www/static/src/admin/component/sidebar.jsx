@@ -58,19 +58,19 @@ export default class extends Base {
       active: active
     })
   }
-  getSubUlClassName(routeUrl){
-    if(this.isActive(routeUrl)){
-      return 'block';
-    }
-    return 'hide';
-  }
+  // getSubUlClassName(routeUrl){
+  //   if(this.isActive(routeUrl)){
+  //     return 'block';
+  //   }
+  //   return 'hide';
+  // }
   getSubLinkClassName(routeUrl){
     return classnames({
       active: this.isActive(routeUrl)
     })
   }
   open(routeUrl){
-    this.context.router.push(routeUrl)
+    this.context.router.push(routeUrl);
   }
   render(){
     let routes = this.state.routes;
@@ -101,7 +101,7 @@ export default class extends Base {
               </Link>
               }
               {route.children ?
-                <ul className={this.getSubUlClassName(route.url)}>
+                <ul style={{height: 49*(this.isActive(route.url) ? route.children.length : 0)}}>
                   {route.children.map((child, j) =>
                     <li key={j}>
                       <Link to={child.url} onClick={this.open.bind(this, child.url)} className={this.getSubLinkClassName(child.url)}>
