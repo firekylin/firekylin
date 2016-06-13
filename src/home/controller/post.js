@@ -31,10 +31,14 @@ export default class extends Base {
 
     let list = await model.getPostList(this.get('page'), where);
     list.data.forEach(post => post.pathname = encodeURIComponent(post.pathname));
-    this.assign('tag', this.get('tag'));
-    this.assign('cate', this.get('cate'));
-    this.assign('postList', list);
-    return this.displayView('list');
+    let {data, ...pagination} = list;
+    this.assign({
+      posts: data,
+      pagination,
+      tag: this.get('tag'),
+      cate: this.get('cate')
+    });
+    return this.displayView('index');
   }
   /**
    * post detail
@@ -48,15 +52,15 @@ export default class extends Base {
       return this.redirect('/');
     }
     detail.pathname = encodeURIComponent(detail.pathname);
-    this.assign(detail);
+    this.assign('post', detail);
 
-    return this.displayView('detail');
+    return this.displayView('post');
   }
 
   async pageAction(){
     let pathname = this.get('pathname');
     let detail = await this.model('post').setRelation(false).where({
-      pathname: pathname,
+      pathname,
       is_public: 1, //公开
       type: 1, //文章
       status: 3 //已经发布

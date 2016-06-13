@@ -48,6 +48,14 @@ export default Reflux.createStore({
       this.trigger(err, 'saveCommentFail');
     });
   },
+  onNavigation(data) {
+    let req = superagent.post('/admin/api/options?method=put');
+    req.type('form').send({'navigation': JSON.stringify(data)});
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'saveNavigationSuccess'),
+      err => this.trigger(err, 'saveNavigationFailed')
+    );
+  },
   onDefaultCategory(id){
     let url = '/admin/api/options?type=defaultCategory', req;
     if( id ) {

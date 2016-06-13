@@ -13,6 +13,22 @@
   <title>{% block title %}{% endblock %}</title>
   {% set lscookie = 'lscookie'%}
   <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
+  {% if themeConfig.sidebarBackground or themeConfig.customCSS or themeConfig.sidebarColor %}
+  <style>
+    {% if themeConfig.sidebarBackground %}
+    #sidebar {
+      background: url({{themeConfig.sidebarBackground}});
+      background-size:cover;
+    }
+    {% endif %}
+    {% if themeConfig.sidebarColor %}
+    #sidebar .profile span, #sidebar .buttons li a, #sidebar .buttons li a:hover{
+      color: {{themeConfig.sidebarColor}};
+    }
+    {% endif %}
+    {% if themeConfig.customCSS %}{{themeConfig.customCSS | safe}}{% endif %}
+  </style>
+  {% endif %}
 </head>
 <body>
 <nav id="sidebar" class="behavior_1">
@@ -24,36 +40,14 @@
           <span>{{options.title}}</span>
       </div>
       <ul class="buttons">
+          {% for nav in navigation %}
           <li>
-              <a class="" href="/" title="首页">
-                  <i class="iconfont icon-home"></i>
-                  <span>首页</span>
+              <a class="" href="{{nav.url}}" title="{{nav.label}}">
+                  <i class="iconfont icon-{{nav.option}}"></i>
+                  <span>{{nav.label}}</span>
               </a>
           </li>
-          <li>
-              <a class="" href="/archives/" title="归档">
-                  <i class="iconfont icon-archive"></i>
-                  <span>归档</span>
-              </a>
-          </li>
-          <li>
-              <a class="" href="/tags/" title="标签">
-                  <i class="iconfont icon-tags"></i>
-                  <span>标签</span>
-              </a>
-          </li>
-          <li>
-              <a class="" href="/about/" title="关于">
-                  <i class="iconfont icon-user"></i>
-                  <span>关于</span>
-              </a>
-          </li>
-          <li>
-              <a class="" href="/links/" title="友情链接">
-                  <i class="iconfont icon-link"></i>
-                  <span>友链</span>
-              </a>
-          </li>
+          {% endfor %}
       </ul>
       <ul class="buttons">
         <li>
@@ -109,5 +103,6 @@
 {% if options.analyze_code %}
   {{options.analyze_code | safe}}
 {% endif %}
+{% if themeConfig.customJS %}<script>{{themeConfig.customJS | safe}}</script>{% endif %}
 </body>
 </html>
