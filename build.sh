@@ -44,6 +44,7 @@ $PHP $STC_PATH/index.php ${path} test online;
 mkdir -p www/theme/firekylin.build/html;
 cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
 cp -r www/theme/firekylin/inc www/theme/firekylin.build/html/
+cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
 
 $PHP $STC_PATH/index.php ${path} test online config_theme.php output.theme;
