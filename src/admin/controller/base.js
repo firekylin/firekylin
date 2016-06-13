@@ -35,7 +35,9 @@ export default class extends think.controller.base {
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);
     options.comment.name = escape(options.comment.name);
-    options.navigation = JSON.parse(options.navigation);
+    try {
+      options.navigation = JSON.parse(options.navigation);
+    } catch(e) { options.navigation = []; }
     delete options.push_sites; //不显示推送的配置，会有安全问题
     this.assign('options', options);
     return this.display('index/index');
