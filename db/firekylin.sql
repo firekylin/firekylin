@@ -72,6 +72,7 @@ VALUES
   ('theme','firekylin','主题名称'),
   ('title','Firekylin 系统','网站标题'),
   ('twitter_url','','微博地址'),
+  ('navigation', '[{"label":"首页","url":"/","option":"home"},{"label":"归档","url":"/archives/","option":"archive"},{"label":"标签","url":"/tags","option":"tags"},{"label":"关于","url":"/about","option":"user"},{"label":"友链","url":"/links","option":"link"}]', '导航菜单'),
   ('two_factor_auth','','是否开启二步验证');
 
 /*!40000 ALTER TABLE `fk_options` ENABLE KEYS */;
