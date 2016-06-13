@@ -33,6 +33,10 @@ import Push from './component/push';
 import PushList from './component/push_list';
 import PushCreate from './component/push_create';
 
+import Appearance from './component/appearance';
+import Theme from './component/theme';
+import Navigation from './component/navigation';
+
 import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
@@ -87,6 +91,11 @@ ReactDOM.render((
         <Route path="list" component={PushList} />
         <Route path="create" component={PushCreate} />
         <Route path="edit/:id" component={PushCreate} />
+      </Route>
+      <Route path="appearance" component={Appearance}>
+        <Redirect from="/" to="theme" />
+        <Route path="theme" component={Theme} />
+        <Route path="navigation" component={Navigation} />
       </Route>
       <Route path="options" component={Options}>
         <Redirect from="/" to="general" />

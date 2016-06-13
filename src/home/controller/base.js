@@ -1,4 +1,5 @@
 'use strict';
+import fs from 'fs';
 
 export default class extends think.controller.base {
   /**
@@ -21,11 +22,13 @@ export default class extends think.controller.base {
     if(!firekylin.isInstalled){
       return this.redirect('/index/install');
     }
-    
+
     let model = this.model('options');
     let options = await model.getOptions();
     this.options = options;
     this.assign('options', options);
+    this.assign('navigation', JSON.parse(options.navigation) || '');
+    this.assign('themeConfig', JSON.parse(options.themeConfig) || '');
 
     //set theme view root path
     let theme = options.theme || 'firekylin';
@@ -45,7 +48,7 @@ export default class extends think.controller.base {
    * @param  {} name []
    * @return {}      []
    */
-  displayView(name){
+  async displayView(name){
     return this.display(this.THEME_VIEW_PATH + name + '.html');
   }
 }
