@@ -62,11 +62,11 @@
     {%if post.prev.title or post.next.title %}
         <nav class="pagination">
             {% if post.prev.title %}
-                <a href="/post/{{ prev.pathname }}.html" class="prev">&laquo; {{ post.prev.title }}</a>
+                <a href="/post/{{ post.prev.pathname }}.html" class="prev">&laquo; {{ post.prev.title }}</a>
             {% endif %}
 
             {% if post.next.title %}
-                <a href="/post/{{ next.pathname }}.html" class="next">{{ post.next.title }} &raquo;</a>
+                <a href="/post/{{ post.next.pathname }}.html" class="next">{{ post.next.title }} &raquo;</a>
             {% endif %}
         </nav>
     {% endif %}
