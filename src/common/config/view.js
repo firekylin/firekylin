@@ -10,7 +10,7 @@ export default {
   root_path: think.ROOT_PATH + '/view',
   adapter: {
     nunjucks: {
-      
+      prerender: (nunjucks, env) => env.addFilter('utc', time => (new Date(time)).toUTCString())
     }
   }
 };
