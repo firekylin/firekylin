@@ -28,7 +28,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
   sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
   ```
 
-  需要将 `path.to` 改为当前的项目路径， `www.example.com` 改为对应的域名。
+  需要将 `path/to` 改为当前的项目路径， `www.example.com` 改为对应的域名。
 
 ## 常见问题
 
