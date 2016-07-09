@@ -14,18 +14,32 @@ import TipAction from 'common/action/tip';
 export default class extends Base {
   constructor(props){
     super(props);
-    this.state = {
-      submitting: false,
-      userInfo: {}
-    }
+    this.state = this.initialState();
     this.id = this.props.params.id | 0;
   }
+
+  initialState() {
+    return {
+      submitting: false,
+      userInfo: {}
+    };
+  }
+
   componentDidMount(){
     this.listenTo(UserStore, this.handleTrigger.bind(this));
     if(this.id){
       UserAction.select(this.id);
     }
   }
+
+  componentWillReceiveProps(nextProps) {
+    this.id = nextProps.params.id | 0;
+    if(this.id) {
+      UserAction.select(this.id);
+    }
+    this.setState(this.initialState());
+  }
+
   /**
    * hanle trigger
    * @param  {[type]} data [description]
