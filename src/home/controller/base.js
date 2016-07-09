@@ -1,5 +1,6 @@
 'use strict';
 import fs from 'fs';
+import pack from '../../../package.json';
 
 export default class extends think.controller.base {
   /**
@@ -41,7 +42,7 @@ export default class extends think.controller.base {
     this.assign('options', options);
     this.assign('navigation', navigation);
     this.assign('themeConfig', themeConfig);
-
+    this.assign('VERSION', pack.version);
     //set theme view root path
     let theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = `${think.ROOT_PATH}${think.sep}www${think.sep}theme${think.sep}${theme}${think.sep}`;
