@@ -63,6 +63,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 * http://lisongfeng.cn - 为之漫笔
 * https://g.32ph.com/ - Steven's Club
 * https://cooxa.com/ - 大路小兵的博客
+* http://www.60sky.com/ - 小撸的博客
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 
