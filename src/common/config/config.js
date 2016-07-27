@@ -9,6 +9,7 @@ if(think.isFile(portFile)){
  * config
  */
 export default {
+  host: '127.0.0.1',
   port: port || 8360,
   resource_reg: /^(static\/|theme\/|[^\/]+\.(?!js|html|xml)\w+$)/
 };
