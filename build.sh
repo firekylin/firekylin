@@ -1,64 +1,30 @@
 #!/bin/sh
-if [ -d "/Users/lizheming/Desktop/workspace/stc" ]; then
-STC_PATH="/Users/lizheming/Desktop/workspace/stc"
-elif [ -d "/Users/akira_cn/Workspace/thinkjs/firekylin/stc/src" ]; then
-STC_PATH="/Users/akira_cn/Workspace/thinkjs/firekylin/stc/src"
-else
-STC_PATH="/Users/welefen/Develop/git/stc/src"
-fi
-path=`dirname $0`;
-first=${path:0:1};
-if [[ $first != '/' ]];then
-    path=$(pwd);
-fi
 
 rm -rf firekylin;
+rm -rf output;
+rm -rf output.theme;
 
-if [ -d ${path}"/output" ];then
-  rm -rf ${path}"/output";
-fi
-
-if [ -d ${path}"/output.theme" ];then
-  rm -rf ${path}"/output.theme";
-fi
-
-mkdir ${path}"/output";
-if [ ! -f ${path}"/config.php" ];then
-  cp $STC_PATH/config/config.php ${path};
-fi
-if [ -f /usr/local/bin/php ];then
-    PHP="/usr/local/bin/php";
-else
-    PHP="/usr/bin/php";
-fi
+mkdir output;
 
 echo 'webpack start ...';
 webpack;
 echo 'webpack end';
 
-rm -rf www/static/js/admin.bundle.js.map;
-rm -rf www/static/js/common.js.map;
-
-$PHP $STC_PATH/index.php ${path} test online;
+node stc.config.js;
 
 mkdir -p www/theme/firekylin.build/html;
 cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
 cp -r www/theme/firekylin/inc www/theme/firekylin.build/html/
 cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
+node stc.view.config.js;
 
-$PHP $STC_PATH/index.php ${path} test online config_theme.php output.theme;
 cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
 rm -rf output.theme/www/theme/firekylin.build;
 cp -r output.theme/www/ output/www/
 rm -rf output.theme;
 rm -rf www/theme/firekylin.build/;
 
-
-if [ -f ${path}"/stc.error.log" ]; then
-    rm -rf ${path}"/stc.error.log";
-    #exit 1;
-fi
 
 npm run compile;
 npm run copy-package;
@@ -90,6 +56,8 @@ rm -rf firekylin/;
 
 cd build;
 tar zxvfm $TARNAME;
+
+exit;
 
 HOST="qiw""oo@firekylin.org";
 REMOTE_TAR="/home/qiw""oo/www/firekylin.org/www/release";
