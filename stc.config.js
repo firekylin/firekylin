@@ -19,7 +19,7 @@ stc.workflow({
   uglify: {plugin: uglify, exclude: [/static\/src/]},
   cssCompress: {plugin: cssCompress},
   resourceVersion: {plugin: resourceVersion},
-  //htmlCompress: {plugin: htmlCompress}
+  htmlCompress: {plugin: htmlCompress}
 });
 
 stc.start();

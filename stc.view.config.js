@@ -22,7 +22,7 @@ stc.workflow({
   uglify: {plugin: uglify},
   cssCombine: {plugin: cssCombine, include: /\.css$/},
   cssCompress: {plugin: cssCompress},
-  //htmlCompress: {plugin: htmlCompress},
+  htmlCompress: {plugin: htmlCompress},
   localstorage: {
     include: {type: 'tpl'},
     plugin: localstorage,
