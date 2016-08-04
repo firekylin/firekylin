@@ -8,7 +8,8 @@
     "watch-compile": "node -e \"console.log('<npm run watch-compile> no longer need, use <npm start> command direct.');console.log();\"",
     "watch": "npm run watch-compile",
     "copy-package": "node copy_package.js",
-    "webpack": "webpack --watch"
+    "webpack": "webpack --watch",
+    "webpack.build": "webpack"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
@@ -61,6 +62,14 @@
     "react-mixin": "^3.0.3",
     "react-router": "^2.0.0-rc5",
     "reflux": "^0.3.0",
+    "stc": "^2.0.2",
+    "stc-css-combine": "^1.0.1",
+    "stc-css-compress": "^1.0.1",
+    "stc-html-compress": "^1.0.1",
+    "stc-localstorage": "^1.0.3",
+    "stc-localstorage-nunjucks": "^1.0.1",
+    "stc-resource-version": "^1.0.0",
+    "stc-uglify": "^1.0.1",
     "style-loader": "^0.13.0",
     "superagent": "^1.7.2",
     "webpack": "^1.12.12"
