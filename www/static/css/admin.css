@@ -43,12 +43,12 @@ ul,ol{padding:0;list-style:none;}
 #app,.fk{height: 100%;}
 /* 警告提示box */
 .fk-tips-box .modal-dialog, .fk-image-box .modal-dialog, .fk-link-box .modal-dialog, .fk-confirm-box .modal-dialog{width: 370px;}
-.fk-tips-box .modal-body{background: url(../img/warmming.png) no-repeat right 5px;}
+.fk-tips-box .modal-body{/*background: url(../img/warmming.png) no-repeat right 5px;*/}
 .fk-tips-box .modal-body p{margin: 10px 0;}
 /* 全局loading样式 */
 #fk-loading{position:fixed;top:50%;left:50%;z-index: 10001;margin: 0 0 0 -20px;width: 40px;height: 40px;border-radius: 5px;background:#000;opacity: 0.75;filter: alpha(opacity=75);}
-#fk-loading-box{width:40px;height:40px;background-image: url('../../common/loading.png');}
-.fk-loading{display:inline-block;width:16px;height:16px;background:url("img/ajax-loader.gif") no-repeat;}
+#fk-loading-box{width:40px;height:40px;/*background-image: url('../../common/loading.png');*/}
+.fk-loading{display:inline-block;width:16px;height:16px;/*background:url("img/ajax-loader.gif") no-repeat*/;}
 /* 附件上传 */
 #upload-form{position: relative;width: 0;height: 0;opacity: 0;filter:alpha(opacity=0);}
 #upload-form .file-input{position: absolute;left: 0;top: 0;width: 50px;height: 50px;opacity: 0;filter:alpha(opacity=0);}
