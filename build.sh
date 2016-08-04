@@ -57,8 +57,6 @@ rm -rf firekylin/;
 cd build;
 tar zxvfm $TARNAME;
 
-exit;
-
 HOST="qiw""oo@firekylin.org";
 REMOTE_TAR="/home/qiw""oo/www/firekylin.org/www/release";
 scp $TARNAME $HOST:$REMOTE_TAR;
