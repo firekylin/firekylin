@@ -32,6 +32,9 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 ## 常见问题
 
+- **为何我无法通过 http://ip:port 的形式访问博客？**
+    由于安全问题我们在默认配置中禁止了远端的端口访问，建议按照安装步骤配置好 nginx 代理之后再访问。
+
 - **博客后台地址是什么？**  
     你的博客地址 + `/admin`
 
