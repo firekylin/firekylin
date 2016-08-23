@@ -47,6 +47,7 @@ cp -r https.js output/;
 cp -r https.sh output/;
 
 rm -r output/app/common/config/db.js;
+rm -rf output/www/static/js/*.map;
 mv output firekylin;
 VERSION=`cat .version`;
 TARNAME=firekylin_${VERSION}.tar.gz;
@@ -56,6 +57,7 @@ rm -rf firekylin/;
 
 cd build;
 tar zxvfm $TARNAME;
+
 
 HOST="qiw""oo@firekylin.org";
 REMOTE_TAR="/home/qiw""oo/www/firekylin.org/www/release";
