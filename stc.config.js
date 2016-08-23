@@ -6,6 +6,7 @@ var resourceVersion = require('stc-resource-version');
 
 
 stc.config({
+  product: 'firekylin',
   include: ['view/', 'www/static/'],
   exclude: [/static\/src/, /static\/upload/],
   tpl: {
