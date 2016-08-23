@@ -8,6 +8,7 @@ var localstorageAdapter = require('stc-localstorage-nunjucks');
 var cssCombine = require('stc-css-combine');
 
 stc.config({
+  product: 'firekylin.view',
   include: ['www/theme/firekylin.build/html', 'www/theme/firekylin/res'],
   exclude: [],
   outputPath: 'output.theme',
