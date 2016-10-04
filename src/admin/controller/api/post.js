@@ -218,22 +218,22 @@ ${post.markdown_content}`;
     });
 
     let markedContent = marked(content);
-    // markedContent = markedContent.replace(/<h(\d)[^<>]*>(.*?)<\/h\1>/g, (a, b, c) => {
-    //   if(b == 2){
-    //     return `<h${b} id="${this.generateTocName(c)}">${c}</h${b}>`;
-    //   }
-    //   return `<h${b} id="${this.generateTocName(c)}"><a class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
-    // });
-    // markedContent = markedContent.replace(/<h(\d)[^<>]*>([^<>]+)<\/h\1>/, (a, b, c) => {
-    //   return `${a}<div class="toc">${tocContent}</div>`;
-    // });
+    markedContent = markedContent.replace(/<h(\d)[^<>]*>(.*?)<\/h\1>/g, (a, b, c) => {
+      if(b == 2){
+        return `<h${b} id="${this.generateTocName(c)}">${c}</h${b}>`;
+      }
+      return `<h${b} id="${this.generateTocName(c)}"><a class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
+    });
+    markedContent = markedContent.replace(/<h(\d)[^<>]*>([^<>]+)<\/h\1>/, (a, b, c) => {
+      return `${a}<div class="toc">${tocContent}</div>`;
+    });
 
     let highlightContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
       text = text.replace(/&#39;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\&quot;/g, '"').replace(/\&amp;/g, "&");
       var result = highlight.highlightAuto(text, language ? [language] : undefined);
       return `<pre><code class="hljs lang-${result.language}">${result.value}</code></pre>`;
     });
-
+    
     return highlightContent;
   }
 
