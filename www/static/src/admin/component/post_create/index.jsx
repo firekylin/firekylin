@@ -113,7 +113,6 @@ export default class extends Base {
    * @return {[type]}      [description]
    */
   handleTrigger(data, type){
-    console.log(type, data);
     switch(type){
       case 'savePostFail':
         this.setState({draftSubmitting: false, postSubmitting: false});

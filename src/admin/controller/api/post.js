@@ -127,7 +127,6 @@ export default class extends Base {
   }
 
   async pushPost(post) {
-    console.log(post);
     let postOpt = JSON.parse(post.options);
     let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
     if( post.status != 3 && post.is_public != 1 && !canPush ) {
