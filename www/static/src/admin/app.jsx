@@ -45,6 +45,11 @@ import Import from './component/import';
 import OptionsAnalytic from './component/options_analytic';
 import OptionsPush from './component/options_push';
 
+if( Object.freeze ) {
+  Object.freeze(window.SysConfig.userInfo);
+  Object.freeze(window.SysConfig.options);
+}
+
 let history = useRouterHistory(createHistory)({
   basename: '/admin',
   queryKey: false
