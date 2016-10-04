@@ -10,6 +10,12 @@
     },
     {
       "type": "color",
+      "name": "sidebarBackgroundColor",
+      "label": "主题左侧背景颜色",
+      "help": "选择左侧菜单背景颜色"
+    },
+    {
+      "type": "color",
       "name": "sidebarColor",
       "label": "主题左侧文字颜色"
     },
