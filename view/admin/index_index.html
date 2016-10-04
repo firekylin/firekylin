@@ -10,10 +10,10 @@
 </head>
 <body>
 <script>
-window.SysConfig = {
+window.SysConfig = Object.freeze({
   userInfo: {{JSON.stringify(userInfo) | safe}},
   options: {{JSON.stringify(options) | safe}},
-}
+});
 </script>
 <div id="app"></div>
 <script src="/static/js/common.js"></script>
