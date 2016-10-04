@@ -46,6 +46,8 @@ export default class extends think.model.relation {
    * @return {[type]}       [description]
    */
   async getPostList(page, options = {}){
+    page = page | 0 || 1;
+
     let field = options.field || 'id,title,pathname,create_time,summary,comment_num';
     if( (await this.model('user').count()) > 1 ) { field += ',user_id'; }
 
@@ -60,17 +62,16 @@ export default class extends think.model.relation {
         table: `post_${name}`,
         as: name,
         on: ['id', 'post_id']
-      }).where(where).order('create_time DESC').countSelect();
+      }).where(where).order('create_time DESC').page(page).countSelect();
     }
 
     let where = this.getWhereCondition(options.where);
-    page = page | 0 || 1;
-    //only cache first page post
-    // if(page === 1){
-    //   return think.cache('post_1', () => {
-    //     return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
-    //   },{timeout:259200});
-    // }
+    // only cache first page post
+    if(page === 1){
+      return think.cache('post_1', () => {
+        return this.field(field).page(page).setRelation(false).order('create_time DESC').where(where).countSelect();
+      },{timeout:259200});
+    }
 
     return this.field(field).page(page).setRelation('user').order('create_time DESC').where(where).countSelect();
   }
