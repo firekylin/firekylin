@@ -44,14 +44,21 @@ body.side {
 
 #main {
   background-color: #fff;
-  padding-left: 290px;
-  padding-right: 40px;
-  max-width: 1390px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-top: 72px;
   -webkit-overflow-scrolling: touch;
 }
 h1.intro{
-    padding: 20px 30px;
+  padding: 20px 30px;
   background-color: #f6f9fa;
   text-align: center;
   color: #999;
+}
+
+.placeholder-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
 }

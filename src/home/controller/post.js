@@ -111,4 +111,18 @@ export default class extends Base {
     this.assign('keyword', keyword);
     return this.displayView('search');
   }
+  /**
+   * reading action
+   * @return {[type]} [description]
+   */
+  async readingAction(){
+    return this.displayView('reading');
+  }
+  /**
+   * reading action
+   * @return {[type]} [description]
+   */
+  async homepageAction(){
+    return this.displayView('homepage');
+  }
 }

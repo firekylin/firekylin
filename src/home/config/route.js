@@ -4,6 +4,8 @@
 export default [
   [/^about$/, 'post/page?pathname=about'],
   [/^archives$/, 'post/archive'],
+  [/^homepage$/, 'post/homepage'],
+  [/^reading$/, 'post/reading'],
   [/^cate\/(.+)$/, 'post/list?cate=:1'],
   [/^tags\/(.+)$/, 'post/list?tag=:1'],
   [/^author\/([^/]+)$/, 'post/list?name=:1'],
