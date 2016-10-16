@@ -14,12 +14,14 @@
   {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor or themeConfig.customCSS or themeConfig.sidebarColor %}
   <style>
     {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor %}
-      {% if themeConfig.sidebarBackground %}
-        {% set backgroundUrl = 'url(' + themeConfig.sidebarBackground + ') ' %}
-      {% endif %}
       #sidebar {
-        background: {{backgroundUrl}}{{themeConfig.sidebarBackgroundColor}};
+        {% if themeConfig.sidebarBackground %}
+        background-image: url('{{themeConfig.sidebarBackground}}');
         background-size:cover;
+        {% endif %}
+        {% if themeConfig.sidebarBackgroundColor %}
+        background-color: {{themeConfig.sidebarBackgroundColor}};
+        {% endif %}
       }
     {% endif %}
 
