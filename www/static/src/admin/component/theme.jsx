@@ -175,7 +175,7 @@ export default class extends Base {
                   theme="monokai"
                   width="600px"
                   height="300px"
-                  fontSize="14px"
+                  fontSize={14}
                   name={`ace-editor-${element.name}-${element.type}`}
                   value={this.state.themeConfig[element.name]}
                   onChange={val => {
