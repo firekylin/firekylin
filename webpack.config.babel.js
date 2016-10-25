@@ -49,7 +49,6 @@ export default {
     ]
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin({name: 'vendor', filename: 'common.js'}),
-    //new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})
+    new webpack.optimize.CommonsChunkPlugin({name: 'vendor', filename: 'common.js'})
   ]
 };
