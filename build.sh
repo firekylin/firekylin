@@ -7,7 +7,7 @@ rm -rf output.theme;
 mkdir output;
 
 echo 'webpack start ...';
-npm run webpack.build;
+npm run webpack.build.production;
 echo 'webpack end';
 
 node stc.config.js;

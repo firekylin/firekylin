@@ -9,7 +9,8 @@
     "watch": "npm run watch-compile",
     "copy-package": "node copy_package.js",
     "webpack": "webpack --watch",
-    "webpack.build": "webpack"
+    "webpack.build": "webpack",
+    "webpack.build.production": "webpack --config=webpack.production.config.babel.js"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
@@ -52,13 +53,11 @@
     "rc-select": "^5.10.0",
     "react": "^0.14.7",
     "react-ace": "^3.4.1",
-    "react-anything-sortable": "^1.5.0",
     "react-bootstrap": "^0.28.3",
     "react-bootstrap-validation": "^0.1.11",
     "react-color": "^2.1.0",
     "react-datetime": "^2.0.3",
     "react-dom": "^0.14.7",
-    "react-fontawesome": "^0.3.3",
     "react-mixin": "^3.0.3",
     "react-router": "^2.0.0-rc5",
     "reflux": "^0.3.0",
