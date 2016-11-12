@@ -202,7 +202,7 @@ export default class extends Base {
     let props = {
       value: postInfo.title,
       label: `${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`,
-      onChange(e) {
+      onChange:(e)=>{
         postInfo.title = e.target.value;
         this.setState({postInfo});
       }
@@ -226,7 +226,7 @@ export default class extends Base {
     let props = {
       disabled: postInfo.status === 3,
       value: postInfo.pathname,
-      onChange(e) {
+      onChange:(e)=>{
         postInfo.pathname = e.target.value;
         this.setState({postInfo});
       }
