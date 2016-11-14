@@ -271,7 +271,7 @@ export default class extends Base {
     if( this.state.push_sites.length === 0 ) { return null; }
 
     let push_sites = postInfo.options.push_sites || [];
-    let list = push_sites.map((site, i) => {
+    let list = this.state.push_sites.map((site, i) => {
       let checked = push_sites.includes(site.appKey);
       let props = {
         checked,
