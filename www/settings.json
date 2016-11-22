@@ -1,0 +1,12 @@
+{
+  "store": {
+    "type": "qiniu",
+    "enable": false,
+    "accessKey": "",
+    "secretKey": "",
+    "bucket": "",
+    "origin": "",
+    "prefix": "",
+    "format": ""
+  }
+}

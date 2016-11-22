@@ -1,5 +1,5 @@
 import Base from './base';
-import storage from '../store/qiniu'
+import storage from '../store'
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
@@ -26,7 +26,7 @@ export default class extends Base {
     let file = this.file('file');
 
     // qiniu
-    if (storage.enable) {
+    if (storage.enable && storage.type === 'qiniu') {
       return this.uploadByQiniu(file.path);
     }
 
