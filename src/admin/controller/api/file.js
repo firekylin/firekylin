@@ -1,4 +1,5 @@
 import Base from './base';
+import storage from '../store/qiniu'
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
@@ -23,6 +24,12 @@ export default class extends Base {
     }
 
     let file = this.file('file');
+
+    // qiniu
+    if (storage.enable) {
+      return this.uploadByQiniu(file.path);
+    }
+
     if( !file ) {
       if( this.post('fileUrl') ) {
         return this.getFileByUrl( this.post('fileUrl') );
@@ -44,6 +51,13 @@ export default class extends Base {
       this.fail('FILE_UPLOAD_MOVE_ERROR');
     }
     return this.success(path.join('/static/upload', destDir, basename));
+  }
+
+  async uploadByQiniu(filename) {
+    let result = await storage.upload(filename).catch(() =>{
+      return this.fail("FILE_UPLOAD_ERROR");
+    })
+    return this.success(result);
   }
 
   async getFileByUrl(url) {
@@ -153,7 +167,7 @@ export default class extends Base {
       } else {
         summary = item['content:encoded'][0];
       }
-      
+
       let post = {
         title: item.title[0],
         pathname: decodeURIComponent(item['wp:post_name'][0]),

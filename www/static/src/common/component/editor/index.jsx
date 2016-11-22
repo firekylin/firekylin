@@ -310,7 +310,10 @@ class MdEditor extends React.Component {
 
         return firekylin.upload(data).then(
           res => {
-            res.data = location.origin + res.data;
+            const reg = /^http.+/;
+            if (!reg.test(res.data)) {
+              res.data = location.origin + res.data;
+            }
             if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
               preInputText(`![alt](${res.data})`, 2, 5);
             } else {
