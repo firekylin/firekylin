@@ -1,18 +1,26 @@
 import Base from './base';
-import storage from '../store'
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
 import request from 'request';
 import xml2js from 'xml2js';
 import toMarkdown from 'to-markdown';
+import qiniu from 'qiniu';
 
 request.defaults({
   strictSSL: false,
   rejectUnauthorized: false
 });
 
+let uploadConfig
+
 export default class extends Base {
+  async __before() {
+    uploadConfig = await this.getUploadConfig();
+    qiniu.conf.ACCESS_KEY = uploadConfig.accessKey;
+    qiniu.conf.SECRET_KEY = uploadConfig.secretKey;
+  }
+
   async postAction() {
     /** 处理远程抓取 **/
     if( this.post('fileUrl') ) {
@@ -26,7 +34,7 @@ export default class extends Base {
     let file = this.file('file');
 
     // qiniu
-    if (storage.enable && storage.type === 'qiniu') {
+    if (uploadConfig.type === 'qiniu') {
       return this.uploadByQiniu(file.path);
     }
 
@@ -53,8 +61,43 @@ export default class extends Base {
     return this.success(path.join('/static/upload', destDir, basename));
   }
 
+  // 获取上传设置
+  async getUploadConfig() {
+    let options = await this.model('options').getOptions();
+    return options.upload;
+  }
+
+  // 七牛相关方法
+  getSavePath(filename) {
+    const now = new Date();
+    const prefix = uploadConfig.prefix;
+    const dir = moment(now).format("YYYYMMDD");
+    const basename = path.basename(filename);
+    return `${prefix}/${dir}/${basename}`;
+  }
+  getToken(filename) {
+    const bucket = uploadConfig.bucket;
+    const savePath = this.getSavePath(filename)
+    const putPolicy = new qiniu.rs.PutPolicy(`${bucket}:${savePath}`)
+    return putPolicy.token();
+  }
+  async qiniuUpload(filename) {
+    return new Promise((resolve, reject) => {
+      const savePath = this.getSavePath(filename);
+      const token = this.getToken(filename);
+      const extra = new qiniu.io.PutExtra();
+      qiniu.io.putFile(token, savePath, filename, extra, (err, ret) => {
+        if (err) {
+          reject(err);
+        } else {
+          const compeletePath = `${uploadConfig.origin}/${ret.key}`
+          resolve(compeletePath);
+        }
+      });
+    });
+  }
   async uploadByQiniu(filename) {
-    let result = await storage.upload(filename).catch(() =>{
+    let result = await this.qiniuUpload(filename).catch(() => {
       return this.fail("FILE_UPLOAD_ERROR");
     })
     return this.success(result);

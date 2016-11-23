@@ -33,7 +33,6 @@ cp -r app output;
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
-cp -r www/*.json output/www;
 
 
 cp -r db/firekylin.sql output/;

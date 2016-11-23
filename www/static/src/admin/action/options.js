@@ -5,6 +5,7 @@ export default Reflux.createActions({
   auth: {children: ['completed', 'failed'], asyncResult: true},
   qrcode: {children: ['completed', 'failed'], asyncResult: true},
   comment: {children: ['completed', 'failed'], asyncResult: true},
+  upload: {children: ['completed', 'failed'], asyncResult: true},
   navigation: {children: ['completed', 'failed'], asyncResult: true},
   defaultCategory: {children: ['completed', 'failed'], asyncResult: true}
 });
