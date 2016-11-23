@@ -17,8 +17,11 @@ let uploadConfig
 export default class extends Base {
   async __before() {
     uploadConfig = await this.getUploadConfig();
-    qiniu.conf.ACCESS_KEY = uploadConfig.accessKey;
-    qiniu.conf.SECRET_KEY = uploadConfig.secretKey;
+    // only use qiniu will set ak/sk
+    if (uploadConfig && uploadConfig.type === 'qiniu') {
+      qiniu.conf.ACCESS_KEY = uploadConfig.accessKey;
+      qiniu.conf.SECRET_KEY = uploadConfig.secretKey;
+    }
   }
 
   async postAction() {
