@@ -103,7 +103,6 @@ export default class extends Base {
 
   async uploadByQiniu(filename, config) {
     const result = await this.qiniuUpload(filename, config).catch((err) => {
-      console.log(err)
       return this.fail("FILE_UPLOAD_ERROR");
     })
     return this.success(result);
