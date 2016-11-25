@@ -40,6 +40,13 @@ export default class extends think.model.base {
       if(!ret.comment){
         ret.comment = {type: 'disqus'};
       }
+      // upload settings
+      if(ret.upload && think.isString(ret.upload)){
+        ret.upload = JSON.parse(ret.upload);
+      }
+      if(!ret.upload){
+        ret.upload = {type: 'local'};
+      }
       if(ret.push_sites && think.isString(ret.push_sites)){
         ret.push_sites = JSON.parse(ret.push_sites);
       }
