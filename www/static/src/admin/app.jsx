@@ -41,6 +41,7 @@ import Options from './component/options';
 import OptionsGeneral from './component/options_general';
 import Options2fa from './component/options_2fa';
 import OptionsComment from './component/options_comment';
+import OptionsUpload from './component/options_upload';
 import Import from './component/import';
 import OptionsAnalytic from './component/options_analytic';
 import OptionsPush from './component/options_push';
@@ -106,6 +107,7 @@ ReactDOM.render((
         <Route path="general" component={OptionsGeneral} />
         <Route path="two_factor_auth" component={Options2fa} />
         <Route path="comment" component={OptionsComment} />
+        <Route path="upload" component={OptionsUpload} />
         <Route path="analytic" component={OptionsAnalytic} />
         <Route path="push" component={OptionsPush} />
         <Route path="import" component={Import} />

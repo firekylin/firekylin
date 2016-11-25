@@ -23,6 +23,7 @@
     "nunjucks": "^2.3.0",
     "phpass": "^0.1.1",
     "push-to-firekylin": "^0.2.2",
+    "qiniu": "^6.1.13",
     "request": "^2.69.0",
     "semver": "^5.1.0",
     "source-map-support": "^0.4.0",
@@ -71,6 +72,7 @@
     "stc-uglify": "^1.0.1",
     "style-loader": "^0.13.0",
     "superagent": "^1.7.2",
+    "upyun": "^2.0.4",
     "webpack": "^1.12.12"
   },
   "repository": "https://github.com/75team/firekylin",

@@ -48,6 +48,15 @@ export default Reflux.createStore({
       this.trigger(err, 'saveCommentFail');
     });
   },
+  onUpload(data){
+    let req = superagent.post('/admin/api/options?method=put');
+    req.type('form').send({'upload': JSON.stringify(data)});
+    return firekylin.request(req).then(data => {
+      this.trigger(data, 'saveUploadSuccess');
+    }).catch(err => {
+      this.trigger(err, 'saveUploadFail');
+    });
+  },
   onNavigation(data) {
     let req = superagent.post('/admin/api/options?method=put');
     req.type('form').send({'navigation': JSON.stringify(data)});
