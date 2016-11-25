@@ -176,8 +176,10 @@ ${post.markdown_content}`;
   }
 
   getContentAndSummary(data) {
-    data.content = this.markdownToHtml(data.markdown_content);
-    data.summary = data.content.split('<!--more-->')[0].replace(/<[>]*>/g, '');
+    if (data.markdown_content) {
+      data.content = this.markdownToHtml(data.markdown_content);
+      data.summary = data.content.split('<!--more-->')[0].replace(/<[>]*>/g, '');
+    }
     return data;
   }
 
