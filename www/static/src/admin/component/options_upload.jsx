@@ -24,7 +24,6 @@ export default class extends Base {
       submitting: false,
       upload: upload
     };
-    this.uploadType = upload.type;
   }
   componentDidMount(){
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
@@ -67,13 +66,14 @@ export default class extends Base {
           name='type'
           value={upload.type}
           validate={(value) => {
-            this.uploadType = value;
-            this.forceUpdate();
+            upload.type = value;
+            this.setState({ upload: upload });
             return true;
           }}
       >
         <Radio value='local' label='本地' />
         <Radio value='qiniu' label='七牛云' />
+        <Radio value='upyun' label='又拍云' />
       </RadioGroup>
     );
     let qiniu = (
@@ -115,7 +115,7 @@ export default class extends Base {
             />
         </div>
         <div className="form-group">
-          <label>七牛域名</label>
+          <label>七牛云域名</label>
           <ValidatedInput
               type='text'
               {...this.getProps('origin')}
@@ -136,7 +136,66 @@ export default class extends Base {
         </div>
       </div>
     )
-
+    let upyun = (
+      <div>
+        <div className="form-group">
+          <label>操作员</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('operater')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写又拍云的操作员'
+              }}
+              name='operater'
+            />
+        </div>
+        <div className="form-group">
+          <label>操作员密码</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('password')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写又拍云的操作员密码'
+              }}
+              name='password'
+            />
+        </div>
+        <div className="form-group">
+          <label>服务名(Bucket)</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('upyunBucket')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写又拍云的服务名'
+              }}
+              name='upyunBucket'
+            />
+        </div>
+        <div className="form-group">
+          <label>又拍云域名</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('upyunOrigin')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写又拍云的域名'
+              }}
+              name='upyunOrigin'
+            />
+        </div>
+        <div className="form-group">
+          <label>路径前缀</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('upyunPrefix')}
+              name='upyunPrefix'
+            />
+        </div>
+      </div>
+    )
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -146,8 +205,8 @@ export default class extends Base {
             <label>图片上传至：</label>
             { res }
           </div>
-
-          { this.uploadType == 'qiniu' && qiniu }
+          { upload.type == 'qiniu' && qiniu }
+          { upload.type == 'upyun' && upyun }
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
         </Form>
       </div>

@@ -310,7 +310,7 @@ class MdEditor extends React.Component {
 
         return firekylin.upload(data).then(
           res => {
-            const reg = /^http.+/;
+            const reg = /^https?:\/\/.+/;
             if (!reg.test(res.data)) {
               res.data = location.origin + res.data;
             }

@@ -6,22 +6,18 @@ import request from 'request';
 import xml2js from 'xml2js';
 import toMarkdown from 'to-markdown';
 import qiniu from 'qiniu';
+import upyun from 'upyun';
 
 request.defaults({
   strictSSL: false,
   rejectUnauthorized: false
 });
 
-let uploadConfig
-
 export default class extends Base {
+  uploadConfig = {};
+
   async __before() {
-    uploadConfig = await this.getUploadConfig();
-    // only use qiniu will set ak/sk
-    if (uploadConfig && uploadConfig.type === 'qiniu') {
-      qiniu.conf.ACCESS_KEY = uploadConfig.accessKey;
-      qiniu.conf.SECRET_KEY = uploadConfig.secretKey;
-    }
+    this.uploadConfig = await this.getUploadConfig();
   }
 
   async postAction() {
@@ -36,9 +32,12 @@ export default class extends Base {
 
     let file = this.file('file');
 
-    // qiniu
+    // qiniu && upyun
+    const uploadConfig = this.uploadConfig;
     if (uploadConfig.type === 'qiniu') {
-      return this.uploadByQiniu(file.path);
+      return this.uploadByQiniu(file.path, uploadConfig);
+    } else if (uploadConfig.type === 'upyun') {
+      return this.uploadByUpyun(file.path, uploadConfig);
     }
 
     if( !file ) {
@@ -66,41 +65,81 @@ export default class extends Base {
 
   // 获取上传设置
   async getUploadConfig() {
-    let options = await this.model('options').getOptions();
+    const options = await this.model('options').getOptions();
     return options.upload;
   }
 
+  // 域名不带http/https自动补全http
+  getAbsOrigin(origin) {
+    const reg = /^https?:\/\/.+/;
+    if (!reg.test(origin)) {
+      return `http://${origin}`;
+    }
+    return origin;
+  }
+
   // 七牛相关方法
-  getSavePath(filename) {
-    const now = new Date();
-    const prefix = uploadConfig.prefix;
-    const dir = moment(now).format("YYYYMMDD");
+  async qiniuUpload(filename, config) {
+    qiniu.conf.ACCESS_KEY = config.accessKey;
+    qiniu.conf.SECRET_KEY = config.secretKey;
+    const prefix = config.prefix ? `${config.prefix}/` : '';
+    const dir = moment(new Date()).format("YYYYMMDD");
     const basename = path.basename(filename);
-    return `${prefix}/${dir}/${basename}`;
-  }
-  getToken(filename) {
-    const bucket = uploadConfig.bucket;
-    const savePath = this.getSavePath(filename)
-    const putPolicy = new qiniu.rs.PutPolicy(`${bucket}:${savePath}`)
-    return putPolicy.token();
-  }
-  async qiniuUpload(filename) {
+    const savePath = `${prefix}${dir}/${basename}`;
+    const token = new qiniu.rs.PutPolicy(`${config.bucket}:${savePath}`).token();
+    const extra = new qiniu.io.PutExtra();
     return new Promise((resolve, reject) => {
-      const savePath = this.getSavePath(filename);
-      const token = this.getToken(filename);
-      const extra = new qiniu.io.PutExtra();
       qiniu.io.putFile(token, savePath, filename, extra, (err, ret) => {
         if (err) {
           reject(err);
         } else {
-          const compeletePath = `${uploadConfig.origin}/${ret.key}`
+          const origin = this.getAbsOrigin(config.origin);
+          const compeletePath = `${origin}/${ret.key}`;
           resolve(compeletePath);
         }
       });
     });
   }
-  async uploadByQiniu(filename) {
-    let result = await this.qiniuUpload(filename).catch(() => {
+
+  async uploadByQiniu(filename, config) {
+    const result = await this.qiniuUpload(filename, config).catch((err) => {
+      console.log(err)
+      return this.fail("FILE_UPLOAD_ERROR");
+    })
+    return this.success(result);
+  }
+
+
+  // 又拍云相关方法
+  async upyunUpload(filename, config) {
+    const upyunInstance = new upyun(
+      config.upyunBucket, config.operater, config.password, 'v0.api.upyun.com', { apiVersion: 'v2' }
+    );
+    const prefix = config.upyunPrefix ? `${config.upyunPrefix}/` : '';
+    const dir = moment(new Date()).format("YYYYMMDD");
+    const basename = path.basename(filename);
+    const remotePath = `${prefix}${dir}/${basename}`;
+    return new Promise((resolve, reject) => {
+      upyunInstance.putFile(remotePath, filename, null, false, {
+        'save-key': '/{year}{mon}{day}/{filename}{.suffix}'
+      }, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          if (res.statusCode === 200) {
+            const origin = this.getAbsOrigin(config.upyunOrigin);
+            const compeletePath = `${origin}/${remotePath}`;
+            resolve(compeletePath);
+          } else {
+            reject(res);
+          }
+        }
+      });
+    });
+  }
+
+  async uploadByUpyun(filename, config) {
+    const result = await this.upyunUpload(filename, config).catch((err) => {
       return this.fail("FILE_UPLOAD_ERROR");
     })
     return this.success(result);
