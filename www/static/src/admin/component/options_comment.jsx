@@ -26,7 +26,6 @@ export default class extends Base {
       submitting: false,
       comment: comment
     };
-    this.commentType = comment.type;
   }
   componentDidMount(){
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
@@ -63,8 +62,9 @@ export default class extends Base {
   }
 
   openDialog(){
+    let comment = this.state.comment;
     let url = "/static/img/duoshuo.jpg";
-    if(this.commentType === 'disqus'){
+    if(comment.type === 'disqus'){
       url = "/static/img/disqus.jpg";
     }
     let content = (<div className="center">
@@ -79,8 +79,8 @@ export default class extends Base {
           name='type'
           value={comment.type}
           validate={(value) => {
-            this.commentType = value;
-            this.forceUpdate();
+            comment.type = value;
+            this.setState({ comment: comment });
             return true;
           }}
       >
@@ -100,7 +100,7 @@ export default class extends Base {
             { res }
           </div>
 
-          {this.commentType != 'custom' ?
+          {comment.type != 'custom' ?
           <div className="form-group">
             <label>网站名称（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
             <ValidatedInput
