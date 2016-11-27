@@ -93,18 +93,23 @@ export default class extends Base {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }
+
     let data = this.post();
-
-    /** 推送文章 **/
-    this.pushPost(data);
-
     data.id = this.id;
-    data = this.getPostTime(data);
-    data = this.getContentAndSummary(data);
-    data.options = data.options ? JSON.stringify(data.options) : '';
-    if(data.tag) {
-      data.tag = await this.getTagIds(data.tag);
+
+    /** 判断接收的参数中是否有 markdown_content 来区别审核通过的状态修改和普通的文章更新 */
+    if( data.markdown_content ) {
+      /** 推送文章 */
+      this.pushPost(data);
+
+      data = this.getPostTime(data);
+      data = this.getContentAndSummary(data);
+      data.options = data.options ? JSON.stringify(data.options) : '';
+      if(data.tag) {
+        data.tag = await this.getTagIds(data.tag);
+      }
     }
+
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
   }
