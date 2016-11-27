@@ -9,7 +9,7 @@ import PostStore from 'admin/store/post';
 import SystemAction from 'admin/action/system';
 import SystemStore from 'admin/store/system';
 
-export default class extends Base {
+module.exports = class extends Base {
   state = {
     platform: '',
     nodeVersion: '',

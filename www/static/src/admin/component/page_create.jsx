@@ -5,7 +5,7 @@ import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
 
-export default class extends PostCreate {
+module.exports = class extends PostCreate {
   type = 1;
 
   componentWillMount() {

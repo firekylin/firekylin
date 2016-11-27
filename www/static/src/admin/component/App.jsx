@@ -7,7 +7,7 @@ import Tip from 'common/component/tip';
 import ModalManage from 'common/component/modal_manage';
 
 
-export default class App extends Base {
+module.exports = class App extends Base {
   state = {
 
   };

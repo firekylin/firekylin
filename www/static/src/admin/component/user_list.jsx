@@ -16,7 +16,7 @@ import TipAction from 'common/action/tip';
 
 import ModalAction from '../../common/action/modal';
 
-export default class extends Base {
+module.exports = class extends Base {
   constructor(props){
     super(props);
     this.state = {

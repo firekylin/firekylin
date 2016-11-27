@@ -1,1 +1,2 @@
-export default from './cate';
+import Cate from './cate';
+module.exports = Cate;

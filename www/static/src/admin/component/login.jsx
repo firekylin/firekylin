@@ -9,7 +9,7 @@ import UserStore from '../store/user';
 
 import TipAction from 'common/action/tip';
 
-export default class extends Base {
+module.exports = class extends Base {
   componentDidMount(){
     this.listenTo(UserStore, this.handleTrigger.bind(this));
   }

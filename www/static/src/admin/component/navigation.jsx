@@ -6,7 +6,7 @@ import OptionsStore from 'admin/store/options';
 import OptionsAction from 'admin/action/options';
 import {Form, ValidatedInput} from 'react-bootstrap-validation';
 
-export default class extends Base {
+module.exports = class extends Base {
   state = this.initialState();
 
   initialState() {

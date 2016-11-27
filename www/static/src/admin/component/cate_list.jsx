@@ -11,7 +11,7 @@ import CateStore from '../store/cate';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
 
-export default class extends Base {
+module.exports = class extends Base {
   constructor(props){
     super(props);
     this.state = {

@@ -20,7 +20,9 @@ export default {
   },
   output: {
     path: `${base}/js`,
-    filename: '[name].bundle.js'
+    filename: '[name].js',
+    publicPath: '/static/js/',
+    chunkFilename: '[name].js'
   },
   resolve: {
     extensions: ['', '.js', '.jsx'],

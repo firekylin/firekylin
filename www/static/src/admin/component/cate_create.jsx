@@ -10,7 +10,7 @@ import CateAction from '../action/cate';
 import CateStore from '../store/cate';
 import TipAction from 'common/action/tip';
 
-export default class extends Base {
+module.exports = class extends Base {
   initialState() {
     return Object.assign({
       submitting: false,
