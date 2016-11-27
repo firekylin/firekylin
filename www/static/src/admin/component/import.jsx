@@ -6,7 +6,7 @@ import firekylin from 'common/util/firekylin';
 import BreadCrumb from 'admin/component/breadcrumb';
 import TipAction from 'common/action/tip';
 
-export default class extends Base {
+module.exports = class extends Base {
   state = {
     uploading: false
   };

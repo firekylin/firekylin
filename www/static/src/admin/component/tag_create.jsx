@@ -10,7 +10,7 @@ import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
 
-export default class extends Base {
+module.exports = class extends Base {
   initialState() {
     return Object.assign({
       submitting: false,

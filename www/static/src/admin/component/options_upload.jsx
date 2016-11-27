@@ -13,7 +13,7 @@ import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
 
-export default class extends Base {
+module.exports = class extends Base {
   constructor(props){
     super(props);
     let upload = SysConfig.options.upload;

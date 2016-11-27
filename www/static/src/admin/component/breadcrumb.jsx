@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import Sidebar from './sidebar';
 import {Link} from 'react-router';
 
-export default class extends Base {
+module.exports = class extends Base {
 
   constructor(props){
     super(props);

@@ -33,7 +33,7 @@ import 'react-datetime/css/react-datetime.css';
 import 'rc-select/assets/index.css';
 import './style.css';
 
-export default class extends Base {
+module.exports = class extends Base {
   initialState() {
     return JSON.parse(JSON.stringify({
       postSubmitting: false,

@@ -14,7 +14,7 @@ import 'brace/mode/css';
 import 'brace/theme/monokai';
 import 'brace/ext/language_tools';
 
-export default class extends Base {
+module.exports = class extends Base {
   state = this.initialState();
   initialState() {
     return {

@@ -17,7 +17,7 @@ import PostStore from '../store/post';
 
 import firekylin from 'common/util/firekylin';
 
-export default class extends Base {
+module.exports = class extends Base {
   constructor(props){
     super(props);
     this.state = {

@@ -9,7 +9,7 @@ import classnames from 'classnames';
 import ModalAction from 'common/action/modal';
 import BreadCrumb from 'admin/component/breadcrumb';
 
-export default class extends Base {
+module.exports = class extends Base {
   constructor(props){
     super(props);
     this.state = {
