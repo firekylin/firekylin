@@ -30,6 +30,8 @@ npm run compile;
 npm run copy-package;
 
 cp -r app output;
+rm -rf output/app/common/runtime;
+
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
