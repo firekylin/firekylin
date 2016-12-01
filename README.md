@@ -53,6 +53,18 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 - **后台菜单设置的菜单属性是什么？**  
     菜单属性就是对应该菜单的附加属性，主题内可以获取到这个属性对菜单进行对应操作。例如默认主题里会直接读取属性内容作为字体图标的名称。当然你也可以自定义设置一个 JSON 数据在主题中解析获取菜单的更多属性。
 
+- **如何更新 Firekylin？**
+    假设你的网站目录再 `/var/www/xxx`，那么在服务器上执行以下命令即可完成更新操作。使用其他进程守护工具的自行替换重启进程守护命令。
+    ```
+    cd /var/www/xxx
+    wget http://firekylin.org/release/latest.tar.gz
+    tar zvxf latest.tar.gz
+    cp -r firekylin/* ./
+    npm install
+    pm2 restart pm2.json
+    rm -rf firekylin latest.tar.gz
+    ```
+
 ## 使用 FireKylin 构建的博客系统（排名不分先后）：
 
 * http://www.75team.com/ - 奇舞团博客
