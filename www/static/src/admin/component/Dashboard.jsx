@@ -49,6 +49,8 @@ module.exports = class extends Base {
           <p>点击下面的链接快速开始:</p>
           <div className="">
             <Link to="/post/create">撰写新文章</Link>
+            <Link to="/page/create" style={{marginLeft: 20}}>创建页面</Link>
+            <Link to="/appearance/theme" style={{marginLeft: 20}}>更改外观</Link>
             <Link to="/options/general" style={{marginLeft: 20}}>系统设置</Link>
           </div>
           <hr />
