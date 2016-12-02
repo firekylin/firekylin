@@ -6,7 +6,7 @@ A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 *注：普通安装请直接按照下方操作说明使用安装包安装。仓库的是开发版不建议使用，如需安装开发版请参见 [**如何贡献代码**](https://github.com/75team/firekylin/wiki/%E5%A6%82%E4%BD%95%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81%EF%BC%9F)*。
 
-Firekylin 支持 Docker 安装使用，具体可参考 [docker-firekylin](https://github.com/cosli/docker-firekylin)，普通安装过程如下：
+Firekylin 支持 Docker 安装使用，具体可参考 [docker-firekylin](https://github.com/cosli/docker-firekylin)。正常版的安装过程如下：
 
 1. [下载最新的安装包 - v0.13.0](http://firekylin.org/release/firekylin_0.13.0.tar.gz)
 
