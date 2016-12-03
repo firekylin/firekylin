@@ -30,6 +30,7 @@
     "speakeasy": "2.0.0",
     "thinkjs": "^2.1.5",
     "to-markdown": "^2.0.1",
+    "upyun": "^2.0.4",
     "xml2js": "^0.4.16"
   },
   "devDependencies": {
@@ -72,7 +73,6 @@
     "stc-uglify": "^1.0.1",
     "style-loader": "^0.13.0",
     "superagent": "^1.7.2",
-    "upyun": "^2.0.4",
     "webpack": "^1.12.12"
   },
   "repository": "https://github.com/75team/firekylin",
