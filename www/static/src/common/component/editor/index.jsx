@@ -50,6 +50,19 @@ class MdEditor extends React.Component {
         })
     }
     this.textControl.addEventListener('keydown', this._bindKey);
+
+    this.textControl.addEventListener('paste', e => {
+      let clipboard = e.clipboardData;
+      let FileList = Array.from(clipboard.items)
+        .filter(item => item.kind==='file' && item.type.indexOf('image') > -1)
+        .map(item => item.getAsFile());
+      if( !FileList.length ) { return true; }
+
+      e.preventDefault();
+      let data = new FormData();
+      data.append('file', FileList[0]);
+      this._uploadImage.call(this, data, {type: 'image'});
+    });
   }
 
   _bindKey(e) {
@@ -281,7 +294,7 @@ class MdEditor extends React.Component {
   }
 
   _pictureText () {
-    let preInputText = this._preInputText, that = this;
+    let that = this;
     ModalAction.confirm(
       '插入图片',
       <Tabs defaultActiveKey={1}>
@@ -296,7 +309,7 @@ class MdEditor extends React.Component {
           </div>
         </Tab>
       </Tabs>,
-      ()=> {
+      () => {
         if( (this.state.file && this.state.file.length === 0) && !this.state.fileUrl ) {
           return false;
         }
@@ -308,22 +321,24 @@ class MdEditor extends React.Component {
           data.append('file', this.state.file[0]);
         }
 
-        return firekylin.upload(data).then(
-          res => {
-            const reg = /^https?:\/\/.+/;
-            if (!reg.test(res.data)) {
-              res.data = location.origin + res.data;
-            }
-            if( res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
-              preInputText(`![alt](${res.data})`, 2, 5);
-            } else {
-              let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
-              preInputText(`[${text}](${res.data})`, 1, text.length + 1);
-            }
-          }
-        ).catch((res)=> TipAction.fail(res.errmsg));
+        this._uploadImage.call(this, data, {});
       }
     );
+  }
+
+  _uploadImage(data, {type = ''}) {
+    return firekylin.upload(data).then(res => {
+      const reg = /^https?:\/\/.+/;
+      if (!reg.test(res.data)) {
+        res.data = location.origin + res.data;
+      }
+      if( type.includes('image') || res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
+        this._preInputText(`![alt](${res.data})`, 2, 5);
+      } else {
+        let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
+        this._preInputText(`[${text}](${res.data})`, 1, text.length + 1);
+      }
+    }).catch((res)=> TipAction.fail(res.errmsg));
   }
 
   _listUlText () {
