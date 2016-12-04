@@ -16,8 +16,8 @@ let history = useRouterHistory(createHistory)({
 
 let rootRoute = {
   path: '/',
-  getIndexRoute(location, callback) {
-    callback(null, require('./page/dashboard'));
+  indexRoute: { 
+    onEnter: (nextState, replace) => replace('/dashboard') 
   },
   getChildRoutes(location, callback) {
     require.ensure([], function(require) {
