@@ -1,0 +1,35 @@
+{% extends './layout.html' %}
+
+{% block title %}
+{{page.title}} - {{options.title}}
+{% endblock %}
+
+{% block body %}
+
+<article class="post page">
+  <div class="post-content">
+  {% if page.title %}
+  <header>
+    <h1 class="title"><a href="/post/{{post.pathname}}.html">{{post.title}}</a></h1>
+  </header>
+  <div class="entry">
+      {{page.content | safe}}
+  </div>
+  <footer>
+    <div class="clearfix"></div>
+  </footer>
+  {% else %}
+  <h1 class="title">提示</h1>
+  <div class="entry-content">
+    <p>未找到相关页面。</p>
+    <p>如果是管理员，请到后台添加地址为 <code>{{pathname}}</code> 的页面，点击<a href="/admin/page/create?pathname={{pathname}}">这里</a>添加。</p>
+  </div>
+  {% endif %}
+  </div>
+</article>
+
+{% if page.allow_comment and page.title %}
+    {% include "./inc/comment.html" %}
+{% endif %}
+
+{% endblock %}

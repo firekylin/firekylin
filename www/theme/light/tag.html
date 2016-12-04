@@ -1,0 +1,23 @@
+{% extends './layout.html' %}
+
+{% block title %}
+标签 - {{options.title}}
+{% endblock %}
+
+{% block body %}
+<article class="post page tags">
+  <div class="post-content">
+    <header>
+      <h1 class="title">标签</h1>
+    </header>
+    <div class="entry">
+      {% for tag in list %}
+      <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">{{tag.name}}({{tag.count}})</a>
+      {% endfor %}
+    </div>
+    <footer>
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends './layout.html' %}
+
+{% block title %}
+站内搜索 - {{options.title}}
+{% endblock %}
+
+{%block body %}
+{% if keyword %}
+    <div id="searchResult">
+      {% if searchData.count %}
+        <div class="info">
+          本次搜索找到结果 {{ searchData.count }} 条
+        </div>
+      {% endif %}
+    
+      {% if not searchData.count %}
+        <div class="no-result">没有找到任何结果，请更换查询词试试~</div>
+        <div class="item">
+          <div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q={{ ('site: ' + http.hostname + ' ' + keyword)|urlencode }}">site:{{http.hostname}} {{ keyword }}</a></div>
+        </div>
+      {% endif %}
+    
+    {%for post in searchData.data %}
+    <article class="post">
+      <!--<% if (item.photos && item.photos.length){ %>
+        <%- partial('post/gallery') %>
+      <% } %>-->
+      <div class="post-content">
+        <header>
+          <h1 class="title"><a href="/post/{{post.pathname}}.html">{{post.title}}</a></h1>
+        </header>
+        <div class="entry">
+          {{post.summary | safe}}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div id="searchResult">
+    <div class="hot-words">
+      热搜词：
+      {% for tag in hotTags %}
+        <a href="?keyword={{ tag.name }}">{{ tag.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+{% if searchData and searchData.items.length and (searchData.prevPage or searchData.nextPage) %}
+  <nav id="pagination">
+    {% if searchData.prevPage %}
+      <a href="{{ pagerPath }}start={{ searchData.prevPage }}" class="prev alignleft">&laquo; 上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;
+    {% endif %}
+
+    {% if searchData.nextPage %}
+      <a href="{{ pagerPath }}start={{ searchData.nextPage }}" class="next alignright">下一页 &raquo;</a>
+    {% endif %}
+    <div class="clearfix"></div>
+  </nav>
+{% endif %}
+{% endblock %}

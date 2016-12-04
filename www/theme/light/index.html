@@ -1,0 +1,53 @@
+{% extends './layout.html' %}
+{% block title %}{{options.title}}{% endblock %}
+
+
+{%block body %}
+{%for post in posts %}
+<article class="post">
+  <!--<% if (item.photos && item.photos.length){ %>
+    <%- partial('post/gallery') %>
+  <% } %>-->
+  <div class="post-content">
+    <header>
+      <div class="icon"></div>
+      <time datetime="{{post.create_time}}">
+        <a href="/post/{{post.pathname}}.html">
+          {{think.datetime(post.create_time, 'MM月DD, YYYY')}}
+        </a>
+      </time>
+      <h1 class="title"><a href="/post/{{post.pathname}}.html">{{post.title}}</a></h1>
+    </header>
+    <div class="entry">
+       {{post.summary | safe}}
+    </div>
+    <footer>
+      <div class="alignleft">
+        <a href="/post/{{post.pathname}}.html" class="more-link">阅读全文 »</a>
+      </div>
+
+      <div class="alignright">
+          <a href="/post/{{post.pathname}}.html#comments">{{post.comment_num}} comments</a>
+      </div>
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+{% endfor %}
+
+<nav id="pagination">
+  {% if pagination.currentPage > 1 %}
+    {% set prev = pagination.currentPage - 1 %}
+    <a href="{{prev | pagination}}" class="prev alignleft">&laquo; 上一页</a>
+  {% endif %}
+
+  {% if pagination.currentPage < pagination.totalPages %}
+    {% set next = pagination.currentPage + 1 %}
+    <a href="{{next | pagination}}" class="next alignright">下一页 &raquo;</a>
+  {% endif %}
+  <div class="clearfix"></div>
+
+  <div class="center"><a href="/archives.html">博客归档</a></div>
+</nav>
+{% endblock %}
+
