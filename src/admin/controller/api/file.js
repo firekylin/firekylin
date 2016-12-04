@@ -28,6 +28,8 @@ export default class extends Base {
     /** 处理导入数据 **/
     if( this.post('importor') === 'wordpress' ) {
       return this.importFromWP();
+    } else if (this.post('importor') === 'ghost' ) {
+      return this.importFromGhost();
     }
 
     let file = this.file('file');
@@ -301,6 +303,107 @@ export default class extends Base {
     });
     Promise.all(pagesPromise);
     this.success(`共导入文章 ${(posts || []).length} 篇，页面 ${(pages || []).length} 页，分类 ${(categories || []).length} 个，标签 ${(tags || []).length} 个`);
+  }
+
+  async importFromGhost() {
+    const file = this.file('file');
+    if( !file ) { return this.fail('FILE_UPLOAD_ERROR'); }
+
+    const jsonObj = think.safeRequire(file.path);
+    if( !jsonObj ) { return this.fail('FILE_UPLOAD_ERROR'); } // 没有正确引入json文件内容，是否需要另外的提示语
+    const data = jsonObj.db[0].data;
+
+    // 导入用户
+    const [authors, userModelInstance] = [data.users, this.model('user')];
+    if(authors.length) {
+      const authorsPromise = authors.map(author => userModelInstance.addUser({
+        username: author.slug,
+        email: author.email,
+        display_name: author.name,
+        password: 'admin12345678',
+        type: 2, //默认导入用户都为编辑
+        status: 2, //默认导入用户都处于禁用状态
+      }, '127.0.0.1'));
+      await Promise.all(authorsPromise);
+    }
+
+    // 导入标签
+    const [tags, tagModelInstance] = [data.tags, this.model('tag')];
+    if(tags.length) {
+      const tagsPromise = tags.map(tag => tagModelInstance.addTag({
+        name: tag.name,
+        pathname: tag.slug
+      }));
+      await Promise.all(tagsPromise);
+    }
+
+    //导入文章
+    const postStatus = {
+      published: 3, //发布
+      draft: 0 //草稿
+    };
+    const [allPosts, postsTags, postModelInstance] = [
+      data.posts, data.posts_tags, this.model('post')
+    ];
+    const posts = allPosts.filter(item => item.page === 0);
+    const postsPromise = posts.map(async item => {
+      try{
+      //获取用户和标签
+      const userSlug = authors.filter(author => author.id === item.author_id)[0].slug;
+      const user = await this.model('user').where({ name: userSlug }).find();
+      let retTag = []
+      postsTags.forEach(tag => {
+        if (tag.post_id === item.id) {
+          retTag.push(tag.tag_id);
+        }
+        return retTag;
+      });
+
+      const post = {
+        title: item.title,
+        pathname: item.slug,
+        content: item.html,
+        summary: item.html,
+        create_time: moment(new Date(item.created_at)).format('YYYY-MM-DD HH:mm:ss'),
+        update_time: moment(new Date(item.updated_at)).format('YYYY-MM-DD HH:mm:ss'),
+        status: postStatus[item.status] || 0,
+        user_id: user.id,
+        comment_num: 0,
+        allow_comment: 1,
+        is_public: Number(item.visibility === 'public'),
+        tag: retTag
+      };
+      post.markdown_content = toMarkdown(post.content);
+      await postModelInstance.addPost(post);
+      } catch(e) { console.log(e)}
+    });
+    Promise.all(postsPromise);
+
+    //导入页面
+    const pages = allPosts.filter(item => item.page === 1);
+    const pageModelInstance = this.model('page').setRelation('user');
+    const pagesPromise = pages.map(async item => {
+      const userSlug = authors.filter(author => author.id === item.author_id)[0].slug;
+      const user = await this.model('user').where({ name: userSlug }).find();
+
+      const page = {
+        title: item.title,
+        pathname: item.slug,
+        content: item.html,
+        summary: item.html,
+        create_time: moment(new Date(item.created_at)).format('YYYY-MM-DD HH:mm:ss'),
+        update_time: moment(new Date(item.updated_at)).format('YYYY-MM-DD HH:mm:ss'),
+        status: postStatus[item.status] || 0,
+        user_id: user.id,
+        comment_num: 0,
+        allow_comment: 1,
+        is_public: Number(item.visibility === 'public')
+      };
+      page.markdown_content = toMarkdown(page.content);
+      await pageModelInstance.addPost(page);
+    });
+    Promise.all(pagesPromise);
+    this.success(`共导入文章 ${(posts || []).length} 篇，页面 ${(pages || []).length} 页，标签 ${(tags || []).length} 个`);
   }
 
   formatArray(obj) {
