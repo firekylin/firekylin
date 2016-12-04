@@ -351,12 +351,12 @@ export default class extends Base {
       //获取用户和标签
       const userSlug = authors.filter(author => author.id === item.author_id)[0].slug;
       const user = await this.model('user').where({ name: userSlug }).find();
-      const tag = postsTags.forEach(tag => {
-        let ret = []
+      let retTag = []
+      postsTags.forEach(tag => {
         if (tag.post_id === item.id) {
-          ret.push(tag.tag_id);
+          retTag.push(tag.tag_id);
         }
-        return ret;
+        return retTag;
       });
 
       const post = {
@@ -371,7 +371,7 @@ export default class extends Base {
         comment_num: 0,
         allow_comment: 1,
         is_public: Number(item.visibility === 'public'),
-        tag
+        tag: retTag
       };
       post.markdown_content = toMarkdown(post.content);
       await postModelInstance.addPost(post);
