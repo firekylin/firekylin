@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+  <link rel="icon" href="{{options.favicon_url |default('/static/img/firekylin.jpg')}}">
+  {% if options.favicon %}<link rel="shortcut icon" href="{{options.favicon}}" type="image/x-icon">{% endif %}
+  <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
+  <meta name="keywords" content="{{options.keywords}}">
+  <meta name="description" content="{{options.description}}">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="/theme/light/res/style.css" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body>
+  <header id="header" class="inner">
+    <div class="alignleft">
+      <h1><a href="/">{{options.title}}</a></h1>
+      <h2><a href="/">{{options.description}}</a></h2>
+    </div>
+
+    <nav id="main-nav" class="alignright">
+      <ul>
+        {% for nav in navigation %}
+        <li>
+            <a class="" href="{{nav.url}}" title="{{nav.label}}">
+                <i class="iconfont icon-{{nav.option}}"></i>
+                <span>{{nav.label}}</span>
+            </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="clearfix"></div>
+    </nav>
+    <div class="clearfix"></div>  
+  </header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft">
+      <div id="wrapper">{%block body%}{% endblock %}</div>
+    </div>
+    <aside id="sidebar" class="alignright">
+      <div class="search">
+        <form action="/search.html">
+            <input maxlength="80" placeholder="请输入关键字..." id="keyword" name="keyword" value="{{ keyword }}" type="search" required />
+        </form>
+      </div>
+      <!-- more -->
+    </aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner">
+    <div class="alignleft">
+      &copy; {{ currentYear }}&nbsp;-&nbsp; {{options.title}}
+      {% if options.miitbeian %}
+        &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.miitbeian.gov.cn/">{{options.miitbeian}}</a>
+      {%else%}
+        &nbsp;-&nbsp;<a href="/">{{http.hostname}}</a>
+      {% endif %}
+      <br />
+      Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>&nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin {{VERSION}}</a>
+    </div>
+    <div class="clearfix"></div>  
+  </footer>
+  <script src="//lib.baomitu.com/jquery/3.1.1/jquery.min.js"></script>
+  <script src="/theme/light/res/js/jquery.imagesloaded.min.js"></script>
+  <script src="/theme/light/res/js/gallery.js"></script>
+  <link href="//lib.baomitu.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet" media="screen" type="text/css">
+  <script src="//lib.baomitu.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript">(function($){ $('.fancybox').fancybox(); })(jQuery);</script>
+  {% if options.analyze_code %}
+    {{options.analyze_code | safe}}
+  {% endif %}
+</body>
+</html>
