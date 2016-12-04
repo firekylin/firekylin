@@ -1,3 +1,7 @@
+/**
+ * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
+ */
+
 import React, { PropTypes as T } from 'react';
 import Autobind from 'autobind-decorator';
 import ReactDOM from 'react-dom';
