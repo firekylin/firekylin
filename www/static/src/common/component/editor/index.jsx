@@ -214,10 +214,25 @@ class MdEditor extends React.Component {
     this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   }
 
+  _cleanSelect() {
+    const start = this.textControl.selectionStart;
+    const end = this.textControl.selectionEnd;
+    if( start === end ) {
+      return true;
+    }
+
+    let text = this.props.content;
+    text = text.slice(0, start) + text.slice(end);
+    this.setState({ result: marked(text) });
+    this.props.onChange(text);
+
+    return start;
+  }
+
   // default text processors
-  _preInputText (text, preStart, preEnd) {
-    const start = this.textControl.selectionStart
-    const end = this.textControl.selectionEnd
+  _preInputText (text, preStart, preEnd, selectStart) {
+    const start = selectStart || this.textControl.selectionStart;
+    const end = selectStart || this.textControl.selectionEnd;
     const origin = this.props.content;
 
     if (start !== end) {
@@ -331,18 +346,23 @@ class MdEditor extends React.Component {
   }
 
   _uploadImage(data, {type = ''}) {
+    this._preInputText("![图片上传中…]", 0, 9);
     return firekylin.upload(data).then(res => {
+      let start = this._cleanSelect();
       const reg = /^https?:\/\/.+/;
       if (!reg.test(res.data)) {
         res.data = location.origin + res.data;
       }
       if( type.includes('image') || res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
-        this._preInputText(`![alt](${res.data})`, 2, 5);
+        this._preInputText(`![alt](${res.data})`, 2, 5, start);
       } else {
         let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
-        this._preInputText(`[${text}](${res.data})`, 1, text.length + 1);
+        this._preInputText(`[${text}](${res.data})`, 1, text.length + 1, start);
       }
-    }).catch((res)=> TipAction.fail(res.errmsg));
+    }).catch((res)=> {
+      this._cleanSelect();
+      TipAction.fail(res.errmsg);
+    });
   }
 
   _listUlText () {
