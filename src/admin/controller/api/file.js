@@ -310,7 +310,7 @@ export default class extends Base {
     if( !file ) { return this.fail('FILE_UPLOAD_ERROR'); }
 
     const jsonObj = think.safeRequire(file.path);
-    if( !jsonObj ) { return this.fail('FILE_UPLOAD_ERROR'); } // 没有正确引入json文件内容，是否需要另外的提示语
+    if( !jsonObj ) { return this.fail('INVALID_FILE'); } 
     const data = jsonObj.db[0].data;
 
     // 导入用户
