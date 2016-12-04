@@ -141,6 +141,7 @@ module.exports = class extends Base {
       </td>
     );
   }
+  
   renderStatus(status) {
     let text = '';
     switch(status) {

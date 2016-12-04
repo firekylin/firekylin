@@ -16,6 +16,7 @@ export default {
   FILE_UPLOAD_MOVE_ERROR: [109, '文件上传后移动错误'],
   UPLOAD_URL_ERROR: [109, 'URL参数不合法或者请求失败！'],
   UPLOAD_TYPE_ERROR: [109, '请求的资源不是一张图片'],
+  INVALID_FILE: [109, '文件格式错误无法解析'],
   KEY_EMPTY: [110, '公钥不能为空'],
   KEY_EXIST: [110, '公钥已经存在'],
   PATHNAME_EXIST: [111, '文章地址已经存在'],
