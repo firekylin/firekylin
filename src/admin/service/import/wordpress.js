@@ -197,6 +197,6 @@ export default class extends Base {
    */
   async run(file) {
     let channel = await this.parseFile(file);
-    return await this.import(channel);
+    return await this.importData(channel);
   }
 }

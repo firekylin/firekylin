@@ -144,6 +144,6 @@ export default class extends Base {
    * 执行导入
    */
   async run(file) {
-    return await this.import(this.parseFile(file));
+    return await this.importData(this.parseFile(file));
   }
 }
