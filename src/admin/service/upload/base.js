@@ -1,5 +1,5 @@
-import moment from 'moment';
 import path from 'path';
+import moment from 'moment';
 
 export default class extends think.service.base {
   init(...args) {
