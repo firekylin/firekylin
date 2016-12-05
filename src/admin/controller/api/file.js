@@ -57,8 +57,7 @@ export default class extends Base {
       const result = await (new uploader).run(file, config);
       return this.success(result);
     } catch (e) {
-      // return this.fail(e);
-      return this.fail("FILE_UPLOAD_ERROR");
+      return this.fail(e || 'FILE_UPLOAD_ERROR');
     }
   }
 
