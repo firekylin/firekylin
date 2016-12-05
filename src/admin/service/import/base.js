@@ -63,7 +63,7 @@ export default class extends think.service.base {
     
   }
 
-  async import(data) {
+  async importData(data) {
     let user = await this.user(data);
     let category = await this.category(data);
     let tag = await this.tag(data);

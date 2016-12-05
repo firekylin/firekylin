@@ -31,7 +31,7 @@ export default class extends Base {
 
     /** 处理导入数据 **/
     if( this.post('importor') ) {
-      return this.import( this.post('importor'), file );
+      return this.importFrom( this.post('importor'), file );
     }
 
     // 处理CDN上传
@@ -113,7 +113,7 @@ export default class extends Base {
   /**
    * 从其他平台导入数据
    */
-  async import(service, file) {
+  async importFrom(service, file) {
     try {
       let importor = think.service(`import/${service}`, 'admin');
       let {post, page, category, tag} = await (new importor).run(file);
