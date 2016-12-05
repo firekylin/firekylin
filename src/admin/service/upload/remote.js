@@ -20,7 +20,7 @@ export default class extends Base {
       strictSSL: false,
       timeout: 1000,
       encoding: 'binary'
-    }).catch(() => throw Error("UPLOAD_URL_ERROR"));
+    }).catch(() => { throw Error("UPLOAD_URL_ERROR"); });
 
     if(result.headers["content-type"].indexOf('image') === -1) {
       throw Error('UPLOAD_TYPE_ERROR');
