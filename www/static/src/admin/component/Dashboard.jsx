@@ -1,5 +1,6 @@
 import React from 'react';
 import Base from 'base';
+import ReactDOM from 'react-dom';
 import {Link} from 'react-router';
 import BreadCrumb from 'admin/component/breadcrumb';
 import moment from 'moment';
@@ -8,6 +9,14 @@ import PostAction from 'admin/action/post';
 import PostStore from 'admin/store/post';
 import SystemAction from 'admin/action/system';
 import SystemStore from 'admin/store/system';
+import ModalAction from 'common/action/modal';
+
+const UPDATE_STEPS = [
+  [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
+  [2, '正在解压更新文件...', '文件更新成功！'],
+  [3, '正在重新安装依赖...', '依赖安装成功！'],
+  [4, '正在重启程序...', '程序重启成功，将在 3 秒后刷新页面！']
+];
 
 module.exports = class extends Base {
   state = {
@@ -22,16 +31,79 @@ module.exports = class extends Base {
       posts: 0,
       comments: 0,
       cates: 0
-    }
+    },
+    step: 1
   };
 
   componentWillMount() {
     this.listenTo(PostStore, posts => this.setState({posts}));
-    this.listenTo(SystemStore, data => {
-      this.setState(Object.assign({}, data.versions, {count: data.count}));
-    });
+    this.listenTo(SystemStore, this.handleTrigger.bind(this));
     PostAction.selectLastest();
     SystemAction.select();
+  }
+
+  handleTrigger(data, type) {
+    switch(type) {
+      case 'updateSystem':
+        if( this.state.step <= UPDATE_STEPS.length ) {
+          this.setState({step: this.state.step + 1}, () => SystemAction.updateSystem(this.state.step));
+        }
+        if( this.state.step > UPDATE_STEPS.length ) {
+          setTimeout(location.reload.bind(location), 3000);
+        }
+        break;
+
+      case 'getSystemInfo':
+        this.setState(Object.assign({}, data.versions, {count: data.count}));
+        break;
+    }
+  }
+
+  renderUpdateConfirm() {
+    ModalAction.confirm(
+      '自动更新警告!',
+      <div>自动更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。</div>,
+      ()=> {
+        this.setState({showUpdate: true});
+        SystemAction.updateSystem(this.state.step);
+      }
+    );
+  }
+
+  renderUpdate() {
+    return (
+    <div className="modal fade in" style={{display: this.state.showUpdate ? 'block' : 'none'}}>
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+            <h4 className="modal-title" >自动更新</h4>
+          </div>
+          <div className="modal-body" >
+            <div className="dialog-panel anim-modal " >
+              <a href="###" class="close-btn" ></a>
+              <div className="dialog-content" >
+                <ul className="update-step">
+                  {UPDATE_STEPS.map(step =>
+                    <li key={step[0]} className={this.state.step >= step[0] ? 'show' : null}>
+                      <i className={this.state.step > step[0] ? 'success' : null}>{step[0]}</i>
+                      <div className="pipe">
+                        <div className="half"></div>
+                      </div>
+                      <span className="loading">{step[1]}</span>
+                      <span className="ok">{step[2]}</span>
+                    </li>  
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    );
   }
 
   render() {
@@ -41,7 +113,8 @@ module.exports = class extends Base {
         <div className="manage-container">
           {this.state.needUpdate ?
             <p className="bg-info" style={{padding: 15, color: '#337ab7'}}>
-              Firekylin {this.state.needUpdate} 已经发布，请立即<a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a>！
+              Firekylin {this.state.needUpdate} 已经发布，请立即<a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a> 或者使用
+              <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)} style={{textDecoration: 'underline'}}>自动更新</a>！
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
@@ -104,6 +177,7 @@ module.exports = class extends Base {
             </div>
           </div>
         </div>
+        {this.renderUpdate()}
       </div>
     );
   }

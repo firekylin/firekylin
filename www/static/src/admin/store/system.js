@@ -19,5 +19,12 @@ export default Reflux.createStore({
     return firekylin.request(req).then(
       data => this.trigger(data, 'getSystemInfo')
     );
+  },
+  onUpdateSystem(step) {
+    let url = '/admin/api/system?method=update&step='+step;
+    let req = superagent.get(url);
+    return firekylin.request(req).then(
+      () => this.trigger(null, 'updateSystem')
+    );
   }
 })
