@@ -89,6 +89,7 @@ export default class extends base {
 
           this.success();
         });
+
       /** 安装依赖 */
       case '3':
         let registry = think.config('registry') || 'https://registry.npm.taobao.org';
@@ -99,12 +100,12 @@ export default class extends base {
 
           this.success();
         });
-        break;
+        
       /** 重启服务 */
       case '4':
         if( cluster.isWorker ) {
           this.success();
-          cluster.worker.kill();
+          setTimeout(() => cluster.worker.kill(), 200);
         } else {
           this.fail();
         }
