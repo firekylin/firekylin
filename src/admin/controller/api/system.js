@@ -1,15 +1,21 @@
-import moment from 'moment';
-
+import fs from 'fs';
+import path from 'path';
 import base from './base';
-import pack from '../../../../package.json';
-import request from 'request';
 import semver from 'semver';
+import moment from 'moment';
+import request from 'request';
+import {exec} from 'child_process';
+import pack from '../../../../package.json';
+
+const cluster = require('cluster');
+
 request.defaults({
   timeout: 1000,
   strictSSL: false,
   rejectUnauthorized: false
 });
-let reqIns = url => new Promise((resolve, reject) => request.get(url, (err, res, body) => err ? reject(res) : resolve(body)));
+
+const reqIns = think.promisify(request.get);
 
 export default class extends base {
 
@@ -22,7 +28,8 @@ export default class extends base {
   async getAction() {
     let needUpdate = false;
     try {
-      let onlineVersion = await reqIns('http://firekylin.org/release/.latest');
+      let res = await reqIns('http://firekylin.org/release/.latest');
+      let onlineVersion = res.body;
       if( semver.gt(onlineVersion, pack.version) ) {
         needUpdate = onlineVersion;
       }
@@ -40,6 +47,7 @@ export default class extends base {
       mysqlVersion: mysql[0].version,
       needUpdate
     };
+
     //非管理员只统计当前用户文章
     let where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
     return this.success({
@@ -53,6 +61,56 @@ export default class extends base {
     });
   }
 
+  async updateAction() {
+    if( /^win/.test(process.platform) ) {
+      return this.fail('PLATFORM_NOT_SUPPORT');
+    }
+    
+    let {step} = this.get();
+    switch(step) {
+      /** 下载文件 */
+      case '1':
+      default:
+        return request({uri: 'http://firekylin.org/release/latest.tar.gz'})
+          .pipe(fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz')))
+          .on('close', () => this.success())
+          .on('error', err => this.fail(err));
+
+      /** 解压覆盖，删除更新文件 */
+      case '2':
+        return exec(`
+          cd ${think.RESOURCE_PATH};
+          tar zvxf latest.tar.gz;
+          cp -r firekylin/* ../;
+          rm -rf firekylin latest.tar.gz`, (error, stdout, stderr) => {
+          if(error) {
+            this.fail(error);
+          }
+
+          this.success();
+        });
+      /** 安装依赖 */
+      case '3':
+        let registry = think.config('registry') || 'https://registry.npm.taobao.org';
+        return exec(`npm install --registry=${registry}`, (error, stdout, stderr) => {
+          if(error) {
+            this.fail(error);
+          }
+
+          this.success();
+        });
+        break;
+      /** 重启服务 */
+      case '4':
+        if( cluster.isWorker ) {
+          this.success();
+          cluster.worker.kill();
+        } else {
+          this.fail();
+        }
+        break;
+    }
+  }
 
   async getConfig() {
     let items = await this.modelInstance.select();
