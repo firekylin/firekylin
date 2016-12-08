@@ -61,8 +61,8 @@ module.exports = class extends Base {
 
   renderUpdateConfirm() {
     ModalAction.confirm(
-      '自动更新警告!',
-      <div>自动更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。</div>,
+      '在线更新警告!',
+      <div>在线更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。</div>,
       ()=> {
         this.setState({showUpdate: true});
         SystemAction.updateSystem(this.state.step);
@@ -79,7 +79,7 @@ module.exports = class extends Base {
             <button type="button" className="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
-            <h4 className="modal-title" >自动更新</h4>
+            <h4 className="modal-title" >在线更新</h4>
           </div>
           <div className="modal-body" >
             <div className="dialog-panel anim-modal " >
@@ -113,8 +113,7 @@ module.exports = class extends Base {
         <div className="manage-container">
           {this.state.needUpdate ?
             <p className="bg-info" style={{padding: 15, color: '#337ab7'}}>
-              Firekylin {this.state.needUpdate} 已经发布，请立即<a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a> 或者使用
-              <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)} style={{textDecoration: 'underline'}}>自动更新</a>！
+              Firekylin {this.state.needUpdate} 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)} style={{textDecoration: 'underline'}}>在线更新</a>！
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>

@@ -419,6 +419,7 @@ label,.fk-content-wrap .mod-title,.fk-article-list b,.fk-question-list b{font-we
 .update-step > li > i.success {
 	background: #DFF0DF;
 	color: #333;
+    animation: scale .1s linear;
 }
 .update-step > li > i.success + .pipe {
 	display: none;
@@ -478,6 +479,22 @@ div.pipe:after, .pipe>.half:before, .pipe>.half:after  {
     z-index:15;
     animation:ha-rotate 3s linear infinite;
     -webkit-animation:ha-rotate 3s linear infinite;
+}
+@-webkit-keyframes scale {
+    from {
+        -webkit-transform: scale(0);
+    }
+    to {
+        -webkit-transform: scale(1);
+    }
+}
+@keyframes scale {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 @-webkit-keyframes ha-rotate {
     from {
