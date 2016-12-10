@@ -15,8 +15,9 @@ const UPDATE_STEPS = [
   [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
   [2, '正在解压更新文件...', '文件更新成功！'],
   [3, '正在重新安装依赖...', '依赖安装成功！'],
-  [4, '正在重启程序...', '程序重启成功，将在 3 秒后刷新页面！']
+  [4, '正在重启程序...', '程序重启成功，将在 %d 秒后刷新页面！']
 ];
+const COUNT_DOWN = 3;
 
 module.exports = class extends Base {
   state = {
@@ -32,7 +33,8 @@ module.exports = class extends Base {
       comments: 0,
       cates: 0
     },
-    step: 1
+    step: 1,
+    downCount: COUNT_DOWN
   };
 
   componentWillMount() {
@@ -49,7 +51,8 @@ module.exports = class extends Base {
           this.setState({step: this.state.step + 1}, () => SystemAction.updateSystem(this.state.step));
         }
         if( this.state.step > UPDATE_STEPS.length ) {
-          setTimeout(location.reload.bind(location), 3000);
+          setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
+          setInterval(() => this.setState({downCount: Math.max(0, --this.state.downCount)}), 1000);
         }
         break;
 
@@ -83,7 +86,7 @@ module.exports = class extends Base {
           </div>
           <div className="modal-body" >
             <div className="dialog-panel anim-modal " >
-              <a href="###" class="close-btn" ></a>
+              <a href="###" className="close-btn" ></a>
               <div className="dialog-content" >
                 <ul className="update-step">
                   {UPDATE_STEPS.map(step =>
@@ -93,7 +96,7 @@ module.exports = class extends Base {
                         <div className="half"></div>
                       </div>
                       <span className="loading">{step[1]}</span>
-                      <span className="ok">{step[2]}</span>
+                      <span className="ok">{step[2].replace('%d', this.state.downCount)}</span>
                     </li>  
                   )}
                 </ul>
