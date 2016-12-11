@@ -390,7 +390,13 @@ label,.fk-content-wrap .mod-title,.fk-article-list b,.fk-question-list b{font-we
 .fk-content-wrap .editor,.fk-content-wrap .mod-foot-center td{text-align:center;}
 .ps-container:hover .ps-scrollbar-x-rail,.ps-container.hover .ps-scrollbar-x-rail,.ps-container:hover .ps-scrollbar-y-rail,.ps-container.hover .ps-scrollbar-y-rail{opacity:.6;filter:alpha(opacity=60);}
 .ps-container.ie6 .ps-scrollbar-x,.ps-container.ie6 .ps-scrollbar-y{font-size:0;}*/
-
+.update-message {
+    padding: 15px;
+    color: #337ab7;
+}
+.update-message a {
+    text-decoration: underline;
+}
 .update-step > li {
 	display: none;
 	font-size: 16px;

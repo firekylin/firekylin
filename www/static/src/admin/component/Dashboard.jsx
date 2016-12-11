@@ -115,8 +115,8 @@ module.exports = class extends Base {
         <BreadCrumb {...this.props} />
         <div className="manage-container">
           {this.state.needUpdate ?
-            <p className="bg-info" style={{padding: 15, color: '#337ab7'}}>
-              Firekylin {this.state.needUpdate} 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz" style={{textDecoration: 'underline'}}>下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)} style={{textDecoration: 'underline'}}>在线更新</a>！
+            <p className="bg-info update-message">
+              Firekylin <a href={`https://github.com/75team/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}>{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz">下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}>在线更新</a>！
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
