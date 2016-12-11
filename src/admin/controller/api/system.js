@@ -29,7 +29,7 @@ export default class extends base {
     let needUpdate = false;
     try {
       let res = await reqIns('http://firekylin.org/release/.latest');
-      let onlineVersion = res.body;
+      let onlineVersion = res.body.trim();
       if( semver.gt(onlineVersion, pack.version) ) {
         needUpdate = onlineVersion;
       }
