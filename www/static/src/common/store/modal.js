@@ -38,6 +38,7 @@ export default Reflux.createStore({
       return item.idx !== idx;
     });
     this.trigger(this.modalList, 'modalList');
+    this.trigger(null, 'removeModal');
   },
   /**
    * 关闭一个弹出层
