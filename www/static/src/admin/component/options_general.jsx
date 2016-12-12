@@ -71,6 +71,27 @@ module.exports = class extends Base {
     if(this.state.submitting){
       BtnProps.disabled = true;
     }
+    const logoUrl = this.state.options.logo_url;
+    const uploadType = this.state.options.upload;
+    let logo;
+    if (!logoUrl) {
+      logo = null;
+    } else {
+      const style = {
+        width: '140px',
+        height: '140px',
+        display: 'block',
+        marginBottom: '10px',
+        backgroundImage: `url(${logoUrl}?m=${Date.now()})`,
+        backgroundSize: '100% 100%'
+      }
+      if (/^data:image/.test(logoUrl) || uploadType !== 'local') {
+        style.backgroundImage = `url(${logoUrl})`;
+      }
+      logo = (
+        <div className="logo-container" style={style}></div>
+      );
+    }
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -96,7 +117,7 @@ module.exports = class extends Base {
             </div>
             <div className="form-group">
               <label>LOGO 地址</label>
-              {this.state.options.logo_url ? <img src={this.state.options.logo_url + '?m=' + Date.now()} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
+              { logo }
               <ValidatedInput
                 type="text"
                 name="logo_url"
