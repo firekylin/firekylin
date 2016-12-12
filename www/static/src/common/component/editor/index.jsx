@@ -33,7 +33,7 @@ class MdEditor extends Base {
   initialState () {
     return {
       panelClass: 'md-panel',
-      mode: 'edit',
+      mode: 'split',
       isFullScreen: false,
       result: marked(this.props.content),
       linkUrl: null,
@@ -69,7 +69,28 @@ class MdEditor extends Base {
       this._uploadImage.call(this, data, {type: 'image'});
     });
 
+    this._bindMouse();
     this.listen(ModalStore, () => this.textControl.focus(), 'removeModal');
+  }
+
+  _bindMouse() {
+    let panel = ReactDOM.findDOMNode(this.refs.editorPanel);
+    let resizebar = ReactDOM.findDOMNode(this.refs.resizebar);
+    
+    resizebar.addEventListener('mousedown', function resizeStart(e) {
+      e.preventDefault();
+
+      let start = e.pageY, oHeight = panel.clientHeight;
+      let resize = e => {
+        e.preventDefault();
+        panel.style.height = oHeight + e.pageY - start + 'px';
+      }
+
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', ()=> {
+        window.removeEventListener('mousemove', resize);
+      });
+    });
   }
 
   _bindKey(e) {
@@ -115,16 +136,19 @@ class MdEditor extends Base {
     const previewClass = classnames([ 'md-preview', 'markdown', { 'expand': this.state.mode === 'preview', 'shrink': this.state.mode === 'edit' } ])
 
     return (
-      <div className={panelClass}>
-        <div className="md-menubar">
-          {this._getModeBar()}
-          {this._getToolBar()}
+      <div className="editor">
+        <div className={panelClass} ref="editorPanel">
+          <div className="md-menubar">
+            {this._getModeBar()}
+            {this._getToolBar()}
+          </div>
+          <div className={editorClass}>
+            <textarea ref="editor" name="content" onChange={this._onChange} value={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
+          </div>
+          <div className={previewClass} ref="preview" dangerouslySetInnerHTML={{ __html: this.state.result }}></div>
+          <div className="md-spliter"></div>
         </div>
-        <div className={editorClass}>
-          <textarea ref="editor" name="content" onChange={this._onChange} value={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
-        </div>
-        <div className={previewClass} ref="preview" dangerouslySetInnerHTML={{ __html: this.state.result }}></div>
-        <div className="md-spliter"></div>
+        <a ref="resizebar" href="javascript:void(0);" className="editor__resize">调整高度</a>
       </div>
     )
   }
