@@ -1,13 +1,14 @@
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
-
-import React, { PropTypes as T } from 'react';
-import Autobind from 'autobind-decorator';
-import ReactDOM from 'react-dom';
+import Base from 'base';
 import marked from 'marked';
+import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
+import Autobind from 'autobind-decorator';
+import ModalStore from 'common/store/modal';
+import React, { PropTypes as T } from 'react';
 import ModalAction from 'common/action/modal';
 import firekylin from 'common/util/firekylin';
 import Search from './search';
@@ -15,7 +16,7 @@ import './style.css';
 
 import TipAction from 'common/action/tip';
 
-class MdEditor extends React.Component {
+class MdEditor extends Base {
   static defaultProps = {
     content: ''
   };
@@ -67,6 +68,8 @@ class MdEditor extends React.Component {
       data.append('file', FileList[0]);
       this._uploadImage.call(this, data, {type: 'image'});
     });
+
+    this.listen(ModalStore, () => this.textControl.focus(), 'removeModal');
   }
 
   _bindKey(e) {
