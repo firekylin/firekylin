@@ -146,7 +146,7 @@ class MdEditor extends Base {
             <textarea ref="editor" name="content" onChange={this._onChange} value={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
           </div>
           <div className={previewClass} ref="preview" dangerouslySetInnerHTML={{ __html: this.state.result }}></div>
-          <div className="md-spliter"></div>
+          <div className={classnames({hide: this.state.mode !== 'split'}, 'md-spliter')}></div>
         </div>
         <a ref="resizebar" href="javascript:void(0);" className="editor__resize">调整高度</a>
       </div>
@@ -165,20 +165,20 @@ class MdEditor extends Base {
   // widgets constructors
   _getToolBar () {
     return (
-      <ul className="md-toolbar clearfix">
-        <li className="tb-btn"><a title="加粗(Ctrl + B)" onClick={this._boldText}><i className="glyphicon glyphicon-bold" /></a></li>{/* bold */}
-        <li className="tb-btn"><a title="斜体(Ctrl + I)" onClick={this._italicText}><i className="glyphicon glyphicon-italic" /></a></li>{/* italic */}
+      <ul className={classnames('md-toolbar clearfix', {hide: this.state.mode === 'preview'})}>
+        <li className="tb-btn"><a title="加粗(Ctrl + B)" onClick={this._boldText} className="editor-toolbar bold"><span /></a></li>{/* bold */}
+        <li className="tb-btn"><a title="斜体(Ctrl + I)" onClick={this._italicText} className="editor-toolbar italic"></a></li>{/* italic */}
         <li className="tb-btn spliter"></li>
-        <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={()=>this._linkModal()}><i className="glyphicon glyphicon-link" /></a></li>{/* link */}
-        <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={this._blockquoteText}><i className="glyphicon glyphicon-comment" /></a></li>{/* blockquote */}
-        <li className="tb-btn"><a title="代码段(Ctrl + K)" onClick={this._codeText}><i className="glyphicon glyphicon-console" /></a></li>{/* code */}
-        <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={this._pictureText}><i className="glyphicon glyphicon-picture" /></a></li>{/* picture-o */}
+        <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={()=>this._linkModal()} className="editor-toolbar link"></a></li>{/* link */}
+        <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={this._blockquoteText} className="editor-toolbar quote"></a></li>{/* blockquote */}
+        <li className="tb-btn"><a title="代码段(Ctrl + K)" onClick={this._codeText} className="editor-toolbar code"></a></li>{/* code */}
+        <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={this._pictureText} className="editor-toolbar img"></a></li>{/* picture-o */}
         <li className="tb-btn spliter"></li>
-        <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={this._listOlText}><i className="glyphicon glyphicon-list-alt" /></a></li>{/* list-ol */}
-        <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={this._listUlText}><i className="glyphicon glyphicon-list" /></a></li>{/* list-ul */}
-        <li className="tb-btn"><a title="标题(Ctrl + H)" onClick={this._headerText}><i className="glyphicon glyphicon-header" /></a></li>{/* header */}
+        <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={this._listOlText} className="editor-toolbar ol"></a></li>{/* list-ol */}
+        <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={this._listUlText} className="editor-toolbar ul"></a></li>{/* list-ul */}
+        <li className="tb-btn"><a title="标题(Ctrl + H)" onClick={this._headerText} className="editor-toolbar title"></a></li>{/* header */}
         <li className="tb-btn spliter"></li>
-        <li className="tb-btn"><a title="插入 more 标签(Ctrl + M)" onClick={this._insertMore}><i className="glyphicon glyphicon-pushpin" /></a></li>{/* more */}
+        <li className="tb-btn"><a title="插入 more 标签(Ctrl + M)" onClick={this._insertMore} className="editor-toolbar two"></a></li>{/* more */}
         {this._getExternalBtn()}
       </ul>
     )
@@ -193,27 +193,21 @@ class MdEditor extends Base {
   }
 
   _getModeBar () {
-    const checkActive = (mode) => classnames({ active: this.state.mode === mode })
+    const checkActive = (mode) => ({ active: this.state.mode === mode })
 
     return (
       <ul className="md-modebar">
         <li className="tb-btn pull-right">
-          <a className={checkActive('preview')} onClick={this._changeMode('preview')} title="预览模式">
-            <i className="glyphicon glyphicon-eye-open" />
-          </a>
+          <a className={classnames(checkActive('preview'), 'editor-toolbar preview')} onClick={this._changeMode('preview')} title="预览模式"></a>
         </li> { /* preview mode */ }
         <li className="tb-btn pull-right">
-          <a className={checkActive('split')} onClick={this._changeMode('split')} title="分屏模式">
-            <i className="glyphicon glyphicon-adjust" />
-          </a>
+          <a className={classnames(checkActive('split'), 'editor-toolbar live')} onClick={this._changeMode('split')} title="分屏模式"></a>
         </li> { /* split mode */ }
         <li className="tb-btn pull-right">
-          <a className={checkActive('edit')} onClick={this._changeMode('edit')} title="编辑模式">
-            <i className="glyphicon glyphicon-pencil" />
-          </a>
+          <a className={classnames(checkActive('edit'), 'editor-toolbar edit')} onClick={this._changeMode('edit')} title="编辑模式"></a>
         </li> { /* edit mode */ }
         <li className="tb-btn spliter pull-right"></li>
-        <li className="tb-btn pull-right"><a title="全屏模式" onClick={this._toggleFullScreen}><i className="glyphicon glyphicon-fullscreen" /></a></li> {/* full-screen */}
+        <li className="tb-btn pull-right"><a title="全屏模式" onClick={this._toggleFullScreen} className={classnames({unzen: this.state.isFullScreen, zen: !this.state.isFullScreen}, 'editor-toolbar')}></a></li> {/* full-screen */}
       </ul>
     )
   }
