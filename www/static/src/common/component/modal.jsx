@@ -19,6 +19,9 @@ export default class extends Base {
   componentDidMount(){
     window.addEventListener("hashchange", this.hashchange);
     this.listenTo(ModalStore, this.change.bind(this));
+
+    let inputEle = document.querySelector('.modal input');
+    if( inputEle ) { inputEle.focus(); }
   }
   /**
    * 改变状态
