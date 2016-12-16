@@ -112,7 +112,8 @@ class MdEditor extends Base {
       O: this._listOlText,
       U: this._listUlText,
       H: this._headerText,
-      M: this._insertMore
+      M: this._insertMore,
+      R: this._insertHr
     };
 
     if( keys[key] ) {
@@ -179,6 +180,7 @@ class MdEditor extends Base {
         <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={this._listUlText} className="editor-toolbar ul"></a></li>{/* list-ul */}
         <li className="tb-btn"><a title="标题(Ctrl + H)" onClick={this._headerText} className="editor-toolbar title"></a></li>{/* header */}
         <li className="tb-btn spliter"></li>
+        <li className="tb-btn"><a title="分割线(Ctrl + R)" onClick={this._insertHr} className="editor-toolbar hr"></a></li>
         <li className="tb-btn"><a title="插入 more 标签(Ctrl + M)" onClick={this._insertMore} className="editor-toolbar two"></a></li>{/* more */}
         {this._getExternalBtn()}
       </ul>
@@ -413,6 +415,10 @@ class MdEditor extends Base {
 
   _insertMore() {
     this._preInputText("\n<!--more-->", 12, 12);
+  }
+
+  _insertHr() {
+    this._preInputText("\n----------", 11, 11);
   }
 }
 
