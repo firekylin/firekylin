@@ -50,27 +50,28 @@ class MdEditor extends Base {
           let content = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id];
           this.setState({ result: marked(content) });
           this.props.onChange(content);
+          return true;
         },"","",()=>{
-          localStorage.removeItem('unsavetype'+this.props.info.type+'id'+this.props.info.id)
+          localStorage.removeItem('unsavetype'+this.props.info.type+'id'+this.props.info.id);
         })
     }
     this.textControl.addEventListener('keydown', this._bindKey);
-
-    this.textControl.addEventListener('paste', e => {
-      let clipboard = e.clipboardData;
-      let FileList = Array.from(clipboard.items)
-        .filter(item => item.kind==='file' && item.type.indexOf('image') > -1)
-        .map(item => item.getAsFile());
-      if( !FileList.length ) { return true; }
-
-      e.preventDefault();
-      let data = new FormData();
-      data.append('file', FileList[0]);
-      this._uploadImage.call(this, data, {type: 'image'});
-    });
-
+    this.textControl.addEventListener('paste', this._bindPaste.bind(this));
     this._bindMouse();
     this.listen(ModalStore, () => this.textControl.focus(), 'removeModal');
+  }
+
+  _bindPaste(e) {
+    let clipboard = e.clipboardData;
+    let FileList = Array.from(clipboard.items)
+      .filter(item => item.kind==='file' && item.type.indexOf('image') > -1)
+      .map(item => item.getAsFile());
+    if( !FileList.length ) { return true; }
+
+    e.preventDefault();
+    let data = new FormData();
+    data.append('file', FileList[0]);
+    this._uploadImage.call(this, data, {type: 'image'});
   }
 
   _bindMouse() {
@@ -276,8 +277,13 @@ class MdEditor extends Base {
     this._preInputText("_斜体文字_", 1, 5)
   }
 
-  _linkText (url = 'www.yourlink.com', text = '链接文本') {
-    this._preInputText(`[${text}](${url})`, 1, 1+text.length);
+  _linkText (url = 'www.yourlink.com', text = '链接文本', select = true) {
+    let start = 1, end = 1+text.length;
+    if( !select ) {
+      start = end = text.length + url.length + 4;
+    }
+
+    this._preInputText(`[${text}](${url})`, start, end);
   }
 
   _blockquoteText () {
@@ -329,7 +335,13 @@ class MdEditor extends Base {
           </div>
         </Tab>
       </Tabs>,
-      () => _linkText(this.state.linkUrl, this.state.linkText)
+      () => {
+        if( this.state.linkUrl && this.state.linkText ) {
+          _linkText(this.state.linkUrl, this.state.linkText, false);
+        } else {
+          _linkText();
+        }
+      }
     )
   }
 
@@ -340,7 +352,7 @@ class MdEditor extends Base {
       <Tabs defaultActiveKey={1}>
         <Tab eventKey={1} title="本地上传">
           <div style={{margin: '20px 0'}}>
-            <input type="file" name="file" onChange={e=> this.setState({file: e.target.files, fileUrl: null})} />
+            <input type="file" name="file" onChange={e=> this.setState({file: e.target.files[0], fileUrl: null})} />
           </div>
         </Tab>
         <Tab eventKey={2} title="从网络上抓取">
@@ -350,7 +362,8 @@ class MdEditor extends Base {
         </Tab>
       </Tabs>,
       () => {
-        if( (this.state.file && this.state.file.length === 0) && !this.state.fileUrl ) {
+        console.log(this.state.file);
+        if( !this.state.file && !this.state.fileUrl ) {
           return false;
         }
 
@@ -358,7 +371,7 @@ class MdEditor extends Base {
         if( this.state.fileUrl ) {
           data.append('fileUrl', this.state.fileUrl);
         } else {
-          data.append('file', this.state.file[0]);
+          data.append('file', this.state.file);
         }
 
         this._uploadImage.call(this, data, {});

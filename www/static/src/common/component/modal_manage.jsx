@@ -19,19 +19,28 @@ export default class extends Base {
 
   componentDidMount(){
     this.listen(ModalStore, this.changeModalList, 'modalList');
-    document.addEventListener('keydown', this.closeEvent.bind(this));
+    document.addEventListener('keydown', this.keyEvent.bind(this));
   }
 
-  closeEvent(e) {
+  keyEvent(e) {
     if( !this.state.list.length ) {
       return true;
     }
 
-    if( e.keyCode !== 27 ) {
-      return true;
+    if( e.keyCode === 27 ) {
+      let data = this.state.list[this.state.list.length - 1];
+      ModalAction.remove(data.idx);
+      if(data.cancelCallback) {
+        data.cancelCallback();
+      }
     }
-
-    ModalAction.remove( this.state.list[this.state.list.length - 1].idx );
+    
+    if( e.keyCode === 13 ) {
+      let okBtn = document.querySelector('.modal .modal-footer button.btn-primary');
+      if( okBtn ) {
+        okBtn.focus();
+      }
+    }
   }
 
   changeModalList(data){
