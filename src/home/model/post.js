@@ -21,6 +21,8 @@ export default class extends think.model.relation {
       field: 'id,name,display_name'
     }
   };
+
+  optionModel = this.model('options');
   /**
    * get where condition
    * @param  {[type]} where [description]
@@ -104,11 +106,17 @@ export default class extends think.model.relation {
     return detail;
   }
   async getPostRssList(){
-    let field = 'id,title,pathname,content,create_time';
+    let {feedFullText} = await this.optionModel.getOptions();
+    let field = 'id,title,pathname,create_time,';
     let where = this.getWhereCondition();
 
-    let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
+    if( feedFullText === '0' ) {
+      field += 'summary,content';
+    } else {
+      field = 'content';
+    }
 
+    let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
     return data;
   }
 
