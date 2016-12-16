@@ -11,6 +11,7 @@ module.exports = {
   getChildRoutes(nextState, callback) {
     callback(null, [
       require('./general'),
+      require('./reading'),
       require('./two_factor_auth'),
       require('./comment'),
       require('./upload'),
