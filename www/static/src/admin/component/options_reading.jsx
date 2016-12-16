@@ -48,6 +48,7 @@ module.exports = class extends Base {
         <div className="manage-container">
           <h3 style={{marginBottom: '20px'}}>阅读设置</h3>
           <Form
+          model={this.state.options}
           className="clearfix options-reading"
           onValidSubmit={this.handleValidSubmit.bind(this)}
           onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
