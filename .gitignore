@@ -51,8 +51,7 @@ output/
 output.theme/
 .version
 .installed
-
-build/firekylin
+build
 
 75team.sh
 stc/
