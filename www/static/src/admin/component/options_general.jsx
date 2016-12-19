@@ -72,13 +72,11 @@ module.exports = class extends Base {
       BtnProps.disabled = true;
     }
     const logoUrl = this.state.options.logo_url;
-    let logoExt;
+    let logoExt = `?m=${Date.now()}`;
     if (logoUrl.indexOf('data:image') > -1) {
       logoExt = '';
     } else if (logoUrl.indexOf('?') > -1) {
-      logoExt = `&?m=${Date.now()}`;
-    } else {
-      logoExt = `?m=${Date.now()}`;
+      logoExt = `&${logoExt}`;
     }
     return (
       <div className="fk-content-wrap">
