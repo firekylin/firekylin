@@ -111,11 +111,10 @@ export default class extends think.model.relation {
     return detail;
   }
   async getPostRssList(){
-    let {feedFullText} = await this.optionModel.getOptions();
     let field = 'id,title,pathname,create_time,';
     let where = this.getWhereCondition();
 
-    if( feedFullText === '0' ) {
+    if( this.feedFullText === '0' ) {
       field += 'summary,content';
     } else {
       field = 'content';
