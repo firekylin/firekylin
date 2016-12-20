@@ -71,6 +71,13 @@ module.exports = class extends Base {
     if(this.state.submitting){
       BtnProps.disabled = true;
     }
+    const logoUrl = this.state.options.logo_url;
+    let logoExt = `?m=${Date.now()}`;
+    if (logoUrl.indexOf('data:image') > -1) {
+      logoExt = '';
+    } else if (logoUrl.indexOf('?') > -1) {
+      logoExt = `&${logoExt}`;
+    }
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -96,7 +103,7 @@ module.exports = class extends Base {
             </div>
             <div className="form-group">
               <label>LOGO 地址</label>
-              {this.state.options.logo_url ? <img src={this.state.options.logo_url + '?m=' + Date.now()} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
+              {logoUrl ? <img src={logoUrl + logoExt} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
               <ValidatedInput
                 type="text"
                 name="logo_url"
