@@ -71,13 +71,17 @@ module.exports = class extends Base {
     if(this.state.submitting){
       BtnProps.disabled = true;
     }
-    const logoUrl = this.state.options.logo_url;
-    let logoExt = `?m=${Date.now()}`;
-    if (logoUrl.indexOf('data:image') > -1) {
-      logoExt = '';
-    } else if (logoUrl.indexOf('?') > -1) {
-      logoExt = `&${logoExt}`;
+
+    let logoUrl = this.state.options.logo_url;
+    let iconUrl = this.state.options.favicon_url;
+    if( logoUrl && !logoUrl.includes('data:image') ) {
+      logoUrl += (logoUrl.includes('?') ? '&' : '?') + 'm=' + Date.now();
     }
+
+    if( iconUrl ) {
+      iconUrl += (iconUrl.includes('?') ? '&' : '?') + 'm=' + Date.now(); 
+    }
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -103,7 +107,7 @@ module.exports = class extends Base {
             </div>
             <div className="form-group">
               <label>LOGO 地址</label>
-              {logoUrl ? <img src={logoUrl + logoExt} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
+              {logoUrl ? <img src={logoUrl} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
               <ValidatedInput
                 type="text"
                 name="logo_url"
@@ -170,7 +174,7 @@ module.exports = class extends Base {
             </div>
             <div className="form-group">
               <label>Favicon 地址</label>
-              {this.state.options.favicon_url ? <img src={this.state.options.favicon_url + '?m=' + Date.now()} alt="logo" style={{display: 'block', marginBottom: '10px', maxWidth: '128px', maxHeight: '128px'}}/> : null}
+              {iconUrl ? <img src={iconUrl} alt="logo" style={{display: 'block', marginBottom: '10px', maxWidth: '128px', maxHeight: '128px'}}/> : null}
               <ValidatedInput
                 type="text"
                 name="favicon_url"
