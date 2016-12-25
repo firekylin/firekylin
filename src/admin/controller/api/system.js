@@ -106,9 +106,8 @@ export default class extends base {
         if( cluster.isWorker ) {
           this.success();
           setTimeout(() => cluster.worker.kill(), 200);
-        } else {
-          this.fail();
         }
+        
         break;
     }
   }
