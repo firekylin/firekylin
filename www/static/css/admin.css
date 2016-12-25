@@ -597,3 +597,6 @@ div.pipe:after, .pipe>.half:before, .pipe>.half:after  {
         z-index:5;
     }
 }
+.quick-link a + a { 
+    margin-left: 20px; 
+}
