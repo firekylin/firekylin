@@ -49,7 +49,7 @@ export default Reflux.createStore({
     })
   },
   onSavepwd(data){
-    let url = '/admin/api/user?method=put&type=savepwd';
+    let url = '/admin/user/password';
     let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(data => {
