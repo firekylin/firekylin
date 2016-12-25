@@ -1,15 +1,15 @@
-import React from 'react';
 import Base from 'base';
+import React from 'react';
+import moment from 'moment';
 import ReactDOM from 'react-dom';
 import {Link} from 'react-router';
 import BreadCrumb from 'admin/component/breadcrumb';
-import moment from 'moment';
 
-import PostAction from 'admin/action/post';
 import PostStore from 'admin/store/post';
-import SystemAction from 'admin/action/system';
+import PostAction from 'admin/action/post';
 import SystemStore from 'admin/store/system';
 import ModalAction from 'common/action/modal';
+import SystemAction from 'admin/action/system';
 
 const UPDATE_STEPS = [
   [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
@@ -110,6 +110,13 @@ module.exports = class extends Base {
   }
 
   render() {
+    let links = [
+      {url: '/post/create', title: '撰写新文章', type: 2},
+      {url: '/page/create', title: '创建页面', type: 1},
+      {url: '/appearance/theme', title: '更改外观', type: 1},
+      {url: '/options/general', title: '系统设置', type: 1}
+    ].filter(link => link.type >= SysConfig.userInfo.type);
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -122,11 +129,8 @@ module.exports = class extends Base {
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
           <p>目前有 {this.state.count.posts} 篇文章, 并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
-          <div className="">
-            <Link to="/post/create">撰写新文章</Link>
-            <Link to="/page/create" style={{marginLeft: 20}}>创建页面</Link>
-            <Link to="/appearance/theme" style={{marginLeft: 20}}>更改外观</Link>
-            <Link to="/options/general" style={{marginLeft: 20}}>系统设置</Link>
+          <div className="quick-link">
+            {links.map(link => <Link key={link.url} to={link.url}>{link.title}</Link>)}
           </div>
           <hr />
           <div className="row">
