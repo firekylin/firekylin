@@ -56,4 +56,21 @@ export default class extends Base {
     await this.session('userInfo', '');
     return this.redirect('/');
   }
+
+  /**
+   * update user password
+   */
+  async passwordAction() {
+    let userInfo = await this.session('userInfo') || {};
+    if(think.isEmpty(userInfo)){
+      return this.fail('USER_NOT_LOGIN');
+    }
+
+    let rows = await this.model('user').saveUser({
+      password: this.post('password'),
+      id: userInfo.id
+    }, this.ip());
+
+    return this.success(rows);
+  }
 }

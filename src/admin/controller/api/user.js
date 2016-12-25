@@ -74,15 +74,6 @@ export default class extends Base {
    */
   async putAction(self){
     let type = this.get('type');
-    //save password
-    if(type === 'savepwd'){
-      let userInfo = this.userInfo;
-      let rows = await this.modelInstance.saveUser({
-        password: this.post('password'),
-        id: userInfo.id
-      }, this.ip());
-      return this.success(rows);
-    }
 
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
@@ -91,6 +82,7 @@ export default class extends Base {
     if(type === 'contributor') {
       return await this.generateKey(self, 1);
     }
+    
     let data = this.post();
     data.id = this.id;
     let rows = await this.modelInstance.saveUser(data, this.ip());
