@@ -1,5 +1,10 @@
+import auth from 'common/util/auth';
+
 module.exports = {
   path: 'push',
+  onEnter(nextState, replace) {
+    return auth(replace);
+  },
   getComponent(nextState, callback) {
     callback(null, require('../../component/push'));
   },
