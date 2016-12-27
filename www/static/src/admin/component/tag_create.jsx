@@ -49,7 +49,6 @@ module.exports = class extends Base {
   handleTrigger(data, type){
     switch(type){
       case 'saveTagFail':
-        TipAction.fail(data.message);
         this.setState({submitting: false});
         break;
       case 'saveTagSuccess':
