@@ -1,7 +1,7 @@
 'use strict';
 import marked from "marked";
 import Base from './base.js';
-import markToc from "marked-toc";
+import toc from 'markdown-toc';
 import highlight from 'highlight.js';
 import push2Firekylin from 'push-to-firekylin';
 
@@ -236,7 +236,7 @@ ${post.markdown_content}`;
      * 增加 TOC 目录
      */
     if( option.toc ) {
-      let tocContent = marked(markToc(content)).replace(/<a\s+href="#([^\"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
+      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^\"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
 

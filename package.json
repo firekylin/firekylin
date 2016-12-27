@@ -15,8 +15,8 @@
   "dependencies": {
     "babel-runtime": "6.x.x",
     "highlight.js": "^9.2.0",
+    "markdown-toc": "^1.0.2",
     "marked": "^0.3.5",
-    "marked-toc": "^0.3.0",
     "moment": "^2.11.2",
     "node-crontab": "0.0.8",
     "nodemailer": "^2.3.2",
