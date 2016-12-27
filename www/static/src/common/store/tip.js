@@ -28,6 +28,10 @@ export default Reflux.createStore({
    * @return {[type]}      [description]
    */
   onSuccess: function(text, timeout){
+    if( typeof(text) !== 'string' ) {
+      text = JSON.stringify(text);
+    }
+    
     this.trigger({
       type: 'success',
       text: text || '操作成功',
@@ -41,6 +45,10 @@ export default Reflux.createStore({
    * @return {[type]}      [description]
    */
   onFail: function(text, timeout){
+    if( typeof(text) !== 'string' ) {
+      text = JSON.stringify(text);
+    }
+    
     this.trigger({
       type: 'danger',
       text: text || '操作失败',
