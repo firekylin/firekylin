@@ -84,12 +84,6 @@ module.exports = class extends Base {
       props.disabled = true;
     }
 
-    //如果是在编辑状态下在没有拿到数据之前不做渲染
-    //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if( this.id && !this.state.tagInfo.pathname ) {
-      return null;
-    }
-
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
