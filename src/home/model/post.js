@@ -117,7 +117,7 @@ export default class extends think.model.relation {
     if( this.feedFullText === '0' ) {
       field += 'summary,content';
     } else {
-      field = 'content';
+      field += 'content';
     }
 
     let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
