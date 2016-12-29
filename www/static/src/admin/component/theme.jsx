@@ -1,5 +1,6 @@
 import Base from 'base';
 import React from 'react';
+import brace from 'brace';
 import AceEditor from 'react-ace';
 import BreadCrumb from './breadcrumb';
 import TipAction from 'common/action/tip';
