@@ -34,7 +34,7 @@ export default class extends Base {
     }
 
     let authors = channel['wp:author'];
-    
+
     let authorsPromise = authors.map(author => this.userModelInstance.addUser({
       username: author['wp:author_login'][0],
       email: author['wp:author_email'][0],
@@ -52,7 +52,7 @@ export default class extends Base {
    * 导入文章
    */
   async post(channel) {
-    if( !Array.isArray('item') ) {
+    if( !Array.isArray(channel.item) ) {
       return 0;
     }
 
@@ -108,7 +108,7 @@ export default class extends Base {
    * 导入页面
    */
   async page(channel) {
-    if( !channel.hasOwnProperty('item') ) {
+    if( !Array.isArray(channel.item) ) {
       return 0;
     }
 
@@ -145,7 +145,7 @@ export default class extends Base {
    * 导入标签
    */
   async tag(channel) {
-    if( !channel.hasOwnProperty('wp:tag') ) {
+    if( !Array.isArray(channel['wp:tag']) ) {
       return 0;
     }
 
@@ -164,7 +164,7 @@ export default class extends Base {
    * 为了简单不支持子分类导入，默认所有分类为一级分类
    */
   async category(channel) {
-    if( channel.hasOwnProperty('wp:category') ) {
+    if( !Array.isArray(channel['wp:category']) ) {
       return 0;
     }
 
