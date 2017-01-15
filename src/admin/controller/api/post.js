@@ -77,7 +77,7 @@ export default class extends Base {
     this.pushPost(data);
 
     data.tag = await this.getTagIds(data.tag);
-    data = this.getContentAndSummary(data);
+    data = await this.getContentAndSummary(data);
     data.user_id = this.userInfo.id;
     data = this.getPostTime(data);
     data.options = data.options ? JSON.stringify(data.options) : '';
@@ -103,7 +103,7 @@ export default class extends Base {
       this.pushPost(data);
 
       data = this.getPostTime(data);
-      data = this.getContentAndSummary(data);
+      data = await this.getContentAndSummary(data);
       data.options = data.options ? JSON.stringify(data.options) : '';
       if(data.tag) {
         data.tag = await this.getTagIds(data.tag);
@@ -144,7 +144,6 @@ export default class extends Base {
     let push_sites_keys = postOpt.push_sites;
 
     if( post.markdown_content.slice(0, 5) !== '> 原文：') {
-      let options = await this.model('options').getOptions();
       let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.http.host}`;
       post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
 
@@ -183,16 +182,24 @@ ${post.markdown_content}`;
   /**
    * 渲染 markdown 
    * 摘要为部分内容时不展示 TOC
+   * 文章正文设置为手动指定 TOC 时不显示
+   * 页面不自动生成 TOC 除非是手动指定了
    */
-  getContentAndSummary(data) {
-    data.content = this.markdownToHtml(data.markdown_content);
-
-    data.summary = data.markdown_content.split('<!--more-->')[0];
-    if( data.summary === data.markdown_content ) {
-      data.summary = data.content;
+  async getContentAndSummary(data) {
+    let options = await this.model('options').getOptions();
+    let postTocManual = options.postTocManual === '1';
+    
+    let showToc;
+    console.log(data);
+    if( !postTocManual ) {
+      showToc = data.type/1 === 0;
     } else {
-      data.summary = this.markdownToHtml(data.summary, {toc: false});
+      showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
     }
+
+    data.content = this.markdownToHtml(data.markdown_content, {toc: showToc});
+    data.summary = data.markdown_content.split('<!--more-->')[0];
+    data.summary = this.markdownToHtml(data.summary, {toc: false});
     data.summary.replace(/<[>]*>/g, '');
     
     return data;

@@ -6,7 +6,7 @@ export default class extends Post {
   modelInstance = this.modelInstance.setRelation('user').where({type: 1});
 
   getAction(self){
-    this.modelInstance.order('id DESC').page( this.get('page'), 20 );
+    this.modelInstance.order('create_time DESC').page( this.get('page'), 20 );
     return super.getBaseAction(self);
   }
 
@@ -19,10 +19,10 @@ export default class extends Post {
       return this.fail('PATHNAME_EXIST');
     }
 
+    data.type = 1;
     data.user_id = this.userInfo.id;
     data = this.getContentAndSummary(data);
     data = this.getPostTime(data);
-    data.type = 1;
 
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
