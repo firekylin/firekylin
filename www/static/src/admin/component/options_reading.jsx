@@ -53,6 +53,15 @@ module.exports = class extends Base {
           onValidSubmit={this.handleValidSubmit.bind(this)}
           onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
           >
+            <RadioGroup
+                defaultValue="0"
+                name="postTocManual"
+                label="自动生成文章TOC目录"
+                help={<span>自动生成会为文章生成TOC目录，选择非自动后你也可以在文章开头插入 <code>&lt;!--toc--&gt;</code> 来为这篇文章生成目录</span>}
+            >
+              <Radio value="0" label="是" />
+              <Radio value="1" label="否" />
+            </RadioGroup>
             <div className="form-group">
               <label>每页文章数目</label>
               <ValidatedInput
