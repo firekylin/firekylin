@@ -600,3 +600,9 @@ div.pipe:after, .pipe>.half:before, .pipe>.half:after  {
 .quick-link a + a { 
     margin-left: 20px; 
 }
+.admin-post-link span,
+.admin-post-status span {
+    font-size: 12px;
+    margin-left: 5px;
+    color: #AAA;
+}
