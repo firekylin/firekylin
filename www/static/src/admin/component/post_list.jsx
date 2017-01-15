@@ -76,17 +76,36 @@ module.exports = class extends Base {
         <tr key={item.id}>
           <td>
             <Link to={`/post/edit/${item.id}`} title={item.title}>{item.title}</Link>
-            {item.status !== 3 ? null : <a href={`/post/${item.pathname}.html`} target="_blank"><span className="glyphicon glyphicon-link" style={{fontSize: 12, marginLeft: 5, color: '#AAA'}} /></a>}
+            {this.renderPostLink(item)}
           </td>
           <td>{item.user ? item.user.display_name || item.user.name : null}</td>
-          <td>{this.renderStatus(item.status)}</td>
+          <td>{this.renderStatus(item)}</td>
           <td>{!item.create_time || item.create_time == '0000-00-00 00:00:00' ? '' : firekylin.formatTime(item.create_time)}</td>
-          <td>{firekylin.formatTime(item.update_time)}</td>
           {this.renderBtns(item)}
         </tr>
       );
     })
   }
+
+  /**
+   * 当文章为公开且发布状态时渲染文章链接
+   */
+  renderPostLink(post) {
+    if( post.status !== 3 || !post.is_public ) {
+      return null;
+    }
+
+    return (
+      <a 
+          href={`/post/${post.pathname}.html`} 
+          target="_blank"
+          className="admin-post-link"
+      >
+        <span className="glyphicon glyphicon-link" />
+      </a>
+    );
+  }
+
   renderBtns(post) {
     //管理员在审核和拒绝tab上显示更多按钮
     let isAdmin = SysConfig.userInfo.type === 1;
@@ -142,17 +161,27 @@ module.exports = class extends Base {
     );
   }
   
-  renderStatus(status) {
+  renderStatus({status, is_public, create_time}) {
+    const isFuture = time => time && (new Date(time)).getTime() > Date.now();
     let text = '';
     switch(status) {
-      case 0: text = '草稿'; break;
-      case 1: text = '待审核'; break;
-      case 2: text = '已拒绝'; break;
-      case 3: text = '已发布'; break;
+      case 0: text += '草稿'; break;
+      case 1: text += '待审核'; break;
+      case 2: text += '已拒绝'; break;
+      case 3: 
+        text += isFuture(create_time) ? '即将发布' : '已发布';
+      break;
     }
+
     if( status !== '' ) {
-      return <em className="status">{text}</em>;
+      return (
+        <span className="admin-post-status">
+          <em className="status">{text}</em>
+          {is_public ? null : <span className="glyphicon glyphicon-lock" />}
+        </span>
+      );
     }
+
     return null;
   }
 
@@ -184,8 +213,7 @@ module.exports = class extends Base {
                 <th>标题</th>
                 <th>作者</th>
                 <th>状态</th>
-                <th>创建日期</th>
-                <th>修改日期</th>
+                <th>发布日期</th>
                 <th>操作</th>
               </tr>
             </thead>
