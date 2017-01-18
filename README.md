@@ -78,6 +78,7 @@ Firekylin 支持 Docker 安装使用，具体可参考 [docker-firekylin](https:
 * https://g.32ph.com/ - Steven's Club
 * https://cooxa.com/ - 大路小兵的博客
 * http://www.60sky.com/ - 小撸的博客
+* http://imwineki.cn/ - 花花的博客
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 
