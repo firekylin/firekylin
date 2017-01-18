@@ -66,6 +66,7 @@ Firekylin 支持 Docker 安装使用，具体可参考 [docker-firekylin](https:
 ## 使用 FireKylin 构建的博客系统（排名不分先后）：
 
 * http://www.75team.com/ - 奇舞团博客
+* http://www.opsdev.cn - opsdev
 * http://h5jun.com/ - 月影的博客
 * http://gyblog.cn/ - 光宇的博客
 * http://welefen.com/ - welefen 的博客
