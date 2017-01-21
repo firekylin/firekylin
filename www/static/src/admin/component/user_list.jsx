@@ -83,6 +83,8 @@ module.exports = class extends Base {
           <td>{item.email}</td>
           <td>{this.getUserType(item)}</td>
           <td>{item.status == 1 ? <span className="label label-success">有效</span> : <span className="label label-warning">禁用</span>}</td>
+          <td>{item.post_num}</td>
+          <td>{item.comment_num}</td>
           <td>{item.create_time}</td>
           <td>{item.last_login_time}</td>
           <td>
@@ -127,6 +129,8 @@ module.exports = class extends Base {
                 <th>邮箱</th>
                 <th>用户组</th>
                 <th>有效</th>
+                <th>文章数</th>
+                <th>评论数</th>
                 <th>注册时间</th>
                 <th>最后登录时间</th>
                 <th>操作</th>
