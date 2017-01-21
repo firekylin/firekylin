@@ -8,7 +8,7 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  getAction(self){
+  async getAction(self){
     let where = {};
     if( this.id ) {
       where.id = this.id;
@@ -19,8 +19,17 @@ export default class extends Base {
         where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
       }
     }
-    this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret').where(where);
-    return super.getAction(self);
+    let users = await this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret').where(where).select();
+    
+    let posts = await this.model('post').field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num').setRelation(false).group('user_id').select();
+    let postsNum = new Map( posts.map(({user_id, post_num}) => [user_id, post_num]) );
+    let commentsNum = new Map( posts.map(({user_id, comment_num}) => [user_id, comment_num]) );
+
+    users.forEach(user => {
+      user.post_num = postsNum.get(user.id) || 0; 
+      user.comment_num = commentsNum.get(user.id) || 0;
+    });
+    return this.success(users);
   }
   /**
    * add user
