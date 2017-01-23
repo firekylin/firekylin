@@ -190,7 +190,6 @@ ${post.markdown_content}`;
     let postTocManual = options.postTocManual === '1';
     
     let showToc;
-    console.log(data);
     if( !postTocManual ) {
       showToc = data.type/1 === 0;
     } else {

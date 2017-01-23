@@ -21,9 +21,9 @@ export default class extends Post {
 
     data.type = 1;
     data.user_id = this.userInfo.id;
-    data = this.getContentAndSummary(data);
+    data = await this.getContentAndSummary(data);
     data = this.getPostTime(data);
-
+    
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
   }
@@ -35,7 +35,7 @@ export default class extends Post {
     let data = this.post();
     data.id = this.id;
     data.type = 1;
-    data = this.getContentAndSummary(data);
+    data = await this.getContentAndSummary(data);
     data = this.getPostTime(data);
 
     let rows = await this.modelInstance.savePost(data);
