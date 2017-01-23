@@ -606,3 +606,6 @@ div.pipe:after, .pipe>.half:before, .pipe>.half:after  {
     margin-left: 5px;
     color: #AAA;
 }
+.theme-editor .CodeMirror {
+    height: 600px;
+}

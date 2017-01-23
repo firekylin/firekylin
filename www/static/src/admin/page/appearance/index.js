@@ -14,6 +14,7 @@ module.exports = {
   },
   getChildRoutes(nextState, callback) {
     callback(null, [
+      require('./edit'),
       require('./theme'),
       require('./navigation')
     ]);
