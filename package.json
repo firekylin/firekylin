@@ -61,6 +61,7 @@
     "react-dom": "^0.14.7",
     "react-mixin": "^3.0.3",
     "react-router": "^2.0.0-rc5",
+    "react-treebeard": "^1.1.4",
     "reflux": "^0.3.0",
     "stc": "^2.0.2",
     "stc-css-combine": "^1.0.1",
