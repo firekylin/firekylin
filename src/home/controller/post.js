@@ -50,6 +50,8 @@ export default class extends Base {
   async detailAction(){
     this.http.url = decodeURIComponent(this.http.url);
     let pathname = this.get('pathname');
+    if( pathname === 'list' ) { return this.listAction(); }
+    
     let detail = await this.model('post').getPostDetail(pathname);
     if(think.isEmpty(detail)){
       return this.redirect('/');
