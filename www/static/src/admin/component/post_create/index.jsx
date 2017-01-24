@@ -48,13 +48,15 @@ module.exports = class extends Base {
         create_time: '',
         allow_comment: true,
         options: {
+          template: '',
           push_sites: []
         }
       },
       status: 3,
       cateList: [],
       tagList: [],
-      push_sites: []
+      push_sites: [],
+      templateList: []
     }));
   }
 
@@ -88,6 +90,27 @@ module.exports = class extends Base {
     }
     let {postInfo} = this.initialState();
     this.setState({postInfo});
+  }
+
+  /**
+   * 判断是否是文章管理
+   */
+  isPost() {
+    return !this.type;
+  }
+
+  /**
+   * 判断是否是页面管理
+   */
+  isPage() {
+    return this.type;
+  }
+
+  /**
+   * 获取页面自定义模板列表
+   */
+  getThemeTemplateList(templateList) {
+    this.setState({templateList});
   }
 
   /**
@@ -201,7 +224,7 @@ module.exports = class extends Base {
   renderTitle(postInfo = this.state.postInfo) {
     let props = {
       value: postInfo.title,
-      label: `${this.id ? '编辑' : '撰写'}${this.type ? '页面' : '文章'}`,
+      label: `${this.id ? '编辑' : '撰写'}${this.isPage() ? '页面' : '文章'}`,
       onChange:(e)=>{
         postInfo.title = e.target.value;
         this.setState({postInfo});
@@ -351,7 +374,7 @@ module.exports = class extends Base {
    * 渲染标签选择，编辑页面的时候无标签
    */
   renderTag(postInfo = this.state.postInfo) {
-    if( this.type ) { return null; }
+    if( this.isPage() ) { return null; }
 
     return (
       <div className="form-group">
@@ -381,7 +404,7 @@ module.exports = class extends Base {
    * 嵌套分类树最大支持两层
    */
   renderCategory(postInfo = this.state.postInfo) {
-    if( this.type ) { return null; }
+    if( this.isPage() ) { return null; }
 
     let cateInitial = [];
     if( Array.isArray(this.state.postInfo.cate) ) {
@@ -414,6 +437,40 @@ module.exports = class extends Base {
         </ul>
       </div>
     );
+  }
+
+  /**
+   * 渲染页面模板选择控件，仅对页面编辑有效
+   */
+  renderPageTemplateSelect(postInfo = this.state.postInfo) {
+    if( this.isPost() ) { return null; }
+
+    let template = postInfo.options.template || '';
+    let templateList = this.state.templateList.map(t => ({id: t, name: t}));
+    templateList = [{id: '', name: '不选择'}].concat(templateList);
+    
+    return (
+      <div style={{marginBottom: 15}}>
+        <label>自定义模板</label>
+        <div>
+          <Select
+              optionLabelProp="label"
+              showSearch={false}
+              style={{width: '100%'}}
+              value={template}
+              onChange={val => { 
+                postInfo.options.template = val;
+                this.setState({postInfo});
+              }}
+          >
+            
+            {templateList.map(({id, name}) =>
+              <Option key={name} value={id} label={name}>{name}</Option>
+            )}
+          </Select>
+        </div>
+      </div>
+    )
   }
 
   /**
@@ -467,7 +524,7 @@ module.exports = class extends Base {
             {...props}
             className="btn btn-primary"
             onClick={publishOnClick}
-        >{this.state.postSubmitting ? '发布中...' : `发布${this.type ? '页面' : '文章'}`}</button>
+        >{this.state.postSubmitting ? '发布中...' : `发布${this.isPage() ? '页面' : '文章'}`}</button>
       </div>
     );
   }
@@ -511,6 +568,7 @@ module.exports = class extends Base {
               <div className={classnames('col-xs-3')}>
                 {this.renderPostButton(props)}
                 {this.renderDatetime()}
+                {this.renderPageTemplateSelect()}
                 {this.renderCategory()}
                 {this.renderTag()}
                 {this.renderPublicRadio()}
