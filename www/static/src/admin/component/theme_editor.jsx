@@ -138,6 +138,7 @@ module.exports = class extends Base {
 
   render() {
     TreeTheme.tree.base.backgroundColor = 'transparent';
+    TreeTheme.tree.node.activeLink.background = '#eee';
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
