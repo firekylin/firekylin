@@ -5,6 +5,8 @@ import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validat
 import BreadCrumb from 'admin/component/breadcrumb';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
+import PageAction from 'admin/action/page';
+import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
@@ -12,12 +14,26 @@ module.exports = class extends Base {
     super(props);
     this.state = {
       submitting: false,
-      options: SysConfig.options
+      options: SysConfig.options,
+      pageList: []
     };
+    
+    let {frontPage} = this.state.options;
+    if( !frontPage ) {
+      frontPage = 'recent';
+    } else {
+      this.state.options.frontPagePage = frontPage;
+      frontPage = 'page';
+    }
+    this.state.options.frontPage = frontPage;
   }
+
   componentDidMount(){
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
+    this.listenTo(PageStore, this.getPageList.bind(this));
+    PageAction.selectList(-1);
   }
+
   handleTrigger(data, type){
     switch(type){
       case 'saveOptionsSuccess':
@@ -29,19 +45,51 @@ module.exports = class extends Base {
         break;
     }
   }
+
+  getPageList(pageList) {
+    this.setState({pageList});
+  }
+
   handleValidSubmit(values){
+    if( values.frontPage === 'recent' ) {
+      values.frontPage = '';
+    } else if( values.frontPage === 'page' ) {
+      values.frontPage = this.state.options.frontPagePage;
+    }
+
     this.setState({submitting: true});
     this.optionsSavedValue = values;
     OptionsAction.save(values);
   }
+
   handleInvalidSubmit(){
 
   }
+
+  renderPageList() {
+    return (
+      <select 
+          name="frontPagePage" 
+          ref="frontPagePage" 
+          value={this.state.options.frontPagePage}
+          onChange={e => {
+            let options = this.state.options;
+            options.frontPagePage = e.target.value;
+            this.setState({options});
+          }}
+      >
+        {this.state.pageList.map(page => (<option key={page.id} value={page.pathname}>{page.title}</option>))}
+      </select>
+    );
+  }
+
   render(){
     let BtnProps = {}
     if(this.state.submitting){
       BtnProps.disabled = true;
     }
+    let postListUrl = location.origin + '/post/list';
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -53,6 +101,19 @@ module.exports = class extends Base {
           onValidSubmit={this.handleValidSubmit.bind(this)}
           onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
           >
+            <RadioGroup
+                defaultValue="recent"
+                name="frontPage"
+                label="自定义站点首页"
+                help={<span>设置页面为首页之后仍可以通过 <a href={postListUrl}>{postListUrl}</a> 访问最新发布的文章</span>}
+            >
+              <Radio value="recent" label="显示最新发布的文章" />
+              <Radio value="page" label={<div>
+                <span>使用 </span>
+                {this.renderPageList()}
+                <span> 页面作为首页</span>
+              </div>} />
+            </RadioGroup>
             <RadioGroup
                 defaultValue="0"
                 name="postTocManual"

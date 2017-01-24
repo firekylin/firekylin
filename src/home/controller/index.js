@@ -5,10 +5,16 @@ import Base from './base.js';
 
 export default class extends Base {
   /**
-   * index
+   * 首页如果设置了自定义首页则渲染对应页面
    * @return {[type]} [description]
    */
-  indexAction(){
+  async indexAction(){
+    let {frontPage} = await this.model('options').getOptions();
+    if( frontPage ) {
+      this.get('pathname', frontPage);
+      return this.action('post', 'page');
+    }
+
     return this.action('post', 'list');
   }
   /**
