@@ -30,9 +30,6 @@ module.exports = class extends Base {
     this.listenTo(ThemeStore, this.handleTrigger.bind(this));
     this.checkTheme();
     ThemeAction.getThemeFileList(this.state.theme);
-
-    this.state.currentFile = this.state.theme + '/package.json';
-    ThemeAction.getThemeFile(this.state.currentFile);
   }
 
   handleTrigger(data, type) {
@@ -77,9 +74,15 @@ module.exports = class extends Base {
       if( item.children ) {
         item.children = this.initialFileList(item.children, item);
       }
+
+      /** 默认加载 package.json 文件 */
       if( item.name.toLowerCase() === 'package.json' ) {
         item.active = true;
+        this.state.cursor = item;
+        this.state.currentFile = this.state.theme + '/package.json';
+        ThemeAction.getThemeFile(this.state.currentFile);
       }
+      
       return item;
     });
   }
