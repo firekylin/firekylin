@@ -58,5 +58,12 @@ export default Reflux.createStore({
       data => this.trigger(data, 'updateThemeFileSuccess'),
       err => this.trigger(err, 'updateThemeFileFailed')
     );
+  },
+  onGetPageTemplateList(theme) {
+    let req = superagent.get('/admin/api/theme?type=templateList&theme=' + theme);
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'getThemeTemplateListSuccess'),
+      err => this.trigger(err, 'getThemeTemplateListFailed')
+    );
   }
 })

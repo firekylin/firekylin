@@ -24,6 +24,9 @@ export default class extends Base {
         let file = await think.promisify(fs.readFile)( path.join(THEME_DIR, filePath), {encoding: 'utf-8'} );
         return this.success(file);
 
+      case 'templateList':
+        return await this.getPageTemplateList();
+
       case 'themeList':
       default:
         return await this.getThemeList();
@@ -117,5 +120,25 @@ export default class extends Base {
       }
     }
     return this.success(result);
+  }
+
+  /**
+   * 获取主题的自定义模板
+   */
+  async getPageTemplateList() {
+    let {theme} = this.get();
+    let templatePath = path.join(THEME_DIR, theme, 'template');
+    let templates = [];
+    try {
+      let stat = await stats(templatePath);
+      if( !stat.isDirectory() ) {
+        throw Error();
+      }
+    } catch(e) {
+      return this.success(templates);
+    }
+    templates = await readdir(templatePath);
+    templates = templates.filter(t => /\.html$/.test(t));
+    return this.success(templates);
   }
 }

@@ -7,5 +7,6 @@ export default Reflux.createActions({
   getThemeFile: {children: ['completed', 'failed'], asyncResult: true},
   saveThemeConfig: {children: ['completed', 'failed'], asyncResult: true},
   getThemeFileList: {children:['completed', 'failed'], asyncResult: true},
-  updateThemeFile: {children: ['completed', 'failed'], asyncResult: true}
+  updateThemeFile: {children: ['completed', 'failed'], asyncResult: true},
+  getPageTemplateList: {children: ['completed', 'failed'], asyncResult: true}
 });
