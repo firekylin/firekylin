@@ -1,4 +1,8 @@
 'use strict';
+import fs from 'fs';
+import path from 'path';
+
+const stats = think.promisify(fs.stat);
 /**
  * error controller
  */
@@ -8,7 +12,7 @@ export default class extends think.controller.base {
    * @param  {Number} status []
    * @return {Promise}        []
    */
-  displayError(status){
+  async displayError(status){
 
     //hide error message on production env
     if(think.env === 'production'){
@@ -31,6 +35,16 @@ export default class extends think.controller.base {
       module = this.config('default_module');
     }
     let file = `${module}/error/${status}.html`;
+    
+    let {theme} = await this.model('options').getOptions();
+    let themeErrorFilePath = path.join(think.RESOURCE_PATH, 'theme', theme, 'error', `${status}.html`);
+    try {
+      await stats(themeErrorFilePath);
+      file = themeErrorFilePath;
+    } catch(e) {
+      console.log(e);
+    }
+    
     let options = this.config('tpl');
     options = think.extend({}, options, {type: 'base', file_depr: '_'});
     this.fetch(file, {}, options).then(content => {
@@ -43,41 +57,41 @@ export default class extends think.controller.base {
    * Bad Request 
    * @return {Promise} []
    */
-  _400Action(){
-    return this.displayError(400);
+  async _400Action(){
+    return await this.displayError(400);
   }
   /**
    * Forbidden 
    * @return {Promise} []
    */
-  _403Action(){
-    return this.displayError(403);
+  async _403Action(){
+    return await this.displayError(403);
   }
   /**
    * Not Found 
    * @return {Promise}      []
    */
-  _404Action(){
+  async _404Action(){
     //管理端
     if(this.http.module === 'admin' && !this.isAjax()){
       let controller = this.controller('admin/base');
       this.status(200);
       return controller.invoke('__call');
     }
-    return this.displayError(404);
+    return await this.displayError(404);
   }
   /**
    * Internal Server Error
    * @return {Promise}      []
    */
-  _500Action(){
-    return this.displayError(500);
+  async _500Action(){
+    return await this.displayError(500);
   }
   /**
    * Service Unavailable
    * @return {Promise}      []
    */
-  _503Action(){
-    return this.displayError(503);
+  async _503Action(){
+    return await this.displayError(503);
   }
 }
