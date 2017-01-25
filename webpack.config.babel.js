@@ -25,7 +25,7 @@ export default {
     chunkFilename: '[name].js'
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['.js', '.jsx'],
     alias: {
       admin: `${base}/src/admin`,
       common: `${base}/src/common`,
@@ -33,20 +33,23 @@ export default {
     }
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
-        loader: 'babel',
-        cacheDirectory: true,
-        query: {
-          presets: ['react', 'es2015-loose', 'stage-0'],
+        loader: 'babel-loader',
+        options: {
+          cacheDirectory: true,
+          presets: ['react', ['es2015', {loose: true, module: false}], 'stage-0'],
           plugins: ['transform-runtime', 'transform-decorators-legacy']
         },
         exclude: /node_modules/
       },
       {
         test: /\.css?$/,
-        loader: 'style!css'
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
       }
     ]
   },
