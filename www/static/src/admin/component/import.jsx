@@ -41,6 +41,7 @@ module.exports = class extends Base {
         <Radio value='wordpress' label='WordPress' />
         <Radio value='ghost' label='Ghost / Jekyll' />
         <Radio value='hexo' label='Hexo' />
+        <Radio value='markdown' label='Markdown文件' />
       </RadioGroup>
     );
     const uploadInput = {
@@ -98,6 +99,25 @@ module.exports = class extends Base {
                 return true;
               }}
               accept="application/json"
+          />
+        </div>
+      ),
+      markdown: (
+        <div>
+          <p>请将所有 Markdown 文件直接打包成 tar.gz 文件上传</p>
+          <ValidatedInput
+              type="file"
+              name="file"
+              label="上传文件："
+              labelClassName="col-xs-2"
+              wrapperClassName="col-xs-10"
+              validate={files => {
+                if( FileValidator.isEmpty(files) ) {
+                  return '请上传文件';
+                }
+                return true;
+              }}
+              accept="application/gzip"
           />
         </div>
       )
