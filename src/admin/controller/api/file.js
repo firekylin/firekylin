@@ -70,6 +70,7 @@ export default class extends Base {
       let {post, page, category, tag} = await (new importor).run(file);
       return this.success(`共导入文章 ${post} 篇，页面 ${page} 页，分类 ${category} 个，标签 ${tag} 个`);
     } catch(e) {
+      console.log(e);
       return this.fail(e);
     }
   }

@@ -39,47 +39,69 @@ module.exports = class extends Base {
           }}
       >
         <Radio value='wordpress' label='WordPress' />
-        <Radio value='ghost' label='Ghost' />
+        <Radio value='ghost' label='Ghost / Jekyll' />
+        <Radio value='hexo' label='Hexo' />
       </RadioGroup>
     );
-    const wp = (
-      <div>
-        <p>请上传 WordPress 中导出的 .xml 文件</p>
-        <ValidatedInput
-            type="file"
-            name="file"
-            label="上传文件："
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-            validate={files => {
-              if (FileValidator.isEmpty(files)) {
+    const uploadInput = {
+      wordpress: (
+        <div>
+          <p>请上传 WordPress 中导出的 .xml 文件</p>
+          <ValidatedInput
+              type="file"
+              name="file"
+              label="上传文件："
+              labelClassName="col-xs-2"
+              wrapperClassName="col-xs-10"
+              validate={files => {
+                if (FileValidator.isEmpty(files)) {
+                    return '请上传文件';
+                }
+                return true;
+              }}
+              accept="application/xml"
+          />
+        </div>
+      ), 
+      ghost: (
+        <div>
+          <p>请上传 Ghost 中导出的 .json 文件，Jekyll用户请上传使用 <a href="https://github.com/redwallhp/Jekyll-to-Ghost">Jekyll to Ghost 插件</a>导出后的 .json 文件</p>
+          <ValidatedInput
+              type="file"
+              name="file"
+              label="上传文件："
+              labelClassName="col-xs-2"
+              wrapperClassName="col-xs-10"
+              validate={files => {
+                if (FileValidator.isEmpty(files)) {
+                    return '请上传文件';
+                }
+                return true;
+              }}
+              accept="application/json"
+          />
+        </div>
+      ),
+      hexo: (
+        <div>
+          <p>请上传使用 <a href="https://github.com/lizheming/hexo-generator-hexo2firekylin">Hexo2Firekylin 插件</a> 导出后的 .json 文件</p>
+          <ValidatedInput
+              type="file"
+              name="file"
+              label="上传文件："
+              labelClassName="col-xs-2"
+              wrapperClassName="col-xs-10"
+              validate={files => {
+                if( FileValidator.isEmpty(files) ) {
                   return '请上传文件';
-              }
-              return true;
-            }}
-            accept="application/xml"
-        />
-      </div>
-    );
-    const ghost = (
-      <div>
-        <p>请上传 Ghost 中导出的 .json 文件</p>
-        <ValidatedInput
-            type="file"
-            name="file"
-            label="上传文件："
-            labelClassName="col-xs-2"
-            wrapperClassName="col-xs-10"
-            validate={files => {
-              if (FileValidator.isEmpty(files)) {
-                  return '请上传文件';
-              }
-              return true;
-            }}
-            accept="application/json"
-        />
-      </div>
-    );
+                }
+                return true;
+              }}
+              accept="application/json"
+          />
+        </div>
+      )
+    };
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -89,8 +111,7 @@ module.exports = class extends Base {
               <label>请选择导入的博客平台</label>
               { radio }
             </div>
-            { this.state.uploadType === 'wordpress' && wp }
-            { this.state.uploadType === 'ghost' && ghost }
+            {uploadInput[this.state.uploadType]}
             <button type="submit" className="btn btn-primary">
               上传{this.state.uploading?'中...':''}
             </button>

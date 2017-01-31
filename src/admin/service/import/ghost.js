@@ -30,38 +30,70 @@ export default class extends Base {
   /**
    * 导入文章
    */
-  async post({posts, users, post_tags}) {
+  async post({
+    posts, 
+    users, 
+    tags,
+    categories,
+    post_tags, 
+    posts_tags, 
+    post_categories, 
+    posts_categories
+  }) {
     if(!Array.isArray(posts) || !Array.isArray(users)) {
       return 0;
     }
 
+    post_tags = post_tags || posts_tags;
+    post_categories = post_categories || posts_categories;
     if(!Array.isArray(post_tags)) {
       post_tags = [];
+    }
+    if(!Array.isArray(post_categories)) {
+      post_categories = [];
     }
 
     posts = posts.filter(item => item.page === 0);
     const postsPromise = posts.map(async item => {
       try{
-        //获取用户和标签
+        //获取用户
         const userSlug = users.filter(user => user.id === item.author_id)[0].slug;
         const user = await this.userModelInstance.where({ name: userSlug }).find();
-        const retTag = post_tags.filter(tag => tag.post_id === item.id).map(tag => tag.tag_id);
 
+        //获取标签
+        let tag = [];
+        let retTag = post_tags.filter(tag => tag.post_id === item.id).map(tag => tag.tag_id);
+        retTag = tags.filter(({id}) => retTag.includes(id)).map(({name}) => name);
+        if( retTag.length ) {
+          tag = await this.tagModelInstance.setRelation(false).where({name: ['IN', retTag]}).select();
+          tag = tag.map(item => item.id);
+        }
+
+        //获取分类
+        let cate = [];
+        let retCategory = post_categories.filter(({post_id}) => post_id === item.id).map(({category_id}) => category_id);
+        retCategory = categories.filter(({id}) => retCategory.includes(id)).map(({name}) => name);
+        if( retCategory.length ) {
+          cate = await this.cateModelInstance.setRelation(false).where({name: ['IN', retCategory]}).select();
+          cate = cate.map(item => item.id);
+        }
+        
         const post = {
           title: item.title,
           pathname: item.slug,
           content: item.html,
           summary: item.html,
+          markdown_content: item.hasOwnProperty('markdown') ? item.markdown : this.toMarkdown(item.html),
           create_time: this.formatDate(new Date(item.created_at)),
           update_time: this.formatDate(new Date(item.updated_at)),
           status: GHOST_POST_STATUS[item.status] || 0,
           user_id: user.id,
           comment_num: 0,
-          allow_comment: 1,
-          is_public: Number(item.visibility === 'public'),
-          tag: retTag
+          allow_comment: item.hasOwnProperty('allow_comment') ? item.allow_comment : 1,
+          is_public: item.hasOwnProperty('visibility') ? Number(item.visibility === 'public') : 1,
+          tag,
+          cate
         };
-        post.markdown_content = this.toMarkdown(post.content);
         await this.postModelInstance.addPost(post);
       } catch(e) { console.log(e)}
     });
@@ -78,7 +110,7 @@ export default class extends Base {
       return 0;
     }
 
-    const pages = posts.filter(item => item.page === 1);
+    const pages = posts.filter(item => item.page === 1 && item.title);
     const pagesPromise = pages.map(async item => {
       const userSlug = authors.filter(author => author.id === item.author_id)[0].slug;
       const user = await this.userModelInstance.where({ name: userSlug }).find();
@@ -88,15 +120,15 @@ export default class extends Base {
         pathname: item.slug,
         content: item.html,
         summary: item.html,
+        markdown_content: item.hasOwnProperty('markdown') ? item.markdown : this.toMarkdown(item.html),
         create_time: this.formatDate(new Date(item.created_at)),
         update_time: this.formatDate(new Date(item.updated_at)),
         status: GHOST_POST_STATUS[item.status] || 0,
         user_id: user.id,
         comment_num: 0,
-        allow_comment: 1,
-        is_public: Number(item.visibility === 'public')
+        allow_comment: item.hasOwnProperty('allow_comment') ? item.allow_comment : 1,
+        is_public: item.hasOwnProperty('visibility') ? Number(item.visibility === 'public') : 1,
       };
-      page.markdown_content = this.toMarkdown(page.content);
       await this.pageModelInstance.addPost(page);
     });
     Promise.all(pagesPromise);
@@ -133,8 +165,11 @@ export default class extends Base {
    */
   parseFile(file) {
     try {
-      const jsonObj = think.safeRequire(file.path);
-      return jsonObj.db[0].data
+      let jsonObj = think.safeRequire(file.path);
+      if( Array.isArray(jsonObj.db) && jsonObj.db.length ) {
+        jsonObj = jsonObj.db[0];
+      }
+      return jsonObj.data;
     } catch(e) {
       throw Error('INVALID_FILE');
     }
