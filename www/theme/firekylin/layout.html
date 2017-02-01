@@ -43,7 +43,7 @@
           </a>
           <span>{{options.title}}</span>
       </div>
-      <ul class="buttons">
+      <ul class="buttons mod-menu">
           {% for nav in navigation %}
           <li>
               <a class="" href="{{nav.url}}" title="{{nav.label}}">
@@ -53,7 +53,7 @@
           </li>
           {% endfor %}
       </ul>
-      <ul class="buttons">
+      <ul class="buttons mod-quick">
         <li>
           {% if options.github_url %}
           <a class="inline" rel="nofollow" target="_blank" href="{{options.github_url}}">
@@ -72,10 +72,10 @@
             </a>
             {% endif %}
           {% endif %}
-          <a class="inline" href="/rss.html">
+          <!-- <a class="inline" href="/rss.html" style="display: none">
             <i class="iconfont icon-rss-v" title="RSS"></i>
-          </a>
-          <a class="inline" href="/search.html">
+          </a> -->
+          <a href="/search.html">
             <i class="iconfont icon-search" title="Search"></i>
           </a>
         </li>
@@ -99,8 +99,6 @@
   {%else%}
     &nbsp;-&nbsp;<a href="/">{{http.hostname}}</a>
   {% endif %}
-  <br />
-  Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>&nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://github.com/75team/firekylin">FireKylin {{VERSION}}</a>
 </footer>
 </div>
 <script src="/theme/firekylin/res/js/firekylin.js" data-ls="js_firekylin"></script>
