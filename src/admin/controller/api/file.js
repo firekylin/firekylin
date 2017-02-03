@@ -67,7 +67,7 @@ export default class extends Base {
   async serviceImport(service, file) {
     try {
       let importor = think.service(`import/${service}`, 'admin');
-      let {post, page, category, tag} = await (new importor).run(file);
+      let {post, page, category, tag} = await (new importor(this)).run(file);
       return this.success(`共导入文章 ${post} 篇，页面 ${page} 页，分类 ${category} 个，标签 ${tag} 个`);
     } catch(e) {
       console.log(e);
