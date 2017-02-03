@@ -7,9 +7,9 @@ import {execSync} from 'child_process';
 
 const PATH = path.join(think.RUNTIME_PATH, 'importMarkdownFileToFirekylin');
 export default class extends Base {
-  constructor(args) {
+  constructor(...args) {
     super(...args);
-    this.post = new Post(this.http);
+    this._think = args[0];
   }
   /**
    * 导入用户
@@ -40,10 +40,11 @@ export default class extends Base {
       return 0;
     }
 
+
     const postsPromise = posts.map(async item => {
       try{
         //获取用户
-        const user = await this.session('userInfo');
+        const user = await this._think.session('userInfo');
       
         const post = {
           title: item.title,
@@ -58,7 +59,7 @@ export default class extends Base {
           is_public: 1,
           type: 0
         };
-        await this.post.getContentAndSummary(post);
+        await Post.prototype.getContentAndSummary(post);
         await this.postModelInstance.addPost(post);
       } catch(e) { console.log(e)}
     });
@@ -76,8 +77,8 @@ export default class extends Base {
 
   parseFile(file) {
     try {
-      execSync('rm -rf ${PATH}; tar zvxf ${file.path} ${PATH}');
-      let files = fs.readdir(PATH, {encoding: 'utf-8'});
+      execSync(`rm -rf ${PATH}; mkdir ${PATH}; cd ${PATH}; tar zxvf ${file.path}`);
+      let files = fs.readdirSync(PATH, {encoding: 'utf-8'});
       if( !files.length ) { return []; }
 
       return files.map(function(file) {
@@ -96,5 +97,12 @@ export default class extends Base {
     } catch(e) {
       throw new Error(e);
     }
+  }
+
+  /**
+   * 执行导入
+   */
+  async run(file) {
+    return await this.importData(this.parseFile(file));
   }
 }
