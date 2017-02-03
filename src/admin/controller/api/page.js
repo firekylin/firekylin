@@ -6,8 +6,10 @@ export default class extends Post {
   modelInstance = this.modelInstance.setRelation('user').where({type: 1});
 
   getAction(self){
-    let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
-    this.modelInstance.order('create_time DESC').field(field);
+    if( !this.id ) {
+      let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
+      this.modelInstance.order('create_time DESC').field(field);
+    }
 
     if( this.get('page') !== '-1' ) {
       this.modelInstance.page( this.get('page'), 20 );
