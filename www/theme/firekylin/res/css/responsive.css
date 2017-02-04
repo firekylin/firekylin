@@ -8,6 +8,9 @@
     transition: all .2s cubic-bezier(.4,.01,.165,.99);
     display: block;
   }
+  a.anchor {
+    top: -50px;
+  }
 }
 
 @media screen and (max-width:768px) {

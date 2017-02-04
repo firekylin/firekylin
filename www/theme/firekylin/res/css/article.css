@@ -261,3 +261,8 @@ article.tags section a:hover {
   color: #2479CC;
   border-color: #2479CC;
 }
+a.anchor {
+  display: block;
+  position: relative;
+  visibility: hidden;
+}
