@@ -1,3 +1,8 @@
+## 0.15.1
+
+- 导入数据增加 Hexo, Jekyll, Markdown文件的支持，使用方法参考：<https://github.com/75team/firekylin/wiki/导入>
+- 修复页面编辑无法编辑内容的问题
+ 
 ## 0.15.0
 - 增加 `/sitemap.xml` 和 `/rss.xml` 两个路由
 - 增加后台在线编辑主题功能
