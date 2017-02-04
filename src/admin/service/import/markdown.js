@@ -7,9 +7,9 @@ import {execSync} from 'child_process';
 
 const PATH = path.join(think.RUNTIME_PATH, 'importMarkdownFileToFirekylin');
 export default class extends Base {
-  constructor(...args) {
-    super(...args);
-    this._think = args[0];
+  constructor(think) {
+    super(think);
+    this._think = think;
   }
   /**
    * 导入用户
