@@ -196,9 +196,9 @@ ${post.markdown_content}`;
       showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
     }
 
-    data.content = this.markdownToHtml(data.markdown_content, {toc: showToc});
+    data.content = this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
     data.summary = data.markdown_content.split('<!--more-->')[0];
-    data.summary = this.markdownToHtml(data.summary, {toc: false});
+    data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
     data.summary.replace(/<[>]*>/g, '');
     
     return data;
