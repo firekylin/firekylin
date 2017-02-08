@@ -1,6 +1,5 @@
 var stc = require('stc');
 var htmlCompress = require('stc-html-compress');
-var uglify = require('stc-uglify');
 var cssCompress = require('stc-css-compress');
 var resourceVersion = require('stc-resource-version');
 var localstorage = require('stc-localstorage');
@@ -20,7 +19,6 @@ stc.config({
 });
 
 stc.workflow({
-  uglify: {plugin: uglify},
   cssCombine: {plugin: cssCombine, include: /\.css$/},
   cssCompress: {plugin: cssCompress},
   htmlCompress: {plugin: htmlCompress},
