@@ -339,6 +339,14 @@
 .markdown img {
 	max-width: 80%;
 }
+.markdown ul {
+	list-style: disc;
+	padding-left: 40px;
+}
+.markdown ol {
+	list-style: decimal;
+	padding-left: 40px;
+}
 * {
 	box-sizing: border-box;
 }
