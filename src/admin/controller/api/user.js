@@ -10,17 +10,21 @@ export default class extends Base {
    */
   async getAction(self){
     let where = {};
+    let modelInstance = this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
+    
     if( this.id ) {
       where.id = this.id;
-    } else {
-      if(this.get('type') === 'contributor') {
-        where = {status: 2, type: 3};
-      } else {
-        where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
-      }
+      let user = await modelInstance.where(where).find();
+      return this.success(user);
     }
-    let users = await this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret').where(where).select();
-    
+
+    if(this.get('type') === 'contributor') {
+      where = {status: 2, type: 3};
+    } else {
+      where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
+    }
+
+    let users = await modelInstance.where(where).select();
     let posts = await this.model('post').field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num').setRelation(false).group('user_id').select();
     let postsNum = new Map( posts.map(({user_id, post_num}) => [user_id, post_num]) );
     let commentsNum = new Map( posts.map(({user_id, comment_num}) => [user_id, comment_num]) );
@@ -29,6 +33,7 @@ export default class extends Base {
       user.post_num = postsNum.get(user.id) || 0; 
       user.comment_num = commentsNum.get(user.id) || 0;
     });
+
     return this.success(users);
   }
   /**
