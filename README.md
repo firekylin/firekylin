@@ -1,5 +1,7 @@
 ## FireKylin
 
+[![Join the chat at https://gitter.im/fire_kylin/Lobby](https://badges.gitter.im/fire_kylin/Lobby.svg)](https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Simple & Fast Node Blogging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
 ## 安装
