@@ -64,7 +64,6 @@ export default class extends Post {
       post.status = 1;
     }
 
-    console.log(post);
     let insertId = await this.modelInstance.addPost(post);
     return this.success({id: insertId});
   }
