@@ -1,3 +1,10 @@
+## 0.15.2
+
+- Fix #230 后台编辑用户无法显示用户数据
+- Fix 文章内单引号被替换成双引号的问题
+- Fix 文章推送失败的问题
+- 编译取消默认模板的代码压缩
+
 ## 0.15.1
 
 - 导入数据增加 Hexo, Jekyll, Markdown文件的支持，使用方法参考：<https://github.com/75team/firekylin/wiki/导入>
