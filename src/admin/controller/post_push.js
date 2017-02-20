@@ -56,7 +56,7 @@ export default class extends Post {
     }
     
     post.user_id = this.poster.id;
-    post = this.getContentAndSummary(post);
+    post = await this.getContentAndSummary(post);
     post = this.getPostTime(post);
     post.tag = await this.getTagIds(post.tag);
 
@@ -64,6 +64,7 @@ export default class extends Post {
       post.status = 1;
     }
 
+    console.log(post);
     let insertId = await this.modelInstance.addPost(post);
     return this.success({id: insertId});
   }
