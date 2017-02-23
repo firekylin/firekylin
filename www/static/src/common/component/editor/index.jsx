@@ -354,7 +354,7 @@ class MdEditor extends Base {
       <Tabs defaultActiveKey={1}>
         <Tab eventKey={1} title="本地上传">
           <div style={{margin: '20px 0'}}>
-            <input type="file" name="file" onChange={e=> this.setState({file: e.target.files[0], fileUrl: null})} />
+            <input type="file" name="file" accept="image/*" onChange={e=> this.setState({file: e.target.files[0], fileUrl: null})} />
           </div>
         </Tab>
         <Tab eventKey={2} title="从网络上抓取">
@@ -364,7 +364,6 @@ class MdEditor extends Base {
         </Tab>
       </Tabs>,
       () => {
-        console.log(this.state.file);
         if( !this.state.file && !this.state.fileUrl ) {
           return false;
         }
@@ -373,6 +372,9 @@ class MdEditor extends Base {
         if( this.state.fileUrl ) {
           data.append('fileUrl', this.state.fileUrl);
         } else {
+          if( this.state.file.size > 5 * 1024 * 1024 ) {
+            return TipAction.fail('图片大小超过 5M！');
+          }
           data.append('file', this.state.file);
         }
 
