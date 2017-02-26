@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/75team/Firekylin">
-    <img width="200" heigth="200" src="https://s4.ssl.qhres.com/static/d48c248d76e955ea.svg">
+    <img width="200" heigth="200" src="https://s1.ssl.qhres.com/static/0c8555d630012930.svg">
   </a>  
 
   <h1>Firekylin</h1>
