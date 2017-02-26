@@ -72,3 +72,11 @@
 
 - [主题开发](https://github.com/75team/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
 - [贡献代码](https://github.com/75team/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
+
+## 捐赠我们
+
+你的每一份帮助都将使 Firekylin 做的更好，走的更远！我们一直在坚持不懈地努力，并坚持让 Firekylin 完全开源免费，你的帮助将使我们更有动力和信心！
+
+欢迎使用支付宝或者微信扫描二维码进行捐赠！已捐赠用户将在 [捐赠列表](https://github.com/75team/firekylin/wiki/捐赠列表) 中列出。
+
+<img width="600" src="https://p1.ssl.qhimg.com/t01d34e454e72fb86d4.png" />
