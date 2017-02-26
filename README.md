@@ -79,4 +79,4 @@
 
 欢迎使用支付宝或者微信扫描二维码进行捐赠！已捐赠用户将在 [捐赠列表](https://github.com/75team/firekylin/wiki/捐赠列表) 中列出。
 
-<img width="600" src="https://p1.ssl.qhimg.com/t01d34e454e72fb86d4.png" />
+<img width="600" src="https://p4.ssl.qhimg.com/t017d0da8c37508775a.png" />
