@@ -15,6 +15,8 @@
     <a href="https://github.com/75team/firekylin/releases">
       <img src="https://img.shields.io/github/downloads/75team/firekylin/total.svg?style=flat-square" alt="Github All Releases" />
     </a>
+  </div>
+  <div>
     <a href="https://github.com/75team/firekylin/issues?q=is%3Aissue+is%3Aclosed">
       <img src="https://img.shields.io/github/issues-closed-raw/75team/firekylin.svg?style=flat-square" alt="" />
     </a>
