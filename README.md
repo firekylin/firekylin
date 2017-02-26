@@ -1,91 +1,60 @@
-## FireKylin
+<div align="center">
+  <a href="https://github.com/75team/Firekylin">
+    <img width="200" heigth="200" src="https://s4.ssl.qhres.com/static/d48c248d76e955ea.svg">
+  </a>  
 
-[![Join the chat at https://gitter.im/fire_kylin/Lobby](https://badges.gitter.im/fire_kylin/Lobby.svg)](https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# Firekylin
+
+[![node version](https://img.shields.io/badge/node-%3E%3D4.0-red.svg?style=flat-square)]()
+[![GitHub release](https://img.shields.io/github/release/75team/firekylin.svg?style=flat-square)](https://github.com/75team/firekylin/releases)
+[![Github All Releases](https://img.shields.io/github/downloads/75team/firekylin/total.svg?style=flat-square)](https://github.com/75team/firekylin/releases)
+[![](https://img.shields.io/github/issues-closed-raw/75team/firekylin.svg?style=flat-square)](https://github.com/75team/firekylin/issues?q=is%3Aissue+is%3Aclosed)
+[![license](https://img.shields.io/github/license/75team/firekylin.svg?colorB=f48041&style=flat-square)](https://github.com/75team/firekylin/blob/master/LICENSE)
+[![Gitter](https://img.shields.io/gitter/room/firekylin/Lobby.svg?style=flat-square&colorB=96c312)](https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 A Simple & Fast Node Blogging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
 
+</div>
+
+
 ## 安装
 
-*注：普通安装请直接按照下方操作说明使用安装包安装。仓库的是开发版不建议使用，如需安装开发版请参见 [**如何贡献代码**](https://github.com/75team/firekylin/wiki/%E5%A6%82%E4%BD%95%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81%EF%BC%9F)*。
+普通用户安装参见 [普通安装](https://github.com/75team/firekylin/wiki/安装)，如需对 Firekylin 进行开发，可参考 [仓库版安装](https://github.com/75team/firekylin/wiki/仓库版安装)
 
-Firekylin 支持 Docker 安装使用，具体可参考 [docker-firekylin](https://github.com/cosli/docker-firekylin)。正常版的安装过程如下：
+## 如何使用
 
-1. [下载最新的安装包 - v0.15.2](http://firekylin.org/release/firekylin_0.15.2.tar.gz)
-
-2. 解压安装包，执行 `npm install` 安装对应的依赖*（执行之前请确认已有 Node.js 环境，Node.js 版本要大于 4.0）*。
-
-3. 执行 `npm start`，然后访问 `http://127.0.0.1:8360`，根据提示填写相关信息进行安装。
-
-4. 配置 PM2  
-
-  在服务器上推荐使用 `pm2` 来管理 Node.js 服务，可以通过 `sudo npm install -g pm2` 来安装 `pm2`。  
-  将项目下的 `pm2_default.json` 文件改为 `pm2.json`，将文件中的 `cwd` 配置值改为项目的当前路径。  
-  然后通过 `pm2 start pm2.json` 来启动项目。
-
-5. 配置 nginx  
-
-  将项目下的 `nginx_default.conf` 改为 `nginx.conf`，修改文件中的 `server_name`、`root` 和 `set $node_port` 等配置值，然后将该文件软链到 nginx 的配置目录下。
-
-  假设 nginx 的配置目录为 `/usr/local/nginx/conf/include`，那么可以通过下面的命令设置软链：
-
-  ```sh
-  sudo ln -s path/to/nginx.conf /usr/local/nginx/conf/include/www.example.com.conf
-  ```
-
-  需要将 `path/to` 改为当前的项目路径， `www.example.com` 改为对应的域名。
+- [添加和管理文章](https://github.com/75team/firekylin/wiki/%E6%96%87%E7%AB%A0)
+- [添加和管理页面](https://github.com/75team/firekylin/wiki/%E9%A1%B5%E9%9D%A2)
+- [添加和管理推送](https://github.com/75team/firekylin/wiki/%E6%8E%A8%E9%80%81)
+- [调整网站外观](https://github.com/75team/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%A4%96%E8%A7%82)
+- [系统设置](https://github.com/75team/firekylin/wiki/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E7%BD%AE)
 
 ## 常见问题
 
-- **为何我无法通过 http://ip:port 的形式访问博客？**
-    由于安全问题我们在默认配置中禁止了远端的端口访问，建议按照安装步骤配置好 nginx 代理之后再访问。
+如果您在使用过程中遇到问题，请查看 [问题解答](https://github.com/75team/firekylin/wiki/问题解答) 中的解答，或者在 [GitHub](https://github.com/75team/firekylin/wiki/issues) 及 [Gitter](https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 上提问。
 
-- **博客后台地址是什么？**  
-    你的博客地址 + `/admin`
+## 用户列表
 
-- **文章如何设置摘要？**  
-    在你的文章中插入 `<!--more-->` 该标签之前的即为文章摘要
-
-- **如何修改端口？**  
-    默认 Firekylin 用的端口是  `8360`，如果该端口已经被占用或者不想使用该端口，那么可以在项目目录下新建文件 `port` （是的，这个文件没有后缀名），文件内容为端口号。如：  
-
-    设置文件 `port` 的内容为 `9999`，表示设置的端口为 `9999`。
-
-- **如何更新 Firekylin？**  
-    0.14.0+ 版本已经支持直接在线更新程序，无需以下步骤，0.14.0 版本以下的需要手动执行更新操作。假设你的网站目录再 `/var/www/xxx`，那么在服务器上执行以下命令即可完成更新操作。使用其他进程守护工具的自行替换重启进程守护命令。
-    ```
-    cd /var/www/xxx
-    wget http://firekylin.org/release/latest.tar.gz
-    tar zvxf latest.tar.gz
-    cp -r firekylin/* ./
-    npm install
-    pm2 restart pm2.json
-    rm -rf firekylin latest.tar.gz
-    ```
-
-- **后台菜单设置的菜单属性是什么？**  
-    菜单属性就是对应该菜单的附加属性，主题内可以获取到这个属性对菜单进行对应操作。例如默认主题里会直接读取属性内容作为字体图标的名称。当然你也可以自定义设置一个 JSON 数据在主题中解析获取菜单的更多属性。
-
-## 使用 FireKylin 构建的博客系统（排名不分先后）：
-
-* http://www.75team.com/ - 奇舞团博客
-* http://www.opsdev.cn - opsdev
-* http://h5jun.com/ - 月影的博客
-* http://gyblog.cn/ - 光宇的博客
-* http://welefen.com/ - welefen 的博客
-* https://haozi.me/ - 耗子么
-* https://imjiangtao.com - 江涛的博客
-* http://aztack.wang/ - Aztack's blog
-* https://blog.cosli.top/ - 且等风来
-* http://lisongfeng.cn - 为之漫笔
-* https://g.32ph.com/ - Steven's Club
-* https://cooxa.com/ - 大路小兵的博客
-* http://www.60sky.com/ - 小撸的博客
-* http://imwineki.cn/ - 花花的博客
+[奇舞团博客](http://www.75team.com/) / 
+[opsdev](http://www.opsdev.cn) / 
+[十年踪迹的博客](http://h5jun.com/) / 
+[光宇的博客](http://gyblog.cn/) / 
+[welefen的博客](http://welefen.com/) / 
+[耗子么](https://haozi.me/) /
+[江涛的博客](https://imjiangtao.com) / 
+[Aztack's blog](http://aztack.wang/) / 
+[且等风来](https://blog.cosli.top/) / 
+[为之漫笔](http://lisongfeng.cn) / 
+[Steven's Club](https://g.32ph.com/) / 
+[大路小兵的博客](https://cooxa.com/) / 
+[小撸的博客](http://www.60sky.com/) / 
+[花花的博客](https://imwineki.cn/)
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 
-## 如何贡献代码
+## 开发者文档
 
-安装包里的代码都是编译后的（如：React 代码已经编译，HTML、JS、CSS 都已经压缩，并且使用了 LocalStorage 等优化技术）。如果想贡献代码，可以直接 clone 项目代码。
 
-如何开发请见[这里](https://github.com/75team/firekylin/wiki/%E5%A6%82%E4%BD%95%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81%EF%BC%9F)。
+- [主题开发](https://github.com/75team/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
+- [贡献代码](https://github.com/75team/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
