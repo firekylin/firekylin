@@ -3,18 +3,30 @@
     <img width="200" heigth="200" src="https://s4.ssl.qhres.com/static/d48c248d76e955ea.svg">
   </a>  
 
-# Firekylin
+  <h1>Firekylin</h1>
 
-[![node version](https://img.shields.io/badge/node-%3E%3D4.0-red.svg?style=flat-square)]()
-[![GitHub release](https://img.shields.io/github/release/75team/firekylin.svg?style=flat-square)](https://github.com/75team/firekylin/releases)
-[![Github All Releases](https://img.shields.io/github/downloads/75team/firekylin/total.svg?style=flat-square)](https://github.com/75team/firekylin/releases)
-[![](https://img.shields.io/github/issues-closed-raw/75team/firekylin.svg?style=flat-square)](https://github.com/75team/firekylin/issues?q=is%3Aissue+is%3Aclosed)
-[![license](https://img.shields.io/github/license/75team/firekylin.svg?colorB=f48041&style=flat-square)](https://github.com/75team/firekylin/blob/master/LICENSE)
-[![Gitter](https://img.shields.io/gitter/room/firekylin/Lobby.svg?style=flat-square&colorB=96c312)](https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+  <div>
+    <a href="https://github.com/75team/firekylin">
+      <img src="https://img.shields.io/badge/node-%3E%3D4.0-red.svg?style=flat-square" alt="node version required" />
+    </a>
+    <a href="https://github.com/75team/firekylin/releases">
+      <img src="https://img.shields.io/github/release/75team/firekylin.svg?style=flat-square" alt="GitHub release" />
+    </a>
+    <a href="https://github.com/75team/firekylin/releases">
+      <img src="https://img.shields.io/github/downloads/75team/firekylin/total.svg?style=flat-square" alt="Github All Releases" />
+    </a>
+    <a href="https://github.com/75team/firekylin/issues?q=is%3Aissue+is%3Aclosed">
+      <img src="https://img.shields.io/github/issues-closed-raw/75team/firekylin.svg?style=flat-square" alt="" />
+    </a>
+    <a href="https://github.com/75team/firekylin/blob/master/LICENSE">
+      <img src="https://img.shields.io/github/license/75team/firekylin.svg?colorB=f48041&style=flat-square" alt="license" />
+    </a>
+    <a href="https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+      <img src="https://img.shields.io/gitter/room/firekylin/Lobby.svg?style=flat-square&colorB=96c312" alt="Gitter" />
+    </a>
+  </div>
 
-
-A Simple & Fast Node Blogging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+
-
+  <p>A Simple & Fast Node Blogging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+.</p>
 </div>
 
 
