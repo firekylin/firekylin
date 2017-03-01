@@ -51,7 +51,7 @@
 ## 用户列表
 
 [奇舞团博客](http://www.75team.com/) / 
-[opsdev](http://www.opsdev.cn) / 
+[奇虎360-addops](https://addops.cn) / 
 [十年踪迹的博客](http://h5jun.com/) / 
 [光宇的博客](http://gyblog.cn/) / 
 [welefen的博客](http://welefen.com/) / 
