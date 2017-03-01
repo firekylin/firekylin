@@ -23,6 +23,8 @@ export default class extends think.service.base {
         return this.syncFromDisqus(comment);
       }else if(comment.type === 'duoshuo'){
         return this.syncFromDuoshuo(comment);
+      }else if(comment.type === 'changyan'){
+        return this.syncFromChangyan(comment);
       }
     }
   }
@@ -107,6 +109,43 @@ export default class extends think.service.base {
       let fn = think.promisify(request, request);
       let response = await fn(url);
       let data = JSON.parse(response.body).response;
+      let promises = [];
+      for(let key in data){
+        if(data[key].comments === postData[key].comment_num){
+          continue;
+        }
+        let id = postData[key].id;
+        let promise = this.model('post').where({id: id}).update({comment_num: data[key].comments});
+        promises.push(promise);
+      }
+      await Promise.all(promises);
+      if(promises.length){
+        await this.clearPostCache();
+      }
+    }
+  }
+  /**
+   * sync from changyan
+   * @return {[type]} [description]
+   */
+  async syncFromChangyan(comment){
+    let postData = await this.getPostData();
+    if(think.isEmpty(postData)){
+      return;
+    }
+    let threads = Object.keys(postData);
+    let index = 0;
+    while(true){
+      let ths = threads.slice(index, index + 10);
+      index += 10;
+      if(!ths.length){
+        return;
+      }
+      let url = `http://changyan.sohu.com/api/2/topic/count?client_id=${comment.name}&topic_id=${ths.join(',')}`;
+      //think.log(`sync comments ${url}`);
+      let fn = think.promisify(request, request);
+      let response = await fn(url);
+      let data = JSON.parse(response.body).result;
       let promises = [];
       for(let key in data){
         if(data[key].comments === postData[key].comment_num){

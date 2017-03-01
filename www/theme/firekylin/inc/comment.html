@@ -12,6 +12,8 @@
       {% elif options.comment.type == 'duoshuo'%}
         <div id="ds_thread" class="ds-thread" data-thread-key="{{think.md5(http.get('pathname'))}}" data-url="{{site_url}}{{http.url}}" data-name="{{options.comment.name}}">
         </div>
+      {% elif options.comment.type == 'changyan' %}
+        <div id="SOHUCS" sid="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div> 
       {% else %}
         {{options.comment.name|safe}}
       {% endif %}
