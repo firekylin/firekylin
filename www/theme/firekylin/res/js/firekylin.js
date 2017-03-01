@@ -86,6 +86,8 @@
         loadDisqusComment();
       }else if(dataType === 'duoshuo'){
         loadDuoshuoComment();
+      }else if(dataType === 'changyan'){
+        loadChangyanComment();
       }
     }
     if(location.hash.indexOf('#comments') > -1){
@@ -132,6 +134,24 @@
     (doc.head || doc.body).appendChild(s);
   };
 
+  var loadChangyanComment = function(){
+    var disqus_thread = getById('SOHUCS');
+    if( !disqus_thread ) { return; }
+    var appid = disqus_thread.getAttribute('data-name'); 
+    var conf = disqus_thread.getAttribute('sid');
+    var width = window.innerWidth || document.documentElement.clientWidth; 
+    var s = document.createElement('script');
+    if (width < 960) { 
+      s.id = 'changyan_mobile_js';
+      s.src = 'http://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
+    } else {
+      s.src = 'http://changyan.sohu.com/upload/changyan.js';
+      s.onload = function() {
+        window.changyan.api.config({appid:appid,conf:conf});
+      }
+    }
+    (doc.head||doc.body).appendChild(s);
+  }
   window.addEventListener('load', function(){
     loadComment();
   });

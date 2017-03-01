@@ -63,10 +63,7 @@ module.exports = class extends Base {
 
   openDialog(){
     let comment = this.state.comment;
-    let url = "/static/img/duoshuo.jpg";
-    if(comment.type === 'disqus'){
-      url = "/static/img/disqus.jpg";
-    }
+    let url = `/static/img/${comment.type}.jpg`;
     let content = (<div className="center">
       <a href={url} target="_blank"><img src={url} style={{maxWidth: '100%'}} /></a>
     </div>);
@@ -86,6 +83,7 @@ module.exports = class extends Base {
       >
         <Radio value='disqus' label='Disqus' />
         <Radio value='duoshuo' label='多说' />
+        <Radio value='changyan' label='畅言' />
         <Radio value='custom' label='自定义' />
       </RadioGroup>
     );
