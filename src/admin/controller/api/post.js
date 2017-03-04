@@ -99,6 +99,11 @@ export default class extends Base {
 
     /** 判断接收的参数中是否有 markdown_content 来区别审核通过的状态修改和普通的文章更新 */
     if( data.markdown_content ) {
+      /** 如果是编辑发布文章的话默认状态改为审核中 **/
+      if( data.status == 3 && this.userInfo.type != 1 ) {
+        data.status = 1;
+      }
+
       /** 推送文章 */
       this.pushPost(data);
 
