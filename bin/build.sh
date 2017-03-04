@@ -44,9 +44,9 @@ if [ 0 -eq `grep -c analyze_code  output/firekylin.sql` ];then
 fi
 
 
-cp -r auto_build.sh output/;
-cp -r https.js output/;
-cp -r https.sh output/;
+cp -r bin/ssl/auto_build.sh output/;
+cp -r bin/ssl/https.js output/;
+cp -r bin/ssl/https.sh output/;
 
 rm -r output/app/common/config/db.js;
 rm -rf output/www/static/js/*.map;
