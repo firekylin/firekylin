@@ -170,9 +170,8 @@ ${post.markdown_content}`;
 
   getPostTime(data) {
     data.update_time = think.datetime();
-    /**草稿可以没有创建时间**/
     if( !data.create_time ) {
-      data.create_time = data.status != 0 ? data.update_time : null;
+      data.create_time = data.update_time;
     }else{
       data.create_time = think.datetime(data.create_time);
     }
