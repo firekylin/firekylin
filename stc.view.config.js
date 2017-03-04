@@ -1,10 +1,10 @@
 var stc = require('stc');
-var htmlCompress = require('stc-html-compress');
 var cssCompress = require('stc-css-compress');
-var resourceVersion = require('stc-resource-version');
+// var resourceVersion = require('stc-resource-version');
 var localstorage = require('stc-localstorage');
 var localstorageAdapter = require('stc-localstorage-nunjucks');
 var cssCombine = require('stc-css-combine');
+// var htmlCompress = require('stc-html-compress');
 
 stc.config({
   product: 'firekylin.view',
@@ -21,7 +21,6 @@ stc.config({
 stc.workflow({
   cssCombine: {plugin: cssCombine, include: /\.css$/},
   cssCompress: {plugin: cssCompress},
-  htmlCompress: {plugin: htmlCompress},
   localstorage: {
     include: {type: 'tpl'},
     plugin: localstorage,
@@ -31,7 +30,8 @@ stc.workflow({
       appId : '3e988cdb'
     }
   },
-  resourceVersion: {plugin: resourceVersion}
+  // htmlCompress: {plugin: htmlCompress}
+  // resourceVersion: {plugin: resourceVersion}
 });
 
 stc.start();
