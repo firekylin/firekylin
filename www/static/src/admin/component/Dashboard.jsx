@@ -161,11 +161,15 @@ module.exports = class extends Base {
               <ul>
                 <li>
                   <label>项目主页：</label>
-                  <a href="http://firekylin.org/" target="_blank">http://firekylin.org/</a>
+                  <a href="https://firekylin.org/" target="_blank">http://firekylin.org/</a>
                 </li>
                 <li>
                   <label>项目源码：</label>
                   <a href="https://github.com/75team/firekylin">https://github.com/75team/firekylin</a>
+                </li>
+                <li>
+                  <label>帮助文档：</label>
+                  <a href="https://github.com/75team/firekylin/wiki" target="_blank">https://github.com/75team/firekylin/wiki</a>
                 </li>
                 <li>
                   <label>问题反馈：</label>
@@ -173,7 +177,7 @@ module.exports = class extends Base {
                 </li>
                 <li>
                   <label>团队博客：</label>
-                  <a href="http://www.75team.com/">http://www.75team.com/</a>
+                  <a href="https://www.75team.com/">http://www.75team.com/</a>
                 </li>
                 <li>
                   <label>开发成员：</label>
