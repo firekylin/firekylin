@@ -4,7 +4,7 @@
   "version": "0.15.3",
   "scripts": {
     "start": "node www/development.js",
-    "compile": "babel --presets es2015-loose,stage-1 --plugins transform-runtime src/ --out-dir app/",
+    "compile": "babel --presets es2015,stage-1 --plugins transform-runtime src/ --out-dir app/",
     "watch-compile": "node -e \"console.log('<npm run watch-compile> no longer need, use <npm start> command direct.');console.log();\"",
     "watch": "npm run watch-compile",
     "copy-package": "node bin/copy_package.js",
@@ -47,6 +47,7 @@
     "babel-preset-stage-0": "6.x.x",
     "babel-preset-stage-1": "^6.5.0",
     "classnames": "^2.2.3",
+    "codemirror": "^5.24.2",
     "css-loader": "^0.23.1",
     "history": "^1.17.0",
     "md5": "^2.0.0",
