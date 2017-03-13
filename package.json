@@ -10,7 +10,8 @@
     "copy-package": "node bin/copy_package.js",
     "webpack": "webpack --watch",
     "webpack.build": "webpack",
-    "webpack.build.production": "webpack --config=webpack.production.config.babel.js"
+    "webpack.build.production": "webpack --config=webpack.production.config.babel.js",
+    "dev": "sh bin/dev.sh"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
