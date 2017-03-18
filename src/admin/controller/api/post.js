@@ -193,21 +193,31 @@ ${post.markdown_content}`;
    * 页面不自动生成 TOC 除非是手动指定了
    */
   async getContentAndSummary(data) {
-    let options = await this.model('options').getOptions();
-    let postTocManual = options.postTocManual === '1';
-    
+    const options = await this.model('options').getOptions();
+    const postTocManual = options.postTocManual === '1';
+    const auto_summary = parseInt(options.auto_summary);
+
     let showToc;
     if( !postTocManual ) {
       showToc = data.type/1 === 0;
     } else {
       showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
     }
-
     data.content = this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
-    data.summary = data.markdown_content.split('<!--more-->')[0];
-    data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
-    data.summary.replace(/<[>]*>/g, '');
-    
+
+    const hasMoreTag = /(?:^|[\r\n]+)\s*\<\!--more--\>\s*[\r\n]+/i.test(data.markdown_content);
+
+    if ( hasMoreTag || auto_summary === 0 ) {
+      data.summary = data.markdown_content.split('<!--more-->')[0];
+      data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
+      data.summary.replace(/<[>]*>/g, '');
+
+    } else {
+      let summary = this.markdownToHtml(data.markdown_content, {toc: false, highlight: true});
+      // 过滤掉 HTML 标签并截取所需的长度
+      data.summary = summary.replace(/<\/?[^>]*>/g,'').substr(0, auto_summary) + '...';
+    }
+
     return data;
   }
 
