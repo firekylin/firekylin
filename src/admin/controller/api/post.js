@@ -136,7 +136,8 @@ export default class extends Base {
     return this.success();
   }
 
-  async pushPost(post) {
+  async pushPost(postData) {
+    let post = Object.assign({}, postData);
     let postOpt = JSON.parse(post.options);
     let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
     if( post.status != 3 && post.is_public != 1 && !canPush ) {
@@ -154,6 +155,8 @@ export default class extends Base {
 
 ${post.markdown_content}`;
     }
+    
+    delete post.id;
     delete post.cate;
     delete post.options;
 

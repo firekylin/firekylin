@@ -45,6 +45,29 @@ class MdEditor extends Base {
     // cache dom node
     this.textControl = ReactDOM.findDOMNode(this.refs.editor);
     this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
+    this._syncScroll = ((e) => {
+      let leftSync = false, rightSync = false;
+      let that = this;
+
+      return function(e) {
+        let scrollEle = e.target;
+        let syncEle = scrollEle === that.textControl ? that.previewControl : that.textControl;
+        let percent = scrollEle.scrollTop / (scrollEle.scrollHeight - scrollEle.clientHeight);
+        if( leftSync && scrollEle === that.previewControl ) { 
+          return true;
+        }
+        if( rightSync && scrollEle === that.textControl ) {
+          return true;
+        }
+
+        leftSync = scrollEle === that.textControl;
+        rightSync = scrollEle === that.previewControl;
+        syncEle.scrollTop = percent * (syncEle.scrollHeight - syncEle.clientHeight);
+
+        setTimeout(() => leftSync = rightSync = false, 100);
+      }
+    })();
+
     if(localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+'']) {
         ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
           let content = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id];
@@ -57,6 +80,8 @@ class MdEditor extends Base {
     }
     this.textControl.addEventListener('keydown', this._bindKey);
     this.textControl.addEventListener('paste', this._bindPaste.bind(this));
+    this.textControl.addEventListener('scroll', this._syncScroll, false);
+    this.previewControl.addEventListener('scroll', this._syncScroll, false);
     this._bindMouse();
     this.listen(ModalStore, () => this.textControl.focus(), 'removeModal');
   }
@@ -145,7 +170,13 @@ class MdEditor extends Base {
             {this._getToolBar()}
           </div>
           <div className={editorClass}>
-            <textarea ref="editor" name="content" onChange={this._onChange} value={this.props.content}></textarea>{/* style={{height: this.state.editorHeight + 'px'}} */}
+            <textarea 
+                ref="editor" 
+                name="content" 
+                onChange={this._onChange}
+                value={this.props.content}
+            >
+            </textarea>
           </div>
           <div className={previewClass} ref="preview" dangerouslySetInnerHTML={{ __html: this.state.result }}></div>
           <div className={classnames({hide: this.state.mode !== 'split'}, 'md-spliter')}></div>
