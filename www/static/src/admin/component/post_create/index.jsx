@@ -219,6 +219,25 @@ module.exports = class extends Base {
   }
 
   /**
+   * https://github.com/lepture/editor/blob/master/src/intro.js#L327-L341
+   * The right word count in respect for CJK.
+   */
+  wordCount(data) {
+    var pattern = /[a-zA-Z0-9_\u0392-\u03c9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
+    var m = data.match(pattern);
+    var count = 0;
+    if( m === null ) return count;
+    for (var i = 0; i < m.length; i++) {
+      if (m[i].charCodeAt(0) >= 0x4E00) {
+        count += m[i].length;
+      } else {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  /**
    * 渲染标题输入控件
    */
   renderTitle(postInfo = this.state.postInfo) {
@@ -281,7 +300,17 @@ module.exports = class extends Base {
           onFullScreen={isFullScreen => this.setState({isFullScreen})}
           info = {{id: this.id,type: this.type}}
         />
-        <p style={{lineHeight: '30px'}}>文章使用 markdown 格式，格式说明请见<a href="https://guides.github.com/features/mastering-markdown/" target="_blank">这里</a></p>
+        <p style={{lineHeight: '30px'}}>
+          <span className="pull-left">
+            文章使用 markdown 格式，格式说明请见
+            <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">
+              这里
+            </a>
+          </span>
+          <span className="pull-right">
+            字数：{this.wordCount(this.state.postInfo.markdown_content)}
+          </span>
+        </p>
       </div>
     );
   }
