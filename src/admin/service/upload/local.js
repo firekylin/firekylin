@@ -5,7 +5,9 @@ import Base from './base';
 const moveFile = think.promisify(fs.rename, fs);
 export default class extends Base {
   async uploadMethod(file, {name}) {
-    let basename = name ? name + path.extname(file) : path.basename(file) + '.png';
+    let ext = /^\.\w+$/.test(path.extname(file)) ? path.extname(file) : '.png';
+    let basename = (name || path.basename(file, ext)) + ext;
+
     let destDir = this.formatNow();
     let destPath = path.join( think.UPLOAD_PATH, destDir );
     if( !think.isDir(destPath) ) {
