@@ -52,6 +52,12 @@ export default class extends Base {
     if(!Array.isArray(post_categories)) {
       post_categories = [];
     }
+    if(!Array.isArray(tags)) {
+      tags = [];
+    }
+    if(!Array.isArray(categories)) {
+      categories = [];
+    }
 
     posts = posts.filter(item => item.page === 0);
     const postsPromise = posts.map(async item => {
