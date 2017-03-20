@@ -6,7 +6,15 @@ import highlight from 'highlight.js';
 import push2Firekylin from 'push-to-firekylin';
 
 export default class extends Base {
-  modelInstance = this.modelInstance.where({type: 0});
+  constructor(http){
+    super(http);
+    this._modelInstance = this.modelInstance;
+    Object.defineProperty(this, 'modelInstance', {
+      get() {
+        return this._modelInstance.where({type: 0})
+      }
+    })
+  }
   /**
    * get
    * @return {[type]} [description]
@@ -82,8 +90,8 @@ export default class extends Base {
     data = this.getPostTime(data);
     data.options = data.options ? JSON.stringify(data.options) : '';
 
-    let insertId = await this.modelInstance.addPost(data);
-    return this.success({id: insertId});
+    let insert = await this.modelInstance.addPost(data);
+    return this.success(insert);
   }
   /**
    * update user info
@@ -155,7 +163,7 @@ export default class extends Base {
 
 ${post.markdown_content}`;
     }
-    
+
     delete post.id;
     delete post.cate;
     delete post.options;
@@ -187,7 +195,7 @@ ${post.markdown_content}`;
   }
 
   /**
-   * 渲染 markdown 
+   * 渲染 markdown
    * 摘要为部分内容时不展示 TOC
    * 文章正文设置为手动指定 TOC 时不显示
    * 页面不自动生成 TOC 除非是手动指定了
@@ -195,7 +203,7 @@ ${post.markdown_content}`;
   async getContentAndSummary(data) {
     let options = await this.model('options').getOptions();
     let postTocManual = options.postTocManual === '1';
-    
+
     let showToc;
     if( !postTocManual ) {
       showToc = data.type/1 === 0;
@@ -207,7 +215,7 @@ ${post.markdown_content}`;
     data.summary = data.markdown_content.split('<!--more-->')[0];
     data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
     data.summary.replace(/<[>]*>/g, '');
-    
+
     return data;
   }
 
@@ -244,7 +252,7 @@ ${post.markdown_content}`;
    */
   markdownToHtml(content, option = {toc: true, highlight: true}){
     let markedContent = marked(content);
-    
+
     /**
      * 增加 TOC 目录
      */
@@ -269,7 +277,7 @@ ${post.markdown_content}`;
         return `<pre><code class="hljs lang-${result.language}">${result.value}</code></pre>`;
       });
     }
-    
+
     return markedContent;
   }
 
