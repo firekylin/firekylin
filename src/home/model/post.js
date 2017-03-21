@@ -24,10 +24,9 @@ export default class extends think.model.relation {
 
   async init(...args) {
     super.init(...args);
-    let {feedFullText, postsListSize, auto_summary} = await this.model('options').getOptions();
+    let {feedFullText, postsListSize} = await this.model('options').getOptions();
     this.feedFullText = feedFullText;
     this.postsListSize = +postsListSize;
-    this.autoSummary = parseInt(auto_summary) || 0;
   }
   /**
    * get where condition
@@ -81,13 +80,7 @@ export default class extends think.model.relation {
     //   },{timeout:259200});
     // }
 
-    const data = await this.field(field).page(page, this.postsListSize).setRelation('user').order('create_time DESC').where(where).countSelect();
-
-    if (this.autoSummary > 0) {
-      data.data.forEach(post => post.summary = post.summary.replace(/<\/?[^>]*>/g,'').substr(0, this.autoSummary) + '...');
-    }
-
-    return data;
+    return this.field(field).page(page, this.postsListSize).setRelation('user').order('create_time DESC').where(where).countSelect();
   }
 
   /**
