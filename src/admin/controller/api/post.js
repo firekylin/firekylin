@@ -71,8 +71,8 @@ export default class extends Base {
   async postAction(){
     let data = this.post();
     //check pathname
-    let post = await this.modelInstance.where({pathname: data.pathname}).select();
-    if( post.length > 0 ) {
+    let post = await this.modelInstance.where({pathname: data.pathname}).find();
+    if( !think.isEmpty(post) ) {
       return this.fail('PATHNAME_EXIST');
     }
 

@@ -3,7 +3,15 @@
 import Post from './post';
 
 export default class extends Post {
-  modelInstance = this.modelInstance.setRelation('user').where({type: 1});
+  constructor(http){
+    super(http);
+    this._modelInstance = this.modelInstance;
+    Object.defineProperty(this, 'modelInstance', {
+      get() {
+        return this._modelInstance.setRelation('user').where({type: 1});
+      }
+    })
+  }
 
   getAction(self){
     if( !this.id ) {
@@ -21,8 +29,9 @@ export default class extends Post {
     let data = this.post();
 
     //check pathname
-    let post = await this.modelInstance.where({pathname: data.pathname}).select();
-    if( post.length > 0 ) {
+    let post = await this.modelInstance.where({pathname: data.pathname}).find();
+
+    if( !think.isEmpty(post) ) {
       return this.fail('PATHNAME_EXIST');
     }
 
@@ -30,7 +39,7 @@ export default class extends Post {
     data.user_id = this.userInfo.id;
     data = await this.getContentAndSummary(data);
     data = this.getPostTime(data);
-    
+
     let insertId = await this.modelInstance.addPost(data);
     return this.success({id: insertId});
   }
