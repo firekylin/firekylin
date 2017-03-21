@@ -56,7 +56,25 @@ export default class extends Base {
       return 0;
     }
 
-    let posts = channel.item.filter(item => item['wp:post_type'][0] ==='post');
+    let posts = channel.item.filter(item => {
+      let keys = [
+        'wp:post_type',
+        'dc:creator',
+        'content:encoded',
+        'wp:post_name',
+        'wp:post_date',
+        'wp:status',
+        'wp:comment_status'
+      ];
+
+      for(let key of keys) {
+        if(!Array.isArray(item[key]) || !item[key].length) {
+          return false;
+        }
+      }
+      return item['wp:post_type'][0] ==='post';
+    });
+    
     let postsPromise = posts.map(async item => {
       try{
         //获取用户
@@ -112,7 +130,24 @@ export default class extends Base {
       return 0;
     }
 
-    let pages = channel.item.filter(item => item['wp:post_type'][0] === 'page');
+    let pages = channel.item.filter(item => {
+      let keys = [
+        'wp:post_type',
+        'dc:creator', 
+        'excerpt:encoded', 
+        'content:encoded', 
+        'wp:post_name',
+        'wp:status',
+        'wp:comment_status',
+      ];
+      for(let key of keys) {
+        if(!Array.isArray(item[key]) || !item[key].length) {
+          return false;
+        }
+      }
+      return item['wp:post_type'][0] === 'page';
+    });
+
     let pagesPromise = pages.map(async item => {
       let user = await this.userModelInstance.where({name: item['dc:creator'][0]}).find();
       let summary = item['excerpt:encoded'][0];
@@ -150,12 +185,23 @@ export default class extends Base {
     }
 
     let tags = channel['wp:tag'];
-    let tagsPromise = tags.map(tag => this.tagModelInstance.addTag({
-      name: tag['wp:tag_name'][0],
-      pathname: decodeURIComponent(tag['wp:tag_slug'][0])
-    }));
-    await Promise.all(tagsPromise);
+    let tagsPromise = [];
+    for(let tag of tags) {
+      let tagName = tag['wp:tag_name'], tagSlug = tag['wp:tag_slug'];
+      if( !Array.isArray(tagName) || !tagName.length ) {
+        continue;
+      }
+      if( !Array.isArray(tagSlug) || !tagName.length ) {
+        continue;
+      }
+      
+      tagsPromise.push(this.tagModelInstance.addTag({
+        name: tagName[0],
+        pathname: decodeURIComponent(tagSlug[0])
+      }));
+    }
 
+    await Promise.all(tagsPromise);
     return tags.length;
   }
 
@@ -169,13 +215,24 @@ export default class extends Base {
     }
 
     let categories = channel['wp:category'];
-    let categoriesPromise = categories.map(cate => this.cateModelInstance.addCate({
-      name: cate['wp:cat_name'][0],
-      pathname: decodeURIComponent(cate['wp:category_nicename'][0]),
-      pid: 0
-    }));
-    await Promise.all(categoriesPromise);
-    
+    let categoriesPromise = [];
+    for(let cate of categories) {
+      let cateName = cate['wp:cat_name'], cateSlug = cate['wp:category_nicename'];
+      if( !Array.isArray(cateName) || !cateName.length ) {
+        continue;
+      }
+      if( !Array.isArray(cateSlug) || !cateSlug.length ) {
+        continue;
+      }
+
+      categoriesPromise.push(this.cateModelInstance.addCate({
+        name: cateName[0],
+        pathname: decodeURIComponent(cateSlug[0]),
+        pid: 0
+      }));
+    }
+
+    await Promise.all(categoriesPromise);    
     return categories.length;
   }
 

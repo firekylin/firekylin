@@ -13,7 +13,7 @@ export default class extends Post {
       is_public: 1
     }, data);
 
-    return this.where({pathname: data.pathname, _logic: 'OR'}).thenAdd(data);
+    return this.where({pathname: data.pathname}).thenAdd(data);
   }
 
   async savePost(data){
