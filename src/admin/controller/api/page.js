@@ -40,8 +40,8 @@ export default class extends Post {
     data = await this.getContentAndSummary(data);
     data = this.getPostTime(data);
 
-    let insertId = await this.modelInstance.addPost(data);
-    return this.success({id: insertId});
+    let insert = await this.modelInstance.addPost(data);
+    return this.success(insert);
   }
 
   async putAction(){
