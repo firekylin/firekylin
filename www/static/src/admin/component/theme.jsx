@@ -28,11 +28,17 @@ module.exports = class extends Base {
     this.listenTo(ThemeStore, this.handleTrigger.bind(this));
     ThemeAction.list();
     this.state.themeConfig = {};
-    if( window.SysConfig.options.themeConfig ) {
-      try{
-        this.state.themeConfig = JSON.parse(window.SysConfig.options.themeConfig);
-      } catch(e) { console.log(e) }
-    }
+
+    let themeConfig = window.SysConfig.options.themeConfig;
+    try {
+      if( !themeConfig ) {
+        return;
+      }
+      if( typeof(themeConfig) === 'string' ) {
+        themeConfig = JSON.parse(themeConfig);
+      }
+      this.state.themeConfig = themeConfig;
+    } catch(e) { console.log(e) }
   }
 
   handleTrigger(data, type) {
