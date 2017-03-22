@@ -88,8 +88,11 @@
         loadDuoshuoComment();
       }else if(dataType === 'changyan'){
         loadChangyanComment();
+      }else if(dataType === 'netease') {
+        loadNeteaseComment();
       }
     }
+
     if(location.hash.indexOf('#comments') > -1){
       load();
     }else {
@@ -151,6 +154,22 @@
       }
     }
     (doc.head||doc.body).appendChild(s);
+  }
+
+  var loadNeteaseComment = function() {
+    var disqus_thread = getById('cloud-tie-wrapper');
+    if(!disqus_thread){
+      return;
+    }
+    window.cloudTieConfig = {
+      url: document.location.href, 
+      sourceId: "",
+      productKey: disqus_thread.getAttribute('data-name'),
+      target: disqus_thread.className
+    };
+    var s = document.createElement('script');
+    s.src = 'https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js';
+    (doc.head || doc.body).appendChild(s);
   }
   window.addEventListener('load', function(){
     loadComment();
