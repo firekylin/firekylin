@@ -84,6 +84,7 @@ module.exports = class extends Base {
         <Radio value='disqus' label='Disqus' />
         <Radio value='duoshuo' label='多说' />
         <Radio value='changyan' label='畅言' />
+        <Radio value='netease' label='网易云跟帖' />
         <Radio value='custom' label='自定义' />
       </RadioGroup>
     );
