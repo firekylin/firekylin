@@ -1,10 +1,11 @@
 import Base from 'base';
 import React from 'react';
+import _ from 'classnames';
+import Tree from 'react-ui-tree';
 import BreadCrumb from './breadcrumb';
 import CodeMirror from 'react-codemirror';
 import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
-import {Treebeard, theme as TreeTheme} from 'react-treebeard';
 
 import ThemeStore from 'admin/store/theme';
 import ThemeAction from 'admin/action/theme';
@@ -72,13 +73,13 @@ module.exports = class extends Base {
     return data.map((item) => {
       item.parent = parent;
       if( item.children ) {
+        item.collapsed = true;
         item.children = this.initialFileList(item.children, item);
       }
 
       /** 默认加载 package.json 文件 */
-      if( item.name.toLowerCase() === 'package.json' ) {
-        item.active = true;
-        this.state.cursor = item;
+      if( item.module.toLowerCase() === 'package.json' ) {
+        this.state.active = item;
         this.state.currentFile = this.state.theme + '/package.json';
         ThemeAction.getThemeFile(this.state.currentFile);
       }
@@ -90,7 +91,7 @@ module.exports = class extends Base {
   getThemeFile(node) {
     let filePath = '';
     do {
-      filePath = node.name + (!filePath ? '' : '/' + filePath);
+      filePath = node.module + (!filePath ? '' : '/' + filePath);
       node = node.parent;
     } while(node);
 
@@ -98,18 +99,13 @@ module.exports = class extends Base {
     ThemeAction.getThemeFile(this.state.currentFile);
   }
 
-  toggleFile(node, toggled) {
-    if( node.children ) {
-      node.toggled = toggled;
+  toggleFile(node) {
+    if(node.hasOwnProperty('children')) {
+      node.collapsed = !node.collapsed;
       return this.forceUpdate();
     }
 
-
-    if( this.state.cursor ) {
-      this.state.cursor.active = false;
-    }
-    node.active = true;
-    this.setState({ cursor: node });
+    this.setState({active: node});
     this.getThemeFile(node);
   }
   
@@ -137,8 +133,9 @@ module.exports = class extends Base {
   }
 
   render() {
-    TreeTheme.tree.base.backgroundColor = 'transparent';
-    TreeTheme.tree.node.activeLink.background = '#eee';
+    // TreeTheme.tree.base.backgroundColor = 'transparent';
+    // TreeTheme.tree.node.activeLink.background = '#eee';
+    let tree = {module: this.state.theme, children: this.state.list};
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -160,10 +157,16 @@ module.exports = class extends Base {
               </div>
             </div>
             <div className="col-xs-3">
-              <Treebeard
-                  style={TreeTheme}
-                  data={this.state.list}
-                  onToggle={this.toggleFile.bind(this)}
+              <Tree
+                tree={tree}
+                renderNode={node => 
+                  <span 
+                      className={_('node', {'is-active': node===this.state.active})}
+                      onClick={this.toggleFile.bind(this, node)}
+                  >
+                    {node.module}
+                  </span>
+                }
               />
             </div>
           </div>

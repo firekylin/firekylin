@@ -112,13 +112,13 @@ export default class extends Base {
       let stat = await statsAsync(pos);
       if( stat.isDirectory() ) {
         result.push({
-          name: file,
+          module: file,
           children: await this.getFileList(pos)
         });
       }
 
       if( stat.isFile() ) {
-        result.push({name: file});
+        result.push({module: file});
       }
     }
 
