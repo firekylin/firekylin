@@ -143,9 +143,9 @@
     var s = document.createElement('script');
     if (width < 960) { 
       s.id = 'changyan_mobile_js';
-      s.src = 'http://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
+      s.src = '//changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
     } else {
-      s.src = 'http://changyan.sohu.com/upload/changyan.js';
+      s.src = '//changyan.sohu.com/upload/changyan.js';
       s.onload = function() {
         window.changyan.api.config({appid:appid,conf:conf});
       }
