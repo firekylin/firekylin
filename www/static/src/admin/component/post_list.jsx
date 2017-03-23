@@ -96,8 +96,8 @@ module.exports = class extends Base {
     }
 
     return (
-      <a 
-          href={`/post/${post.pathname}.html`} 
+      <a
+          href={`/post/${post.pathname}.html`}
           target="_blank"
           className="admin-post-link"
       >
@@ -118,7 +118,7 @@ module.exports = class extends Base {
             type="button"
             className="btn btn-success btn-xs"
             disabled={[0,3].includes(post.status)}
-            onClick={PostAction.pass.bind(PostAction, post.id)}
+            onClick={PostAction.pass.bind(PostAction, post)}
         >
           <span className="glyphicon glyphicon-ok"></span>
           通过
@@ -160,7 +160,7 @@ module.exports = class extends Base {
       </td>
     );
   }
-  
+
   renderStatus({status, is_public, create_time}) {
     const isFuture = time => time && (new Date(time)).getTime() > Date.now();
     let text = '';
@@ -168,7 +168,7 @@ module.exports = class extends Base {
       case 0: text += '草稿'; break;
       case 1: text += '待审核'; break;
       case 2: text += '已拒绝'; break;
-      case 3: 
+      case 3:
         text += isFuture(create_time) ? '即将发布' : '已发布';
       break;
     }

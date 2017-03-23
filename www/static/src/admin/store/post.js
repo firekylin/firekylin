@@ -1,5 +1,6 @@
 import Reflux from 'reflux';
 import superagent from 'superagent';
+import moment from 'moment';
 
 import firekylin from '../../common/util/firekylin';
 
@@ -70,8 +71,16 @@ export default Reflux.createStore({
     );
   },
 
-  onPass(id) {
-    this.onSave({id, status: 3});
+  onPass({id, create_time}) {
+    const postData = {id, status: 3};
+    const now = moment();
+    const {auditFreshCreateTime = '1'} = SysConfig.options;
+
+    if (Number(auditFreshCreateTime) && moment(create_time) < now) {
+      postData.create_time = now.format('YYYY-MM-DD HH:mm:ss')
+    }
+
+    this.onSave(postData);
   },
 
   onDeny(id) {
