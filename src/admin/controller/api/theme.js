@@ -18,7 +18,8 @@ export default class extends Base {
    */
   pathCheck(themePath, basePath = THEME_DIR) {
     if( themePath.indexOf(basePath) !== 0 ) {
-      return this.fail();
+      this.fail();
+      throw Error(`theme path ${themePath} error`);
     }
     return true;
   }
