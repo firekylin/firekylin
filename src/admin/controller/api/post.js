@@ -4,6 +4,7 @@ import Base from './base.js';
 import toc from 'markdown-toc';
 import highlight from 'highlight.js';
 import push2Firekylin from 'push-to-firekylin';
+import moment from 'moment';
 
 export default class extends Base {
   constructor(http){
@@ -121,6 +122,11 @@ export default class extends Base {
       if(data.tag) {
         data.tag = await this.getTagIds(data.tag);
       }
+    } else if (data.create_time && moment(data.create_time) < moment()) {
+      /** 审核通过的状态修改，有 create_time 即需要更新时间，时间由服务器生成 */
+      // 此处可能出现 create_time 和 update_time 不一致的情况
+      // TODO: 防止再次审核通过时修改时间。
+      data.create_time = think.datetime();
     }
 
     let rows = await this.modelInstance.savePost(data);
