@@ -162,7 +162,7 @@
       return;
     }
     window.cloudTieConfig = {
-      url: document.location.href, 
+      url: getById('comments').getAttribute('data-url'), 
       sourceId: "",
       productKey: disqus_thread.getAttribute('data-name'),
       target: disqus_thread.className
