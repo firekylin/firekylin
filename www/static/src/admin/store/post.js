@@ -70,8 +70,15 @@ export default Reflux.createStore({
     );
   },
 
-  onPass(id) {
-    this.onSave({id, status: 3});
+  onPass({id, create_time}) {
+    const postData = {id, status: 3};
+    const {auditFreshCreateTime = '1'} = SysConfig.options;
+
+    if (Number(auditFreshCreateTime)) {
+      postData.create_time = create_time
+    }
+
+    this.onSave(postData);
   },
 
   onDeny(id) {

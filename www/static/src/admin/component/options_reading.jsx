@@ -17,7 +17,7 @@ module.exports = class extends Base {
       options: SysConfig.options,
       pageList: []
     };
-    
+
     let {frontPage} = this.state.options;
     if( !frontPage ) {
       frontPage = 'recent';
@@ -68,9 +68,9 @@ module.exports = class extends Base {
 
   renderPageList() {
     return (
-      <select 
-          name="frontPagePage" 
-          ref="frontPagePage" 
+      <select
+          name="frontPagePage"
+          ref="frontPagePage"
           value={this.state.options.frontPagePage}
           onChange={e => {
             let options = this.state.options;
@@ -123,6 +123,15 @@ module.exports = class extends Base {
               <Radio value="0" label="是" />
               <Radio value="1" label="否" />
             </RadioGroup>
+            <RadioGroup
+                defaultValue="1"
+                name="auditFreshCreateTime"
+                label="文章审核通过时更新文章的发布时间"
+                help={<span>文章审核通过时，若文章的发布时间在当前时间之前，更新文章的发布时间</span>}
+            >
+              <Radio value="1" label="是" />
+              <Radio value="0" label="否" />
+            </RadioGroup>
             <div className="form-group">
               <label>每页文章数目</label>
               <ValidatedInput
@@ -144,7 +153,7 @@ module.exports = class extends Base {
                   if( parseInt(val) !== p ) {
                     return '请填入一个整数';
                   }
-                  
+
                   return true;
                 }}
               />
