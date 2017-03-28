@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
       <loc>{{site_url}}</loc>
-      <priority>0.6</priority>
       <lastmod>{{think.datetime(postList[0] and postList[0].update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.8</priority>
   </url>
   {% for item in postList %}
   <url>
       <loc>{{site_url}}/{{'page' if item.type === 1 else 'post'}}/{{item.pathname}}.html</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
-      <priority>0.6</priority>
+      <priority>{{0.7 if item.type === 1 else 0.6}}</priority>
   </url>
   {% endfor %}
   {% if tagList[0] %}
