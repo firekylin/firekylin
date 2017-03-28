@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+      <loc>{{site_url}}</loc>
+      <lastmod>{{think.datetime(list[0] and list[0].update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.6</priority>
+  </url>
   {% for item in list %}
   <url>
       <loc>{{site_url}}/{{'page' if item.type === 1 else 'post'}}/{{item.pathname}}.html</loc>
