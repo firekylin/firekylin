@@ -36,9 +36,13 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async sitemapAction(){
-    let model = this.model('post');
-    let list = model.getPostSitemapList();
-    this.assign('list', list);
+    let postModel = this.model('post');
+    let postList = postModel.getPostSitemapList();
+    this.assign('postList', postList);
+
+    let tagModel = this.model('tag');
+    let tagList = tagModel.getTagSitemapList();
+    this.assign('tagList', tagList);
 
     this.type('text/xml');
     return this.display(this.HOME_VIEW_PATH + 'sitemap.xml');
