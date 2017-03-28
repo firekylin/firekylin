@@ -4,6 +4,7 @@ import Base from './base.js';
 import toc from 'markdown-toc';
 import highlight from 'highlight.js';
 import push2Firekylin from 'push-to-firekylin';
+import moment from 'moment';
 
 export default class extends Base {
   constructor(http){
@@ -120,6 +121,26 @@ export default class extends Base {
       data.options = data.options ? JSON.stringify(data.options) : '';
       if(data.tag) {
         data.tag = await this.getTagIds(data.tag);
+      }
+    } else if (data.create_time) {
+      /** 审核通过的状态修改，有 create_time 即需要更新时间，时间由服务器生成 */
+
+      const post = await this.modelInstance.where({id: data.id}).find();
+      let options = JSON.parse(post.options || "{}");
+      if (typeof options === 'string') {
+        options = JSON.parse(options) || {};
+      }
+
+      if (moment(data.create_time) < moment() && !options.origin_create_time) {
+
+        data.options = JSON.stringify({
+          ...options,
+          origin_create_time: data.create_time
+        });
+        data.create_time = think.datetime(); // 此处可能出现 create_time 和 update_time 不一致的情况
+      } else {
+        // 此处需删除 create_time，或者对 create_time 的格式进行处理
+        delete data.create_time;
       }
     }
 
