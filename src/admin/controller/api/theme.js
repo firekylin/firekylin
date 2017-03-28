@@ -6,22 +6,40 @@ import Base from './base.js';
 import {execSync} from 'child_process';
 
 const cluster = require('cluster');
-const stats = think.promisify(fs.stat);
-const readdir = think.promisify(fs.readdir);
-const writeFile = think.promisify(fs.writeFile);
+const statsAsync = think.promisify(fs.stat);
+const readdirAsync = think.promisify(fs.readdir);
+const readFileAsync = think.promisify(fs.readFile);
+const writeFileAsync = think.promisify(fs.writeFile);
 const THEME_DIR = path.join(think.RESOURCE_PATH, 'theme');
 
 export default class extends Base {
+  /**
+   * forbidden ../ style path
+   */
+  pathCheck(themePath, basePath = THEME_DIR) {
+    if( themePath.indexOf(basePath) !== 0 ) {
+      this.fail();
+      throw Error(`theme path ${themePath} error`);
+    }
+    return true;
+  }
+  
   async getAction(){
     switch(this.get('type')) {
       case 'fileList':
         let {theme} = this.get();
-        let files = await this.getFileList( path.join(THEME_DIR, theme) );
+        let themePath = path.join(THEME_DIR, theme);
+        this.pathCheck(themePath);
+
+        let files = await this.getFileList(themePath);
         return this.success(files);
         
       case 'file':
         let {filePath} = this.get();
-        let file = await think.promisify(fs.readFile)( path.join(THEME_DIR, filePath), {encoding: 'utf-8'} );
+        filePath = path.join(THEME_DIR, filePath);
+        this.pathCheck(filePath);
+
+        let file = await readFileAsync(filePath, {encoding: 'utf-8'});
         return this.success(file);
 
       case 'templateList':
@@ -35,12 +53,11 @@ export default class extends Base {
 
   async updateAction() {
     let {filePath, content} = this.post();
+    filePath = path.join(THEME_DIR, filePath);
+    this.pathCheck(filePath);
+
     try {
-      await writeFile( 
-        path.join(THEME_DIR, filePath), 
-        content, 
-        {encoding: 'utf-8'}
-      );
+      await writeFileAsync(filePath, content, {encoding: 'utf-8'});
 
       if( cluster.isWorker ) {
         setTimeout(() => cluster.worker.kill(), 200);
@@ -58,8 +75,10 @@ export default class extends Base {
     let {theme, new_theme} = this.post();
     let themeDir = path.join(THEME_DIR, theme);
     let newThemeDir = path.join(THEME_DIR, new_theme);
+    this.pathCheck(themeDir) && this.pathCheck(newThemeDir);
+
     try {
-      let stat = await stats(newThemeDir);
+      let stat = await statsAsync(newThemeDir);
       return this.fail(`${new_theme} 已存在，请手动切换到该主题`);
     } catch(e) {
       execSync(`cp -r ${themeDir} ${newThemeDir}`);
@@ -69,7 +88,11 @@ export default class extends Base {
       config.name = new_theme;
 
       try {
-        await writeFile(configPath, JSON.stringify(config, null, '\t'), {encoding: 'utf-8'});
+        await writeFileAsync(
+          configPath, 
+          JSON.stringify(config, null, '\t'), 
+          {encoding: 'utf-8'}
+        );
         await this.model('options').updateOptions('theme', new_theme);
         return this.success();
       } catch(e) {
@@ -83,20 +106,20 @@ export default class extends Base {
    */
   async getFileList(base) {
     let result = [];
-    let files = await readdir(base);
+    let files = await readdirAsync(base);
 
     for(let file of files) {
       let pos = path.join(base, file);
-      let stat = await stats(pos);
+      let stat = await statsAsync(pos);
       if( stat.isDirectory() ) {
         result.push({
-          name: file,
+          module: file,
           children: await this.getFileList(pos)
         });
       }
 
       if( stat.isFile() ) {
-        result.push({name: file});
+        result.push({module: file});
       }
     }
 
@@ -107,13 +130,13 @@ export default class extends Base {
    * 获取主题列表
    */
   async getThemeList() {
-    let themes = await readdir(THEME_DIR);
+    let themes = await readdirAsync(THEME_DIR);
 
     let result = [];
     for(let theme of themes) {
       let infoFile = path.join(THEME_DIR, theme, 'package.json');
       try {
-        let stat = await stats(infoFile);
+        let stat = await statsAsync(infoFile);
         result.push( think.extend({id: theme}, think.require(infoFile)) );
       } catch(e) {
         console.log(e);
@@ -128,16 +151,18 @@ export default class extends Base {
   async getPageTemplateList() {
     let {theme} = this.get();
     let templatePath = path.join(THEME_DIR, theme, 'template');
+    this.pathCheck(templatePath);
+
     let templates = [];
     try {
-      let stat = await stats(templatePath);
+      let stat = await statsAsync(templatePath);
       if( !stat.isDirectory() ) {
         throw Error();
       }
     } catch(e) {
       return this.success(templates);
     }
-    templates = await readdir(templatePath);
+    templates = await readdirAsync(templatePath);
     templates = templates.filter(t => /\.html$/.test(t));
     return this.success(templates);
   }

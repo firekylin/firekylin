@@ -1,7 +1,7 @@
 {
   "name": "Firekylin",
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+",
-  "version": "0.15.4",
+  "version": "0.15.5",
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015,stage-1 --plugins transform-runtime src/ --out-dir app/",
@@ -62,7 +62,7 @@
     "react-dom": "^0.14.7",
     "react-mixin": "^3.0.3",
     "react-router": "^2.0.0-rc5",
-    "react-treebeard": "^1.1.4",
+    "react-ui-tree": "^2.6.0",
     "reflux": "^0.3.0",
     "stc": "^2.0.2",
     "stc-css-combine": "^1.0.1",
