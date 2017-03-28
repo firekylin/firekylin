@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   {% for item in list %}
   <url>
-      <loc>{{site_url}}/post/{{item.pathname}}.html</loc>
+      <loc>{{site_url}}/{{'page' if item.type === 1 else 'post'}}/{{item.pathname}}.html</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
       <priority>0.6</priority>
   </url>
