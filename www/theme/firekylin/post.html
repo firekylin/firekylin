@@ -4,6 +4,10 @@
 {{post.title}} - {{options.title}}
 {% endblock %}
 
+{% block headers %}
+<link rel="canonical" href="{{site_url}}/post/{{post.pathname}}.html" />
+{% endblock %}
+
 {% block content %}
 <div id="page-post">
     <article class="post detail">
