@@ -1,5 +1,5 @@
-import webpack from 'webpack';
-import config from './webpack.config.babel.js';
+const webpack = require('webpack');
+const config = require('./webpack.config.babel.js');
 
 config.plugins.push(
   new webpack.optimize.UglifyJsPlugin({
@@ -14,4 +14,4 @@ config.plugins.push(
   })
 );
 
-export default config;
+module.exports = config;
