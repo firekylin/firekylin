@@ -110,6 +110,28 @@ export default class extends Base {
   }
 
 
+  /**
+   * 更新所有文章的摘要信息并重新保存到数据库
+   *
+   * @returns {Promise.<void>}
+   */
+  async updateAllPostSummaries () {
+    // get all posts' id and mark down content
+    const posts = await this.field('id, markdown_content').setRelation(false).select();
+    const allPromises = [];
+
+    if (posts.length > 0) {
+      for (let i = 0; i < posts.length; i++) {
+        const item = posts[i];
+        const summary = await this.getSummary(item.markdown_content);
+
+        allPromises.push(this.where({id: item.id}).update({summary}))
+      }
+
+      await Promise.all(allPromises)
+    }
+  }
+
 
   /**
    * 渲染 markdown
@@ -144,6 +166,38 @@ export default class extends Base {
     }
 
     return data;
+  }
+
+
+  /**
+   * 渲染 markdown 并返回摘要内容
+   * 区别于 getContentAndSummary 方法，此方法只处理和返回摘要
+   *
+   * @param markdown_content MarkDown 内容
+   * @param summary_length 摘要长度（可为空）
+   */
+  async getSummary (markdown_content, summary_length) {
+    let summary;
+
+    if (! summary_length) {
+      const options = await this.model('options').getOptions();
+      summary_length = parseInt(options.auto_summary);
+    }
+
+    const hasMoreTag = /(?:^|[\r\n]+)\s*\<\!--more--\>\s*[\r\n]+/i.test(markdown_content);
+
+    if ( hasMoreTag || summary_length === 0 ) {
+      summary = markdown_content.split('<!--more-->')[0];
+      summary = this.markdownToHtml(summary, {toc: false, highlight: true});
+      summary.replace(/<[>]*>/g, '');
+
+    } else {
+      summary = this.markdownToHtml(markdown_content, {toc: false, highlight: true});
+      // 过滤掉 HTML 标签 及换行、空格等 并截取所需的长度
+      summary = summary.replace(/<\/?[^>]*>/g,'').replace(/[\n\s\t]/g, '').substr(0, summary_length) + '...';
+    }
+
+    return summary;
   }
 
 
