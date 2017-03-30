@@ -53,16 +53,6 @@
   </div>
 </article>
 
-{% if searchData and searchData.items.length and (searchData.prevPage or searchData.nextPage) %}
-  <nav class="page-navi">
-    {% if searchData.prevPage %}
-      <a href="{{ pagerPath }}start={{ searchData.prevPage }}" class="prev">&laquo; 上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;
-    {% endif %}
-
-    {% if searchData.nextPage %}
-      <a href="{{ pagerPath }}start={{ searchData.nextPage }}" class="next">下一页 &raquo;</a>
-    {% endif %}
-  </nav>
-{% endif %}
+{% include "./inc/pagination.html" %}
 {% endblock %}
 
