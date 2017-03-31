@@ -157,6 +157,6 @@ export default class extends think.model.relation {
   async getPostSearch(keyword, page){
     let where = {'title|content': ['LIKE', `%${keyword}%`]}
     where = this.getWhereCondition(where);
-    return this.where(where).page(page, this.postsListSize).setRelation(false).field('title,pathname,summary,create_time').order('create_time DESC').countSelect();
+    return this.where(where).page(page, this.postsListSize).setRelation(false).field('title,pathname,summary,create_time').order('create_time DESC').countSelect(false);
   }
 }

@@ -118,6 +118,7 @@ export default class extends Base {
       let postModel = this.model('post');
       let searchResultPromise = postModel.getPostSearch(keyword, this.get('page'));
       this.assign('searchData', searchResultPromise);
+      this.assign('pagination', searchResultPromise);
     }
 
     //热门标签

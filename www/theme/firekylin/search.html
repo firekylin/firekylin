@@ -29,7 +29,7 @@
         {% if not searchData.count %}
           <div class="no-result">没有找到任何结果，请更换查询词试试~</div>
           <div class="item">
-            <div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q={{ ('site: ' + http.hostname + ' ' + keyword)|urlencode }}">site:{{http.hostname}} {{ keyword }}</a></div>
+            <div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q={{ ('site:' + http.hostname + ' ' + keyword)|urlencode }}">site:{{http.hostname}} {{ keyword }}</a></div>
           </div>
         {% endif %}
         
@@ -53,16 +53,6 @@
   </div>
 </article>
 
-{% if searchData and searchData.items.length and (searchData.prevPage or searchData.nextPage) %}
-  <nav class="page-navi">
-    {% if searchData.prevPage %}
-      <a href="{{ pagerPath }}start={{ searchData.prevPage }}" class="prev">&laquo; 上一页</a>&nbsp;&nbsp;&nbsp;&nbsp;
-    {% endif %}
-
-    {% if searchData.nextPage %}
-      <a href="{{ pagerPath }}start={{ searchData.nextPage }}" class="next">下一页 &raquo;</a>
-    {% endif %}
-  </nav>
-{% endif %}
+{% include "./inc/pagination.html" %}
 {% endblock %}
 
