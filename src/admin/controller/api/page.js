@@ -3,6 +3,9 @@
 import Post from './post';
 
 export default class extends Post {
+
+  postModel = this.model('post');
+
   constructor(http){
     super(http);
     this._modelInstance = this.modelInstance;
@@ -10,7 +13,7 @@ export default class extends Post {
       get() {
         return this._modelInstance.setRelation('user').where({type: 1});
       }
-    })
+    });
   }
 
   getAction(self){
@@ -37,8 +40,8 @@ export default class extends Post {
 
     data.type = 1;
     data.user_id = this.userInfo.id;
-    data = await this.getContentAndSummary(data);
-    data = this.getPostTime(data);
+    data = await this.postModel.getContentAndSummary(data);
+    data = this.postModel.getPostTime(data);
 
     let insert = await this.modelInstance.addPost(data);
     return this.success(insert);
@@ -51,8 +54,8 @@ export default class extends Post {
     let data = this.post();
     data.id = this.id;
     data.type = 1;
-    data = await this.getContentAndSummary(data);
-    data = this.getPostTime(data);
+    data = await this.postModel.getContentAndSummary(data);
+    data = this.postModel.getPostTime(data);
 
     let rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});

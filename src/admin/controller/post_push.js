@@ -24,8 +24,8 @@ export default class extends Post {
   }
 
   async updatePost(post) {
-    if( post.markdown_content ) { post = this.getContentAndSummary(post); }
-    if( post.create_time ) { post = this.getPostTime(post); }
+    if( post.markdown_content ) { post = this.modelInstance.getContentAndSummary(post); }
+    if( post.create_time ) { post = this.modelInstance.getPostTime(post); }
     if( post.tag ) { post = await this.getTagIds(post.tag); }
     let rows = await this.modelInstance.savePost(post);
     return this.success({affectedRows: rows});
@@ -56,8 +56,8 @@ export default class extends Post {
     }
     
     post.user_id = this.poster.id;
-    post = await this.getContentAndSummary(post);
-    post = this.getPostTime(post);
+    post = await this.modelInstance.getContentAndSummary(post);
+    post = this.modelInstance.getPostTime(post);
     post.tag = await this.getTagIds(post.tag);
 
     if( post.status == 3 && this.poster.type != 1 ) {
