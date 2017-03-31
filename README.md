@@ -64,7 +64,8 @@
 [大路小兵的博客](https://cooxa.com/) / 
 [小撸的博客](http://www.60sky.com/) / 
 [花花的博客](https://imwineki.cn/) / 
-[刘涛的个人小站](https://imliutao.com)
+[刘涛的个人小站](https://imliutao.com) / 
+[大官人的博客](https://www.daguanren.cc/)
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 
