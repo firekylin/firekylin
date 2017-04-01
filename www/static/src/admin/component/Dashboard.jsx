@@ -123,7 +123,7 @@ module.exports = class extends Base {
         <div className="manage-container">
           {this.state.needUpdate ?
             <p className="bg-info update-message">
-              Firekylin <a href={`https://github.com/75team/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}>{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz">下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}>在线更新</a>！
+              Firekylin <a href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}>{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz">下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}>在线更新</a>！
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
@@ -165,15 +165,15 @@ module.exports = class extends Base {
                 </li>
                 <li>
                   <label>项目源码：</label>
-                  <a href="https://github.com/75team/firekylin">https://github.com/75team/firekylin</a>
+                  <a href="https://github.com/firekylin/firekylin">https://github.com/firekylin/firekylin</a>
                 </li>
                 <li>
                   <label>帮助文档：</label>
-                  <a href="https://github.com/75team/firekylin/wiki" target="_blank">https://github.com/75team/firekylin/wiki</a>
+                  <a href="https://github.com/firekylin/firekylin/wiki" target="_blank">https://github.com/firekylin/firekylin/wiki</a>
                 </li>
                 <li>
                   <label>问题反馈：</label>
-                  <a href="https://github.com/75team/firekylin/issues">https://github.com/75team/firekylin/issues</a>
+                  <a href="https://github.com/firekylin/firekylin/issues">https://github.com/firekylin/firekylin/issues</a>
                 </li>
                 <li>
                   <label>团队博客：</label>
