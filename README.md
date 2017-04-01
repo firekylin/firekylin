@@ -23,7 +23,7 @@
     <a href="https://github.com/75team/firekylin/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/75team/firekylin.svg?colorB=f48041&style=flat-square" alt="license" />
     </a>
-    <a href="https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+    <a href="https://gitter.im/firekylin/firekylin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
       <img src="https://img.shields.io/gitter/room/firekylin/Lobby.svg?style=flat-square&colorB=96c312" alt="Gitter" />
     </a>
   </div>
@@ -64,7 +64,8 @@
 [大路小兵的博客](https://cooxa.com/) / 
 [小撸的博客](http://www.60sky.com/) / 
 [花花的博客](https://imwineki.cn/) / 
-[刘涛的个人小站](https://imliutao.com)
+[刘涛的个人小站](https://imliutao.com) / 
+[大官人的博客](https://www.daguanren.cc/)
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/75team/firekylin/issues/34 提交网址。
 

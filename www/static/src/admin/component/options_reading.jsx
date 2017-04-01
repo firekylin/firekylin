@@ -17,7 +17,7 @@ module.exports = class extends Base {
       options: SysConfig.options,
       pageList: []
     };
-    
+
     let {frontPage} = this.state.options;
     if( !frontPage ) {
       frontPage = 'recent';
@@ -68,9 +68,9 @@ module.exports = class extends Base {
 
   renderPageList() {
     return (
-      <select 
-          name="frontPagePage" 
-          ref="frontPagePage" 
+      <select
+          name="frontPagePage"
+          ref="frontPagePage"
           value={this.state.options.frontPagePage}
           onChange={e => {
             let options = this.state.options;
@@ -123,6 +123,15 @@ module.exports = class extends Base {
               <Radio value="0" label="是" />
               <Radio value="1" label="否" />
             </RadioGroup>
+            <RadioGroup
+                defaultValue="1"
+                name="auditFreshCreateTime"
+                label="文章审核通过时更新文章的发布时间"
+                help={<span>文章审核通过时，若文章的发布时间在当前时间之前，更新文章的发布时间</span>}
+            >
+              <Radio value="1" label="是" />
+              <Radio value="0" label="否" />
+            </RadioGroup>
             <div className="form-group">
               <label>每页文章数目</label>
               <ValidatedInput
@@ -144,7 +153,30 @@ module.exports = class extends Base {
                   if( parseInt(val) !== p ) {
                     return '请填入一个整数';
                   }
-                  
+
+                  return true;
+                }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>自动生成摘要截取的字符数</label>
+              <ValidatedInput
+                type="text"
+                name="auto_summary"
+                defaultValue={0}
+                className="form-control"
+                help="文章列表页自动截取开头的部分文字作为摘要。0 为禁用，大于 0 为截取的字符数"
+                validate={val => {
+                  if( !val ) {
+                    return '请填写自动截取的字符数';
+                  }
+
+                  let p = parseInt(val);
+                  if( Number.isNaN(p) ) {
+                    return '请填入一个数字';
+                  }
+
                   return true;
                 }}
               />
@@ -153,12 +185,13 @@ module.exports = class extends Base {
             <RadioGroup
                 defaultValue="1"
                 name="feedFullText"
-                label="聚合全文输出"
+                label="RSS 聚合全文输出"
                 help="如果你不希望在聚合中输出文章全文,请使用仅输出摘要选项.摘要的文字取决于你在文章中使用分隔符的位置."
             >
               <Radio value="1" label="全文输出" />
               <Radio value="0" label="摘要输出" />
             </RadioGroup>
+
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>
