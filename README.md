@@ -23,7 +23,7 @@
     <a href="https://github.com/75team/firekylin/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/75team/firekylin.svg?colorB=f48041&style=flat-square" alt="license" />
     </a>
-    <a href="https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+    <a href="https://gitter.im/firekylin/firekylin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
       <img src="https://img.shields.io/gitter/room/firekylin/Lobby.svg?style=flat-square&colorB=96c312" alt="Gitter" />
     </a>
   </div>
