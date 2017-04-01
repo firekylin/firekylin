@@ -51,6 +51,7 @@ LOCK TABLES `fk_options` WRITE;
 INSERT INTO `fk_options` (`key`, `value`, `desc`)
 VALUES
 	('analyze_code','','统计代码，可以添加百度统计、Google 统计等'),
+	('auto_summary', '0', '自动摘要。0 为禁用，具体的数字为摘要截取的字符数'),
 	('comment','','评论类型'),
 	('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
 	('github_blog','','GitHub blog 地址，如果填了则同步到 GitHub 上'),

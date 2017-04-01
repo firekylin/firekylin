@@ -1,8 +1,5 @@
 'use strict';
-import marked from "marked";
 import Base from './base.js';
-import toc from 'markdown-toc';
-import highlight from 'highlight.js';
 import push2Firekylin from 'push-to-firekylin';
 import moment from 'moment';
 
@@ -86,9 +83,9 @@ export default class extends Base {
     this.pushPost(data);
 
     data.tag = await this.getTagIds(data.tag);
-    data = await this.getContentAndSummary(data);
+    data = await this.modelInstance.getContentAndSummary(data);
     data.user_id = this.userInfo.id;
-    data = this.getPostTime(data);
+    data = this.modelInstance.getPostTime(data);
     data.options = data.options ? JSON.stringify(data.options) : '';
 
     let insert = await this.modelInstance.addPost(data);
@@ -116,8 +113,8 @@ export default class extends Base {
       /** 推送文章 */
       this.pushPost(data);
 
-      data = this.getPostTime(data);
-      data = await this.getContentAndSummary(data);
+      data = this.modelInstance.getPostTime(data);
+      data = await this.modelInstance.getContentAndSummary(data);
       data.options = data.options ? JSON.stringify(data.options) : '';
       if(data.tag) {
         data.tag = await this.getTagIds(data.tag);
@@ -215,30 +212,6 @@ ${post.markdown_content}`;
     return data;
   }
 
-  /**
-   * 渲染 markdown
-   * 摘要为部分内容时不展示 TOC
-   * 文章正文设置为手动指定 TOC 时不显示
-   * 页面不自动生成 TOC 除非是手动指定了
-   */
-  async getContentAndSummary(data) {
-    let options = await this.model('options').getOptions();
-    let postTocManual = options.postTocManual === '1';
-
-    let showToc;
-    if( !postTocManual ) {
-      showToc = data.type/1 === 0;
-    } else {
-      showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
-    }
-
-    data.content = this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
-    data.summary = data.markdown_content.split('<!--more-->')[0];
-    data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
-    data.summary.replace(/<[>]*>/g, '');
-
-    return data;
-  }
 
   async getTagIds(tags) {
     if(!tags){
@@ -266,40 +239,6 @@ ${post.markdown_content}`;
       return name;
     }
     return `toc-${think.md5(name).slice(0, 3)}`;
-  }
-  /**
-   * markdown to html
-   * @return {} []
-   */
-  markdownToHtml(content, option = {toc: true, highlight: true}){
-    let markedContent = marked(content);
-
-    /**
-     * 增加 TOC 目录
-     */
-    if( option.toc ) {
-      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^\"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
-        return `<a href="#${this.generateTocName(c)}">${c}</a>`;
-      });
-
-      markedContent = markedContent.replace(/<h(\d)[^<>]*>(.*?)<\/h\1>/g, (a, b, c) => {
-        return `<h${b}><a id="${this.generateTocName(c)}" class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
-      });
-      markedContent = `<div class="toc">${tocContent}</div>${markedContent}`;
-    }
-
-    /**
-     * 增加代码高亮
-     */
-    if( option.highlight ) {
-      markedContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
-        text = text.replace(/&#39;/g, '\'').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\&quot;/g, '"').replace(/\&amp;/g, "&");
-        var result = highlight.highlightAuto(text, language ? [language] : undefined);
-        return `<pre><code class="hljs lang-${result.language}">${result.value}</code></pre>`;
-      });
-    }
-
-    return markedContent;
   }
 
 }

@@ -91,5 +91,12 @@ export default class extends think.model.base {
     }
     await Promise.all(promises);
     await this.getOptions(true);
+
+    // if `auto_summary` is changed, then rebuild all summaries of posts
+    if (typeof changedData.auto_summary !== 'undefined') {
+      const postModel = think.model('post', {}, 'admin');
+      // doesn't wait for return
+      await postModel.updateAllPostSummaries();
+    }
   }
 }

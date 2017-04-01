@@ -159,15 +159,39 @@ module.exports = class extends Base {
               />
             </div>
 
+            <div className="form-group">
+              <label>自动生成摘要截取的字符数</label>
+              <ValidatedInput
+                type="text"
+                name="auto_summary"
+                defaultValue={0}
+                className="form-control"
+                help="文章列表页自动截取开头的部分文字作为摘要。0 为禁用，大于 0 为截取的字符数"
+                validate={val => {
+                  if( !val ) {
+                    return '请填写自动截取的字符数';
+                  }
+
+                  let p = parseInt(val);
+                  if( Number.isNaN(p) ) {
+                    return '请填入一个数字';
+                  }
+
+                  return true;
+                }}
+              />
+            </div>
+
             <RadioGroup
                 defaultValue="1"
                 name="feedFullText"
-                label="聚合全文输出"
+                label="RSS 聚合全文输出"
                 help="如果你不希望在聚合中输出文章全文,请使用仅输出摘要选项.摘要的文字取决于你在文章中使用分隔符的位置."
             >
               <Radio value="1" label="全文输出" />
               <Radio value="0" label="摘要输出" />
             </RadioGroup>
+
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>
