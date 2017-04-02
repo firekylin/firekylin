@@ -16,7 +16,7 @@ export default class extends Base {
 
     try {
       await moveFile(file, path.join(destPath, basename));
-      return (think.UPLOAD_URL_PATH || '') + path.join(think.UPLOAD_PATH.replace(think.RESOURCE_PATH, ''), destDir, basename);
+      return think.UPLOAD_BASE_URL + path.join(think.UPLOAD_PATH.replace(think.RESOURCE_PATH, ''), destDir, basename);
     } catch(e) {
       throw Error('FILE_UPLOAD_MOVE_ERROR');
     }
