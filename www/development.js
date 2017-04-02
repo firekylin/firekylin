@@ -9,6 +9,7 @@ var instance = new thinkjs({
   ROOT_PATH: rootPath,
   RESOURCE_PATH: __dirname,
   UPLOAD_PATH: path.join(__dirname, 'static/upload'),
+  UPLOAD_BASE_URL: '',
   env: 'development'
 });
 
