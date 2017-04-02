@@ -249,4 +249,34 @@
 
   Dom.bindEvent();
 
+  /**
+   *  Image Lazy Load
+   */
+  window.addEventListener('load', lazyLoad);
+  window.addEventListener('scroll', lazyLoad);
+  window.addEventListener('resize', lazyLoad);
+
+  function lazyLoad() {
+    var lazyLoadImages = document.getElementsByClassName('lazy-load');
+
+    if (lazyLoadImages.length === 0) {
+      window.removeEventListener('load', lazyLoad);
+      window.removeEventListener('scroll', lazyLoad);
+      window.removeEventListener('resize', lazyLoad);
+    } else {
+      for (var i = 0; i < lazyLoadImages.length; i++) {
+        var img = lazyLoadImages[i];
+        if (lazyLoadShouldAppear(img, 300)) {
+          img.src = img.getAttribute('data-src');
+          img.removeAttribute('data-src');
+          img.classList.remove('lazy-load');
+        }
+      }
+    }
+  }
+
+  function lazyLoadShouldAppear(el, buffer) {
+    return el.offsetTop - (document.body.scrollTop + (window.innerHeight || document.documentElement.clientHeight)) < buffer;
+  }
+
 })(window, document);
