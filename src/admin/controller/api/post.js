@@ -227,18 +227,4 @@ ${post.markdown_content}`;
     await Promise.all(promises);
     return tagIds;
   }
-
-  /**
-   * generate toc name
-   * @param  {String} name []
-   * @return {String}      []
-   */
-  generateTocName(name){
-    name = name.trim().replace(/\s+/g, '').replace(/\)/g, '').replace(/[\(\,]/g, '-').toLowerCase();
-    if(/^[\w\-]+$/.test(name)){
-      return name;
-    }
-    return `toc-${think.md5(name).slice(0, 3)}`;
-  }
-
 }
