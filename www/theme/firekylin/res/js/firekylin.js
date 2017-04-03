@@ -252,17 +252,17 @@
   /**
    *  Image Lazy Load
    */
-  window.addEventListener('load', lazyLoad);
-  window.addEventListener('scroll', lazyLoad);
-  window.addEventListener('resize', lazyLoad);
+  win.addEventListener('load', lazyLoad);
+  win.addEventListener('scroll', lazyLoad);
+  win.addEventListener('resize', lazyLoad);
 
   function lazyLoad() {
-    var lazyLoadImages = document.getElementsByClassName('lazy-load');
+    var lazyLoadImages = doc.getElementsByClassName('lazy-load');
 
     if (lazyLoadImages.length === 0) {
-      window.removeEventListener('load', lazyLoad);
-      window.removeEventListener('scroll', lazyLoad);
-      window.removeEventListener('resize', lazyLoad);
+      win.removeEventListener('load', lazyLoad);
+      win.removeEventListener('scroll', lazyLoad);
+      win.removeEventListener('resize', lazyLoad);
     } else {
       for (var i = 0; i < lazyLoadImages.length; i++) {
         var img = lazyLoadImages[i];
@@ -276,7 +276,7 @@
   }
 
   function lazyLoadShouldAppear(el, buffer) {
-    return el.offsetTop - (document.body.scrollTop + (window.innerHeight || document.documentElement.clientHeight)) < buffer;
+    return el.offsetTop - (doc.body.scrollTop + (win.innerHeight || doc.documentElement.clientHeight)) < buffer;
   }
 
 })(window, document);
