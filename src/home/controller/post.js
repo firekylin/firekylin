@@ -104,7 +104,6 @@ export default class extends Base {
   async tagAction(){
     let model = this.model('tag');
     let data = await model.getTagArchive();
-    data.map(post => post.pathname = encodeURIComponent(post.pathname));
     this.assign('list', data);
     return this.displayView('tag');
   }
