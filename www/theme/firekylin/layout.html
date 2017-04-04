@@ -95,8 +95,13 @@
 {% endblock %}
 <footer id="footer" class="inner">
   &copy; {{ currentYear }}&nbsp;-&nbsp; {{options.title}}
-  {% if options.miitbeian %}
+  {% if options.miitbeian or options.mpsbeian %}
+    {% if options.miitbeian %}
     &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.miitbeian.gov.cn/">{{options.miitbeian}}</a>
+    {% endif %}
+    {% if options.mpsbeian %}
+    &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.beian.gov.cn/">{{options.mpsbeian}}</a>
+    {% endif %}
   {%else%}
     &nbsp;-&nbsp;<a href="/">{{http.hostname}}</a>
   {% endif %}

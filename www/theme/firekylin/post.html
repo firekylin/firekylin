@@ -19,7 +19,7 @@
         </div>
         <h1 class="title">{{post.title}}</h1>
         <div class="entry-content">
-            {{post.content | safe}}
+            {{post.content | replace(r/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') | safe}}
         </div>
         <p>本文链接：<a href="{{site_url + http.url | safe}}">{{site_url + http.url | safe}}</a></p>
         <p>-- <acronym title="End of File">EOF</acronym> --</p>
@@ -38,7 +38,7 @@
                 {% if post.cate.length %}
                 ，添加在分类
                 {% for cate in post.cate %}
-                <a href="/cate/{{cate.name}}" data-cate="{{cate.name}}">
+                <a href="/cate/{{cate.pathname}}" data-cate="{{cate.name}}">
                     <code class="notebook">{{cate.name}}</code>
                 </a>
                 {% endfor%}
@@ -48,7 +48,7 @@
                 {% if post.tag.length %}
                 ，并被添加「
                 {% for tag in post.tag %}
-                <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">
+                <a href="/tag/{{tag.pathname}}" data-tag="{{tag.name}}">
                     <code class="notebook">{{tag.name}}</code>
                 </a>
                 {% endfor %}

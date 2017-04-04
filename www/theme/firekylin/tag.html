@@ -14,7 +14,7 @@
   <div class="entry-content">
     <section>
       {% for tag in list %}
-      <a href="/tags/{{tag.name}}" data-tag="{{tag.name}}">{{tag.name}}({{tag.count}})</a>
+      <a href="/tag/{{tag.pathname}}" data-tag="{{tag.name}}">{{tag.name}}({{tag.count}})</a>
       {% endfor %}
     </section>
   </div>
