@@ -21,7 +21,14 @@
   {% endif %}
   {% for item in tagList %}
   <url>
-      <loc>{{site_url}}/tags/{{item.pathname}}</loc>
+      <loc>{{site_url}}/tag/{{item.pathname}}</loc>
+      <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.5</priority>
+  </url>
+  {% endfor %}
+  {% for item in cateList %}
+  <url>
+      <loc>{{site_url}}/cate/{{item.pathname}}</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
       <priority>0.5</priority>
   </url>
