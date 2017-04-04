@@ -63,11 +63,14 @@ export default class extends think.model.relation {
 
     let result = {};
     for(let tag of data) {
-      if(!result[tag.pathname]) {
+      if(result[tag.pathname]) {
+        result[tag.pathname].count += 1;
+      } else {
         result[tag.pathname] = {
           name: tag.name,
           pathname: encodeURIComponent(tag.pathname),
-          update_time: tag.update_time
+          update_time: tag.update_time,
+          count: 1
         };
       }
     }

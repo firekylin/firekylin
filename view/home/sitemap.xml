@@ -20,17 +20,21 @@
   </url>
   {% endif %}
   {% for item in tagList %}
+  {% for pageNum in range(1, item.count % postsListSize + 2) -%}
   <url>
-      <loc>{{site_url}}/tag/{{item.pathname}}</loc>
+      <loc>{{site_url}}/tag/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
       <priority>0.5</priority>
   </url>
   {% endfor %}
+  {% endfor %}
   {% for item in cateList %}
+  {% for pageNum in range(1, item.count % postsListSize + 2) -%}
   <url>
-      <loc>{{site_url}}/cate/{{item.pathname}}</loc>
+      <loc>{{site_url}}/cate/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
       <priority>0.5</priority>
   </url>
+  {% endfor %}
   {% endfor %}
 </urlset>
