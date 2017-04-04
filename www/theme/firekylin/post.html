@@ -34,7 +34,7 @@
                 {% if post.cate.length %}
                 ，添加在分类
                 {% for cate in post.cate %}
-                <a href="/cate/{{cate.name}}" data-cate="{{cate.name}}">
+                <a href="/cate/{{cate.pathname}}" data-cate="{{cate.name}}">
                     <code class="notebook">{{cate.name}}</code>
                 </a>
                 {% endfor%}
