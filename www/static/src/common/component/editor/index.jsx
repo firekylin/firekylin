@@ -35,7 +35,7 @@ class MdEditor extends Base {
       panelClass: 'md-panel',
       mode: 'split',
       isFullScreen: false,
-      result: marked(this.props.content),
+      result: this.toHtml(this.props.content),
       linkUrl: null,
       linkText: null
     };
@@ -186,6 +186,9 @@ class MdEditor extends Base {
     )
   }
 
+  toHtml(text) {
+    return marked(text, {sanitize: true});
+  }
   // public methods
   isDirty () {
     return this._isDirty || false
@@ -252,7 +255,7 @@ class MdEditor extends Base {
     if (this._ltr) clearTimeout(this._ltr)
     let content = e.target.value;
     this._ltr = setTimeout(() => {
-      this.setState({ result: marked(content) }) // change state
+      this.setState({ result: this.toHtml(content) }) // change state
       localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+''] = content;
     }, 300);
 
