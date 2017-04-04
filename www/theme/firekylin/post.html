@@ -44,7 +44,7 @@
                 {% if post.tag.length %}
                 ，并被添加「
                 {% for tag in post.tag %}
-                <a href="/tags/{{tag.pathname}}" data-tag="{{tag.name}}">
+                <a href="/tag/{{tag.pathname}}" data-tag="{{tag.name}}">
                     <code class="notebook">{{tag.name}}</code>
                 </a>
                 {% endfor %}
