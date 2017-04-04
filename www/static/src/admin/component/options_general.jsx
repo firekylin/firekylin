@@ -248,7 +248,7 @@ module.exports = class extends Base {
               />
             </div>
             <div className="form-group">
-              <label>网站备案号</label>
+              <label>网站工信部备案号</label>
               <ValidatedInput
                 type="text"
                 name="miitbeian"
@@ -257,7 +257,16 @@ module.exports = class extends Base {
                 className="form-control"
               />
             </div>
-
+            <div className="form-group">
+              <label>网站公安部备案号</label>
+              <ValidatedInput
+                type="text"
+                name="mpsbeian"
+                {...this.getProps('mpsbeian')}
+                ref="miitbeian"
+                className="form-control"
+              />
+            </div>
             <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
           </Form>
         </div>
