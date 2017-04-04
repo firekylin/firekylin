@@ -60,7 +60,7 @@ export default class extends think.model.relation {
 
     if(options.tag || options.cate){
       let name = options.tag ? 'tag' : 'cate';
-      let {id} = await this.model(name).field('id').setRelation(false).where({name: options.tag || options.cate}).find();
+      let {id} = await this.model(name).field('id').setRelation(false).where({pathname: options.tag || options.cate}).find();
       if(think.isEmpty(id)){
         return false;
       }
