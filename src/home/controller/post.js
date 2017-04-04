@@ -31,6 +31,20 @@ export default class extends Base {
         where.where = {user_id: user.id};
       }
     }
+    
+    let tagName = '', cateName = '';
+    if(where.tag) {
+      tagName = await this.model('tag').where({pathname: where.tag}).find();
+      if(!think.isEmpty(tagName) ) {
+        tagName = tagName.name;
+      }
+    }
+    if(where.cate) {
+      [cateName] = this.assign('categories').filter(cate => 
+        cate.pathname.toLowerCase() === where.cate.toLowerCase()
+      );
+      cateName = cateName && cateName.name;
+    }
 
     let list = await model.getPostList(this.get('page'), where);
     list.data.forEach(post => post.pathname = encodeURIComponent(post.pathname));
@@ -38,8 +52,8 @@ export default class extends Base {
     this.assign({
       posts: data,
       pagination,
-      tag: this.get('tag'),
-      cate: this.get('cate')
+      tag: tagName,
+      cate: cateName
     });
     return this.displayView('index');
   }

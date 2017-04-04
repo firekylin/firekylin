@@ -54,6 +54,10 @@ export default class extends think.controller.base {
     }
     this.assign('site_url', siteUrl);
 
+    //所有的分类
+    let categories = await this.model('cate').getCateArchive();
+    this.assign('categories', categories);
+
     this.assign('currentYear', (new Date).getFullYear());
   }
   /**
