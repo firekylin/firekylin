@@ -19,7 +19,7 @@
       <priority>0.5</priority>
   </url>
   {%- endif %}
-  {%- for item in tagList %}
+  {%- for item in tags %}
   {%- for pageNum in range(1, item.count % options.postsListSize + 2) %}
   <url>
       <loc>{{site_url}}/tag/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>

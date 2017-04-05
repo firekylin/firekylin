@@ -42,7 +42,7 @@ export default class extends Base {
 
     let tagModel = this.model('tag');
     let tagList = tagModel.getTagArchive();
-    this.assign('tagList', tagList);
+    this.assign('tags', tagList);
 
     this.type('text/xml');
     return this.display(this.HOME_VIEW_PATH + 'sitemap.xml');
