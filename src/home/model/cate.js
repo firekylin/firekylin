@@ -22,8 +22,8 @@ export default class extends think.model.relation {
       type: 0,
       status: 3,
       is_public: 1
-    }).select();
-    
+    }).order('update_time DESC').select();
+
     let result = {};
     for(let cate of data) {
       if(result[cate.pathname]) {
@@ -32,6 +32,7 @@ export default class extends think.model.relation {
         result[cate.pathname] = {
           name: cate.name,
           pathname: encodeURIComponent(cate.pathname),
+          update_time: cate.update_time,
           count: 1
         };
       }

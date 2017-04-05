@@ -60,7 +60,7 @@ VALUES
 	('keywords','','网站关键字'),
 	('logo_url','','logo 地址'),
 	('miitbeian','','网站备案号'),
-	('num_per_page','10','文章一页显示的条数'),
+	('postsListSize','10','文章一页显示的条数'),
 	('password_salt','firekylin','密码 salt，网站安装的时候随机生成一个'),
 	('push_sites','','推送列表'),
 	('theme','firekylin','主题名称'),

@@ -1,7 +1,7 @@
 {% extends './layout.html' %}
 
 {% block title %}
-  {{options.title}}
+{% if tag %}标签 {{tag}} - {% elif cate %}分类 {{cate}} - {% endif %}{{options.title}}
 {% endblock %}
 
 {% block content %}

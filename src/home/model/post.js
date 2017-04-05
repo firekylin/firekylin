@@ -125,8 +125,14 @@ export default class extends think.model.relation {
   }
 
   async getPostSitemapList(){
-    let field = 'pathname,update_time';
-    let where = this.getWhereCondition();
+    let field = 'pathname,type,update_time';
+    let where = {
+      is_public: 1, //公开
+      status: 3, //已经发布
+      create_time: {
+        '<=': think.datetime()
+      }
+    }
 
     let data = await this.field(field).where(where).order('update_time DESC').setRelation(false).select();
     return data;
