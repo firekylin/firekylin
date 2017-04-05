@@ -36,19 +36,16 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async sitemapAction(){
-    let options = await this.model('options').getOptions();
-    this.assign('postsListSize', +options.postsListSize || +options.num_per_page);
-
     let postModel = this.model('post');
     let postList = postModel.getPostSitemapList();
     this.assign('postList', postList);
 
     let tagModel = this.model('tag');
-    let tagList = tagModel.getTagSitemapList();
+    let tagList = tagModel.getTagArchive();
     this.assign('tagList', tagList);
 
     let cateModel = this.model('cate');
-    let cateList = cateModel.getCateSitemapList();
+    let cateList = cateModel.getCateArchive();
     this.assign('cateList', cateList);
 
     this.type('text/xml');
