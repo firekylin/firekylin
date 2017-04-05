@@ -28,7 +28,7 @@
   </url>
   {%- endfor %}
   {%- endfor %}
-  {%- for item in cateList %}
+  {%- for item in categories %}
   {%- for pageNum in range(1, item.count % options.postsListSize + 2) %}
   <url>
       <loc>{{site_url}}/cate/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
