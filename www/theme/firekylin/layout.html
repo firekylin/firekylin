@@ -9,6 +9,7 @@
   {% if options.keywords %}<meta name="keywords" content="{{options.keywords}}">{% endif %}
   {% if options.description %}<meta name="description" content="{{options.description}}">{% endif %}
   <title>{% block title %}{% endblock %}</title>
+  {%- block headers %}{% endblock -%}
   {% set lscookie = 'lscookie'%}
   <link rel="stylesheet" href="/theme/firekylin/res/css/all.css" type="text/css" data-ls="css_firekylin">
   {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor or themeConfig.customCSS or themeConfig.sidebarColor %}

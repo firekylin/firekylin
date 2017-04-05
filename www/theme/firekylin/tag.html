@@ -4,6 +4,10 @@
 标签 - {{options.title}}
 {% endblock %}
 
+{% block headers %}
+<link rel="canonical" href="{{site_url}}/tags" />
+{% endblock %}
+
 {% block content %}
 <article class="post tags">
   <h1 class="title">标签</h1>

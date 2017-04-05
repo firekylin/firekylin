@@ -4,6 +4,10 @@
 归档 - {{options.title}}
 {% endblock %}
 
+{% block headers %}
+<link rel="canonical" href="{{site_url}}/archives" />
+{% endblock %}
+
 {% block content %}
 <article class="post archive">
     <h1 class="title">归档</h1>
