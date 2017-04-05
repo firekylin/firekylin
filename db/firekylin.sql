@@ -65,7 +65,7 @@ VALUES
   ('keywords','www,fasdf,fasdfa','网站关键字'),
   ('logo_url','/static/img/firekylin.jpg','logo 地址'),
   ('miitbeian','wewww','网站备案号'),
-  ('num_per_page','10','文章一页显示的条数'),
+  ('postsListSize','10','文章一页显示的条数'),
   ('password_salt','firekylin','密码 salt，网站安装的时候随机生成一个'),
   ('push','0','是否允许推送'),
   ('push_sites','','推送网站列表'),
