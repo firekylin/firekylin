@@ -53,7 +53,8 @@ export default class extends Base {
       posts: data,
       pagination,
       tag: tagName,
-      cate: cateName
+      cate: cateName,
+      pathname: where.tag || where.cate
     });
     return this.displayView('index');
   }
