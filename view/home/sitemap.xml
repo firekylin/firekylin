@@ -20,7 +20,7 @@
   </url>
   {%- endif %}
   {%- for item in tags %}
-  {%- for pageNum in range(1, item.count % options.postsListSize + 2) %}
+  {%- for pageNum in range(1, item.count / options.postsListSize + 1) %}
   <url>
       <loc>{{site_url}}/tag/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
@@ -29,7 +29,7 @@
   {%- endfor %}
   {%- endfor %}
   {%- for item in categories %}
-  {%- for pageNum in range(1, item.count % options.postsListSize + 2) %}
+  {%- for pageNum in range(1, item.count / options.postsListSize + 1) %}
   <url>
       <loc>{{site_url}}/cate/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
       <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
