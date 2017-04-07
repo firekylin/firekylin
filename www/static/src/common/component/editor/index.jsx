@@ -421,7 +421,7 @@ class MdEditor extends Base {
     this._preInputText("![图片上传中…]", 0, 9);
     return firekylin.upload(data).then(res => {
       let start = this._cleanSelect();
-      const reg = /^https?:\/\/.+/;
+      const reg = /^(https?:)?\/\/.+/;
       if (!reg.test(res.data)) {
         res.data = location.origin + res.data;
       }

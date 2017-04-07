@@ -36,7 +36,7 @@ export default class extends Base {
     }
 
     result = await putFileContent( path.join(destPath, basename), result.body, 'binary');
-    return path.join('/static/upload', destDir, basename);
+    return path.join(think.UPLOAD_PATH.replace(think.RESOURCE_PATH, ''), destDir, basename);
   }
 
   async run(file, config) {

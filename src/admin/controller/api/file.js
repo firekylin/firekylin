@@ -1,6 +1,6 @@
-import fs from 'fs';
 import path from 'path';
 import Base from './base';
+import url from 'url';
 
 export default class extends Base {
   uploadConfig = {};
@@ -10,13 +10,25 @@ export default class extends Base {
   }
 
   async postAction() {
+    let {type} = this.uploadConfig;
+    let config = this.uploadConfig;
+
     /** 处理远程抓取 **/
     if( this.post('fileUrl') ) {
-      return this.serviceUpload(
-        'remote', 
-        this.post('fileUrl'), 
-        {name: this.post('name')}
-      );
+      try {
+        // 先存到本地
+        const uploader = think.service('upload/remote', 'admin');
+        const result = await (new uploader()).run(this.post('fileUrl'), {name: this.post('name')});
+
+        // 如果是本地上传
+        if (type === 'local' || !type) {
+          return this.success(url.resolve(think.UPLOAD_BASE_URL, result));
+        }
+
+        return this.serviceUpload(type, path.join(think.RESOURCE_PATH, result), config);
+      } catch (e) {
+        this.fail(e || 'FILE_UPLOAD_ERROR');
+      }
     }
 
     let file = this.file('file');
@@ -31,8 +43,6 @@ export default class extends Base {
     // let contentType = file.headers['content-type']; 
 
     // 处理其它上传
-    let {type} = this.uploadConfig;
-    let config = this.uploadConfig;
     
     if( !type ) { return this.fail(); }
     if(type == 'local') {
