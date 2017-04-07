@@ -12,26 +12,26 @@ export default class extends think.controller.base {
    * @param  {Number} status []
    * @return {Promise}        []
    */
-  async displayError(status){
+  async displayError(status) {
 
     //hide error message on production env
-    if(think.env === 'production'){
+    if(think.env === 'production') {
       this.http.error = null;
     }
 
     let errorConfig = this.config('error');
     let message = this.http.error && this.http.error.message || '';
-    if(this.isJsonp()){
+    if(this.isJsonp()) {
       return this.jsonp({
         [errorConfig.key]: status,
         [errorConfig.msg]: message
       })
-    }else if(this.isAjax()){
+    }else if(this.isAjax()) {
       return this.fail(status, message);
     }
 
     let module = 'common';
-    if(think.mode !== think.mode_module){
+    if(think.mode !== think.mode_module) {
       module = this.config('default_module');
     }
     let file = `${module}/error/${status}.html`;
@@ -57,23 +57,23 @@ export default class extends think.controller.base {
    * Bad Request
    * @return {Promise} []
    */
-  async _400Action(){
+  async _400Action() {
     return await this.displayError(400);
   }
   /**
    * Forbidden
    * @return {Promise} []
    */
-  async _403Action(){
+  async _403Action() {
     return await this.displayError(403);
   }
   /**
    * Not Found
    * @return {Promise}      []
    */
-  async _404Action(){
+  async _404Action() {
     //管理端
-    if(this.http.module === 'admin' && !this.isAjax()){
+    if(this.http.module === 'admin' && !this.isAjax()) {
       let controller = this.controller('admin/base');
       this.status(200);
       return controller.invoke('__call');
@@ -84,14 +84,14 @@ export default class extends think.controller.base {
    * Internal Server Error
    * @return {Promise}      []
    */
-  async _500Action(){
+  async _500Action() {
     return await this.displayError(500);
   }
   /**
    * Service Unavailable
    * @return {Promise}      []
    */
-  async _503Action(){
+  async _503Action() {
     return await this.displayError(503);
   }
 }

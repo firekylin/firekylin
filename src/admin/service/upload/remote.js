@@ -29,13 +29,13 @@ export default class extends Base {
 
     let destDir = this.formatNow();
     let basename = (name ? name : think.md5(result.body)) + path.extname(url);
-    let destPath = path.join( think.UPLOAD_PATH, destDir );
+    let destPath = path.join(think.UPLOAD_PATH, destDir);
 
-    if( !think.isDir(destPath) ) {
+    if(!think.isDir(destPath)) {
       think.mkdir(destPath);
     }
 
-    result = await putFileContent( path.join(destPath, basename), result.body, 'binary');
+    result = await putFileContent(path.join(destPath, basename), result.body, 'binary');
     return path.join(think.UPLOAD_PATH.replace(think.RESOURCE_PATH, ''), destDir, basename);
   }
 

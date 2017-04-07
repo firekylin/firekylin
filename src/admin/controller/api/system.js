@@ -29,7 +29,7 @@ export default class extends base {
     try {
       let res = await reqIns('http://firekylin.org/release/.latest');
       let onlineVersion = res.body.trim();
-      if( semver.gt(onlineVersion, pack.version) ) {
+      if(semver.gt(onlineVersion, pack.version)) {
         needUpdate = onlineVersion;
       }
     } catch(e) {
@@ -61,7 +61,7 @@ export default class extends base {
   }
 
   async updateAction() {
-    if( /^win/.test(process.platform) ) {
+    if(/^win/.test(process.platform)) {
       return this.fail('PLATFORM_NOT_SUPPORT');
     }
 
@@ -102,7 +102,7 @@ export default class extends base {
       }
       /** 重启服务 */
       case '4': {
-        if( cluster.isWorker ) {
+        if(cluster.isWorker) {
           this.success();
           setTimeout(() => cluster.worker.kill(), 200);
         }

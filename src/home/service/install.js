@@ -8,7 +8,7 @@ export default class extends think.service.base {
    * @param  {[type]} info [description]
    * @return {[type]}      [description]
    */
-  init(dbConfig, accountConfig, ip){
+  init(dbConfig, accountConfig, ip) {
     this.dbConfig = dbConfig;
     this.dbConfig.type = 'mysql';
     this.accountConfig = accountConfig;
@@ -18,9 +18,9 @@ export default class extends think.service.base {
    * get model
    * @return {[type]} [description]
    */
-  getModel(name, module){
+  getModel(name, module) {
     let dbConfig
-    if(name === true){
+    if(name === true) {
       dbConfig = think.extend({}, this.dbConfig);
       dbConfig.database = '';
       name = '';
@@ -37,7 +37,7 @@ export default class extends think.service.base {
    *
    * @return {[type]} [description]
    */
-  checkDbInfo(){
+  checkDbInfo() {
     let dbInstance = this.getModel(true);
     return dbInstance.query('SELECT VERSION()').catch(() => {
       return Promise.reject('数据库信息有误');
@@ -47,16 +47,16 @@ export default class extends think.service.base {
    * insert data
    * @return {[type]} [description]
    */
-  async insertData(){
+  async insertData() {
     let model = this.getModel(true);
     let dbExist = await model.query('SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' + this.dbConfig.database + '\'');
-    if(think.isEmpty(dbExist)){
+    if(think.isEmpty(dbExist)) {
       //忽略错误
       await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
       //model.close();
     }
     let dbFile = think.ROOT_PATH + think.sep + 'firekylin.sql';
-    if(!think.isFile(dbFile)){
+    if(!think.isFile(dbFile)) {
       return Promise.reject('数据库文件（firekylin.sql）不存在，请重新下载');
     }
 
@@ -65,8 +65,8 @@ export default class extends think.service.base {
     content = content.split('\n').filter(item => {
       item = item.trim();
       let ignoreList = ['#', 'LOCK', 'UNLOCK'];
-      for(let it of ignoreList){
-        if(item.indexOf(it) === 0){
+      for(let it of ignoreList) {
+        if(item.indexOf(it) === 0) {
           return false;
         }
       }
@@ -79,14 +79,14 @@ export default class extends think.service.base {
     model = this.getModel();
     content = content.split(';');
     try{
-      for(let item of content){
+      for(let item of content) {
         item = item.trim();
-        if(item){
+        if(item) {
           think.log(item);
           await model.query(item);
         }
       }
-    }catch(e){
+    }catch(e) {
       think.log(e);
       return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
     }
@@ -97,7 +97,7 @@ export default class extends think.service.base {
     //清除已有的数据内容
     let promises = ['cate', 'post', 'post_cate', 'post_tag', 'tag', 'user'].map(item => {
       let modelInstance = this.getModel(item);
-      if( modelInstance ) {
+      if(modelInstance) {
         modelInstance.where('1=1').delete();
       }
     });
@@ -121,7 +121,7 @@ export default class extends think.service.base {
    * update config
    * @return {[type]} [description]
    */
-  updateConfig(){
+  updateConfig() {
     let data = {
       type: 'mysql',
       adapter: {
@@ -141,7 +141,7 @@ export default class extends think.service.base {
    * create account
    * @return {[type]} [description]
    */
-  async createAccount(){
+  async createAccount() {
 
     let password = think.md5(this.password_salt + this.accountConfig.password);
 
@@ -161,7 +161,7 @@ export default class extends think.service.base {
    * run
    * @return {[type]} [description]
    */
-  async run(){
+  async run() {
     await this.checkDbInfo();
     await this.insertData();
     await this.createAccount();

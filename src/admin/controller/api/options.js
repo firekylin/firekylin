@@ -8,13 +8,13 @@ export default class extends Base {
    * 获取
    * @return {[type]} [description]
    */
-  async getAction(){
+  async getAction() {
     let type = this.get('type');
     let model = this.model('options');
     let options = await model.getOptions();
 
-    if(type === '2fa'){
-      if(options.two_factor_auth.length === 32){
+    if(type === '2fa') {
+      if(options.two_factor_auth.length === 32) {
         return this.success({
           otpauth_url: 'otpauth://totp/firekylin?secret=' + options.two_factor_auth,
           secret: options.two_factor_auth
@@ -39,9 +39,9 @@ export default class extends Base {
     return this.success();
   }
 
-  postAction(){
+  postAction() {
     let type = this.get('type');
-    if(type === '2faAuth'){
+    if(type === '2faAuth') {
       let data = this.post();
       let verified = speakeasy.totp.verify({
         secret: data.secret,
@@ -60,18 +60,18 @@ export default class extends Base {
    * 更新选项
    * @return {[type]} [description]
    */
-  async putAction(){
+  async putAction() {
     let type = this.get('type');
     let data = this.post();
-    if(think.isEmpty(data)){
+    if(think.isEmpty(data)) {
       return this.fail('DATA_EMPTY');
     }
 
     let model = this.model('options');
-    if( type === 'push' ) {
+    if(type === 'push') {
       let {id, ...site} = data;
       return this.setPushSites(id, site);
-    } else if( type == 'defaultCategory') {
+    } else if(type == 'defaultCategory') {
       let result = await model.updateOptions('defaultCategory', data.id);
       this.success(result);
     } else {
@@ -82,9 +82,9 @@ export default class extends Base {
 
   async deleteAction() {
     let type = this.get('type');
-    if( type === 'push' ) {
+    if(type === 'push') {
       let key = this.get('key');
-      if( think.isEmpty(key) ) {
+      if(think.isEmpty(key)) {
         return this.fail('KEY_EMPTY');
       }
       return this.setPushSites(key, null);
@@ -102,21 +102,21 @@ export default class extends Base {
     let push_sites = await this.getPushSites();
 
     /** 新添加的 push_sites 要校验唯一性 **/
-    if( !key && push_sites.hasOwnProperty(data.appKey) ) {
+    if(!key && push_sites.hasOwnProperty(data.appKey)) {
       return this.fail('KEY_EXIST');
     }
 
     /** 无论修改还是删除都把原来的删除掉 **/
-    if( key ) {
+    if(key) {
       delete push_sites[key];
     }
 
     /** 无论是新增还是修改先将新的数据添加进去 **/
-    if( data ) {
+    if(data) {
       /** 需要增加验证 key 正确性的请求 **/
       let {url, appKey, appSecret} = data;
       let result = await (new push2Firekylin(url, appKey, appSecret)).authorize();
-      if( result.errno ) {
+      if(result.errno) {
         return this.fail('APP_KEY_SECRET_ERROR', result.errmsg);
       }
       push_sites[data.appKey] = data;

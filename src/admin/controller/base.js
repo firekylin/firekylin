@@ -4,20 +4,20 @@ export default class extends think.controller.base {
   /**
    * before
    */
-  async __before(){
+  async __before() {
 
     let http = this.http;
-    if(http.controller === 'user' && http.action === 'login'){
+    if(http.controller === 'user' && http.action === 'login') {
       return;
     }
     let userInfo = await this.session('userInfo') || {};
-    if(think.isEmpty(userInfo)){
-      if(this.isAjax()){
+    if(think.isEmpty(userInfo)) {
+      if(this.isAjax()) {
         return this.fail('NOT_LOGIN');
       }
     }
     this.userInfo = userInfo;
-    if(!this.isAjax()){
+    if(!this.isAjax()) {
       this.assign('userInfo', {id: userInfo.id, name: userInfo.name, type: userInfo.type});
     }
   }
@@ -25,8 +25,8 @@ export default class extends think.controller.base {
    * call magic method
    * @return {} []
    */
-  async __call(){
-    if(this.isAjax()){
+  async __call() {
+    if(this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
     let model = this.model('options');

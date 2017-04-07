@@ -16,7 +16,7 @@ export default class extends Ghost {
         pathname: tag.slug
       });
 
-      if( result.type === 'add' ) {
+      if(result.type === 'add') {
         len += 1;
       }
     }
@@ -29,7 +29,7 @@ export default class extends Ghost {
    * 为了简单不支持子分类导入，默认所有分类为一级分类
    */
   async category({categories}) {
-    if( !categories || !Array.isArray(categories) ) {
+    if(!categories || !Array.isArray(categories)) {
       return 0;
     }
 
@@ -41,7 +41,7 @@ export default class extends Ghost {
         pid: 0
       });
 
-      if( result.type === 'add' ) {
+      if(result.type === 'add') {
         len += 1;
       }
     }

@@ -33,13 +33,13 @@ export default class extends think.model.relation {
    * @param  {[type]} where [description]
    * @return {[type]}       [description]
    */
-  getWhereCondition(where){
+  getWhereCondition(where) {
     where = think.extend({}, where, {
       is_public: 1, //公开
       type: 0, //文章
       status: 3 //已经发布
     });
-    if(!where.create_time){
+    if(!where.create_time) {
       where.create_time = {
         '<=': think.datetime()
       };
@@ -52,16 +52,16 @@ export default class extends think.model.relation {
    * @param  {[type]} where [description]
    * @return {[type]}       [description]
    */
-  async getPostList(page, options = {}){
+  async getPostList(page, options = {}) {
     page = page | 0 || 1;
 
     let field = options.field || 'id,title,pathname,create_time,summary,comment_num';
-    if( (await this.model('user').count()) > 1 ) { field += ',user_id'; }
+    if((await this.model('user').count()) > 1) { field += ',user_id'; }
 
-    if(options.tag || options.cate){
+    if(options.tag || options.cate) {
       let name = options.tag ? 'tag' : 'cate';
       let {id} = await this.model(name).field('id').setRelation(false).where({pathname: options.tag || options.cate}).find();
-      if(think.isEmpty(id)){
+      if(think.isEmpty(id)) {
         return false;
       }
       let where = this.getWhereCondition({[`${name}.${name}_id`]: id});
@@ -88,10 +88,10 @@ export default class extends think.model.relation {
    * @param  {[type]} pathname [description]
    * @return {[type]}          [description]
    */
-  async getPostDetail(pathname){
+  async getPostDetail(pathname) {
     let where = this.getWhereCondition({pathname});
     let detail = await this.where(where).fieldReverse('markdown_content,summary').find();
-    if(think.isEmpty(detail)){
+    if(think.isEmpty(detail)) {
       return detail;
     }
     let createTime = think.datetime(detail.create_time);
@@ -110,11 +110,11 @@ export default class extends think.model.relation {
     detail.next = next;
     return detail;
   }
-  async getPostRssList(){
+  async getPostRssList() {
     let field = 'id,title,pathname,create_time,';
     let where = this.getWhereCondition();
 
-    if( this.feedFullText === '0' ) {
+    if(this.feedFullText === '0') {
       field += 'summary,content';
     } else {
       field += 'content';
@@ -124,7 +124,7 @@ export default class extends think.model.relation {
     return data;
   }
 
-  async getPostSitemapList(){
+  async getPostSitemapList() {
     let field = 'pathname,type,update_time';
     let where = {
       is_public: 1, //公开
@@ -141,13 +141,13 @@ export default class extends think.model.relation {
    * get post archive
    * @return {[type]} [description]
    */
-  async getPostArchive(){
+  async getPostArchive() {
     let where = this.getWhereCondition();
     let data = await this.field('id,title,pathname,create_time').order('create_time DESC').setRelation(false).where(where).select();
     let result = {};
     data.forEach(item => {
       let yearMonth = think.datetime(item.create_time, 'YYYY年MM月');
-      if(!(yearMonth in result)){
+      if(!(yearMonth in result)) {
         result[yearMonth] = [];
       }
       result[yearMonth].push(item);
@@ -160,7 +160,7 @@ export default class extends think.model.relation {
    * @param  {[type]} page    [description]
    * @return {[type]}         [description]
    */
-  async getPostSearch(keyword, page){
+  async getPostSearch(keyword, page) {
     let where = {'title|content': ['LIKE', `%${keyword}%`]}
     where = this.getWhereCondition(where);
     return this.where(where).page(page, this.postsListSize).setRelation(false).field('title,pathname,summary,create_time').order('create_time DESC').countSelect(false);

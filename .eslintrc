@@ -36,7 +36,9 @@
     "no-console": 1,
     "eol-last": 2,
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
-    "no-trailing-spaces": 2
-
+    "no-trailing-spaces": 2,
+    "nonblock-statement-body-position": 2,
+    "space-before-blocks": 2,
+    "space-in-parens": 2
   }
 }

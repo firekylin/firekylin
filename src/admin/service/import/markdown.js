@@ -81,7 +81,7 @@ export default class extends Base {
     try {
       execSync(`rm -rf ${PATH}; mkdir ${PATH}; cd ${PATH}; tar zxvf ${file.path}`);
       let files = fs.readdirSync(PATH, {encoding: 'utf-8'});
-      if( !files.length ) { return []; }
+      if(!files.length) { return []; }
 
       return files.map(function(file) {
         let tar = path.join(PATH, file);

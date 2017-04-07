@@ -4,7 +4,7 @@ import push2Firekylin from 'push-to-firekylin';
 import moment from 'moment';
 
 export default class extends Base {
-  constructor(http){
+  constructor(http) {
     super(http);
     this._modelInstance = this.modelInstance;
     Object.defineProperty(this, 'modelInstance', {
@@ -17,16 +17,16 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self){  // eslint-disable-line no-unused-vars
+  async getAction(self) {  // eslint-disable-line no-unused-vars
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
     let data;
-    if( this.id ) {
-      if( this.id === 'lastest' ) {
+    if(this.id) {
+      if(this.id === 'lastest') {
         return this.lastest();
       }
       data = await this.modelInstance.where({id: this.id}).find();
       //文章选项
-      if(data.options){
+      if(data.options) {
         data.options = JSON.parse(data.options) || {};
       }else{
         data.options = {};
@@ -34,7 +34,7 @@ export default class extends Base {
     } else {
       let where = {};
       //不是管理员，只显示个人的文章
-      if(this.userInfo.type !== 1){
+      if(this.userInfo.type !== 1) {
         where.user_id = this.userInfo.id;
       }
 
@@ -44,7 +44,7 @@ export default class extends Base {
 
       if(this.get('keyword')) {
         let keywords = this.get('keyword').split(/\s+/g);
-        if( keywords.indexOf(':public') > -1 || keywords.indexOf(':private') > -1 ) {
+        if(keywords.indexOf(':public') > -1 || keywords.indexOf(':private') > -1) {
           where.is_public = Number(keywords.indexOf(':public') > -1);
           keywords = keywords.filter(word => word !== ':public' && word !== ':private');
         }
@@ -54,7 +54,7 @@ export default class extends Base {
       }
 
       let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
-      data = await this.modelInstance.where(where).field(field).order('create_time DESC').page( this.get('page'), 15 ).countSelect();
+      data = await this.modelInstance.where(where).field(field).order('create_time DESC').page(this.get('page'), 15).countSelect();
     }
     return this.success(data);
   }
@@ -66,16 +66,16 @@ export default class extends Base {
    * add user
    * @return {[type]} [description]
    */
-  async postAction(){
+  async postAction() {
     let data = this.post();
     //check pathname
     let post = await this.modelInstance.where({pathname: data.pathname}).find();
-    if( !think.isEmpty(post) ) {
+    if(!think.isEmpty(post)) {
       return this.fail('PATHNAME_EXIST');
     }
 
     /** 如果是编辑发布文章的话默认状态改为审核中 **/
-    if( data.status == 3 && this.userInfo.type != 1 ) {
+    if(data.status == 3 && this.userInfo.type != 1) {
       data.status = 1;
     }
 
@@ -95,7 +95,7 @@ export default class extends Base {
    * update user info
    * @return {[type]} [description]
    */
-  async putAction(){
+  async putAction() {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }
@@ -104,9 +104,9 @@ export default class extends Base {
     data.id = this.id;
 
     /** 判断接收的参数中是否有 markdown_content 来区别审核通过的状态修改和普通的文章更新 */
-    if( data.markdown_content ) {
+    if(data.markdown_content) {
       /** 如果是编辑发布文章的话默认状态改为审核中 **/
-      if( data.status == 3 && this.userInfo.type != 1 ) {
+      if(data.status == 3 && this.userInfo.type != 1) {
         data.status = 1;
       }
 
@@ -153,7 +153,7 @@ export default class extends Base {
     /** 如果不是管理员且不是本文作者则无权限删除文章 **/
     if(this.userInfo.type !== 1) {
       let post = await this.modelInstance.where({id: this.id}).find();
-      if( post.user_id != this.userInfo.id ) {
+      if(post.user_id != this.userInfo.id) {
         return this.fail('USER_NO_PERMISSION');
       }
     }
@@ -166,7 +166,7 @@ export default class extends Base {
     let post = Object.assign({}, postData);
     let postOpt = JSON.parse(post.options);
     let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
-    if( post.status != 3 && post.is_public != 1 && !canPush ) {
+    if(post.status != 3 && post.is_public != 1 && !canPush) {
       return;
     }
     post = think.extend({}, post);
@@ -175,7 +175,7 @@ export default class extends Base {
     let push_sites = options.push_sites;
     let push_sites_keys = postOpt.push_sites;
 
-    if( post.markdown_content.slice(0, 5) !== '> 原文：') {
+    if(post.markdown_content.slice(0, 5) !== '> 原文：') {
       let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.http.host}`;
       post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
 
@@ -204,7 +204,7 @@ ${post.markdown_content}`;
 
   getPostTime(data) {
     data.update_time = think.datetime();
-    if( !data.create_time ) {
+    if(!data.create_time) {
       data.create_time = data.update_time;
     }else{
       data.create_time = think.datetime(data.create_time);
@@ -214,10 +214,10 @@ ${post.markdown_content}`;
 
 
   async getTagIds(tags) {
-    if(!tags){
+    if(!tags) {
       return [];
     }
-    if(!think.isArray(tags)){
+    if(!think.isArray(tags)) {
       tags = [tags];
     }
     let modelInstance = this.model('tag').setRelation(false), tagIds = [];
