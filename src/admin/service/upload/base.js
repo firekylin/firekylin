@@ -8,7 +8,7 @@ export default class extends think.service.base {
 
   // 域名不带http/https自动补全http
   getAbsOrigin(origin) {
-    const reg = /^https?:\/\/.+/;
+    const reg = /^(https?:)?\/\/.+/;
     if (!reg.test(origin)) {
       return `http://${origin}`;
     }
