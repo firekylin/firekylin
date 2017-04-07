@@ -37,6 +37,6 @@ export default class extends think.model.relation {
         };
       }
     }
-    return Object.values(result).sort((a,b)=> a.count>b.count ? -1 : 1);
+    return Object.values(result).sort((a, b)=> a.count>b.count ? -1 : 1);
   }
 }

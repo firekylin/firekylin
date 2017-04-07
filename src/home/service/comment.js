@@ -210,7 +210,7 @@ export default class extends think.service.base {
       let data = JSON.parse(resp.body).data;
 
       let promises = [];
-      for(let i=0;i<ths.length;i++) {
+      for(let i=0; i<ths.length; i++) {
         let post = postData[ths[i]];
         if(data[i] === post.comment_num) {
           continue;
