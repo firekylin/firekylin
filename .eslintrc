@@ -3,7 +3,20 @@
   "parser": "babel-eslint",
   "env": {
     "browser": true,
+    "es6": true,
     "node": true
+  },
+  "globals": {
+    "think": false,
+    "firekylin": false
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+      "ecmaFeatures": {
+          "experimentalObjectRestSpread": true,
+          "jsx": true
+      },
+      "sourceType": "module"
   },
   "plugins": [
     "react"
