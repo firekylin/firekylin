@@ -1,8 +1,8 @@
 'use strict';
 
-import Base from './base.js';
 import fs from 'fs';
 import path from 'path';
+import Base from './base';
 
 const stats = think.promisify(fs.stat);
 

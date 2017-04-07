@@ -1,5 +1,7 @@
 'use strict';
+
 import fs from 'fs';
+
 let port;
 let portFile = think.ROOT_PATH + think.sep + 'port';
 if(think.isFile(portFile)) {

@@ -1,6 +1,6 @@
 import path from 'path';
-import Base from './base';
 import url from 'url';
+import Base from './base';
 
 export default class extends Base {
   uploadConfig = {};

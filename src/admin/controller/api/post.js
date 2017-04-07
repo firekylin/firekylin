@@ -1,7 +1,8 @@
 'use strict';
-import Base from './base.js';
+
 import push2Firekylin from 'push-to-firekylin';
 import moment from 'moment';
+import Base from './base';
 
 export default class extends Base {
   constructor(http) {

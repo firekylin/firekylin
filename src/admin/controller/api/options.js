@@ -1,7 +1,8 @@
 'use strict';
-import Base from './base.js';
+
 import speakeasy from 'speakeasy';
 import push2Firekylin from 'push-to-firekylin';
+import Base from './base';
 
 export default class extends Base {
   /**

@@ -1,6 +1,6 @@
 import fs from 'fs';
-import Base from './base';
 import xml2js from 'xml2js';
+import Base from './base';
 
 const WP_POST_STATUS = {
   publish: 3, //发布
