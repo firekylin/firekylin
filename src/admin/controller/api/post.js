@@ -49,7 +49,7 @@ export default class extends Base {
           keywords = keywords.filter(word => word !== ':public' && word !== ':private');
         }
         if(keywords.length > 0) {
-          where.title = ["like", keywords.map(word => `%${word}%`)];
+          where.title = ['like', keywords.map(word => `%${word}%`)];
         }
       }
 
@@ -123,7 +123,7 @@ export default class extends Base {
       /** 审核通过的状态修改，有 create_time 即需要更新时间，时间由服务器生成 */
 
       const post = await this.modelInstance.where({id: data.id}).find();
-      let options = JSON.parse(post.options || "{}");
+      let options = JSON.parse(post.options || '{}');
       if (typeof options === 'string') {
         options = JSON.parse(options) || {};
       }

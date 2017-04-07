@@ -8,9 +8,9 @@ if(!think.cli){
     if(!firekylin.isInstalled){
       return;
     }
-    think.http("/crontab/sync_comment", true); 
+    think.http('/crontab/sync_comment', true); 
   }
-  crontab.scheduleJob("0 */1 * * *", syncComment);
+  crontab.scheduleJob('0 */1 * * *', syncComment);
   
   //服务启动时同步一次
   syncComment();

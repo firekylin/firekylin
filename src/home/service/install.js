@@ -49,7 +49,7 @@ export default class extends think.service.base {
    */
   async insertData(){
     let model = this.getModel(true);
-    let dbExist = await model.query("SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`='" + this.dbConfig.database + "'");
+    let dbExist = await model.query('SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' + this.dbConfig.database + '\'');
     if(think.isEmpty(dbExist)){
       //忽略错误
       await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
@@ -109,7 +109,7 @@ export default class extends think.service.base {
     let salt = think.uuid(10) + '!@#$%^&*';
     this.password_salt = salt;
 
-    await optionsModel.where({key: 'navigation'}).update({value: JSON.stringify([{"label":"首页","url":"/","option":"home"},{"label":"归档","url":"/archives/","option":"archive"},{"label":"标签","url":"/tags","option":"tags"},{"label":"关于","url":"/about","option":"user"},{"label":"友链","url":"/links","option":"link"}])});
+    await optionsModel.where({key: 'navigation'}).update({value: JSON.stringify([{'label':'首页','url':'/','option':'home'},{'label':'归档','url':'/archives/','option':'archive'},{'label':'标签','url':'/tags','option':'tags'},{'label':'关于','url':'/about','option':'user'},{'label':'友链','url':'/links','option':'link'}])});
     await optionsModel.where({key: 'password_salt'}).update({value: salt});
     await optionsModel.where({key: 'title'}).update({value: 'FireKylin 系统'});
     await optionsModel.where({key: 'logo_url'}).update({value: '/static/img/firekylin.jpg'});

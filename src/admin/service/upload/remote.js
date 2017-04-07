@@ -16,14 +16,14 @@ export default class extends Base {
     let result = await getFileContent({
       url,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36"
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36'
       },
       strictSSL: false,
       timeout: 1000,
       encoding: 'binary'
-    }).catch(() => { throw Error("UPLOAD_URL_ERROR"); });
+    }).catch(() => { throw Error('UPLOAD_URL_ERROR'); });
 
-    if(result.headers["content-type"].indexOf('image') === -1) {
+    if(result.headers['content-type'].indexOf('image') === -1) {
       throw Error('UPLOAD_TYPE_ERROR');
     }
 
