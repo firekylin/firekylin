@@ -25,7 +25,11 @@ export default class extends Base {
     }
 
     let users = await modelInstance.where(where).select();
-    let posts = await this.model('post').field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num').setRelation(false).group('user_id').select();
+    let posts = await this.model('post')
+      .field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num')
+      .setRelation(false)
+      .group('user_id')
+      .select();
     let postsNum = new Map(posts.map(({user_id, post_num}) => [user_id, post_num]));
     let commentsNum = new Map(posts.map(({user_id, comment_num}) => [user_id, comment_num]));
 

@@ -79,12 +79,15 @@ export default class extends Base {
 
   async pageAction() {
     let pathname = this.get('pathname');
-    let detail = await this.model('post').setRelation(false).where({
-      pathname,
-      is_public: 1, //公开
-      type: 1, //文章
-      status: 3 //已经发布
-    }).find();
+    let detail = await this.model('post')
+      .setRelation(false)
+      .where({
+        pathname,
+        is_public: 1, //公开
+        type: 1, //文章
+        status: 3 //已经发布
+      })
+      .find();
     detail.pathname = encodeURIComponent(detail.pathname);
     this.assign('page', detail);
     this.assign('pathname', pathname);

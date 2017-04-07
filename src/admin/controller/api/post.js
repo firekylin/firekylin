@@ -54,7 +54,11 @@ export default class extends Base {
       }
 
       let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
-      data = await this.modelInstance.where(where).field(field).order('create_time DESC').page(this.get('page'), 15).countSelect();
+      data = await this.modelInstance.where(where)
+        .field(field)
+        .order('create_time DESC')
+        .page(this.get('page'), 15)
+        .countSelect();
     }
     return this.success(data);
   }
@@ -222,7 +226,9 @@ ${post.markdown_content}`;
     }
     let modelInstance = this.model('tag').setRelation(false), tagIds = [];
     let promises = tags.map(name =>
-      modelInstance.where({name}).thenAdd({name, pathname: encodeURIComponent(name)}).then(data => tagIds.push({tag_id: data.id, name: name}))
+      modelInstance.where({name})
+        .thenAdd({name, pathname: encodeURIComponent(name)})
+        .then(data => tagIds.push({tag_id: data.id, name: name}))
     );
     await Promise.all(promises);
     return tagIds;

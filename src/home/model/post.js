@@ -60,16 +60,25 @@ export default class extends think.model.relation {
 
     if(options.tag || options.cate) {
       let name = options.tag ? 'tag' : 'cate';
-      let {id} = await this.model(name).field('id').setRelation(false).where({pathname: options.tag || options.cate}).find();
+      let {id} = await this.model(name)
+        .field('id')
+        .setRelation(false)
+        .where({pathname: options.tag || options.cate})
+        .find();
       if(think.isEmpty(id)) {
         return false;
       }
       let where = this.getWhereCondition({[`${name}.${name}_id`]: id});
-      return this.join({
-        table: `post_${name}`,
-        as: name,
-        on: ['id', 'post_id']
-      }).where(where).order('create_time DESC').page(page, this.postsListSize).countSelect();
+      return this
+        .join({
+          table: `post_${name}`,
+          as: name,
+          on: ['id', 'post_id']
+        })
+        .where(where)
+        .order('create_time DESC')
+        .page(page, this.postsListSize)
+        .countSelect();
     }
 
     let where = this.getWhereCondition(options.where);
@@ -80,7 +89,12 @@ export default class extends think.model.relation {
     //   },{timeout:259200});
     // }
 
-    return this.field(field).page(page, this.postsListSize).setRelation('user').order('create_time DESC').where(where).countSelect();
+    return this.field(field)
+      .page(page, this.postsListSize)
+      .setRelation('user')
+      .order('create_time DESC')
+      .where(where)
+      .countSelect();
   }
 
   /**
@@ -99,12 +113,20 @@ export default class extends think.model.relation {
       create_time: ['<', createTime],
       id: ['!=', detail.id]
     });
-    let prevPromise = this.field('title,pathname').setRelation(false).where(prevWhere).order('create_time DESC').find();
+    let prevPromise = this.field('title,pathname')
+      .setRelation(false)
+      .where(prevWhere)
+      .order('create_time DESC')
+      .find();
     let nextWhere = this.getWhereCondition({
       create_time: ['>', createTime],
       id: ['!=', detail.id]
     });
-    let nextPromise = this.field('title,pathname').setRelation(false).where(nextWhere).order('create_time ASC').find();
+    let nextPromise = this.field('title,pathname')
+      .setRelation(false)
+      .where(nextWhere)
+      .order('create_time ASC')
+      .find();
     let [prev, next] = await Promise.all([prevPromise, nextPromise]);
     detail.prev = prev;
     detail.next = next;
@@ -120,7 +142,12 @@ export default class extends think.model.relation {
       field += 'content';
     }
 
-    let data = await this.field(field).where(where).order('create_time DESC').setRelation(false).limit(10).select();
+    let data = await this.field(field)
+      .where(where)
+      .order('create_time DESC')
+      .setRelation(false)
+      .limit(10)
+      .select();
     return data;
   }
 
@@ -134,7 +161,11 @@ export default class extends think.model.relation {
       }
     }
 
-    let data = await this.field(field).where(where).order('update_time DESC').setRelation(false).select();
+    let data = await this.field(field)
+      .where(where)
+      .order('update_time DESC')
+      .setRelation(false)
+      .select();
     return data;
   }
   /**
@@ -143,7 +174,11 @@ export default class extends think.model.relation {
    */
   async getPostArchive() {
     let where = this.getWhereCondition();
-    let data = await this.field('id,title,pathname,create_time').order('create_time DESC').setRelation(false).where(where).select();
+    let data = await this.field('id,title,pathname,create_time')
+      .order('create_time DESC')
+      .setRelation(false)
+      .where(where)
+      .select();
     let result = {};
     data.forEach(item => {
       let yearMonth = think.datetime(item.create_time, 'YYYY年MM月');
@@ -163,6 +198,11 @@ export default class extends think.model.relation {
   async getPostSearch(keyword, page) {
     let where = {'title|content': ['LIKE', `%${keyword}%`]}
     where = this.getWhereCondition(where);
-    return this.where(where).page(page, this.postsListSize).setRelation(false).field('title,pathname,summary,create_time').order('create_time DESC').countSelect(false);
+    return this.where(where)
+      .page(page, this.postsListSize)
+      .setRelation(false)
+      .field('title,pathname,summary,create_time')
+      .order('create_time DESC')
+      .countSelect(false);
   }
 }
