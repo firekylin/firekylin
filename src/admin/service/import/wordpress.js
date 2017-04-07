@@ -74,7 +74,7 @@ export default class extends Base {
       }
       return item['wp:post_type'][0] ==='post';
     });
-    
+
     let postsPromise = posts.map(async item => {
       try{
         //获取用户
@@ -115,7 +115,9 @@ export default class extends Base {
 
         post.markdown_content = this.toMarkdown(post.content);
         await this.postModelInstance.addPost(post);
-      } catch(e) { console.log(e)}
+      } catch(e) {
+        console.log(e);  // eslint-disable-line no-console
+      }
     });
     await Promise.all(postsPromise);
 
@@ -133,9 +135,9 @@ export default class extends Base {
     let pages = channel.item.filter(item => {
       let keys = [
         'wp:post_type',
-        'dc:creator', 
-        'excerpt:encoded', 
-        'content:encoded', 
+        'dc:creator',
+        'excerpt:encoded',
+        'content:encoded',
         'wp:post_name',
         'wp:status',
         'wp:comment_status',
@@ -194,7 +196,7 @@ export default class extends Base {
       if( !Array.isArray(tagSlug) || !tagName.length ) {
         continue;
       }
-      
+
       tagsPromise.push(this.tagModelInstance.addTag({
         name: tagName[0],
         pathname: decodeURIComponent(tagSlug[0])
@@ -232,7 +234,7 @@ export default class extends Base {
       }));
     }
 
-    await Promise.all(categoriesPromise);    
+    await Promise.all(categoriesPromise);
     return categories.length;
   }
 
@@ -245,7 +247,7 @@ export default class extends Base {
     let parser = new xml2js.Parser();
     let parseString = think.promisify(parser.parseString, parser);
     let wxrJSON = await parseString(data);
-    
+
     return this.formatArray(wxrJSON).rss.channel;
   }
 

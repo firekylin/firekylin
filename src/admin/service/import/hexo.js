@@ -15,7 +15,7 @@ export default class extends Ghost {
         name: tag.name,
         pathname: tag.slug
       });
-      
+
       if( result.type === 'add' ) {
         len += 1;
       }
@@ -31,7 +31,7 @@ export default class extends Ghost {
   async category({categories}) {
     if( !categories || !Array.isArray(categories) ) {
       return 0;
-    } 
+    }
 
     var len = 0;
     for(let category of categories) {
@@ -40,7 +40,7 @@ export default class extends Ghost {
         pathname: category.slug,
         pid: 0
       });
-      
+
       if( result.type === 'add' ) {
         len += 1;
       }

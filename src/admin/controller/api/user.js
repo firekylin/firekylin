@@ -8,10 +8,10 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self){
+  async getAction(self){  // eslint-disable-line no-unused-vars
     let where = {};
     let modelInstance = this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
-    
+
     if( this.id ) {
       where.id = this.id;
       let user = await modelInstance.where(where).find();
@@ -30,7 +30,7 @@ export default class extends Base {
     let commentsNum = new Map( posts.map(({user_id, comment_num}) => [user_id, comment_num]) );
 
     users.forEach(user => {
-      user.post_num = postsNum.get(user.id) || 0; 
+      user.post_num = postsNum.get(user.id) || 0;
       user.comment_num = commentsNum.get(user.id) || 0;
     });
 
@@ -96,7 +96,7 @@ export default class extends Base {
     if(type === 'contributor') {
       return await this.generateKey(self, 1);
     }
-    
+
     let data = this.post();
     data.id = this.id;
     let rows = await this.modelInstance.saveUser(data, this.ip());

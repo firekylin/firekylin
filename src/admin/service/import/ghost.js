@@ -13,7 +13,7 @@ export default class extends Base {
     if( !users || !Array.isArray(users) ) {
       return 0;
     }
-    
+
     const usersPromise = users.map(user => this.userModelInstance.addUser({
       username: user.slug,
       email: user.email,
@@ -31,13 +31,13 @@ export default class extends Base {
    * 导入文章
    */
   async post({
-    posts, 
-    users, 
+    posts,
+    users,
     tags,
     categories,
-    post_tags, 
-    posts_tags, 
-    post_categories, 
+    post_tags,
+    posts_tags,
+    post_categories,
     posts_categories
   }) {
     if(!Array.isArray(posts) || !Array.isArray(users)) {
@@ -83,7 +83,7 @@ export default class extends Base {
           cate = await this.cateModelInstance.setRelation(false).where({name: ['IN', retCategory]}).select();
           cate = cate.map(item => item.id);
         }
-        
+
         const post = {
           title: item.title,
           pathname: item.slug,
@@ -101,10 +101,12 @@ export default class extends Base {
           cate
         };
         await this.postModelInstance.addPost(post);
-      } catch(e) { console.log(e)}
+      } catch(e) {
+        console.log(e);  // eslint-disable-line no-console
+      }
     });
     Promise.all(postsPromise);
-    
+
     return posts.length;
   }
 
@@ -155,7 +157,7 @@ export default class extends Base {
       pathname: tag.slug
     }));
     await Promise.all(tagsPromise);
-    
+
     return tags.length;
   }
 

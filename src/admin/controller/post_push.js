@@ -54,7 +54,7 @@ export default class extends Post {
       post.id = exPost.id;
       return this.updatePost(post);
     }
-    
+
     post.user_id = this.poster.id;
     post = await this.modelInstance.getContentAndSummary(post);
     post = this.modelInstance.getPostTime(post);

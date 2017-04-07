@@ -5,6 +5,6 @@ export default {
     reg: /^admin/
   },
   home: {
-    
+
   }
 }

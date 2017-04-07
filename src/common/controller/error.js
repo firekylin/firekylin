@@ -35,16 +35,16 @@ export default class extends think.controller.base {
       module = this.config('default_module');
     }
     let file = `${module}/error/${status}.html`;
-    
+
     let {theme} = await this.model('options').getOptions();
     let themeErrorFilePath = path.join(think.RESOURCE_PATH, 'theme', theme, 'error', `${status}.html`);
     try {
       await stats(themeErrorFilePath);
       file = themeErrorFilePath;
     } catch(e) {
-      console.log(e);
+      console.log(e);  // eslint-disable-line no-console
     }
-    
+
     let options = this.config('tpl');
     options = think.extend({}, options, {type: 'base', file_depr: '_'});
     this.fetch(file, {}, options).then(content => {
@@ -54,21 +54,21 @@ export default class extends think.controller.base {
     });
   }
   /**
-   * Bad Request 
+   * Bad Request
    * @return {Promise} []
    */
   async _400Action(){
     return await this.displayError(400);
   }
   /**
-   * Forbidden 
+   * Forbidden
    * @return {Promise} []
    */
   async _403Action(){
     return await this.displayError(403);
   }
   /**
-   * Not Found 
+   * Not Found
    * @return {Promise}      []
    */
   async _404Action(){
