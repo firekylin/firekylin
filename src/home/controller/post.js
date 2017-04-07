@@ -111,7 +111,7 @@ export default class extends Base {
   async archiveAction(){
     let model = this.model('post');
     let data = await model.getPostArchive();
-    for(let i in data) { data[i].map(post => post.pathname = encodeURIComponent(post.pathname)) };
+    for(let i in data) { data[i].map(post => post.pathname = encodeURIComponent(post.pathname)) }
     this.assign('list', data);
     return this.displayView('archive');
   }
