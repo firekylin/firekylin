@@ -5,9 +5,9 @@
  */
 
 /**
- * 
+ *
  * think.middleware('xxx', http => {
- *   
+ *
  * })
- * 
+ *
  */

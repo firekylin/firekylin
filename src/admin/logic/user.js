@@ -10,7 +10,7 @@ export default class extends think.logic.base {
    * @return {} []
    */
   indexAction(){
-   
+
   }
   /**
    * 添加或者修改用户
@@ -19,7 +19,7 @@ export default class extends think.logic.base {
   saveAction(){
     this.allowMethods = 'post';
     this.rules = {
-      
+
     }
   }
   /**

@@ -1,5 +1,4 @@
 'use strict';
-import fs from 'fs';
 import pack from '../../../package.json';
 
 export default class extends think.controller.base {

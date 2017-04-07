@@ -16,7 +16,7 @@ export default {
         env.addFilter('utc', time => (new Date(time)).toUTCString());
         env.addFilter('pagination', function(page) {
           let {pathname, query} = parse(this.ctx.http.url, true);
-          
+
           query.page = page;
           return pathname + build_query(query);
         });

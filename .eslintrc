@@ -10,7 +10,9 @@
     "think": false,
     "firekylin": false
   },
-  "extends": "eslint:recommended",
+  "extends": [
+    "eslint:recommended"
+  ],
   "parserOptions": {
       "ecmaFeatures": {
           "experimentalObjectRestSpread": true,
@@ -31,6 +33,10 @@
     "new-cap": 0,
     "no-shadow": 0,
     "no-use-before-define": 0,
-    "eol-last": 1,
+    "no-console": 1,
+    "eol-last": 2,
+    "brace-style": [2, "1tbs", { "allowSingleLine": true }],
+    "no-trailing-spaces": 2
+
   }
 }

@@ -31,7 +31,7 @@ export default class extends Base {
         where.where = {user_id: user.id};
       }
     }
-    
+
     let tagName = '', cateName = '';
     if(where.tag) {
       tagName = await this.model('tag').where({pathname: where.tag}).find();
@@ -40,7 +40,7 @@ export default class extends Base {
       }
     }
     if(where.cate) {
-      [cateName] = this.assign('categories').filter(cate => 
+      [cateName] = this.assign('categories').filter(cate =>
         cate.pathname.toLowerCase() === where.cate.toLowerCase()
       );
       cateName = cateName && cateName.name;
@@ -66,7 +66,7 @@ export default class extends Base {
     this.http.url = decodeURIComponent(this.http.url);
     let pathname = this.get('pathname');
     if( pathname === 'list' ) { return this.listAction(); }
-    
+
     let detail = await this.model('post').getPostDetail(pathname);
     if(think.isEmpty(detail)){
       return this.redirect('/');
@@ -88,17 +88,17 @@ export default class extends Base {
     detail.pathname = encodeURIComponent(detail.pathname);
     this.assign('page', detail);
     this.assign('pathname', pathname);
-    
+
     let template = 'page';
     if( detail.options ) {
       try {
         detail.options = JSON.parse(detail.options);
         if( detail.options.template ) {
-          let stat = await stats( path.join(this.THEME_VIEW_PATH, 'template', detail.options.template) );
+          /*let stat = */await stats( path.join(this.THEME_VIEW_PATH, 'template', detail.options.template) );
           template = `template${think.sep}`+detail.options.template.slice(0, -5);
         }
       } catch(e) {
-        console.log(e);
+        console.log(e);  // eslint-disable-line no-console
       }
     }
 

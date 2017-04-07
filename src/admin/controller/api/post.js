@@ -17,7 +17,7 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self){
+  async getAction(self){  // eslint-disable-line no-unused-vars
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
     let data;
     if( this.id ) {
@@ -193,7 +193,7 @@ ${post.markdown_content}`;
       return p2fk.push(post);
     });
     let result = await Promise.all(pushes);
-    console.log('push result for debug: ', result);
+    console.log('push result for debug: ', result);  // eslint-disable-line no-console
   }
 
   async lastest() {

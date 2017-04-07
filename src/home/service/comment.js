@@ -9,7 +9,7 @@ request.defaults({
 
 const _ = {
   get: think.promisify(request, request),
-  post: think.promisify(request.post, request) 
+  post: think.promisify(request.post, request)
 };
 
 export default class extends think.service.base {
@@ -70,7 +70,7 @@ export default class extends think.service.base {
     }
     let threads = Object.keys(postData); //.join('&l=')
     let index = 0;
-    while(true){
+    while(true){  // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 10);
       index += 10;
       if(!ths.length){
@@ -112,7 +112,7 @@ export default class extends think.service.base {
     }
     let threads = Object.keys(postData);
     let index = 0;
-    while(true){
+    while(true){  // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 10);
       index += 10;
       if(!ths.length){
@@ -148,7 +148,7 @@ export default class extends think.service.base {
     }
     let threads = Object.keys(postData);
     let index = 0;
-    while(true){
+    while(true){  // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 10);
       index += 10;
       if(!ths.length){
@@ -196,7 +196,7 @@ export default class extends think.service.base {
     let threads = Object.keys(postData);
     let index = 0;
     let url = `https://api.gentie.163.com/products/${comment.name}/threads/joincounts`;
-    while(true){
+    while(true){  // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 50);
       if(!ths.length){return;}
       index += 50;

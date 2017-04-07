@@ -33,7 +33,9 @@ try{
   if(fs.existsSync(installedFile)){
     firekylin.isInstalled = true;
   }
-}catch(e){}
+}catch(e){
+  // fs.accessSync failed
+}
 
 /**
  * set app is installed

@@ -1,8 +1,6 @@
 'use strict';
 
 import Base from './base.js';
-import fs from 'fs';
-
 
 export default class extends Base {
   /**

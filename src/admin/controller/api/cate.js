@@ -7,7 +7,7 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self){
+  async getAction(self){  // eslint-disable-line no-unused-vars
     let result;
     if(this.get('pid')) {
       this.modelInstance.where({pid: this.get('pid')});

@@ -40,15 +40,15 @@ export default class extends Base {
     }
 
     /** 检查文件类型 */
-    // let contentType = file.headers['content-type']; 
+    // let contentType = file.headers['content-type'];
 
     // 处理其它上传
-    
+
     if( !type ) { return this.fail(); }
     if(type == 'local') {
       config = {name: this.post('name')};
     }
-    
+
     return this.serviceUpload(type, file.path, config);
   }
 
@@ -80,7 +80,7 @@ export default class extends Base {
       let {post, page, category, tag} = await (new importor(this)).run(file);
       return this.success(`共导入文章 ${post} 篇，页面 ${page} 页，分类 ${category} 个，标签 ${tag} 个`);
     } catch(e) {
-      console.log(e);
+      console.log(e);  // eslint-disable-line no-console
       return this.fail(e);
     }
   }
