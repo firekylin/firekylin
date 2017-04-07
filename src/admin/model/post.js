@@ -1,9 +1,9 @@
 'use strict';
 
-import Base from './base';
 import marked from 'marked';
 import toc from 'markdown-toc';
 import highlight from 'highlight.js';
+import Base from './base';
 
 /**
  * relation model

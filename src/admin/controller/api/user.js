@@ -1,7 +1,7 @@
 'use strict';
 
-import Base from './base.js';
 import nodemailer from 'nodemailer';
+import Base from './base';
 
 export default class extends Base {
   /**

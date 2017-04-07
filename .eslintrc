@@ -11,7 +11,9 @@
     "firekylin": false
   },
   "extends": [
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings"
   ],
   "parserOptions": {
       "ecmaFeatures": {
@@ -21,7 +23,8 @@
       "sourceType": "module"
   },
   "plugins": [
-    "react"
+    "react",
+    "import"
   ],
   "rules": {
     "strict": 0,
@@ -51,6 +54,16 @@
     "semi-spacing": 2,
     "comma-spacing": 2,
     "no-tabs": 2,
-    "new-parens": 2
+    "new-parens": 2,
+    "import/first": 2,
+    "import/no-duplicates": 2,
+    'import/extensions': [2, 'always', {
+      js: 'never',
+      jsx: 'never',
+    }],
+    "import/order": 2,
+    "import/no-absolute-path": 2,
+    "import/newline-after-import": 2,
+    "import/no-named-default": 2,
   }
 }

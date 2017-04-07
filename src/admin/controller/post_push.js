@@ -1,5 +1,5 @@
-import Post from './api/post.js';
 import {PasswordHash} from 'phpass';
+import Post from './api/post';
 
 export default class extends Post {
   modelInstance = this.model('post');

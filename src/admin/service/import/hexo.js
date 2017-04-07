@@ -1,4 +1,4 @@
-import Ghost from './ghost.js';
+import Ghost from './ghost';
 
 export default class extends Ghost {
   /**

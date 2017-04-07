@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import base from './base';
+import {exec} from 'child_process';
 import semver from 'semver';
 import request from 'request';
-import {exec} from 'child_process';
 import pack from '../../../../package.json';
+import base from './base';
 
 const cluster = require('cluster');
 

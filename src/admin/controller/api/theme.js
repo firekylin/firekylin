@@ -2,10 +2,11 @@
 
 import fs from 'fs';
 import path from 'path';
-import Base from './base.js';
 import {execSync} from 'child_process';
+import Base from './base';
 
 const cluster = require('cluster');
+
 const statsAsync = think.promisify(fs.stat);
 const readdirAsync = think.promisify(fs.readdir);
 const readFileAsync = think.promisify(fs.readFile);

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import Base from './base';
 import url from 'url';
+import Base from './base';
 
 const moveFile = think.promisify(fs.rename, fs);
 export default class extends Base {

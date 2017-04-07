@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import Base from './base';
 import request from 'request';
+import Base from './base';
 
 request.defaults({
   strictSSL: false,
