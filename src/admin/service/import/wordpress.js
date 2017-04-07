@@ -112,7 +112,8 @@ export default class extends Base {
           comment_num: 0,
           allow_comment: Number(item['wp:comment_status'][0] === 'open'),
           is_public: Number(item['wp:status'][0] !== 'private'),
-          tag: item.hasOwnProperty('category') ? item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
+          tag: item.hasOwnProperty('category') ?
+            item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
           cate
         };
 

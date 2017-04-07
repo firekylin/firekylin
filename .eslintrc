@@ -26,6 +26,13 @@
   "rules": {
     "strict": 0,
     "quotes": [2, "single"],
+    "max-len": [2, {
+      "code": 120,
+      "ignoreTrailingComments": true,
+      "ignoreUrls": true,
+      "ignoreRegExpLiterals": true,
+      "ignoreTemplateLiterals": true
+    }],
     "no-underscore-dangle": 0,
     "no-unused-vars": 1,
     "no-unused-expressions": 0,
@@ -38,7 +45,7 @@
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
     "no-trailing-spaces": 2,
     "nonblock-statement-body-position": 2,
-    "newline-per-chained-call": [2, {"ignoreChainWithDepth": 3}],
+    "newline-per-chained-call": [2, { "ignoreChainWithDepth": 3 }],
     "space-before-blocks": 2,
     "space-in-parens": 2,
     "semi-spacing": 2,

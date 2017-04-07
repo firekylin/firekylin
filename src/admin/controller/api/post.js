@@ -53,7 +53,16 @@ export default class extends Base {
         }
       }
 
-      let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
+      let field = [
+        'id',
+        'title',
+        'user_id',
+        'create_time',
+        'update_time',
+        'status',
+        'pathname',
+        'is_public'
+      ];
       data = await this.modelInstance.where(where)
         .field(field)
         .order('create_time DESC')

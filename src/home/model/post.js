@@ -85,7 +85,12 @@ export default class extends think.model.relation {
     // only cache first page post
     // if(page === 1){
     //   return think.cache('post_1', () => {
-    //     return this.field(field).page(page, this.postsListSize).setRelation(false).order('create_time DESC').where(where).countSelect();
+    //     return this.field(field)
+    //       .page(page, this.postsListSize)
+    //       .setRelation(false)
+    //       .order('create_time DESC')
+    //       .where(where)
+    //       .countSelect();
     //   },{timeout:259200});
     // }
 

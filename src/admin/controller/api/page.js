@@ -18,7 +18,16 @@ export default class extends Post {
 
   getAction(self) {
     if(!this.id) {
-      let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
+      let field = [
+        'id',
+        'title',
+        'user_id',
+        'create_time',
+        'update_time',
+        'status',
+        'pathname',
+        'is_public'
+      ];
       this.modelInstance.order('create_time DESC').field(field);
     }
 
