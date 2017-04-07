@@ -48,7 +48,7 @@ export default class extends Post {
     //check pathname
     let exPost = await this.modelInstance.where({pathname: post.pathname}).find();
     if(!think.isEmpty(exPost)) {
-      if(exPost.user.id != this.poster.id) {
+      if(exPost.user.id !== this.poster.id) {
         return this.fail('POST_USER_ERROR');
       }
       post.id = exPost.id;
@@ -60,7 +60,7 @@ export default class extends Post {
     post = this.modelInstance.getPostTime(post);
     post.tag = await this.getTagIds(post.tag);
 
-    if(post.status == 3 && this.poster.type != 1) {
+    if(post.status === 3 && this.poster.type !== 1) {
       post.status = 1;
     }
 

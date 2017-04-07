@@ -89,7 +89,7 @@ export default class extends Base {
     }
 
     /** 如果是编辑发布文章的话默认状态改为审核中 **/
-    if(data.status == 3 && this.userInfo.type != 1) {
+    if(data.status === 3 && this.userInfo.type !== 1) {
       data.status = 1;
     }
 
@@ -120,7 +120,7 @@ export default class extends Base {
     /** 判断接收的参数中是否有 markdown_content 来区别审核通过的状态修改和普通的文章更新 */
     if(data.markdown_content) {
       /** 如果是编辑发布文章的话默认状态改为审核中 **/
-      if(data.status == 3 && this.userInfo.type != 1) {
+      if(data.status === 3 && this.userInfo.type !== 1) {
         data.status = 1;
       }
 
@@ -167,7 +167,7 @@ export default class extends Base {
     /** 如果不是管理员且不是本文作者则无权限删除文章 **/
     if(this.userInfo.type !== 1) {
       let post = await this.modelInstance.where({id: this.id}).find();
-      if(post.user_id != this.userInfo.id) {
+      if(post.user_id !== this.userInfo.id) {
         return this.fail('USER_NO_PERMISSION');
       }
     }
@@ -180,7 +180,7 @@ export default class extends Base {
     let post = Object.assign({}, postData);
     let postOpt = JSON.parse(post.options);
     let canPush = Array.isArray(postOpt.push_sites) && postOpt.push_sites.length > 0;
-    if(post.status != 3 && post.is_public != 1 && !canPush) {
+    if(post.status !== 3 && post.is_public !== 1 && !canPush) {
       return;
     }
     post = think.extend({}, post);
