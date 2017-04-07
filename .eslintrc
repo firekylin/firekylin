@@ -30,6 +30,7 @@
     "react/jsx-no-undef": 2,
     "new-cap": 0,
     "no-shadow": 0,
-    "no-use-before-define": 0
+    "no-use-before-define": 0,
+    "eol-last": 1,
   }
 }
