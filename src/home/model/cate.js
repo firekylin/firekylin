@@ -11,7 +11,7 @@ export default class extends think.model.relation {
     }
   };
 
-  async getCateArchive(){
+  async getCateArchive() {
     let data = await this.model('post_cate').join({
       table: 'post',
       on: ['post_id', 'id']

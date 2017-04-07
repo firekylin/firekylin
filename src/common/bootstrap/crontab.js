@@ -2,10 +2,10 @@ import crontab from 'node-crontab';
 
 import './global';
 
-if(!think.cli){
+if(!think.cli) {
 
   let syncComment = () => {
-    if(!firekylin.isInstalled){
+    if(!firekylin.isInstalled) {
       return;
     }
     think.http('/crontab/sync_comment', true);

@@ -8,11 +8,11 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self){  // eslint-disable-line no-unused-vars
+  async getAction(self) {  // eslint-disable-line no-unused-vars
     let where = {};
     let modelInstance = this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
 
-    if( this.id ) {
+    if(this.id) {
       where.id = this.id;
       let user = await modelInstance.where(where).find();
       return this.success(user);
@@ -26,8 +26,8 @@ export default class extends Base {
 
     let users = await modelInstance.where(where).select();
     let posts = await this.model('post').field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num').setRelation(false).group('user_id').select();
-    let postsNum = new Map( posts.map(({user_id, post_num}) => [user_id, post_num]) );
-    let commentsNum = new Map( posts.map(({user_id, comment_num}) => [user_id, comment_num]) );
+    let postsNum = new Map(posts.map(({user_id, post_num}) => [user_id, post_num]));
+    let commentsNum = new Map(posts.map(({user_id, comment_num}) => [user_id, comment_num]));
 
     users.forEach(user => {
       user.post_num = postsNum.get(user.id) || 0;
@@ -40,8 +40,8 @@ export default class extends Base {
    * add user
    * @return {[type]} [description]
    */
-  async postAction(self){
-    if( this.get('type') === 'key' ) {
+  async postAction(self) {
+    if(this.get('type') === 'key') {
       return await this.generateKey(self);
     }
 
@@ -53,7 +53,7 @@ export default class extends Base {
   async generateKey(self, status) {
     let isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
     // let isMine = this.userInfo.id === this.id;
-    if( !isAdmin ) {
+    if(!isAdmin) {
       return this.failed();
     }
 
@@ -86,7 +86,7 @@ export default class extends Base {
    * update user info
    * @return {[type]} [description]
    */
-  async putAction(self){
+  async putAction(self) {
     let type = this.get('type');
 
     if (!this.id) {

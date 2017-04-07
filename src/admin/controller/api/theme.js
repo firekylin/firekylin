@@ -17,14 +17,14 @@ export default class extends Base {
    * forbidden ../ style path
    */
   pathCheck(themePath, basePath = THEME_DIR) {
-    if( themePath.indexOf(basePath) !== 0 ) {
+    if(themePath.indexOf(basePath) !== 0) {
       this.fail();
       throw Error(`theme path ${themePath} error`);
     }
     return true;
   }
 
-  async getAction(){
+  async getAction() {
     switch(this.get('type')) {
       case 'fileList': {
         let {theme} = this.get();
@@ -59,7 +59,7 @@ export default class extends Base {
     try {
       await writeFileAsync(filePath, content, {encoding: 'utf-8'});
 
-      if( cluster.isWorker ) {
+      if(cluster.isWorker) {
         setTimeout(() => cluster.worker.kill(), 200);
       }
       this.success();
@@ -111,14 +111,14 @@ export default class extends Base {
     for(let file of files) {
       let pos = path.join(base, file);
       let stat = await statsAsync(pos);
-      if( stat.isDirectory() ) {
+      if(stat.isDirectory()) {
         result.push({
           module: file,
           children: await this.getFileList(pos)
         });
       }
 
-      if( stat.isFile() ) {
+      if(stat.isFile()) {
         result.push({module: file});
       }
     }
@@ -137,7 +137,7 @@ export default class extends Base {
       let infoFile = path.join(THEME_DIR, theme, 'package.json');
       try {
         /*let stat = */await statsAsync(infoFile);
-        result.push( think.extend({id: theme}, think.require(infoFile)) );
+        result.push(think.extend({id: theme}, think.require(infoFile)));
       } catch(e) {
         console.log(e);  // eslint-disable-line no-console
       }
@@ -156,7 +156,7 @@ export default class extends Base {
     let templates = [];
     try {
       let stat = await statsAsync(templatePath);
-      if( !stat.isDirectory() ) {
+      if(!stat.isDirectory()) {
         throw Error();
       }
     } catch(e) {

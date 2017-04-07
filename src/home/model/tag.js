@@ -15,12 +15,12 @@ export default class extends think.model.relation {
    * get hot tags
    * @return {} []
    */
-  async getHotTags(){
+  async getHotTags() {
     let data = await this.getTagArchive();
     return data.slice(0, 5);
   }
 
-  async getTagArchive(){
+  async getTagArchive() {
     let data = await this.model('post_tag').join({
       table: 'post',
       on: ['post_id', 'id']

@@ -14,7 +14,7 @@ export default class extends Base {
    * @param  {} args []
    * @return {}         []
    */
-  init(...args){
+  init(...args) {
     super.init(...args);
 
     this.relation = {
@@ -34,7 +34,7 @@ export default class extends Base {
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
-  addPost(data){
+  addPost(data) {
     let create_time = think.datetime();
     data = Object.assign({
       type: 0,
@@ -47,9 +47,9 @@ export default class extends Base {
     return this.where({pathname: data.pathname}).thenAdd(data);
   }
 
-  async savePost(data){
+  async savePost(data) {
     let info = await this.where({id: data.id}).find();
-    if(think.isEmpty(info)){
+    if(think.isEmpty(info)) {
       return Promise.reject(new Error('POST_NOT_EXIST'));
     }
     data.update_time = think.datetime();
@@ -67,8 +67,8 @@ export default class extends Base {
    * @param  {Number} userId []
    * @return {Promise}        []
    */
-  getCount(userId){
-    if(userId){
+  getCount(userId) {
+    if(userId) {
       return this.where({user_id: userId}).count();
     }
     return this.count();
@@ -78,7 +78,7 @@ export default class extends Base {
    * @param  {Number} nums []
    * @return {}      []
    */
-  getLatest(user_id, nums = 10){
+  getLatest(user_id, nums = 10) {
     let where = {
       create_time: {'<=': think.datetime()},
       is_public: 1, //公开
@@ -145,7 +145,7 @@ export default class extends Base {
     const auto_summary = parseInt(options.auto_summary);
 
     let showToc;
-    if( !postTocManual ) {
+    if(!postTocManual) {
       showToc = data.type/1 === 0;
     } else {
       showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
@@ -154,7 +154,7 @@ export default class extends Base {
 
     const hasMoreTag = /(?:^|[\r\n]+)\s*\<\!--more--\>\s*[\r\n]+/i.test(data.markdown_content);
 
-    if ( hasMoreTag || auto_summary === 0 ) {
+    if (hasMoreTag || auto_summary === 0) {
       data.summary = data.markdown_content.split('<!--more-->')[0];
       data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
       data.summary.replace(/<[>]*>/g, '');
@@ -186,7 +186,7 @@ export default class extends Base {
 
     const hasMoreTag = /(?:^|[\r\n]+)\s*\<\!--more--\>\s*[\r\n]+/i.test(markdown_content);
 
-    if ( hasMoreTag || summary_length === 0 ) {
+    if (hasMoreTag || summary_length === 0) {
       summary = markdown_content.split('<!--more-->')[0];
       summary = this.markdownToHtml(summary, {toc: false, highlight: true});
       summary.replace(/<[>]*>/g, '');
@@ -205,13 +205,13 @@ export default class extends Base {
    * markdown to html
    * @return {} []
    */
-  markdownToHtml(content, option = {toc: true, highlight: true}){
+  markdownToHtml(content, option = {toc: true, highlight: true}) {
     let markedContent = marked(content);
 
     /**
      * 增加 TOC 目录
      */
-    if( option.toc ) {
+    if(option.toc) {
       let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^\"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
@@ -225,7 +225,7 @@ export default class extends Base {
     /**
      * 增加代码高亮
      */
-    if( option.highlight ) {
+    if(option.highlight) {
       markedContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
         text = text.replace(/&#39;/g, '\'').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\&quot;/g, '"').replace(/\&amp;/g, '&');
         var result = highlight.highlightAuto(text, language ? [language] : undefined);
@@ -245,7 +245,7 @@ export default class extends Base {
    */
   getPostTime(data) {
     data.update_time = think.datetime();
-    if( !data.create_time ) {
+    if(!data.create_time) {
       data.create_time = data.update_time;
     }else{
       data.create_time = think.datetime(data.create_time);
@@ -259,9 +259,9 @@ export default class extends Base {
    * @param  {String} name []
    * @return {String}      []
    */
-  generateTocName(name){
+  generateTocName(name) {
     name = name.trim().replace(/\s+/g, '').replace(/\)/g, '').replace(/[\(\,]/g, '-').toLowerCase();
-    if(/^[\w\-]+$/.test(name)){
+    if(/^[\w\-]+$/.test(name)) {
       return name;
     }
     return `toc-${think.md5(name).slice(0, 3)}`;

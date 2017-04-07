@@ -14,7 +14,7 @@ export default class extends Base {
     let config = this.uploadConfig;
 
     /** 处理远程抓取 **/
-    if( this.post('fileUrl') ) {
+    if(this.post('fileUrl')) {
       try {
         // 先存到本地
         const uploader = think.service('upload/remote', 'admin');
@@ -32,11 +32,11 @@ export default class extends Base {
     }
 
     let file = this.file('file');
-    if( !file ) { return this.fail('FILE_UPLOAD_ERROR'); }
+    if(!file) { return this.fail('FILE_UPLOAD_ERROR'); }
 
     /** 处理导入数据 **/
-    if( this.post('importor') ) {
-      return this.serviceImport( this.post('importor'), file );
+    if(this.post('importor')) {
+      return this.serviceImport(this.post('importor'), file);
     }
 
     /** 检查文件类型 */
@@ -44,7 +44,7 @@ export default class extends Base {
 
     // 处理其它上传
 
-    if( !type ) { return this.fail(); }
+    if(!type) { return this.fail(); }
     if(type == 'local') {
       config = {name: this.post('name')};
     }

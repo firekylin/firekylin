@@ -8,9 +8,9 @@ export default class extends Base {
    * 首页如果设置了自定义首页则渲染对应页面
    * @return {[type]} [description]
    */
-  async indexAction(){
+  async indexAction() {
     let {frontPage} = await this.model('options').getOptions();
-    if( frontPage ) {
+    if(frontPage) {
       this.get('pathname', frontPage);
       return this.action('post', 'page');
     }
@@ -21,7 +21,7 @@ export default class extends Base {
    * rss
    * @return {[type]} [description]
    */
-  async rssAction(){
+  async rssAction() {
     let model = this.model('post');
     let list = await model.getPostRssList();
     this.assign('list', list);
@@ -35,7 +35,7 @@ export default class extends Base {
    * sitemap action
    * @return {[type]} [description]
    */
-  async sitemapAction(){
+  async sitemapAction() {
     let postModel = this.model('post');
     let postList = postModel.getPostSitemapList();
     this.assign('postList', postList);
@@ -51,19 +51,19 @@ export default class extends Base {
    * install
    * @return {[type]} [description]
    */
-  async installAction(){
-    if(this.isGet()){
-      if(firekylin.isInstalled){
+  async installAction() {
+    if(this.isGet()) {
+      if(firekylin.isInstalled) {
         return this.redirect('/');
       }
       return this.display();
     }
-    if(firekylin.isInstalled){
+    if(firekylin.isInstalled) {
       return this.fail('SYSTERM_INSTALLED');
     }
 
     let errors = this.assign('errors');
-    if(!think.isEmpty(errors)){
+    if(!think.isEmpty(errors)) {
       this.assign('message', errors[Object.keys(errors)[0]]);
       return this.display();
     }
@@ -96,10 +96,10 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async contributorAction() {
-    if( !this.options.hasOwnProperty('push') || this.options.push == 0) {
+    if(!this.options.hasOwnProperty('push') || this.options.push == 0) {
       return this.fail('PUSH_CLOSED');
     }
-    if( this.isGet() ) {
+    if(this.isGet()) {
       return this.display();
     }
 

@@ -7,7 +7,7 @@ export default class extends think.controller.base {
    * @param  {[type]} http [description]
    * @return {[type]}      [description]
    */
-  init(http){
+  init(http) {
     super.init(http);
     //home view path
     this.HOME_VIEW_PATH = `${think.ROOT_PATH}${think.sep}view${think.sep}home${think.sep}`;
@@ -15,11 +15,11 @@ export default class extends think.controller.base {
   /**
    * some base method in here
    */
-  async __before(){
-    if(this.http.action === 'install'){
+  async __before() {
+    if(this.http.action === 'install') {
       return;
     }
-    if(!firekylin.isInstalled){
+    if(!firekylin.isInstalled) {
       return this.redirect('/index/install');
     }
 
@@ -48,7 +48,7 @@ export default class extends think.controller.base {
 
     //网站地址
     let siteUrl = this.options.site_url;
-    if(!siteUrl){
+    if(!siteUrl) {
       siteUrl = 'http://' + this.http.host;
     }
     this.assign('site_url', siteUrl);
@@ -64,7 +64,7 @@ export default class extends think.controller.base {
    * @param  {} name []
    * @return {}      []
    */
-  async displayView(name){
+  async displayView(name) {
     return this.display(this.THEME_VIEW_PATH + name + '.html');
   }
 }

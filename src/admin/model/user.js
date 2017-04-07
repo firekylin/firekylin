@@ -13,7 +13,7 @@ export default class extends Base {
    * @param  {String} salt     []
    * @return {String}          []
    */
-  getEncryptPassword(password){
+  getEncryptPassword(password) {
     let passwordHash = new PasswordHash();
     let hash = passwordHash.hashPassword(password);
     return hash;
@@ -24,7 +24,7 @@ export default class extends Base {
    * @param  {[type]} password [description]
    * @return {[type]}          [description]
    */
-  checkPassword(userInfo, password){
+  checkPassword(userInfo, password) {
     let passwordHash = new PasswordHash();
     return passwordHash.checkPassword(password, userInfo.password);
   }
@@ -40,16 +40,16 @@ export default class extends Base {
    * @param  {[type]} data [description]
    * @return {[type]}      [description]
    */
-  afterSelect(data){
+  afterSelect(data) {
     return data.map(item => {
       return this.afterFind(item);
     });
   }
-  afterFind(data){
-    if(data.create_time){
+  afterFind(data) {
+    if(data.create_time) {
       data.create_time = think.datetime(new Date(data.create_time));
     }
-    if(data.last_login_time){
+    if(data.last_login_time) {
       data.last_login_time = think.datetime(new Date(data.last_login_time));
     }
     return data;
@@ -59,7 +59,7 @@ export default class extends Base {
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
-  addUser(data, ip){
+  addUser(data, ip) {
     let create_time = think.datetime();
     let encryptPassword = this.getEncryptPassword(data.password);
     return this.where({name: data.username, email: data.email, _logic: 'OR'}).thenAdd({
@@ -80,30 +80,30 @@ export default class extends Base {
    * @param  {[type]} data [description]
    * @return {[type]}      [description]
    */
-  async saveUser(data, ip){
+  async saveUser(data, ip) {
     let info = await this.where({id: data.id}).find();
-    if(think.isEmpty(info)){
+    if(think.isEmpty(info)) {
       return Promise.reject(new Error('UESR_NOT_EXIST'));
     }
     let password = data.password;
-    if(password){
+    if(password) {
       password = this.getEncryptPassword(password);
     }
     let updateData = {};
     ['display_name', 'type', 'status'].forEach(item => {
-      if(data[item]){
+      if(data[item]) {
         updateData[item] = data[item];
       }
     });
-    if(password){
+    if(password) {
       updateData.password = password;
     }
-    if(think.isEmpty(updateData)){
+    if(think.isEmpty(updateData)) {
       return Promise.reject('DATA_EMPTY');
     }
-    if(!info.email && data.email){
+    if(!info.email && data.email) {
       let count = await this.where({email: data.email}).count('email');
-      if(!count){
+      if(!count) {
         updateData.email = data.email;
       }
     }

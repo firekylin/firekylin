@@ -10,7 +10,7 @@ export default class extends Base {
    * 导入用户
    */
   async user({users}) {
-    if( !users || !Array.isArray(users) ) {
+    if(!users || !Array.isArray(users)) {
       return 0;
     }
 
@@ -70,7 +70,7 @@ export default class extends Base {
         let tag = [];
         let retTag = post_tags.filter(tag => tag.post_id === item.id).map(tag => tag.tag_id);
         retTag = tags.filter(({id}) => retTag.includes(id)).map(({name}) => name);
-        if( retTag.length ) {
+        if(retTag.length) {
           tag = await this.tagModelInstance.setRelation(false).where({name: ['IN', retTag]}).select();
           tag = tag.map(item => item.id);
         }
@@ -79,7 +79,7 @@ export default class extends Base {
         let cate = [];
         let retCategory = post_categories.filter(({post_id}) => post_id === item.id).map(({category_id}) => category_id);
         retCategory = categories.filter(({id}) => retCategory.includes(id)).map(({name}) => name);
-        if( retCategory.length ) {
+        if(retCategory.length) {
           cate = await this.cateModelInstance.setRelation(false).where({name: ['IN', retCategory]}).select();
           cate = cate.map(item => item.id);
         }
@@ -174,7 +174,7 @@ export default class extends Base {
   parseFile(file) {
     try {
       let jsonObj = think.safeRequire(file.path);
-      if( Array.isArray(jsonObj.db) && jsonObj.db.length ) {
+      if(Array.isArray(jsonObj.db) && jsonObj.db.length) {
         jsonObj = jsonObj.db[0];
       }
       return jsonObj.data;
