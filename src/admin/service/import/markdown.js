@@ -85,7 +85,7 @@ export default class extends Base {
 
       return files.map(function(file) {
         let tar = path.join(PATH, file);
-        let title = file.split('.').slice(0,-1).join('');
+        let title = file.split('.').slice(0, -1).join('');
         let content = fs.readFileSync(tar, {encoding: 'utf-8'});
         let stat = fs.statSync(tar);
         return {

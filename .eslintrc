@@ -39,6 +39,9 @@
     "no-trailing-spaces": 2,
     "nonblock-statement-body-position": 2,
     "space-before-blocks": 2,
-    "space-in-parens": 2
+    "space-in-parens": 2,
+    "semi-spacing": 2,
+    "comma-spacing": 2,
+    "no-tabs": 2
   }
 }

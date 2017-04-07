@@ -162,7 +162,7 @@ export default class extends Base {
     } else {
       let summary = this.markdownToHtml(data.markdown_content, {toc: false, highlight: true});
       // 过滤掉 HTML 标签并截取所需的长度
-      data.summary = summary.replace(/<\/?[^>]*>/g,'').substr(0, auto_summary) + '...';
+      data.summary = summary.replace(/<\/?[^>]*>/g, '').substr(0, auto_summary) + '...';
     }
 
     return data;
@@ -194,7 +194,7 @@ export default class extends Base {
     } else {
       summary = this.markdownToHtml(markdown_content, {toc: false, highlight: true});
       // 过滤掉 HTML 标签 及换行、空格等 并截取所需的长度
-      summary = summary.replace(/<\/?[^>]*>/g,'').replace(/[\n\s\t]/g, '').substr(0, summary_length) + '...';
+      summary = summary.replace(/<\/?[^>]*>/g, '').replace(/[\n\s\t]/g, '').substr(0, summary_length) + '...';
     }
 
     return summary;
