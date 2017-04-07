@@ -10,7 +10,8 @@ export default class extends Base {
    */
   async getAction(self) {  // eslint-disable-line no-unused-vars
     let where = {};
-    let modelInstance = this.modelInstance.field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
+    let modelInstance = this.modelInstance
+      .field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
 
     if(this.id) {
       where.id = this.id;

@@ -77,7 +77,8 @@ export default class extends Base {
 
         //获取分类
         let cate = [];
-        let retCategory = post_categories.filter(({post_id}) => post_id === item.id).map(({category_id}) => category_id);
+        let retCategory = post_categories.filter(({post_id}) => post_id === item.id)
+          .map(({category_id}) => category_id);
         retCategory = categories.filter(({id}) => retCategory.includes(id)).map(({name}) => name);
         if(retCategory.length) {
           cate = await this.cateModelInstance.setRelation(false).where({name: ['IN', retCategory]}).select();

@@ -122,7 +122,8 @@ export default class extends Base {
       push_sites[data.appKey] = data;
     }
 
-    let result = await this.model('options').updateOptions('push_sites', JSON.stringify(push_sites));
+    let result = await this.model('options')
+      .updateOptions('push_sites', JSON.stringify(push_sites));
     return this.success(result);
   }
 }
