@@ -1,6 +1,6 @@
-import fs from 'fs';
 import path from 'path';
 import Base from './base';
+import url from 'url';
 
 export default class extends Base {
   uploadConfig = {};
@@ -22,7 +22,7 @@ export default class extends Base {
 
         // 如果是本地上传
         if (type === 'local' || !type) {
-          return this.success(think.UPLOAD_BASE_URL + result);
+          return this.success(url.resolve(think.UPLOAD_BASE_URL, result));
         }
 
         return this.serviceUpload(type, path.join(think.RESOURCE_PATH, result), config);

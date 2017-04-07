@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import Base from './base';
+import url from 'url';
 
 const moveFile = think.promisify(fs.rename, fs);
 export default class extends Base {
@@ -15,8 +16,11 @@ export default class extends Base {
     }
 
     try {
-      await moveFile(file, path.join(destPath, basename));
-      return think.UPLOAD_BASE_URL + path.join(think.UPLOAD_PATH.replace(think.RESOURCE_PATH, ''), destDir, basename);
+      // 上传文件路径
+      let filepath = path.join(destPath, basename);
+
+      await moveFile(file, filepath);
+      return url.resolve(think.UPLOAD_BASE_URL, filepath.replace(think.RESOURCE_PATH, ''));
     } catch(e) {
       throw Error('FILE_UPLOAD_MOVE_ERROR');
     }
