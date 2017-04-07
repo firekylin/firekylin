@@ -57,7 +57,7 @@ export default class extends think.controller.base {
     let categories = await this.model('cate').getCateArchive();
     this.assign('categories', categories);
 
-    this.assign('currentYear', (new Date).getFullYear());
+    this.assign('currentYear', (new Date()).getFullYear());
   }
   /**
    * display view page

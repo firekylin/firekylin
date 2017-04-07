@@ -42,6 +42,7 @@
     "space-in-parens": 2,
     "semi-spacing": 2,
     "comma-spacing": 2,
-    "no-tabs": 2
+    "no-tabs": 2,
+    "new-parens": 2
   }
 }

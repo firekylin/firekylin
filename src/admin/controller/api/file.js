@@ -64,7 +64,7 @@ export default class extends Base {
   async serviceUpload(service, file, config) {
     try {
       const uploader = think.service(`upload/${service}`, 'admin');
-      const result = await (new uploader).run(file, config);
+      const result = await (new uploader()).run(file, config);
       return this.success(result);
     } catch (e) {
       return this.fail(e || 'FILE_UPLOAD_ERROR');
