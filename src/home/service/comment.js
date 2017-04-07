@@ -49,7 +49,10 @@ export default class extends think.service.base {
    */
   async getPostData() {
     let postModel = this.model('post');
-    let allPost = await postModel.setRelation(false).order('create_time DESC').field('id,pathname,comment_num,type').select();
+    let allPost = await postModel.setRelation(false)
+      .order('create_time DESC')
+      .field('id,pathname,comment_num,type')
+      .select();
     let keys = {};
     allPost.map(item => {
       let key = think.md5(item.pathname);

@@ -12,17 +12,22 @@ export default class extends think.model.relation {
   };
 
   async getCateArchive() {
-    let data = await this.model('post_cate').join({
-      table: 'post',
-      on: ['post_id', 'id']
-    }).join({
-      table: 'cate',
-      on: ['cate_id', 'id']
-    }).where({
-      type: 0,
-      status: 3,
-      is_public: 1
-    }).order('update_time DESC').select();
+    let data = await this.model('post_cate')
+      .join({
+        table: 'post',
+        on: ['post_id', 'id']
+      })
+      .join({
+        table: 'cate',
+        on: ['cate_id', 'id']
+      })
+      .where({
+        type: 0,
+        status: 3,
+        is_public: 1
+      })
+      .order('update_time DESC')
+      .select();
 
     let result = {};
     for(let cate of data) {

@@ -86,7 +86,12 @@ export default class extends Base {
       status: 3, //已经发布
     };
     if(user_id) { where.user_id = user_id; }
-    return this.order('id DESC').where(where).limit(nums).setRelation(false).order('create_time DESC').select();
+    return this.order('id DESC')
+      .where(where)
+      .limit(nums)
+      .setRelation(false)
+      .order('create_time DESC')
+      .select();
   }
 
   async afterUpdate(data, options) {
@@ -227,7 +232,11 @@ export default class extends Base {
      */
     if(option.highlight) {
       markedContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
-        text = text.replace(/&#39;/g, '\'').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\&quot;/g, '"').replace(/\&amp;/g, '&');
+        text = text.replace(/&#39;/g, '\'')
+          .replace(/&gt;/g, '>')
+          .replace(/&lt;/g, '<')
+          .replace(/\&quot;/g, '"')
+          .replace(/\&amp;/g, '&');
         var result = highlight.highlightAuto(text, language ? [language] : undefined);
         return `<pre><code class="hljs lang-${result.language}">${result.value}</code></pre>`;
       });
@@ -260,7 +269,11 @@ export default class extends Base {
    * @return {String}      []
    */
   generateTocName(name) {
-    name = name.trim().replace(/\s+/g, '').replace(/\)/g, '').replace(/[\(\,]/g, '-').toLowerCase();
+    name = name.trim()
+      .replace(/\s+/g, '')
+      .replace(/\)/g, '')
+      .replace(/[\(\,]/g, '-')
+      .toLowerCase();
     if(/^[\w\-]+$/.test(name)) {
       return name;
     }

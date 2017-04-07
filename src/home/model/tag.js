@@ -21,17 +21,22 @@ export default class extends think.model.relation {
   }
 
   async getTagArchive() {
-    let data = await this.model('post_tag').join({
-      table: 'post',
-      on: ['post_id', 'id']
-    }).join({
-      table: 'tag',
-      on: ['tag_id', 'id']
-    }).where({
-      type: 0,
-      status: 3,
-      is_public: 1
-    }).order('update_time DESC').select();
+    let data = await this.model('post_tag')
+      .join({
+        table: 'post',
+        on: ['post_id', 'id']
+      })
+      .join({
+        table: 'tag',
+        on: ['tag_id', 'id']
+      })
+      .where({
+        type: 0,
+        status: 3,
+        is_public: 1
+      })
+      .order('update_time DESC')
+      .select();
 
     let result = {};
     for(let tag of data) {

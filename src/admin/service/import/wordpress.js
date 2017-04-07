@@ -84,7 +84,10 @@ export default class extends Base {
         if(item.hasOwnProperty('category')) {
           let cates = item.category.filter(item => item.$.domain === 'category').map(item => item._);
           if(Array.isArray(cates) && cates.length > 0) {
-            cate = await this.cateModelInstance.setRelation(false).field('id').where({name: ['IN', cates]}).select();
+            cate = await this.cateModelInstance.setRelation(false)
+              .field('id')
+              .where({name: ['IN', cates]})
+              .select();
             cate = cate.map(item => item.id);
           }
         }
