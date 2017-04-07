@@ -45,7 +45,7 @@ export default class extends Base {
     // 处理其它上传
 
     if(!type) { return this.fail(); }
-    if(type == 'local') {
+    if(type === 'local') {
       config = {name: this.post('name')};
     }
 

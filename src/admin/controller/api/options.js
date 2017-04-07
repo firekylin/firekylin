@@ -72,7 +72,7 @@ export default class extends Base {
     if(type === 'push') {
       let {id, ...site} = data;
       return this.setPushSites(id, site);
-    } else if(type == 'defaultCategory') {
+    } else if(type === 'defaultCategory') {
       let result = await model.updateOptions('defaultCategory', data.id);
       this.success(result);
     } else {
