@@ -10,10 +10,10 @@ export default class extends Base {
    * 导入用户
    */
   async user({users}) {
-    if( !users || !Array.isArray(users) ) {
+    if(!users || !Array.isArray(users)) {
       return 0;
     }
-    
+
     const usersPromise = users.map(user => this.userModelInstance.addUser({
       username: user.slug,
       email: user.email,
@@ -31,13 +31,13 @@ export default class extends Base {
    * 导入文章
    */
   async post({
-    posts, 
-    users, 
+    posts,
+    users,
     tags,
     categories,
-    post_tags, 
-    posts_tags, 
-    post_categories, 
+    post_tags,
+    posts_tags,
+    post_categories,
     posts_categories
   }) {
     if(!Array.isArray(posts) || !Array.isArray(users)) {
@@ -70,20 +70,21 @@ export default class extends Base {
         let tag = [];
         let retTag = post_tags.filter(tag => tag.post_id === item.id).map(tag => tag.tag_id);
         retTag = tags.filter(({id}) => retTag.includes(id)).map(({name}) => name);
-        if( retTag.length ) {
+        if(retTag.length) {
           tag = await this.tagModelInstance.setRelation(false).where({name: ['IN', retTag]}).select();
           tag = tag.map(item => item.id);
         }
 
         //获取分类
         let cate = [];
-        let retCategory = post_categories.filter(({post_id}) => post_id === item.id).map(({category_id}) => category_id);
+        let retCategory = post_categories.filter(({post_id}) => post_id === item.id)
+          .map(({category_id}) => category_id);
         retCategory = categories.filter(({id}) => retCategory.includes(id)).map(({name}) => name);
-        if( retCategory.length ) {
+        if(retCategory.length) {
           cate = await this.cateModelInstance.setRelation(false).where({name: ['IN', retCategory]}).select();
           cate = cate.map(item => item.id);
         }
-        
+
         const post = {
           title: item.title,
           pathname: item.slug,
@@ -101,10 +102,12 @@ export default class extends Base {
           cate
         };
         await this.postModelInstance.addPost(post);
-      } catch(e) { console.log(e)}
+      } catch(e) {
+        console.log(e);  // eslint-disable-line no-console
+      }
     });
     Promise.all(postsPromise);
-    
+
     return posts.length;
   }
 
@@ -158,7 +161,7 @@ export default class extends Base {
       pathname: tag.slug
     }));
     await Promise.all(tagsPromise);
-    
+
     return tags.length;
   }
 
@@ -175,7 +178,7 @@ export default class extends Base {
   parseFile(file) {
     try {
       let jsonObj = think.safeRequire(file.path);
-      if( Array.isArray(jsonObj.db) && jsonObj.db.length ) {
+      if(Array.isArray(jsonObj.db) && jsonObj.db.length) {
         jsonObj = jsonObj.db[0];
       }
       return jsonObj.data;

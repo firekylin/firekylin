@@ -1,15 +1,15 @@
 'use strict';
 
-import Base from './base.js';
+import Base from './base';
 
 export default class extends Base {
   /**
    * get
    * @return {[type]} [description]
    */
-  async getAction(self){
+  async getAction(self) {  // eslint-disable-line no-unused-vars
     let result;
-    if( this.id ) {
+    if(this.id) {
       result = await this.modelInstance.where({id: this.id}).find();
       result.post_tag = result.post_tag.length;
     } else {
@@ -25,11 +25,11 @@ export default class extends Base {
    * add user
    * @return {[type]} [description]
    */
-  async postAction(){
+  async postAction() {
     let data = this.post();
 
     let ret = await this.modelInstance.addTag(data);
-    if(ret.type === 'exist'){
+    if(ret.type === 'exist') {
       return this.fail('TAG_EXIST');
     }
     return this.success({id: ret.id});
@@ -38,7 +38,7 @@ export default class extends Base {
    * update user info
    * @return {[type]} [description]
    */
-  async putAction(){
+  async putAction() {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }

@@ -1,4 +1,4 @@
-import Ghost from './ghost.js';
+import Ghost from './ghost';
 
 export default class extends Ghost {
   /**
@@ -15,8 +15,8 @@ export default class extends Ghost {
         name: tag.name,
         pathname: tag.slug
       });
-      
-      if( result.type === 'add' ) {
+
+      if(result.type === 'add') {
         len += 1;
       }
     }
@@ -29,9 +29,9 @@ export default class extends Ghost {
    * 为了简单不支持子分类导入，默认所有分类为一级分类
    */
   async category({categories}) {
-    if( !categories || !Array.isArray(categories) ) {
+    if(!categories || !Array.isArray(categories)) {
       return 0;
-    } 
+    }
 
     var len = 0;
     for(let category of categories) {
@@ -40,8 +40,8 @@ export default class extends Ghost {
         pathname: category.slug,
         pid: 0
       });
-      
-      if( result.type === 'add' ) {
+
+      if(result.type === 'add') {
         len += 1;
       }
     }

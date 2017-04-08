@@ -10,7 +10,7 @@ export default class extends Base {
    * @param  {} args []
    * @return {}         []
    */
-  init(...args){
+  init(...args) {
     super.init(...args);
 
     this.relation = {
@@ -26,20 +26,20 @@ export default class extends Base {
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
-  addCate(data){
+  addCate(data) {
     let where = {
       name: data.name,
       _logic: 'OR'
     };
-    if(data.pathname){
+    if(data.pathname) {
       where.pathname = data.pathname;
     }
     return this.where(where).thenAdd(data);
   }
 
-  async saveCate(data){
+  async saveCate(data) {
     let info = await this.where({id: data.id}).find();
-    if(think.isEmpty(info)){
+    if(think.isEmpty(info)) {
       return Promise.reject(new Error('CATE_NOT_EXIST'));
     }
 
@@ -55,8 +55,8 @@ export default class extends Base {
    * @param  {Number} userId []
    * @return {Promise}        []
    */
-  getCount(userId){
-    if(userId){
+  getCount(userId) {
+    if(userId) {
       return this.where({user_id: userId}).count();
     }
     return this.count();

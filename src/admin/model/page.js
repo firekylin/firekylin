@@ -3,7 +3,7 @@ import Post from './post';
 export default class extends Post {
   tableName = 'post';
 
-  addPost(data){
+  addPost(data) {
     let create_time = think.datetime();
     data = Object.assign({
       type: 1,
@@ -16,9 +16,9 @@ export default class extends Post {
     return this.where({pathname: data.pathname}).thenAdd(data);
   }
 
-  async savePost(data){
+  async savePost(data) {
     let info = await this.where({id: data.id, type: 1}).find();
-    if(think.isEmpty(info)){
+    if(think.isEmpty(info)) {
       return Promise.reject(new Error('PAGE_NOT_EXIST'));
     }
 

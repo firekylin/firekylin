@@ -3,20 +3,72 @@
   "parser": "babel-eslint",
   "env": {
     "browser": true,
+    "es6": true,
     "node": true
   },
+  "globals": {
+    "think": false,
+    "firekylin": false
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings"
+  ],
+  "parserOptions": {
+      "ecmaFeatures": {
+          "experimentalObjectRestSpread": true,
+          "jsx": true
+      },
+      "sourceType": "module"
+  },
   "plugins": [
-    "react"
+    "react",
+    "import"
   ],
   "rules": {
     "strict": 0,
     "quotes": [2, "single"],
+    "max-len": [2, {
+      "code": 120,
+      "ignoreTrailingComments": true,
+      "ignoreUrls": true,
+      "ignoreRegExpLiterals": true,
+      "ignoreTemplateLiterals": true
+    }],
     "no-underscore-dangle": 0,
     "no-unused-vars": 1,
     "no-unused-expressions": 0,
     "react/jsx-no-undef": 2,
     "new-cap": 0,
     "no-shadow": 0,
-    "no-use-before-define": 0
+    "no-use-before-define": 0,
+    "no-case-declarations": 0,
+    "no-console": 1,
+    "eol-last": 2,
+    "brace-style": [2, "1tbs", { "allowSingleLine": true }],
+    "no-trailing-spaces": 2,
+    "nonblock-statement-body-position": 2,
+    "newline-per-chained-call": [2, { "ignoreChainWithDepth": 3 }],
+    "space-before-blocks": 2,
+    "space-in-parens": 2,
+    "semi-spacing": 2,
+    "comma-spacing": 2,
+    "no-tabs": 2,
+    "eqeqeq": 2,
+    "no-multi-spaces": 2,
+    "new-parens": 2,
+    "no-implicit-globals": 2,
+    "import/first": 2,
+    "import/no-duplicates": 2,
+    'import/extensions': [2, 'always', {
+      js: 'never',
+      jsx: 'never'
+    }],
+    "import/order": 2,
+    "import/no-absolute-path": 2,
+    "import/newline-after-import": 2,
+    "import/no-named-default": 2
   }
 }

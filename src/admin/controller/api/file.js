@@ -1,6 +1,5 @@
 import os from 'os';
 import fs from 'fs';
-import url from 'url';
 import path from 'path';
 import request from 'request';
 
@@ -27,7 +26,7 @@ export default class extends Base {
     let file;
 
     /** 处理远程抓取 **/
-    if( this.post('fileUrl') ) {
+    if(this.post('fileUrl')) {
       try {
         file = await this.getUrlFile(this.post('fileUrl'));
       } catch(e) {
@@ -36,22 +35,22 @@ export default class extends Base {
     } else {
       file = this.file('file');
     }
-    if( !file ) { return this.fail('FILE_UPLOAD_ERROR'); }
+    if(!file) { return this.fail('FILE_UPLOAD_ERROR'); }
 
     /** 处理导入数据 **/
-    if( this.post('importor') ) {
-      return this.serviceImport( this.post('importor'), file );
+    if(this.post('importor')) {
+      return this.serviceImport(this.post('importor'), file);
     }
 
     /** 检查文件类型 */
-    // let contentType = file.headers['content-type']; 
+    // let contentType = file.headers['content-type'];
 
     // 处理其它上传
-    if( !type ) { return this.fail(); }
-    if(type == 'local') {
+    if(!type) { return this.fail(); }
+    if(type === 'local') {
       config = {name: this.post('name')};
     }
-    
+
     return this.serviceUpload(type, file.path, config);
   }
 
@@ -67,7 +66,7 @@ export default class extends Base {
   async serviceUpload(service, file, config) {
     try {
       const uploader = think.service(`upload/${service}`, 'admin');
-      const result = await (new uploader).run(file, config);
+      const result = await (new uploader()).run(file, config);
       return this.success(result);
     } catch (e) {
       return this.fail(e || 'FILE_UPLOAD_ERROR');
@@ -83,7 +82,7 @@ export default class extends Base {
       let {post, page, category, tag} = await (new importor(this)).run(file);
       return this.success(`共导入文章 ${post} 篇，页面 ${page} 页，分类 ${category} 个，标签 ${tag} 个`);
     } catch(e) {
-      console.log(e);
+      console.log(e);  // eslint-disable-line no-console
       return this.fail(e);
     }
   }
@@ -92,12 +91,12 @@ export default class extends Base {
     let resp = await getFileContent({
       url,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36"
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36'
       },
       strictSSL: false,
       timeout: 1000,
       encoding: 'binary'
-    }).catch((e) => { throw new Error("UPLOAD_URL_ERROR"); });
+    }).catch(() => { throw new Error('UPLOAD_URL_ERROR'); });
 
     if(resp.headers['content-type'].indexOf('image') === -1) {
       throw new Error('UPLOAD_TYPE_ERROR');
@@ -114,7 +113,7 @@ export default class extends Base {
     let uploadName = think.uuid(20) + path.extname(url);
     let uploadPath = path.join(uploadDir, uploadName);
     await writeFileAsync(uploadPath, resp.body, 'binary');
-    
+
     return {
       fieldName: 'file',
       originalFilename: path.basename(url),

@@ -1,18 +1,18 @@
 'use strict';
 
-import Base from './base.js';
 import speakeasy from 'speakeasy';
+import Base from './base';
 
 export default class extends Base {
   /**
    * login
    * @return {} []
    */
-  async loginAction(){
+  async loginAction() {
     //二步验证
     let model = this.model('options');
     let options = await model.getOptions();
-    if(options.two_factor_auth){
+    if(options.two_factor_auth) {
       let two_factor_auth = this.post('two_factor_auth');
       let verified = speakeasy.totp.verify({
         secret: options.two_factor_auth,
@@ -20,7 +20,7 @@ export default class extends Base {
         token: two_factor_auth,
         window: 2
       });
-      if(!verified){
+      if(!verified) {
         return this.fail('TWO_FACTOR_AUTH_ERROR');
       }
     }
@@ -29,18 +29,18 @@ export default class extends Base {
     let username = this.post('username');
     let userModel = this.model('user');
     let userInfo = await userModel.where({name: username}).find();
-    if(think.isEmpty(userInfo)){
+    if(think.isEmpty(userInfo)) {
       return this.fail('ACCOUNT_ERROR');
     }
 
     //帐号是否被禁用，且投稿者不允许登录
-    if((userInfo.status | 0) !== 1 || userInfo.type === 3){
+    if((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 
     //校验密码
     let password = this.post('password');
-    if(!userModel.checkPassword(userInfo, password)){
+    if(!userModel.checkPassword(userInfo, password)) {
       return this.fail('ACCOUNT_ERROR');
     }
 
@@ -52,7 +52,7 @@ export default class extends Base {
    * logout
    * @return {}
    */
-  async logoutAction(){
+  async logoutAction() {
     await this.session('userInfo', '');
     return this.redirect('/');
   }
@@ -62,7 +62,7 @@ export default class extends Base {
    */
   async passwordAction() {
     let userInfo = await this.session('userInfo') || {};
-    if(think.isEmpty(userInfo)){
+    if(think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
 

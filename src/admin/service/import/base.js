@@ -19,7 +19,7 @@ export default class extends think.service.base {
 
   toMarkdown(content) {
     return toMarkdown(content);
-  } 
+  }
 
   /**
    * 导入用户
@@ -28,7 +28,7 @@ export default class extends think.service.base {
 
   }
 
-  /** 
+  /**
    * 导入分类
    */
   async category() {
@@ -59,8 +59,8 @@ export default class extends think.service.base {
   /**
    * 处理上传文件获取导入数据
    */
-  async parseFile(file) {
-    
+  async parseFile(file) {  // eslint-disable-line no-unused-vars
+
   }
 
   async importData(data) {

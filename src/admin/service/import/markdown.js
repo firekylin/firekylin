@@ -1,9 +1,8 @@
-import Base from './base';
-import Post from '../../controller/api/post.js';
-
 import fs from 'fs';
 import path from 'path';
 import {execSync} from 'child_process';
+import Post from '../../controller/api/post';
+import Base from './base';
 
 const PATH = path.join(think.RUNTIME_PATH, 'importMarkdownFileToFirekylin');
 export default class extends Base {
@@ -18,7 +17,7 @@ export default class extends Base {
     return 0;
   }
 
-  /** 
+  /**
    * 导入分类
    */
   async category() {
@@ -45,7 +44,7 @@ export default class extends Base {
       try{
         //获取用户
         const user = await this._think.session('userInfo');
-      
+
         const post = {
           title: item.title,
           pathname: item.pathname,
@@ -61,10 +60,12 @@ export default class extends Base {
         };
         await Post.prototype.getContentAndSummary(post);
         await this.postModelInstance.addPost(post);
-      } catch(e) { console.log(e)}
+      } catch(e) {
+        console.log(e);  // eslint-disable-line no-console
+      }
     });
     Promise.all(postsPromise);
-    
+
     return posts.length;
   }
 
@@ -79,11 +80,11 @@ export default class extends Base {
     try {
       execSync(`rm -rf ${PATH}; mkdir ${PATH}; cd ${PATH}; tar zxvf ${file.path}`);
       let files = fs.readdirSync(PATH, {encoding: 'utf-8'});
-      if( !files.length ) { return []; }
+      if(!files.length) { return []; }
 
       return files.map(function(file) {
         let tar = path.join(PATH, file);
-        let title = file.split('.').slice(0,-1).join('');
+        let title = file.split('.').slice(0, -1).join('');
         let content = fs.readFileSync(tar, {encoding: 'utf-8'});
         let stat = fs.statSync(tar);
         return {

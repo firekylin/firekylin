@@ -12,7 +12,7 @@ export default class extends think.controller.rest {
    * @param  {[type]} http [description]
    * @return {[type]}      [description]
    */
-  constructor(http){
+  constructor(http) {
     super(http);
     this._method = 'method';
   }
@@ -20,21 +20,21 @@ export default class extends think.controller.rest {
    * before
    * @return {} []
    */
-  async __before(){
+  async __before() {
     let userInfo = await this.session('userInfo') || {};
-    if(think.isEmpty(userInfo)){
+    if(think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
     this.userInfo = userInfo;
     let type = userInfo.type | 0;
     //not admin
-    if(type !== 1){
+    if(type !== 1) {
       let action = this.http.action;
-      if(action === 'get'){
+      if(action === 'get') {
         return;
       }
       let name = this.http.controller + '/' + this.http.action;
-      if(this.allowList.indexOf(name) > -1){
+      if(this.allowList.indexOf(name) > -1) {
         return;
       }
       return this.fail('USER_NO_PERMISSION');

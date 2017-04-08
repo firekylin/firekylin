@@ -1,5 +1,5 @@
-import Post from './api/post.js';
 import {PasswordHash} from 'phpass';
+import Post from './api/post';
 
 export default class extends Post {
   modelInstance = this.model('post');
@@ -12,7 +12,7 @@ export default class extends Post {
     let {app_key, auth_key, ...post} = data;
     //check user
     let poster = await this.model('user').where({app_key}).find();
-    if( think.isEmpty(poster) ) {
+    if(think.isEmpty(poster)) {
       return this.fail('POSTER_NOT_EXIST');
     }
 
@@ -24,15 +24,15 @@ export default class extends Post {
   }
 
   async updatePost(post) {
-    if( post.markdown_content ) { post = this.modelInstance.getContentAndSummary(post); }
-    if( post.create_time ) { post = this.modelInstance.getPostTime(post); }
-    if( post.tag ) { post = await this.getTagIds(post.tag); }
+    if(post.markdown_content) { post = this.modelInstance.getContentAndSummary(post); }
+    if(post.create_time) { post = this.modelInstance.getPostTime(post); }
+    if(post.tag) { post = await this.getTagIds(post.tag); }
     let rows = await this.modelInstance.savePost(post);
     return this.success({affectedRows: rows});
   }
 
   async getAction() {
-    if( !this.get('app_key') || !this.get('auth_key') ) {
+    if(!this.get('app_key') || !this.get('auth_key')) {
       return this.fail('PARAMS_ERROR');
     }
 
@@ -43,24 +43,24 @@ export default class extends Post {
 
   async postAction() {
     let post = this.post();
-    if( !this.checkAuth(post) ) { return this.fail('POST_CONTENT_ERROR'); }
+    if(!this.checkAuth(post)) { return this.fail('POST_CONTENT_ERROR'); }
 
     //check pathname
     let exPost = await this.modelInstance.where({pathname: post.pathname}).find();
-    if( !think.isEmpty(exPost) ) {
-      if( exPost.user.id != this.poster.id ) {
+    if(!think.isEmpty(exPost)) {
+      if(exPost.user.id !== this.poster.id) {
         return this.fail('POST_USER_ERROR');
       }
       post.id = exPost.id;
       return this.updatePost(post);
     }
-    
+
     post.user_id = this.poster.id;
     post = await this.modelInstance.getContentAndSummary(post);
     post = this.modelInstance.getPostTime(post);
     post.tag = await this.getTagIds(post.tag);
 
-    if( post.status == 3 && this.poster.type != 1 ) {
+    if(post.status === 3 && this.poster.type !== 1) {
       post.status = 1;
     }
 

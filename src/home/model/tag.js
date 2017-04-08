@@ -15,23 +15,28 @@ export default class extends think.model.relation {
    * get hot tags
    * @return {} []
    */
-  async getHotTags(){
+  async getHotTags() {
     let data = await this.getTagArchive();
     return data.slice(0, 5);
   }
 
-  async getTagArchive(){
-    let data = await this.model('post_tag').join({
-      table: 'post',
-      on: ['post_id', 'id']
-    }).join({
-      table: 'tag',
-      on: ['tag_id', 'id']
-    }).where({
-      type: 0,
-      status: 3,
-      is_public: 1
-    }).order('update_time DESC').select();
+  async getTagArchive() {
+    let data = await this.model('post_tag')
+      .join({
+        table: 'post',
+        on: ['post_id', 'id']
+      })
+      .join({
+        table: 'tag',
+        on: ['tag_id', 'id']
+      })
+      .where({
+        type: 0,
+        status: 3,
+        is_public: 1
+      })
+      .order('update_time DESC')
+      .select();
 
     let result = {};
     for(let tag of data) {
@@ -46,6 +51,6 @@ export default class extends think.model.relation {
         };
       }
     }
-    return Object.values(result).sort((a,b)=> a.count>b.count ? -1 : 1);
+    return Object.values(result).sort((a, b)=> a.count>b.count ? -1 : 1);
   }
 }

@@ -9,15 +9,15 @@ export default class extends think.logic.base {
    * index action logic
    * @return {} []
    */
-  indexAction(){
-   
+  indexAction() {
+
   }
   /**
    * install
    * @return {[type]} [description]
    */
-  installAction(){
-    if(this.isGet()){
+  installAction() {
+    if(this.isGet()) {
       return;
     }
     this.rules = {

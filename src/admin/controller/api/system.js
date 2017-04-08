@@ -1,11 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import base from './base';
-import semver from 'semver';
-import moment from 'moment';
-import request from 'request';
 import {exec} from 'child_process';
+import semver from 'semver';
+import request from 'request';
 import pack from '../../../../package.json';
+import base from './base';
 
 const cluster = require('cluster');
 
@@ -30,11 +29,11 @@ export default class extends base {
     try {
       let res = await reqIns('http://firekylin.org/release/.latest');
       let onlineVersion = res.body.trim();
-      if( semver.gt(onlineVersion, pack.version) ) {
+      if(semver.gt(onlineVersion, pack.version)) {
         needUpdate = onlineVersion;
       }
     } catch(e) {
-      console.log(e);
+      console.log(e);  // eslint-disable-line no-console
     }
 
     let mysql = await this.modelInstance.query('SELECT VERSION() as version');
@@ -62,10 +61,10 @@ export default class extends base {
   }
 
   async updateAction() {
-    if( /^win/.test(process.platform) ) {
+    if(/^win/.test(process.platform)) {
       return this.fail('PLATFORM_NOT_SUPPORT');
     }
-    
+
     let {step} = this.get();
     switch(step) {
       /** 下载文件 */
@@ -82,7 +81,7 @@ export default class extends base {
           cd ${think.RESOURCE_PATH};
           tar zvxf latest.tar.gz;
           cp -r firekylin/* ../;
-          rm -rf firekylin latest.tar.gz`, (error, stdout, stderr) => {
+          rm -rf firekylin latest.tar.gz`, (error, stdout, stderr) => {  // eslint-disable-line no-unused-vars
           if(error) {
             this.fail(error);
           }
@@ -93,21 +92,21 @@ export default class extends base {
       /** 安装依赖 */
       case '3':
         let registry = think.config('registry') || 'https://registry.npm.taobao.org';
-        return exec(`npm install --registry=${registry}`, (error, stdout, stderr) => {
+        return exec(`npm install --registry=${registry}`, (error, stdout, stderr) => {  // eslint-disable-line no-unused-vars
           if(error) {
             this.fail(error);
           }
 
           this.success();
         });
-        
+
       /** 重启服务 */
       case '4':
-        if( cluster.isWorker ) {
+        if(cluster.isWorker) {
           this.success();
           setTimeout(() => cluster.worker.kill(), 200);
         }
-        
+
         break;
     }
   }

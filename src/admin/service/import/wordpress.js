@@ -1,6 +1,6 @@
 import fs from 'fs';
-import Base from './base';
 import xml2js from 'xml2js';
+import Base from './base';
 
 const WP_POST_STATUS = {
   publish: 3, //发布
@@ -15,9 +15,9 @@ export default class extends Base {
 
   formatArray(obj) {
     for(var i in obj) {
-      if( Array.isArray(obj[i]) && obj[i].length === 1 ) {
+      if(Array.isArray(obj[i]) && obj[i].length === 1) {
         obj[i] = obj[i][0];
-      } else if( typeof(obj[i]) === 'object' ) {
+      } else if(typeof(obj[i]) === 'object') {
         obj[i] = this.formatArray(obj[i]);
       }
     }
@@ -52,7 +52,7 @@ export default class extends Base {
    * 导入文章
    */
   async post(channel) {
-    if( !Array.isArray(channel.item) ) {
+    if(!Array.isArray(channel.item)) {
       return 0;
     }
 
@@ -74,24 +74,27 @@ export default class extends Base {
       }
       return item['wp:post_type'][0] ==='post';
     });
-    
+
     let postsPromise = posts.map(async item => {
       try{
         //获取用户
         let user = await this.userModelInstance.where({name: item['dc:creator'][0]}).find();
         //查询分类 ID
         let cate = [];
-        if( item.hasOwnProperty('category') ) {
+        if(item.hasOwnProperty('category')) {
           let cates = item.category.filter(item => item.$.domain === 'category').map(item => item._);
-          if( Array.isArray(cates) && cates.length > 0 ) {
-            cate = await this.cateModelInstance.setRelation(false).field('id').where({name: ['IN', cates]}).select();
+          if(Array.isArray(cates) && cates.length > 0) {
+            cate = await this.cateModelInstance.setRelation(false)
+              .field('id')
+              .where({name: ['IN', cates]})
+              .select();
             cate = cate.map(item => item.id);
           }
         }
 
         //摘要有可能是空
         let summary;
-        if( item.hasOwnProperty('excerpt:encoded') && item['excerpt:encoded'][0] !== '' ) {
+        if(item.hasOwnProperty('excerpt:encoded') && item['excerpt:encoded'][0] !== '') {
           summary = item['excerpt:encoded'][0];
         } else {
           summary = item['content:encoded'][0];
@@ -109,13 +112,16 @@ export default class extends Base {
           comment_num: 0,
           allow_comment: Number(item['wp:comment_status'][0] === 'open'),
           is_public: Number(item['wp:status'][0] !== 'private'),
-          tag: item.hasOwnProperty('category') ? item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
+          tag: item.hasOwnProperty('category') ?
+            item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
           cate
         };
 
         post.markdown_content = this.toMarkdown(post.content);
         await this.postModelInstance.addPost(post);
-      } catch(e) { console.log(e)}
+      } catch(e) {
+        console.log(e);  // eslint-disable-line no-console
+      }
     });
     await Promise.all(postsPromise);
 
@@ -126,16 +132,16 @@ export default class extends Base {
    * 导入页面
    */
   async page(channel) {
-    if( !Array.isArray(channel.item) ) {
+    if(!Array.isArray(channel.item)) {
       return 0;
     }
 
     let pages = channel.item.filter(item => {
       let keys = [
         'wp:post_type',
-        'dc:creator', 
-        'excerpt:encoded', 
-        'content:encoded', 
+        'dc:creator',
+        'excerpt:encoded',
+        'content:encoded',
         'wp:post_name',
         'wp:status',
         'wp:comment_status',
@@ -151,7 +157,7 @@ export default class extends Base {
     let pagesPromise = pages.map(async item => {
       let user = await this.userModelInstance.where({name: item['dc:creator'][0]}).find();
       let summary = item['excerpt:encoded'][0];
-      if( summary === '' ) {
+      if(summary === '') {
         summary = item['content:encoded'][0];
       }
 
@@ -180,7 +186,7 @@ export default class extends Base {
    * 导入标签
    */
   async tag(channel) {
-    if( !Array.isArray(channel['wp:tag']) ) {
+    if(!Array.isArray(channel['wp:tag'])) {
       return 0;
     }
 
@@ -188,13 +194,13 @@ export default class extends Base {
     let tagsPromise = [];
     for(let tag of tags) {
       let tagName = tag['wp:tag_name'], tagSlug = tag['wp:tag_slug'];
-      if( !Array.isArray(tagName) || !tagName.length ) {
+      if(!Array.isArray(tagName) || !tagName.length) {
         continue;
       }
-      if( !Array.isArray(tagSlug) || !tagName.length ) {
+      if(!Array.isArray(tagSlug) || !tagName.length) {
         continue;
       }
-      
+
       tagsPromise.push(this.tagModelInstance.addTag({
         name: tagName[0],
         pathname: decodeURIComponent(tagSlug[0])
@@ -210,7 +216,7 @@ export default class extends Base {
    * 为了简单不支持子分类导入，默认所有分类为一级分类
    */
   async category(channel) {
-    if( !Array.isArray(channel['wp:category']) ) {
+    if(!Array.isArray(channel['wp:category'])) {
       return 0;
     }
 
@@ -218,10 +224,10 @@ export default class extends Base {
     let categoriesPromise = [];
     for(let cate of categories) {
       let cateName = cate['wp:cat_name'], cateSlug = cate['wp:category_nicename'];
-      if( !Array.isArray(cateName) || !cateName.length ) {
+      if(!Array.isArray(cateName) || !cateName.length) {
         continue;
       }
-      if( !Array.isArray(cateSlug) || !cateSlug.length ) {
+      if(!Array.isArray(cateSlug) || !cateSlug.length) {
         continue;
       }
 
@@ -232,7 +238,7 @@ export default class extends Base {
       }));
     }
 
-    await Promise.all(categoriesPromise);    
+    await Promise.all(categoriesPromise);
     return categories.length;
   }
 
@@ -245,7 +251,7 @@ export default class extends Base {
     let parser = new xml2js.Parser();
     let parseString = think.promisify(parser.parseString, parser);
     let wxrJSON = await parseString(data);
-    
+
     return this.formatArray(wxrJSON).rss.channel;
   }
 

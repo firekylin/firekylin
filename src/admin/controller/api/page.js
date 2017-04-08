@@ -6,7 +6,7 @@ export default class extends Post {
 
   postModel = this.model('post');
 
-  constructor(http){
+  constructor(http) {
     super(http);
     this._modelInstance = this.modelInstance;
     Object.defineProperty(this, 'modelInstance', {
@@ -16,25 +16,34 @@ export default class extends Post {
     });
   }
 
-  getAction(self){
-    if( !this.id ) {
-      let field = ['id', 'title', 'user_id', 'create_time', 'update_time', 'status', 'pathname', 'is_public'];
+  getAction(self) {
+    if(!this.id) {
+      let field = [
+        'id',
+        'title',
+        'user_id',
+        'create_time',
+        'update_time',
+        'status',
+        'pathname',
+        'is_public'
+      ];
       this.modelInstance.order('create_time DESC').field(field);
     }
 
-    if( this.get('page') !== '-1' ) {
-      this.modelInstance.page( this.get('page'), 20 );
+    if(this.get('page') !== '-1') {
+      this.modelInstance.page(this.get('page'), 20);
     }
     return super.getBaseAction(self);
   }
 
-  async postAction(){
+  async postAction() {
     let data = this.post();
 
     //check pathname
     let post = await this.modelInstance.where({pathname: data.pathname}).find();
 
-    if( !think.isEmpty(post) ) {
+    if(!think.isEmpty(post)) {
       return this.fail('PATHNAME_EXIST');
     }
 
@@ -47,7 +56,7 @@ export default class extends Post {
     return this.success(insert);
   }
 
-  async putAction(){
+  async putAction() {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }

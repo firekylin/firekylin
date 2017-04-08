@@ -1,6 +1,6 @@
-(function(win, doc){
-  var getById = function(el){
-    return document.getElementById(el);
+(function(win, doc) {
+  var getById = function(el) {
+    return doc.getElementById(el);
   };
 
   //from qwrap
@@ -15,7 +15,7 @@
       scrollY = win.pageYOffset || 0,
       scrollW = root.scrollWidth,
       scrollH = root.scrollHeight;
-    if (mode != 'CSS1Compat') { // Quirks
+    if (mode !== 'CSS1Compat') { // Quirks
       root = doc.body;
       scrollW = root.scrollWidth;
       scrollH = root.scrollHeight;
@@ -44,10 +44,7 @@
       scrollLeft = docRect.scrollX,
       scrollTop = docRect.scrollY,
       box = node.getBoundingClientRect(),
-      xy = [box.left, box.top],
-      mode,
-      off1,
-      off2;
+      xy = [box.left, box.top];
     if (scrollTop || scrollLeft) {
       xy[0] += scrollLeft;
       xy[1] += scrollTop;
@@ -55,7 +52,7 @@
     return xy;
   };
 
-  var getRect = function(el){
+  var getRect = function(el) {
     var p = getXY(el);
     var x = p[0];
     var y = p[1];
@@ -75,32 +72,32 @@
    * load comment
    * @return {[type]} [description]
    */
-  var loadComment = function(){
+  var loadComment = function() {
     var comments = getById('comments');
-    if(!comments){
+    if(!comments) {
       return;
     }
-    var load = function(){
+    var load = function() {
       var dataType = comments.getAttribute('data-type');
-      if(dataType === 'disqus'){
+      if(dataType === 'disqus') {
         loadDisqusComment();
-      }else if(dataType === 'duoshuo'){
+      }else if(dataType === 'duoshuo') {
         loadDuoshuoComment();
-      }else if(dataType === 'changyan'){
+      }else if(dataType === 'changyan') {
         loadChangyanComment();
       }else if(dataType === 'netease') {
         loadNeteaseComment();
       }
     }
 
-    if(location.hash.indexOf('#comments') > -1){
+    if(location.hash.indexOf('#comments') > -1) {
       load();
     }else {
-      var timer = setInterval(function(){
+      var timer = setInterval(function() {
         var docRect = getDocRect();
         var currentTop = docRect.scrollY + docRect.height;
         var elTop = getRect(comments).top;
-        if(Math.abs(elTop - currentTop) < 1000){
+        if(Math.abs(elTop - currentTop) < 1000) {
           load();
           clearInterval(timer);
         }
@@ -111,12 +108,12 @@
    * load disqus comment
    * @return {[type]} [description]
    */
-  var loadDisqusComment = function(){
+  var loadDisqusComment = function() {
     var disqus_thread = getById('disqus_thread');
-    if(!disqus_thread){
+    if(!disqus_thread) {
       return;
     }
-    window.disqus_config = function(){
+    win.disqus_config = function() {
       this.page.url = disqus_thread.getAttribute('data-url');
       this.page.identifier = disqus_thread.getAttribute('data-identifier');
     }
@@ -126,31 +123,31 @@
     (doc.head || doc.body).appendChild(s);
   };
 
-  var loadDuoshuoComment = function(){
+  var loadDuoshuoComment = function() {
     var disqus_thread = getById('ds_thread');
-    if(!disqus_thread){
+    if(!disqus_thread) {
       return;
     }
-    window.duoshuoQuery = {short_name: disqus_thread.getAttribute('data-name')};
-    var s = document.createElement('script');
+    win.duoshuoQuery = {short_name: disqus_thread.getAttribute('data-name')};
+    var s = doc.createElement('script');
     s.src = '//static.duoshuo.com/embed.js';
     (doc.head || doc.body).appendChild(s);
   };
 
-  var loadChangyanComment = function(){
+  var loadChangyanComment = function() {
     var disqus_thread = getById('SOHUCS');
-    if( !disqus_thread ) { return; }
-    var appid = disqus_thread.getAttribute('data-name'); 
+    if(!disqus_thread) { return; }
+    var appid = disqus_thread.getAttribute('data-name');
     var conf = disqus_thread.getAttribute('sid');
-    var width = window.innerWidth || document.documentElement.clientWidth; 
-    var s = document.createElement('script');
-    if (width < 960) { 
+    var width = win.innerWidth || doc.documentElement.clientWidth;
+    var s = doc.createElement('script');
+    if (width < 960) {
       s.id = 'changyan_mobile_js';
       s.src = '//changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
     } else {
       s.src = '//changyan.sohu.com/upload/changyan.js';
       s.onload = function() {
-        window.changyan.api.config({appid:appid,conf:conf});
+        win.changyan.api.config({appid:appid, conf:conf});
       }
     }
     (doc.head||doc.body).appendChild(s);
@@ -158,20 +155,20 @@
 
   var loadNeteaseComment = function() {
     var disqus_thread = getById('cloud-tie-wrapper');
-    if(!disqus_thread){
+    if(!disqus_thread) {
       return;
     }
-    window.cloudTieConfig = {
-      url: getById('comments').getAttribute('data-url'), 
-      sourceId: "",
+    win.cloudTieConfig = {
+      url: getById('comments').getAttribute('data-url'),
+      sourceId: '',
       productKey: disqus_thread.getAttribute('data-name'),
       target: disqus_thread.className
     };
-    var s = document.createElement('script');
+    var s = doc.createElement('script');
     s.src = 'https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js';
     (doc.head || doc.body).appendChild(s);
   }
-  window.addEventListener('load', function(){
+  win.addEventListener('load', function() {
     loadComment();
   });
 
@@ -180,12 +177,12 @@
 
 
   var utils = {
-    isMob : (function(){
+    isMob : (function() {
       var ua = navigator.userAgent.toLowerCase();
-      var agents = ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"];
+      var agents = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'];
       var result = false;
-      for( var i = 0 ; i < agents.length; i++ ){
-        if( ua.indexOf( agents[i].toLowerCase() ) > -1){
+      for(var i = 0; i < agents.length; i++) {
+        if(ua.indexOf(agents[i].toLowerCase()) > -1) {
           result = true;
         }
       }
@@ -194,57 +191,57 @@
   }
 
 
-  if( utils.isMob ){
-    document.documentElement.className += ' mob';
+  if(utils.isMob) {
+    doc.documentElement.className += ' mob';
   }else{
-    document.documentElement.className += ' pc';
+    doc.documentElement.className += ' pc';
   }
 
 
   var Dom = {
-    $sidebar : document.querySelector('#sidebar'),
-    $main : document.querySelector('#main'),
-    $sidebar_mask : document.querySelector('#sidebar-mask'),
-    $body : document.body,
-    $btn_side : document.querySelector('#header .btn-bar'),
-    $article : document.querySelectorAll('.mob #page-index article')
+    $sidebar : doc.querySelector('#sidebar'),
+    $main : doc.querySelector('#main'),
+    $sidebar_mask : doc.querySelector('#sidebar-mask'),
+    $body : doc.body,
+    $btn_side : doc.querySelector('#header .btn-bar'),
+    $article : doc.querySelectorAll('.mob #page-index article')
   };
 
-  Dom.bindEvent = function(){
+  Dom.bindEvent = function() {
 
     var _this = this,
       body_class_name = 'side',
       eventFirst = 'click',
       eventSecond = 'click';
 
-    if( utils.isMob ){
+    if(utils.isMob) {
       eventFirst = 'touchstart';
       eventSecond = 'touchend';
     }
 
-    this.$btn_side.addEventListener( eventSecond ,function(){
+    this.$btn_side.addEventListener(eventSecond, function() {
 
-      if( _this.$body.className.indexOf( body_class_name ) > -1 ){
-        _this.$body.className = _this.$body.className.replace( body_class_name , '');
+      if(_this.$body.className.indexOf(body_class_name) > -1) {
+        _this.$body.className = _this.$body.className.replace(body_class_name, '');
         _this.$sidebar_mask.style.display = 'none';
       }else{
         _this.$body.className += (' ' + body_class_name);
         _this.$sidebar_mask.style.display = 'block';
       }
 
-    },false);
+    }, false);
 
-    this.$sidebar_mask.addEventListener( eventFirst , function( e ){
-      _this.$body.className = _this.$body.className.replace( body_class_name , '');
+    this.$sidebar_mask.addEventListener(eventFirst, function(e) {
+      _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
       e.preventDefault();
-    },false);
+    }, false);
 
 
-    window.addEventListener('resize',function(){
-      _this.$body.className = _this.$body.className.replace( body_class_name , '');
+    win.addEventListener('resize', function() {
+      _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
-    },false);
+    }, false);
   }
 
   Dom.bindEvent();

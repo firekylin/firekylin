@@ -2,10 +2,11 @@
 
 import fs from 'fs';
 import path from 'path';
-import Base from './base.js';
 import {execSync} from 'child_process';
+import Base from './base';
 
 const cluster = require('cluster');
+
 const statsAsync = think.promisify(fs.stat);
 const readdirAsync = think.promisify(fs.readdir);
 const readFileAsync = think.promisify(fs.readFile);
@@ -17,14 +18,14 @@ export default class extends Base {
    * forbidden ../ style path
    */
   pathCheck(themePath, basePath = THEME_DIR) {
-    if( themePath.indexOf(basePath) !== 0 ) {
+    if(themePath.indexOf(basePath) !== 0) {
       this.fail();
       throw Error(`theme path ${themePath} error`);
     }
     return true;
   }
-  
-  async getAction(){
+
+  async getAction() {
     switch(this.get('type')) {
       case 'fileList':
         let {theme} = this.get();
@@ -33,7 +34,7 @@ export default class extends Base {
 
         let files = await this.getFileList(themePath);
         return this.success(files);
-        
+
       case 'file':
         let {filePath} = this.get();
         filePath = path.join(THEME_DIR, filePath);
@@ -59,7 +60,7 @@ export default class extends Base {
     try {
       await writeFileAsync(filePath, content, {encoding: 'utf-8'});
 
-      if( cluster.isWorker ) {
+      if(cluster.isWorker) {
         setTimeout(() => cluster.worker.kill(), 200);
       }
       this.success();
@@ -69,7 +70,7 @@ export default class extends Base {
   }
 
   /**
-   * Fork theme 
+   * Fork theme
    */
   async putAction() {
     let {theme, new_theme} = this.post();
@@ -78,19 +79,19 @@ export default class extends Base {
     this.pathCheck(themeDir) && this.pathCheck(newThemeDir);
 
     try {
-      let stat = await statsAsync(newThemeDir);
+      /*let stat = */await statsAsync(newThemeDir);
       return this.fail(`${new_theme} 已存在，请手动切换到该主题`);
     } catch(e) {
       execSync(`cp -r ${themeDir} ${newThemeDir}`);
-      
+
       let configPath = path.join(newThemeDir, 'package.json');
       let config = think.require(configPath);
       config.name = new_theme;
 
       try {
         await writeFileAsync(
-          configPath, 
-          JSON.stringify(config, null, '\t'), 
+          configPath,
+          JSON.stringify(config, null, '\t'),
           {encoding: 'utf-8'}
         );
         await this.model('options').updateOptions('theme', new_theme);
@@ -111,14 +112,14 @@ export default class extends Base {
     for(let file of files) {
       let pos = path.join(base, file);
       let stat = await statsAsync(pos);
-      if( stat.isDirectory() ) {
+      if(stat.isDirectory()) {
         result.push({
           module: file,
           children: await this.getFileList(pos)
         });
       }
 
-      if( stat.isFile() ) {
+      if(stat.isFile()) {
         result.push({module: file});
       }
     }
@@ -136,10 +137,10 @@ export default class extends Base {
     for(let theme of themes) {
       let infoFile = path.join(THEME_DIR, theme, 'package.json');
       try {
-        let stat = await statsAsync(infoFile);
-        result.push( think.extend({id: theme}, think.require(infoFile)) );
+        /*let stat = */await statsAsync(infoFile);
+        result.push(think.extend({id: theme}, think.require(infoFile)));
       } catch(e) {
-        console.log(e);
+        console.log(e);  // eslint-disable-line no-console
       }
     }
     return this.success(result);
@@ -156,7 +157,7 @@ export default class extends Base {
     let templates = [];
     try {
       let stat = await statsAsync(templatePath);
-      if( !stat.isDirectory() ) {
+      if(!stat.isDirectory()) {
         throw Error();
       }
     } catch(e) {

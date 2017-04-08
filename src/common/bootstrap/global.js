@@ -27,13 +27,15 @@ global.firekylin = {
 firekylin.isInstalled = false;
 try{
   let installedFile = think.ROOT_PATH + think.sep + '.installed';
-  if(fs.accessSync && fs.accessSync(installedFile, fs.F_OK)){
+  if(fs.accessSync && fs.accessSync(installedFile, fs.F_OK)) {
     firekylin.isInstalled = true;
   }
-  if(fs.existsSync(installedFile)){
+  if(fs.existsSync(installedFile)) {
     firekylin.isInstalled = true;
   }
-}catch(e){}
+}catch(e) {
+  // fs.accessSync failed
+}
 
 /**
  * set app is installed

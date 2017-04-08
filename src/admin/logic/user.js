@@ -9,26 +9,26 @@ export default class extends think.logic.base {
    * index action logic
    * @return {} []
    */
-  indexAction(){
-   
+  indexAction() {
+
   }
   /**
    * 添加或者修改用户
    * @return {} []
    */
-  saveAction(){
+  saveAction() {
     this.allowMethods = 'post';
     this.rules = {
-      
+
     }
   }
   /**
    * login
    * @return {} []
    */
-  loginAction(){
+  loginAction() {
     this.allowMethods = 'get,post';
-    if(this.isGet()){
+    if(this.isGet()) {
       return;
     }
     this.rules = {
