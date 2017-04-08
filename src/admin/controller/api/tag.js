@@ -7,7 +7,7 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self) {  // eslint-disable-line no-unused-vars
+  async getAction() {
     let result;
     if(this.id) {
       result = await this.modelInstance.where({id: this.id}).find();

@@ -8,7 +8,7 @@ export default class extends Base {
    * get
    * @return {[type]} [description]
    */
-  async getAction(self) {  // eslint-disable-line no-unused-vars
+  async getAction() {
     let where = {};
     let modelInstance = this.modelInstance
       .field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');

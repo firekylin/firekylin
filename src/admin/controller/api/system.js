@@ -81,7 +81,7 @@ export default class extends base {
           cd ${think.RESOURCE_PATH};
           tar zvxf latest.tar.gz;
           cp -r firekylin/* ../;
-          rm -rf firekylin latest.tar.gz`, (error, stdout, stderr) => {  // eslint-disable-line no-unused-vars
+          rm -rf firekylin latest.tar.gz`, error => {
           if(error) {
             this.fail(error);
           }
@@ -92,7 +92,7 @@ export default class extends base {
       /** 安装依赖 */
       case '3':
         let registry = think.config('registry') || 'https://registry.npm.taobao.org';
-        return exec(`npm install --registry=${registry}`, (error, stdout, stderr) => {  // eslint-disable-line no-unused-vars
+        return exec(`npm install --registry=${registry}`, error => {
           if(error) {
             this.fail(error);
           }
