@@ -1,6 +1,18 @@
-import path from 'path';
-import Base from './base';
+import os from 'os';
+import fs from 'fs';
 import url from 'url';
+import path from 'path';
+import request from 'request';
+
+import Base from './base';
+
+request.defaults({
+  strictSSL: false,
+  rejectUnauthorized: false
+});
+
+const getFileContent = think.promisify(request.get, request);
+const writeFileAsync = think.promisify(fs.writeFile, fs);
 
 export default class extends Base {
   uploadConfig = {};
@@ -10,28 +22,20 @@ export default class extends Base {
   }
 
   async postAction() {
-    let {type} = this.uploadConfig;
     let config = this.uploadConfig;
+    let {type} = config;
+    let file;
 
     /** 处理远程抓取 **/
     if( this.post('fileUrl') ) {
       try {
-        // 先存到本地
-        const uploader = think.service('upload/remote', 'admin');
-        const result = await (new uploader()).run(this.post('fileUrl'), {name: this.post('name')});
-
-        // 如果是本地上传
-        if (type === 'local' || !type) {
-          return this.success(url.resolve(think.UPLOAD_BASE_URL, result));
-        }
-
-        return this.serviceUpload(type, path.join(think.RESOURCE_PATH, result), config);
-      } catch (e) {
-        this.fail(e || 'FILE_UPLOAD_ERROR');
+        file = await this.getUrlFile(this.post('fileUrl'));
+      } catch(e) {
+        return this.fail(e.message);
       }
+    } else {
+      file = this.file('file');
     }
-
-    let file = this.file('file');
     if( !file ) { return this.fail('FILE_UPLOAD_ERROR'); }
 
     /** 处理导入数据 **/
@@ -43,7 +47,6 @@ export default class extends Base {
     // let contentType = file.headers['content-type']; 
 
     // 处理其它上传
-    
     if( !type ) { return this.fail(); }
     if(type == 'local') {
       config = {name: this.post('name')};
@@ -83,5 +86,40 @@ export default class extends Base {
       console.log(e);
       return this.fail(e);
     }
+  }
+
+  async getUrlFile(url) {
+    let resp = await getFileContent({
+      url,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36"
+      },
+      strictSSL: false,
+      timeout: 1000,
+      encoding: 'binary'
+    }).catch((e) => { throw new Error("UPLOAD_URL_ERROR"); });
+
+    if(resp.headers['content-type'].indexOf('image') === -1) {
+      throw new Error('UPLOAD_TYPE_ERROR');
+    }
+
+    let uploadDir = this.config('post').file_upload_path;
+    if(!uploadDir) {
+      uploadDir = path.join(os.tmpdir(), 'thinkjs/upload');
+    }
+    if(!think.isDir(uploadDir)) {
+      think.mkdir(uploadDir);
+    }
+
+    let uploadName = think.uuid(20) + path.extname(url);
+    let uploadPath = path.join(uploadDir, uploadName);
+    await writeFileAsync(uploadPath, resp.body, 'binary');
+    
+    return {
+      fieldName: 'file',
+      originalFilename: path.basename(url),
+      path: uploadPath,
+      size: resp.headers['content-length']
+    };
   }
 }
