@@ -70,7 +70,7 @@ export default class extends Base {
     let user = await this.modelInstance.where({id: this.id}).find();
     let options = await this.model('options').getOptions();
     let transporter = nodemailer.createTransport();
-    let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${http.host}`;
+    let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.http.host}`;
     transporter.sendMail({
       from: 'no-reply@firekylin.org',
       to: user.email,
@@ -84,7 +84,7 @@ export default class extends Base {
     });
 
 
-    if(status != null) { this.id = null; }
+    if(status !== null) { this.id = null; }
     return await this.getAction(self);
   }
   /**

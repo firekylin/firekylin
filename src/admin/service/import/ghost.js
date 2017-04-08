@@ -114,14 +114,17 @@ export default class extends Base {
   /**
    * 导入页面
    */
-  async page({posts}) {
+  async page({
+    posts,
+    users
+  }) {
     if(!Array.isArray(posts)) {
       return 0;
     }
 
     const pages = posts.filter(item => item.page === 1 && item.title);
     const pagesPromise = pages.map(async item => {
-      const userSlug = authors.filter(author => author.id === item.author_id)[0].slug;
+      const userSlug = users.filter(user => user.id === item.author_id)[0].slug;
       const user = await this.userModelInstance.where({ name: userSlug }).find();
 
       const page = {
