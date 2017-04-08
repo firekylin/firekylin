@@ -79,7 +79,7 @@ export default class extends Base {
     });
 
 
-    if(status != null) { this.id = null; }
+    if(status !== null) { this.id = null; }
     return await this.getAction(self);
   }
   /**
