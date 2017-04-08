@@ -1,6 +1,7 @@
 'use strict';
 
 import fs from 'fs';
+import path from 'path';
 
 export default class extends think.service.base {
   /**
@@ -133,7 +134,15 @@ export default class extends think.service.base {
       exports.__esModule = true;
       exports.default = ${JSON.stringify(data, undefined, 4)}
     `;
-    let dbConfigFile = think.APP_PATH + '/common/config/db.js';
+
+    let dbConfigFile;
+    try {
+      let srcPath = path.join(think.ROOT_PATH, 'src/common/config');
+      fs.statSync(srcPath);
+      dbConfigFile = path.join(srcPath, 'db.js');
+    } catch(e) {
+      dbConfigFile = path.join(think.APP_PATH, '/common/config/db.js');
+    }
     fs.writeFileSync(dbConfigFile, content);
     think.config('db', data);
   }
