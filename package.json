@@ -12,7 +12,7 @@
     "webpack.build": "webpack",
     "webpack.build.production": "webpack --config=webpack.production.config.babel.js",
     "lint": "eslint ./src ./www/theme/firekylin -f table --ext .js --ext .jsx || true",
-    "lint-break-on-errors": "eslint ./src -f table --ext .js --ext .jsx"
+    "lint-break-on-errors": "eslint ./src ./www/theme/firekylin -f table --ext .js --ext .jsx"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
