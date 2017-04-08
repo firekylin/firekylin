@@ -37,7 +37,7 @@ cp -r pm2.json output/pm2_default.json;
 cp -r www/*.js output/www;
 
 
-cp -r db/firekylin.sql output/;
+cp -r firekylin.sql output/;
 if [ 0 -eq `grep -c analyze_code  output/firekylin.sql` ];then
   echo 'missing analyze_code in firekylin.sql';
   exit;
