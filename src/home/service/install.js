@@ -113,18 +113,17 @@ export default class extends think.service.base {
     let salt = think.uuid(10) + '!@#$%^&*';
     this.password_salt = salt;
 
-    await optionsModel.where({key: 'navigation'}).update({value: JSON.stringify([
-      {'label':'首页', 'url':'/', 'option':'home'},
-      {'label':'归档', 'url':'/archives/', 'option':'archive'},
-      {'label':'标签', 'url':'/tags', 'option':'tags'},
-      {'label':'关于', 'url':'/about', 'option':'user'},
-      {'label':'友链', 'url':'/links', 'option':'link'}
-    ])});
-    await optionsModel.where({key: 'password_salt'}).update({value: salt});
-    await optionsModel.where({key: 'title'}).update({value: 'FireKylin 系统'});
-    await optionsModel.where({key: 'logo_url'}).update({value: '/static/img/firekylin.jpg'});
-    await optionsModel.where({key: 'theme'}).update({value: 'firekylin'});
-
+    await optionsModel.updateOptions('navigation', JSON.stringify([
+      {"label":"首页","url":"/","option":"home"},
+      {"label":"归档","url":"/archives/","option":"archive"},
+      {"label":"标签","url":"/tags","option":"tags"},
+      {"label":"关于","url":"/about","option":"user"},
+      {"label":"友链","url":"/links","option":"link"}
+    ]));
+    await optionsModel.updateOptions('password_salt', salt);
+    await optionsModel.updateOptions('title', 'FireKylin 系统');
+    await optionsModel.updateOptions('logo_url', '/static/img/firekylin.jpg');
+    await optionsModel.updateOptions('theme', 'firekylin');
     //optionsModel.close();
   }
   /**
