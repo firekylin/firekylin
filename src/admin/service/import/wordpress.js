@@ -162,7 +162,7 @@ export default class extends Base {
         summary,
         create_time: this.formatDate(new Date(item.pubDate[0])),
         update_time: item['wp:post_date'][0],
-        status: postStatus[ item['wp:status'][0] ] || 0,
+        status: WP_POST_STATUS[ item['wp:status'][0] ] || 0,
         user_id: user.id,
         comment_num: 0,
         allow_comment: item['wp:comment_status'][0] === 'open',
