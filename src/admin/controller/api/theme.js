@@ -27,25 +27,25 @@ export default class extends Base {
 
   async getAction() {
     switch(this.get('type')) {
-      case 'fileList': {
+      case 'fileList':
         let {theme} = this.get();
         let themePath = path.join(THEME_DIR, theme);
         this.pathCheck(themePath);
 
         let files = await this.getFileList(themePath);
         return this.success(files);
-      }
-      case 'file': {
+
+      case 'file':
         let {filePath} = this.get();
         filePath = path.join(THEME_DIR, filePath);
         this.pathCheck(filePath);
 
         let file = await readFileAsync(filePath, {encoding: 'utf-8'});
         return this.success(file);
-      }
-      case 'templateList': {
+
+      case 'templateList':
         return await this.getPageTemplateList();
-      }
+
       case 'themeList':
       default:
         return await this.getThemeList();

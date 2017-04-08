@@ -90,7 +90,7 @@ export default class extends base {
         });
 
       /** 安装依赖 */
-      case '3': {
+      case '3':
         let registry = think.config('registry') || 'https://registry.npm.taobao.org';
         return exec(`npm install --registry=${registry}`, (error, stdout, stderr) => {  // eslint-disable-line no-unused-vars
           if(error) {
@@ -99,16 +99,15 @@ export default class extends base {
 
           this.success();
         });
-      }
+
       /** 重启服务 */
-      case '4': {
+      case '4':
         if(cluster.isWorker) {
           this.success();
           setTimeout(() => cluster.worker.kill(), 200);
         }
 
         break;
-      }
     }
   }
 

@@ -43,6 +43,7 @@
     "new-cap": 0,
     "no-shadow": 0,
     "no-use-before-define": 0,
+    "no-case-declarations": 0,
     "no-console": 1,
     "eol-last": 2,
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
