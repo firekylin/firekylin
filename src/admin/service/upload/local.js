@@ -10,8 +10,8 @@ export default class extends Base {
     let basename = (name || path.basename(file, ext)) + ext;
 
     let destDir = this.formatNow();
-    let destPath = path.join( think.UPLOAD_PATH, destDir );
-    if( !think.isDir(destPath) ) {
+    let destPath = path.join(think.UPLOAD_PATH, destDir);
+    if(!think.isDir(destPath)) {
       think.mkdir(destPath);
     }
 
