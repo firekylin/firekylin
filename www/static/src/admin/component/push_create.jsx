@@ -20,7 +20,7 @@ module.exports = class extends Base {
       }
     });
   }
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = this.initialState();
     this.id = this.props.params.id;
@@ -28,14 +28,14 @@ module.exports = class extends Base {
 
   componentWillMount() {
     this.listenTo(PushStore, this.handleTrigger.bind(this));
-    if(this.id){
+    if(this.id) {
       PushAction.select(this.id);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     this.id = nextProps.params.id | 0;
-    if( this.id ) {
+    if(this.id) {
       PushAction.select(this.id);
     }
     this.setState(this.initialState());
@@ -46,8 +46,8 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'savePushFailed':
         TipAction.fail(data.message);
         this.setState({submitting: false});
@@ -66,9 +66,9 @@ module.exports = class extends Base {
    * save
    * @return {}       []
    */
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
-    if(this.id){
+    if(this.id) {
       values.id = this.id;
     }
     PushAction.save(values);
@@ -77,15 +77,15 @@ module.exports = class extends Base {
    * render
    * @return {} []
    */
-  render(){
+  render() {
     let props = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       props.disabled = true;
     }
 
     //如果是在编辑状态下在没有拿到数据之前不做渲染
     //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if( this.id && !this.state.pushInfo.title ) {
+    if(this.id && !this.state.pushInfo.title) {
       return null;
     }
 

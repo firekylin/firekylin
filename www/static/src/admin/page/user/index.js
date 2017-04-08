@@ -3,7 +3,7 @@ module.exports = {
   path: 'user',
   onEnter(nextState, replace) {
     let {pathname} = nextState.location;
-    if( pathname !== '/user/edit_pwd' ) {
+    if(pathname !== '/user/edit_pwd') {
       return auth(replace);
     } else return true;
   },

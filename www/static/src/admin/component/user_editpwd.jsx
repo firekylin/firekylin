@@ -12,14 +12,14 @@ import UserStore from '../store/user';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       submitting: false,
       userInfo: {}
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(UserStore, this.handleTrigger.bind(this));
   }
   /**
@@ -28,8 +28,8 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveUserFail':
         this.setState({submitting: false});
         break;
@@ -43,7 +43,7 @@ module.exports = class extends Base {
    * save
    * @return {}       []
    */
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     delete values.repassword;
     let password = md5(SysConfig.options.password_salt + values.password);
     values.password = password;
@@ -54,7 +54,7 @@ module.exports = class extends Base {
    * handle invalid
    * @return {} []
    */
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
   /**
@@ -63,7 +63,7 @@ module.exports = class extends Base {
    * @param  {[type]} event [description]
    * @return {[type]}       [description]
    */
-  changeInput(type, event){
+  changeInput(type, event) {
     let value = event.target.value;
     let userInfo = this.state.userInfo;
     userInfo[type] = value;
@@ -76,7 +76,7 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  getProps(type){
+  getProps(type) {
     let prop = {
       value: this.state.userInfo[type] || '',
       onChange: this.changeInput.bind(this, type)
@@ -88,11 +88,11 @@ module.exports = class extends Base {
       email: 'isEmail',
       password: val => {
 
-        if( val === '' ) {
+        if(val === '') {
           return '请输出密码';
         }
 
-        if( val.length < 8 || val.length > 30 ) {
+        if(val.length < 8 || val.length > 30) {
           return '密码长度为8到30个字符';
         }
 
@@ -100,7 +100,7 @@ module.exports = class extends Base {
       },
       repassword: (val, context) => val === context.password
     }
-    if(typeof validates[type] === 'string'){
+    if(typeof validates[type] === 'string') {
       prop.validate = validatePrefix + validates[type];
     }else{
       prop.validate = validates[type];
@@ -109,9 +109,9 @@ module.exports = class extends Base {
     return prop;
   }
 
-  getOptionProp(type, value){
+  getOptionProp(type, value) {
     let val = this.state.userInfo[type];
-    if(val == value){
+    if(val == value) {
       return {selected: true}
     }
     return {};
@@ -120,9 +120,9 @@ module.exports = class extends Base {
    * render
    * @return {} []
    */
-  render(){
+  render() {
     let props = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       props.disabled = true;
     }
 

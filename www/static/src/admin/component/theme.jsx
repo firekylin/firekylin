@@ -22,7 +22,7 @@ module.exports = class extends Base {
       themeConfig: {},
       theme: window.SysConfig.options.theme || 'firekylin'
     }
-  };
+  }
 
   componentWillMount() {
     this.listenTo(ThemeStore, this.handleTrigger.bind(this));
@@ -31,10 +31,10 @@ module.exports = class extends Base {
 
     let themeConfig = window.SysConfig.options.themeConfig;
     try {
-      if( !themeConfig ) {
+      if(!themeConfig) {
         return;
       }
-      if( typeof(themeConfig) === 'string' ) {
+      if(typeof(themeConfig) === 'string') {
         themeConfig = JSON.parse(themeConfig);
       }
       this.state.themeConfig = themeConfig;
@@ -65,7 +65,7 @@ module.exports = class extends Base {
   }
 
   renderConfigElement(element, i) {
-    if( element.type === 'html' ) {
+    if(element.type === 'html') {
       element.type = 'htmlmixed';
     }
 
@@ -83,7 +83,7 @@ module.exports = class extends Base {
 
         return (
           <RadioGroup {...element} key={i}>
-            {element.options.map((opt,j) => <Radio {...opt} key={j} />)}
+            {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
           </RadioGroup>
         );
         break;
@@ -101,14 +101,14 @@ module.exports = class extends Base {
                       key={j}
                       type="checkbox"
                       className="form-control"
-                      name={`element.name[]`}
+                      name={'element.name[]'}
                       value={opt.value ? opt.value : opt}
                       checked={Array.isArray(this.state.themeConfig[element.name]) && this.state.themeConfig[element.name].includes(opt.value || opt)}
                       onChange={e => {
                         let checked = e.target.checked;
                         let val = opt.value ? opt.value : opt;
-                        if( Array.isArray(this.state.themeConfig[element.name]) ) {
-                          if( checked ) {
+                        if(Array.isArray(this.state.themeConfig[element.name])) {
+                          if(checked) {
                             this.state.themeConfig[element.name].push(val);
                           } else {
                             this.state.themeConfig[element.name] = this.state.themeConfig[element.name].filter(v => v !== val);
@@ -192,7 +192,7 @@ module.exports = class extends Base {
                     this.forceUpdate();
                   }}
               />
-              
+
               <div className="help-block">{element.help ? element.help : ''}</div>
             </div>
           </div>
@@ -202,12 +202,12 @@ module.exports = class extends Base {
   }
 
   renderThemeConfig() {
-    if( this.state.list.length === 0 ) {
+    if(this.state.list.length === 0) {
       return null;
     }
 
     let theme = this.state.list.filter(theme => theme.id === this.state.theme)[0];
-    if( !theme.configElements || !Array.isArray(theme.configElements) ) {
+    if(!theme.configElements || !Array.isArray(theme.configElements)) {
       return null;
     }
 

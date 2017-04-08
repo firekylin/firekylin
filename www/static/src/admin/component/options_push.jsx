@@ -13,7 +13,7 @@ import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       submitting: false,
@@ -24,47 +24,47 @@ module.exports = class extends Base {
     }
     this.state.options.analyze_code = unescape(SysConfig.options.analyze_code);
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveOptionsSuccess':
         this.setState({submitting: false});
         TipAction.success('更新成功');
-        for(let key in this.optionsSavedValue){
+        for(let key in this.optionsSavedValue) {
           SysConfig.options[key] = this.optionsSavedValue[key];
         }
         break;
     }
   }
-  changeInput(type, event){
+  changeInput(type, event) {
     let value = event.target.value;
     let options = this.state.options;
     options[type] = value;
     this.setState({options: options});
   }
-  getProps(name){
+  getProps(name) {
     let props = {
       value: this.state.options[name] || '',
       onChange: this.changeInput.bind(this, name)
     }
-    if(['title', 'description'].indexOf(name) > -1){
+    if(['title', 'description'].indexOf(name) > -1) {
       props.validate = 'required'
     }
     return props;
   }
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
     this.optionsSavedValue = values;
     OptionsAction.save(values);
   }
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
-  render(){
+  render() {
     let BtnProps = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       BtnProps.disabled = true;
     }
     let url = location.protocol + '//' + location.host + '/index/contributor';

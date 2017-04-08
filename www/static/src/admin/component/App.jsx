@@ -13,7 +13,7 @@ module.exports = class App extends Base {
   };
 
   render() {
-    if(!SysConfig.userInfo.name){
+    if(!SysConfig.userInfo.name) {
       return (
       <div className="fk">
         <Tip />

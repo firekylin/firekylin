@@ -22,7 +22,7 @@ module.exports = class extends Base {
       cateList: []
     });
   }
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = this.initialState();
     this.id = this.props.params.id | 0;
@@ -31,14 +31,14 @@ module.exports = class extends Base {
   componentWillMount() {
     this.listenTo(CateStore, this.handleTrigger.bind(this));
     CateAction.selectParent();
-    if(this.id){
+    if(this.id) {
       CateAction.select(this.id);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     this.id = nextProps.params.id | 0;
-    if( this.id ) {
+    if(this.id) {
       CateAction.select(this.id);
     }
 
@@ -52,8 +52,8 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveCateFail':
         TipAction.fail(data.message);
         this.setState({submitting: false});
@@ -75,9 +75,9 @@ module.exports = class extends Base {
    * save
    * @return {}       []
    */
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
-    if(this.id){
+    if(this.id) {
       values.id = this.id;
     }
     values.pid = this.state.pid;
@@ -87,16 +87,16 @@ module.exports = class extends Base {
    * render
    * @return {} []
    */
-  render(){
+  render() {
     let props = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       props.disabled = true;
     }
     let cateList = [{id:0, name:'不选择'}].concat(this.state.cateList);
 
     //如果是在编辑状态下在没有拿到数据之前不做渲染
     //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if( this.id && !this.state.cateInfo.hasOwnProperty('pathname') ) {
+    if(this.id && !this.state.cateInfo.hasOwnProperty('pathname')) {
       return null;
     }
 

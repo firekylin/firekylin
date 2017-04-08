@@ -17,7 +17,7 @@ import TipAction from 'common/action/tip';
 import ModalAction from '../../common/action/modal';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       loading: true,
@@ -25,12 +25,12 @@ module.exports = class extends Base {
       key: 0
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(UserStore, this.handleTrigger.bind(this));
     UserAction.select();
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'deleteUserSuccess':
         TipAction.success('删除成功');
         UserAction.select(null, this.state.key===3?'contributor':'');
@@ -39,7 +39,7 @@ module.exports = class extends Base {
         this.setState({userList: data, loading: false});
     }
   }
-  handleDelete(userId){
+  handleDelete(userId) {
     return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br /><p className="gray">删除后无法恢复</p></div>, () => {
       UserAction.delete(userId);
     }, 'modal-sm');
@@ -68,11 +68,11 @@ module.exports = class extends Base {
     return '';
   }
 
-  getUserList(){
-    if(this.state.loading){
+  getUserList() {
+    if(this.state.loading) {
       return (<tr><td colSpan="10" className="center">加载中……</td></tr>);
     }
-    if(!this.state.userList.length){
+    if(!this.state.userList.length) {
       return (<tr><td colSpan="10" className="center">无相关用户</td></tr>);
     }
     return this.state.userList.map(item => {
@@ -112,7 +112,7 @@ module.exports = class extends Base {
       );
     })
   }
-  render(){
+  render() {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />

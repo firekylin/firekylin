@@ -47,10 +47,10 @@ module.exports = class extends Base {
   handleTrigger(data, type) {
     switch(type) {
       case 'updateSystem':
-        if( this.state.step <= UPDATE_STEPS.length ) {
+        if(this.state.step <= UPDATE_STEPS.length) {
           this.setState({step: this.state.step + 1}, () => SystemAction.updateSystem(this.state.step));
         }
-        if( this.state.step > UPDATE_STEPS.length ) {
+        if(this.state.step > UPDATE_STEPS.length) {
           setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
           setInterval(() => this.setState({downCount: Math.max(0, --this.state.downCount)}), 1000);
         }
@@ -97,7 +97,7 @@ module.exports = class extends Base {
                       </div>
                       <span className="loading">{step[1]}</span>
                       <span className="ok">{step[2].replace('%d', this.state.downCount)}</span>
-                    </li>  
+                    </li>
                   )}
                 </ul>
               </div>

@@ -12,7 +12,7 @@ import PageStore from 'admin/store/page';
 import firekylin from 'common/util/firekylin';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       loading: true,
@@ -20,12 +20,12 @@ module.exports = class extends Base {
       page: this.props.location.query.page || 1
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(PageStore, this.handleTrigger.bind(this));
     PageAction.selectList(this.state.page);
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'deletePageFail':
         TipAction.fail(data);
         break;
@@ -38,11 +38,11 @@ module.exports = class extends Base {
         break;
     }
   }
-  getPageList(){
-    if(this.state.loading){
+  getPageList() {
+    if(this.state.loading) {
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
-    if(!this.state.pageList.length){
+    if(!this.state.pageList.length) {
       return (<tr><td colSpan="8" className="center">暂无页面</td></tr>);
     }
     return this.state.pageList.map(item => {
@@ -92,12 +92,12 @@ module.exports = class extends Base {
       case 2: text = '已拒绝'; break;
       case 3: text = '已发布'; break;
     }
-    if( status !== '' ) {
+    if(status !== '') {
       return <em className="status">{text}</em>;
     }
     return null;
   }
-  render(){
+  render() {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />

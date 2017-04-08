@@ -54,10 +54,10 @@ module.exports = class extends Base {
    * @param  {[type]}  routeUrl [description]
    * @return {Boolean}          [description]
    */
-  isActive(routeUrl){
+  isActive(routeUrl) {
     return this.context.router.isActive(routeUrl);
   }
-  getClassName(icon, routeUrl){
+  getClassName(icon, routeUrl) {
     let active = this.isActive(routeUrl);
     return classnames({
       icon: true,
@@ -71,22 +71,22 @@ module.exports = class extends Base {
   //   }
   //   return 'hide';
   // }
-  getSubLinkClassName(routeUrl){
+  getSubLinkClassName(routeUrl) {
     return classnames({
       active: this.isActive(routeUrl)
     })
   }
-  open(routeUrl){
+  open(routeUrl) {
     this.context.router.push(routeUrl);
   }
-  render(){
+  render() {
     let routes = this.state.routes;
     let userType = SysConfig.userInfo.type | 0;
     routes = routes.filter(item => {
-      if(!item.type){
+      if(!item.type) {
         return true;
       }
-      if(userType <= item.type){
+      if(userType <= item.type) {
         return true;
       }
     });
@@ -99,7 +99,7 @@ module.exports = class extends Base {
         </div>
         <ul className="mod-bar" style={{marginTop: 10}}>
           <input type="hidden" id="hide_values" val="0" />
-          {routes.map( (route, i) =>
+          {routes.map((route, i) =>
             <li key={i}>
               {route.children ? <a onClick={this.open.bind(this, route.children && route.children[0].url || route.url)} className={this.getClassName(route.icon, route.url)}><span>{route.title}</span></a>
               :

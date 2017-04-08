@@ -20,7 +20,7 @@ module.exports = class extends Base {
       }
     });
   }
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = this.initialState();
     this.id = this.props.params.id | 0;
@@ -28,14 +28,14 @@ module.exports = class extends Base {
 
   componentWillMount() {
     this.listenTo(TagStore, this.handleTrigger.bind(this));
-    if(this.id){
+    if(this.id) {
       TagAction.select(this.id);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     this.id = nextProps.params.id | 0;
-    if( this.id ) {
+    if(this.id) {
       TagAction.select(this.id);
     }
     this.setState(this.initialState());
@@ -46,8 +46,8 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveTagFail':
         this.setState({submitting: false});
         break;
@@ -65,9 +65,9 @@ module.exports = class extends Base {
    * save
    * @return {}       []
    */
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
-    if(this.id){
+    if(this.id) {
       values.id = this.id;
     }
     values.pid = this.state.pid;
@@ -77,9 +77,9 @@ module.exports = class extends Base {
    * render
    * @return {} []
    */
-  render(){
+  render() {
     let props = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       props.disabled = true;
     }
 

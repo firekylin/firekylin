@@ -4,7 +4,7 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
-import { Radio, RadioGroup, Form, ValidatedInput  } from 'react-bootstrap-validation';
+import { Radio, RadioGroup, Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
 import BreadCrumb from 'admin/component/breadcrumb';
@@ -15,10 +15,10 @@ import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     let comment = SysConfig.options.comment;
-    if(typeof comment === 'string'){
+    if(typeof comment === 'string') {
       comment = JSON.parse(comment);
     }
     comment.name = unescape(comment.name);
@@ -27,41 +27,41 @@ module.exports = class extends Base {
       comment: comment
     };
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveCommentSuccess':
         this.setState({submitting: false});
         TipAction.success('评论设置更新成功');
         let comment = JSON.parse(SysConfig.options.comment);
         SysConfig.options.comment = JSON.stringify({
-          "comment": comment
+          'comment': comment
         });
         break;
     }
   }
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
     this.optionsSavedValue = values;
     OptionsAction.comment(values);
   }
-  getProps(name){
+  getProps(name) {
     let props = {
       value: this.state.comment[name] || '',
       onChange: this.changeInput.bind(this, name)
     };
     return props;
   }
-  changeInput(type, event){
+  changeInput(type, event) {
     let value = event.target.value;
     let comment = this.state.comment;
     comment[type] = value;
     this.setState({comment: comment});
   }
 
-  openDialog(){
+  openDialog() {
     let comment = this.state.comment;
     let url = `/static/img/${comment.type}.jpg`;
     let content = (<div className="center">
@@ -69,7 +69,7 @@ module.exports = class extends Base {
     </div>);
     let instance = ModalAction.alert('提示', content);
   }
-  render(){
+  render() {
     let comment = this.state.comment;
     let res = (
       <RadioGroup
@@ -122,7 +122,7 @@ module.exports = class extends Base {
               label="评论代码"
               style={{height: 240}}
           />}
-          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
+          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交' }</button>
         </Form>
       </div>
     </div>

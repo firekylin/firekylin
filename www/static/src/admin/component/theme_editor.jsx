@@ -25,7 +25,7 @@ module.exports = class extends Base {
       content: '',
       theme: window.SysConfig.options.theme || 'firekylin'
     }
-  };
+  }
 
   componentWillMount() {
     this.listenTo(ThemeStore, this.handleTrigger.bind(this));
@@ -35,7 +35,7 @@ module.exports = class extends Base {
 
   handleTrigger(data, type) {
     switch (type) {
-      case 'getThemeFileListSuccess':  
+      case 'getThemeFileListSuccess':
         this.setState({list: this.initialFileList(data)});
         break;
       case 'getThemeFileSuccess':
@@ -52,11 +52,11 @@ module.exports = class extends Base {
   }
 
   checkTheme() {
-    if( this.state.theme !== 'firekylin' ) {
+    if(this.state.theme !== 'firekylin') {
       return true;
     }
 
-    
+
     ModalAction.confirm(
       '主题修改警告！',
       <div>您当前使用的是默认主题，升级过程中很有可能会覆盖你的修改，是否需要拷贝默认主题为新的主题来避免这个问题？</div>,
@@ -72,18 +72,18 @@ module.exports = class extends Base {
   initialFileList(data, parent = null) {
     return data.map((item) => {
       item.parent = parent;
-      if( item.children ) {
+      if(item.children) {
         item.collapsed = true;
         item.children = this.initialFileList(item.children, item);
       }
 
       /** 默认加载 package.json 文件 */
-      if( item.module.toLowerCase() === 'package.json' ) {
+      if(item.module.toLowerCase() === 'package.json') {
         this.state.active = item;
         this.state.currentFile = this.state.theme + '/package.json';
         ThemeAction.getThemeFile(this.state.currentFile);
       }
-      
+
       return item;
     });
   }
@@ -108,7 +108,7 @@ module.exports = class extends Base {
     this.setState({active: node});
     this.getThemeFile(node);
   }
-  
+
   getEditorMode(ext) {
     switch(ext.toLowerCase()) {
       case 'json':
@@ -125,7 +125,7 @@ module.exports = class extends Base {
   updateThemeFile() {
     let filePath = this.state.currentFile;
     let content = this.state.content;
-    if( !filePath ) {
+    if(!filePath) {
       return true;
     }
 
@@ -159,8 +159,8 @@ module.exports = class extends Base {
             <div className="col-xs-3">
               <Tree
                 tree={tree}
-                renderNode={node => 
-                  <span 
+                renderNode={node =>
+                  <span
                       className={_('node', {'is-active': node===this.state.active})}
                       onClick={this.toggleFile.bind(this, node)}
                   >

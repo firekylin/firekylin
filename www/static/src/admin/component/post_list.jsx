@@ -18,7 +18,7 @@ import PostStore from '../store/post';
 import firekylin from 'common/util/firekylin';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       key: 4,
@@ -29,12 +29,12 @@ module.exports = class extends Base {
       page: this.props.location.query.page/1 || 1
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
     PostAction.selectList(this.state.page);
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'savePostSuccess':
         TipAction.success('审核成功');
         this.setState({loading: true}, PostAction.selectList.bind(PostAction, this.state.page, this.state.key === 4 ? null : this.state.key));
@@ -64,11 +64,11 @@ module.exports = class extends Base {
     PostAction.selectList(this.state.page, this.state.key !== 4 ? this.state.key : null, this.state.keyword);
   }
 
-  getPostList(){
-    if(this.state.loading){
+  getPostList() {
+    if(this.state.loading) {
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
-    if(!this.state.postList.length){
+    if(!this.state.postList.length) {
       return (<tr><td colSpan="8" className="center">暂无文章</td></tr>);
     }
     return this.state.postList.map(item => {
@@ -91,7 +91,7 @@ module.exports = class extends Base {
    * 当文章为公开且发布状态时渲染文章链接
    */
   renderPostLink(post) {
-    if( post.status !== 3 || !post.is_public ) {
+    if(post.status !== 3 || !post.is_public) {
       return null;
     }
 
@@ -109,7 +109,7 @@ module.exports = class extends Base {
   renderBtns(post) {
     //管理员在审核和拒绝tab上显示更多按钮
     let isAdmin = SysConfig.userInfo.type === 1;
-    let showPassAndDeny = isAdmin && [1,2,3].includes(this.state.key);
+    let showPassAndDeny = isAdmin && [1, 2, 3].includes(this.state.key);
     let showEditAndDel = !isAdmin || this.state.key===4;
     return (
       <td>
@@ -117,7 +117,7 @@ module.exports = class extends Base {
         <button
             type="button"
             className="btn btn-success btn-xs"
-            disabled={[0,3].includes(post.status)}
+            disabled={[0, 3].includes(post.status)}
             onClick={PostAction.pass.bind(PostAction, post)}
         >
           <span className="glyphicon glyphicon-ok"></span>
@@ -128,7 +128,7 @@ module.exports = class extends Base {
         <button
             type="button"
             className="btn btn-warning btn-xs"
-            disabled={[0,2].includes(post.status)}
+            disabled={[0, 2].includes(post.status)}
             onClick={PostAction.deny.bind(PostAction, post.id)}
         >
           <span className="glyphicon glyphicon-remove"></span>
@@ -173,7 +173,7 @@ module.exports = class extends Base {
       break;
     }
 
-    if( status !== '' ) {
+    if(status !== '') {
       return (
         <span className="admin-post-status">
           <em className="status">{text}</em>
@@ -185,7 +185,7 @@ module.exports = class extends Base {
     return null;
   }
 
-  render(){
+  render() {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props}/>

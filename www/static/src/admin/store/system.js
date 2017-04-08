@@ -13,7 +13,7 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(){
+  onSelect() {
     let url = '/admin/api/system';
     let req = superagent.get(url);
     return firekylin.request(req).then(

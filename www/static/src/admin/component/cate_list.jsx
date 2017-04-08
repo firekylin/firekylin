@@ -12,7 +12,7 @@ import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       loading: true,
@@ -20,14 +20,14 @@ module.exports = class extends Base {
       defaultCategory: null
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(CateStore, this.handleTrigger.bind(this));
     this.listenTo(OptionsStore, this.getOptionTrigger.bind(this));
     CateAction.select();
     OptionsAction.defaultCategory();
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'deleteCateFail':
         TipAction.fail(data);
         break;
@@ -52,7 +52,7 @@ module.exports = class extends Base {
     }
   }
   renderDefaultCategoryBtn(id) {
-    if( this.state.defaultCategory == id ) {
+    if(this.state.defaultCategory == id) {
       return (
         <button
             disabled
@@ -76,11 +76,11 @@ module.exports = class extends Base {
       </button>
     );
   }
-  getCateList(){
-    if(this.state.loading){
+  getCateList() {
+    if(this.state.loading) {
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
-    if(!this.state.cateList.length){
+    if(!this.state.cateList.length) {
       return (<tr><td colSpan="8" className="center">暂无分类</td></tr>);
     }
     return this.state.cateList.map(item => {
@@ -119,7 +119,7 @@ module.exports = class extends Base {
       );
     })
   }
-  render(){
+  render() {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />

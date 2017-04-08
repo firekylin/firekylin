@@ -13,7 +13,7 @@ export default Reflux.createStore({
    * @param  {Object} data []
    * @return {Promise}      []
    */
-  onSave(data){
+  onSave(data) {
     let req = superagent.post('/admin/api/options?method=put');
     req.type('form').send(data);
     return firekylin.request(req).then(data => {
@@ -22,7 +22,7 @@ export default Reflux.createStore({
       this.trigger(err, 'saveOptionsFail');
     })
   },
-  onAuth(data){
+  onAuth(data) {
     let req = superagent.post('/admin/api/options?type=2faAuth');
     req.type('form').send(data);
     return firekylin.request(req).then(data => {
@@ -31,7 +31,7 @@ export default Reflux.createStore({
       this.trigger(err, 'Auth2FAFail');
     })
   },
-  onQrcode(){
+  onQrcode() {
     let req = superagent.get('/admin/api/options?type=2fa');
     return firekylin.request(req).then(data => {
       this.trigger(data, 'getQrcodeSuccess');
@@ -39,7 +39,7 @@ export default Reflux.createStore({
       this.trigger(err, 'getQrcodeFail');
     })
   },
-  onComment(data){
+  onComment(data) {
     let req = superagent.post('/admin/api/options?method=put');
     req.type('form').send({'comment': JSON.stringify(data)});
     return firekylin.request(req).then(data => {
@@ -48,7 +48,7 @@ export default Reflux.createStore({
       this.trigger(err, 'saveCommentFail');
     });
   },
-  onUpload(data){
+  onUpload(data) {
     let req = superagent.post('/admin/api/options?method=put');
     req.type('form').send({'upload': JSON.stringify(data)});
     return firekylin.request(req).then(data => {
@@ -65,9 +65,9 @@ export default Reflux.createStore({
       err => this.trigger(err, 'saveNavigationFailed')
     );
   },
-  onDefaultCategory(id){
+  onDefaultCategory(id) {
     let url = '/admin/api/options?type=defaultCategory', req;
-    if( id ) {
+    if(id) {
       url += '&method=put';
       req = superagent.post(url).type('form').send({id});
       return firekylin.request(req)

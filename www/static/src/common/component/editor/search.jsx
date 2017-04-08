@@ -27,7 +27,7 @@ class Search extends React.Component {
           showArrow={false}
           dropdownStyle={{zIndex: 10000}}
       >
-        {this.state.options.map( (opt, i) =>
+        {this.state.options.map((opt, i) =>
           <Option key={i} value={opt.pathname}>{opt.title}</Option>
         )}
       </Select>

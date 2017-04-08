@@ -19,7 +19,7 @@ export default Reflux.createStore({
    * 添加一个弹出层
    * @param {[type]} data [description]
    */
-  add: function(data){
+  add: function(data) {
     let idx = this.idx++;
     data.idx = idx;
 
@@ -33,7 +33,7 @@ export default Reflux.createStore({
    * @param  {[type]} index [description]
    * @return {[type]}       [description]
    */
-  remove: function(idx){
+  remove: function(idx) {
     this.modalList = this.modalList.filter(item => {
       return item.idx !== idx;
     });
@@ -45,7 +45,7 @@ export default Reflux.createStore({
    * @param  {[type]} idx [description]
    * @return {[type]}     [description]
    */
-  onRemove: function(idx){
+  onRemove: function(idx) {
     this.remove(idx);
   },
   /**
@@ -55,7 +55,7 @@ export default Reflux.createStore({
    * @param  {[type]} options [description]
    * @return {[type]}         [description]
    */
-  onPanel: function(title, content, options){
+  onPanel: function(title, content, options) {
     let data = {
       type: 'panel',
       title: title,
@@ -70,7 +70,7 @@ export default Reflux.createStore({
    * @param  {[type]} text [description]
    * @return {[type]}      [description]
    */
-  onConfirm: function(title, content, callback, className, options, cancelCallback){
+  onConfirm: function(title, content, callback, className, options, cancelCallback) {
     let data = {
       type: 'confirm',
       title: title,
@@ -88,7 +88,7 @@ export default Reflux.createStore({
    * @param  {[type]} text [description]
    * @return {[type]}      [description]
    */
-  onAlert: function(title, content){
+  onAlert: function(title, content) {
     let data = {
       type: 'alert',
       title: title,

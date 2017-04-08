@@ -10,11 +10,11 @@ import UserStore from '../store/user';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(UserStore, this.handleTrigger.bind(this));
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'LoginSuccess':
         TipAction.success('登录成功');
         setTimeout(() => {location.reload()}, 1000)
@@ -25,8 +25,8 @@ module.exports = class extends Base {
    * get two factor auth
    * @return {} []
    */
-  getTwoFactorAuth(){
-    if(SysConfig.options.two_factor_auth){
+  getTwoFactorAuth() {
+    if(SysConfig.options.two_factor_auth) {
       return (
         <div className="form-group">
           <ValidatedInput
@@ -45,11 +45,11 @@ module.exports = class extends Base {
       );
     }
   }
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     values.password = md5(SysConfig.options.password_salt + values.password);
     UserAction.login(values);
   }
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
   render() {

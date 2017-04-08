@@ -12,9 +12,9 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(id){
+  onSelect(id) {
     let url = '/admin/api/page';
-    if(id){
+    if(id) {
       url += '/' + id;
     }
     let req = superagent.get(url);
@@ -23,23 +23,23 @@ export default Reflux.createStore({
     );
   },
   onSelectList(page) {
-    return firekylin.request( superagent.get('/admin/api/page?page='+page) ).then(
+    return firekylin.request(superagent.get('/admin/api/page?page='+page)).then(
       data => this.trigger(data, 'getPageList')
     );
   },
 
-  onSave(data){
+  onSave(data) {
     let id = data.id;
     delete data.id;
     let url = '/admin/api/page';
-    if(id){
+    if(id) {
       url += '/' + id + '?method=put';
     }
     let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(
       data => this.trigger(data, 'savePageSuccess'),
-      err  => this.trigger(err, 'savePageFail')
+      err => this.trigger(err, 'savePageFail')
     );
   },
 

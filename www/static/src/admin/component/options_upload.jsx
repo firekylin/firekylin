@@ -4,7 +4,7 @@ import Base from 'base';
 import {Link} from 'react-router';
 import classnames from 'classnames';
 
-import { Radio, RadioGroup, Form, ValidatedInput  } from 'react-bootstrap-validation';
+import { Radio, RadioGroup, Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
 import BreadCrumb from 'admin/component/breadcrumb';
@@ -14,10 +14,10 @@ import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     let upload = SysConfig.options.upload;
-    if(typeof upload === 'string'){
+    if(typeof upload === 'string') {
       upload = JSON.parse(upload);
     }
     this.state = {
@@ -25,41 +25,41 @@ module.exports = class extends Base {
       upload: upload
     };
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveUploadSuccess':
         this.setState({submitting: false});
         TipAction.success('上传设置更新成功');
         let upload = JSON.parse(SysConfig.options.upload);
         SysConfig.options.upload = JSON.stringify({
-          "upload": upload
+          'upload': upload
         });
         break;
     }
   }
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
     this.optionsSavedValue = values;
     OptionsAction.upload(values);
   }
-  getProps(name){
+  getProps(name) {
     let props = {
       value: this.state.upload[name] || '',
       onChange: this.changeInput.bind(this, name)
     };
     return props;
   }
-  changeInput(type, event){
+  changeInput(type, event) {
     let value = event.target.value;
     let upload = this.state.upload;
     upload[type] = value;
     this.setState({upload: upload});
   }
 
-  render(){
+  render() {
     let upload = this.state.upload;
     let res = (
       <RadioGroup
@@ -207,7 +207,7 @@ module.exports = class extends Base {
           </div>
           { upload.type == 'qiniu' && qiniu }
           { upload.type == 'upyun' && upyun }
-          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交'  }</button>
+          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交' }</button>
         </Form>
       </div>
     </div>
