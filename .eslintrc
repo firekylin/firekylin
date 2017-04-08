@@ -63,11 +63,11 @@
     "import/no-duplicates": 2,
     'import/extensions': [2, 'always', {
       js: 'never',
-      jsx: 'never',
+      jsx: 'never'
     }],
     "import/order": 2,
     "import/no-absolute-path": 2,
     "import/newline-after-import": 2,
-    "import/no-named-default": 2,
+    "import/no-named-default": 2
   }
 }
