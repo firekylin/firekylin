@@ -1,6 +1,6 @@
 (function(win, doc) {
   var getById = function(el) {
-    return document.getElementById(el);
+    return doc.getElementById(el);
   };
 
   //from qwrap
@@ -113,7 +113,7 @@
     if(!disqus_thread) {
       return;
     }
-    window.disqus_config = function() {
+    win.disqus_config = function() {
       this.page.url = disqus_thread.getAttribute('data-url');
       this.page.identifier = disqus_thread.getAttribute('data-identifier');
     }
@@ -128,8 +128,8 @@
     if(!disqus_thread) {
       return;
     }
-    window.duoshuoQuery = {short_name: disqus_thread.getAttribute('data-name')};
-    var s = document.createElement('script');
+    win.duoshuoQuery = {short_name: disqus_thread.getAttribute('data-name')};
+    var s = doc.createElement('script');
     s.src = '//static.duoshuo.com/embed.js';
     (doc.head || doc.body).appendChild(s);
   };
@@ -139,15 +139,15 @@
     if(!disqus_thread) { return; }
     var appid = disqus_thread.getAttribute('data-name');
     var conf = disqus_thread.getAttribute('sid');
-    var width = window.innerWidth || document.documentElement.clientWidth;
-    var s = document.createElement('script');
+    var width = win.innerWidth || doc.documentElement.clientWidth;
+    var s = doc.createElement('script');
     if (width < 960) {
       s.id = 'changyan_mobile_js';
       s.src = '//changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
     } else {
       s.src = '//changyan.sohu.com/upload/changyan.js';
       s.onload = function() {
-        window.changyan.api.config({appid:appid, conf:conf});
+        win.changyan.api.config({appid:appid, conf:conf});
       }
     }
     (doc.head||doc.body).appendChild(s);
@@ -158,17 +158,17 @@
     if(!disqus_thread) {
       return;
     }
-    window.cloudTieConfig = {
+    win.cloudTieConfig = {
       url: getById('comments').getAttribute('data-url'),
       sourceId: '',
       productKey: disqus_thread.getAttribute('data-name'),
       target: disqus_thread.className
     };
-    var s = document.createElement('script');
+    var s = doc.createElement('script');
     s.src = 'https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js';
     (doc.head || doc.body).appendChild(s);
   }
-  window.addEventListener('load', function() {
+  win.addEventListener('load', function() {
     loadComment();
   });
 
@@ -192,19 +192,19 @@
 
 
   if(utils.isMob) {
-    document.documentElement.className += ' mob';
+    doc.documentElement.className += ' mob';
   }else{
-    document.documentElement.className += ' pc';
+    doc.documentElement.className += ' pc';
   }
 
 
   var Dom = {
-    $sidebar : document.querySelector('#sidebar'),
-    $main : document.querySelector('#main'),
-    $sidebar_mask : document.querySelector('#sidebar-mask'),
-    $body : document.body,
-    $btn_side : document.querySelector('#header .btn-bar'),
-    $article : document.querySelectorAll('.mob #page-index article')
+    $sidebar : doc.querySelector('#sidebar'),
+    $main : doc.querySelector('#main'),
+    $sidebar_mask : doc.querySelector('#sidebar-mask'),
+    $body : doc.body,
+    $btn_side : doc.querySelector('#header .btn-bar'),
+    $article : doc.querySelectorAll('.mob #page-index article')
   };
 
   Dom.bindEvent = function() {
@@ -238,7 +238,7 @@
     }, false);
 
 
-    window.addEventListener('resize', function() {
+    win.addEventListener('resize', function() {
       _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
     }, false);
