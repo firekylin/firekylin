@@ -45,7 +45,7 @@ class MdEditor extends Base {
     // cache dom node
     this.textControl = ReactDOM.findDOMNode(this.refs.editor);
     this.previewControl = ReactDOM.findDOMNode(this.refs.preview);
-    this._syncScroll = ((e) => {
+    this._syncScroll = (() => {
       let leftSync = false, rightSync = false;
       let that = this;
 
@@ -382,7 +382,6 @@ class MdEditor extends Base {
   }
 
   _pictureText () {
-    let that = this;
     ModalAction.confirm(
       '插入图片',
       <Tabs defaultActiveKey={1}>
@@ -428,7 +427,7 @@ class MdEditor extends Base {
       if(type.includes('image') || res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i)) {
         this._preInputText(`![alt](${res.data})`, 2, 5, start);
       } else {
-        let text = that.state.fileUrl ? '链接文本' : that.state.file[0].name;
+        let text = this.state.fileUrl ? '链接文本' : this.state.file[0].name;
         this._preInputText(`[${text}](${res.data})`, 1, text.length + 1, start);
       }
     }).catch((res)=> {

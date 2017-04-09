@@ -83,7 +83,7 @@
     "superagent": "^1.7.2",
     "webpack": "^2.2.0"
   },
-  "repository": "https://github.com/75team/firekylin",
+  "repository": "https://github.com/firekylin/firekylin",
   "license": "MIT",
   "pre-commit": ["lint-break-on-errors"]
 }
