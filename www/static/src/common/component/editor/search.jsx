@@ -8,6 +8,7 @@ class Search extends React.Component {
   state = {
     options: []
   };
+
   fetchData(value) {
     let req = superagent.get('/admin/api/post?status=3&keyword='+encodeURIComponent(value));
     firekylin.request(req).then(
@@ -34,6 +35,10 @@ class Search extends React.Component {
     );
   }
 }
+
+Search.propTypes = {
+  onSelect: React.PropTypes.func.isRequired
+};
 
 Search = Autobind(Search);
 export default Search;
