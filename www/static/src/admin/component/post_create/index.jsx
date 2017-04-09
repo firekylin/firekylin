@@ -542,7 +542,7 @@ module.exports = class extends Base {
     return (
       <div className="button-group">
         <button
-          type="submit"
+          type="button"
           {...props}
           className="btn btn-default"
           onClick={draftOnClick}
