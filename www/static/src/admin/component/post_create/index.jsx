@@ -532,6 +532,9 @@ module.exports = class extends Base {
     let draftOnClick = () => {
       this.state.status = 0;
       localStorage.removeItem('unsavetype'+this.type+'id'+this.id);
+
+      // 让表单提交
+      this.refs.form.submit();
     };
 
     let publishOnClick = () => {
@@ -584,6 +587,7 @@ module.exports = class extends Base {
         <BreadCrumb {...this.props} />
         <div className="manage-container">
           <Form
+            ref='form'
             model={this.state.postInfo}
             className="post-create clearfix"
             onValidSubmit={this.handleValidSubmit.bind(this)}
