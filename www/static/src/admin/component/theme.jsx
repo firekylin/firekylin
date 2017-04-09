@@ -1,19 +1,18 @@
-import Base from 'base';
 import React from 'react';
 import CodeMirror from 'react-codemirror';
+import { SketchPicker } from 'react-color';
+import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
+import BreadCrumb from './breadcrumb';
+import Base from 'base';
 import TipAction from 'common/action/tip';
 import ThemeStore from 'admin/store/theme';
-import { SketchPicker } from 'react-color';
 import ThemeAction from 'admin/action/theme';
-import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
-
-import BreadCrumb from './breadcrumb';
 
 
 module.exports = class extends Base {

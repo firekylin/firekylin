@@ -1,6 +1,6 @@
 import React from 'react';
-import Base from 'base';
 import { Radio, RadioGroup, Form, ValidatedInput, FileValidator } from 'react-bootstrap-validation';
+import Base from 'base';
 import firekylin from 'common/util/firekylin';
 
 import BreadCrumb from 'admin/component/breadcrumb';

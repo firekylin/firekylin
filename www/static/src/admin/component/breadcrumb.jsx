@@ -1,9 +1,9 @@
 import ReactDom from 'react-dom';
 import React from 'react';
-import Base from 'base';
 import classnames from 'classnames';
 import {Link} from 'react-router';
 import Sidebar from './sidebar';
+import Base from 'base';
 
 module.exports = class extends Base {
 

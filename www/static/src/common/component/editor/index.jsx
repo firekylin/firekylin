@@ -2,18 +2,19 @@
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
 /* eslint max-len:0 */
-import Base from 'base';
 import marked from 'marked';
 import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
 import Autobind from 'autobind-decorator';
-import ModalStore from 'common/store/modal';
 import React, { PropTypes as T } from 'react';
+
+import Search from './search';
+import Base from 'base';
+import ModalStore from 'common/store/modal';
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
-import Search from './search';
 import './style.css';
 
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import Base from 'base';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
+import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';

@@ -1,11 +1,11 @@
 import React from 'react';
-import Base from 'base';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
-import BreadCrumb from 'admin/component/breadcrumb';
-import TipAction from 'common/action/tip';
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   initialState() {

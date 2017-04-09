@@ -1,9 +1,9 @@
 import React from 'react';
+import Login from './login';
+import Sidebar from './sidebar';
 import Base from 'base';
 import Tip from 'common/component/tip';
 import ModalManage from 'common/component/modal_manage';
-import Login from './login';
-import Sidebar from './sidebar';
 
 
 module.exports = class App extends Base {

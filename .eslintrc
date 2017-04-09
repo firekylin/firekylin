@@ -27,6 +27,13 @@
     "react",
     "import"
   ],
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.babel.js"
+      }
+    }
+  },
   "rules": {
     "strict": 0,
     "quotes": [2, "single"],
@@ -63,8 +70,11 @@
     "no-implicit-globals": 2,
     "import/first": 2,
     "import/no-duplicates": 2,
-    "import/extensions": 0,
-    "import/no-unresolved": 0,
+    "import/extensions": [2, "always", {
+      "js": "never",
+      "jsx": "never"
+    }],
+    "import/no-unresolved": 2,
     "import/order": 2,
     "import/no-absolute-path": 2,
     "import/newline-after-import": 2,

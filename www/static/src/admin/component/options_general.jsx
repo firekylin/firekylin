@@ -1,13 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Base from 'base';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
-import firekylin from 'common/util/firekylin';
-
-import BreadCrumb from 'admin/component/breadcrumb';
-import TipAction from 'common/action/tip';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
+import Base from 'base';
+import firekylin from 'common/util/firekylin';
+import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   constructor(props) {

@@ -1,4 +1,3 @@
-import Base from 'base';
 import React from 'react';
 import moment from 'moment';
 import {
@@ -10,6 +9,7 @@ import {
 import classnames from 'classnames';
 import Datetime from 'react-datetime';
 import Select, {Option} from 'rc-select';
+import Base from 'base';
 import Editor from 'common/component/editor';
 
 import BreadCrumb from 'admin/component/breadcrumb';

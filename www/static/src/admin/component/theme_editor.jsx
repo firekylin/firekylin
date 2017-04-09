@@ -1,11 +1,11 @@
-import Base from 'base';
 import React from 'react';
 import classnames from 'classnames';
 import Tree from 'react-ui-tree';
 import CodeMirror from 'react-codemirror';
+import BreadCrumb from './breadcrumb';
+import Base from 'base';
 import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
-
 import ThemeStore from 'admin/store/theme';
 import ThemeAction from 'admin/action/theme';
 
@@ -14,8 +14,6 @@ import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
-
-import BreadCrumb from './breadcrumb';
 
 
 module.exports = class extends Base {

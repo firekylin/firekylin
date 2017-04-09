@@ -1,5 +1,4 @@
 import React from 'react';
-import Base from 'base';
 import {Link} from 'react-router';
 import {
   Pagination,
@@ -7,13 +6,13 @@ import {
   Tab
 } from 'react-bootstrap';
 
+import PostAction from '../action/post';
+import PostStore from '../store/post';
+import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
-import PostAction from '../action/post';
-import PostStore from '../store/post';
-
 
 module.exports = class extends Base {
   constructor(props) {

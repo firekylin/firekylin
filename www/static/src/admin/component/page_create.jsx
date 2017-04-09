@@ -1,12 +1,12 @@
 import moment from 'moment';
 
+import PostCreate from './post_create';
 import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
 import ThemeAction from 'admin/action/theme';
 import ThemeStore from 'admin/store/theme';
 
-import PostCreate from './post_create';
 
 module.exports = class extends PostCreate {
   type = 1;

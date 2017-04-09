@@ -1,11 +1,11 @@
 import React from 'react';
-import Base from 'base';
 import { Form, Radio, RadioGroup } from 'react-bootstrap-validation';
 
-import BreadCrumb from 'admin/component/breadcrumb';
-import TipAction from 'common/action/tip';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   constructor(props) {

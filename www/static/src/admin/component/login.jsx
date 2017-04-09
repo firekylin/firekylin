@@ -1,11 +1,11 @@
 import React from 'react';
-import Base from 'base';
 import md5 from 'md5';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
-import TipAction from 'common/action/tip';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
+import Base from 'base';
+import TipAction from 'common/action/tip';
 
 
 module.exports = class extends Base {

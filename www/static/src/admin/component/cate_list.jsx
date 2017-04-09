@@ -1,14 +1,14 @@
 import React from 'react';
-import Base from 'base';
 import {Link} from 'react-router';
 
-import BreadCrumb from 'admin/component/breadcrumb';
-import TipAction from 'common/action/tip';
-import ModalAction from 'common/action/modal';
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
+import ModalAction from 'common/action/modal';
 
 module.exports = class extends Base {
   constructor(props) {

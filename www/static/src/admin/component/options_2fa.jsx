@@ -1,13 +1,13 @@
 import React from 'react';
-import Base from 'base';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import QRcode from 'qrcode-react';
 
+import OptionsAction from '../action/options';
+import OptionsStore from '../store/options';
+import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
-import OptionsAction from '../action/options';
-import OptionsStore from '../store/options';
 
 module.exports = class extends Base {
   constructor(props) {

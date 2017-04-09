@@ -1,12 +1,12 @@
 import React from 'react';
-import Base from 'base';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
-import BreadCrumb from 'admin/component/breadcrumb';
-import TipAction from 'common/action/tip';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   constructor(props) {

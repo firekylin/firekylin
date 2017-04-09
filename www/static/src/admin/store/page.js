@@ -1,8 +1,7 @@
 import Reflux from 'reflux';
 import superagent from 'superagent';
-import firekylin from 'common/util/firekylin';
-
 import PageAction from '../action/page';
+import firekylin from 'common/util/firekylin';
 
 export default Reflux.createStore({
 

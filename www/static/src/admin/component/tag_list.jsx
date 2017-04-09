@@ -1,10 +1,10 @@
 import React from 'react';
+import {Link} from 'react-router';
+
+import Base from 'base';
 import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
-
-import Base from 'base';
-import {Link} from 'react-router';
 import ModalAction from 'common/action/modal';
 import BreadCrumb from 'admin/component/breadcrumb';
 

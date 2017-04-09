@@ -1,16 +1,16 @@
 import React from 'react';
-import Base from 'base';
 import {Link} from 'react-router';
 import {
   Tabs,
   Tab
 } from 'react-bootstrap';
 
-import BreadCrumb from 'admin/component/breadcrumb';
-import TipAction from 'common/action/tip';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 import ModalAction from '../../common/action/modal';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   constructor(props) {
