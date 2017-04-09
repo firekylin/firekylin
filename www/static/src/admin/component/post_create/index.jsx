@@ -532,6 +532,9 @@ module.exports = class extends Base {
     let draftOnClick = () => {
       this.state.status = 0;
       localStorage.removeItem('unsavetype'+this.type+'id'+this.id);
+
+      // 让表单提交
+      this.refs.form.submit();
     };
 
     let publishOnClick = () => {
@@ -542,7 +545,7 @@ module.exports = class extends Base {
     return (
       <div className="button-group">
         <button
-          type="submit"
+          type="button"
           {...props}
           className="btn btn-default"
           onClick={draftOnClick}
@@ -570,7 +573,7 @@ module.exports = class extends Base {
 
     //如果是在编辑状态下在没有拿到数据之前不做渲染
     //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if( this.id && !this.state.postInfo.pathname ) {
+    if( this.id && !this.state.postInfo.pathname && this.state.postInfo.status !== 0 ) {
       return null;
     }
 
@@ -584,6 +587,7 @@ module.exports = class extends Base {
         <BreadCrumb {...this.props} />
         <div className="manage-container">
           <Form
+            ref='form'
             model={this.state.postInfo}
             className="post-create clearfix"
             onValidSubmit={this.handleValidSubmit.bind(this)}
