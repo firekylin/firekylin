@@ -1,6 +1,6 @@
 import React from 'react';
-import Base from 'base';
 import { Radio, RadioGroup, Form, ValidatedInput, FileValidator } from 'react-bootstrap-validation';
+import Base from 'base';
 import firekylin from 'common/util/firekylin';
 
 import BreadCrumb from 'admin/component/breadcrumb';
@@ -20,13 +20,13 @@ module.exports = class extends Base {
       TipAction.success(result.data);
       alert(result.data);
       this.setState({uploading: false});
-    }, err => {
+    }, () => {
       TipAction.fail('IMPORT_FAIL');
       this.setState({uploading: false});
     });
   }
 
-  render(){
+  render() {
     let uploadType = this.state.uploadType;
     const radio = (
       <RadioGroup
@@ -63,7 +63,7 @@ module.exports = class extends Base {
               accept="application/xml"
           />
         </div>
-      ), 
+      ),
       ghost: (
         <div>
           <p>请上传 Ghost 中导出的 .json 文件，Jekyll用户请上传使用 <a href="https://github.com/redwallhp/Jekyll-to-Ghost">Jekyll to Ghost 插件</a>导出后的 .json 文件</p>
@@ -93,7 +93,7 @@ module.exports = class extends Base {
               labelClassName="col-xs-2"
               wrapperClassName="col-xs-10"
               validate={files => {
-                if( FileValidator.isEmpty(files) ) {
+                if(FileValidator.isEmpty(files)) {
                   return '请上传文件';
                 }
                 return true;
@@ -112,7 +112,7 @@ module.exports = class extends Base {
               labelClassName="col-xs-2"
               wrapperClassName="col-xs-10"
               validate={files => {
-                if( FileValidator.isEmpty(files) ) {
+                if(FileValidator.isEmpty(files)) {
                   return '请上传文件';
                 }
                 return true;

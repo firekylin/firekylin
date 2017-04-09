@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'babel-polyfill';
-import {Router, Route, Redirect, useRouterHistory} from 'react-router';
+import {Router, useRouterHistory} from 'react-router';
 
 import {createHistory} from 'history';
 
-if( Object.freeze ) {
+if(Object.freeze) {
   Object.freeze(window.SysConfig.userInfo);
 }
 
@@ -16,8 +16,8 @@ let history = useRouterHistory(createHistory)({
 
 let rootRoute = {
   path: '/',
-  indexRoute: { 
-    onEnter: (nextState, replace) => replace('/dashboard') 
+  indexRoute: {
+    onEnter: (nextState, replace) => replace('/dashboard')
   },
   getChildRoutes(location, callback) {
     require.ensure([], function(require) {

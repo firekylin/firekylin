@@ -1,25 +1,25 @@
-import Base from 'base';
 import React from 'react';
 import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
 
-import BreadCrumb from 'admin/component/breadcrumb';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
 import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       submitting: false,
-      options: SysConfig.options,
+      options: window.SysConfig.options,
       pageList: []
     };
 
     let {frontPage} = this.state.options;
-    if( !frontPage ) {
+    if(!frontPage) {
       frontPage = 'recent';
     } else {
       this.state.options.frontPagePage = frontPage;
@@ -28,19 +28,19 @@ module.exports = class extends Base {
     this.state.options.frontPage = frontPage;
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
     this.listenTo(PageStore, this.getPageList.bind(this));
     PageAction.selectList(-1);
   }
 
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveOptionsSuccess':
         this.setState({submitting: false});
         TipAction.success('更新成功');
-        for(let key in this.optionsSavedValue){
-          SysConfig.options[key] = this.optionsSavedValue[key];
+        for(let key in this.optionsSavedValue) {
+          window.SysConfig.options[key] = this.optionsSavedValue[key];
         }
         break;
     }
@@ -50,10 +50,10 @@ module.exports = class extends Base {
     this.setState({pageList});
   }
 
-  handleValidSubmit(values){
-    if( values.frontPage === 'recent' ) {
+  handleValidSubmit(values) {
+    if(values.frontPage === 'recent') {
       values.frontPage = '';
-    } else if( values.frontPage === 'page' ) {
+    } else if(values.frontPage === 'page') {
       values.frontPage = this.state.options.frontPagePage;
     }
 
@@ -62,7 +62,7 @@ module.exports = class extends Base {
     OptionsAction.save(values);
   }
 
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
 
@@ -83,9 +83,9 @@ module.exports = class extends Base {
     );
   }
 
-  render(){
+  render() {
     let BtnProps = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       BtnProps.disabled = true;
     }
     let postListUrl = location.origin + '/post/list';
@@ -141,16 +141,16 @@ module.exports = class extends Base {
                 className="form-control"
                 help="此数目用于指定文章归档输出时每页显示的文章数目."
                 validate={val => {
-                  if( !val ) {
+                  if(!val) {
                     return '请填写列表页文章数目';
                   }
 
                   let p = Number(val);
-                  if( Number.isNaN(p) ) {
+                  if(Number.isNaN(p)) {
                     return '请填入一个数字';
                   }
 
-                  if( parseInt(val) !== p ) {
+                  if(parseInt(val) !== p) {
                     return '请填入一个整数';
                   }
 
@@ -168,12 +168,12 @@ module.exports = class extends Base {
                 className="form-control"
                 help="文章列表页自动截取开头的部分文字作为摘要。0 为禁用，大于 0 为截取的字符数"
                 validate={val => {
-                  if( !val ) {
+                  if(!val) {
                     return '请填写自动截取的字符数';
                   }
 
                   let p = parseInt(val);
-                  if( Number.isNaN(p) ) {
+                  if(Number.isNaN(p)) {
                     return '请填入一个数字';
                   }
 
@@ -192,7 +192,9 @@ module.exports = class extends Base {
               <Radio value="0" label="摘要输出" />
             </RadioGroup>
 
-            <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            <button type="submit" {...BtnProps} className="btn btn-primary">
+              {this.state.submitting ? '提交中...' : '提交'}
+            </button>
           </Form>
         </div>
       </div>

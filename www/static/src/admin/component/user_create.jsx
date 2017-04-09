@@ -1,18 +1,16 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
-import BreadCrumb from 'admin/component/breadcrumb';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
+import Base from 'base';
+import BreadCrumb from 'admin/component/breadcrumb';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = this.initialState();
     this.id = this.props.params.id | 0;
@@ -25,9 +23,9 @@ module.exports = class extends Base {
     };
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(UserStore, this.handleTrigger.bind(this));
-    if(this.id){
+    if(this.id) {
       UserAction.select(this.id);
     }
   }
@@ -46,8 +44,8 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveUserFail':
         this.setState({submitting: false});
         break;
@@ -66,18 +64,18 @@ module.exports = class extends Base {
    * save
    * @return {}       []
    */
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     values.type = ReactDom.findDOMNode(this.refs.type).value;
     values.status = ReactDom.findDOMNode(this.refs.status).value;
     delete values.repassword;
-    if( this.id && values.password === '' ) {
+    if(this.id && values.password === '') {
       delete values.password;
     } else {
-      let password = md5(SysConfig.options.password_salt + values.password);
+      let password = md5(window.SysConfig.options.password_salt + values.password);
       values.password = password;
     }
     this.setState({submitting: true});
-    if(this.id){
+    if(this.id) {
       values.id = this.id;
     }
     UserAction.save(values);
@@ -90,7 +88,7 @@ module.exports = class extends Base {
    * handle invalid
    * @return {} []
    */
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
   /**
@@ -99,7 +97,7 @@ module.exports = class extends Base {
    * @param  {[type]} event [description]
    * @return {[type]}       [description]
    */
-  changeInput(type, event){
+  changeInput(type, event) {
     let value = event.target.value;
     let userInfo = this.state.userInfo;
     userInfo[type] = value;
@@ -112,14 +110,14 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  getProps(type){
+  getProps(type) {
     let prop = {
       value: this.state.userInfo[type] || '',
       onChange: this.changeInput.bind(this, type)
     };
-    if(this.id && ['name', 'email'].indexOf(type) > -1){
-      if(type === 'email'){
-        if(this.hasEmail){
+    if(this.id && ['name', 'email'].indexOf(type) > -1) {
+      if(type === 'email') {
+        if(this.hasEmail) {
           prop.readOnly = true;
         }
       }else{
@@ -128,7 +126,7 @@ module.exports = class extends Base {
     }
 
     let validatePrefix = '';
-    if(!this.id && ['name', 'email'].indexOf(type) > -1){
+    if(!this.id && ['name', 'email'].indexOf(type) > -1) {
       validatePrefix = 'required,';
     }
     let validates = {
@@ -136,15 +134,15 @@ module.exports = class extends Base {
       email: 'isEmail',
       password: val => {
         //编辑时可以不用输入用户名
-        if( this.id && val === '' ) {
+        if(this.id && val === '') {
           return true;
         }
 
-        if( val === '' ) {
+        if(val === '') {
           return '请输出密码';
         }
 
-        if( val.length < 8 || val.length > 30 ) {
+        if(val.length < 8 || val.length > 30) {
           return '密码长度为8到30个字符';
         }
 
@@ -152,7 +150,7 @@ module.exports = class extends Base {
       },
       repassword: (val, context) => val === context.password
     }
-    if(typeof validates[type] === 'string'){
+    if(typeof validates[type] === 'string') {
       prop.validate = validatePrefix + validates[type];
     }else{
       prop.validate = validates[type];
@@ -161,9 +159,9 @@ module.exports = class extends Base {
     return prop;
   }
 
-  getOptionProp(type, value){
+  getOptionProp(type, value) {
     let val = this.state.userInfo[type];
-    if(val == value){
+    if(val === value) {
       return {selected: true}
     }
     return {};
@@ -172,9 +170,9 @@ module.exports = class extends Base {
    * render
    * @return {} []
    */
-  render(){
+  render() {
     let props = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       props.disabled = true;
     }
 
@@ -243,7 +241,9 @@ module.exports = class extends Base {
                   errorHelp='密码不一致'
                 />
               </div>
-              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+              <button type="submit" {...props} className="btn btn-primary">
+                {this.state.submitting ? '提交中...' : '提交'}
+              </button>
             </div>
             <div className="pull-left">
               <div className="form-group">
@@ -286,12 +286,14 @@ module.exports = class extends Base {
                 <div className="form-group">
                   <label>App Key</label>
                   <div>
-                    <input type="text" className="form-control" disabled={true} value={this.state.userInfo.app_key} />
+                    <input type="text" className="form-control" disabled={true}
+                      value={this.state.userInfo.app_key} />
                   </div>
                 </div>
                 <div className="form-group">
                   <label>App Secret</label>
-                  <input type="text" className="form-control" disabled={true} value={this.state.userInfo.app_secret} />
+                  <input type="text" className="form-control" disabled={true}
+                    value={this.state.userInfo.app_secret} />
                 </div>
               </filedset>
             </div>

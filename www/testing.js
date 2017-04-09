@@ -1,5 +1,5 @@
-var thinkjs = require('thinkjs');
 var path = require('path');
+var thinkjs = require('thinkjs');
 
 var rootPath = path.dirname(__dirname);
 

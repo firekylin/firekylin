@@ -1,4 +1,4 @@
-//import {Promise} from 'es6-promise';
+/* eslint eqeqeq:0 */
 import moment from 'moment';
 import TipActions from '../action/tip';
 
@@ -10,7 +10,7 @@ let firekylin = {
    * 获取deferred对象
    * @return {[type]} [description]
    */
-  defer(){
+  defer() {
     let deferred = {};
     deferred.promise = new Promise((resolve, reject) => {
       deferred.resolve = resolve;
@@ -26,11 +26,11 @@ let firekylin = {
   request: request => {
     let deferred = firekylin.defer();
     if(request.method === 'POST') {
-      request.type('form').send({web_token: SysConfig.token});
+      request.type('form').send({web_token: window.SysConfig.token});
     }
     request.query({ _r: Math.random() });
     request.end((err, res) => {
-      if(err){
+      if(err) {
         if(navigator.onLine) {
           TipActions.fail(err.message);
         } else {
@@ -41,12 +41,12 @@ let firekylin = {
       let text = res.text.trim();
       try{
         text = JSON.parse(text);
-        if(text.errno !== 0){
+        if(text.errno !== 0) {
           TipActions.fail(text.errmsg);
           return deferred.reject(new Error(text.errmsg));
         }
         deferred.resolve(text.data || {});
-      }catch(err){
+      }catch(err) {
         TipActions.fail(err.message);
         return deferred.reject(err);
       }
@@ -59,7 +59,7 @@ let firekylin = {
       xhr.open('POST', url, true);
       xhr.onload = function() {
         let res = JSON.parse(xhr.responseText);
-        if(res.errno != 0) {
+        if(res.errno !== 0) {
           reject(res);
         } else {
           resolve(res);
@@ -131,7 +131,7 @@ let firekylin = {
    */
   isEmpty: obj => {
     if (firekylin.isObject(obj)) {
-      for(let key in obj){
+      for(let key in obj) {
         return !key && !0;
       }
       return true;
@@ -159,20 +159,20 @@ let firekylin = {
   extend: (target, ...args) => {
     target = target || {};
     let i = 0, length = args.length, options, name, src, copy;
-    for(; i < length; i++){
+    for(; i < length; i++) {
       options = args[i];
       if (!options) {
         continue;
       }
-      for(name in options){
+      for(name in options) {
         src = target[name];
         copy = options[name];
         if (src && src === copy) {
           continue;
         }
-        if(firekylin.isObject(copy)){
+        if(firekylin.isObject(copy)) {
           target[name] = firekylin.extend(src && firekylin.isObject(src) ? src : {}, copy);
-        }else if(firekylin.isArray(copy)){
+        }else if(firekylin.isArray(copy)) {
           target[name] = firekylin.extend([], copy);
         }else{
           target[name] = copy;
@@ -184,17 +184,14 @@ let firekylin = {
   deepEqual: (actual, expected) => {
 
     function objEquiv(a, b) {
-      if (firekylin.isNullOrUndefined(a) || firekylin.isNullOrUndefined(b))
-        return false;
+      if (firekylin.isNullOrUndefined(a) || firekylin.isNullOrUndefined(b)) return false;
       // an identical 'prototype' property.
       if (a.prototype !== b.prototype) return false;
       // if one is a primitive, the other must be same
-      if (firekylin.isPrimitive(a) || firekylin.isPrimitive(b))
-        return a === b;
+      if (firekylin.isPrimitive(a) || firekylin.isPrimitive(b)) return a === b;
       var aIsArgs = firekylin.isArguments(a),
           bIsArgs = firekylin.isArguments(b);
-      if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs))
-        return false;
+      if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs)) return false;
       if (aIsArgs) {
         a = pSlice.call(a);
         b = pSlice.call(b);
@@ -205,15 +202,13 @@ let firekylin = {
           key, i;
       // having the same number of owned properties (keys incorporates
       // hasOwnProperty)
-      if (ka.length != kb.length)
-        return false;
+      if (ka.length != kb.length) return false;
       //the same set of keys (although not necessarily the same order),
       ka.sort();
       kb.sort();
       //~~~cheap key test
       for (i = ka.length - 1; i >= 0; i--) {
-        if (ka[i] != kb[i])
-          return false;
+        if (ka[i] != kb[i]) return false;
       }
       //equivalent values for every corresponding key, and
       //~~~possibly expensive deep test
@@ -244,11 +239,9 @@ let firekylin = {
 
     // 7.4. Other pairs that do not both pass typeof value == 'object',
     // equivalence is determined by ==.
-    }
-    else if(firekylin.isArray(actual) && firekylin.isArray(expected)){
+    } else if(firekylin.isArray(actual) && firekylin.isArray(expected)) {
       return objEquiv(actual, expected);
-    }
-    else if (!firekylin.isObject(actual) && !firekylin.isObject(expected)) {
+    } else if (!firekylin.isObject(actual) && !firekylin.isObject(expected)) {
       return actual == expected;
 
     // 7.5 For all other Object pairs, including Array objects, equivalence is
@@ -263,7 +256,7 @@ let firekylin = {
   },
 
   formatTime(str) {
-    return str ? moment(new Date(str)).format("YYYY年MM月DD日 HH:mm") : '';
+    return str ? moment(new Date(str)).format('YYYY年MM月DD日 HH:mm') : '';
   }
 };
 

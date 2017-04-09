@@ -1,19 +1,20 @@
-import Base from 'base';
 import React from 'react';
+import {Form, ValidatedInput} from 'react-bootstrap-validation';
+
 import BreadCrumb from './breadcrumb';
+import Base from 'base';
 import TipAction from 'common/action/tip';
 import OptionsStore from 'admin/store/options';
 import OptionsAction from 'admin/action/options';
-import {Form, ValidatedInput} from 'react-bootstrap-validation';
 
 module.exports = class extends Base {
   state = this.initialState();
 
   initialState() {
     let options = window.SysConfig.options;
-    if( !options.navigation ) {
+    if(!options.navigation) {
       options.navigation = [];
-    } else if( typeof(options.navigation) === 'string' ) {
+    } else if(typeof(options.navigation) === 'string') {
       options.navigation = JSON.parse(options.navigation);
     }
     return {
@@ -44,7 +45,7 @@ module.exports = class extends Base {
     this.forceUpdate();
   }
 
-  move(a,b) {
+  move(a, b) {
     let c = this.state.list[a];
     this.state.list[a] = this.state.list[b];
     this.state.list[b] = c;
@@ -68,7 +69,7 @@ module.exports = class extends Base {
               type="button"
               disabled={i===0}
               className="btn btn-success btn-xs"
-              onClick={()=> this.move(i-1,i)}
+              onClick={()=> this.move(i-1, i)}
           >
             <span className="glyphicon glyphicon-arrow-up"></span>
             <span>上移</span>
@@ -88,7 +89,7 @@ module.exports = class extends Base {
               type="button"
               className="btn btn-danger btn-xs"
               onClick={()=> {
-                this.state.list.splice(i,1);
+                this.state.list.splice(i, 1);
                 this.updateNav();
               }}
           >

@@ -1,10 +1,8 @@
-import Base from 'base';
 import React from 'react';
 import moment from 'moment';
-import ReactDOM from 'react-dom';
 import {Link} from 'react-router';
+import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
-
 import PostStore from 'admin/store/post';
 import PostAction from 'admin/action/post';
 import SystemStore from 'admin/store/system';
@@ -47,10 +45,10 @@ module.exports = class extends Base {
   handleTrigger(data, type) {
     switch(type) {
       case 'updateSystem':
-        if( this.state.step <= UPDATE_STEPS.length ) {
+        if(this.state.step <= UPDATE_STEPS.length) {
           this.setState({step: this.state.step + 1}, () => SystemAction.updateSystem(this.state.step));
         }
-        if( this.state.step > UPDATE_STEPS.length ) {
+        if(this.state.step > UPDATE_STEPS.length) {
           setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
           setInterval(() => this.setState({downCount: Math.max(0, --this.state.downCount)}), 1000);
         }
@@ -97,7 +95,7 @@ module.exports = class extends Base {
                       </div>
                       <span className="loading">{step[1]}</span>
                       <span className="ok">{step[2].replace('%d', this.state.downCount)}</span>
-                    </li>  
+                    </li>
                   )}
                 </ul>
               </div>
@@ -115,7 +113,7 @@ module.exports = class extends Base {
       {url: '/page/create', title: '创建页面', type: 1},
       {url: '/appearance/theme', title: '更改外观', type: 1},
       {url: '/options/general', title: '系统设置', type: 1}
-    ].filter(link => link.type >= SysConfig.userInfo.type);
+    ].filter(link => link.type >= window.SysConfig.userInfo.type);
 
     return (
       <div className="fk-content-wrap">
@@ -123,11 +121,16 @@ module.exports = class extends Base {
         <div className="manage-container">
           {this.state.needUpdate ?
             <p className="bg-info update-message">
-              Firekylin <a href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}>{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz">下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}>在线更新</a>！
+              Firekylin <a
+              href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}
+              >{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz"
+              >下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}
+              >在线更新</a>！
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
-          <p>目前有 {this.state.count.posts} 篇文章, 并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
+          <p>目前有 {this.state.count.posts} 篇文章,
+            并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
           <div className="quick-link">
             {links.map(link => <Link key={link.url} to={link.url}>{link.title}</Link>)}

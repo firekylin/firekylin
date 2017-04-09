@@ -1,4 +1,5 @@
 import auth from 'common/util/auth';
+
 module.exports = {
   path: 'options',
   onEnter(nextState, replace) {

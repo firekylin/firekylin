@@ -11,8 +11,9 @@
     "webpack": "webpack --watch",
     "webpack.build": "webpack",
     "webpack.build.production": "webpack --config=webpack.production.config.babel.js",
-    "lint": "eslint ./src ./*.js ./www/theme/firekylin -f table --ext .js --ext .jsx || true",
-    "lint-break-on-errors": "eslint ./src ./*.js ./www/theme/firekylin -f table --ext .js --ext .jsx"
+    "lint": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache -f table --ext .js,.jsx || true",
+    "lint-fix": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache -f table --ext .js,.jsx --fix || true",
+    "lint-break-on-errors": "echo 'Running ESLint...\n(Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache -f table --ext .js,.jsx"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
@@ -52,6 +53,7 @@
     "codemirror": "^5.24.2",
     "css-loader": "^0.23.1",
     "eslint": "^3.19.0",
+    "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-react": "^6.10.3",
     "history": "^1.17.0",
@@ -84,5 +86,7 @@
   },
   "repository": "https://github.com/firekylin/firekylin",
   "license": "MIT",
-  "pre-commit": ["lint-break-on-errors"]
+  "pre-commit": [
+    "lint-break-on-errors"
+  ]
 }

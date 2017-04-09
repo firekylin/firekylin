@@ -13,7 +13,7 @@ class Search extends React.Component {
     let req = superagent.get('/admin/api/post?status=3&keyword='+encodeURIComponent(value));
     firekylin.request(req).then(
       resp => this.setState({options: resp.data})
-    ).catch(err => console.log(err));
+    ).catch(() => {});
   }
   render() {
     return (
@@ -28,7 +28,7 @@ class Search extends React.Component {
           showArrow={false}
           dropdownStyle={{zIndex: 10000}}
       >
-        {this.state.options.map( (opt, i) =>
+        {this.state.options.map((opt, i) =>
           <Option key={i} value={opt.pathname}>{opt.title}</Option>
         )}
       </Select>
