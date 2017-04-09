@@ -30,5 +30,6 @@ export default {
   POST_USER_ERROR: [118, '当前用户与文章用户不一致'],
   ACCOUNT_FORBIDDEN: [119, '禁止登录'],
   SYSTERM_INSTALLED: [120, '程序已安装请勿重复安装'],
-  PUSH_CLOSED: [121, '推送申请功能未开启']
+  PUSH_CLOSED: [121, '推送申请功能未开启'],
+  DELETE_CURRENT_USER_ERROR: [122, '不能删除当前登录用户']
 };

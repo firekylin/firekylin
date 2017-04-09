@@ -30,6 +30,11 @@ module.exports = class extends Base {
     UserAction.select();
   }
   handleTrigger(data, type){
+    // 如果删除用户失败不渲染页面
+    if (type === 'deleteUserFail') {
+      return;
+    }
+
     switch(type){
       case 'deleteUserSuccess':
         TipAction.success('删除成功');
