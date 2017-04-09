@@ -1,30 +1,27 @@
 import React from 'react';
-import Base from 'base';
 import {Link} from 'react-router';
-import classnames from 'classnames';
 
+import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
 import PushAction from 'admin/action/push';
 import PushStore from 'admin/store/push';
 
-import firekylin from 'common/util/firekylin';
-
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       loading: false,
       pushList: []
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(PushStore, this.handleTrigger.bind(this));
     PushAction.select();
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'deletePushFail':
         TipAction.fail(data);
         break;
@@ -37,11 +34,11 @@ module.exports = class extends Base {
         break;
     }
   }
-  getPushList(){
-    if(this.state.loading){
+  getPushList() {
+    if(this.state.loading) {
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
-    if(!this.state.pushList.length){
+    if(!this.state.pushList.length) {
       return (<tr><td colSpan="8" className="center">暂无记录</td></tr>);
     }
     return this.state.pushList.map(item => {
@@ -80,7 +77,7 @@ module.exports = class extends Base {
     })
   }
 
-  render(){
+  render() {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />

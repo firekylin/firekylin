@@ -1,10 +1,7 @@
 import React from 'react';
-import ReactDom from 'react-dom';
-import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
+import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import PushAction from 'admin/action/push';
 import PushStore from 'admin/store/push';
@@ -20,7 +17,7 @@ module.exports = class extends Base {
       }
     });
   }
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = this.initialState();
     this.id = this.props.params.id;
@@ -28,14 +25,14 @@ module.exports = class extends Base {
 
   componentWillMount() {
     this.listenTo(PushStore, this.handleTrigger.bind(this));
-    if(this.id){
+    if(this.id) {
       PushAction.select(this.id);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     this.id = nextProps.params.id | 0;
-    if( this.id ) {
+    if(this.id) {
       PushAction.select(this.id);
     }
     this.setState(this.initialState());
@@ -46,8 +43,8 @@ module.exports = class extends Base {
    * @param  {[type]} type [description]
    * @return {[type]}      [description]
    */
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'savePushFailed':
         TipAction.fail(data.message);
         this.setState({submitting: false});
@@ -66,9 +63,9 @@ module.exports = class extends Base {
    * save
    * @return {}       []
    */
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
-    if(this.id){
+    if(this.id) {
       values.id = this.id;
     }
     PushAction.save(values);
@@ -77,15 +74,15 @@ module.exports = class extends Base {
    * render
    * @return {} []
    */
-  render(){
+  render() {
     let props = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       props.disabled = true;
     }
 
     //如果是在编辑状态下在没有拿到数据之前不做渲染
     //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if( this.id && !this.state.pushInfo.title ) {
+    if(this.id && !this.state.pushInfo.title) {
       return null;
     }
 
@@ -99,7 +96,9 @@ module.exports = class extends Base {
             onValidSubmit={this.handleValidSubmit.bind(this)}
           >
             <div className="alert alert-info" role="alert" style={{maxWidth: '700px'}}>
-              推送功能是指在本系统写博客时可以将文章推送到其他也使用 Firekylin 构建的博客系统中。最明显的需求就是个人写博客时需要将文章推送到团队博客中。如果每次都是写完后把内容拷贝到团队博客中势必非常麻烦，使用推送功能就非常简单了。
+              推送功能是指在本系统写博客时可以将文章推送到其他也使用 Firekylin 构建的博客系统中。
+              最明显的需求就是个人写博客时需要将文章推送到团队博客中。如果每次都是写完后把内容拷贝到团队博客中势必非常麻烦，
+              使用推送功能就非常简单了。
             </div>
             <ValidatedInput
                 name="title"
@@ -146,7 +145,9 @@ module.exports = class extends Base {
                 }}
             />
             <div className="form-group col-xs-12">
-              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+              <button type="submit" {...props} className="btn btn-primary">
+                {this.state.submitting ? '提交中...' : '提交'}
+              </button>
             </div>
           </Form>
         </div>

@@ -8,9 +8,9 @@ export default Reflux.createStore({
 
   listenables: TipActions,
 
-  clear: function(timeout){
+  clear: function(timeout) {
     clearTimeout(this.timer);
-    if(this.deferred){
+    if(this.deferred) {
       this.deferred.resolve();
     }
     let deferred = firekylin.defer();
@@ -27,11 +27,11 @@ export default Reflux.createStore({
    * @param  {[type]} text [description]
    * @return {[type]}      [description]
    */
-  onSuccess: function(text, timeout){
-    if( typeof(text) !== 'string' ) {
+  onSuccess: function(text, timeout) {
+    if(typeof(text) !== 'string') {
       text = JSON.stringify(text);
     }
-    
+
     this.trigger({
       type: 'success',
       text: text || '操作成功',
@@ -44,11 +44,11 @@ export default Reflux.createStore({
    * @param  {[type]} text [description]
    * @return {[type]}      [description]
    */
-  onFail: function(text, timeout){
-    if( typeof(text) !== 'string' ) {
+  onFail: function(text, timeout) {
+    if(typeof(text) !== 'string') {
       text = JSON.stringify(text);
     }
-    
+
     this.trigger({
       type: 'danger',
       text: text || '操作失败',

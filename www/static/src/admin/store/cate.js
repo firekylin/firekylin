@@ -13,9 +13,9 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(id){
+  onSelect(id) {
     let url = '/admin/api/cate';
-    if(id){
+    if(id) {
       url += '/' + id;
     }
     let req = superagent.get(url);
@@ -35,11 +35,11 @@ export default Reflux.createStore({
    * @param  {Object} data []
    * @return {Promise}      []
    */
-  onSave(data){
+  onSave(data) {
     let id = data.id;
     delete data.id;
     let url = '/admin/api/cate';
-    if(id){
+    if(id) {
       url += '/' + id + '?method=put';
     }
     let req = superagent.post(url);
@@ -50,7 +50,7 @@ export default Reflux.createStore({
           this.trigger('CATE_EXIST', 'saveCateFail');
         } else this.trigger(data, 'saveCateSuccess');
       },
-      err  => this.trigger(err, 'saveCateFail')
+      err => this.trigger(err, 'saveCateFail')
     );
   },
 

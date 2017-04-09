@@ -6,9 +6,9 @@ import TagAction from 'admin/action/tag';
 export default Reflux.createStore({
   listenables: TagAction,
 
-  onSelect(id){
+  onSelect(id) {
     let url = '/admin/api/tag';
-    if(id){
+    if(id) {
       url += '/' + id;
     }
     let req = superagent.get(url);
@@ -17,11 +17,11 @@ export default Reflux.createStore({
     );
   },
 
-  onSave(data){
+  onSave(data) {
     let id = data.id;
     delete data.id;
     let url = '/admin/api/tag';
-    if(id){
+    if(id) {
       url += '/' + id + '?method=put';
     }
     let req = superagent.post(url);
@@ -32,7 +32,7 @@ export default Reflux.createStore({
           this.trigger('TAG_EXIST', 'saveTagFail');
         } else this.trigger(data, 'saveTagSuccess');
       },
-      err  => this.trigger(err, 'saveTagFail')
+      err => this.trigger(err, 'saveTagFail')
     );
   },
 

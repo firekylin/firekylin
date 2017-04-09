@@ -59,3 +59,5 @@ jsconfig.json
 .vscode
 www/theme/firekylin_new
 db/
+
+.eslintcache

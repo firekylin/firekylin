@@ -1,29 +1,28 @@
 import React from 'react';
+import {Link} from 'react-router';
+
+import Base from 'base';
 import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
 import TipAction from 'common/action/tip';
-
-import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import ModalAction from 'common/action/modal';
 import BreadCrumb from 'admin/component/breadcrumb';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       loading: true,
       tagList: []
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(TagStore, this.handleTrigger.bind(this));
     TagAction.select();
   }
 
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'deleteTagFail':
         TipAction.fail(data);
         break;
@@ -37,11 +36,11 @@ module.exports = class extends Base {
     }
   }
 
-  getTagList(){
-    if(this.state.loading){
+  getTagList() {
+    if(this.state.loading) {
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
-    if(!this.state.tagList.length){
+    if(!this.state.tagList.length) {
       return (<tr><td colSpan="8" className="center">暂无标签</td></tr>);
     }
     return this.state.tagList.map(item => {
@@ -78,7 +77,7 @@ module.exports = class extends Base {
       );
     })
   }
-  render(){
+  render() {
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />

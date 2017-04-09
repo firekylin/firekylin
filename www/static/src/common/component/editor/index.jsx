@@ -1,20 +1,22 @@
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
-import Base from 'base';
+/* eslint max-len:0 */
 import marked from 'marked';
 import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import {Tabs, Tab} from 'react-bootstrap';
 import Autobind from 'autobind-decorator';
-import ModalStore from 'common/store/modal';
 import React, { PropTypes as T } from 'react';
-import ModalAction from 'common/action/modal';
-import firekylin from 'common/util/firekylin';
+
 import Search from './search';
+import Base from 'base';
+import ModalStore from 'common/store/modal';
+import ModalAction from 'common/action/modal';
+import TipAction from 'common/action/tip';
+import firekylin from 'common/util/firekylin';
 import './style.css';
 
-import TipAction from 'common/action/tip';
 
 class MdEditor extends Base {
   static defaultProps = {
@@ -53,10 +55,10 @@ class MdEditor extends Base {
         let scrollEle = e.target;
         let syncEle = scrollEle === that.textControl ? that.previewControl : that.textControl;
         let percent = scrollEle.scrollTop / (scrollEle.scrollHeight - scrollEle.clientHeight);
-        if( leftSync && scrollEle === that.previewControl ) { 
+        if(leftSync && scrollEle === that.previewControl) {
           return true;
         }
-        if( rightSync && scrollEle === that.textControl ) {
+        if(rightSync && scrollEle === that.textControl) {
           return true;
         }
 
@@ -69,12 +71,12 @@ class MdEditor extends Base {
     })();
 
     if(localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id+'']) {
-        ModalAction.confirm('提示','检测到上次没有保存文章就退出页面，是否从缓存里恢复文章',()=>{
+        ModalAction.confirm('提示', '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章', ()=>{
           let content = localStorage['unsavetype'+this.props.info.type+'id'+this.props.info.id];
           this.setState({ result: marked(content) });
           this.props.onChange(content);
           return true;
-        },"","",()=>{
+        }, '', '', ()=>{
           localStorage.removeItem('unsavetype'+this.props.info.type+'id'+this.props.info.id);
         })
     }
@@ -91,7 +93,7 @@ class MdEditor extends Base {
     let FileList = Array.from(clipboard.items)
       .filter(item => item.kind==='file' && item.type.indexOf('image') > -1)
       .map(item => item.getAsFile());
-    if( !FileList.length ) { return true; }
+    if(!FileList.length) { return true; }
 
     e.preventDefault();
     let data = new FormData();
@@ -102,7 +104,7 @@ class MdEditor extends Base {
   _bindMouse() {
     let panel = ReactDOM.findDOMNode(this.refs.editorPanel);
     let resizebar = ReactDOM.findDOMNode(this.refs.resizebar);
-    
+
     resizebar.addEventListener('mousedown', function resizeStart(e) {
       e.preventDefault();
 
@@ -125,7 +127,7 @@ class MdEditor extends Base {
       return e.preventDefault();
     }
 
-    if( !e.metaKey && !e.ctrlKey ) { return true; }
+    if(!e.metaKey && !e.ctrlKey) { return true; }
     let key = String.fromCharCode(e.keyCode).toUpperCase();
     let keys = {
       B: this._boldText,
@@ -141,7 +143,7 @@ class MdEditor extends Base {
       R: this._insertHr
     };
 
-    if( keys[key] ) {
+    if(keys[key]) {
       keys[key]();
       return e.preventDefault();
     }
@@ -170,9 +172,9 @@ class MdEditor extends Base {
             {this._getToolBar()}
           </div>
           <div className={editorClass}>
-            <textarea 
-                ref="editor" 
-                name="content" 
+            <textarea
+                ref="editor"
+                name="content"
                 onChange={this._onChange}
                 value={this.props.content}
             >
@@ -263,19 +265,19 @@ class MdEditor extends Base {
   }
 
   _changeMode (mode) {
-    return (e) => {
+    return () => {
       this.setState({ mode })
     }
   }
 
-  _toggleFullScreen (e) {
+  _toggleFullScreen () {
     this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   }
 
   _cleanSelect() {
     const start = this.textControl.selectionStart;
     const end = this.textControl.selectionEnd;
-    if( start === end ) {
+    if(start === end) {
       return true;
     }
 
@@ -302,20 +304,20 @@ class MdEditor extends Base {
     // pre-select
     setTimeout(()=> this.textControl.setSelectionRange(start + preStart, start + preEnd), 20);
     this.setState({ result: marked(content) }); // change state
-    this.props.onChange( content );
+    this.props.onChange(content);
   }
 
   _boldText () {
-    this._preInputText("**加粗文字**", 2, 6)
+    this._preInputText('**加粗文字**', 2, 6)
   }
 
   _italicText () {
-    this._preInputText("_斜体文字_", 1, 5)
+    this._preInputText('_斜体文字_', 1, 5)
   }
 
   _linkText (url = 'www.yourlink.com', text = '链接文本', select = true) {
     let start = 1, end = 1+text.length;
-    if( !select ) {
+    if(!select) {
       start = end = text.length + url.length + 4;
     }
 
@@ -323,11 +325,11 @@ class MdEditor extends Base {
   }
 
   _blockquoteText () {
-    this._preInputText("\n> 引用", 3, 5)
+    this._preInputText('\n> 引用', 3, 5)
   }
 
   _codeText () {
-    this._preInputText("\n```\ncode block\n```", 5, 15)
+    this._preInputText('\n```\ncode block\n```', 5, 15)
   }
 
   _linkModal() {
@@ -372,7 +374,7 @@ class MdEditor extends Base {
         </Tab>
       </Tabs>,
       () => {
-        if( this.state.linkUrl && this.state.linkText ) {
+        if(this.state.linkUrl && this.state.linkText) {
           _linkText(this.state.linkUrl, this.state.linkText, false);
         } else {
           _linkText();
@@ -397,15 +399,15 @@ class MdEditor extends Base {
         </Tab>
       </Tabs>,
       () => {
-        if( !this.state.file && !this.state.fileUrl ) {
+        if(!this.state.file && !this.state.fileUrl) {
           return false;
         }
 
-        var data = new FormData;
-        if( this.state.fileUrl ) {
+        var data = new FormData();
+        if(this.state.fileUrl) {
           data.append('fileUrl', this.state.fileUrl);
         } else {
-          if( this.state.file.size > 5 * 1024 * 1024 ) {
+          if(this.state.file.size > 5 * 1024 * 1024) {
             return TipAction.fail('图片大小超过 5M！');
           }
           data.append('file', this.state.file);
@@ -417,14 +419,14 @@ class MdEditor extends Base {
   }
 
   _uploadImage(data, {type = ''}) {
-    this._preInputText("![图片上传中…]", 0, 9);
+    this._preInputText('![图片上传中…]', 0, 9);
     return firekylin.upload(data).then(res => {
       let start = this._cleanSelect();
       const reg = /^(https?:)?\/\/.+/;
       if (!reg.test(res.data)) {
         res.data = location.origin + res.data;
       }
-      if( type.includes('image') || res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i) ) {
+      if(type.includes('image') || res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i)) {
         this._preInputText(`![alt](${res.data})`, 2, 5, start);
       } else {
         let text = this.state.fileUrl ? '链接文本' : this.state.file[0].name;
@@ -437,23 +439,23 @@ class MdEditor extends Base {
   }
 
   _listUlText () {
-    this._preInputText("- 无序列表项0\n- 无序列表项1", 2, 8)
+    this._preInputText('- 无序列表项0\n- 无序列表项1', 2, 8)
   }
 
   _listOlText () {
-    this._preInputText("1. 有序列表项0\n2. 有序列表项1", 3, 9)
+    this._preInputText('1. 有序列表项0\n2. 有序列表项1', 3, 9)
   }
 
   _headerText () {
-    this._preInputText("## 标题", 3, 5)
+    this._preInputText('## 标题', 3, 5)
   }
 
   _insertMore() {
-    this._preInputText("\n<!--more-->", 12, 12);
+    this._preInputText('\n<!--more-->', 12, 12);
   }
 
   _insertHr() {
-    this._preInputText("\n----------", 11, 11);
+    this._preInputText('\n----------', 11, 11);
   }
 }
 

@@ -1,14 +1,14 @@
 import React from 'react';
-import Base from './base';
 
 import TipStore from '../store/tip';
+import Base from './base';
 
 /**
  * 通用Tip
  */
 export default class extends Base {
 
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(TipStore, this.change.bind(this));
   }
   /**
@@ -16,12 +16,12 @@ export default class extends Base {
    * @param  {[type]} data [description]
    * @return {[type]}      [description]
    */
-  change(data){
+  change(data) {
     this.setState(data);
   }
 
-  render(){
-    if(this.state.isOpen){
+  render() {
+    if(this.state.isOpen) {
       let className = 'fk-alert alert alert-' + this.state.type;
       return (
         <div className={className}>

@@ -13,9 +13,9 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(id, filter){
+  onSelect(id, filter) {
     let url = '/admin/api/user';
-    if(id){
+    if(id) {
       url += '/' + id;
     }
     if(filter) {
@@ -24,7 +24,7 @@ export default Reflux.createStore({
     let req = superagent.get(url);
     return firekylin.request(req).then(data => {
       this.trigger(data, id ? 'getUserInfo' : 'getUserList');
-    }).catch(err => {
+    }).catch(() => {
 
     })
   },
@@ -33,11 +33,11 @@ export default Reflux.createStore({
    * @param  {Object} data []
    * @return {Promise}      []
    */
-  onSave(data){
+  onSave(data) {
     let id = data.id;
     delete data.id;
     let url = '/admin/api/user';
-    if(id){
+    if(id) {
       url += '/' + id + '?method=put';
     }
     let req = superagent.post(url);
@@ -48,7 +48,7 @@ export default Reflux.createStore({
       this.trigger(err, 'saveUserFail');
     })
   },
-  onSavepwd(data){
+  onSavepwd(data) {
     let url = '/admin/user/password';
     let req = superagent.post(url);
     req.type('form').send(data);
@@ -63,7 +63,7 @@ export default Reflux.createStore({
    * @param  {[type]} data [description]
    * @return {[type]}      [description]
    */
-  onLogin(data){
+  onLogin(data) {
     let req = superagent.post('/admin/user/login');
     req.type('form').send(data);
     return firekylin.request(req).then(data => {
@@ -73,7 +73,7 @@ export default Reflux.createStore({
     })
   },
 
-  onDelete(userId){
+  onDelete(userId) {
     let url = '/admin/api/user/' + userId + '?method=delete';
     let req = superagent.post(url);
     req.type('form').send();

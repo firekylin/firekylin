@@ -1,8 +1,7 @@
 import Reflux from 'reflux';
 import superagent from 'superagent';
-import firekylin from 'common/util/firekylin';
-
 import PushAction from '../action/push';
+import firekylin from 'common/util/firekylin';
 
 export default Reflux.createStore({
 
@@ -12,7 +11,7 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(id){
+  onSelect(id) {
     let url = '/admin/api/options?type=push';
     if(id) { url += `&key=${id}`; }
     let req = superagent.get(url);
@@ -21,13 +20,13 @@ export default Reflux.createStore({
     );
   },
 
-  onSave(data){
+  onSave(data) {
     let url = '/admin/api/options?method=put&type=push';
     let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(
       data => this.trigger(data, 'savePushSuccess'),
-      err  => this.trigger(err, 'savePushFailed')
+      err => this.trigger(err, 'savePushFailed')
     );
   },
 

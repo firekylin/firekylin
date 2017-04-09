@@ -1,85 +1,81 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
-import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
-import md5 from 'md5';
-import firekylin from 'common/util/firekylin';
-
-import BreadCrumb from 'admin/component/breadcrumb';
+import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
+import Base from 'base';
+import firekylin from 'common/util/firekylin';
+import BreadCrumb from 'admin/component/breadcrumb';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
       submitting: false,
-      options: SysConfig.options
+      options: window.SysConfig.options
     };
     if(!this.state.options.hasOwnProperty('push')) {
       this.state.options.push = '0';
     }
-    this.state.options.analyze_code = unescape(SysConfig.options.analyze_code);
+    this.state.options.analyze_code = unescape(window.SysConfig.options.analyze_code);
     //网站地址
-    if(!this.state.options.site_url){
+    if(!this.state.options.site_url) {
       this.state.options.site_url = location.protocol + '//' + location.host;
     }
   }
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'saveOptionsSuccess':
         this.setState({submitting: false});
         TipAction.success('更新成功');
-        for(let key in this.optionsSavedValue){
-          SysConfig.options[key] = this.optionsSavedValue[key];
+        for(let key in this.optionsSavedValue) {
+          window.SysConfig.options[key] = this.optionsSavedValue[key];
         }
         break;
     }
   }
-  changeInput(type, event){
+  changeInput(type, event) {
     let value = event.target.value;
     let options = this.state.options;
     options[type] = value;
     this.setState({options: options});
   }
-  getProps(name){
+  getProps(name) {
     let props = {
       value: this.state.options[name] || '',
       onChange: this.changeInput.bind(this, name)
     }
-    if(['title', 'description'].indexOf(name) > -1){
+    if(['title', 'description'].indexOf(name) > -1) {
       props.validate = 'required'
     }
     return props;
   }
-  handleValidSubmit(values){
+  handleValidSubmit(values) {
     this.setState({submitting: true});
     this.optionsSavedValue = values;
     OptionsAction.save(values);
   }
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
-  render(){
+  render() {
     let BtnProps = {}
-    if(this.state.submitting){
+    if(this.state.submitting) {
       BtnProps.disabled = true;
     }
 
     let logoUrl = this.state.options.logo_url;
     let iconUrl = this.state.options.favicon_url;
-    if( logoUrl && !logoUrl.includes('data:image') ) {
+    if(logoUrl && !logoUrl.includes('data:image')) {
       logoUrl += (logoUrl.includes('?') ? '&' : '?') + 'm=' + Date.now();
     }
 
-    if( iconUrl ) {
-      iconUrl += (iconUrl.includes('?') ? '&' : '?') + 'm=' + Date.now(); 
+    if(iconUrl) {
+      iconUrl += (iconUrl.includes('?') ? '&' : '?') + 'm=' + Date.now();
     }
 
     return (
@@ -107,7 +103,9 @@ module.exports = class extends Base {
             </div>
             <div className="form-group">
               <label>LOGO 地址</label>
-              {logoUrl ? <img src={logoUrl} width="140px" height="140px" alt="logo" style={{display: 'block', marginBottom: '10px'}}/> : null}
+              {logoUrl ?
+                <img src={logoUrl} width="140px" height="140px" alt="logo"
+                  style={{display: 'block', marginBottom: '10px'}}/> : null}
               <ValidatedInput
                 type="text"
                 name="logo_url"
@@ -117,7 +115,10 @@ module.exports = class extends Base {
               />
               <p className="help-block">
                 尺寸最好为 140x140px。
-                <button type="button" className="btn btn-default" onClick={()=> ReactDOM.findDOMNode(this.refs.logoInput).click()}>{this.state.logo_uploading?'正在':''}上传</button>
+                <button type="button" className="btn btn-default"
+                  onClick={()=> ReactDOM.findDOMNode(this.refs.logoInput).click()}>
+                  {this.state.logo_uploading?'正在':''}上传
+                </button>
                 <input
                     type="file"
                     ref="logoInput"
@@ -125,7 +126,7 @@ module.exports = class extends Base {
                     accept="image/*"
                     onChange={e=> {
                       let file = e.target.files[0];
-                      if( !file ) {
+                      if(!file) {
                         return false;
                       }
                       this.state.options.logo_url = '';
@@ -174,7 +175,8 @@ module.exports = class extends Base {
             </div>
             <div className="form-group">
               <label>Favicon 地址</label>
-              {iconUrl ? <img src={iconUrl} alt="logo" style={{display: 'block', marginBottom: '10px', maxWidth: '128px', maxHeight: '128px'}}/> : null}
+              {iconUrl ? <img src={iconUrl} alt="logo"
+                style={{display: 'block', marginBottom: '10px', maxWidth: '128px', maxHeight: '128px'}}/> : null}
               <ValidatedInput
                 type="text"
                 name="favicon_url"
@@ -184,7 +186,10 @@ module.exports = class extends Base {
               />
               <p className="help-block">
                 尺寸最好为 128x128px。
-                <button type="button" className="btn btn-default" onClick={()=> ReactDOM.findDOMNode(this.refs.faviconInput).click()}>{this.state.favicon_uploading?'正在':''}上传</button>
+                <button type="button" className="btn btn-default"
+                  onClick={()=> ReactDOM.findDOMNode(this.refs.faviconInput).click()}>
+                  {this.state.favicon_uploading?'正在':''}上传
+                </button>
                 <input
                     type="file"
                     ref="faviconInput"
@@ -192,7 +197,7 @@ module.exports = class extends Base {
                     accept="image/x-icon"
                     onChange={e=> {
                       let file = e.target.files[0];
-                      if( !file ) {
+                      if(!file) {
                         return false;
                       }
                       this.state.options.favicon_url = '';
@@ -267,7 +272,9 @@ module.exports = class extends Base {
                 className="form-control"
               />
             </div>
-            <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            <button type="submit" {...BtnProps} className="btn btn-primary">
+              {this.state.submitting ? '提交中...' : '提交'}
+            </button>
           </Form>
         </div>
       </div>

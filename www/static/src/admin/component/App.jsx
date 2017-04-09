@@ -1,8 +1,7 @@
 import React from 'react';
-import Base from 'base';
 import Login from './login';
 import Sidebar from './sidebar';
-import BreadCrumb from './breadcrumb';
+import Base from 'base';
 import Tip from 'common/component/tip';
 import ModalManage from 'common/component/modal_manage';
 
@@ -13,7 +12,7 @@ module.exports = class App extends Base {
   };
 
   render() {
-    if(!SysConfig.userInfo.name){
+    if(!window.SysConfig.userInfo.name) {
       return (
       <div className="fk">
         <Tip />

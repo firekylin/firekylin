@@ -1,18 +1,19 @@
-import Base from 'base';
 import React from 'react';
-import BreadCrumb from './breadcrumb';
 import CodeMirror from 'react-codemirror';
+import { SketchPicker } from 'react-color';
+import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
+import BreadCrumb from './breadcrumb';
+import Base from 'base';
 import TipAction from 'common/action/tip';
 import ThemeStore from 'admin/store/theme';
-import { SketchPicker } from 'react-color';
 import ThemeAction from 'admin/action/theme';
-import {Form, ValidatedInput} from 'react-bootstrap-validation';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
+
 
 module.exports = class extends Base {
   state = this.initialState();
@@ -22,7 +23,7 @@ module.exports = class extends Base {
       themeConfig: {},
       theme: window.SysConfig.options.theme || 'firekylin'
     }
-  };
+  }
 
   componentWillMount() {
     this.listenTo(ThemeStore, this.handleTrigger.bind(this));
@@ -31,14 +32,14 @@ module.exports = class extends Base {
 
     let themeConfig = window.SysConfig.options.themeConfig;
     try {
-      if( !themeConfig ) {
+      if(!themeConfig) {
         return;
       }
-      if( typeof(themeConfig) === 'string' ) {
+      if(typeof(themeConfig) === 'string') {
         themeConfig = JSON.parse(themeConfig);
       }
       this.state.themeConfig = themeConfig;
-    } catch(e) { console.log(e) }
+    } catch(e) { /* JSON Parse Error */ }
   }
 
   handleTrigger(data, type) {
@@ -65,7 +66,7 @@ module.exports = class extends Base {
   }
 
   renderConfigElement(element, i) {
-    if( element.type === 'html' ) {
+    if(element.type === 'html') {
       element.type = 'htmlmixed';
     }
 
@@ -76,17 +77,15 @@ module.exports = class extends Base {
       case 'textarea':
       case 'password':
         return (<ValidatedInput {...element} key={i}/>);
-        break;
 
       case 'radio':
         if(!Array.isArray(element.options)) { return null; }
 
         return (
           <RadioGroup {...element} key={i}>
-            {element.options.map((opt,j) => <Radio {...opt} key={j} />)}
+            {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
           </RadioGroup>
         );
-        break;
 
       case 'checkbox':
         if(!Array.isArray(element.options)) { return null; }
@@ -101,17 +100,19 @@ module.exports = class extends Base {
                       key={j}
                       type="checkbox"
                       className="form-control"
-                      name={`element.name[]`}
+                      name={'element.name[]'}
                       value={opt.value ? opt.value : opt}
-                      checked={Array.isArray(this.state.themeConfig[element.name]) && this.state.themeConfig[element.name].includes(opt.value || opt)}
+                      checked={Array.isArray(this.state.themeConfig[element.name]) &&
+                        this.state.themeConfig[element.name].includes(opt.value || opt)}
                       onChange={e => {
                         let checked = e.target.checked;
                         let val = opt.value ? opt.value : opt;
-                        if( Array.isArray(this.state.themeConfig[element.name]) ) {
-                          if( checked ) {
+                        if(Array.isArray(this.state.themeConfig[element.name])) {
+                          if(checked) {
                             this.state.themeConfig[element.name].push(val);
                           } else {
-                            this.state.themeConfig[element.name] = this.state.themeConfig[element.name].filter(v => v !== val);
+                            this.state.themeConfig[element.name] =
+                              this.state.themeConfig[element.name].filter(v => v !== val);
                           }
                         } else {
                           this.state.themeConfig[element.name] = [val];
@@ -125,7 +126,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
 
       case 'select':
         if(!Array.isArray(element.options)) { return null; }
@@ -151,7 +151,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
 
       case 'color':
         return (
@@ -171,7 +170,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
 
       case 'css':
       case 'htmlmixed':
@@ -192,22 +190,21 @@ module.exports = class extends Base {
                     this.forceUpdate();
                   }}
               />
-              
+
               <div className="help-block">{element.help ? element.help : ''}</div>
             </div>
           </div>
         );
-        break;
     }
   }
 
   renderThemeConfig() {
-    if( this.state.list.length === 0 ) {
+    if(this.state.list.length === 0) {
       return null;
     }
 
     let theme = this.state.list.filter(theme => theme.id === this.state.theme)[0];
-    if( !theme.configElements || !Array.isArray(theme.configElements) ) {
+    if(!theme.configElements || !Array.isArray(theme.configElements)) {
       return null;
     }
 

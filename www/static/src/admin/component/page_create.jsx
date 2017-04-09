@@ -1,11 +1,12 @@
 import moment from 'moment';
-import PostCreate from './post_create';
 
+import PostCreate from './post_create';
 import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
 import ThemeAction from 'admin/action/theme';
 import ThemeStore from 'admin/store/theme';
+
 
 module.exports = class extends PostCreate {
   type = 1;
@@ -13,7 +14,7 @@ module.exports = class extends PostCreate {
   componentWillMount() {
     this.listenTo(PageStore, this.handleTrigger.bind(this));
 
-    if(this.id){
+    if(this.id) {
       PageAction.select(this.id);
     }
 
@@ -33,8 +34,8 @@ module.exports = class extends PostCreate {
     this.setState(initialState);
   }
 
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'savePageFail':
         this.setState({draftSubmitting: false, postSubmitting: false});
         break;
@@ -44,13 +45,15 @@ module.exports = class extends PostCreate {
         setTimeout(() => this.redirect('page/list'), 1000);
         break;
       case 'getPageInfo':
-        if(data.create_time === '0000-00-00 00:00:00'){
+        if(data.create_time === '0000-00-00 00:00:00') {
           data.create_time = '';
         }
-        data.create_time = data.create_time ? moment( new Date(data.create_time) ).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
-        if( !data.options ) {
+        data.create_time = data.create_time ?
+          moment(new Date(data.create_time)).format('YYYY-MM-DD HH:mm:ss') :
+          data.create_time;
+        if(!data.options) {
           data.options = {push_sites: []};
-        } else if( typeof(data.options) === 'string' ) {
+        } else if(typeof(data.options) === 'string') {
           data.options = JSON.parse(data.options);
         } else {
           data.options.push_sites = data.options.push_sites || [];
@@ -60,14 +63,14 @@ module.exports = class extends PostCreate {
     }
   }
 
-  handleValidSubmit(values){
-    if( !this.state.status ) {
+  handleValidSubmit(values) {
+    if(!this.state.status) {
       this.setState({draftSubmitting: true});
     } else {
       this.setState({postSubmitting: true});
     }
 
-    if(this.id){
+    if(this.id) {
       values.id = this.id;
     }
 
@@ -77,7 +80,7 @@ module.exports = class extends PostCreate {
     values.allow_comment = Number(this.state.postInfo.allow_comment);
     values.markdown_content = this.state.postInfo.markdown_content;
     values.options = JSON.stringify(this.state.postInfo.options);
-    if( values.status === 3 && !values.markdown_content ) {
+    if(values.status === 3 && !values.markdown_content) {
       this.setState({draftSubmitting: false, postSubmitting: false});
       return TipAction.fail('没有内容不能提交呢！');
     }

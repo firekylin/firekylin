@@ -1,20 +1,19 @@
 import React from 'react';
-import Base from 'base';
 import md5 from 'md5';
-
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import UserAction from '../action/user';
 import UserStore from '../store/user';
-
+import Base from 'base';
 import TipAction from 'common/action/tip';
 
+
 module.exports = class extends Base {
-  componentDidMount(){
+  componentDidMount() {
     this.listenTo(UserStore, this.handleTrigger.bind(this));
   }
-  handleTrigger(data, type){
-    switch(type){
+  handleTrigger(data, type) {
+    switch(type) {
       case 'LoginSuccess':
         TipAction.success('登录成功');
         setTimeout(() => {location.reload()}, 1000)
@@ -25,8 +24,8 @@ module.exports = class extends Base {
    * get two factor auth
    * @return {} []
    */
-  getTwoFactorAuth(){
-    if(SysConfig.options.two_factor_auth){
+  getTwoFactorAuth() {
+    if(window.SysConfig.options.two_factor_auth) {
       return (
         <div className="form-group">
           <ValidatedInput
@@ -45,11 +44,11 @@ module.exports = class extends Base {
       );
     }
   }
-  handleValidSubmit(values){
-    values.password = md5(SysConfig.options.password_salt + values.password);
+  handleValidSubmit(values) {
+    values.password = md5(window.SysConfig.options.password_salt + values.password);
     UserAction.login(values);
   }
-  handleInvalidSubmit(){
+  handleInvalidSubmit() {
 
   }
   render() {
@@ -58,7 +57,7 @@ module.exports = class extends Base {
         <div className="row">
             <div className="login">
               <h1 className="text-center">
-              <a href="/">{SysConfig.options.title}</a>
+              <a href="/">{window.SysConfig.options.title}</a>
               </h1>
               <Form
               className="clearfix"

@@ -13,9 +13,9 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(id){
+  onSelect(id) {
     let url = '/admin/api/post';
-    if(id){
+    if(id) {
       url += '/' + id;
     }
     let req = superagent.get(url);
@@ -25,9 +25,9 @@ export default Reflux.createStore({
   },
   onSelectList(page, status, keyword) {
     let url = `/admin/api/post?page=${page}`;
-    if(status) { url += `&status=${status}` };
-    if(keyword) { url += `&keyword=${keyword}`};
-    return firekylin.request( superagent.get(url) ).then(
+    if(status) { url += `&status=${status}` }
+    if(keyword) { url += `&keyword=${keyword}`}
+    return firekylin.request(superagent.get(url)).then(
       data => this.trigger(data, 'getPostList')
     );
   },
@@ -42,18 +42,18 @@ export default Reflux.createStore({
    * @param  {Object} data []
    * @return {Promise}      []
    */
-  onSave(data){
+  onSave(data) {
     let id = data.id;
     delete data.id;
     let url = '/admin/api/post';
-    if(id){
+    if(id) {
       url += '/' + id + '?method=put';
     }
     let req = superagent.post(url);
     req.type('form').send(data);
     return firekylin.request(req).then(
       data => this.trigger(data, 'savePostSuccess'),
-      err  => this.trigger(err, 'savePostFail')
+      err => this.trigger(err, 'savePostFail')
     );
   },
 
@@ -72,7 +72,7 @@ export default Reflux.createStore({
 
   onPass({id, create_time}) {
     const postData = {id, status: 3};
-    const {auditFreshCreateTime = '1'} = SysConfig.options;
+    const {auditFreshCreateTime = '1'} = window.SysConfig.options;
 
     if (Number(auditFreshCreateTime)) {
       postData.create_time = create_time

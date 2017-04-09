@@ -1,8 +1,6 @@
 import Reflux from 'reflux';
 import superagent from 'superagent';
-
 import firekylin from '../../common/util/firekylin';
-
 import SystemAction from 'admin/action/system';
 
 export default Reflux.createStore({
@@ -13,7 +11,7 @@ export default Reflux.createStore({
    * @param  {[type]} id [description]
    * @return {[type]}    [description]
    */
-  onSelect(){
+  onSelect() {
     let url = '/admin/api/system';
     let req = superagent.get(url);
     return firekylin.request(req).then(
