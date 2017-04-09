@@ -1,12 +1,12 @@
 {% extends './layout.html' %}
 
-{% block title %}
+{% block title -%}
 标签 - {{options.title}}
-{% endblock %}
+{%- endblock %}
 
-{% block headers %}
+{% block headers -%}
 <link rel="canonical" href="{{site_url}}/tags" />
-{% endblock %}
+{%- endblock %}
 
 {% block content %}
 <article class="post tags">
