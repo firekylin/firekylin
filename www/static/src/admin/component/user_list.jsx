@@ -32,7 +32,7 @@ module.exports = class extends Base {
         UserAction.select(null, this.state.key===3?'contributor':'');
         break;
       case 'deleteUserFail':
-         break;
+        break;
       default:
         this.setState({userList: data, loading: false});
     }
