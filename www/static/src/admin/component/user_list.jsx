@@ -31,6 +31,8 @@ module.exports = class extends Base {
         TipAction.success('删除成功');
         UserAction.select(null, this.state.key===3?'contributor':'');
         break;
+      case 'deleteUserFail':
+         break;
       default:
         this.setState({userList: data, loading: false});
     }

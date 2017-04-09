@@ -41,6 +41,35 @@ export default class extends Base {
 
     return this.success(users);
   }
+
+  /**
+   * 删除用户
+   *
+   * @param {number} id 被删除用户id
+   * @return {Promise}
+   */
+  async deleteAction() {
+    let id = this.id;
+
+    if (!id) {
+      return this.fail('PARAMS_ERROR');
+    }
+
+    // 禁止删除当前登录用户
+    if (id === String(this.userInfo.id)) {
+      return this.fail('DELETE_CURRENT_USER_ERROR');
+    }
+
+    let pk = await this.modelInstance.getPk();
+    let rows = await this.modelInstance.where({
+      [pk]: id
+    }).delete();
+
+    return this.success({
+      affectedRows: rows
+    });
+  }
+
   /**
    * add user
    * @return {[type]} [description]
