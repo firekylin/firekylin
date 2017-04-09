@@ -1,13 +1,11 @@
 import React from 'react';
-//import {Promise} from 'es6-promise';
-//import autobind from 'autobind-decorator';
-//import classNames from 'classnames';
+
+import ModalAction from '../action/modal';
+import ModalStore from '../store/modal';
 
 import Base from './base';
 import Modal from './modal';
 
-import ModalAction from '../action/modal';
-import ModalStore from '../store/modal';
 
 /**
  * 通用弹出层管理，支持多个弹出层

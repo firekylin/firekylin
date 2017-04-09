@@ -1,18 +1,20 @@
 import Base from 'base';
 import React from 'react';
-import BreadCrumb from './breadcrumb';
 import CodeMirror from 'react-codemirror';
 import TipAction from 'common/action/tip';
 import ThemeStore from 'admin/store/theme';
 import { SketchPicker } from 'react-color';
 import ThemeAction from 'admin/action/theme';
-import {Form, ValidatedInput} from 'react-bootstrap-validation';
+import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
+
+import BreadCrumb from './breadcrumb';
+
 
 module.exports = class extends Base {
   state = this.initialState();
@@ -38,7 +40,7 @@ module.exports = class extends Base {
         themeConfig = JSON.parse(themeConfig);
       }
       this.state.themeConfig = themeConfig;
-    } catch(e) { console.log(e) }
+    } catch(e) { /* JSON Parse Error */ }
   }
 
   handleTrigger(data, type) {
@@ -76,7 +78,6 @@ module.exports = class extends Base {
       case 'textarea':
       case 'password':
         return (<ValidatedInput {...element} key={i}/>);
-        break;
 
       case 'radio':
         if(!Array.isArray(element.options)) { return null; }
@@ -86,7 +87,6 @@ module.exports = class extends Base {
             {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
           </RadioGroup>
         );
-        break;
 
       case 'checkbox':
         if(!Array.isArray(element.options)) { return null; }
@@ -103,7 +103,8 @@ module.exports = class extends Base {
                       className="form-control"
                       name={'element.name[]'}
                       value={opt.value ? opt.value : opt}
-                      checked={Array.isArray(this.state.themeConfig[element.name]) && this.state.themeConfig[element.name].includes(opt.value || opt)}
+                      checked={Array.isArray(this.state.themeConfig[element.name]) &&
+                        this.state.themeConfig[element.name].includes(opt.value || opt)}
                       onChange={e => {
                         let checked = e.target.checked;
                         let val = opt.value ? opt.value : opt;
@@ -111,7 +112,8 @@ module.exports = class extends Base {
                           if(checked) {
                             this.state.themeConfig[element.name].push(val);
                           } else {
-                            this.state.themeConfig[element.name] = this.state.themeConfig[element.name].filter(v => v !== val);
+                            this.state.themeConfig[element.name] =
+                              this.state.themeConfig[element.name].filter(v => v !== val);
                           }
                         } else {
                           this.state.themeConfig[element.name] = [val];
@@ -125,7 +127,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
 
       case 'select':
         if(!Array.isArray(element.options)) { return null; }
@@ -151,7 +152,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
 
       case 'color':
         return (
@@ -171,7 +171,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
 
       case 'css':
       case 'htmlmixed':
@@ -197,7 +196,6 @@ module.exports = class extends Base {
             </div>
           </div>
         );
-        break;
     }
   }
 

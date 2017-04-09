@@ -1,14 +1,11 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 import CateAction from '../action/cate';
 import CateStore from '../store/cate';
-import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   initialState() {
@@ -140,14 +137,18 @@ module.exports = class extends Base {
             <div className="form-group">
               <label className="control-label col-xs-1">父级分类</label>
               <div className="col-xs-4">
-                <select className="form-control" onChange={e => this.setState({pid: e.target.value})} value={this.state.pid}>
+                <select className="form-control"
+                  onChange={e => this.setState({pid: e.target.value})}
+                  value={this.state.pid}>
                   {cateList.length === 1 ? <option value={cateList[0].id}>{cateList[0].name}</option>
                   : cateList.map(item => <option key={item.id} value={item.id}>{item.name}</option>)
                   }
                 </select>
               </div>
             </div>
-            <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            <button type="submit" {...props} className="btn btn-primary">
+              {this.state.submitting ? '提交中...' : '提交'}
+            </button>
           </Form>
         </div>
       </div>

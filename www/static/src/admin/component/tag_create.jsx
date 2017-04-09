@@ -1,8 +1,5 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import BreadCrumb from 'admin/component/breadcrumb';
@@ -121,7 +118,9 @@ module.exports = class extends Base {
                 }}
             />
             <div className="form-group col-xs-12">
-              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+              <button type="submit" {...props} className="btn btn-primary">
+                {this.state.submitting ? '提交中...' : '提交'}
+              </button>
             </div>
           </Form>
         </div>

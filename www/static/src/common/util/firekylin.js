@@ -1,4 +1,4 @@
-//import {Promise} from 'es6-promise';
+/* eslint eqeqeq:0 */
 import moment from 'moment';
 import TipActions from '../action/tip';
 
@@ -26,7 +26,7 @@ let firekylin = {
   request: request => {
     let deferred = firekylin.defer();
     if(request.method === 'POST') {
-      request.type('form').send({web_token: SysConfig.token});
+      request.type('form').send({web_token: window.SysConfig.token});
     }
     request.query({ _r: Math.random() });
     request.end((err, res) => {
@@ -59,7 +59,7 @@ let firekylin = {
       xhr.open('POST', url, true);
       xhr.onload = function() {
         let res = JSON.parse(xhr.responseText);
-        if(res.errno != 0) {
+        if(res.errno !== 0) {
           reject(res);
         } else {
           resolve(res);

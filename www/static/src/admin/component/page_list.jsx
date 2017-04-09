@@ -1,7 +1,6 @@
 import React from 'react';
 import Base from 'base';
 import {Link} from 'react-router';
-import classnames from 'classnames';
 
 import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';

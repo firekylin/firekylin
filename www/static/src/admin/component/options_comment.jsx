@@ -1,23 +1,18 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 
 import { Radio, RadioGroup, Form, ValidatedInput } from 'react-bootstrap-validation';
-import md5 from 'md5';
 
 import BreadCrumb from 'admin/component/breadcrumb';
-
-import OptionsAction from '../action/options';
-import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
+import OptionsAction from '../action/options';
+import OptionsStore from '../store/options';
 
 module.exports = class extends Base {
   constructor(props) {
     super(props);
-    let comment = SysConfig.options.comment;
+    let comment = window.SysConfig.options.comment;
     if(typeof comment === 'string') {
       comment = JSON.parse(comment);
     }
@@ -35,8 +30,8 @@ module.exports = class extends Base {
       case 'saveCommentSuccess':
         this.setState({submitting: false});
         TipAction.success('评论设置更新成功');
-        let comment = JSON.parse(SysConfig.options.comment);
-        SysConfig.options.comment = JSON.stringify({
+        let comment = JSON.parse(window.SysConfig.options.comment);
+        window.SysConfig.options.comment = JSON.stringify({
           'comment': comment
         });
         break;
@@ -67,7 +62,7 @@ module.exports = class extends Base {
     let content = (<div className="center">
       <a href={url} target="_blank"><img src={url} style={{maxWidth: '100%'}} /></a>
     </div>);
-    let instance = ModalAction.alert('提示', content);
+    ModalAction.alert('提示', content);
   }
   render() {
     let comment = this.state.comment;
@@ -99,7 +94,7 @@ module.exports = class extends Base {
             { res }
           </div>
 
-          {comment.type != 'custom' ?
+          {comment.type !== 'custom' ?
           <div className="form-group">
             <label>网站名称（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
             <ValidatedInput
@@ -122,7 +117,9 @@ module.exports = class extends Base {
               label="评论代码"
               style={{height: 240}}
           />}
-          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交' }</button>
+          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
+            { this.state.submitting ? '提交中...' : '提交' }
+          </button>
         </Form>
       </div>
     </div>

@@ -3,18 +3,18 @@ import React from 'react';
 import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
 
 import BreadCrumb from 'admin/component/breadcrumb';
-import OptionsAction from '../action/options';
-import OptionsStore from '../store/options';
 import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
+import OptionsAction from '../action/options';
+import OptionsStore from '../store/options';
 
 module.exports = class extends Base {
   constructor(props) {
     super(props);
     this.state = {
       submitting: false,
-      options: SysConfig.options,
+      options: window.SysConfig.options,
       pageList: []
     };
 
@@ -40,7 +40,7 @@ module.exports = class extends Base {
         this.setState({submitting: false});
         TipAction.success('更新成功');
         for(let key in this.optionsSavedValue) {
-          SysConfig.options[key] = this.optionsSavedValue[key];
+          window.SysConfig.options[key] = this.optionsSavedValue[key];
         }
         break;
     }
@@ -192,7 +192,9 @@ module.exports = class extends Base {
               <Radio value="0" label="摘要输出" />
             </RadioGroup>
 
-            <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            <button type="submit" {...BtnProps} className="btn btn-primary">
+              {this.state.submitting ? '提交中...' : '提交'}
+            </button>
           </Form>
         </div>
       </div>

@@ -1,19 +1,15 @@
 import React from 'react';
 import Base from 'base';
 import {Link} from 'react-router';
-import classnames from 'classnames';
 import {
-  Col,
   Tabs,
   Tab
 } from 'react-bootstrap';
 
 import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
-
-import TipAction from 'common/action/tip';
-
 import ModalAction from '../../common/action/modal';
 
 module.exports = class extends Base {
@@ -40,7 +36,8 @@ module.exports = class extends Base {
     }
   }
   handleDelete(userId) {
-    return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br /><p className="gray">删除后无法恢复</p></div>, () => {
+    return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br />
+      <p className="gray">删除后无法恢复</p></div>, () => {
       UserAction.delete(userId);
     }, 'modal-sm');
   }
@@ -54,16 +51,17 @@ module.exports = class extends Base {
   }
 
   deny(user) {
-    return ModalAction.confirm('提示', <div className="center">拒绝该用户的申请后会直接删除该账号<br /><p className="gray">删除后无法恢复</p></div>, () => {
+    return ModalAction.confirm('提示', <div className="center">拒绝该用户的申请后会直接删除该账号<br />
+      <p className="gray">删除后无法恢复</p></div>, () => {
       UserAction.delete(user.id);
     }, 'modal-sm');
   }
 
   getUserType(user) {
     switch(user.type) {
-      case 1: return '管理员'; break;
-      case 2: return '编辑'; break;
-      case 3: return '投稿者'; break;
+      case 1: return '管理员';
+      case 2: return '编辑';
+      case 3: return '投稿者';
     }
     return '';
   }
@@ -82,7 +80,11 @@ module.exports = class extends Base {
           <td>{item.display_name || item.name}</td>
           <td>{item.email}</td>
           <td>{this.getUserType(item)}</td>
-          <td>{item.status == 1 ? <span className="label label-success">有效</span> : <span className="label label-warning">禁用</span>}</td>
+          <td>
+            {item.status === 1 ?
+              <span className="label label-success">有效</span> :
+              <span className="label label-warning">禁用</span>}
+          </td>
           <td>{item.post_num}</td>
           <td>{item.comment_num}</td>
           <td>{item.create_time}</td>
@@ -99,7 +101,8 @@ module.exports = class extends Base {
             </button>
             }
             &nbsp;
-            {!this.state.key ? <button type="button" className="btn btn-danger btn-xs" onClick={this.handleDelete.bind(this, item.id)}>
+            {!this.state.key ? <button type="button" className="btn btn-danger btn-xs"
+              onClick={this.handleDelete.bind(this, item.id)}>
               <span className="glyphicon glyphicon-remove" aria-hidden="true"></span> 删除
             </button> :
             <button type="button" className="btn btn-warning btn-xs" onClick={this.deny.bind(this, item)}>

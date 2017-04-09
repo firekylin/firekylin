@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'babel-polyfill';
-import {Router, Route, Redirect, useRouterHistory} from 'react-router';
+import {Router, useRouterHistory} from 'react-router';
 
 import {createHistory} from 'history';
 

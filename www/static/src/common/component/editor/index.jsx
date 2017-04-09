@@ -1,6 +1,7 @@
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
+/* eslint max-len:0 */
 import Base from 'base';
 import marked from 'marked';
 import ReactDOM from 'react-dom';
@@ -10,11 +11,11 @@ import Autobind from 'autobind-decorator';
 import ModalStore from 'common/store/modal';
 import React, { PropTypes as T } from 'react';
 import ModalAction from 'common/action/modal';
+import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
 import Search from './search';
 import './style.css';
 
-import TipAction from 'common/action/tip';
 
 class MdEditor extends Base {
   static defaultProps = {
@@ -263,12 +264,12 @@ class MdEditor extends Base {
   }
 
   _changeMode (mode) {
-    return (e) => {
+    return () => {
       this.setState({ mode })
     }
   }
 
-  _toggleFullScreen (e) {
+  _toggleFullScreen () {
     this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   }
 

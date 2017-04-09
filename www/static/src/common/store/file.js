@@ -1,6 +1,5 @@
 import Reflux from 'reflux';
 import superagent from 'superagent';
-import firekylin from 'common/util/firekylin';
 
 import FileActions from 'common/action/file';
 

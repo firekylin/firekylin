@@ -1,23 +1,19 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
-import md5 from 'md5';
 import QRcode from 'qrcode-react';
 
 import BreadCrumb from 'admin/component/breadcrumb';
-import OptionsAction from '../action/options';
-import OptionsStore from '../store/options';
 import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
+import OptionsAction from '../action/options';
+import OptionsStore from '../store/options';
 
 module.exports = class extends Base {
   constructor(props) {
     super(props);
     this.state = {
-      options: SysConfig.options,
+      options: window.SysConfig.options,
       qrcode: '',
       step: 1,
       errmsg: ''
@@ -66,7 +62,8 @@ module.exports = class extends Base {
     });
   }
   close2Fa() {
-    return ModalAction.confirm('提示', <div className="center">确定关闭吗？<br /><p className="gray">二次验证可以大大提升账户的安全性</p></div>, () => {
+    return ModalAction.confirm('提示', <div className="center">确定关闭吗？<br />
+      <p className="gray">二次验证可以大大提升账户的安全性</p></div>, () => {
        OptionsAction.save({two_factor_auth: ''});
     }, 'modal-sm');
   }
@@ -89,7 +86,8 @@ module.exports = class extends Base {
   }
   step1() {
     return (<div>
-      <p>两步验证，对应的英文是 Two-factor Authentication(2FA)，或者 Two-step Verification。从名字可以看出，「两步」是 2FA 的重点，广义的 2FA 是指提供多种方案完成用户权限鉴定。</p>
+      <p>两步验证，对应的英文是 Two-factor Authentication(2FA)，或者 Two-step Verification。从名字可以看出，
+        「两步」是 2FA 的重点，广义的 2FA 是指提供多种方案完成用户权限鉴定。</p>
       <p>开启两步验证后，登录系统后台，除了要提供用户名和密码外，还要提供额外的 Token，这样可以大大提高系统的安全性。</p>
       <div className="alert alert-warning" role="alert">
       为了提升系统安全性，本系统的两步验证开启后对所有人有效。

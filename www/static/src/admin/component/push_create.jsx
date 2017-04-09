@@ -1,8 +1,5 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import BreadCrumb from 'admin/component/breadcrumb';
@@ -99,7 +96,9 @@ module.exports = class extends Base {
             onValidSubmit={this.handleValidSubmit.bind(this)}
           >
             <div className="alert alert-info" role="alert" style={{maxWidth: '700px'}}>
-              推送功能是指在本系统写博客时可以将文章推送到其他也使用 Firekylin 构建的博客系统中。最明显的需求就是个人写博客时需要将文章推送到团队博客中。如果每次都是写完后把内容拷贝到团队博客中势必非常麻烦，使用推送功能就非常简单了。
+              推送功能是指在本系统写博客时可以将文章推送到其他也使用 Firekylin 构建的博客系统中。
+              最明显的需求就是个人写博客时需要将文章推送到团队博客中。如果每次都是写完后把内容拷贝到团队博客中势必非常麻烦，
+              使用推送功能就非常简单了。
             </div>
             <ValidatedInput
                 name="title"
@@ -146,7 +145,9 @@ module.exports = class extends Base {
                 }}
             />
             <div className="form-group col-xs-12">
-              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+              <button type="submit" {...props} className="btn btn-primary">
+                {this.state.submitting ? '提交中...' : '提交'}
+              </button>
             </div>
           </Form>
         </div>

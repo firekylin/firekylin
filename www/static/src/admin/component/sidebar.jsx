@@ -81,7 +81,7 @@ module.exports = class extends Base {
   }
   render() {
     let routes = this.state.routes;
-    let userType = SysConfig.userInfo.type | 0;
+    let userType = window.SysConfig.userInfo.type | 0;
     routes = routes.filter(item => {
       if(!item.type) {
         return true;
@@ -94,16 +94,19 @@ module.exports = class extends Base {
       <div className="fk-side ps-container" id="fk-side">
         <div className="mod">
           <div className="mod-logo">
-            <h1><a href="/">{SysConfig.options.title}</a></h1>
+            <h1><a href="/">{window.SysConfig.options.title}</a></h1>
           </div>
         </div>
         <ul className="mod-bar" style={{marginTop: 10}}>
           <input type="hidden" id="hide_values" val="0" />
           {routes.map((route, i) =>
             <li key={i}>
-              {route.children ? <a onClick={this.open.bind(this, route.children && route.children[0].url || route.url)} className={this.getClassName(route.icon, route.url)}><span>{route.title}</span></a>
+              {route.children ?
+              <a onClick={this.open.bind(this, route.children && route.children[0].url || route.url)}
+                className={this.getClassName(route.icon, route.url)}><span>{route.title}</span></a>
               :
-              <Link to={route.url} onClick={this.open.bind(this, route.children && route.children[0].url || route.url)} className={this.getClassName(route.icon, route.url)}>
+              <Link to={route.url} onClick={this.open.bind(this, route.children && route.children[0].url || route.url)}
+                className={this.getClassName(route.icon, route.url)}>
                 <span>{route.title}</span>
               </Link>
               }
@@ -111,7 +114,8 @@ module.exports = class extends Base {
                 <ul style={{height: 49*(this.isActive(route.url) ? route.children.length : 0)}}>
                   {route.children.map((child, j) =>
                     <li key={j}>
-                      <Link to={child.url} onClick={this.open.bind(this, child.url)} className={this.getSubLinkClassName(child.url)}>
+                      <Link to={child.url} onClick={this.open.bind(this, child.url)}
+                        className={this.getSubLinkClassName(child.url)}>
                         <span>{child.title}</span>
                       </Link>
                     </li>

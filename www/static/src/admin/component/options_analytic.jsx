@@ -1,28 +1,23 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
-import { Form, ValidatedInput, Radio, RadioGroup } from 'react-bootstrap-validation';
-import md5 from 'md5';
-import firekylin from 'common/util/firekylin';
+import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
 import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
-import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   constructor(props) {
     super(props);
     this.state = {
       submitting: false,
-      options: SysConfig.options
+      options: window.SysConfig.options
     };
     if(!this.state.options.hasOwnProperty('push')) {
       this.state.options.push = '0';
     }
-    this.state.options.analyze_code = unescape(SysConfig.options.analyze_code);
+    this.state.options.analyze_code = unescape(window.SysConfig.options.analyze_code);
   }
   componentDidMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
@@ -33,7 +28,7 @@ module.exports = class extends Base {
         this.setState({submitting: false});
         TipAction.success('更新成功');
         for(let key in this.optionsSavedValue) {
-          SysConfig.options[key] = this.optionsSavedValue[key];
+          window.SysConfig.options[key] = this.optionsSavedValue[key];
         }
         break;
     }
@@ -88,7 +83,9 @@ module.exports = class extends Base {
               />
               <p>直接贴入百度统计或者 Google 统计代码</p>
             </div>
-            <button type="submit" {...BtnProps} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+            <button type="submit" {...BtnProps} className="btn btn-primary">
+              {this.state.submitting ? '提交中...' : '提交'}
+            </button>
           </Form>
         </div>
       </div>

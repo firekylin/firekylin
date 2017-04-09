@@ -11,9 +11,9 @@
     "webpack": "webpack --watch",
     "webpack.build": "webpack",
     "webpack.build.production": "webpack --config=webpack.production.config.babel.js",
-    "lint": "eslint ./src ./*.js ./www/static/src ./www/theme/firekylin -f table --ext .js,.jsx || true",
-    "lint-fix": "eslint ./src ./*.js ./www/static/src ./www/theme/firekylin -f table --ext .js,.jsx --fix || true",
-    "lint-break-on-errors": "echo 'Running ESLint...\n(Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/static/src ./www/theme/firekylin -f table --ext .js,.jsx"
+    "lint": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --cache -f table --ext .js,.jsx || true",
+    "lint-fix": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --cache -f table --ext .js,.jsx --fix || true",
+    "lint-break-on-errors": "echo 'Running ESLint...\n(Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --cache -f table --ext .js,.jsx"
   },
   "dependencies": {
     "babel-runtime": "6.x.x",

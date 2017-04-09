@@ -1,8 +1,7 @@
 import Base from 'base';
 import React from 'react';
-import _ from 'classnames';
+import classnames from 'classnames';
 import Tree from 'react-ui-tree';
-import BreadCrumb from './breadcrumb';
 import CodeMirror from 'react-codemirror';
 import TipAction from 'common/action/tip';
 import ModalAction from 'common/action/modal';
@@ -15,6 +14,10 @@ import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
+
+import BreadCrumb from './breadcrumb';
+
+
 module.exports = class extends Base {
   state = this.initialState();
 
@@ -161,7 +164,7 @@ module.exports = class extends Base {
                 tree={tree}
                 renderNode={node =>
                   <span
-                      className={_('node', {'is-active': node===this.state.active})}
+                      className={classnames('node', {'is-active': node===this.state.active})}
                       onClick={this.toggleFile.bind(this, node)}
                   >
                     {node.module}

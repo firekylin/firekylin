@@ -20,7 +20,7 @@ module.exports = class extends Base {
       TipAction.success(result.data);
       alert(result.data);
       this.setState({uploading: false});
-    }, err => {
+    }, () => {
       TipAction.fail('IMPORT_FAIL');
       this.setState({uploading: false});
     });

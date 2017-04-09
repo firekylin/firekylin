@@ -1,13 +1,12 @@
 import React from 'react';
 import Base from 'base';
 import md5 from 'md5';
-
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 
+import TipAction from 'common/action/tip';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
 
-import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   componentDidMount() {
@@ -26,7 +25,7 @@ module.exports = class extends Base {
    * @return {} []
    */
   getTwoFactorAuth() {
-    if(SysConfig.options.two_factor_auth) {
+    if(window.SysConfig.options.two_factor_auth) {
       return (
         <div className="form-group">
           <ValidatedInput
@@ -46,7 +45,7 @@ module.exports = class extends Base {
     }
   }
   handleValidSubmit(values) {
-    values.password = md5(SysConfig.options.password_salt + values.password);
+    values.password = md5(window.SysConfig.options.password_salt + values.password);
     UserAction.login(values);
   }
   handleInvalidSubmit() {
@@ -58,7 +57,7 @@ module.exports = class extends Base {
         <div className="row">
             <div className="login">
               <h1 className="text-center">
-              <a href="/">{SysConfig.options.title}</a>
+              <a href="/">{window.SysConfig.options.title}</a>
               </h1>
               <Form
               className="clearfix"

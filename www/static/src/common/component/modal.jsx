@@ -1,12 +1,10 @@
 import React from 'react';
-//import {Promise} from 'es6-promise';
-//import autobind from 'autobind-decorator';
 import classNames from 'classnames';
 
-import Base from './base';
 import ModalStore from '../store/modal';
 import ModalActions from '../action/modal';
 import firekylin from '../../common/util/firekylin';
+import Base from './base';
 
 /**
  * 通用弹出层
@@ -165,12 +163,16 @@ export default class extends Base {
 
     if(this.data.type === 'alert') {
       return (<div className="modal-footer">
-        <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">关闭</button>
+        <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">
+          关闭
+        </button>
       </div>);
     }
     if(this.data.type === 'confirm') {
       return (<div className="modal-footer">
-        <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" onClick={this.confirmCancel.bind(this)} className="btn btn-default" data-dismiss="modal">
+          取消
+        </button>
         <button type="button" onClick={this.confirm.bind(this)} className="btn btn-primary">确定</button>
       </div>);
     }
@@ -232,7 +234,8 @@ export default class extends Base {
         <div className={clsName}>
           <div className="modal-content">
             <div className="modal-header">
-              <button type="button" onClick={this.close.bind(this)} className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+              <button type="button" onClick={this.close.bind(this)} className="close"
+                data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
               <h4 className="modal-title">{this.data.title}</h4>
             </div>
             <div className="modal-body">

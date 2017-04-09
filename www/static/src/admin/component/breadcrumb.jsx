@@ -2,8 +2,8 @@ import ReactDom from 'react-dom';
 import React from 'react';
 import Base from 'base';
 import classnames from 'classnames';
-import Sidebar from './sidebar';
 import {Link} from 'react-router';
+import Sidebar from './sidebar';
 
 module.exports = class extends Base {
 
@@ -96,7 +96,7 @@ module.exports = class extends Base {
         <ul className="nav navbar-nav navbar-right userinfo" ref="userinfo">
           <li className={this.getUserClass()}>
             <a onClick={this.toggleUser.bind(this)} className="dropdown-toggle" data-toggle="dropdown">
-              {SysConfig.userInfo.name} <b className="caret"></b>
+              {window.SysConfig.userInfo.name} <b className="caret"></b>
             </a>
             <ul className="dropdown-menu">
               <li><Link to="/user/edit_pwd">修改密码</Link></li>

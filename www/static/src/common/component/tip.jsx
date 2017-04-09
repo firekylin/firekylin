@@ -1,7 +1,7 @@
 import React from 'react';
-import Base from './base';
 
 import TipStore from '../store/tip';
+import Base from './base';
 
 /**
  * 通用Tip

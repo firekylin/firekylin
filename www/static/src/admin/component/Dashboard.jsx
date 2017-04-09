@@ -1,7 +1,6 @@
 import Base from 'base';
 import React from 'react';
 import moment from 'moment';
-import ReactDOM from 'react-dom';
 import {Link} from 'react-router';
 import BreadCrumb from 'admin/component/breadcrumb';
 
@@ -115,7 +114,7 @@ module.exports = class extends Base {
       {url: '/page/create', title: '创建页面', type: 1},
       {url: '/appearance/theme', title: '更改外观', type: 1},
       {url: '/options/general', title: '系统设置', type: 1}
-    ].filter(link => link.type >= SysConfig.userInfo.type);
+    ].filter(link => link.type >= window.SysConfig.userInfo.type);
 
     return (
       <div className="fk-content-wrap">
@@ -123,11 +122,16 @@ module.exports = class extends Base {
         <div className="manage-container">
           {this.state.needUpdate ?
             <p className="bg-info update-message">
-              Firekylin <a href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}>{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz">下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}>在线更新</a>！
+              Firekylin <a
+              href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}
+              >{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz"
+              >下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={this.renderUpdateConfirm.bind(this)}
+              >在线更新</a>！
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
-          <p>目前有 {this.state.count.posts} 篇文章, 并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
+          <p>目前有 {this.state.count.posts} 篇文章,
+            并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
           <div className="quick-link">
             {links.map(link => <Link key={link.url} to={link.url}>{link.title}</Link>)}

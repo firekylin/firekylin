@@ -1,7 +1,6 @@
 import React from 'react';
 import Base from 'base';
 import {Link} from 'react-router';
-import classnames from 'classnames';
 
 import BreadCrumb from 'admin/component/breadcrumb';
 import TipAction from 'common/action/tip';
@@ -52,7 +51,7 @@ module.exports = class extends Base {
     }
   }
   renderDefaultCategoryBtn(id) {
-    if(this.state.defaultCategory == id) {
+    if(this.state.defaultCategory === id) {
       return (
         <button
             disabled

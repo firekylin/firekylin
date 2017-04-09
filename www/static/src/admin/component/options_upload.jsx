@@ -1,22 +1,17 @@
 import React from 'react';
-import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
-
 import { Radio, RadioGroup, Form, ValidatedInput } from 'react-bootstrap-validation';
-import md5 from 'md5';
 
 import BreadCrumb from 'admin/component/breadcrumb';
-
+import TipAction from 'common/action/tip';
 import OptionsAction from '../action/options';
 import OptionsStore from '../store/options';
-import TipAction from 'common/action/tip';
+
 
 module.exports = class extends Base {
   constructor(props) {
     super(props);
-    let upload = SysConfig.options.upload;
+    let upload = window.SysConfig.options.upload;
     if(typeof upload === 'string') {
       upload = JSON.parse(upload);
     }
@@ -33,8 +28,8 @@ module.exports = class extends Base {
       case 'saveUploadSuccess':
         this.setState({submitting: false});
         TipAction.success('上传设置更新成功');
-        let upload = JSON.parse(SysConfig.options.upload);
-        SysConfig.options.upload = JSON.stringify({
+        let upload = JSON.parse(window.SysConfig.options.upload);
+        window.SysConfig.options.upload = JSON.stringify({
           'upload': upload
         });
         break;
@@ -205,9 +200,11 @@ module.exports = class extends Base {
             <label>图片上传至：</label>
             { res }
           </div>
-          { upload.type == 'qiniu' && qiniu }
-          { upload.type == 'upyun' && upyun }
-          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>{ this.state.submitting ? '提交中...' : '提交' }</button>
+          { upload.type === 'qiniu' && qiniu }
+          { upload.type === 'upyun' && upyun }
+          <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
+            { this.state.submitting ? '提交中...' : '提交' }
+          </button>
         </Form>
       </div>
     </div>

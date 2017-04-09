@@ -1,15 +1,13 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import Base from 'base';
-import {Link} from 'react-router';
-import classnames from 'classnames';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
 import md5 from 'md5';
 
 import BreadCrumb from 'admin/component/breadcrumb';
+import TipAction from 'common/action/tip';
 import UserAction from '../action/user';
 import UserStore from '../store/user';
-import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
   constructor(props) {
@@ -73,7 +71,7 @@ module.exports = class extends Base {
     if(this.id && values.password === '') {
       delete values.password;
     } else {
-      let password = md5(SysConfig.options.password_salt + values.password);
+      let password = md5(window.SysConfig.options.password_salt + values.password);
       values.password = password;
     }
     this.setState({submitting: true});
@@ -163,7 +161,7 @@ module.exports = class extends Base {
 
   getOptionProp(type, value) {
     let val = this.state.userInfo[type];
-    if(val == value) {
+    if(val === value) {
       return {selected: true}
     }
     return {};
@@ -243,7 +241,9 @@ module.exports = class extends Base {
                   errorHelp='密码不一致'
                 />
               </div>
-              <button type="submit" {...props} className="btn btn-primary">{this.state.submitting ? '提交中...' : '提交'}</button>
+              <button type="submit" {...props} className="btn btn-primary">
+                {this.state.submitting ? '提交中...' : '提交'}
+              </button>
             </div>
             <div className="pull-left">
               <div className="form-group">
@@ -286,12 +286,14 @@ module.exports = class extends Base {
                 <div className="form-group">
                   <label>App Key</label>
                   <div>
-                    <input type="text" className="form-control" disabled={true} value={this.state.userInfo.app_key} />
+                    <input type="text" className="form-control" disabled={true}
+                      value={this.state.userInfo.app_key} />
                   </div>
                 </div>
                 <div className="form-group">
                   <label>App Secret</label>
-                  <input type="text" className="form-control" disabled={true} value={this.state.userInfo.app_secret} />
+                  <input type="text" className="form-control" disabled={true}
+                    value={this.state.userInfo.app_secret} />
                 </div>
               </filedset>
             </div>

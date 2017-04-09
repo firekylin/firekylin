@@ -1,11 +1,12 @@
 import moment from 'moment';
-import PostCreate from './post_create';
 
 import PageAction from 'admin/action/page';
 import PageStore from 'admin/store/page';
 import TipAction from 'common/action/tip';
 import ThemeAction from 'admin/action/theme';
 import ThemeStore from 'admin/store/theme';
+
+import PostCreate from './post_create';
 
 module.exports = class extends PostCreate {
   type = 1;
@@ -47,7 +48,9 @@ module.exports = class extends PostCreate {
         if(data.create_time === '0000-00-00 00:00:00') {
           data.create_time = '';
         }
-        data.create_time = data.create_time ? moment(new Date(data.create_time)).format('YYYY-MM-DD HH:mm:ss') : data.create_time;
+        data.create_time = data.create_time ?
+          moment(new Date(data.create_time)).format('YYYY-MM-DD HH:mm:ss') :
+          data.create_time;
         if(!data.options) {
           data.options = {push_sites: []};
         } else if(typeof(data.options) === 'string') {

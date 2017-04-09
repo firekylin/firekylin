@@ -1,10 +1,8 @@
 import React from 'react';
 import Base from 'base';
 import {Link} from 'react-router';
-import classnames from 'classnames';
 import {
   Pagination,
-  Col,
   Tabs,
   Tab
 } from 'react-bootstrap';
@@ -12,10 +10,10 @@ import {
 import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
 import TipAction from 'common/action/tip';
+import firekylin from 'common/util/firekylin';
 import PostAction from '../action/post';
 import PostStore from '../store/post';
 
-import firekylin from 'common/util/firekylin';
 
 module.exports = class extends Base {
   constructor(props) {
@@ -37,7 +35,8 @@ module.exports = class extends Base {
     switch(type) {
       case 'savePostSuccess':
         TipAction.success('审核成功');
-        this.setState({loading: true}, PostAction.selectList.bind(PostAction, this.state.page, this.state.key === 4 ? null : this.state.key));
+        this.setState({loading: true},
+          PostAction.selectList.bind(PostAction, this.state.page, this.state.key === 4 ? null : this.state.key));
         break;
       case 'savePostFail':
       case 'deletePostFail':
@@ -80,7 +79,8 @@ module.exports = class extends Base {
           </td>
           <td>{item.user ? item.user.display_name || item.user.name : null}</td>
           <td>{this.renderStatus(item)}</td>
-          <td>{!item.create_time || item.create_time == '0000-00-00 00:00:00' ? '' : firekylin.formatTime(item.create_time)}</td>
+          <td>{!item.create_time || item.create_time === '0000-00-00 00:00:00' ?
+            '' : firekylin.formatTime(item.create_time)}</td>
           {this.renderBtns(item)}
         </tr>
       );
@@ -108,7 +108,7 @@ module.exports = class extends Base {
 
   renderBtns(post) {
     //管理员在审核和拒绝tab上显示更多按钮
-    let isAdmin = SysConfig.userInfo.type === 1;
+    let isAdmin = window.SysConfig.userInfo.type === 1;
     let showPassAndDeny = isAdmin && [1, 2, 3].includes(this.state.key);
     let showEditAndDel = !isAdmin || this.state.key===4;
     return (

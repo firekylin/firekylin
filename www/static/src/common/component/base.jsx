@@ -1,11 +1,6 @@
 import React from 'react';
-//import autobind from 'autobind-decorator';
-
 import { decorate as mixin } from 'react-mixin';
 import { ListenerMixin } from 'reflux';
-import ModalActions from '../action/modal';
-
-import { Router } from 'react-router';
 
 @mixin(ListenerMixin)
 class Base extends React.Component {

@@ -72,7 +72,7 @@ export default Reflux.createStore({
 
   onPass({id, create_time}) {
     const postData = {id, status: 3};
-    const {auditFreshCreateTime = '1'} = SysConfig.options;
+    const {auditFreshCreateTime = '1'} = window.SysConfig.options;
 
     if (Number(auditFreshCreateTime)) {
       postData.create_time = create_time

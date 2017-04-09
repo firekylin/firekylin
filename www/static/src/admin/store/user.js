@@ -24,7 +24,7 @@ export default Reflux.createStore({
     let req = superagent.get(url);
     return firekylin.request(req).then(data => {
       this.trigger(data, id ? 'getUserInfo' : 'getUserList');
-    }).catch(err => {
+    }).catch(() => {
 
     })
   },
