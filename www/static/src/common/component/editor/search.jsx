@@ -40,5 +40,4 @@ Search.propTypes = {
   onSelect: React.PropTypes.func.isRequired
 };
 
-Search = Autobind(Search);
-export default Search;
+export default Autobind(Search);
