@@ -65,6 +65,19 @@ export default class extends think.controller.base {
    * @return {}      []
    */
   async displayView(name) {
+    if (this.http.url.match(/\.json(?:\?|$)/)) {
+      let jsonOutput = {},
+        assignObj = this.assign();
+      Object.keys(assignObj).forEach((key)=>{
+        if (['controller', 'http', 'config', '_'].indexOf(key) === -1) {
+          jsonOutput[key] = assignObj[key];
+        }
+      })
+
+      this.type('application/json');
+      return this.end(jsonOutput);
+    }
+
     return this.display(this.THEME_VIEW_PATH + name + '.html');
   }
 }
