@@ -6,7 +6,7 @@ export default [
   [/^tag\/(.+)(?:\.html|\.json)$/, 'post/list?tag=:1'],
   [/^author\/([^/]+)(?:\.html|\.json)$/, 'post/list?name=:1'],
   [/^tags(?:\.html|\.json)$/, 'post/tag'],
-  [/^search$/, 'post/search'],
+  [/^search(?:\.html|\.json)$/, 'post/search'],
   [/^page\/([^/]+)(?:\.html|\.json)$/, 'post/page?pathname=:1'],
   [/^post\/([^/]+)(?:\.html|\.json)$/, 'post/detail?pathname=:1'],
 
