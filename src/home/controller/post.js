@@ -37,13 +37,19 @@ export default class extends Base {
       tagName = await this.model('tag').where({pathname: where.tag}).find();
       if(!think.isEmpty(tagName)) {
         tagName = tagName.name;
+      } else {
+        return think.statusAction(404, this.http);
       }
     }
     if(where.cate) {
       [cateName] = this.assign('categories').filter(cate =>
         cate.pathname.toLowerCase() === where.cate.toLowerCase()
       );
-      cateName = cateName && cateName.name;
+      if (cateName && cateName.name) {
+        cateName = cateName.name;
+      } else {
+        return think.statusAction(404, this.http);
+      }
     }
 
     let list = await model.getPostList(this.get('page'), where);
