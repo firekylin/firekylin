@@ -14,5 +14,6 @@ export default [
   [/^search$/, 'post/search'],
   [/^page\/([^/]+)$/, 'post/page?pathname=:1'],
   [/^post\/sitemap$/, 'post/sitemap'],
-  [/^post\/([^/]+)$/, 'post/detail?pathname=:1']
+  [/^post\/([^/]+)$/, 'post/detail?pathname=:1'],
+  ['opensearch.xml', 'index/opensearch']
 ];
