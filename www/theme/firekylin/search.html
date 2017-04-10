@@ -1,17 +1,17 @@
 {% extends './layout.html' %}
 
-{% block title %}
+{% block title -%}
 站内搜索 - {{options.title}}
-{% endblock %}
+{%- endblock %}
 
-{% block headers %}
+{% block headers -%}
 <link rel="canonical" href="{{site_url}}/search.html{% if keyword %}?keyword={{keyword}}{% endif %}{% if pagination.currentPage > 1 %}&amp;page={{pagination.currentPage}}{% endif %}" />
-{% endblock %}
+{%- endblock %}
 
 {% block content %}
 <article class="post detail">
   <h1 class="title">站内搜索</h1>
-  
+
   <div class="entry-content">
     <div id="search">
       <form action="/search.html">
@@ -29,14 +29,14 @@
             本次搜索找到结果 {{ searchData.count }} 条
           </div>
         {% endif %}
-        
+
         {% if not searchData.count %}
           <div class="no-result">没有找到任何结果，请更换查询词试试~</div>
           <div class="item">
             <div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q={{ ('site:' + http.hostname + ' ' + keyword)|urlencode }}">site:{{http.hostname}} {{ keyword }}</a></div>
           </div>
         {% endif %}
-        
+
         {% for item in searchData.data %}
           <div class="item">
             <div class="title"><a href="/post/{{ item.pathname }}.html">{{ item.title | safe }}</a></div>
@@ -59,4 +59,3 @@
 
 {% include "./inc/pagination.html" %}
 {% endblock %}
-

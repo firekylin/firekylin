@@ -13,7 +13,7 @@
         <div id="ds_thread" class="ds-thread" data-thread-key="{{think.md5(http.get('pathname'))}}" data-url="{{site_url}}{{http.url}}" data-name="{{options.comment.name}}">
         </div>
       {% elif options.comment.type == 'changyan' %}
-        <div id="SOHUCS" sid="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div> 
+        <div id="SOHUCS" sid="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div>
       {% elif options.comment.type == 'netease' %}
         <div id="cloud-tie-wrapper" class="cloud-tie-wrapper" data-name="{{options.comment.name}}"></div>
       {% else %}

@@ -1,8 +1,8 @@
 {% extends '../layout.html' %}
 
-{% block title %}
+{% block title -%}
 {{page.title}} - {{options.title}}
-{% endblock %}
+{%- endblock %}
 
 {% block content %}
 <article class="post tags">
@@ -12,7 +12,7 @@
       {% for cate in categories %}
       <a href="/cate/{{cate.pathname}}" data-cate="{{cate.name}}">{{cate.name}}({{cate.count}})</a>
       {% endfor %}
-      
+
     </section>
   </div>
 </article>

@@ -1,12 +1,12 @@
 {% extends './layout.html' %}
 
-{% block title %}
+{% block title -%}
 {{page.title}} - {{options.title}}
-{% endblock %}
+{%- endblock %}
 
-{% block headers %}
+{% block headers -%}
 <link rel="canonical" href="{{site_url}}/page/{{page.pathname}}.html" />
-{% endblock %}
+{%- endblock %}
 
 {% block content %}
 <article class="post page">
