@@ -139,15 +139,15 @@ export default class extends Base {
     let keyword = this.get('keyword').trim();
     if(keyword) {
       let postModel = this.model('post');
-      let searchResultPromise = postModel.getPostSearch(keyword, this.get('page'));
-      this.assign('searchData', searchResultPromise);
-      this.assign('pagination', searchResultPromise);
+      let searchResult = await postModel.getPostSearch(keyword, this.get('page'));
+      this.assign('searchData', searchResult);
+      this.assign('pagination', searchResult);
     }
 
     //热门标签
     let tagModel = this.model('tag');
-    let hotTagsPromise = tagModel.getHotTags();
-    this.assign('hotTags', hotTagsPromise);
+    let hotTags = await tagModel.getHotTags();
+    this.assign('hotTags', hotTags);
 
 
     this.assign('keyword', keyword);
