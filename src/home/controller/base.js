@@ -69,7 +69,7 @@ export default class extends think.controller.base {
       let jsonOutput = {},
         assignObj = this.assign();
       Object.keys(assignObj).forEach((key)=>{
-        if (['controller', 'http', 'config', '_'].indexOf(key) === -1) {
+        if (['controller', 'http', 'config', '_', 'options'].indexOf(key) === -1) {
           jsonOutput[key] = assignObj[key];
         }
       })
