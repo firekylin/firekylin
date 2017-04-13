@@ -102,10 +102,20 @@ module.exports = class extends Base {
           onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
           >
             <RadioGroup
-                defaultValue="recent"
-                name="frontPage"
-                label="自定义站点首页"
-                help={<span>设置页面为首页之后仍可以通过 <a href={postListUrl}>{postListUrl}</a> 访问最新发布的文章</span>}
+              onChange={e => {
+                if (e.target.value === 'page') {
+                  let options = {
+                    frontPagePage: this.refs.frontPagePage.value
+                  };
+                  this.setState({
+                    options
+                  });
+                }
+              }}
+              defaultValue="recent"
+              name="frontPage"
+              label="自定义站点首页"
+              help={<span>设置页面为首页之后仍可以通过 <a href={postListUrl}>{postListUrl}</a> 访问最新发布的文章</span>}
             >
               <Radio value="recent" label="显示最新发布的文章" />
               <Radio value="page" label={<div>
