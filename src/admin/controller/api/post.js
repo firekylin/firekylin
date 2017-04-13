@@ -237,7 +237,7 @@ ${post.markdown_content}`;
     let modelInstance = this.model('tag').setRelation(false), tagIds = [];
     let promises = tags.map(name =>
       modelInstance.where({name})
-        .thenAdd({name, pathname: encodeURIComponent(name)})
+        .thenAdd({name, pathname: name})
         .then(data => tagIds.push({tag_id: data.id, name: name}))
     );
     await Promise.all(promises);
