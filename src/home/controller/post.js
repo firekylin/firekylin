@@ -126,9 +126,6 @@ export default class extends Base {
   }
 
   async tagAction() {
-    let model = this.model('tag');
-    let data = await model.getTagArchive();
-    this.assign('list', data);
     return this.displayView('tag');
   }
   /**

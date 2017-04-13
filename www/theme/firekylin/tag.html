@@ -13,7 +13,7 @@
   <h1 class="title">标签</h1>
   <div class="entry-content">
     <section>
-      {% for tag in list %}
+      {% for tag in tags %}
       <a href="/tag/{{tag.pathname}}" data-tag="{{tag.name}}">{{tag.name}}({{tag.count}})</a>
       {% endfor %}
     </section>
