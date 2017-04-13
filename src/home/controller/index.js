@@ -55,10 +55,6 @@ export default class extends Base {
     let postList = postModel.getPostSitemapList();
     this.assign('postList', postList);
 
-    let tagModel = this.model('tag');
-    let tagList = tagModel.getTagArchive();
-    this.assign('tags', tagList);
-
     this.type('text/xml');
     return this.display(this.HOME_VIEW_PATH + 'sitemap.xml');
   }

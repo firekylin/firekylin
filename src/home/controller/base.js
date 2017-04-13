@@ -57,6 +57,16 @@ export default class extends think.controller.base {
     let categories = await this.model('cate').getCateArchive();
     this.assign('categories', categories);
 
+    // 所有标签
+    let tagModel = this.model('tag');
+    let tagList = await tagModel.getTagArchive();
+    this.assign('tags', tagList);
+
+    // 最近10条文章
+    let postModel = this.model('post');
+    let lastPostList = await postModel.getLastPostList();
+    this.assign('lastPostList', lastPostList);
+
     this.assign('currentYear', (new Date()).getFullYear());
   }
   /**

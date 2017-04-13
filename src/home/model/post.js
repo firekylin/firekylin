@@ -46,6 +46,19 @@ export default class extends think.model.relation {
     }
     return where;
   }
+
+  /**
+   * 获取最近的10条数据 - 有缓存
+   *
+   * @return {Promise}
+   */
+  getLastPostList() {
+    return think.cache('lastPostList', async () => {
+      let postList = await this.getPostList();
+      return postList.data;
+    });
+  }
+
   /**
    * get post list
    * @param  {[type]} page  [description]
