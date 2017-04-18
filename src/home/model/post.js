@@ -18,7 +18,7 @@ export default class extends think.model.relation {
     },
     user: {
       type: think.model.BELONG_TO,
-      field: 'id,name,display_name'
+      field: 'id,name,display_name,email'
     }
   };
 
@@ -69,7 +69,7 @@ export default class extends think.model.relation {
     page = page | 0 || 1;
 
     let field = options.field || 'id,title,pathname,create_time,summary,comment_num';
-    if((await this.model('user').count()) > 1) { field += ',user_id'; }
+    if((await this.model('user').count()) > 0) { field += ',user_id'; }
 
     if(options.tag || options.cate) {
       let name = options.tag ? 'tag' : 'cate';

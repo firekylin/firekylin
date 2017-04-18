@@ -11,7 +11,7 @@ if(think.isFile(portFile)) {
 let host;
 let hostFile = think.ROOT_PATH + think.sep + 'host';
 if(think.isFile(hostFile)) {
-	host = fs.readFileSync(hostFile, 'utf8');
+  host = fs.readFileSync(hostFile, 'utf8');
 }
 
 /**
