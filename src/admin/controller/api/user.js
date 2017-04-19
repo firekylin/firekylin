@@ -81,6 +81,11 @@ export default class extends Base {
 
     let data = this.post();
     let insertId = await this.modelInstance.addUser(data, this.ip());
+
+    if (insertId.type === 'exist') {
+      return this.fail('USER_EXIST');
+    }
+
     return this.success({id: insertId});
   }
 

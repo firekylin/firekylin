@@ -2,7 +2,7 @@
 
 export default {
   USER_NOT_LOGIN: [403, '未登录'],
-  USER_EXIST: [100, '用户已经存在'],
+  USER_EXIST: [100, '用户名或邮箱已经存在'],
   USER_NO_PERMISSION: [101, '没有权限'],
   PARAMS_ERROR: [102, '参数错误'],
   DATA_EMPTY: [103, '数据不能为空'],
