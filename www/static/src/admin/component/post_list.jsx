@@ -233,7 +233,11 @@ module.exports = class extends Base {
                 activePage={this.state.page}
                 onSelect={(e, selectEvent) =>
                   this.setState({page: selectEvent.eventKey}, ()=>
-                    PostAction.selectList(this.state.page, this.state.key === 4 ? null : this.state.key)
+                    PostAction.selectList(
+                      this.state.page,
+                      this.state.key === 4 ? null : this.state.key,
+                      this.state.keyword
+                    )
                   )
                 }
             />
