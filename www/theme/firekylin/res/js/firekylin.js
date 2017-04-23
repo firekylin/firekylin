@@ -261,7 +261,7 @@
       win.removeEventListener('scroll', lazyLoad);
       win.removeEventListener('resize', lazyLoad);
     } else {
-      for (var i = 0; i < lazyLoadImages.length; i++) {
+      for (var i = lazyLoadImages.length - 1; i > -1; i--) {
         var img = lazyLoadImages[i];
         if (lazyLoadShouldAppear(img, 300)) {
           img.src = img.getAttribute('data-src');
