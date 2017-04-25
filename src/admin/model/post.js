@@ -228,6 +228,11 @@ export default class extends Base {
     }
 
     /**
+     * TODO 如果启用了数学表达式，就把行内的数学表达式内容替换成 MathJax 的格式
+     */
+    markedContent = markedContent.replace(/<code>\$(.*?)\$<\/code>/ig, '\\($1\\)');
+
+    /**
      * 增加代码高亮
      */
     if(option.highlight) {

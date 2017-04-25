@@ -115,5 +115,9 @@
   {{options.analyze_code | safe}}
 {% endif %}
 {% if themeConfig.customJS %}<script>{{themeConfig.customJS | safe}}</script>{% endif %}
+
+{% if true %}
+<script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML"></script>
+{% endif %}
 </body>
 </html>
