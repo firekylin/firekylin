@@ -8,6 +8,8 @@ import {
 
 import PostAction from '../action/post';
 import PostStore from '../store/post';
+import CateAction from '../action/cate';
+import CateStore from '../store/cate';
 import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
@@ -22,13 +24,16 @@ module.exports = class extends Base {
       total: 0,
       loading: true,
       postList: [],
+      cateList: [],
       keyword: '',
       page: this.props.location.query.page/1 || 1
     }
   }
   componentDidMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
+    this.listenTo(CateStore, this.handleTrigger.bind(this));
     PostAction.selectList(this.state.page);
+    CateAction.select();
   }
   handleTrigger(data, type) {
     switch(type) {
@@ -47,6 +52,9 @@ module.exports = class extends Base {
         break;
       case 'getPostList':
         this.setState({postList: data.data, total: data.totalPages, loading: false});
+        break;
+      case 'getCateList':
+        this.setState({cateList: data, loading: false});
         break;
     }
   }
@@ -189,17 +197,27 @@ module.exports = class extends Base {
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props}/>
         <div className="manage-container">
-        <div className="fk-search">
-            <input
-                type="text"
-                className="fk-search-input"
-                placeholder="请输入关键字"
-                value={this.state.keyword}
-                onChange={e=> this.setState({keyword: e.target.value})}
-                onKeyDown={e=> e.keyCode === 13 && this.handleSearch()}
-            />
-            <i className="fk-search-btn icon-search" onClick={this.handleSearch.bind(this)}></i>
-        </div>
+          <div className="fk-post-search form-inline">
+            <div className="form-group">
+              <select className="form-control" ref="type">
+                <option value="">全部分类</option>
+                {this.state.cateList.map(cate =>
+                  <option key={cate.id} value={cate.id}>{cate.name}</option>
+                )}
+              </select>
+            </div>
+            <div className="fk-search form-group">
+              <input
+                  type="text"
+                  className="fk-search-input"
+                  placeholder="请输入关键字"
+                  value={this.state.keyword}
+                  onChange={e=> this.setState({keyword: e.target.value})}
+                  onKeyDown={e=> e.keyCode === 13 && this.handleSearch()}
+              />
+              <i className="fk-search-btn icon-search" onClick={this.handleSearch.bind(this)}></i>
+            </div>
+          </div>
           <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
             <Tab eventKey={4} title="全　部"></Tab>
             <Tab eventKey={3} title="已发布"></Tab>
