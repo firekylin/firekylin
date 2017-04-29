@@ -68,132 +68,141 @@ module.exports = class extends Base {
     this.updateNav();
   }
 
-  render() {
-    let rows = this.state.list.map((nav, i) =>
-      this.state.editingRow !== i ?
-        <tr
-          key={i}
-          className="fk-dragable-row"
-        >
-          <td className="fk-dragable-item">
-            <span className="glyphicon glyphicon-option-vertical"></span>
-          </td>
-          <td>{nav.label}</td>
-          <td>{nav.url}</td>
-          <td>{nav.option}</td>
-            <td>
-              <button
-                  type="button"
-                  disabled={i===0}
-                  className="btn btn-success btn-xs"
-                  onClick={()=> this.move(i-1, i)}
-              >
-                <span className="glyphicon glyphicon-arrow-up"></span>
-                <span>上移</span>
-              </button>
-              <span> </span>
-              <button
-                 type="button"
-                 disabled={i===this.state.list.length-1}
-                 className="btn btn-success btn-xs"
-                 onClick={()=> this.move(i, i+1)}
-              >
-               <span className="glyphicon glyphicon-arrow-down"></span>
-               <span>下移</span>
-              </button>
-              <span> </span>
-              <button
-                  type="button"
-                  className="btn btn-primary btn-xs"
-                  onClick={()=> {
-                    this.setState({editingRow: i, editingNav: Object.assign({}, nav)});
-                  }}
-              >
-                <span className="glyphicon glyphicon-edit"></span>
-                <span>编辑</span>
-              </button>
-              <span> </span>
-              <button
-                  type="button"
-                  disabled={this.state.editingRow !== -1}
-                  className="btn btn-danger btn-xs"
-                  onClick={()=> {
-                    this.state.list.splice(i, 1);
-                    this.updateNav();
-                  }}
-              >
-                <span className="glyphicon glyphicon-trash"></span>
-                <span>删除</span>
-              </button>
-            </td>
-        </tr>
-      :
-        <tr
-          key={`editing-${i}`}
-          className="fk-dragable-row"
-          >
-          <td className="fk-dragable-item">
-            <span className="glyphicon glyphicon-option-vertical"></span>
-          </td>
-          <td>
-            <ValidatedInput
-                type="text"
-                name="label-edit"
-                validate="required"
-                defaultValue={this.state.editingNav.label}
-                onChange={e => {
-                  this.state.editingNav.label = e.target.value;
-                }}
-            />
-          </td>
-          <td>
-            <ValidatedInput
-                type="text"
-                name="url-edit"
-                validate="required"
-                defaultValue={this.state.editingNav.url}
-                onChange={e => {
-                  this.state.editingNav.url = e.target.value;
-                }}
-            />
-          </td>
-          <td>
-            <ValidatedInput
-                type="text"
-                name="option-edit"
-                defaultValue={this.state.editingNav.option}
-                onChange={e => {
-                  this.state.editingNav.option = e.target.value;
-                }}
-            />
-          </td>
+  normalRow(nav, i) {
+    return (
+      <tr
+        key={i}
+        className="fk-dragable-row"
+      >
+        <td className="fk-dragable-item">
+          <span className="glyphicon glyphicon-option-vertical"></span>
+        </td>
+        <td>{nav.label}</td>
+        <td>{nav.url}</td>
+        <td>{nav.option}</td>
           <td>
             <button
                 type="button"
-                className="btn btn-primary btn-xs"
-                onClick={()=> {
-                  if (this.state.editingNav.label && this.state.editingNav.url) {
-                    this.edit(this.state.editingRow, this.state.editingNav);
-                    this.setState({editingRow: -1, editingNav: null});
-                  }
-                }}
+                disabled={i===0}
+                className="btn btn-success btn-xs"
+                onClick={()=> this.move(i-1, i)}
             >
-              <span className="glyphicon glyphicon-edit"></span>
-              <span>保存</span>
+              <span className="glyphicon glyphicon-arrow-up"></span>
+              <span>上移</span>
+            </button>
+            <span> </span>
+            <button
+               type="button"
+               disabled={i===this.state.list.length-1}
+               className="btn btn-success btn-xs"
+               onClick={()=> this.move(i, i+1)}
+            >
+             <span className="glyphicon glyphicon-arrow-down"></span>
+             <span>下移</span>
             </button>
             <span> </span>
             <button
                 type="button"
-                className="btn btn-default btn-xs"
+                className="btn btn-primary btn-xs"
                 onClick={()=> {
-                  this.setState({editingRow: -1, editingNav: null});
+                  this.setState({editingRow: i, editingNav: Object.assign({}, nav)});
                 }}
             >
-              <span className="glyphicon glyphicon-remove"></span>
-              <span>取消</span>
+              <span className="glyphicon glyphicon-edit"></span>
+              <span>编辑</span>
+            </button>
+            <span> </span>
+            <button
+                type="button"
+                disabled={this.state.editingRow !== -1}
+                className="btn btn-danger btn-xs"
+                onClick={()=> {
+                  this.state.list.splice(i, 1);
+                  this.updateNav();
+                }}
+            >
+              <span className="glyphicon glyphicon-trash"></span>
+              <span>删除</span>
             </button>
           </td>
-        </tr>
+      </tr>
+    )
+  }
+
+  editingRow(nav, i) {
+    return (
+      <tr
+        key={`editing-${i}`}
+        className="fk-dragable-row"
+      >
+        <td className="fk-dragable-item">
+          <span className="glyphicon glyphicon-option-vertical"></span>
+        </td>
+        <td>
+          <ValidatedInput
+              type="text"
+              name="label-edit"
+              validate="required"
+              defaultValue={this.state.editingNav.label}
+              onChange={e => {
+                this.state.editingNav.label = e.target.value;
+              }}
+          />
+        </td>
+        <td>
+          <ValidatedInput
+              type="text"
+              name="url-edit"
+              validate="required"
+              defaultValue={this.state.editingNav.url}
+              onChange={e => {
+                this.state.editingNav.url = e.target.value;
+              }}
+          />
+        </td>
+        <td>
+          <ValidatedInput
+              type="text"
+              name="option-edit"
+              defaultValue={this.state.editingNav.option}
+              onChange={e => {
+                this.state.editingNav.option = e.target.value;
+              }}
+          />
+        </td>
+        <td>
+          <button
+              type="button"
+              className="btn btn-primary btn-xs"
+              onClick={()=> {
+                if (this.state.editingNav.label && this.state.editingNav.url) {
+                  this.edit(this.state.editingRow, this.state.editingNav);
+                  this.setState({editingRow: -1, editingNav: null});
+                }
+              }}
+          >
+            <span className="glyphicon glyphicon-edit"></span>
+            <span>保存</span>
+          </button>
+          <span> </span>
+          <button
+              type="button"
+              className="btn btn-default btn-xs"
+              onClick={()=> {
+                this.setState({editingRow: -1, editingNav: null});
+              }}
+          >
+            <span className="glyphicon glyphicon-remove"></span>
+            <span>取消</span>
+          </button>
+        </td>
+      </tr>
+    )
+  }
+
+  render() {
+    let rows = this.state.list.map((nav, i) =>
+      this.state.editingRow !== i ? this.normalRow(nav, i) : this.editingRow(nav, i)
     );
     rows.push(
       <tr key="form">
