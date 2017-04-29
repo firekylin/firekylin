@@ -75,7 +75,7 @@ module.exports = class extends Base {
                   )
                 }
             >
-              <span className="glyphicon glyphicon-remove"></span>
+              <span className="glyphicon glyphicon-trash"></span>
               删除
             </button>
           </td>
