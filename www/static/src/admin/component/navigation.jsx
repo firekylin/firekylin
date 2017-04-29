@@ -18,7 +18,9 @@ module.exports = class extends Base {
       options.navigation = JSON.parse(options.navigation);
     }
     return {
-      list: options.navigation
+      list: options.navigation,
+      editingRow: -1,
+      editingNav: null
     };
   }
 
@@ -35,7 +37,11 @@ module.exports = class extends Base {
   }
 
   onValidSubmit(e) {
-    this.state.list.push(e);
+    this.state.list.push({
+      label: e['label-add'],
+      url: e['url-add'],
+      option: e['option-add']
+    });
     this.updateNav();
   }
 
@@ -49,55 +55,145 @@ module.exports = class extends Base {
     let c = this.state.list[a];
     this.state.list[a] = this.state.list[b];
     this.state.list[b] = c;
+    if (this.state.editingRow === a) {
+      this.state.editingRow = b;
+    } else if (this.state.editingRow === b) {
+      this.state.editingRow = a;
+    }
+    this.updateNav();
+  }
+
+  edit(idx, nav) {
+    this.state.list[idx] = nav;
     this.updateNav();
   }
 
   render() {
     let rows = this.state.list.map((nav, i) =>
-      <tr
+      this.state.editingRow !== i ?
+        <tr
           key={i}
           className="fk-dragable-row"
-      >
-        <td className="fk-dragable-item">
-          <span className="glyphicon glyphicon-option-vertical"></span>
-        </td>
-        <td>{nav.label}</td>
-        <td>{nav.url}</td>
-        <td>{nav.option}</td>
-        <td>
-          <button
-              type="button"
-              disabled={i===0}
-              className="btn btn-success btn-xs"
-              onClick={()=> this.move(i-1, i)}
+        >
+          <td className="fk-dragable-item">
+            <span className="glyphicon glyphicon-option-vertical"></span>
+          </td>
+          <td>{nav.label}</td>
+          <td>{nav.url}</td>
+          <td>{nav.option}</td>
+            <td>
+              <button
+                  type="button"
+                  disabled={i===0}
+                  className="btn btn-success btn-xs"
+                  onClick={()=> this.move(i-1, i)}
+              >
+                <span className="glyphicon glyphicon-arrow-up"></span>
+                <span>上移</span>
+              </button>
+              <span> </span>
+              <button
+                 type="button"
+                 disabled={i===this.state.list.length-1}
+                 className="btn btn-success btn-xs"
+                 onClick={()=> this.move(i, i+1)}
+              >
+               <span className="glyphicon glyphicon-arrow-down"></span>
+               <span>下移</span>
+              </button>
+              <span> </span>
+              <button
+                  type="button"
+                  className="btn btn-primary btn-xs"
+                  onClick={()=> {
+                    this.setState({editingRow: i, editingNav: Object.assign({}, nav)});
+                  }}
+              >
+                <span className="glyphicon glyphicon-edit"></span>
+                <span>编辑</span>
+              </button>
+              <span> </span>
+              <button
+                  type="button"
+                  disabled={this.state.editingRow !== -1}
+                  className="btn btn-danger btn-xs"
+                  onClick={()=> {
+                    this.state.list.splice(i, 1);
+                    this.updateNav();
+                  }}
+              >
+                <span className="glyphicon glyphicon-trash"></span>
+                <span>删除</span>
+              </button>
+            </td>
+        </tr>
+      :
+        <tr
+          key={`editing-${i}`}
+          className="fk-dragable-row"
           >
-            <span className="glyphicon glyphicon-arrow-up"></span>
-            <span>上移</span>
-          </button>
-          <span> </span>
-          <button
-             type="button"
-             disabled={i===this.state.list.length-1}
-             className="btn btn-success btn-xs"
-             onClick={()=> this.move(i, i+1)}
-          >
-           <span className="glyphicon glyphicon-arrow-down"></span>
-           <span>下移</span>
-          </button>
-          <span> </span>
-          <button
-              type="button"
-              className="btn btn-danger btn-xs"
-              onClick={()=> {
-                this.state.list.splice(i, 1);
-                this.updateNav();
-              }}
-          >
-            <span className="glyphicon glyphicon-trash"></span>
-            <span>删除</span>
-          </button>
-        </td>
-      </tr>
+          <td className="fk-dragable-item">
+            <span className="glyphicon glyphicon-option-vertical"></span>
+          </td>
+          <td>
+            <ValidatedInput
+                type="text"
+                name="label-edit"
+                validate="required"
+                defaultValue={this.state.editingNav.label}
+                onChange={e => {
+                  this.state.editingNav.label = e.target.value;
+                }}
+            />
+          </td>
+          <td>
+            <ValidatedInput
+                type="text"
+                name="url-edit"
+                validate="required"
+                defaultValue={this.state.editingNav.url}
+                onChange={e => {
+                  this.state.editingNav.url = e.target.value;
+                }}
+            />
+          </td>
+          <td>
+            <ValidatedInput
+                type="text"
+                name="option-edit"
+                defaultValue={this.state.editingNav.option}
+                onChange={e => {
+                  this.state.editingNav.option = e.target.value;
+                }}
+            />
+          </td>
+          <td>
+            <button
+                type="button"
+                className="btn btn-primary btn-xs"
+                onClick={()=> {
+                  if (this.state.editingNav.label && this.state.editingNav.url) {
+                    this.edit(this.state.editingRow, this.state.editingNav);
+                    this.setState({editingRow: -1, editingNav: null});
+                  }
+                }}
+            >
+              <span className="glyphicon glyphicon-edit"></span>
+              <span>保存</span>
+            </button>
+            <span> </span>
+            <button
+                type="button"
+                className="btn btn-default btn-xs"
+                onClick={()=> {
+                  this.setState({editingRow: -1, editingNav: null});
+                }}
+            >
+              <span className="glyphicon glyphicon-remove"></span>
+              <span>取消</span>
+            </button>
+          </td>
+        </tr>
     );
     rows.push(
       <tr key="form">
@@ -105,21 +201,21 @@ module.exports = class extends Base {
         <td>
           <ValidatedInput
               type="text"
-              name="label"
+              name="label-add"
               validate="required"
           />
         </td>
         <td>
           <ValidatedInput
               type="text"
-              name="url"
+              name="url-add"
               validate="required"
           />
         </td>
         <td>
           <ValidatedInput
               type="text"
-              name="option"
+              name="option-add"
           />
         </td>
         <td>
@@ -136,18 +232,18 @@ module.exports = class extends Base {
         <BreadCrumb {...this.props} />
         <div className="manage-container">
           <Form onValidSubmit={this.onValidSubmit.bind(this)}>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th style={{width: 10}}></th>
-                <th>菜单文本</th>
-                <th>菜单地址</th>
-                <th>菜单属性</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody children={rows} />
-          </table>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th style={{width: 10}}></th>
+                  <th>菜单文本</th>
+                  <th>菜单地址</th>
+                  <th>菜单属性</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody children={rows} />
+            </table>
           </Form>
         </div>
       </div>
