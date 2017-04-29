@@ -17,13 +17,14 @@ cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
 cp -r www/theme/firekylin/inc www/theme/firekylin.build/html/
 cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
-node stc.view.config.js;
+# rm stc plugin in theme file temporary
+# node stc.view.config.js;
 
-cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
-rm -rf output.theme/www/theme/firekylin.build;
-cp -r output.theme/www/ output/www/
-rm -rf output.theme;
-rm -rf www/theme/firekylin.build/;
+# cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
+# rm -rf output.theme/www/theme/firekylin.build;
+# cp -r output.theme/www/ output/www/
+# rm -rf output.theme;
+# rm -rf www/theme/firekylin.build/;
 
 
 npm run compile;
