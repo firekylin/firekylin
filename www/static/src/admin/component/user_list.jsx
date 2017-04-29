@@ -105,7 +105,7 @@ module.exports = class extends Base {
             &nbsp;
             {!this.state.key ? <button type="button" className="btn btn-danger btn-xs"
               onClick={this.handleDelete.bind(this, item.id)}>
-              <span className="glyphicon glyphicon-remove" aria-hidden="true"></span> 删除
+              <span className="glyphicon glyphicon-trash" aria-hidden="true"></span> 删除
             </button> :
             <button type="button" className="btn btn-warning btn-xs" onClick={this.deny.bind(this, item)}>
               <span className="glyphicon glyphicon-remove"></span>
