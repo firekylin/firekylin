@@ -233,6 +233,7 @@ textarea{resize:none;}
     right: 0;
     top: 0;
     width: 40px;
+    background: none;
 }
 .fk-search-btn:before{
 	position: absolute;

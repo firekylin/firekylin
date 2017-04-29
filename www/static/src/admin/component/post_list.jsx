@@ -22,6 +22,7 @@ module.exports = class extends Base {
     this.state = {
       key: 4,
       total: 0,
+      searchCate: '',
       loading: true,
       postList: [],
       cateList: [],
@@ -66,8 +67,15 @@ module.exports = class extends Base {
     return PostAction.selectList(this.state.page, key !== 4 ? key : null, this.state.keyword);
   }
 
-  handleSearch() {
-    PostAction.selectList(this.state.page, this.state.key !== 4 ? this.state.key : null, this.state.keyword);
+  handleSearch(e) {
+    e.preventDefault();
+
+    PostAction.selectList(
+      this.state.page,
+      this.state.key !== 4 ? this.state.key : null,
+      this.state.keyword,
+      this.state.searchCate
+    );
   }
 
   getPostList() {
@@ -197,9 +205,13 @@ module.exports = class extends Base {
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props}/>
         <div className="manage-container">
-          <div className="fk-post-search form-inline">
+          <form className="fk-post-search form-inline" onSubmit={this.handleSearch.bind(this)}>
             <div className="form-group">
-              <select className="form-control" ref="type">
+              <select
+                className="form-control"
+                name="cate"
+                onChange={e=> this.setState({searchCate: e.target.value})}
+              >
                 <option value="">全部分类</option>
                 {this.state.cateList.map(cate =>
                   <option key={cate.id} value={cate.id}>{cate.name}</option>
@@ -213,11 +225,11 @@ module.exports = class extends Base {
                   placeholder="请输入关键字"
                   value={this.state.keyword}
                   onChange={e=> this.setState({keyword: e.target.value})}
-                  onKeyDown={e=> e.keyCode === 13 && this.handleSearch()}
+                  onKeyDown={e=> e.keyCode === 13 && this.handleSearch(e)}
               />
-              <i className="fk-search-btn icon-search" onClick={this.handleSearch.bind(this)}></i>
+              <button className="fk-search-btn icon-search"></button>
             </div>
-          </div>
+          </form>
           <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
             <Tab eventKey={4} title="全　部"></Tab>
             <Tab eventKey={3} title="已发布"></Tab>
