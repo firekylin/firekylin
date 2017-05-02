@@ -311,7 +311,6 @@ module.exports = class extends Base {
             字数：{this.wordCount(this.state.postInfo.markdown_content)}
           </span>
         </p>
-        <script src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML" />
       </div>
     );
   }

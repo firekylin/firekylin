@@ -214,7 +214,7 @@ export default class extends Base {
 
     // TODO 根据是否启用 MathJax 的选项决定使用 markedWithMathJax 渲染 MD 还是使用 marked
     let markedWithMathJax = think.service('marked-with-mathjax');
-    let markedContent = await markedWithMathJax.render(content);
+    let markedContent = await markedWithMathJax(content);
 
     // let markedContent = marked(content);
 
