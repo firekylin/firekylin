@@ -12,6 +12,8 @@ echo 'webpack end';
 
 node stc.config.js;
 
+mkdir -p output/www/theme;
+cp -r www/theme/firekylin output/www/theme;
 # rm stc plugin in theme file temporary
 # mkdir -p www/theme/firekylin.build/html;
 # cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
