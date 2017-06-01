@@ -4,11 +4,12 @@
 
 ## 0.15.7
 
+- 【重要】使用自定义主题者请将主题内 `tag.html` 中的 `for tag in list` 改为 `for tag in tags` - #306
 - 文章页模板增加作者邮箱数据
 - 菜单管理增加编辑功能
 - 后台文章列表增加分类过滤功能
 - 增加 `opensearch.xml` 支持
-- 模板增加 `lastPostList` 最近文章和 `tags` 标签列表变量
+- #306 模板增加 `lastPostList` 最近文章和 `tags` 标签列表变量
 - Fix #279 首页去除 stc 编译修复后台修改模板文件不生效问题
 - Fix 推送 `modelInstance` 定义报错失败问题
 - Fix #303,#304 自定义首页不生效
