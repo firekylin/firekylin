@@ -50,6 +50,7 @@ export default class extends think.controller.base {
     this.fetch(file, {}, options).then(content => {
       content = content.replace('ERROR_MESSAGE', message);
       this.type(options.content_type);
+      this.status(status);
       this.end(content);
     });
   }
