@@ -9,7 +9,7 @@ export default [
   [/^search(?:\.html|\.json)$/, 'post/search'],
   [/^page\/([^/]+)(?:\.html|\.json)$/, 'post/page?pathname=:1'],
   [/^post\/([^/]+)(?:\.html|\.json)$/, 'post/detail?pathname=:1'],
-
+  [/^blog$/, 'post/blog'],
   [/^about$/, 'post/page?pathname=about'],
   [/^archives$/, 'post/archive'],
   [/^cate\/(.+)$/, 'post/list?cate=:1'],

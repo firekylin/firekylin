@@ -15,11 +15,60 @@ export default class extends Base {
   indexAction() {
     return this.listAction();
   }
+	/**
+	 * post list
+	 * @return {Promise} []
+	 */
+	async listAction() {
+		let model = this.model('post');
+		let where = {
+			tag: this.get('tag'),
+			cate: this.get('cate')
+		};
+		if(this.get('name')) {
+			let user = await this.model('user').where({name: this.get('name')}).find();
+			if(!think.isEmpty(user)) {
+				where.where = {user_id: user.id};
+			}
+		}
+
+		let tagName = '', cateName = '';
+		if(where.tag) {
+			tagName = await this.model('tag').where({pathname: where.tag}).find();
+			if(!think.isEmpty(tagName)) {
+				tagName = tagName.name;
+			} else {
+				return think.statusAction(404, this.http);
+			}
+		}
+		if(where.cate) {
+			[cateName] = this.assign('categories').filter(cate =>
+				cate.pathname.toLowerCase() === where.cate.toLowerCase()
+			);
+			if (cateName && cateName.name) {
+				cateName = cateName.name;
+			} else {
+				return think.statusAction(404, this.http);
+			}
+		}
+
+		let list = await model.getPostList(this.get('page'), where);
+		list.data.forEach(post => post.pathname = encodeURIComponent(post.pathname));
+		let {data, ...pagination} = list;
+		this.assign({
+			posts: data,
+			pagination,
+			tag: tagName,
+			cate: cateName,
+			pathname: where.tag || where.cate
+		});
+		return this.displayView('index');
+	}
   /**
-   * post list
+   * post blog
    * @return {Promise} []
    */
-  async listAction() {
+  async blogAction() {
     let model = this.model('post');
     let where = {
       tag: this.get('tag'),
@@ -62,7 +111,7 @@ export default class extends Base {
       cate: cateName,
       pathname: where.tag || where.cate
     });
-    return this.displayView('index');
+    return this.displayView('blog');
   }
   /**
    * post detail
