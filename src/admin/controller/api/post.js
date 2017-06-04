@@ -54,8 +54,20 @@ export default class extends Base {
         }
       }
 
+      if(this.get('cate')) {
+        let cate = parseInt(this.get('cate'));
+        if(!isNaN(cate)) {
+          this.modelInstance.join({
+            table: 'post_cate',
+            join: 'left',
+            on: ['id', 'post_id']
+          });
+          where.cate_id = cate;
+        }
+      }
+
       let field = [
-        'id',
+        `${this.modelInstance.config.prefix}post.id`,
         'title',
         'user_id',
         'create_time',

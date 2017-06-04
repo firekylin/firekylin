@@ -23,10 +23,11 @@ export default Reflux.createStore({
       data => this.trigger(data, id ? 'getPostInfo' : 'getPostList')
     );
   },
-  onSelectList(page, status, keyword) {
+  onSelectList(page, status, keyword, cate) {
     let url = `/admin/api/post?page=${page}`;
     if(status) { url += `&status=${status}` }
     if(keyword) { url += `&keyword=${keyword}`}
+    if(cate) { url += `&cate=${cate}` }
     return firekylin.request(superagent.get(url)).then(
       data => this.trigger(data, 'getPostList')
     );

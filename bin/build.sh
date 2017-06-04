@@ -12,18 +12,21 @@ echo 'webpack end';
 
 node stc.config.js;
 
-mkdir -p www/theme/firekylin.build/html;
-cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
-cp -r www/theme/firekylin/inc www/theme/firekylin.build/html/
-cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
+mkdir -p output/www/theme;
+cp -r www/theme/firekylin output/www/theme;
+# rm stc plugin in theme file temporary
+# mkdir -p www/theme/firekylin.build/html;
+# cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
+# cp -r www/theme/firekylin/inc www/theme/firekylin.build/html/
+# cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
-node stc.view.config.js;
+# node stc.view.config.js;
 
-cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
-rm -rf output.theme/www/theme/firekylin.build;
-cp -r output.theme/www/ output/www/
-rm -rf output.theme;
-rm -rf www/theme/firekylin.build/;
+# cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
+# rm -rf output.theme/www/theme/firekylin.build;
+# cp -r output.theme/www/ output/www/
+# rm -rf output.theme;
+# rm -rf www/theme/firekylin.build/;
 
 
 npm run compile;

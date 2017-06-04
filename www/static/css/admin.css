@@ -3,6 +3,7 @@
 .tooltip.top .tooltip-arrow{border-top-color:#246594;}
 .nav-tabs > li > a:hover{border-color:transparent;}
 .table{margin-bottom:0;}
+.table tr td .form-group{margin-bottom:0;}
 .radio-inline,label.checkbox-inline{margin:0 15px 0 0;padding:0;}
 .radio-inline + .radio-inline,.checkbox-inline + .checkbox-inline{margin-left:0;}
 .nav > li > a:hover,.nav > li > a:focus{background-color:transparent;}
@@ -205,15 +206,21 @@ textarea{resize:none;}
 .fk-article-list a,.fk-question-list a{display:block;max-width:600px;}
 
 /*右侧搜索*/
+.fk-post-search {
+    position: absolute;
+    right: 20px;
+}
+.fk-post-search>.form-group:first-child {
+    margin-right: 10px;
+}
 .fk-search{
-	height: 30px;
-	width: 275px;
-	border: 1px solid #c8c8d5;
-  border-radius: 4px;
-  padding: 4px;
-  margin-bottom: 10px;
-  position: absolute;
-	right: 20px;
+    height: 30px;
+    width: 275px;
+    border: 1px solid #c8c8d5;
+    border-radius: 4px;
+    padding: 4px;
+    margin-bottom: 10px;
+    position: relative;
 }
 .fk-search-input{
 	width: 100%;
@@ -227,6 +234,7 @@ textarea{resize:none;}
     right: 0;
     top: 0;
     width: 40px;
+    background: none;
 }
 .fk-search-btn:before{
 	position: absolute;

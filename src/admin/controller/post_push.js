@@ -2,7 +2,7 @@ import {PasswordHash} from 'phpass';
 import Post from './api/post';
 
 export default class extends Post {
-  modelInstance = this.model('post');
+  postModelInstance = this.model('post');
 
   async __before() {
 
@@ -24,10 +24,10 @@ export default class extends Post {
   }
 
   async updatePost(post) {
-    if(post.markdown_content) { post = this.modelInstance.getContentAndSummary(post); }
-    if(post.create_time) { post = this.modelInstance.getPostTime(post); }
+    if(post.markdown_content) { post = this.postModelInstance.getContentAndSummary(post); }
+    if(post.create_time) { post = this.postModelInstance.getPostTime(post); }
     if(post.tag) { post = await this.getTagIds(post.tag); }
-    let rows = await this.modelInstance.savePost(post);
+    let rows = await this.postModelInstance.savePost(post);
     return this.success({affectedRows: rows});
   }
 
@@ -46,7 +46,7 @@ export default class extends Post {
     if(!this.checkAuth(post)) { return this.fail('POST_CONTENT_ERROR'); }
 
     //check pathname
-    let exPost = await this.modelInstance.where({pathname: post.pathname}).find();
+    let exPost = await this.postModelInstance.where({pathname: post.pathname}).find();
     if(!think.isEmpty(exPost)) {
       if(exPost.user.id !== this.poster.id) {
         return this.fail('POST_USER_ERROR');
@@ -56,15 +56,15 @@ export default class extends Post {
     }
 
     post.user_id = this.poster.id;
-    post = await this.modelInstance.getContentAndSummary(post);
-    post = this.modelInstance.getPostTime(post);
+    post = await this.postModelInstance.getContentAndSummary(post);
+    post = this.postModelInstance.getPostTime(post);
     post.tag = await this.getTagIds(post.tag);
 
     if(post.status === 3 && this.poster.type !== 1) {
       post.status = 1;
     }
 
-    let insertId = await this.modelInstance.addPost(post);
+    let insertId = await this.postModelInstance.addPost(post);
     return this.success({id: insertId});
   }
 

@@ -8,6 +8,8 @@ import {
 
 import PostAction from '../action/post';
 import PostStore from '../store/post';
+import CateAction from '../action/cate';
+import CateStore from '../store/cate';
 import Base from 'base';
 import BreadCrumb from 'admin/component/breadcrumb';
 import ModalAction from 'common/action/modal';
@@ -20,15 +22,19 @@ module.exports = class extends Base {
     this.state = {
       key: 4,
       total: 0,
+      searchCate: '',
       loading: true,
       postList: [],
+      cateList: [],
       keyword: '',
       page: this.props.location.query.page/1 || 1
     }
   }
   componentDidMount() {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
+    this.listenTo(CateStore, this.handleTrigger.bind(this));
     PostAction.selectList(this.state.page);
+    CateAction.select();
   }
   handleTrigger(data, type) {
     switch(type) {
@@ -48,6 +54,9 @@ module.exports = class extends Base {
       case 'getPostList':
         this.setState({postList: data.data, total: data.totalPages, loading: false});
         break;
+      case 'getCateList':
+        this.setState({cateList: data, loading: false});
+        break;
     }
   }
   handleSelect(key) {
@@ -58,8 +67,15 @@ module.exports = class extends Base {
     return PostAction.selectList(this.state.page, key !== 4 ? key : null, this.state.keyword);
   }
 
-  handleSearch() {
-    PostAction.selectList(this.state.page, this.state.key !== 4 ? this.state.key : null, this.state.keyword);
+  handleSearch(e) {
+    e.preventDefault();
+
+    PostAction.selectList(
+      this.state.page,
+      this.state.key !== 4 ? this.state.key : null,
+      this.state.keyword,
+      this.state.searchCate
+    );
   }
 
   getPostList() {
@@ -189,17 +205,31 @@ module.exports = class extends Base {
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props}/>
         <div className="manage-container">
-        <div className="fk-search">
-            <input
-                type="text"
-                className="fk-search-input"
-                placeholder="请输入关键字"
-                value={this.state.keyword}
-                onChange={e=> this.setState({keyword: e.target.value})}
-                onKeyDown={e=> e.keyCode === 13 && this.handleSearch()}
-            />
-            <i className="fk-search-btn icon-search" onClick={this.handleSearch.bind(this)}></i>
-        </div>
+          <form className="fk-post-search form-inline" onSubmit={this.handleSearch.bind(this)}>
+            <div className="form-group">
+              <select
+                className="form-control"
+                name="cate"
+                onChange={e=> this.setState({searchCate: e.target.value})}
+              >
+                <option value="">全部分类</option>
+                {this.state.cateList.map(cate =>
+                  <option key={cate.id} value={cate.id}>{cate.name}</option>
+                )}
+              </select>
+            </div>
+            <div className="fk-search form-group">
+              <input
+                  type="text"
+                  className="fk-search-input"
+                  placeholder="请输入关键字"
+                  value={this.state.keyword}
+                  onChange={e=> this.setState({keyword: e.target.value})}
+                  onKeyDown={e=> e.keyCode === 13 && this.handleSearch(e)}
+              />
+              <button className="fk-search-btn icon-search"></button>
+            </div>
+          </form>
           <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
             <Tab eventKey={4} title="全　部"></Tab>
             <Tab eventKey={3} title="已发布"></Tab>

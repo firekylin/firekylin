@@ -1,7 +1,7 @@
 {
   "name": "Firekylin",
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES2015+",
-  "version": "0.15.6",
+  "version": "0.15.8",
   "scripts": {
     "start": "node www/development.js",
     "compile": "babel --presets es2015,stage-1 --plugins transform-runtime src/ --out-dir app/",
@@ -34,7 +34,7 @@
     "semver": "^5.1.0",
     "source-map-support": "^0.4.0",
     "speakeasy": "2.0.0",
-    "thinkjs": "^2.1.5",
+    "thinkjs": "^2.2.18",
     "to-markdown": "^3.0.3",
     "upyun": "^2.0.4",
     "xml2js": "^0.4.16"

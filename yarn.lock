@@ -33,11 +33,7 @@ acorn-jsx@^3.0.0:
   resolved "http://registry.npm.taobao.org/acorn-jsx/download/acorn-jsx-3.0.1.tgz#afdf9488fb1ecefc8348f6fb22f464e32a58b36b"
   dependencies:
     acorn "^3.0.4"
-
-acorn@^2.1.0, acorn@^2.4.0:
-  version "2.7.0"
-  resolved "http://registry.npm.taobao.org/acorn/download/acorn-2.7.0.tgz#ab6e7d9d886aaca8b085bc3312b79a198433f0e7"
-
+    
 acorn@^3.0.4:
   version "3.3.0"
   resolved "http://registry.npm.taobao.org/acorn/download/acorn-3.3.0.tgz#45e37fb39e8da3f25baee3ff5369e2bb5f22017a"
@@ -5188,9 +5184,9 @@ thinkit@4.10.0:
   version "4.10.0"
   resolved "http://registry.npm.taobao.org/thinkit/download/thinkit-4.10.0.tgz#7829b52e9277dbdfa4672e0e919ea6d430a941d3"
 
-thinkjs@^2.1.5:
-  version "2.2.17"
-  resolved "http://registry.npm.taobao.org/thinkjs/download/thinkjs-2.2.17.tgz#3b9817c996a32719e9481921ccb1b7713e6ba4ea"
+thinkjs@^2.2.18:
+  version "2.2.18"
+  resolved "http://registry.npm.taobao.org/thinkjs/download/thinkjs-2.2.18.tgz#d955937b17a718dfe46b3c2a4436652aab02ca64"
   dependencies:
     babel-runtime "6.6.1"
     bluebird "3.3.5"
