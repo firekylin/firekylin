@@ -155,17 +155,17 @@ export default class extends Base {
     } else {
       showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
     }
-    data.content = this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
+    data.content = await this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
 
     const hasMoreTag = /(?:^|[\r\n]+)\s*\<\!--more--\>\s*[\r\n]+/i.test(data.markdown_content);
 
     if (hasMoreTag || auto_summary === 0) {
       data.summary = data.markdown_content.split('<!--more-->')[0];
-      data.summary = this.markdownToHtml(data.summary, {toc: false, highlight: true});
+      data.summary = await this.markdownToHtml(data.summary, {toc: false, highlight: true});
       data.summary.replace(/<[>]*>/g, '');
 
     } else {
-      let summary = this.markdownToHtml(data.markdown_content, {toc: false, highlight: true});
+      let summary = await this.markdownToHtml(data.markdown_content, {toc: false, highlight: true});
       // 过滤掉 HTML 标签并截取所需的长度
       data.summary = summary.replace(/<\/?[^>]*>/g, '').substr(0, auto_summary) + '...';
     }
@@ -193,11 +193,11 @@ export default class extends Base {
 
     if (hasMoreTag || summary_length === 0) {
       summary = markdown_content.split('<!--more-->')[0];
-      summary = this.markdownToHtml(summary, {toc: false, highlight: true});
+      summary = await this.markdownToHtml(summary, {toc: false, highlight: true});
       summary.replace(/<[>]*>/g, '');
 
     } else {
-      summary = this.markdownToHtml(markdown_content, {toc: false, highlight: true});
+      summary = await this.markdownToHtml(markdown_content, {toc: false, highlight: true});
       // 过滤掉 HTML 标签 及换行、空格等 并截取所需的长度
       summary = summary.replace(/<\/?[^>]*>/g, '').replace(/[\n\s\t]/g, '').substr(0, summary_length) + '...';
     }
@@ -210,8 +210,13 @@ export default class extends Base {
    * markdown to html
    * @return {} []
    */
-  markdownToHtml(content, option = {toc: true, highlight: true}) {
-    let markedContent = marked(content);
+  async markdownToHtml(content, option = {toc: true, highlight: true}) {
+
+    // TODO 根据是否启用 MathJax 的选项决定使用 markedWithMathJax 渲染 MD 还是使用 marked
+    let markedWithMathJax = think.service('marked-with-mathjax');
+    let markedContent = await markedWithMathJax(content);
+
+    // let markedContent = marked(content);
 
     /**
      * 增加 TOC 目录

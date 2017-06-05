@@ -21,6 +21,8 @@
     "highlight.js": "^9.2.0",
     "markdown-toc": "^1.0.2",
     "marked": "^0.3.5",
+    "mathjax": "^2.7.1",
+    "mathjax-node": "^1.0.1",
     "moment": "^2.11.2",
     "node-crontab": "0.0.8",
     "nodemailer": "^2.3.2",
