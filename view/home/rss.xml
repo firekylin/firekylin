@@ -11,16 +11,16 @@
         <item>
             <title>{{item.title}}</title>
             <link>{{site_url}}/post/{{item.pathname}}.html</link>
-            <description>
+            <description><![CDATA[
             {% if item.summary %}
-            {{item.summary}}
+            {{item.summary | safe}}
             {% if item.summary != item.content %}
             <p class="more">
                 <a href="{{site_url}}/post/{{item.pathname}}.html" title="{{item.title}}">[...]</a>
             </p>
             {% endif %}
-            {% else %}{{item.content}}{% endif %}
-            </description>
+            {% else %}{{item.content | safe}}{% endif %}
+            ]]></description>
             <pubDate>{{ item.create_time | utc }}</pubDate>
             <guid>{{site_url}}/post/{{item.pathname}}.html</guid>
         </item>

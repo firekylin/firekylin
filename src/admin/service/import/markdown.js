@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import {execSync} from 'child_process';
-import Post from '../../controller/api/post';
 import Base from './base';
 
 const PATH = path.join(think.RUNTIME_PATH, 'importMarkdownFileToFirekylin');
