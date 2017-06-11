@@ -72,8 +72,8 @@ export default class extends Base {
 
         zip
           .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
-          .pipe(fs.createWriteStream(PATH + '/export.zip'))
-          .on('finish', () => this.download(PATH + '/export.zip'));
+          .pipe(fs.createWriteStream(path.join(PATH, 'export.zip')))
+          .on('finish', () => this.download(path.join(PATH, 'export.zip')));
       } catch (e) {
         throw new Error(e);
       }
