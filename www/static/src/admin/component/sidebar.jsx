@@ -45,7 +45,8 @@ module.exports = class extends Base {
         {url: '/options/upload', title: '上传设置'},
         {url: '/options/analytic', title: '统计代码'},
         {url: '/options/push', title: '推送设置'},
-        {url: '/options/import', title: '导入数据'}
+        {url: '/options/import', title: '导入数据'},
+        {url: '/options/export', title: '导出数据'}
       ]}
     ]
   };
