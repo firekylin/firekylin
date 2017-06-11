@@ -13,13 +13,13 @@
             <link>{{site_url}}/post/{{item.pathname}}.html</link>
             <description><![CDATA[
             {% if item.summary %}
-            {{item.summary | safe}}
+            {{item.summary | xml | safe}}
             {% if item.summary != item.content %}
             <p class="more">
                 <a href="{{site_url}}/post/{{item.pathname}}.html" title="{{item.title}}">[...]</a>
             </p>
             {% endif %}
-            {% else %}{{item.content | safe}}{% endif %}
+            {% else %}{{item.content | xml | safe}}{% endif %}
             ]]></description>
             <pubDate>{{ item.create_time | utc }}</pubDate>
             <guid>{{site_url}}/post/{{item.pathname}}.html</guid>
