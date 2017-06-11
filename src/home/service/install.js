@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import semver from 'semver';
 
 export default class extends think.service.base {
   /**
@@ -42,6 +43,11 @@ export default class extends think.service.base {
     let dbInstance = this.getModel(true);
     return dbInstance.query('SELECT VERSION()').catch(() => {
       return Promise.reject('数据库信息有误');
+    }).then(data => {
+      let version = data[0]['VERSION()']; 
+      /** 版本兼容，当 MySQL 大于 5.5.3 时自动增加 utf8mb4 支持 */
+      this.dbConfig.encoding = semver.gt(version, '5.5.3') ? 'utf8mb4' : 'utf8';
+      return version;
     });
   }
   /**
@@ -130,7 +136,7 @@ export default class extends think.service.base {
    * update config
    * @return {[type]} [description]
    */
-  updateConfig() {
+  async updateConfig() {
     let data = {
       type: 'mysql',
       adapter: {
