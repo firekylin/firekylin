@@ -1,7 +1,9 @@
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 import request from 'request';
+import JSZip from 'jszip';
 
 import Base from './base';
 
@@ -52,6 +54,32 @@ export default class extends Base {
     }
 
     return this.serviceUpload(type, file.path, config);
+  }
+
+  // 导出 Markdown 文件
+  async getAction() {
+    const PATH = path.join(think.RUNTIME_PATH, 'exportedMarkdownFiles');
+
+    if (this.get('type') === 'markdown') {
+      let num = await this.model('post').getCount();
+      let data = await this.model('post').getLatest(0, num);
+      try {
+        execSync(`rm -rf ${PATH}; mkdir ${PATH};`);
+        let zip = new JSZip();
+        for (let item of data) {
+          zip.file(`${think.datetime(item['create_time'], 'YYYY-MM-DD-')}${item['title']}.md`, item['markdown_content']);
+        }
+
+        zip
+          .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
+          .pipe(fs.createWriteStream(path.join(PATH, 'export.zip')))
+          .on('finish', () => this.download(path.join(PATH, 'export.zip')));
+      } catch (e) {
+        throw new Error(e);
+      }
+    } else {
+      this.success();
+    }
   }
 
   // 获取上传设置

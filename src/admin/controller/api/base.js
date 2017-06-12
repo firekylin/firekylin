@@ -6,7 +6,7 @@ export default class extends think.controller.rest {
    * allow list for user
    * @type {Array}
    */
-  allowList = ['api/post/put', 'api/post/post', 'api/post/delete', 'api/file/post'];
+  allowList = ['api/post/put', 'api/post/post', 'api/post/delete', 'api/file/post', 'api/file/get'];
   /**
    * [constructor description]
    * @param  {[type]} http [description]

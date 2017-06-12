@@ -22,7 +22,8 @@ module.exports = {
       require('./upload'),
       require('./analytic'),
       require('./push'),
-      require('./import')
+      require('./import'),
+      require('./export')
     ]);
   }
 }
