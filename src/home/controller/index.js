@@ -2,7 +2,6 @@
 
 import Base from './base';
 
-
 export default class extends Base {
   /**
    * 首页如果设置了自定义首页则渲染对应页面
@@ -63,12 +62,41 @@ export default class extends Base {
    * @return {[type]} [description]
    */
   async installAction() {
+    let step = this.param('step');
+    let InstallService = this.service('install');
+    let instance = new InstallService(this.ip());
+    let message = 'success';
+
+    this.assign({step});
     if(this.isGet()) {
       if(firekylin.isInstalled) {
         return this.redirect('/');
       }
+
+      /** check db config exist */
+      let dbConfig = this.config('db');
+      let isDBConfig = think.isObject(dbConfig.adapter) && !think.isEmpty(dbConfig.adapter[dbConfig.type]);
+      switch(step) {
+        case 1:
+          if(isDBConfig) {
+            this.redirect('/index/install?step=2');
+          }
+        break;
+
+        case 2:
+          if(!isDBConfig) {
+            this.redirect('/index/install');
+          }
+          if(!await InstallService.checkInstalled()) {
+            message = undefined;
+          }
+        break;
+      }
+
+      this.assign({message});
       return this.display();
     }
+
     if(firekylin.isInstalled) {
       return this.fail('SYSTERM_INSTALLED');
     }
@@ -80,24 +108,31 @@ export default class extends Base {
     }
 
     let data = this.post();
-    let dbInfo = {
-      host: data.db_host,
-      port: data.db_port,
-      database: data.db_name,
-      user: data.db_account,
-      password: data.db_password,
-      prefix: data.db_table_prefix
+
+    switch(data.step) {
+      case 2:
+        let siteInfo = {
+          title: data.title,
+          site_url: data.site_url,
+          username: data.username,
+          password: data.password
+        }
+        await instance.saveSiteInfo(siteInfo).catch(err => message = err);
+      break;
+
+      default:
+        let dbInfo = {
+          host: data.db_host,
+          port: data.db_port,
+          database: data.db_name,
+          user: data.db_account,
+          password: data.db_password,
+          prefix: data.db_table_prefix
+        };
+        await instance.saveDbInfo(dbInfo).catch(err => message = err);
+      break;
     }
-    let account = {
-      username: data.username,
-      password: data.password
-    }
-    let InstallService = this.service('install');
-    let instance = new InstallService(dbInfo, account, this.ip());
-    let message = 'success';
-    await instance.run().catch(err => {
-      message = err;
-    });
+
     this.assign('message', message);
     this.assign('data', data);
     this.display();

@@ -5,9 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{{options.title}}</title>
   <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
-  <style>
-.container{width: 800px;}
-</style>
+  <style>.container{width: 800px;}</style>
 </head>
 <body>
  <div class="container">
@@ -18,15 +16,16 @@
 <div class="container">
   <form method="post" action="?">
     {% if message %}
-      {% if message == 'success' %}
+      {% if message == 'success'%}
       <div class="alert alert-success" role="alert">安装成功</div>
       <script>setTimeout(function(){
-        location.href = '/admin';
+        location.href = '{%if step == 1%}?step=2{%else%}/admin{%endif%}';
         }, 1500)</script>
       {% else %}
       <div class="alert alert-danger" role="alert">{{message}}</div>
       {% endif %}
     {% endif %}
+    {% if step == 1 %}
     <h3>数据库信息（MySQL）</h3>
     <div class="row">
       <div class="col-md-6">
@@ -58,8 +57,26 @@
         </div>
       </div>
     </div>
+    <button type="submit" class="btn btn-primary">下一步</button>
+    {% endif %}
 
-
+    {% if step == 2 %}
+    <h3>网站信息</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>网站名称</label>
+          <input type="text" required name="title" class="form-control" placeholder="网站名称" value="{{data.site|default('FireKylin 系统')}}">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>网站地址</label>
+          <input type="text" required name="site_url" class="form-control" placeholder="网站地址" value="{{data.site_url|default('http://'+http.host)}}">
+          <p class="help-block">网站地址主要用于生成内容的永久访问链接</p>
+        </div>
+      </div>
+    </div>
     <h3>后台管理帐号</h3>
     <div class="row">
       <div class="col-md-6">
@@ -77,6 +94,8 @@
       </div>
     </div>
     <button type="submit" class="btn btn-primary">开始安装</button>
+    {% endif %}
+    <input type="hidden" name="step" value="{{step}}" />
   </form>
 </div>
 <div class="container">

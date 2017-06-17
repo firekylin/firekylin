@@ -17,15 +17,19 @@ export default class extends think.logic.base {
    * @return {[type]} [description]
    */
   installAction() {
-    if(this.isGet()) {
-      return;
-    }
     this.rules = {
-      db_account: 'required',
-      db_name: 'required',
-      username: 'required|minLength:4',
-      password: 'required|minLength:8'
+      step: 'int|default:1'
+    };
+
+    if(!this.isGet()) {
+      this.rules = think.extend({
+        db_account: 'requiredIf:step,1',
+        db_name: 'requiredIf:step,1',
+        title: 'requiredIf:step,2',
+        site_url: 'requiredIf:step,2:url',
+        username: 'requiredIf:step,2|minLength:4',
+        password: 'requiredIf:step,2|minLength:8'
+      }, this.rules);
     }
-    this.validate(this.rules);
   }
 }
