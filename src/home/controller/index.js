@@ -65,7 +65,7 @@ export default class extends Base {
     let step = this.param('step');
     let InstallService = this.service('install');
     let instance = new InstallService(this.ip());
-    let message = 'success';
+    let message;
 
     this.assign({step});
     if(this.isGet()) {
@@ -87,8 +87,8 @@ export default class extends Base {
           if(!isDBConfig) {
             this.redirect('/index/install');
           }
-          if(!await InstallService.checkInstalled()) {
-            message = undefined;
+          if(await InstallService.checkInstalled()) {
+            message = 'success';
           }
         break;
       }
@@ -117,7 +117,12 @@ export default class extends Base {
           username: data.username,
           password: data.password
         }
-        await instance.saveSiteInfo(siteInfo).catch(err => message = err);
+        try {
+          await instance.saveSiteInfo(siteInfo);
+          message = 'success';
+        } catch(e) {
+          message = e;
+        }
       break;
 
       default:
@@ -129,7 +134,12 @@ export default class extends Base {
           password: data.db_password,
           prefix: data.db_table_prefix
         };
-        await instance.saveDbInfo(dbInfo).catch(err => message = err);
+        try {
+          await instance.saveDbInfo(dbInfo);
+          message = 'success';
+        } catch(e) {
+          message = e;
+        }
       break;
     }
 
