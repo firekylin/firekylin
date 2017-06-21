@@ -38,6 +38,7 @@
     "thinkjs": "^2.2.19",
     "to-markdown": "^3.0.3",
     "upyun": "^2.0.4",
+    "wxr": "^0.1.2",
     "xml2js": "^0.4.16"
   },
   "devDependencies": {

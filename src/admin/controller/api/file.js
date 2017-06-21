@@ -4,6 +4,7 @@ import path from 'path';
 import { execSync } from 'child_process';
 import request from 'request';
 import JSZip from 'jszip';
+import Wxr from 'wxr';
 
 import Base from './base';
 
@@ -56,9 +57,9 @@ export default class extends Base {
     return this.serviceUpload(type, file.path, config);
   }
 
-  // 导出 Markdown 文件
+  // 导出其他平台数据
   async getAction() {
-    const PATH = path.join(think.RUNTIME_PATH, 'exportedMarkdownFiles');
+    const PATH = path.join(think.RUNTIME_PATH, 'exportedmarkdownfiles');
 
     if (this.get('type') === 'markdown') {
       let num = await this.model('post').getCount();
@@ -74,6 +75,69 @@ export default class extends Base {
           .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
           .pipe(fs.createWriteStream(path.join(PATH, 'export.zip')))
           .on('finish', () => this.download(path.join(PATH, 'export.zip')));
+      } catch (e) {
+        throw new Error(e);
+      }
+    } else if (this.get('type') === 'wordpress') {
+      let data = new Map();
+
+      // get the post's content and sanitize XML
+      let postNum = await this.model('post').getCount();
+      let postList = await this.model('post').getLatest(0, postNum);
+
+      const NOT_SAFE_IN_XML = /[^\x09\x0A\x0D\x20-\xFF\x85\xA0-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]/gm;
+      for (let post of postList) {
+        let item = {};
+        item['id'] = post['id'],
+        item['title'] = post['title'],
+        item['date'] = think.datetime(post['create_time']),
+        item['content'] = post['content'].replace(NOT_SAFE_IN_XML, ''),
+        item['summary'] = post['summary'].replace(NOT_SAFE_IN_XML, ''),
+        item['cate'] = [];
+        data.set(post['id'], item);
+      }
+
+      // get the post's categories
+      let cateList = await this.model('cate').select();
+      for (let cate of cateList) {
+        for (let pair of cate['post_cate']) {
+          if (data.has(pair['post_id'])) {
+            data.get(pair['post_id'])['cate'].push(cate['id']);
+          }
+        }
+      }
+
+      let importer = new Wxr();
+
+      let cateMap = new Map();
+      for (let cate of cateList) {
+        cateMap.set(cate['id'], {title: cate['name'], slug: cate['pathname']});
+        importer.addCategory({
+          id: cate['id'],
+          title: cate['name'],
+          slug: cate['pathname']
+        });
+      }
+      for (let item of data.values()) {
+        let cateArray = [];
+        for (let id of item['cate']) {
+          cateArray.push(cateMap.get(id));
+        }
+        importer.addPost({
+          id: item['id'],
+          title: item['title'],
+          date: item['date'],
+          contentEncoded: item['content'],
+          excerptEncoded: item['summary'],
+          categories: cateArray
+        });
+      }
+
+      const PATH = path.join(think.RUNTIME_PATH, 'exportedwordpressxml');
+      try {
+        execSync(`rm -rf ${PATH}; mkdir ${PATH};`);
+        fs.writeFileSync(path.join(PATH, 'wordpress.xml'), importer.stringify());
+        this.download(path.join(PATH, 'wordpress.xml'));
       } catch (e) {
         throw new Error(e);
       }
