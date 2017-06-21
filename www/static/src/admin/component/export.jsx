@@ -5,7 +5,6 @@ import Base from 'base';
 
 import BreadCrumb from 'admin/component/breadcrumb';
 
-// TODO: wordpress xml
 module.exports = class extends Base {
   state = {
     exportType: 'markdown',
