@@ -76,6 +76,21 @@ export default async function render(content) {
       }
     }
 
+    // 处理表格
+    if (item.type === 'table') {
+      // 处理表头
+      let j, k
+      for (j = 0; j < item.header.length; j++) {
+        item.header[j] = await _mathSpanRender(item.header[j])
+      }
+      // 处理单元格
+      for (j = 0; j < item.cells.length; j++) {
+        for (k = 0; k < item.cells[j].length; k++) {
+          item.cells[j][k] = await _mathSpanRender(item.cells[j][k])
+        }
+      }
+    }
+
     // 处理行内表达式
     if (item.text) {
       item.text = await _mathSpanRender(item.text);
