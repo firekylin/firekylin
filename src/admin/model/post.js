@@ -202,7 +202,7 @@ export default class extends Base {
 
   /**
    * markdown to html
-   * @return {string} []
+   * @return {string}
    */
   async markdownToHtml(content, option = {toc: true, highlight: true}) {
 
