@@ -168,6 +168,7 @@ export default class extends Base {
    *
    * @param markdown_content MarkDown 内容
    * @param summary_length 摘要长度（可为空）
+   * @return {string}
    */
   async getSummary (markdown_content, summary_length) {
     let summary;
@@ -187,7 +188,7 @@ export default class extends Base {
     } else {
       summary = await this.markdownToHtml(markdown_content, {toc: false, highlight: true});
       // 过滤掉 HTML 标签 及换行等 并截取所需的长度
-      // 增加过虑 svg 内容
+      // 增加过滤 svg 内容
       summary = summary
           .replace(/[\n\r\t]/g, '')
           .replace(/<svg[ >].*?<\/svg>/g, '')
@@ -201,7 +202,7 @@ export default class extends Base {
 
   /**
    * markdown to html
-   * @return {} []
+   * @return {string} []
    */
   async markdownToHtml(content, option = {toc: true, highlight: true}) {
 
