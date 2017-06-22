@@ -87,13 +87,14 @@ export default class extends Base {
 
       const NOT_SAFE_IN_XML = /[^\x09\x0A\x0D\x20-\xFF\x85\xA0-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]/gm;
       for (let post of postList) {
-        let item = {};
-        item['id'] = post['id'],
-        item['title'] = post['title'],
-        item['date'] = think.datetime(post['create_time']),
-        item['content'] = post['content'].replace(NOT_SAFE_IN_XML, ''),
-        item['summary'] = post['summary'].replace(NOT_SAFE_IN_XML, ''),
-        item['cate'] = [];
+        let item = {
+          id: post['id'],
+          title: post['title'],
+          date: think.datetime(post['create_time']),
+          content: post['content'].replace(NOT_SAFE_IN_XML, ''),
+          summary: post['summary'].replace(NOT_SAFE_IN_XML, ''),
+          cate: []
+        };
         data.set(post['id'], item);
       }
 
@@ -133,11 +134,9 @@ export default class extends Base {
         });
       }
 
-      const PATH = path.join(think.RUNTIME_PATH, 'exportedwordpressxml');
       try {
-        execSync(`rm -rf ${PATH}; mkdir ${PATH};`);
-        fs.writeFileSync(path.join(PATH, 'wordpress.xml'), importer.stringify());
-        this.download(path.join(PATH, 'wordpress.xml'));
+        fs.writeFileSync(path.join(think.RUNTIME_PATH, 'wordpress.xml'), importer.stringify());
+        this.download(path.join(think.RUNTIME_PATH, 'wordpress.xml'));
       } catch (e) {
         throw new Error(e);
       }
