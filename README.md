@@ -46,7 +46,7 @@
 
 ## 常见问题
 
-如果您在使用过程中遇到问题，请查看 [问题解答](https://github.com/firekylin/firekylin/wiki/问题解答) 中的解答，或者在 [GitHub](https://github.com/firekylin/firekylin/wiki/issues) 及 [Gitter](https://gitter.im/fire_kylin/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 上提问。
+如果您在使用过程中遇到问题，请查看 [问题解答](https://github.com/firekylin/firekylin/wiki/问题解答) 中的解答，或者在 [GitHub](https://github.com/firekylin/firekylin/wiki/issues) 及 [Gitter](https://gitter.im/firekylin/firekylin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 上提问。
 
 ## 用户列表
 
