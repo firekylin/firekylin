@@ -79,24 +79,19 @@ export default class extends Base {
         throw new Error(e);
       }
     } else if (this.get('type') === 'wordpress') {
-      let data = new Map();
-
       // get the post's content and sanitize XML
       let postNum = await this.model('post').getCount();
       let postList = await this.model('post').getLatest(0, postNum);
 
       const NOT_SAFE_IN_XML = /[^\x09\x0A\x0D\x20-\xFF\x85\xA0-\uD7FF\uE000-\uFDCF\uFDE0-\uFFFD]/gm;
-      for (let post of postList) {
-        let item = {
-          id: post['id'],
-          title: post['title'],
-          date: think.datetime(post['create_time']),
-          content: post['content'].replace(NOT_SAFE_IN_XML, ''),
-          summary: post['summary'].replace(NOT_SAFE_IN_XML, ''),
-          cate: []
-        };
-        data.set(post['id'], item);
-      }
+
+      let data = new Map(postList.map(post => ([post.id, {
+        ...post,
+        cate: [],
+        date: think.datetime(post['create_time']),
+        content: post['content'].replace(NOT_SAFE_IN_XML, ''),
+        summary: post['summary'].replace(NOT_SAFE_IN_XML, '')
+      }])));
 
       // get the post's categories
       let cateList = await this.model('cate').select();
