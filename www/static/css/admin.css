@@ -158,7 +158,7 @@ textarea{resize:none;}
 #search{margin-top:25px;}
 .fk-content-wrap .icon-date{position:absolute;top:5px;left:20px;background:#2780bb!important;}
 .fk-content-wrap .mod-data{padding:3px 0 0 20px;text-align: center;}
-.fk-content-wrap input[type=radio],.fk-content-wrap input[type=checkbox]{margin-right:5px;}
+.fk-content-wrap input[type=radio],.fk-content-wrap input[type=checkbox]{margin-right:5px;margin-left:-18px;}
 .fk-content-wrap .tab-content th{border:none;color:#000;font-weight:400;}
 .fk-content-wrap table > tfoot > tr > td{padding-top:18px;padding-bottom:0;}
 .fk-content-wrap .mod-text-inline{padding: 0 5px 0 8px;width:auto;line-height:34px;}
