@@ -68,7 +68,67 @@ export default class extends Base {
         execSync(`rm -rf ${PATH}; mkdir ${PATH};`);
         let zip = new JSZip();
         for (let item of data) {
-          zip.file(`${think.datetime(item['create_time'], 'YYYY-MM-DD-')}${item['title']}.md`, item['markdown_content']);
+          zip.file(`${think.datetime(item.create_time, 'YYYY-MM-DD-')}${item.title}.md`, item.markdown_content);
+        }
+
+        zip
+          .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
+          .pipe(fs.createWriteStream(path.join(PATH, 'export.zip')))
+          .on('finish', () => this.download(path.join(PATH, 'export.zip')));
+      } catch (e) {
+        throw new Error(e);
+      }
+    } else if (this.get('type') === 'hexo') {
+      let postNum = await this.model('post').getCount();
+      let postList = await this.model('post').getLatest(0, postNum);
+
+      let data = new Map(postList.map(post => ([post.id, {
+        ...post,
+        cate: '',
+        tags: [],
+        date: think.datetime(post.create_time)
+      }])));
+
+      // get the post's category and tags
+      let cateList = await this.model('cate').select();
+      let tagList = await this.model('tag').select();
+
+      // every post can only has one category but several tags
+      for (let cate of cateList) {
+        for (let pair of cate.post_cate) {
+          if (data.has(pair.post_id)) {
+            data.get(pair.post_id).cate = cate.name;
+          }
+        }
+      }
+
+      for (let tag of tagList) {
+        for (let pair of tag.post_tag) {
+          if (data.has(pair.post_id)) {
+            data.get(pair.post_id).tags.push(tag.name);
+          }
+        }
+      }
+
+      data.forEach(item => {
+        let frontMatter = `---\ntitle: ${item.title}\ndate: ${item.date}\n`;
+        if (item.cate.length) {
+          frontMatter += `categories:\n\t- ${item.cate}\n`;
+        }
+        if (item.tags.length) {
+          frontMatter += 'tags:\n';
+          for (let tag of item.tags) {
+            frontMatter += `\t- ${tag}\n`;
+          }
+        }
+        item.markdown_content = `${frontMatter}---\n${item.markdown_content}`;
+      });
+
+      try {
+        execSync(`rm -rf ${PATH}; mkdir ${PATH};`);
+        let zip = new JSZip();
+        for (let item of data.values()) {
+          zip.file(`${think.datetime(item.create_time, 'YYYY-MM-DD-')}${item.title}.md`, item.markdown_content);
         }
 
         zip
