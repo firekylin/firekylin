@@ -24,6 +24,7 @@ module.exports = class extends Base {
         }}
       >
         <Radio value='markdown' label='Markdown' />
+        <Radio value='hexo' label='Hexo / Jekyll' />
         <Radio value='wordpress' label='WordPress eXtended RSS' />
       </RadioGroup>
     );
