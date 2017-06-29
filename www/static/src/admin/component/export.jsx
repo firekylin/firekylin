@@ -36,7 +36,7 @@ module.exports = class extends Base {
             <label> 请选择导出的文件类型 </label>
             { radio }
             <Button
-              href={'/admin/api/file/get?type=' + this.state.exportType}
+              href={'/admin/api/file/get?exporter=' + this.state.exportType}
               bsStyle='primary'
             >
               下载
