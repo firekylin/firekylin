@@ -365,7 +365,7 @@ module.exports = class extends Base {
     return (
       <div className="form-group">
         <label className="control-label">权限控制</label>
-        <div>
+        <div className="checkbox">
           <label>
             <input
                 type="checkbox"
@@ -445,7 +445,7 @@ module.exports = class extends Base {
         <label className="control-label">分类</label>
         <ul>
           {this.state.cateList.map(cate =>
-            <li key={cate.id}>
+            <li key={cate.id} className="checkbox">
               {cate.pid !== 0 ? '　' : null}
               <label>
                 <input
