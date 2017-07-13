@@ -341,7 +341,7 @@ module.exports = class extends Base {
       };
 
       return (
-        <li key={i}>
+        <li key={i} className="checkbox">
           <label>
             <input type="checkbox" name="push_sites" {...props} />
             <span style={{fontWeight: 'normal'}}>{site.title}</span>
