@@ -76,9 +76,9 @@ module.exports = class extends Base {
           }}
       >
         <Radio value='disqus' label='Disqus' />
-        <Radio value='duoshuo' label={<span>多说(<a href="http://duoshuo.com" target="_blank">不建议使用</a>)</span>} />
         <Radio value='changyan' label='畅言' />
-        <Radio value='netease' label='网易云跟帖' />
+        <Radio value='duoshuo' label={<span>多说(<a href="http://duoshuo.com" target="_blank">不建议使用</a>)</span>} />
+        <Radio value='netease' label={<span>网易云跟帖(<a href="https://gentie.163.com/" target="_blank">不建议使用</a>)</span>} />
         <Radio value='custom' label='自定义' />
       </RadioGroup>
     );

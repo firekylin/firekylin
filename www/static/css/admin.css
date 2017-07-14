@@ -6,6 +6,8 @@
 .table tr td .form-group{margin-bottom:0;}
 .radio-inline,label.checkbox-inline{margin:0 15px 0 0;padding:0;}
 .radio-inline + .radio-inline,.checkbox-inline + .checkbox-inline{margin-left:0;}
+.checkbox, .radio{margin-top: 5px;margin-bottom: 5px;}
+.checkbox + .checkbox, .radio + .radio{margin-top:0;}
 .nav > li > a:hover,.nav > li > a:focus{background-color:transparent;}
 .table-striped > tbody > tr:nth-child(odd) > td,.table-striped > tbody > tr:nth-child(odd) > th{background-color:#F5F8FA;}
 .alert{padding:5px 15px;}
