@@ -94,8 +94,8 @@ class InstallService extends think.service.base {
   async insertData(title, site_url) {
     let model = this.getModel(true);
     let dbExist = await model.query(
-      'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`= "'+
-      this.dbConfig.database + '"'
+      'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`= \''+
+      this.dbConfig.database + '\''
     );
     if(think.isEmpty(dbExist)) {
       await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
