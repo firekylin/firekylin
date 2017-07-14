@@ -16,10 +16,11 @@
 
 .md-panel {
   height: 550px;
+  min-height: 550px;
 }
 
 .md-panel.fullscreen {
-  height: auto;
+  height: auto !important;
 }
 
 .rc-select-dropdown-menu {
