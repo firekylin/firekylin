@@ -211,7 +211,7 @@
 }*/
 .md-editor {
 	width: 50%;
-	height: auto;
+	height: 100%;
 	transition: width .3s;
 	background-color: #fff;
 }
@@ -224,9 +224,8 @@
 	resize: none;
 	outline: 0;
 	height: 100%;
-	min-height: 550px;
 	width: 100%;
-	padding: 47px 15px 0;
+	padding: 47px 15px 15px;
 }
 .md-preview {
 	position: absolute;
