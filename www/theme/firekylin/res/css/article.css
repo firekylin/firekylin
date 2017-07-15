@@ -266,3 +266,52 @@ a.anchor {
   position: relative;
   visibility: hidden;
 }
+
+/* 文章内代码行号高亮 */
+article .firekylin-code > ul {
+  list-style: decimal;
+  background-color: #fff;
+  margin: 0;
+  margin-left: 40px;
+  padding: 0;
+}
+article .firekylin-code li {
+  list-style: decimal-leading-zero;
+  border-left: 1px solid #ddd;
+  padding-left: 2px;
+  position: relative;
+}
+article .firekylin-code li.mark {
+  background-color: #fffbdd !important;
+}
+article .firekylin-code li:hover {
+  background-color: #f3f3f3 !important;
+}
+article .firekylin-code .line-num {
+  width: 40px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  left: -40px;
+  cursor: pointer;
+}
+article .firekylin-code li:nth-of-type(even) {
+  background-color: #fcfcfc;
+  color: inherit;
+}
+article .entry-content pre .firekylin-code {
+  background-color: #eee;
+}
+/*下面是覆盖默认样式, 为了防闪动*/
+article pre {
+  border-left: none;
+  padding: 0;  
+}
+article .entry-content pre code {
+  font-size: 12px;
+  background-color: #fff;
+  border: 1px solid  #eee;
+  padding: 0;
+  line-height: 26px;
+}

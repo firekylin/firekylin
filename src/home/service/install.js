@@ -53,7 +53,7 @@ class InstallService extends think.service.base {
   }
 
   getModel(name, module) {
-    let dbConfig
+    let dbConfig;
     if(name === true) {
       dbConfig = think.extend({}, this.dbConfig);
       dbConfig.database = '';
@@ -92,6 +92,15 @@ class InstallService extends think.service.base {
   }
 
   async insertData(title, site_url) {
+    let model = this.getModel(true);
+    let dbExist = await model.query(
+      'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`= \''+
+      this.dbConfig.database + '\''
+    );
+    if(think.isEmpty(dbExist)) {
+      await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
+    }
+
     let dbFile = think.ROOT_PATH + think.sep + 'firekylin.sql';
     if(!think.isFile(dbFile)) {
       return Promise.reject('数据库文件（firekylin.sql）不存在，请重新下载');
@@ -112,7 +121,7 @@ class InstallService extends think.service.base {
     content = content.replace(/\/\*.*?\*\//g, '').replace(/fk_/g, this.dbConfig.prefix || '');
 
     //导入数据
-    let model = this.getModel();
+    model = this.getModel();
     content = content.split(';');
     try{
       for(let item of content) {
