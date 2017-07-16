@@ -153,7 +153,6 @@ module.exports = class extends Base {
       case 'savePostSuccess':
         TipAction.success(this.id ? '保存成功' : '添加成功');
         this.setState({draftSubmitting: false, postSubmitting: false});
-        setTimeout(() => this.redirect('post/list'), 1000);
         break;
       case 'getPostInfo':
         if(data.create_time === '0000-00-00 00:00:00') {
