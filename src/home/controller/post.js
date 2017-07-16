@@ -84,7 +84,7 @@ export default class extends Base {
           return this.displayView('post');
         }
       } catch (ex) {
-        // Ignore JSON parse eror
+        // Ignore JSON parse error
       }
     }
 
@@ -108,7 +108,7 @@ export default class extends Base {
           detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
         }
       } catch (ex) {
-        // Ignore JSON parse eror
+        // Ignore JSON parse error
       }
     }
     detail = detail || await this.model('post')
