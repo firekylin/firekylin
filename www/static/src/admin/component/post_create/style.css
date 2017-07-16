@@ -32,8 +32,11 @@
   padding: 0 1px;  
 }
 /** 文章编辑右侧 **/
-.post-create .col-xs-3 > div.button-group {
+.post-create .col-xs-3 > div.button-group:first-child {
   margin-top: 25px;
+}
+.post-create .col-xs-3 > div.button-group:nth-child(2) {
+  margin-top: 10px;
   margin-bottom: 15px;
 }
 .post-create .col-xs-3 > div.button-group > button {
