@@ -151,7 +151,18 @@ module.exports = class extends Base {
         this.setState({draftSubmitting: false, postSubmitting: false});
         break;
       case 'savePostSuccess':
-        TipAction.success(this.id ? '保存成功' : '添加成功');
+        if (!this.id && data.id) {
+          this.id = data.id;
+        }
+        if (this.state.status === 3 && this.state.postInfo.is_public) {
+          TipAction.success(`发布成功，
+            <a href="/post/${this.state.postInfo.pathname}.html" target="_blank">
+              点此查看文章
+            </a>`, 10000);
+        } else {
+          TipAction.success('保存成功');
+        }
+        PostAction.select(this.id);
         this.setState({draftSubmitting: false, postSubmitting: false});
         break;
       case 'getPostInfo':
