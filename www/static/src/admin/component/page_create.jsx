@@ -42,7 +42,6 @@ module.exports = class extends PostCreate {
       case 'savePageSuccess':
         TipAction.success(this.id ? '保存成功' : '添加成功');
         this.setState({draftSubmitting: false, postSubmitting: false});
-        setTimeout(() => this.redirect('page/list'), 1000);
         break;
       case 'getPageInfo':
         if(data.create_time === '0000-00-00 00:00:00') {
