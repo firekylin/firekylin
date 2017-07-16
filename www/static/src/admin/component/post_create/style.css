@@ -2,7 +2,7 @@
   overflow: hidden;
   margin-bottom: 15px;
 }
-.pathname > span {
+.pathname > span, .pathname > a {
   float: left;
   line-height: 39px;
 }
@@ -11,6 +11,13 @@
   min-width: 320px;
   margin: 0 5px;
   display: inline-block;
+}
+.pathname a .glyphicon, .pathname a .icon {
+  display: inline;
+  background: none;
+  font-size: 12px;
+  margin-left: 5px;
+  color: #AAA;
 }
 
 
@@ -32,11 +39,8 @@
   padding: 0 1px;  
 }
 /** 文章编辑右侧 **/
-.post-create .col-xs-3 > div.button-group:first-child {
+.post-create .col-xs-3 > div.button-group {
   margin-top: 25px;
-}
-.post-create .col-xs-3 > div.button-group:nth-child(2) {
-  margin-top: 10px;
   margin-bottom: 15px;
 }
 .post-create .col-xs-3 > div.button-group > button {

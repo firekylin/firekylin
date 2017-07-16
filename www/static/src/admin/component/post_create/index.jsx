@@ -274,13 +274,58 @@ module.exports = class extends Base {
       }
     };
     //baseUrl
-    let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
+    let baseUrl = `${location.origin}/${['post', 'page'][this.type]}/`;
+    let postUrl = `/${['post', 'page'][this.type]}/${this.state.postInfo.pathname}.html`;
+
+    let previewOnClick = () => {
+      let previewData = {
+        title: this.state.postInfo.title || 'Untitled',
+        pathname: this.state.postInfo.pathname || 'untitled',
+        markdown_content: this.state.postInfo.markdown_content,
+        create_time: this.state.postInfo.create_time,
+        update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+        user: this.state.postInfo.user,
+        comment_num: 0,
+        allow_comment: 0,
+      }
+      if(this.type === 0) {
+        previewData.tag = this.state.postInfo.tag
+          .map(tagName=>{return this.state.tagList.filter(tag => tag.name === tagName)[0] || {name: tagName}});
+        previewData.cate = this.state.postInfo.cate;
+      }
+
+      let previewUrl = `/${['post', 'page'][this.type]}/${previewData.pathname}.html?preview=true`;
+
+      let form = document.createElement('form');
+      form.setAttribute('method', 'post');
+      form.setAttribute('action', previewUrl);
+      form.setAttribute('target', '_blank');
+
+      let hiddenField = document.createElement('input');
+      hiddenField.setAttribute('type', 'hidden');
+      hiddenField.setAttribute('name', 'previewData');
+      hiddenField.setAttribute('value', JSON.stringify(previewData));
+      form.appendChild(hiddenField);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
 
     return (
       <div className="pathname">
         <span>{baseUrl}</span>
         <ValidatedInput name="pathname" type="text" validate="required" {...props} />
-        <span>.html</span>
+        <span>.html </span>
+        <span> </span>
+        {this.state.postInfo.status === 3 && this.state.postInfo.is_public ?
+        <a href={postUrl} target="_blank">
+          <span className="glyphicon glyphicon-link" />
+        </a> : null}
+        <span> </span>
+        <a onClick={previewOnClick}>
+          <span className="glyphicon glyphicon-eye-open" />
+        </a>
       </div>
     );
   }
@@ -562,71 +607,6 @@ module.exports = class extends Base {
   }
 
   /**
-   * 文章预览按钮
-   */
-  renderPreviewButton(props = {}) {
-
-    let previewOnClick = () => {
-      let previewData = {
-        title: this.state.postInfo.title || 'Untitled',
-        pathname: this.state.postInfo.pathname || 'untitled',
-        markdown_content: this.state.postInfo.markdown_content,
-        create_time: this.state.postInfo.create_time,
-        update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-        user: this.state.postInfo.user,
-        comment_num: 0,
-        allow_comment: 0,
-      }
-      if(this.type === 0) {
-        previewData.tag = this.state.postInfo.tag
-          .map(tagName=>{return this.state.tagList.filter(tag => tag.name === tagName)[0] || {name: tagName}});
-        previewData.cate = this.state.postInfo.cate;
-      }
-
-      let postUrl = location.origin + '/' + ['post', 'page'][this.type] + '/' + previewData.pathname + '?preview=true';
-
-      let form = document.createElement('form');
-      form.setAttribute('method', 'post');
-      form.setAttribute('action', postUrl);
-      form.setAttribute('target', '_blank');
-
-      let hiddenField = document.createElement('input');
-      hiddenField.setAttribute('type', 'hidden');
-      hiddenField.setAttribute('name', 'previewData');
-      hiddenField.setAttribute('value', JSON.stringify(previewData));
-      form.appendChild(hiddenField);
-
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-    }
-
-    let viewOnClick = () => {
-      let postUrl = location.origin + '/' + ['post', 'page'][this.type] + '/' + this.state.postInfo.pathname;
-      window.open(postUrl, '_blank');
-    }
-
-    return (
-      <div className="button-group">
-        <button
-            type="button"
-            {...props}
-            className="btn btn-default"
-            onClick={previewOnClick}
-        >预览</button>
-        <span> </span>
-        {this.state.postInfo.status === 3 ?
-        <button
-            type="button"
-            {...props}
-            className="btn btn-default"
-            onClick={viewOnClick}
-        >访问</button> : null}
-      </div>
-    );
-  }
-
-  /**
    * render
    * @return {} []
    */
@@ -665,7 +645,6 @@ module.exports = class extends Base {
               </div>
               <div className={classnames('col-xs-3')}>
                 {this.renderPostButton(props)}
-                {this.renderPreviewButton(props)}
                 {this.renderDatetime()}
                 {this.renderPageTemplateSelect()}
                 {this.renderCategory()}
