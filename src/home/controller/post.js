@@ -73,9 +73,9 @@ export default class extends Base {
     let pathname = this.get('pathname');
     if(pathname === 'list') { return this.listAction(); }
 
-    if(this.http.query.preview === 'true') {
+    if(this.get('preview') === 'true') {
       try {
-        let previewData = JSON.parse(this.http._post.previewData);
+        let previewData = JSON.parse(this.post('previewData'));
         if(previewData) {
           let detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
           detail.pathname = encodeURIComponent(detail.pathname);
@@ -101,9 +101,9 @@ export default class extends Base {
   async pageAction() {
     let pathname = this.get('pathname');
     let detail;
-    if(this.http.query.preview === 'true') {
+    if(this.get('preview') === 'true') {
       try {
-        let previewData = JSON.parse(this.http._post.previewData);
+        let previewData = JSON.parse(this.post('previewData'));
         if(previewData) {
           detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
         }

@@ -158,7 +158,7 @@ module.exports = class extends Base {
           TipAction.success(`发布成功，
             <a href="/post/${this.state.postInfo.pathname}.html" target="_blank">
               点此查看文章
-            </a>`, 10000);
+            </a>`, 5000);
         } else {
           TipAction.success('保存成功');
         }

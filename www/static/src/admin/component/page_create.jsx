@@ -47,7 +47,7 @@ module.exports = class extends PostCreate {
           TipAction.success(`发布成功，
             <a href="/page/${this.state.postInfo.pathname}.html" target="_blank">
               点此查看页面
-            </a>`, 10000);
+            </a>`, 5000);
         } else {
           TipAction.success('保存成功');
         }
