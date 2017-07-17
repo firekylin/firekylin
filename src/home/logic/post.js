@@ -21,6 +21,9 @@ export default class extends think.logic.base {
       this.rules = {
         previewData: 'requiredIf:preview,true'
       };
+      if(!this.validate(this.rules)) {
+        think.statusAction(400, this.http);
+      }
     }
   }
   /**
@@ -32,6 +35,9 @@ export default class extends think.logic.base {
       this.rules = {
         previewData: 'requiredIf:preview,true'
       };
+      if(!this.validate(this.rules)) {
+        think.statusAction(400, this.http);
+      }
     }
   }
 }
