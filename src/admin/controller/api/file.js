@@ -57,7 +57,7 @@ export default class extends Base {
   // 导出其他平台数据
   async getAction() {
     if(this.get('exporter')) {
-      return this.serviceExport(this.getAction('exporter'));
+      return this.serviceExport(this.get('exporter'));
     }
     return this.success();
   }

@@ -13,10 +13,14 @@ export default class extends Base {
         let content = `
 ---
 title: ${post.title}
-date: ${post.date}
-categories: ${post.cate.join()}
-tags: ${post.tags.join()}
+date: ${post.create_time}
+updated: ${post.update_time}
+comments: ${post.allow_comment}
+categories: ${post.cate.length ? post.cate[0].pathname : ''}
+tags: [${post.tags.join()}]
+permalink: ${post.pathname}
 ---
+
 ${post.markdown_content}`;
         zip.file(`${think.datetime(post.create_time, 'YYYY-MM-DD-')}${post.title}.md`, content);
       }

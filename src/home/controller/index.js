@@ -75,7 +75,14 @@ export default class extends Base {
 
       /** check db config exist */
       let dbConfig = this.config('db');
-      let isDBConfig = think.isObject(dbConfig.adapter) && !think.isEmpty(dbConfig.adapter[dbConfig.type]);
+      dbConfig = dbConfig.adapter[dbConfig.type];
+      let isDBConfig = think.isObject(dbConfig)
+                        && dbConfig.host
+                        && dbConfig.port
+                        && dbConfig.database
+                        && dbConfig.user
+                        && dbConfig.password;
+
       switch(step) {
         case 1:
           if(isDBConfig) {
