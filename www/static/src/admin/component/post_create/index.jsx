@@ -151,9 +151,19 @@ module.exports = class extends Base {
         this.setState({draftSubmitting: false, postSubmitting: false});
         break;
       case 'savePostSuccess':
-        TipAction.success(this.id ? '保存成功' : '添加成功');
+        if (!this.id && data.id) {
+          this.id = data.id;
+        }
+        if (this.state.status === 3 && this.state.postInfo.is_public) {
+          TipAction.success(`发布成功，
+            <a href="/post/${this.state.postInfo.pathname}.html" target="_blank">
+              点此查看文章
+            </a>`, 5000);
+        } else {
+          TipAction.success('保存成功');
+        }
+        PostAction.select(this.id);
         this.setState({draftSubmitting: false, postSubmitting: false});
-        setTimeout(() => this.redirect('post/list'), 1000);
         break;
       case 'getPostInfo':
         if(data.create_time === '0000-00-00 00:00:00') {
@@ -274,13 +284,58 @@ module.exports = class extends Base {
       }
     };
     //baseUrl
-    let baseUrl = location.origin + '/' + ['post', 'page'][this.type] + '/';
+    let baseUrl = `${location.origin}/${['post', 'page'][this.type]}/`;
+    let postUrl = `/${['post', 'page'][this.type]}/${this.state.postInfo.pathname}.html`;
+
+    let previewOnClick = () => {
+      let previewData = {
+        title: this.state.postInfo.title || 'Untitled',
+        pathname: this.state.postInfo.pathname || 'untitled',
+        markdown_content: this.state.postInfo.markdown_content,
+        create_time: this.state.postInfo.create_time,
+        update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+        user: this.state.postInfo.user,
+        comment_num: 0,
+        allow_comment: 0,
+      }
+      if(this.type === 0) {
+        previewData.tag = this.state.postInfo.tag
+          .map(tagName=>{return this.state.tagList.filter(tag => tag.name === tagName)[0] || {name: tagName}});
+        previewData.cate = this.state.postInfo.cate;
+      }
+
+      let previewUrl = `/${['post', 'page'][this.type]}/${previewData.pathname}.html?preview=true`;
+
+      let form = document.createElement('form');
+      form.setAttribute('method', 'post');
+      form.setAttribute('action', previewUrl);
+      form.setAttribute('target', '_blank');
+
+      let hiddenField = document.createElement('input');
+      hiddenField.setAttribute('type', 'hidden');
+      hiddenField.setAttribute('name', 'previewData');
+      hiddenField.setAttribute('value', JSON.stringify(previewData));
+      form.appendChild(hiddenField);
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
 
     return (
       <div className="pathname">
         <span>{baseUrl}</span>
         <ValidatedInput name="pathname" type="text" validate="required" {...props} />
-        <span>.html</span>
+        <span>.html </span>
+        <span> </span>
+        {this.state.postInfo.status === 3 && this.state.postInfo.is_public ?
+        <a href={postUrl} target="_blank">
+          <span className="glyphicon glyphicon-link" />
+        </a> : null}
+        <span> </span>
+        <a onClick={previewOnClick}>
+          <span className="glyphicon glyphicon-eye-open" />
+        </a>
       </div>
     );
   }

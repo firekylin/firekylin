@@ -24,8 +24,7 @@ export default class extends Base {
     if(this.state.isOpen) {
       let className = 'fk-alert alert alert-' + this.state.type;
       return (
-        <div className={className}>
-          {this.state.text}
+        <div className={className} dangerouslySetInnerHTML={{__html: this.state.text}}>
         </div>
       );
     }else{

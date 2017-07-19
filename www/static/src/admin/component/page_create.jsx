@@ -40,9 +40,19 @@ module.exports = class extends PostCreate {
         this.setState({draftSubmitting: false, postSubmitting: false});
         break;
       case 'savePageSuccess':
-        TipAction.success(this.id ? '保存成功' : '添加成功');
+        if (!this.id && data.id) {
+          this.id = data.id;
+        }
+        if (this.state.status === 3 && this.state.postInfo.is_public) {
+          TipAction.success(`发布成功，
+            <a href="/page/${this.state.postInfo.pathname}.html" target="_blank">
+              点此查看页面
+            </a>`, 5000);
+        } else {
+          TipAction.success('保存成功');
+        }
+        PageAction.select(this.id);
         this.setState({draftSubmitting: false, postSubmitting: false});
-        setTimeout(() => this.redirect('page/list'), 1000);
         break;
       case 'getPageInfo':
         if(data.create_time === '0000-00-00 00:00:00') {
