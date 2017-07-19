@@ -33,7 +33,8 @@ export default class extends think.logic.base {
     }
 
     let rules = {
-      preview: 'boolean|get'
+      preview: 'boolean|get',
+      previewData: 'requiredIf:preview,true'
     };
 
     if(!this.validate(rules)) {
