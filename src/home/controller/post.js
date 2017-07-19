@@ -101,9 +101,7 @@ export default class extends Base {
     if(this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));
-        if(previewData) {
-          detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
-        }
+        detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
       } catch (e) {
         // Ignore JSON parse error
       }
