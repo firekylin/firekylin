@@ -444,7 +444,13 @@ module.exports = class extends Base {
    */
   renderFeaturedImage(postInfo = this.state.postInfo) {
     let featuredImage = postInfo.options.featuredImage || '';
-    let lastImageId = null;
+    let lastTestImageId = null;
+    let handleTestImageLoad = e => {
+      if (e.target.id === lastTestImageId) {
+        postInfo.options.featuredImage = e.target.src;
+        this.setState({postInfo});
+      }
+    }
 
     return (
       <div className="form-group">
@@ -458,20 +464,17 @@ module.exports = class extends Base {
             onInput={e => {
               let img = new Image();
               img.id = `featured-image-test-${new Date().getTime()}`;
-              lastImageId = img.id;
-              img.onload = e => {
-                if (e.target.id === lastImageId) {
-                  postInfo.options.featuredImage = e.target.src;
-                  this.setState({postInfo});
-                }
-              }
+              lastTestImageId = img.id;
+              img.onload = handleTestImageLoad;
               img.src = e.target.value;
             }}
           />
           {featuredImage
-            ? <img src={featuredImage}
-                className="img-thumbnail featured-image"
-                onClick={e => window.open(featuredImage, '_blank')} />
+            ? <div className="text-center">
+                <img src={featuredImage} title={featuredImage}
+                  className="img-thumbnail featured-image"
+                  onClick={() => window.open(featuredImage, '_blank')} />
+              </div>
             : null}
         </div>
       </div>
