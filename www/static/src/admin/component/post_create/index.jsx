@@ -46,6 +46,7 @@ module.exports = class extends Base {
         allow_comment: true,
         options: {
           template: '',
+          featuredImage: '',
           push_sites: []
         }
       },
@@ -439,6 +440,38 @@ module.exports = class extends Base {
   }
 
   /**
+   * 渲染主图片
+   */
+  renderFeaturedImage(postInfo = this.state.postInfo) {
+    let featuredImage = postInfo.options.featuredImage || '';
+
+    return (
+      <div className="form-group">
+        <label className="control-label">主图片</label>
+        <div>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="请输入图片链接"
+            defaultValue={featuredImage}
+            onInput={e => {
+              let img = new Image();
+              img.onload = e => {
+                postInfo.options.featuredImage = e.target.src;
+                this.setState({postInfo});
+              }
+              img.src = e.target.value;
+            }}
+          />
+          {featuredImage
+            ? <img src={featuredImage} className="img-thumbnail featured-image" />
+            : null}
+        </div>
+      </div>
+    )
+  }
+
+  /**
    * 渲染公开度选择
    */
   renderPublicRadio() {
@@ -661,6 +694,7 @@ module.exports = class extends Base {
                 {this.renderTag()}
                 {this.renderPublicRadio()}
                 {this.renderAllowComment()}
+                {this.renderFeaturedImage()}
                 {this.renderPushList()}
               </div>
             </div>
