@@ -73,17 +73,14 @@ export default class extends Base {
     let pathname = this.get('pathname');
     if(pathname === 'list') { return this.listAction(); }
 
-    if(this.get('preview') === 'true') {
+    if(this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));
-        if(previewData) {
-          let detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
-          detail.pathname = encodeURIComponent(detail.pathname);
-          this.assign('post', detail);
-
-          return this.displayView('post');
-        }
-      } catch (ex) {
+        let detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
+        detail.pathname = encodeURIComponent(detail.pathname);
+        this.assign('post', detail);
+        return this.displayView('post');
+      } catch (e) {
         // Ignore JSON parse error
       }
     }
@@ -101,13 +98,13 @@ export default class extends Base {
   async pageAction() {
     let pathname = this.get('pathname');
     let detail;
-    if(this.get('preview') === 'true') {
+    if(this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));
         if(previewData) {
           detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
         }
-      } catch (ex) {
+      } catch (e) {
         // Ignore JSON parse error
       }
     }

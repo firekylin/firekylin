@@ -17,27 +17,27 @@ export default class extends think.logic.base {
    * @return {[type]} [description]
    */
   detailAction() {
-    if(this.isPost()) {
-      this.rules = {
-        previewData: 'requiredIf:preview,true'
-      };
-      if(!this.validate(this.rules)) {
-        think.statusAction(400, this.http);
-      }
-    }
+    this.previewCheck();
   }
   /**
    * page action logic
    * @return {[type]} [description]
    */
   pageAction() {
-    if(this.isPost()) {
-      this.rules = {
-        previewData: 'requiredIf:preview,true'
-      };
-      if(!this.validate(this.rules)) {
-        think.statusAction(400, this.http);
-      }
+    this.previewCheck();
+  }
+
+  previewCheck() {
+    if(!this.isPost()) {
+      return true;
+    }
+
+    let rules = {
+      preview: 'boolean|get'
+    };
+
+    if(!this.validate(rules)) {
+      think.statusAction(400, this.http);
     }
   }
 }
