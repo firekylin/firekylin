@@ -298,7 +298,7 @@ module.exports = class extends Base {
         user: this.state.postInfo.user,
         comment_num: 0,
         allow_comment: 0,
-        options: this.state.postInfo.options,
+        options: JSON.stringify(this.state.postInfo.options),
       }
       if(this.type === 0) {
         previewData.tag = this.state.postInfo.tag

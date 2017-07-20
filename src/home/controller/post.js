@@ -87,6 +87,11 @@ export default class extends Base {
       return this.redirect('/');
     }
     detail.pathname = encodeURIComponent(detail.pathname);
+    try {
+      detail.options = JSON.parse(detail.options);
+    } catch (e) {
+      detail.options = {};
+    }
     detail.featuredImage = detail.options.featuredImage || '';
     this.assign('post', detail);
 
@@ -114,6 +119,11 @@ export default class extends Base {
       })
       .find();
     detail.pathname = encodeURIComponent(detail.pathname);
+    try {
+      detail.options = JSON.parse(detail.options);
+    } catch (e) {
+      detail.options = {};
+    }
     detail.featuredImage = detail.options.featuredImage || '';
     this.assign('page', detail);
     this.assign('pathname', pathname);
