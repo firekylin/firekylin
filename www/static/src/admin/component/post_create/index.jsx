@@ -46,6 +46,7 @@ module.exports = class extends Base {
         allow_comment: true,
         options: {
           template: '',
+          featuredImage: '',
           push_sites: []
         }
       },
@@ -297,6 +298,7 @@ module.exports = class extends Base {
         user: this.state.postInfo.user,
         comment_num: 0,
         allow_comment: 0,
+        options: JSON.stringify(this.state.postInfo.options),
       }
       if(this.type === 0) {
         previewData.tag = this.state.postInfo.tag
@@ -436,6 +438,48 @@ module.exports = class extends Base {
         </div>
       </div>
     );
+  }
+
+  /**
+   * 渲染封面图片
+   */
+  renderFeaturedImage(postInfo = this.state.postInfo) {
+    let featuredImage = postInfo.options.featuredImage || '';
+    let lastTestImageId = null;
+    let handleTestImageLoad = e => {
+      if (e.target.id === lastTestImageId) {
+        postInfo.options.featuredImage = e.target.src;
+        this.setState({postInfo});
+      }
+    }
+
+    return (
+      <div className="form-group">
+        <label className="control-label">封面图片</label>
+        <div>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="请输入图片链接"
+            defaultValue={featuredImage}
+            onInput={e => {
+              let img = new Image();
+              img.id = `featured-image-test-${new Date().getTime()}`;
+              lastTestImageId = img.id;
+              img.onload = handleTestImageLoad;
+              img.src = e.target.value;
+            }}
+          />
+          {featuredImage
+            ? <div className="text-center">
+                <img src={featuredImage} title={featuredImage}
+                  className="img-thumbnail featured-image"
+                  onClick={() => window.open(featuredImage, '_blank')} />
+              </div>
+            : null}
+        </div>
+      </div>
+    )
   }
 
   /**
@@ -661,6 +705,7 @@ module.exports = class extends Base {
                 {this.renderTag()}
                 {this.renderPublicRadio()}
                 {this.renderAllowComment()}
+                {this.renderFeaturedImage()}
                 {this.renderPushList()}
               </div>
             </div>

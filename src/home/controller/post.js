@@ -72,24 +72,27 @@ export default class extends Base {
     this.http.url = decodeURIComponent(this.http.url);
     let pathname = this.get('pathname');
     if(pathname === 'list') { return this.listAction(); }
-
+    let detail;
     if(this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));
-        let detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
-        detail.pathname = encodeURIComponent(detail.pathname);
-        this.assign('post', detail);
-        return this.displayView('post');
+        detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
       } catch (e) {
         // Ignore JSON parse error
       }
     }
 
-    let detail = await this.model('post').getPostDetail(pathname);
+    detail = detail || await this.model('post').getPostDetail(pathname);
     if(think.isEmpty(detail)) {
       return this.redirect('/');
     }
     detail.pathname = encodeURIComponent(detail.pathname);
+    try {
+      detail.options = JSON.parse(detail.options);
+    } catch (e) {
+      detail.options = {};
+    }
+    detail.featuredImage = detail.options.featuredImage || '';
     this.assign('post', detail);
 
     return this.displayView('post');
@@ -116,6 +119,12 @@ export default class extends Base {
       })
       .find();
     detail.pathname = encodeURIComponent(detail.pathname);
+    try {
+      detail.options = JSON.parse(detail.options);
+    } catch (e) {
+      detail.options = {};
+    }
+    detail.featuredImage = detail.options.featuredImage || '';
     this.assign('page', detail);
     this.assign('pathname', pathname);
 

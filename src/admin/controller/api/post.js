@@ -112,7 +112,6 @@ export default class extends Base {
     data = await this.modelInstance.getContentAndSummary(data);
     data.user_id = this.userInfo.id;
     data = this.modelInstance.getPostTime(data);
-    data.options = data.options ? JSON.stringify(data.options) : '';
 
     let insert = await this.modelInstance.addPost(data);
     return this.success(insert);
@@ -141,7 +140,6 @@ export default class extends Base {
 
       data = this.modelInstance.getPostTime(data);
       data = await this.modelInstance.getContentAndSummary(data);
-      data.options = data.options ? JSON.stringify(data.options) : '';
       if(data.tag) {
         data.tag = await this.getTagIds(data.tag);
       }

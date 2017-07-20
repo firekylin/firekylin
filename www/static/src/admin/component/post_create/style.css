@@ -49,3 +49,8 @@
 .post-create .col-xs-3 > div.button-group > button:last-child {
   float: right;
 }
+
+.post-create img.featured-image {
+  margin-top: 5px;
+  cursor: pointer;
+}
