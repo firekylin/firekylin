@@ -298,6 +298,7 @@ module.exports = class extends Base {
         user: this.state.postInfo.user,
         comment_num: 0,
         allow_comment: 0,
+        options: this.state.postInfo.options,
       }
       if(this.type === 0) {
         previewData.tag = this.state.postInfo.tag
@@ -440,7 +441,7 @@ module.exports = class extends Base {
   }
 
   /**
-   * 渲染主图片
+   * 渲染封面图片
    */
   renderFeaturedImage(postInfo = this.state.postInfo) {
     let featuredImage = postInfo.options.featuredImage || '';
@@ -454,7 +455,7 @@ module.exports = class extends Base {
 
     return (
       <div className="form-group">
-        <label className="control-label">主图片</label>
+        <label className="control-label">封面图片</label>
         <div>
           <input
             type="text"
