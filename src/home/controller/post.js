@@ -53,7 +53,16 @@ export default class extends Base {
     }
 
     let list = await model.getPostList(this.get('page'), where);
-    list.data.forEach(post => post.pathname = encodeURIComponent(post.pathname));
+    list.data.forEach(post => {
+      post.pathname = encodeURIComponent(post.pathname);
+      try {
+        post.options = JSON.parse(post.options);
+        post.featuredImage = post.options.featuredImage;
+      } catch (e) {
+        post.options = {};
+        post.featuredImage = '';
+      }
+    });
     let {data, ...pagination} = list;
     this.assign({
       posts: data,
