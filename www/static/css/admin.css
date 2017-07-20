@@ -28,8 +28,17 @@ ul,ol{padding:0;list-style:none;}
 .center{text-align: center;}
 .gray{color: #888}
 
-.login{width: 300px;margin: auto;margin-top:180px;}
+.login, .forgot{width: 300px;margin: auto;margin-top:180px;}
 .login h1{margin-bottom: 20px;}
+.form-footer {
+    margin-top: 20px;
+}
+.form-footer .back-site {
+    float:left;
+}
+.forgot-password {
+    float: right;
+}
 .breadcrumb{background: none;margin-top: 7px;margin-bottom: 7px;margin-left: 0px;padding-left: 20px;}
 .userinfo{margin-right: 0px;-webkit-user-select:none;}
 .manage-container{background: #fff;padding: 10px 20px;position: absolute;top: 60px;bottom: 0;right: 0;left: 0;overflow: auto;}

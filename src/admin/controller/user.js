@@ -73,4 +73,24 @@ export default class extends Base {
 
     return this.success(rows);
   }
+
+  async forgotAction() {
+    let userInfo = await this.session('userInfo') || {};
+    if(!think.isEmpty(userInfo)) {
+      return this.redirect('/');
+    }
+
+    if(this.isPost()) {
+      let user = this.post('user');
+      user = await this.model('user').where(`name = "${user}" OR email = "${user}"`).find();
+      if(think.isEmpty(user)) {
+        return this.fail('查无此人');
+      }
+      if(!user.email) {
+        return this.fail('该用户未设置邮箱，不能使用找回密码功能');
+      }
+      // awat this.sendRestPwd(user.email);
+      return this.success();
+    }
+  }
 }
