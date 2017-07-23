@@ -24,6 +24,13 @@ module.exports = class extends Base {
       case 'forgotFail':
         TipAction.fail(data.message);
         break;
+      case 'resetSuccess':
+        TipAction.success('新密码设置成功');
+        setTimeout(() => location.href = '/admin', 1000);
+        break;
+      case 'resetFail':
+        TipAction.fail(data.message);
+        break;
     }
   }
   /**
@@ -61,8 +68,50 @@ module.exports = class extends Base {
     UserAction.forgot(values);
   }
 
+  handleResetSubmit(values) {
+    values.password = md5(window.SysConfig.options.password_salt + values.password);
+    values.token = this.props.location.query.token;
+    UserAction.reset(values);
+  }
+
   toggleForgot() {
     this.setState({forgot: !this.state.forgot});
+  }
+
+  renderReset() {
+    return (
+      <div className="container">
+        <div className="row forgot">
+          <h1 className="text-center">
+            <a href="/">{window.SysConfig.options.title}</a>
+          </h1>
+          <Form
+            className="clearfix"
+            onValidSubmit={this.handleResetSubmit.bind(this)}
+          >
+            <ValidatedInput
+                type="text"
+                name="password"
+                validate="required,isLength:8:30"
+                placeholder="请输入新密码"
+                errorHelp={{
+                  required: '请填写密码',
+                  isLength: '密码长度为8到30个字符'
+                }}
+            />
+            <button type="submit" className="btn btn-primary btn-lg btn-block">设置新密码</button>
+          </Form>
+          <div className="form-footer">
+            <div className="left back-site">
+              <a href="/">← 回到{window.SysConfig.options.title}</a>
+            </div>
+            <div className="right forgot-password">
+              <a href="/admin">重新登录</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   renderForgot() {
@@ -100,6 +149,10 @@ module.exports = class extends Base {
   }
 
   render() {
+    if(this.props.location.query.reset) {
+      return this.renderReset();
+    }
+
     if(this.state.forgot) {
       return this.renderForgot();
     }

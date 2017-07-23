@@ -8,5 +8,6 @@ export default Reflux.createActions({
   savepwd: {children: ['completed', 'failed'], asyncResult: true},
   login: {children: ['completed', 'failed'], asyncResult: true},
   forgot: {children: ['completed', 'failed'], asyncResult: true},
+  reset: {children: ['completed', 'failed'], asyncResult: true},
   generateKey: {children: ['completed', 'failed'], asyncResult: true}
 });

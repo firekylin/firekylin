@@ -83,6 +83,16 @@ export default Reflux.createStore({
     );
   },
 
+  onReset(data) {
+    let req = superagent.post('/admin/user/reset');
+    req.type('form').send(data);
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'resetSuccess')
+    ).catch(
+      err => this.trigger(err, 'resetFail')
+    );
+  },
+
   onDelete(userId) {
     let url = '/admin/api/user/' + userId + '?method=delete';
     let req = superagent.post(url);
