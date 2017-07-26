@@ -16,7 +16,7 @@ module.exports = class App extends Base {
       return (
       <div className="fk">
         <Tip />
-        <Login />
+        <Login {...this.props}/>
       </div>);
     }
     return (

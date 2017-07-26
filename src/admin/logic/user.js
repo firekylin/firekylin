@@ -45,4 +45,14 @@ export default class extends think.logic.base {
       }
     }
   }
+
+  forgotAction() {
+    this.allowMethods = 'get,post';
+
+    this.rules = {
+      user: {
+        required: true
+      }
+    };
+  }
 }
