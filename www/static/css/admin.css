@@ -626,7 +626,8 @@ div.pipe:after, .pipe>.half:before, .pipe>.half:after  {
     color: #AAA;
 }
 .theme-editor .CodeMirror {
-    height: 600px;
+    height: calc(100vh - 200px);
+    min-height: 600px;
 }
 
 .f-no-select {
