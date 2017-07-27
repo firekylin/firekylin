@@ -22,7 +22,7 @@
 
 
 .md-panel {
-  height: 550px;
+  height: calc(100vh - 300px);;
   min-height: 550px;
 }
 
