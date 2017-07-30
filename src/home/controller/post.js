@@ -140,7 +140,6 @@ export default class extends Base {
     let template = 'page';
     if(detail.options) {
       try {
-        detail.options = JSON.parse(detail.options);
         if(detail.options.template) {
           /*let stat = */await stats(path.join(this.THEME_VIEW_PATH, 'template', detail.options.template));
           template = `template${think.sep}`+detail.options.template.slice(0, -5);
