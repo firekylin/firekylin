@@ -293,11 +293,6 @@
       if (hljs.hasClass(ele, cls)) {
         ele.className = ele.className.replace(new RegExp('(\\s|^)' + cls + '(\\s|$)'), ' ');
       }
-    },
-    each: function (elements, callback) {
-      for (var i = 0; i < elements.length; i++) {
-        callback(elements[i], i);
-      }
     }
   };
 
@@ -370,7 +365,7 @@
    * 移除所有高亮行号
    */
   hljs.removeMark = function () {
-    hljs.each(doc.querySelectorAll('pre code li.mark'), function (elem) {
+    [].slice.call(doc.querySelectorAll('pre code li.mark')).forEach(function (elem) {
       hljs.removeClass(elem, 'mark');
     });
   };
@@ -379,7 +374,7 @@
    * 初始化
    */
   hljs.init = function () {
-    hljs.each(hljs.$code, function (elem, i) {
+    [].slice.call(hljs.$code).forEach(function (elem, i) {
         // 输出行号, -1是为了让最后一个换行忽略
       var lines = elem.innerHTML.split(/\n/).slice(0, -1);
       var html = lines.map(function (item, index) {
