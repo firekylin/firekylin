@@ -352,6 +352,8 @@
         hljs.addClass($li[i], 'mark');
       }
     }
+
+    // 如果需要定位且元素存在
     if (go && $li && $li[0]) {
       setTimeout(function () {
         window.scrollTo(0, getRect($li[0]).top - 50);
@@ -363,7 +365,7 @@
    * 移除所有高亮行号
    */
   hljs.removeMark = function () {
-    doc.querySelectorAll('pre code li.mark').forEach(function (elem) {
+    [].slice.call(doc.querySelectorAll('pre code li.mark')).forEach(function (elem) {
       hljs.removeClass(elem, 'mark');
     });
   };
@@ -372,59 +374,56 @@
    * 初始化
    */
   hljs.init = function () {
-    var $code = hljs.$code;
-    if ($code && $code.length) {
-      $code.forEach(function (elem, i) {
+    [].slice.call(hljs.$code).forEach(function (elem, i) {
         // 输出行号, -1是为了让最后一个换行忽略
-        var lines = elem.innerHTML.split(/\n/).slice(0, -1);
-        var html = lines.map(function (item, index) {
-          return '<li><span class="line-num" data-line="' + (index + 1) + '"></span>' + item + '</li>';
-        }).join('');
-        html = '<ul>' + html + '</ul>';
+      var lines = elem.innerHTML.split(/\n/).slice(0, -1);
+      var html = lines.map(function (item, index) {
+        return '<li><span class="line-num" data-line="' + (index + 1) + '"></span>' + item + '</li>';
+      }).join('');
+      html = '<ul>' + html + '</ul>';
 
-        // 输出语言
-        if (lines.length > 3 && elem.className.match(/lang-(\w+)/)) {
-          html += '<b class="name">' + RegExp.$1 + '</b>';
+      // 输出语言
+      if (lines.length > 3 && elem.className.match(/lang-(\w+)/)) {
+        html += '<b class="name">' + RegExp.$1 + '</b>';
+      }
+
+      elem.innerHTML = html;
+
+      hljs.addClass(elem, 'firekylin-code');
+
+      // 绑定点击高亮行事件
+      elem.addEventListener('click', function (event) {
+        // 小小的委托
+        if (!event.target || !hljs.hasClass(event.target, 'line-num')) {
+          return;
         }
 
-        elem.innerHTML = html;
-
-        hljs.addClass(elem, 'firekylin-code');
-
-        // 绑定点击高亮行事件
-        elem.addEventListener('click', function (event) {
-          // 小小的委托
-          if (!event.target || !hljs.hasClass(event.target, 'line-num')) {
-            return;
-          }
-
-          // 如果是区间
-          if (event.shiftKey) {
-            var hash = hljs.parseHash();
-            hash.newIndex = i + 1;
-            hash.current = event.target.getAttribute('data-line');
-            if (hash.index !== hash.newIndex - 0) {
-              hash.index = hash.newIndex;
-              hash.start = hash.current;
-              hash.end = 0;
-            } else {
-              if (hash.current > hash.start) {
-                hash.end = hash.current;
-              } else {
-                hash.end = hash.start;
-                hash.start = hash.current;
-              }
-            }
-            location.hash = hljs.stringHash(hash);
+        // 如果是区间
+        if (event.shiftKey) {
+          var hash = hljs.parseHash();
+          hash.newIndex = i + 1;
+          hash.current = event.target.getAttribute('data-line');
+          if (hash.index !== hash.newIndex - 0) {
+            hash.index = hash.newIndex;
+            hash.start = hash.current;
+            hash.end = 0;
           } else {
-            location.hash = hljs.stringHash({
-              index: i + 1,
-              start: event.target.getAttribute('data-line')
-            });
+            if (hash.current > hash.start) {
+              hash.end = hash.current;
+            } else {
+              hash.end = hash.start;
+              hash.start = hash.current;
+            }
           }
-        });
+          location.hash = hljs.stringHash(hash);
+        } else {
+          location.hash = hljs.stringHash({
+            index: i + 1,
+            start: event.target.getAttribute('data-line')
+          });
+        }
       });
-    }
+    });
   };
 
   hljs.init();
