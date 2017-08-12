@@ -133,6 +133,11 @@ article pre b.name {
   color: #eee;
   pointer-events: none;
 }
+@media screen and (max-width:768px) {
+  article pre b.name {
+    font-size: 30px;
+  }
+}
 
 article img { 
   padding: 0;
