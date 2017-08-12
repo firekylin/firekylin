@@ -383,7 +383,7 @@
       html = '<ul>' + html + '</ul>';
 
       // 输出语言
-      if (lines.length > 3 && elem.className.match(/lang-(\w+)/)) {
+      if (lines.length > 3 && elem.className.match(/lang-(\w+)/) && RegExp.$1 !== 'undefined') {
         html += '<b class="name">' + RegExp.$1 + '</b>';
       }
 
