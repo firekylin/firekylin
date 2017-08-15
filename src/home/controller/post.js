@@ -56,7 +56,7 @@ export default class extends Base {
     list.data.forEach(post => {
       post.pathname = encodeURIComponent(post.pathname);
       try {
-        post.options = JSON.parse(post.options);
+        post.options = JSON.parse(post.options) || {};
         post.featuredImage = post.options.featuredImage;
       } catch (e) {
         post.options = {};
@@ -97,11 +97,12 @@ export default class extends Base {
     }
     detail.pathname = encodeURIComponent(detail.pathname);
     try {
-      detail.options = JSON.parse(detail.options);
+      detail.options = JSON.parse(detail.options) || {};
+      detail.featuredImage = detail.options.featuredImage;
     } catch (e) {
       detail.options = {};
+      detail.featuredImage = '';
     }
-    detail.featuredImage = detail.options.featuredImage || '';
     this.assign('post', detail);
 
     return this.displayView('post');
@@ -129,11 +130,12 @@ export default class extends Base {
       .find();
     detail.pathname = encodeURIComponent(detail.pathname);
     try {
-      detail.options = JSON.parse(detail.options);
+      detail.options = JSON.parse(detail.options) || {};
+      detail.featuredImage = detail.options.featuredImage;
     } catch (e) {
       detail.options = {};
+      detail.featuredImage = '';
     }
-    detail.featuredImage = detail.options.featuredImage || '';
     this.assign('page', detail);
     this.assign('pathname', pathname);
 
