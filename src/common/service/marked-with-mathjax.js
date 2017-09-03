@@ -44,8 +44,7 @@ async function _mathSpanRender(text) {
       const mathContent = await _renderMathJax(cap[1]);
 
       text = text.substring(0, strStart) + mathContent + text.substring(strEnd);
-      reg.lastIndex += mathContent.length;
-
+      reg.lastIndex += mathContent.length - cap[0].length;
     } else {
       break;
     }
