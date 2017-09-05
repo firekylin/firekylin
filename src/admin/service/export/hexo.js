@@ -17,7 +17,7 @@ date: ${post.create_time}
 updated: ${post.update_time}
 comments: ${post.allow_comment}
 categories: ${post.cate.length ? post.cate[0].pathname : ''}
-tags: [${post.tags.join()}]
+tags: [${post.tag.join()}]
 permalink: ${post.pathname}
 ---
 
