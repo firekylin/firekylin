@@ -273,7 +273,7 @@
   }
 
   function lazyLoadShouldAppear(el, buffer) {
-    return el.offsetTop - (doc.body.scrollTop + (win.innerHeight || doc.documentElement.clientHeight)) < buffer;
+    return el.offsetTop - ((doc.scrollingElement || doc.documentElement).scrollTop + (win.innerHeight || doc.documentElement.clientHeight)) < buffer;
   }
 
 
