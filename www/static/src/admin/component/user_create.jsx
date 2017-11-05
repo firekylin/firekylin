@@ -55,8 +55,8 @@ module.exports = class extends Base {
         setTimeout(() => this.redirect('user/list'), 1000);
         break;
       case 'getUserInfo':
-        this.setState({userInfo: data});
         this.hasEmail = !!data.email;
+        this.setState({userInfo: data});
         break;
     }
   }
