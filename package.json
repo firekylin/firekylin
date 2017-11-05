@@ -64,7 +64,7 @@
     "history": "^1.17.0",
     "md5": "^2.0.0",
     "pre-commit": "^1.2.2",
-    "qrcode-react": "^0.1.14",
+    "qrcode-react": "0.1.14",
     "rc-select": "^5.10.0",
     "react": "^0.14.9",
     "react-bootstrap": "^0.28.3",
