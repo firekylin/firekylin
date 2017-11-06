@@ -49,7 +49,12 @@ module.exports = class extends Base {
         break;
       case 'deletePostSuccess':
         TipAction.success('删除成功');
-        this.setState({loading: true}, ()=> PostAction.selectList(this.state.page));
+        this.setState({loading: true}, ()=> PostAction.selectList(
+          this.state.page,
+          this.state.key !== 4 ? this.state.key : null,
+          this.state.keyword,
+          this.state.searchCate
+        ));
         break;
       case 'getPostList':
         this.setState({postList: data.data, total: data.totalPages, loading: false});
@@ -70,6 +75,7 @@ module.exports = class extends Base {
   handleSearch(e) {
     e.preventDefault();
 
+    this.state.page = 1;
     PostAction.selectList(
       this.state.page,
       this.state.key !== 4 ? this.state.key : null,
