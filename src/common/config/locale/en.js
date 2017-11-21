@@ -31,5 +31,6 @@ export default {
   ACCOUNT_FORBIDDEN: [119, '禁止登录'],
   SYSTERM_INSTALLED: [120, '程序已安装请勿重复安装'],
   PUSH_CLOSED: [121, '推送申请功能未开启'],
-  DELETE_CURRENT_USER_ERROR: [122, '不能删除当前登录用户']
+  DELETE_CURRENT_USER_ERROR: [122, '不能删除当前登录用户'],
+  LDAP_CONNECT_TIMEOUT: [123, '登录超时，请稍后再试']
 };

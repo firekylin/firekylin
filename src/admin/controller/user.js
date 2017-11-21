@@ -9,9 +9,12 @@ export default class extends Base {
    * @return {} []
    */
   async loginAction() {
-    //二步验证
+    const username = this.post('username');
+    let userInfo = {};
     let model = this.model('options');
     let options = await model.getOptions();
+
+    //二步验证
     if(options.two_factor_auth) {
       let two_factor_auth = this.post('two_factor_auth');
       let verified = speakeasy.totp.verify({
@@ -24,24 +27,37 @@ export default class extends Base {
         return this.fail('TWO_FACTOR_AUTH_ERROR');
       }
     }
-
-    //校验帐号和密码
-    let username = this.post('username');
-    let userModel = this.model('user');
-    let userInfo = await userModel.where({name: username}).find();
-    if(think.isEmpty(userInfo)) {
-      return this.fail('ACCOUNT_ERROR');
+    const ldapConfig = {
+      ldap_on: options.ldap_on === '1' ? true : false, //switch, maybe, default '0', '0' => close, '1' => open
+      ldap_url: options.ldap_url, //ldap url, required，'ldap://xxx.xx.x.xx:xxx'
+      ldap_connect_timeout: parseInt(options.ldap_connect_timeout), // ldap connect timeout, maybe, default 20000ms
+      ldap_baseDn: options.ldap_baseDn, //ldap baseDn, required
+      ldap_whiteList: options.ldap_whiteList ? options.ldap_whiteList.split(',') : [], //sep by ",", accounts in this string will not be varified with LDAP when LDAP is opened, and these accounts can be edited by itself instead of LDAP administrator, required
+      ldap_user_page: options.ldap_user_page, //url for ldap user to change userinfo, maybe, default ''
+      ldap_log: options.ldap_on === '0' ? false : true //logconf, maybe, default '1', '0' => close, '1' => open
     }
+
+    if(ldapConfig.ldap_on) {
+      //ldap白名单
+      const ldap_whiteList = ldapConfig.ldap_whiteList;
+
+      if(ldap_whiteList.indexOf(username) > -1) {
+        think.log('NORMAL', 'VARIFY TYPE');
+        userInfo = await this.normalVarify(username);
+      }else {
+        think.log('LDAP', 'VARIFY TYPE');
+        userInfo = await this.ldapVarify(username);
+      }
+    }else {
+      think.log('NORMAL', 'VARIFY TYPE');
+      userInfo = await this.normalVarify(username);
+    }
+
+    think.log(userInfo, 'userInfo');
 
     //帐号是否被禁用，且投稿者不允许登录
     if((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
-    }
-
-    //校验密码
-    let password = this.post('password');
-    if(!userModel.checkPassword(userInfo, password)) {
-      return this.fail('ACCOUNT_ERROR');
     }
 
     await this.session('userInfo', userInfo);
@@ -149,5 +165,111 @@ export default class extends Base {
     }
 
     return this.success();
+  }
+
+  async normalVarify(username) {
+    //校验帐号和密码
+    let userModel = this.model('user');
+    let userInfo = await userModel.where({name: username}).find();
+    if(think.isEmpty(userInfo)) {
+      return this.fail('ACCOUNT_ERROR');
+    }
+
+    //帐号是否被禁用，且投稿者不允许登录
+    if((userInfo.status | 0) !== 1 || userInfo.type === 3) {
+      return this.fail('ACCOUNT_FORBIDDEN');
+    }
+
+    //校验密码
+    let password = this.post('password');
+    if(!userModel.checkPassword(userInfo, password)) {
+      return this.fail('ACCOUNT_ERROR');
+    }
+
+    return userInfo;
+  }
+
+  async ldapVarify(username) {
+    //ldap校验
+    const oripassword = this.post('oripassword');
+    let model = this.model('options');
+    let options = await model.getOptions();
+
+    const ldapConfig = {
+      ldap_on: options.ldap_on === '1' ? true : false, //switch, maybe, default '0', '0' => close, '1' => open
+      ldap_url: options.ldap_url, //ldap url, required，'ldap://xxx.xx.x.xx:xxx'
+      ldap_connect_timeout: parseInt(options.ldap_connect_timeout), // ldap connect timeout, maybe, default 20000ms
+      ldap_baseDn: options.ldap_baseDn, //ldap baseDn, required
+      ldap_whiteList: options.ldap_whiteList ? options.ldap_whiteList.split(',') : [], //sep by ",", accounts in this string will not be varified with LDAP when LDAP is opened, and these accounts can be edited by itself instead of LDAP administrator, required
+      ldap_user_page: options.ldap_user_page, //url for ldap user to change userinfo, maybe, default ''
+      ldap_log: options.ldap_on === '0' ? false : true //logconf, maybe, default '1', '0' => close, '1' => open
+    }
+
+    const Ldap = think.service('ldap/index', 'admin');
+    const ldap = new Ldap(ldapConfig);
+    const ldapRes = await ldap.validate(username, oripassword);
+
+    if(!ldapRes) {
+        return this.fail('ACCOUNT_ERROR');
+    }
+
+    if(ldapRes === 'timeout') {
+        return this.fail('LDAP_CONNECT_TIMEOUT');
+    }
+
+    //ldap校验通过后，在数据库中查询该用户是否存在，若不存在则新增该用户到数据库，若存在则更新用户信息后登录成功
+    //从ldap中获取详细用户信息
+    let ldapUserInfo = await ldap.getUserInfo(username);
+    let newData = {};
+
+    if(!think.isEmpty(ldapUserInfo)) {
+        newData = {
+            username,
+            email: ldapUserInfo.mail,
+            display_name: ldapUserInfo.displayName,
+            password: ldapUserInfo.userPassword,
+            type: 2,
+            status: 1
+        }
+    }
+
+    //校验数据库中帐号是否存在
+    let userModel = this.model('user');
+    let userInfo = await userModel.where({name: username}).find();
+
+    if(think.isEmpty(userInfo)) {
+      //新增该用户到数据库
+
+      let modelInstance = this.model('user');
+      let insertId = await modelInstance.addUser(newData, this.ip());
+
+      think.log(`insertId: ${JSON.stringify(insertId)}`, 'LDAP');
+
+      if(insertId && insertId.type === 'add') {
+          userInfo = await userModel.where({name: username}).find();
+      }
+      if(insertId && insertId.type === 'exist') {
+        return this.fail('ACCOUNT_ERROR');
+      }
+    }else {
+      //更新数据库用户信息
+
+      let updateData = {
+        ...userInfo,
+        email: ldapUserInfo.mail,
+        display_name: ldapUserInfo.displayName,
+        password: ldapUserInfo.userPassword
+      }
+      let modelInstance = this.model('user');
+      let rows = await modelInstance.saveUser(updateData, this.ip());
+
+      think.log(`affectedRows: ${rows}`, 'USERINFO UPDATED');
+
+      if(rows) {
+        userInfo = await userModel.where({name: username}).find();
+      }
+    }
+
+    return userInfo;
   }
 }
