@@ -4,7 +4,7 @@ node_js:
 cache:
   directories:
     - node_modules
-    
+
 addons:
   ssh_known_hosts: firekylin.org
 before_install:
@@ -15,6 +15,3 @@ before_install:
   - ssh-add ~/.ssh/id_rsa
 
 script: sh bin/build.sh
-branches:
-  only:
-    - master
