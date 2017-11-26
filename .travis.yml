@@ -14,3 +14,5 @@ before_install:
   - ssh-add ~/.ssh/id_rsa
 install: npm install
 script: sh bin/build.sh
+on:
+  tags: true
