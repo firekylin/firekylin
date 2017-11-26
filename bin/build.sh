@@ -5,6 +5,9 @@ rm -rf output;
 rm -rf output.theme;
 
 mkdir output;
+if [ ! -d "./build" ]; then
+  mkdir ./build;
+fi
 
 echo 'webpack start ...';
 npm run webpack.build.production;
@@ -51,7 +54,9 @@ cp -r bin/ssl/auto_build.sh output/;
 cp -r bin/ssl/https.js output/;
 cp -r bin/ssl/https.sh output/;
 
-rm -r output/app/common/config/db.js;
+if [ -f output/app/common/config/db.js ]; then
+  rm -r output/app/common/config/db.js;
+fi
 rm -rf output/www/static/js/*.map;
 mv output firekylin;
 VERSION=`cat .version`;
