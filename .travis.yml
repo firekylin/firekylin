@@ -8,8 +8,7 @@ cache:
 addons:
   ssh_known_hosts: firekylin.org
 before_install:
-  - openssl aes-256-cbc -K $encrypted_b487d5435939_key -iv $encrypted_b487d5435939_iv
-  -in .travis/deploy_rsa.enc -out deploy_rsa -d
+  - openssl aes-256-cbc -K $encrypted_b487d5435939_key -iv $encrypted_b487d5435939_iv -in .travis/deploy_rsa.enc -out deploy_rsa -d
   - chomod 600 ~/.ssh/id_rsa
   - eval $(ssh-agent)
   - ssh-add ~/.ssh/id_rsa
