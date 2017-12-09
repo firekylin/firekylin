@@ -28,7 +28,7 @@ const ALLOW_CONTENT_TYPES = [
   ['.avi', /^video\/avi$/i],
   ['.flv', /^video\/flv$/i],
 
-  /** 常用当然文件 */
+  /** 常用档案文件 */
   ['.txt', /^text\/plain$/i],
   ['.xml', /^text\/xml$/i],
   ['.json', /^application\/json$/i],

@@ -2,7 +2,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import {execSync} from 'child_process';
 import Base from './base';
 
 const cluster = require('cluster');
@@ -73,33 +72,35 @@ export default class extends Base {
    * Fork theme
    */
   async putAction() {
-    let {theme, new_theme} = this.post();
-    let themeDir = path.join(THEME_DIR, theme);
-    let newThemeDir = path.join(THEME_DIR, new_theme);
-    this.pathCheck(themeDir) && this.pathCheck(newThemeDir);
+    return this.fail('自动克隆接口已废弃，你可以手动操作');
 
-    try {
-      /*let stat = */await statsAsync(newThemeDir);
-      return this.fail(`${new_theme} 已存在，请手动切换到该主题`);
-    } catch(e) {
-      execSync(`cp -r ${themeDir} ${newThemeDir}`);
+    // let {theme, new_theme} = this.post();
+    // let themeDir = path.join(THEME_DIR, theme);
+    // let newThemeDir = path.join(THEME_DIR, new_theme);
+    // this.pathCheck(themeDir) && this.pathCheck(newThemeDir);
 
-      let configPath = path.join(newThemeDir, 'package.json');
-      let config = think.require(configPath);
-      config.name = new_theme;
+    // try {
+    //   /*let stat = */await statsAsync(newThemeDir);
+    //   return this.fail(`${new_theme} 已存在，请手动切换到该主题`);
+    // } catch(e) {
+    //   execSync(`cp -r ${themeDir} ${newThemeDir}`);
 
-      try {
-        await writeFileAsync(
-          configPath,
-          JSON.stringify(config, null, '\t'),
-          {encoding: 'utf-8'}
-        );
-        await this.model('options').updateOptions('theme', new_theme);
-        return this.success();
-      } catch(e) {
-        return this.fail(e);
-      }
-    }
+    //   let configPath = path.join(newThemeDir, 'package.json');
+    //   let config = think.require(configPath);
+    //   config.name = new_theme;
+
+    //   try {
+    //     await writeFileAsync(
+    //       configPath,
+    //       JSON.stringify(config, null, '\t'),
+    //       {encoding: 'utf-8'}
+    //     );
+    //     await this.model('options').updateOptions('theme', new_theme);
+    //     return this.success();
+    //   } catch(e) {
+    //     return this.fail(e);
+    //   }
+    // }
   }
 
   /**
