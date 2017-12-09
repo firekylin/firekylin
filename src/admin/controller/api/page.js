@@ -60,6 +60,14 @@ export default class extends Post {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }
+
+    if(this.userInfo.type !== 1) {
+      let page = await this.modelInstance.where({id: this.id}).find();
+      if(page.user_id !== this.userInfo.id) {
+        return this.fail('USER_NO_PERMISSION');
+      }
+    }
+
     let data = this.post();
     data.id = this.id;
     data.type = 1;
