@@ -25,11 +25,21 @@ export default class extends think.controller.rest {
     if(think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
+
+    let action = this.http.action;
+    if(action !== 'get') {
+      let referrer = this.http.referrer();
+      let {site_url} = await this.model('options').getOptions()
+
+      if(referrer.indexOf(site_url) !== 0) {
+        return this.fail('REFERRER_ERROR');
+      }
+    }
+
     this.userInfo = userInfo;
     let type = userInfo.type | 0;
     //not admin
     if(type !== 1) {
-      let action = this.http.action;
       if(action === 'get') {
         return;
       }
