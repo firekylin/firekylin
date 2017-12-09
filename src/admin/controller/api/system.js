@@ -49,9 +49,12 @@ export default class extends base {
 
     //非管理员只统计当前用户文章
     let where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
+    const config = await this.getConfig();
+    delete config.password_salt;
+
     return this.success({
       versions: data,
-      config: await this.getConfig(),
+      config,
       count: {
         posts: await this.model('post').where(where).count(),
         cates: await this.model('cate').count(),
