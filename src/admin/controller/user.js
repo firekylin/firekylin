@@ -82,7 +82,12 @@ export default class extends Base {
 
     if(this.isPost()) {
       let user = this.post('user');
-      user = await this.model('user').where(`name = "${user}" OR email = "${user}"`).find();
+      user = await this.model('user').where({
+        name: user,
+        email: user,
+        _logic: 'OR'
+      }).find();
+
       if(think.isEmpty(user)) {
         return this.fail('查无此人');
       }
