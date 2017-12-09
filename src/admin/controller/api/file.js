@@ -13,6 +13,34 @@ request.defaults({
 const getFileContent = think.promisify(request.get, request);
 const writeFileAsync = think.promisify(fs.writeFile, fs);
 
+const ALLOW_CONTENT_TYPES = [
+  /** 图片文件 */
+  ['.gif', /^image\/gif$/i],
+  ['.jpeg', /^(?:image\/jpeg|application\/x-jpg)$/i],
+  ['.png', /^(?:image\/png|application\/x-png)$/i],
+  ['.tiff', /^image\/tiff$/i],
+  ['.bmp', /^application\/x-bmp$/i],
+
+  /** 多媒体文件 */
+  ['.mp3', /^audio\/mp3$/i],
+  ['.wmv', /^video\/x-ms-wmv$/i],
+  ['.mp4', /^video\/mpeg4$/i],
+  ['.avi', /^video\/avi$/i],
+  ['.flv', /^video\/flv$/i],
+
+  /** 常用当然文件 */
+  ['.txt', /^text\/plain$/i],
+  ['.xml', /^text\/xml$/i],
+  ['.json', /^application\/json$/i],
+  ['.doc', /^application\/msword$/],
+  ['.xls', /^(application\/x-xls|application\/vnd\.ms-excel)$/i],
+  ['.ppt', /^(application\/x-ppt|application\/vnd\.ms-powerpoint)$/i],
+  ['.zip', /^application\/(zip|octet-stream)$/i],
+  ['.rar', /^application\/x-rar-comporessed$/i],
+  ['.pdf', /^application\/pdf$/i],
+  ['.tar.gz', /^application\/tar(\+gzip)?$/i]
+];
+
 export default class extends Base {
   uploadConfig = {};
 
@@ -37,13 +65,16 @@ export default class extends Base {
     }
     if(!file) { return this.fail('FILE_UPLOAD_ERROR'); }
 
+    /** 检查文件类型 */
+    const ext = this.extWhiteList(file);
+    if(!ext) {
+      return this.fail('FILE_FORMAT_NOT_ALLOWED');
+    }
+
     /** 处理导入数据 **/
     if(this.post('importor')) {
       return this.serviceImport(this.post('importor'), file);
     }
-
-    /** 检查文件类型 */
-    // let contentType = file.headers['content-type'];
 
     // 处理其它上传
     if(!type) { return this.fail(); }
@@ -60,6 +91,14 @@ export default class extends Base {
       return this.serviceExport(this.get('exporter'));
     }
     return this.success();
+  }
+
+  //MIME过滤
+  extWhiteList(file) {
+    let contentType = file.headers['content-type'];
+    return ALLOW_CONTENT_TYPES.some(type =>
+      type[1].test(contentType)
+    );
   }
 
   // 获取上传设置
