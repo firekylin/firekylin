@@ -8,6 +8,8 @@ export default class extends Base {
   async uploadMethod(file, {name}) {
     let ext = /^\.\w+$/.test(path.extname(file)) ? path.extname(file) : '.png';
     let basename = (name || path.basename(file, ext)) + ext;
+    //过滤 ../../
+    basename = basename.replace(/[\\\/]/g, '');
 
     let destDir = this.formatNow();
     let destPath = path.join(think.UPLOAD_PATH, destDir);
