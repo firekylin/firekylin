@@ -45,6 +45,7 @@ export default class extends Base {
   uploadConfig = {};
 
   async __before() {
+    await super.__before();
     this.uploadConfig = await this.getUploadConfig();
   }
 
