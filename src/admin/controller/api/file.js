@@ -13,32 +13,14 @@ request.defaults({
 const getFileContent = think.promisify(request.get, request);
 const writeFileAsync = think.promisify(fs.writeFile, fs);
 
-const ALLOW_CONTENT_TYPES = [
+const ALLOW_EXTS = [
   /** 图片文件 */
-  ['.gif', /^image\/gif$/i],
-  ['.jpeg', /^(?:image\/jpeg|application\/x-jpg)$/i],
-  ['.png', /^(?:image\/png|application\/x-png)$/i],
-  ['.tiff', /^image\/tiff$/i],
-  ['.bmp', /^application\/x-bmp$/i],
-
+  /\.(gif|jpe?g|png|tiff|bmp)$/i,
   /** 多媒体文件 */
-  ['.mp3', /^audio\/mp3$/i],
-  ['.wmv', /^video\/x-ms-wmv$/i],
-  ['.mp4', /^video\/mpeg4$/i],
-  ['.avi', /^video\/avi$/i],
-  ['.flv', /^video\/flv$/i],
-
+  /\.(mp3|wmv|mp4|avi|flv)$/i,
   /** 常用档案文件 */
-  ['.txt', /^text\/plain$/i],
-  ['.xml', /^text\/xml$/i],
-  ['.json', /^application\/json$/i],
-  ['.doc', /^application\/msword$/],
-  ['.xls', /^(application\/x-xls|application\/vnd\.ms-excel)$/i],
-  ['.ppt', /^(application\/x-ppt|application\/vnd\.ms-powerpoint)$/i],
-  ['.zip', /^application\/(zip|octet-stream)$/i],
-  ['.rar', /^application\/x-rar-comporessed$/i],
-  ['.pdf', /^application\/pdf$/i],
-  ['.tar.gz', /^application\/tar(\+gzip)?$/i]
+  /\.(txt|xml|json|docx?|xlsx?|pptx?)/i,
+  /\.(zip|rar|pdf|gz)/i
 ];
 
 export default class extends Base {
@@ -95,11 +77,8 @@ export default class extends Base {
   }
 
   //MIME过滤
-  extWhiteList(file) {
-    let contentType = file.headers['content-type'];
-    return ALLOW_CONTENT_TYPES.some(type =>
-      type[1].test(contentType)
-    );
+  extWhiteList({filename}) {
+    return ALLOW_EXTS.some(reg => reg.test(filename));
   }
 
   // 获取上传设置
