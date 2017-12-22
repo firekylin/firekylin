@@ -1,9 +1,25 @@
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
+import {parse} from 'url';
 import request from 'request';
 
 import Base from './base';
+
+const INTERNAL_AREAS = [
+  ['10.0.0.0', '10.255.255.255'],
+  ['172.16.0.0', '172.31.255.255'],
+  ['192.168.0.0', '192.168.255.255'],
+  ['127.0.0.1', '127.255.255.255']
+];
+
+function ip2long(ip) {
+  const multi = [0x1000000, 0x10000, 0x100, 1];
+  let longValue = 0;
+  ip.split('.').forEach((part, i) => longValue += part * multi[i]);
+  return longValue;
+}
+
 
 request.defaults({
   strictSSL: false,
@@ -127,6 +143,19 @@ export default class extends Base {
   }
 
   async getUrlFile(url) {
+    const {hostname} = parse(url);
+    if(/^\d+\.\d+\.\d+\.\d+/i.test(hostname)) {
+      const longIP = ip2long(hostname);
+      for(let [start, end] of INTERNAL_AREAS) {
+        start = ip2long(start);
+        end = ip2long(end);
+        if(longIP>=start && longIP<=end) {
+          throw new Error('URL ILLEGAL');
+        }
+      }
+    }
+
+
     let resp = await getFileContent({
       url,
       headers: {
