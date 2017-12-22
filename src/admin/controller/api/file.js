@@ -93,8 +93,8 @@ export default class extends Base {
   }
 
   //MIME过滤
-  extWhiteList({filename}) {
-    return ALLOW_EXTS.some(reg => reg.test(filename));
+  extWhiteList(file) {
+    return ALLOW_EXTS.some(reg => reg.test(file.originalFilename));
   }
 
   // 获取上传设置
