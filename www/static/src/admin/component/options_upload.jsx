@@ -68,6 +68,7 @@ module.exports = class extends Base {
         <Radio value='local' label='本地' />
         <Radio value='qiniu' label='七牛云' />
         <Radio value='upyun' label='又拍云' />
+        <Radio value='aliyun' label='阿里云' />
       </RadioGroup>
     );
     let qiniu = (
@@ -190,6 +191,78 @@ module.exports = class extends Base {
         </div>
       </div>
     )
+    let aliyun = (
+      <div>
+        <div className="form-group">
+          <label>accessKeyId</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('accessKeyId')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写阿里云的accessKeyId'
+              }}
+              name='accessKeyId'
+            />
+        </div>
+        <div className="form-group">
+          <label>accessKeySecret</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('accessKeySecret')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写阿里云的accessKeySecret'
+              }}
+              name='accessKeySecret'
+            />
+        </div>
+        <div className="form-group">
+        <label>服务区域</label>
+        <ValidatedInput
+              type='text'
+              {...this.getProps('region')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写OSS的服务区域'
+              }}
+              name='region'
+            />
+        </div>
+        <div className="form-group">
+          <label>空间名(Bucket)</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('bucket')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写阿里云的空间名'
+              }}
+              name='bucket'
+            />
+        </div>
+        <div className="form-group">
+          <label>阿里云域名</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('origin')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写阿里云的域名'
+              }}
+              name='origin'
+            />
+        </div>
+        <div className="form-group">
+          <label>路径前缀</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('prefix')}
+              name='prefix'
+            />
+        </div>
+      </div>
+    )
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -201,6 +274,7 @@ module.exports = class extends Base {
           </div>
           { upload.type === 'qiniu' && qiniu }
           { upload.type === 'upyun' && upyun }
+          { upload.type === 'aliyun' && aliyun }
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
             { this.state.submitting ? '提交中...' : '提交' }
           </button>
