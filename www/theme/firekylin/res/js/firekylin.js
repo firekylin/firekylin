@@ -81,12 +81,10 @@
       var dataType = comments.getAttribute('data-type');
       if(dataType === 'disqus') {
         loadDisqusComment();
-      }else if(dataType === 'duoshuo') {
-        loadDuoshuoComment();
-      }else if(dataType === 'changyan') {
+      } else if(dataType === 'hypercomments') {
+        loadHyperComments();
+      } else if(dataType === 'changyan') {
         loadChangyanComment();
-      }else if(dataType === 'netease') {
-        loadNeteaseComment();
       }
     }
 
@@ -123,15 +121,32 @@
     (doc.head || doc.body).appendChild(s);
   };
 
-  var loadDuoshuoComment = function() {
-    var disqus_thread = getById('ds_thread');
-    if(!disqus_thread) {
-      return;
-    }
-    win.duoshuoQuery = {short_name: disqus_thread.getAttribute('data-name')};
-    var s = doc.createElement('script');
-    s.src = '//static.duoshuo.com/embed.js';
-    (doc.head || doc.body).appendChild(s);
+  var loadHyperComments = function() {
+    var hyperComments = getById('hypercomments_widget');
+    var appid = hyperComments.getAttribute('data-name');
+
+    win._hcwp = win._hcwp || [];
+    win._hcwp.push({widget: 'Stream', widget_id: appid});
+
+    (function() {
+      if('HC_LOAD_INIT' in win) {
+        return;
+      }
+
+      var lang = (
+        navigator.language ||
+        navigator.systemLanguage ||
+        navigator.userLanguage ||
+        'en'
+      ).substr(0, 2).toLowerCase();
+      var hcc = document.createElement('script');
+      hcc.type = 'text/javascript';
+      hcc.async = true;
+      hcc.src = ('https:' === document.location.protocol ? 'https' : 'http') +'://w.hypercomments.com/widget/hc/'+appid+'/'+lang+'/widget.js';
+
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(hcc, s.nextSibling);
+    })();
   };
 
   var loadChangyanComment = function() {
@@ -153,21 +168,6 @@
     (doc.head||doc.body).appendChild(s);
   }
 
-  var loadNeteaseComment = function() {
-    var disqus_thread = getById('cloud-tie-wrapper');
-    if(!disqus_thread) {
-      return;
-    }
-    win.cloudTieConfig = {
-      url: getById('comments').getAttribute('data-url'),
-      sourceId: '',
-      productKey: disqus_thread.getAttribute('data-name'),
-      target: disqus_thread.className
-    };
-    var s = doc.createElement('script');
-    s.src = 'https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js';
-    (doc.head || doc.body).appendChild(s);
-  }
   win.addEventListener('load', function() {
     loadComment();
   });
