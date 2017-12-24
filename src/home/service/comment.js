@@ -33,11 +33,13 @@ export default class extends think.service.base {
     if(comment.name) {
       if(comment.type === 'disqus') {
         return this.syncFromDisqus(comment);
-      }else if(comment.type === 'duoshuo') {
+      } else if(comment.type === 'hypercomments') {
+        return this.syncFromHyperComments(comment);
+      } else if(comment.type === 'duoshuo') {
         return this.syncFromDuoshuo(comment);
-      }else if(comment.type === 'changyan') {
+      } else if(comment.type === 'changyan') {
         return this.syncFromChangyan(comment);
-      }else if(comment.type === 'netease') {
+      } else if(comment.type === 'netease') {
         return this.syncFromNetease(comment);
       }
     }
@@ -66,7 +68,6 @@ export default class extends think.service.base {
    * @return {[type]} [description]
    */
   async syncFromDisqus(comment) {
-
     let postData = await this.getPostData();
     if(think.isEmpty(postData)) {
       return;
@@ -103,6 +104,74 @@ export default class extends think.service.base {
         await this.clearPostCache();
       }
     }
+  }
+
+  async syncFromHyperComments(comment) {
+    const postData = await this.getPostData();
+    if(think.isEmpty(postData)) {
+      return;
+    }
+
+    let url = 'https://c1n1.hypercomments.com/api/get_count';
+    let site_url = comment.site_url;
+    if(site_url.slice(-1) !== '/') {
+      site_url = site_url + '/';
+    }
+
+    for(let i in postData) {
+      let post = postData[i];
+      post.url = site_url + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
+    }
+
+    let threads = Object.keys(postData);
+    let index = 0;
+    while(true) { // eslint-disable-line no-constant-condition
+      let ths = threads.slice(index, index+50);
+      index += 50;
+
+      if(!ths.length) {
+        return;
+      }
+
+      let formData = {
+        data: JSON.stringify({
+            widget_id: comment.name,
+            href: ths.map(th => postData[th].url)
+        }),
+        host: site_url
+      };
+      let resp = await _.post({
+        url,
+        form: formData
+      });
+      let data = JSON.parse(resp.body).data;
+
+      if(!data) {
+        console.log(resp.body);
+        return;
+      }
+
+      let promises = [];
+      for(let i=0; i<ths.length; i++) {
+        let post = postData[ths[i]];
+        if(data[i].cm === post.comment_num) {
+          continue;
+        }
+
+        let id = post.id;
+        promises.push(
+          this.model('post')
+            .where({id})
+            .update({comment_num: data[i].cm})
+        );
+      }
+
+      await Promise.all(promises);
+      if(promises.length) {
+        await this.clearPostCache();
+      }
+    }
+
   }
   /**
    * sync from duoshuo
