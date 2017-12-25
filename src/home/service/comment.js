@@ -147,7 +147,6 @@ export default class extends think.service.base {
       let data = JSON.parse(resp.body).data;
 
       if(!data) {
-        console.log(resp.body);
         return;
       }
 
