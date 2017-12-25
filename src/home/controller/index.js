@@ -80,8 +80,7 @@ export default class extends Base {
                         && dbConfig.host
                         && dbConfig.port
                         && dbConfig.database
-                        && dbConfig.user
-                        && dbConfig.password;
+                        && dbConfig.user;
 
       switch(step) {
         case 1:
