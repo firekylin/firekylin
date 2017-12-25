@@ -9,13 +9,10 @@
           <br>
           注：如果长时间无法加载，请针对 disq.us | disquscdn.com | disqus.com 启用代理。
       </div>
-      {% elif options.comment.type == 'duoshuo'%}
-        <div id="ds_thread" class="ds-thread" data-thread-key="{{think.md5(http.get('pathname'))}}" data-url="{{site_url}}{{http.url}}" data-name="{{options.comment.name}}">
-        </div>
+      {% elif options.comment.type == 'hypercomments' %}
+      <div id="hypercomments_widget" data-url="{{site_url}}{{http.url}}" data-identifier="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div>
       {% elif options.comment.type == 'changyan' %}
         <div id="SOHUCS" sid="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div>
-      {% elif options.comment.type == 'netease' %}
-        <div id="cloud-tie-wrapper" class="cloud-tie-wrapper" data-name="{{options.comment.name}}"></div>
       {% else %}
         {{options.comment.name|safe}}
       {% endif %}
