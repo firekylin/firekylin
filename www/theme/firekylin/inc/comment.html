@@ -13,8 +13,10 @@
       <div id="hypercomments_widget" data-url="{{site_url}}{{http.url}}" data-identifier="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div>
       {% elif options.comment.type == 'changyan' %}
         <div id="SOHUCS" sid="{{think.md5(http.get('pathname'))}}" data-name="{{options.comment.name}}"></div>
+      {% elif options.comment.type == 'gitalk'%}
+        <div id="gitalk-container" data-identifier="{{think.md5(http.get('pathname'))}}"  data-name="{{options.comment.name}}"></div>
       {% else %}
-        {{options.comment.name|safe}}
+      {{options.comment.name|safe}}
       {% endif %}
     {% else %}
     <p>请在后台配置评论类型和相关的值。</p>

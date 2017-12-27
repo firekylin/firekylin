@@ -30,17 +30,19 @@ export default class extends think.service.base {
     let comment = options.comment;
     comment.site_url = options.site_url;
 
-    if(comment.name) {
-      if(comment.type === 'disqus') {
+    if (comment.name) {
+      if (comment.type === 'disqus') {
         return this.syncFromDisqus(comment);
-      } else if(comment.type === 'hypercomments') {
+      } else if (comment.type === 'hypercomments') {
         return this.syncFromHyperComments(comment);
-      } else if(comment.type === 'duoshuo') {
+      } else if (comment.type === 'duoshuo') {
         return this.syncFromDuoshuo(comment);
-      } else if(comment.type === 'changyan') {
+      } else if (comment.type === 'changyan') {
         return this.syncFromChangyan(comment);
-      } else if(comment.type === 'netease') {
+      } else if (comment.type === 'netease') {
         return this.syncFromNetease(comment);
+      } else if (comment.type === 'gitalk') {
+        return this.syncFromGitalk(comment);
       }
     }
   }
@@ -69,38 +71,42 @@ export default class extends think.service.base {
    */
   async syncFromDisqus(comment) {
     let postData = await this.getPostData();
-    if(think.isEmpty(postData)) {
+    if (think.isEmpty(postData)) {
       return;
     }
     let threads = Object.keys(postData); //.join('&l=')
     let index = 0;
-    while(true) {  // eslint-disable-line no-constant-condition
+    while (true) { // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 10);
       index += 10;
-      if(!ths.length) {
+      if (!ths.length) {
         return;
       }
       let url = `https://${comment.name}.disqus.com/count-data.js?1=${ths.join('&1=')}`;
       //think.log(`sync comments ${url}`);
       let response = await _.get(url).catch(() => {});
-      if(!response) {
+      if (!response) {
         continue;
       }
       let data = response.body.match(/DISQUSWIDGETS.displayCount\(([^\(\)]+)\);/);
-      if(!data) {
+      if (!data) {
         continue;
       }
 
       data = JSON.parse(data[1]).counts;
       let promises = data.map(item => {
-        if(item.comments === postData[item.id].comment_num) {
+        if (item.comments === postData[item.id].comment_num) {
           return;
         }
         let id = postData[item.id].id;
-        return this.model('post').where({id: id}).update({comment_num: item.comments});
+        return this.model('post').where({
+          id: id
+        }).update({
+          comment_num: item.comments
+        });
       });
       await Promise.all(promises);
-      if(promises.length) {
+      if (promises.length) {
         await this.clearPostCache();
       }
     }
@@ -108,35 +114,35 @@ export default class extends think.service.base {
 
   async syncFromHyperComments(comment) {
     const postData = await this.getPostData();
-    if(think.isEmpty(postData)) {
+    if (think.isEmpty(postData)) {
       return;
     }
 
     let url = 'https://c1n1.hypercomments.com/api/get_count';
     let site_url = comment.site_url;
-    if(site_url.slice(-1) !== '/') {
+    if (site_url.slice(-1) !== '/') {
       site_url = site_url + '/';
     }
 
-    for(let i in postData) {
+    for (let i in postData) {
       let post = postData[i];
       post.url = site_url + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
     }
 
     let threads = Object.keys(postData);
     let index = 0;
-    while(true) { // eslint-disable-line no-constant-condition
-      let ths = threads.slice(index, index+50);
+    while (true) { // eslint-disable-line no-constant-condition
+      let ths = threads.slice(index, index + 50);
       index += 50;
 
-      if(!ths.length) {
+      if (!ths.length) {
         return;
       }
 
       let formData = {
         data: JSON.stringify({
-            widget_id: comment.name,
-            href: ths.map(th => postData[th].url)
+          widget_id: comment.name,
+          href: ths.map(th => postData[th].url)
         }),
         host: site_url
       };
@@ -146,27 +152,31 @@ export default class extends think.service.base {
       });
       let data = JSON.parse(resp.body).data;
 
-      if(!data) {
+      if (!data) {
         return;
       }
 
       let promises = [];
-      for(let i=0; i<ths.length; i++) {
+      for (let i = 0; i < ths.length; i++) {
         let post = postData[ths[i]];
-        if(data[i].cm === post.comment_num) {
+        if (data[i].cm === post.comment_num) {
           continue;
         }
 
         let id = post.id;
         promises.push(
           this.model('post')
-            .where({id})
-            .update({comment_num: data[i].cm})
+          .where({
+            id
+          })
+          .update({
+            comment_num: data[i].cm
+          })
         );
       }
 
       await Promise.all(promises);
-      if(promises.length) {
+      if (promises.length) {
         await this.clearPostCache();
       }
     }
@@ -178,15 +188,15 @@ export default class extends think.service.base {
    */
   async syncFromDuoshuo(comment) {
     let postData = await this.getPostData();
-    if(think.isEmpty(postData)) {
+    if (think.isEmpty(postData)) {
       return;
     }
     let threads = Object.keys(postData);
     let index = 0;
-    while(true) {  // eslint-disable-line no-constant-condition
+    while (true) { // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 10);
       index += 10;
-      if(!ths.length) {
+      if (!ths.length) {
         return;
       }
       let url = `http://api.duoshuo.com/threads/counts.json?short_name=${comment.name}&threads=${ths.join(',')}`;
@@ -194,16 +204,20 @@ export default class extends think.service.base {
       let response = await _.get(url);
       let data = JSON.parse(response.body).response;
       let promises = [];
-      for(let key in data) {
-        if(data[key].comments === postData[key].comment_num) {
+      for (let key in data) {
+        if (data[key].comments === postData[key].comment_num) {
           continue;
         }
         let id = postData[key].id;
-        let promise = this.model('post').where({id: id}).update({comment_num: data[key].comments});
+        let promise = this.model('post').where({
+          id: id
+        }).update({
+          comment_num: data[key].comments
+        });
         promises.push(promise);
       }
       await Promise.all(promises);
-      if(promises.length) {
+      if (promises.length) {
         await this.clearPostCache();
       }
     }
@@ -214,15 +228,15 @@ export default class extends think.service.base {
    */
   async syncFromChangyan(comment) {
     let postData = await this.getPostData();
-    if(think.isEmpty(postData)) {
+    if (think.isEmpty(postData)) {
       return;
     }
     let threads = Object.keys(postData);
     let index = 0;
-    while(true) {  // eslint-disable-line no-constant-condition
+    while (true) { // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 10);
       index += 10;
-      if(!ths.length) {
+      if (!ths.length) {
         return;
       }
       let url = `http://changyan.sohu.com/api/2/topic/count?client_id=${comment.name}&topic_id=${ths.join(',')}`;
@@ -230,16 +244,20 @@ export default class extends think.service.base {
       let response = await _.get(url);
       let data = JSON.parse(response.body).result;
       let promises = [];
-      for(let key in data) {
-        if(data[key].comments === postData[key].comment_num) {
+      for (let key in data) {
+        if (data[key].comments === postData[key].comment_num) {
           continue;
         }
         let id = postData[key].id;
-        let promise = this.model('post').where({id: id}).update({comment_num: data[key].comments});
+        let promise = this.model('post').where({
+          id: id
+        }).update({
+          comment_num: data[key].comments
+        });
         promises.push(promise);
       }
       await Promise.all(promises);
-      if(promises.length) {
+      if (promises.length) {
         await this.clearPostCache();
       }
     }
@@ -250,16 +268,16 @@ export default class extends think.service.base {
    */
   async syncFromNetease(comment) {
     let postData = await this.getPostData();
-    if(think.isEmpty(postData)) {
+    if (think.isEmpty(postData)) {
       return;
     }
 
     let site_url = comment.site_url;
-    if(site_url.slice(-1) !== '/') {
+    if (site_url.slice(-1) !== '/') {
       site_url = site_url + '/';
     }
 
-    for(let i in postData) {
+    for (let i in postData) {
       let post = postData[i];
       post.url = site_url + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
     }
@@ -267,34 +285,105 @@ export default class extends think.service.base {
     let threads = Object.keys(postData);
     let index = 0;
     let url = `https://api.gentie.163.com/products/${comment.name}/threads/joincounts`;
-    while(true) {  // eslint-disable-line no-constant-condition
+    while (true) { // eslint-disable-line no-constant-condition
       let ths = threads.slice(index, index + 50);
-      if(!ths.length) {return;}
+      if (!ths.length) {
+        return;
+      }
       index += 50;
       // think.log(`sync comments ${url}`);
       let formData = {
         data: JSON.stringify(
-          ths.map(th => ({url: postData[th].url, sourceId: null}))
+          ths.map(th => ({
+            url: postData[th].url,
+            sourceId: null
+          }))
         )
       };
-      let resp = await _.post({url, form: formData});
+      let resp = await _.post({
+        url,
+        form: formData
+      });
       let data = JSON.parse(resp.body).data;
 
       let promises = [];
-      for(let i=0; i<ths.length; i++) {
+      for (let i = 0; i < ths.length; i++) {
         let post = postData[ths[i]];
-        if(data[i] === post.comment_num) {
+        if (data[i] === post.comment_num) {
           continue;
         }
 
         let id = post.id;
-        promises.push(this.model('post').where({id}).update({comment_num: data[i]}));
+        promises.push(this.model('post').where({
+          id
+        }).update({
+          comment_num: data[i]
+        }));
       }
 
       await Promise.all(promises);
-      if(promises.length) {
+      if (promises.length) {
         await this.clearPostCache();
       }
+    }
+  }
+
+  /**
+   * 
+   * @param {*sync form gitalk in github} comment 
+   */
+  async syncFromGitalk(comment) {
+
+    const postData = await this.getPostData();
+    if (think.isEmpty(postData)) {
+      return;
+    }
+
+    //get gtalk and github config
+    let gtalkConfig = JSON.parse(comment.name);
+
+    const base64Header = new Buffer(gtalkConfig.githubUserName + ':' + gtalkConfig.githubPassWord).toString('base64');
+
+    let url='https://api.github.com/search/issues?q=author:'+gtalkConfig.owner;
+    const options = {
+      url: url,
+      headers: {
+        'User-Agent': 'request',
+        'Authorization': 'Basic ' + base64Header
+      }
+    };
+
+    let promises = [];
+
+    for (let i in postData) {
+      let post = postData[i];
+      post.url = '/' + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
+      options.url = url+'+label:'+i;
+
+      let response = await _.get(options);
+
+      response = JSON.parse(response.body);
+      let commentNum = 0;
+      if (response && response.total_count===1) {
+        commentNum = response.items[0].comments;
+      } else {
+        commentNum = 0;
+      }
+      
+      //update commentNum
+      if (commentNum !== post.comment_num) {
+        let id = post.id;
+        promises.push(this.model('post').where({
+          id
+        }).update({
+          comment_num: commentNum
+        }));
+      }
+    }
+
+    await Promise.all(promises);
+    if (promises.length) {
+      await this.clearPostCache();
     }
   }
 

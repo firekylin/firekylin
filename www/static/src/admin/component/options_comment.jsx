@@ -15,6 +15,9 @@ module.exports = class extends Base {
     if(typeof comment === 'string') {
       comment = JSON.parse(comment);
     }
+    if(comment.name === 'undefined'){
+       comment.name='';
+    }
     comment.name = unescape(comment.name);
     this.state = {
       submitting: false,
@@ -78,6 +81,7 @@ module.exports = class extends Base {
         <Radio value='disqus' label='Disqus' />
         <Radio value='hypercomments' label='HyperComments' />
         <Radio value='changyan' label='畅言' />
+        <Radio value='gitalk' label='Gitalk' />
         <Radio value='custom' label='自定义' />
       </RadioGroup>
     );
@@ -92,7 +96,7 @@ module.exports = class extends Base {
             { res }
           </div>
 
-          {comment.type !== 'custom' ?
+          {(comment.type !== 'custom'&&comment.type!=='gitalk')?
           <div className="form-group">
             <label>网站名称（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
             <ValidatedInput

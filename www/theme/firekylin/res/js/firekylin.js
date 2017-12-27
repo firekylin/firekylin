@@ -1,10 +1,10 @@
-(function(win, doc) {
-  var getById = function(el) {
+(function (win, doc) {
+  var getById = function (el) {
     return doc.getElementById(el);
   };
 
   //from qwrap
-  var getDocRect = function(doc) {
+  var getDocRect = function (doc) {
     doc = doc || document;
     var win = doc.defaultView || doc.parentWindow,
       mode = doc.compatMode,
@@ -38,7 +38,7 @@
     };
   };
 
-  var getXY = function(node) {
+  var getXY = function (node) {
     var doc = node.ownerDocument,
       docRect = getDocRect(doc),
       scrollLeft = docRect.scrollX,
@@ -52,7 +52,7 @@
     return xy;
   };
 
-  var getRect = function(el) {
+  var getRect = function (el) {
     var p = getXY(el);
     var x = p[0];
     var y = p[1];
@@ -72,30 +72,32 @@
    * load comment
    * @return {[type]} [description]
    */
-  var loadComment = function() {
+  var loadComment = function () {
     var comments = getById('comments');
-    if(!comments) {
+    if (!comments) {
       return;
     }
-    var load = function() {
+    var load = function () {
       var dataType = comments.getAttribute('data-type');
-      if(dataType === 'disqus') {
+      if (dataType === 'disqus') {
         loadDisqusComment();
-      } else if(dataType === 'hypercomments') {
+      } else if (dataType === 'hypercomments') {
         loadHyperComments();
-      } else if(dataType === 'changyan') {
+      } else if (dataType === 'changyan') {
         loadChangyanComment();
+      } else if (dataType === 'gitalk') {
+        loadGitalkComment();
       }
     }
 
-    if(location.hash.indexOf('#comments') > -1) {
+    if (location.hash.indexOf('#comments') > -1) {
       load();
-    }else {
-      var timer = setInterval(function() {
+    } else {
+      var timer = setInterval(function () {
         var docRect = getDocRect();
         var currentTop = docRect.scrollY + docRect.height;
         var elTop = getRect(comments).top;
-        if(Math.abs(elTop - currentTop) < 1000) {
+        if (Math.abs(elTop - currentTop) < 1000) {
           load();
           clearInterval(timer);
         }
@@ -106,12 +108,12 @@
    * load disqus comment
    * @return {[type]} [description]
    */
-  var loadDisqusComment = function() {
+  var loadDisqusComment = function () {
     var disqus_thread = getById('disqus_thread');
-    if(!disqus_thread) {
+    if (!disqus_thread) {
       return;
     }
-    win.disqus_config = function() {
+    win.disqus_config = function () {
       this.page.url = disqus_thread.getAttribute('data-url');
       this.page.identifier = disqus_thread.getAttribute('data-identifier');
     }
@@ -121,15 +123,18 @@
     (doc.head || doc.body).appendChild(s);
   };
 
-  var loadHyperComments = function() {
+  var loadHyperComments = function () {
     var hyperComments = getById('hypercomments_widget');
     var appid = hyperComments.getAttribute('data-name');
 
     win._hcwp = win._hcwp || [];
-    win._hcwp.push({widget: 'Stream', widget_id: appid});
+    win._hcwp.push({
+      widget: 'Stream',
+      widget_id: appid
+    });
 
-    (function() {
-      if('HC_LOAD_INIT' in win) {
+    (function () {
+      if ('HC_LOAD_INIT' in win) {
         return;
       }
 
@@ -142,16 +147,18 @@
       var hcc = document.createElement('script');
       hcc.type = 'text/javascript';
       hcc.async = true;
-      hcc.src = ('https:' === document.location.protocol ? 'https' : 'http') +'://w.hypercomments.com/widget/hc/'+appid+'/'+lang+'/widget.js';
+      hcc.src = ('https:' === document.location.protocol ? 'https' : 'http') + '://w.hypercomments.com/widget/hc/' + appid + '/' + lang + '/widget.js';
 
       var s = document.getElementsByTagName('script')[0];
       s.parentNode.insertBefore(hcc, s.nextSibling);
     })();
   };
 
-  var loadChangyanComment = function() {
+  var loadChangyanComment = function () {
     var disqus_thread = getById('SOHUCS');
-    if(!disqus_thread) { return; }
+    if (!disqus_thread) {
+      return;
+    }
     var appid = disqus_thread.getAttribute('data-name');
     var conf = disqus_thread.getAttribute('sid');
     var width = win.innerWidth || doc.documentElement.clientWidth;
@@ -161,28 +168,53 @@
       s.src = '//changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
     } else {
       s.src = '//changyan.sohu.com/upload/changyan.js';
-      s.onload = function() {
-        win.changyan.api.config({appid:appid, conf:conf});
+      s.onload = function () {
+        win.changyan.api.config({
+          appid: appid,
+          conf: conf
+        });
       }
     }
-    (doc.head||doc.body).appendChild(s);
+    (doc.head || doc.body).appendChild(s);
   }
 
-  win.addEventListener('load', function() {
+  var loadGitalkComment = function () {
+    var gitalk_thread = getById('gitalk-container');
+    if (!gitalk_thread) {
+      return;
+    }
+    var gitalkConfig = gitalk_thread.getAttribute('data-name');
+    var dataIdentifier = gitalk_thread.getAttribute('data-identifier');
+    if (gitalkConfig) {
+      gitalkConfig = JSON.parse(gitalkConfig);
+    }
+    gitalkConfig.id = dataIdentifier;
+    var link = doc.createElement('link');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('type', 'text/css');
+    link.setAttribute('href', '//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css');
+    (doc.head || doc.body).appendChild(link);
+
+    var s = doc.createElement('script');
+    s.src = '//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js';
+    s.onload = function () {
+      var gitalk = new Gitalk(gitalkConfig);
+      gitalk.render('gitalk-container');
+    };
+    (doc.head || doc.body).appendChild(s);
+  }
+
+  win.addEventListener('load', function () {
     loadComment();
   });
 
-
-
-
-
   var utils = {
-    isMob : (function() {
+    isMob: (function () {
       var ua = navigator.userAgent.toLowerCase();
       var agents = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'];
       var result = false;
-      for(var i = 0; i < agents.length; i++) {
-        if(ua.indexOf(agents[i].toLowerCase()) > -1) {
+      for (var i = 0; i < agents.length; i++) {
+        if (ua.indexOf(agents[i].toLowerCase()) > -1) {
           result = true;
         }
       }
@@ -191,54 +223,54 @@
   }
 
 
-  if(utils.isMob) {
+  if (utils.isMob) {
     doc.documentElement.className += ' mob';
-  }else{
+  } else {
     doc.documentElement.className += ' pc';
   }
 
 
   var Dom = {
-    $sidebar : doc.querySelector('#sidebar'),
-    $main : doc.querySelector('#main'),
-    $sidebar_mask : doc.querySelector('#sidebar-mask'),
-    $body : doc.body,
-    $btn_side : doc.querySelector('#header .btn-bar'),
-    $article : doc.querySelectorAll('.mob #page-index article')
+    $sidebar: doc.querySelector('#sidebar'),
+    $main: doc.querySelector('#main'),
+    $sidebar_mask: doc.querySelector('#sidebar-mask'),
+    $body: doc.body,
+    $btn_side: doc.querySelector('#header .btn-bar'),
+    $article: doc.querySelectorAll('.mob #page-index article')
   };
 
-  Dom.bindEvent = function() {
+  Dom.bindEvent = function () {
 
     var _this = this,
       body_class_name = 'side',
       eventFirst = 'click',
       eventSecond = 'click';
 
-    if(utils.isMob) {
+    if (utils.isMob) {
       eventFirst = 'touchstart';
       eventSecond = 'touchend';
     }
 
-    this.$btn_side.addEventListener(eventSecond, function() {
+    this.$btn_side.addEventListener(eventSecond, function () {
 
-      if(_this.$body.className.indexOf(body_class_name) > -1) {
+      if (_this.$body.className.indexOf(body_class_name) > -1) {
         _this.$body.className = _this.$body.className.replace(body_class_name, '');
         _this.$sidebar_mask.style.display = 'none';
-      }else{
+      } else {
         _this.$body.className += (' ' + body_class_name);
         _this.$sidebar_mask.style.display = 'block';
       }
 
     }, false);
 
-    this.$sidebar_mask.addEventListener(eventFirst, function(e) {
+    this.$sidebar_mask.addEventListener(eventFirst, function (e) {
       _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
       e.preventDefault();
     }, false);
 
 
-    win.addEventListener('resize', function() {
+    win.addEventListener('resize', function () {
       _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
     }, false);
@@ -377,7 +409,7 @@
    */
   hljs.init = function () {
     [].slice.call(hljs.$code).forEach(function (elem, i) {
-        // 输出行号, -1是为了让最后一个换行忽略
+      // 输出行号, -1是为了让最后一个换行忽略
       var lines = elem.innerHTML.split(/\n/).slice(0, -1);
       var html = lines.map(function (item, index) {
         return '<li><span class="line-num" data-line="' + (index + 1) + '"></span>' + item + '</li>';
@@ -429,7 +461,7 @@
   };
 
   hljs.init();
-  win.addEventListener('load', function() {
+  win.addEventListener('load', function () {
     hljs.mark(true);
   });
   win.addEventListener('hashchange', function () {
