@@ -69,6 +69,7 @@ module.exports = class extends Base {
         <Radio value='qiniu' label='七牛云' />
         <Radio value='upyun' label='又拍云' />
         <Radio value='aliyun' label='阿里云' />
+        <Radio value='smms' label='SM.MS 图床' />
       </RadioGroup>
     );
     let qiniu = (
@@ -263,6 +264,13 @@ module.exports = class extends Base {
         </div>
       </div>
     )
+
+    let smms = (
+      <div>
+          <p>选用此功能图片将上传至第三方图床 : <a href="https://sm.ms/" target="_blank">SM.MS 图床</a></p>
+      </div>
+    )
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -275,6 +283,7 @@ module.exports = class extends Base {
           { upload.type === 'qiniu' && qiniu }
           { upload.type === 'upyun' && upyun }
           { upload.type === 'aliyun' && aliyun }
+          { upload.type === 'smms' && smms }
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
             { this.state.submitting ? '提交中...' : '提交' }
           </button>
