@@ -15,6 +15,9 @@ module.exports = class extends Base {
     if(typeof comment === 'string') {
       comment = JSON.parse(comment);
     }
+    if(comment.name === 'undefined'){
+       comment.name='';
+    }
     comment.name = unescape(comment.name);
     this.state = {
       submitting: false,
@@ -57,6 +60,9 @@ module.exports = class extends Base {
 
   openDialog() {
     let comment = this.state.comment;
+    if(comment.type === 'custom') {
+       return;
+    }
     let url = `/static/img/${comment.type}.jpg`;
     let content = (<div className="center">
       <a href={url} target="_blank"><img src={url} style={{maxWidth: '100%'}} /></a>
@@ -78,6 +84,7 @@ module.exports = class extends Base {
         <Radio value='disqus' label='Disqus' />
         <Radio value='hypercomments' label='HyperComments' />
         <Radio value='changyan' label='畅言' />
+        <Radio value='gitalk' label='Gitalk' />
         <Radio value='custom' label='自定义' />
       </RadioGroup>
     );
@@ -92,7 +99,7 @@ module.exports = class extends Base {
             { res }
           </div>
 
-          {comment.type !== 'custom' ?
+          {(comment.type !== 'custom'&&comment.type!=='gitalk')?
           <div className="form-group">
             <label>网站名称（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
             <ValidatedInput
@@ -106,15 +113,18 @@ module.exports = class extends Base {
               />
           </div>
           :
-          <ValidatedInput
+          <div className="form-group">
+            <label>评论代码（<a onClick={this.openDialog.bind(this)}>有疑问</a>）</label>
+           <ValidatedInput
               type="textarea"
               name="name"
               {...this.getProps('name')}
               validate="required"
               errorHelp="请填写评论代码"
-              label="评论代码"
               style={{height: 240}}
-          />}
+            />
+           </div>
+          }
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
             { this.state.submitting ? '提交中...' : '提交' }
           </button>
