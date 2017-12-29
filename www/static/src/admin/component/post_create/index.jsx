@@ -463,11 +463,16 @@ module.exports = class extends Base {
             placeholder="请输入图片链接"
             defaultValue={featuredImage}
             onInput={e => {
-              let img = new Image();
-              img.id = `featured-image-test-${new Date().getTime()}`;
-              lastTestImageId = img.id;
-              img.onload = handleTestImageLoad;
-              img.src = e.target.value;
+              if (!e.target.value) {
+                postInfo.options.featuredImage = '';
+                this.setState({postInfo});
+              } else {
+                let img = new Image();
+                img.id = `featured-image-test-${new Date().getTime()}`;
+                lastTestImageId = img.id;
+                img.onload = handleTestImageLoad;
+                img.src = e.target.value;
+              }
             }}
           />
           {featuredImage
