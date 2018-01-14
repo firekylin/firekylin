@@ -1,3 +1,4 @@
+import {parse} from 'url';
 /**
  * base rest controller
  */
@@ -31,8 +32,24 @@ export default class extends think.controller.rest {
       let referrer = this.http.referrer();
       let {site_url} = await this.model('options').getOptions()
 
-      if(referrer.indexOf(site_url) !== 0) {
+      if(!referrer || !site_url) {
         return this.fail('REFERRER_ERROR');
+      }
+
+      let siteUrlHost = parse(site_url).host;
+      let referrerHost = parse(referrer).host;
+      if(!siteUrlHost || !referrerHost) {
+        return this.fail('REFERRER_ERROR');
+      }
+
+      if(siteUrlHost.length < referrerHost.length) {
+        if(referrerHost.slice(-siteUrlHost.length) !== siteUrlHost) {
+          return this.fail('REFERRER_ERROR');
+        }
+      } else {
+        if(siteUrlHost.slice(-referrerHost.length) !== referrerHost) {
+          return this.fail('REFERRER_ERROR');
+        }
       }
     }
 
