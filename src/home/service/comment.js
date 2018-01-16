@@ -329,8 +329,8 @@ export default class extends think.service.base {
   }
 
   /**
-   * 
-   * @param {*sync form gitalk in github} comment 
+   *
+   * @param {*sync form gitalk in github} comment
    */
   async syncFromGitalk(comment) {
 
@@ -369,7 +369,7 @@ export default class extends think.service.base {
       } else {
         commentNum = 0;
       }
-      
+
       //update commentNum
       if (commentNum !== post.comment_num) {
         let id = post.id;

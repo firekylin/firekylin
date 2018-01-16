@@ -15,7 +15,7 @@ module.exports = class extends Base {
     if(typeof comment === 'string') {
       comment = JSON.parse(comment);
     }
-    if(comment.name === 'undefined'){
+    if(comment.name === 'undefined') {
        comment.name='';
     }
     comment.name = unescape(comment.name);
