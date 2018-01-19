@@ -1,3 +1,12 @@
+## 0.15.17
+
+- 新增 [sm.ms](http://sm.ms) 上传支持
+- 新增 [gitalk](https://gitalk.github.io/) 评论支持
+- referrer 校验仅校验主域部分，避免端口和协议不同导致的 `REFERRER_ERROR` 报错
+- 安装允许 MySQL 密码为空
+- 修复封面图片无法删除问题
+- 修复 Markdown 上传导致的安全问题
+
 ## 0.15.16
 
 - 新增阿里云 OSS 上传支持
