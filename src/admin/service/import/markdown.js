@@ -77,7 +77,7 @@ export default class extends Base {
 
   parseFile(file) {
     try {
-      const filePath = file.path.replace(/"/g, '');
+      const filePath = file.path.replace(/[^a-zA-Z0-9.\/_-]/g, '');
       execSync(`rm -rf ${PATH}; mkdir ${PATH}; cd ${PATH}; tar zxvf "${filePath}"`);
       let files = fs.readdirSync(PATH, {encoding: 'utf-8'});
       if(!files.length) { return []; }
