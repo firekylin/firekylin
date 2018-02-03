@@ -1,6 +1,6 @@
-import Post from './post';
+const Post = require('./post');
 
-export default class extends Post {
+module.exports = class extends Post {
   tableName = 'post';
 
   addPost(data) {
