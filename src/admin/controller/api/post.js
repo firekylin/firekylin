@@ -1,12 +1,10 @@
-'use strict';
-
-import push2Firekylin from 'push-to-firekylin';
-import moment from 'moment';
-import Base from './base';
+const push2Firekylin = require('push-to-firekylin');
+const moment = require('moment');
+const Base = require('./base');
 
 export default class extends Base {
-  constructor(http) {
-    super(http);
+  constructor(...args) {
+    super(...args);
     this._modelInstance = this.modelInstance;
     Object.defineProperty(this, 'modelInstance', {
       get() {

@@ -1,12 +1,6 @@
-'use strict';
+const Base = require('./base');
 
-import Base from './base';
-
-export default class extends Base {
-  /**
-   * get
-   * @return {[type]} [description]
-   */
+module.exports = class extends Base {
   async getAction() {
     let result;
     if(this.get('pid')) {
@@ -25,10 +19,6 @@ export default class extends Base {
     return this.success(result);
   }
 
-  /**
-   * add user
-   * @return {[type]} [description]
-   */
   async postAction() {
     let data = this.post();
 
@@ -38,10 +28,7 @@ export default class extends Base {
     }
     return this.success({id: ret.id});
   }
-  /**
-   * update user info
-   * @return {[type]} [description]
-   */
+  
   async putAction() {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
