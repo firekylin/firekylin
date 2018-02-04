@@ -16,8 +16,8 @@ try {
       host: msc.host,
       port: msc.port,
       database: msc.database,
-      user: msc.root,
-      password: msc.root,
+      user: msc.user,
+      password: msc.password,
       prefix: msc.prefix,
       encoding: msc.encoding
     }
