@@ -1,17 +1,12 @@
 module.exports = class extends think.Model {
-  /**
-   * options cache key
-   * @type {String}
-   */
-  cacheKey = 'website_options';
-  /**
-   * cache options
-   * @type {Object}
-   */
-  cacheOptions = {
-    timeout: 30 * 24 * 3600 * 1000,
-    type: !think.isMaster ? 'file' : 'memory'
-  };
+  constructor(...args) {
+    this.cacheKey = 'website_options';
+    this.cacheOptions = {
+      timeout: 30 * 24 * 3600 * 1000,
+      type: !think.isMaster ? 'file' : 'memory'
+    }
+  }
+  
   /**
    * get options
    * @return {} []

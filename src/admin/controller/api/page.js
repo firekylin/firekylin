@@ -1,11 +1,9 @@
 const Post = require('./post');
 
 module.exports = class extends Post {
-
-  postModel = this.model('post');
-
   constructor(...args) {
     super(...args);
+    this.postModel = this.model('post');
     this._modelInstance = this.modelInstance;
     Object.defineProperty(this, 'modelInstance', {
       get() {

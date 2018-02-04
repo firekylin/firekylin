@@ -38,7 +38,10 @@ const ALLOW_EXTS = [
 ];
 
 module.exports = class extends Base {
-  uploadConfig = {};
+  constructor(...args) {
+    super(...args);
+    this.uploadConfig = {};
+  }
 
   async __before() {
     await super.__before();

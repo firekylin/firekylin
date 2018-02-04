@@ -2,7 +2,7 @@ const push2Firekylin = require('push-to-firekylin');
 const moment = require('moment');
 const Base = require('./base');
 
-export default class extends Base {
+module.exports = class extends Base {
   constructor(...args) {
     super(...args);
     this._modelInstance = this.modelInstance;

@@ -2,7 +2,10 @@ const {parse} = require('url');
 const BaseRest = require('../rest');
 
 module.exports = class extends BaseRest {
-  allowList = ['api/post/put', 'api/post/post', 'api/post/delete', 'api/file/post', 'api/file/get'];
+  constructor(...args) {
+    super(...args);
+    this.allowList = ['api/post/put', 'api/post/post', 'api/post/delete', 'api/file/post', 'api/file/get'];
+  }
   
   async __before() {
     let userInfo = await this.session('userInfo') || {};

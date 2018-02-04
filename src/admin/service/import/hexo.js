@@ -1,6 +1,6 @@
 const Ghost = require('./ghost');
 
-export default class extends Ghost {
+module.exports = class extends Ghost {
   /**
    * 导入标签
    */

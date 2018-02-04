@@ -2,7 +2,10 @@ const {PasswordHash} = require('phpass');
 const Post = require('./api/post');
 
 module.exports = class extends Post {
-  postModelInstance = this.model('post');
+  constructor(...args) {
+    super(...args);
+    this.postModelInstance = this.model('post');
+  }
 
   async __before() {
 

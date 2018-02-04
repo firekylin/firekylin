@@ -1,11 +1,9 @@
 const moment = require('moment');
 const toMarkdown = require('to-markdown');
 
-module.exports = class extends think.Service {
-  static DEFAULT_USER_PWD = 'admin12345678';
-
-  init(...args) {
-    super.init(...args);
+class Base extends think.Service {
+  constructor(...args) {
+    super(...args);
     this.userModelInstance = this.model('user');
     this.cateModelInstance = this.model('cate');
     this.tagModelInstance = this.model('tag');
@@ -73,3 +71,6 @@ module.exports = class extends think.Service {
     return {user, post, page, tag, category};
   }
 }
+
+Base.prototype.DEFAULT_USER_PWD = 'admin12345678';
+module.exports = Base;

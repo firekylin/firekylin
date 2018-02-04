@@ -4,7 +4,7 @@ const {exec} = require('child_process');
 const semver = require('semver');
 const request = require('request');
 const pack = require('../../../../package.json');
-const base = require('./base');
+const Base = require('./base');
 const cluster = require('cluster');
 
 request.defaults({

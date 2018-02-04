@@ -1,6 +1,6 @@
 const marked = require('marked');
-const toc = require('markedown-toc');
-const highlight = reuqire('highlight.js');
+const toc = require('markdown-toc');
+const highlight = require('highlight.js');
 const Base = require('./base');
 
 module.exports = class extends Base {

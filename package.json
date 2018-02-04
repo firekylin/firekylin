@@ -17,6 +17,8 @@
     "jszip": "^3.1.5",
     "markdown-toc": "^1.2.0",
     "marked": "^0.3.12",
+    "mathjax": "^2.7.2",
+    "mathjax-node": "^1.2.1",
     "moment": "^2.20.1",
     "nodemailer": "^2.7.2",
     "phpass": "^0.1.1",

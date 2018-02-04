@@ -1,3 +1,4 @@
+const path = require('path');
 const view = require('think-view');
 const model = require('think-model');
 const cache = require('think-cache');
@@ -7,5 +8,11 @@ module.exports = [
   view, // make application support view
   model(think.app),
   cache,
-  session
+  session,
+  {
+    think: {
+      RUNTIME_PATH: path.join(think.ROOT_PATH, 'runtime'),
+      RESOURCE_PATH: path.join(think.ROOT_PATH, 'www')
+    }
+  }
 ];

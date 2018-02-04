@@ -1,8 +1,10 @@
 const Post = require('./post');
 
 module.exports = class extends Post {
-  tableName = 'post';
-
+  constructor(...args) {
+    this.tableName = 'post';
+  }
+  
   addPost(data) {
     let create_time = think.datetime();
     data = Object.assign({
