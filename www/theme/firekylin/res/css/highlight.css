@@ -1,0 +1,219 @@
+
+
+/**
+ * GitHub Gist Theme
+ * Author : Louis Barranqueiro - https://github.com/LouisBarranqueiro
+ */
+.hljs {
+  display: block;
+  background: white;
+  padding: 0.5em;
+  color: #333333;
+  overflow-x: auto;
+  -webkit-text-size-adjust: none;
+}
+
+.hljs-comment,
+.lang-bash .hljs-shebang,
+.lang-java .hljs-javadoc,
+.lang-javascript .hljs-javadoc,
+.lang-rust .hljs-preprocessor {
+  color: #969896;
+}
+
+.hljs-string,
+.lang-apache .hljs-sqbracket,
+.lang-coffeescript .hljs-subst,
+.lang-coffeescript .hljs-regexp,
+.lang-cpp .hljs-preprocessor,
+.lang-c .hljs-preprocessor,
+.lang-javascript .hljs-regexp,
+.lang-json .hljs-attribute,
+.lang-makefile .hljs-variable,
+.lang-markdown .hljs-value,
+.lang-markdown .hljs-link_label,
+.lang-markdown .hljs-strong,
+.lang-markdown .hljs-emphasis,
+.lang-markdown .hljs-blockquote,
+.lang-nginx .hljs-regexp,
+.lang-nginx .hljs-number,
+.lang-objectivec .hljs-preprocessor .hljs-title,
+.lang-perl .hljs-regexp,
+.lang-php .hljs-regexp,
+.lang-xml .hljs-value,
+.lang-less .hljs-built_in,
+.lang-scss .hljs-built_in {
+  color: #df5000;
+}
+
+.hljs-keyword,
+.lang-css .hljs-at_rule,
+.lang-css .hljs-important,
+.lang-http .hljs-request,
+.lang-ini .hljs-setting,
+.lang-haskell .hljs-type,
+.lang-java .hljs-javadoctag,
+.lang-javascript .hljs-tag,
+.lang-javascript .hljs-javadoctag,
+.lang-nginx .hljs-title,
+.lang-objectivec .hljs-preprocessor,
+.lang-php .hljs-phpdoc,
+.lang-sql .hljs-built_in,
+.lang-less .hljs-tag,
+.lang-less .hljs-at_rule,
+.lang-scss .hljs-tag,
+.lang-scss .hljs-at_rule,
+.lang-scss .hljs-important,
+.lang-stylus .hljs-at_rule,
+.lang-go .hljs-typename,
+.lang-swift .hljs-preprocessor {
+  color: #a71d5d;
+}
+
+.lang-apache .hljs-common,
+.lang-apache .hljs-cbracket,
+.lang-apache .hljs-keyword,
+.lang-bash .hljs-literal,
+.lang-bash .hljs-built_in,
+.lang-coffeescript .hljs-literal,
+.lang-coffeescript .hljs-built_in,
+.lang-coffeescript .hljs-number,
+.lang-cpp .hljs-number,
+.lang-cpp .hljs-built_in,
+.lang-c .hljs-number,
+.lang-c .hljs-built_in,
+.lang-cs .hljs-number,
+.lang-cs .hljs-built_in,
+.lang-css .hljs-attribute,
+.lang-css .hljs-hexcolor,
+.lang-css .hljs-number,
+.lang-css .hljs-function,
+.lang-haskell .hljs-number,
+.lang-http .hljs-literal,
+.lang-http .hljs-attribute,
+.lang-java .hljs-number,
+.lang-javascript .hljs-built_in,
+.lang-javascript .hljs-literal,
+.lang-javascript .hljs-number,
+.lang-json .hljs-number,
+.lang-makefile .hljs-keyword,
+.lang-markdown .hljs-link_reference,
+.lang-nginx .hljs-built_in,
+.lang-objectivec .hljs-literal,
+.lang-objectivec .hljs-number,
+.lang-objectivec .hljs-built_in,
+.lang-php .hljs-literal,
+.lang-php .hljs-number,
+.lang-python .hljs-number,
+.lang-ruby .hljs-prompt,
+.lang-ruby .hljs-constant,
+.lang-ruby .hljs-number,
+.lang-ruby .hljs-subst .hljs-keyword,
+.lang-ruby .hljs-symbol,
+.lang-rust .hljs-number,
+.lang-sql .hljs-number,
+.lang-puppet .hljs-function,
+.lang-less .hljs-number,
+.lang-less .hljs-hexcolor,
+.lang-less .hljs-function,
+.lang-less .hljs-attribute,
+.lang-scss .hljs-preprocessor,
+.lang-scss .hljs-number,
+.lang-scss .hljs-hexcolor,
+.lang-scss .hljs-function,
+.lang-scss .hljs-attribute,
+.lang-stylus .hljs-number,
+.lang-stylus .hljs-hexcolor,
+.lang-stylus .hljs-attribute,
+.lang-stylus .hljs-params,
+.lang-go .hljs-built_in,
+.lang-go .hljs-constant,
+.lang-swift .hljs-built_in,
+.lang-swift .hljs-number {
+  color: #0086b3;
+}
+
+.lang-apache .hljs-tag,
+.lang-cs .hljs-xmlDocTag,
+.lang-css .hljs-tag,
+.lang-xml .hljs-title,
+.lang-stylus .hljs-tag {
+  color: #63a35c;
+}
+
+.lang-bash .hljs-variable,
+.lang-cs .hljs-preprocessor,
+.lang-cs .hljs-preprocessor .hljs-keyword,
+.lang-css .hljs-attr_selector,
+.lang-css .hljs-value,
+.lang-ini .hljs-value,
+.lang-ini .hljs-keyword,
+.lang-javascript .hljs-tag .hljs-title,
+.lang-makefile .hljs-constant,
+.lang-nginx .hljs-variable,
+.lang-xml .hljs-tag,
+.lang-scss .hljs-variable {
+  color: #333333;
+}
+
+.lang-bash .hljs-title,
+.lang-coffeescript .hljs-title,
+.lang-cpp .hljs-title,
+.lang-c .hljs-title,
+.lang-cs .hljs-title,
+.lang-css .hljs-id,
+.lang-css .hljs-class,
+.lang-css .hljs-pseudo,
+.lang-ini .hljs-title,
+.lang-haskell .hljs-title,
+.lang-haskell .hljs-pragma,
+.lang-java .hljs-title,
+.lang-javascript .hljs-title,
+.lang-makefile .hljs-title,
+.lang-objectivec .hljs-title,
+.lang-perl .hljs-sub,
+.lang-php .hljs-title,
+.lang-python .hljs-decorator,
+.lang-python .hljs-title,
+.lang-ruby .hljs-parent,
+.lang-ruby .hljs-title,
+.lang-rust .hljs-title,
+.lang-xml .hljs-attribute,
+.lang-puppet .hljs-title,
+.lang-less .hljs-id,
+.lang-less .hljs-pseudo,
+.lang-less .hljs-class,
+.lang-scss .hljs-id,
+.lang-scss .hljs-pseudo,
+.lang-scss .hljs-class,
+.lang-stylus .hljs-class,
+.lang-stylus .hljs-id,
+.lang-stylus .hljs-pseudo,
+.lang-stylus .hljs-title,
+.lang-swift .hljs-title,
+.lang-diff .hljs-chunk {
+  color: #795da3;
+}
+
+.lang-coffeescript .hljs-reserved,
+.lang-coffeescript .hljs-attribute {
+  color: #1d3e81;
+}
+
+.lang-diff .hljs-chunk {
+  font-weight: bold;
+}
+
+.lang-diff .hljs-addition {
+  color: #55a532;
+  background-color: #eaffea;
+}
+
+.lang-diff .hljs-deletion {
+  color: #bd2c00;
+  background-color: #ffecec;
+}
+
+.lang-markdown .hljs-link_url {
+  text-decoration: underline;
+}

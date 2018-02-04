@@ -11,27 +11,53 @@ pids
 lib-cov
 
 # Coverage directory used by tools like istanbul
-coverage/
-
-# Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
+coverage
 
 # node-waf configuration
 .lock-wscript
 
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+app
+www/static/dist
+www/static/js
+
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
-node_modules/
+node_modules
 
 # IDE config
 .idea
 
-# output
-output/
-output.tar.gz
+# Temporary folder
+.tmp
+
+# Image upload folder
+www/static/images/upload/*
+
+# Database Config
+src/common/config/db.js
+
+# Compiled Release
+release/
+
+# OS func folder
+.DS_Store
 
 runtime/
-app/
+www/static/upload/
+sitemap.xml
 
-config.development.js
-adapter.development.js
+output/
+output.theme/
+.version
+.installed
+build
+
+75team.sh
+stc/
+jsconfig.json
+.vscode
+www/theme/firekylin_new
+db/
+
+.eslintcache

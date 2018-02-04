@@ -1,0 +1,29 @@
+{% extends './layout.html' %}
+
+{% block title -%}
+{{page.title}} - {{options.title}}
+{%- endblock %}
+
+{% block headers -%}
+<link rel="canonical" href="{{site_url}}/page/{{page.pathname}}.html" />
+{%- endblock %}
+
+{% block content %}
+<article class="post page">
+  {% if page.title %}
+  <h1 class="title">{{page.title}}</h1>
+  <div class="entry-content">
+      {{page.content | replace(r/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') | safe}}
+  </div>
+  {% if page.allow_comment %}
+      {% include "./inc/comment.html" %}
+  {% endif %}
+  {% else %}
+  <h1 class="title">提示</h1>
+  <div class="entry-content">
+    <p>未找到相关页面。</p>
+    <p>如果是管理员，请到后台添加地址为 <code>{{pathname}}</code> 的页面，点击<a href="/admin/page/create?pathname={{pathname}}">这里</a>添加。</p>
+  </div>
+  {% endif %}
+</article>
+{% endblock %}
