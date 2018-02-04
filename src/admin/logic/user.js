@@ -28,11 +28,11 @@ module.exports = class extends think.Logic {
     this.rules = {
       username: {
         required: true,
-        minLength: 4
+        length: {min: 4}
       },
       password: {
         required: true,
-        length: [32, 32]
+        length: {min: 32, max: 32}
       },
       factor: {
         regexp: /^\d{6}$/
