@@ -22,7 +22,7 @@ module.exports = class extends think.Logic {
    */
   loginAction() {
     this.allowMethods = 'get,post';
-    if(this.isGet()) {
+    if(this.isGet) {
       return;
     }
     this.rules = {

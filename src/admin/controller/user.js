@@ -79,7 +79,7 @@ module.exports = class extends Base {
       return this.success();
     }
 
-    if(this.isPost()) {
+    if(this.isPost) {
       let user = this.post('user');
       user = await this.model('user').where({
         name: user,
@@ -124,7 +124,7 @@ module.exports = class extends Base {
       return this.success();
     }
 
-    if(this.isPost()) {
+    if(this.isPost) {
       let {password, token} = this.post();
 
       let user = await think.cache(token);
