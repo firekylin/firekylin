@@ -19,7 +19,11 @@ module.exports = {
   },
   nunjucks: {
     handle: nunjucks,
-    prerender(env, nunjucks) {
+    beforeRender(env, nunjucks) {
+      env.addGlobal('think', think);
+      env.addGlobal('JSON', JSON);
+      env.addGlobal('eval', eval);
+
       env.addFilter('utc', time => (new Date(time)).toUTCString());
       env.addFilter('pagination', function(page) {
         const {pathname, query} = url.parse(this.ctx.http.url, true);

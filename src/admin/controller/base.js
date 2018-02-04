@@ -32,6 +32,7 @@ module.exports = class extends think.Controller {
     } catch(e) { options.navigation = []; }
     delete options.push_sites; //不显示推送的配置，会有安全问题
     this.assign('options', options);
-    return this.display('index/index');
+    // this.assign('JSON', JSON);
+    return this.display('admin/index_index');
   }
 };
