@@ -2,7 +2,7 @@ const mysql = require('think-model-mysql');
 try {
   const dbConfig = require('../db.js');
   const isDev = think.env === 'development';
-  const msc = dbConfig.adapter.mysql;
+  const msc = (dbConfig.default ? dbConfig.default : dbConfig).adapter.mysql;
   module.exports = {
     type: 'mysql',
     common: {
