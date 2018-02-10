@@ -18,11 +18,12 @@ module.exports = class extends Base {
    */
   async getAction() {
     // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
+    if(this.get('type') === 'lastest') {
+      return this.lastest();
+    }
+    
     let data;
     if(this.id) {
-      if(this.id === 'lastest') {
-        return this.lastest();
-      }
       data = await this.modelInstance.where({id: this.id}).find();
       //文章选项
       if(data.options) {

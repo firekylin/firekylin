@@ -3,7 +3,7 @@ const Post = require('./post');
 module.exports = class extends Post {
   constructor(...args) {
     super(...args);
-    this.tableName = 'post';
+    this.modelName = 'post';
   }
   
   addPost(data) {
