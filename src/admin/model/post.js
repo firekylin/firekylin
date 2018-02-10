@@ -98,7 +98,7 @@ module.exports = class extends Base {
   }
 
   clearCache() {
-    think.log('clear cache');
+    think.logger.debug('clear cache');
     return think.cache('post_1', null);
   }
 
@@ -196,7 +196,7 @@ module.exports = class extends Base {
 
     // 使用包含 MathJax 解析的 Markdown 引擎解析 MD 文本
     let markedWithMathJax = think.service('marked-with-mathjax');
-    let markedContent = await markedWithMathJax(content);
+    let markedContent = await markedWithMathJax.render(content);
 
     /**
      * 增加 TOC 目录
