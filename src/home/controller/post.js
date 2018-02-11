@@ -35,7 +35,7 @@ module.exports = class extends Base {
       if(!think.isEmpty(tagName)) {
         tagName = tagName.name;
       } else {
-        return think.statusAction(404, this.http);
+        return this.ctx.throw(404);
       }
     }
     if(where.cate) {
@@ -45,7 +45,7 @@ module.exports = class extends Base {
       if (cateName && cateName.name) {
         cateName = cateName.name;
       } else {
-        return think.statusAction(404, this.http);
+        return this.ctx.throw(404);
       }
     }
 
@@ -75,7 +75,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async detailAction() {
-    this.http.url = decodeURIComponent(this.http.url);
+    this.ctx.url = decodeURIComponent(this.ctx.url);
     let pathname = this.get('pathname');
     if(pathname === 'list') { return this.listAction(); }
     let detail;

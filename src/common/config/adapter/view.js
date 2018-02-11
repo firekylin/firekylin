@@ -25,8 +25,8 @@ module.exports = {
       env.addGlobal('eval', eval);
 
       env.addFilter('utc', time => (new Date(time)).toUTCString());
-      env.addFilter('pagination', function(page) {
-        const {pathname, query} = url.parse(this.ctx.http.url, true);
+      env.addFilter('pagination', function(page, pageUrl) {
+        const {pathname, query} = url.parse(pageUrl, true);
 
         query.page = page;
         return pathname + buildQuery(query);
