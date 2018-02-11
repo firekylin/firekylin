@@ -7,7 +7,7 @@ module.exports = class extends think.Controller {
   constructor(...args) {
     super(...args);
     //home view path
-    this.HOME_VIEW_PATH = `${think.ROOT_PATH}${think.sep}view${think.sep}home${think.sep}`;
+    this.HOME_VIEW_PATH = path.join(think.ROOT_PATH, 'view', 'home');
   }
   /**
    * some base method in here

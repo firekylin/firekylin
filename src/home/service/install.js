@@ -98,7 +98,7 @@ module.exports = class extends think.Service {
       await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
     }
 
-    let dbFile = think.ROOT_PATH + think.sep + 'firekylin.sql';
+    let dbFile = path.join(think.ROOT_PATH, 'firekylin.sql');
     if(!think.isFile(dbFile)) {
       return Promise.reject('数据库文件（firekylin.sql）不存在，请重新下载');
     }

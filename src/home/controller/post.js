@@ -141,7 +141,7 @@ module.exports = class extends Base {
       try {
         if(detail.options.template) {
           /*let stat = */await stats(path.join(this.THEME_VIEW_PATH, 'template', detail.options.template));
-          template = `template${think.sep}`+detail.options.template.slice(0, -5);
+          template = path.join('template', detail.options.template.slice(0, -5));
         }
       } catch(e) {
         console.log(e);  // eslint-disable-line no-console

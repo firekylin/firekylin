@@ -4,6 +4,7 @@
  * you can define global functions used in controllers, models, templates
  */
 const fs = require('fs');
+const path = require('path');
 
 global.firekylin = {
   POST_PUBLIC: 1,
@@ -27,7 +28,7 @@ global.firekylin = {
  */
 firekylin.isInstalled = false;
 try {
-  const installedFile = think.ROOT_PATH + think.sep + '.installed';
+  const installedFile = path.join(think.ROOT_PATH, '.installed');
   if (fs.accessSync && fs.accessSync(installedFile, fs.F_OK)) {
     firekylin.isInstalled = true;
   }
@@ -44,6 +45,6 @@ try {
  */
 firekylin.setInstalled = () => {
   firekylin.isInstalled = true;
-  const installedFile = think.ROOT_PATH + think.sep + '.installed';
+  const installedFile = path.join(think.ROOT_PATH, '.installed');
   fs.writeFileSync(installedFile, 'firekylin');
 };
