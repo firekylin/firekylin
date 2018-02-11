@@ -103,11 +103,8 @@ module.exports = class extends Base {
 
       /** 重启服务 */
       case '4':
-        if(cluster.isWorker) {
-          this.success();
-          setTimeout(() => cluster.worker.kill(), 200);
-        }
-
+        process.send('think-cluster-reload-workers');
+        this.success();
         break;
     }
   }
