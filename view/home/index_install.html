@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{options.title}}</title>
+  <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
+  <style>.container{width: 800px;}</style>
+</head>
+<body>
+ <div class="container">
+  <div class="header clearfix">
+    <h3 class="text-muted">Firekylin - 系统安装</h3>
+  </div>
+</div>
+<div class="container">
+  <form method="post" action="?">
+    {% if message %}
+      {% if message == 'success'%}
+      <div class="alert alert-success" role="alert">安装成功</div>
+      <script>setTimeout(function(){
+        location.href = '{%if step == 1%}?step=2{%else%}/admin{%endif%}';
+        }, 1500)</script>
+      {% else %}
+      <div class="alert alert-danger" role="alert">{{message}}</div>
+      {% endif %}
+    {% endif %}
+    {% if step == 1 %}
+    <h3>数据库信息（MySQL）</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>帐号</label>
+          <input type="text" name="db_account" value="{{data.db_account}}" required class="form-control" placeholder="数据库帐号">
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" name="db_password" value="{{data.db_password}}" class="form-control"  placeholder="数据库密码">
+        </div>
+        <div class="form-group">
+          <label>数据库名</label>
+          <input type="text" required name="db_name" value="{{data.db_name}}" value="firekylin" class="form-control"  placeholder="数据库名">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>主机</label>
+          <input type="text" name="db_host" value="{{data.db_host}}" class="form-control" placeholder="数据库主机地址">
+        </div>
+        <div class="form-group">
+          <label>端口</label>
+          <input type="text" name="db_port" value="{{data.db_port|default('3306')}}" class="form-control"  placeholder="数据库端口">
+        </div>
+        <div class="form-group">
+          <label>表前缀</label>
+          <input type="text" name="db_table_prefix" value="{{data.db_table_prefix|default('fk_')}}" required class="form-control"  placeholder="数据表前缀">
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">下一步</button>
+    {% endif %}
+
+    {% if step == 2 %}
+    <h3>网站信息</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>网站名称</label>
+          <input type="text" required name="title" class="form-control" placeholder="网站名称" value="{{data.site|default('FireKylin 系统')}}">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>网站地址</label>
+          <input type="text" required name="site_url" class="form-control" placeholder="网站地址" value="{{data.site_url|default('http://'+http.host)}}">
+          <p class="help-block">网站地址主要用于生成内容的永久访问链接</p>
+        </div>
+      </div>
+    </div>
+    <h3>后台管理帐号</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>帐号</label>
+          <input type="text" required name="username" value="{{data.username|default('admin')}}" class="form-control" placeholder="管理后台帐号">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>密码</label>
+          <input type="text" required name="password" value="{{data.password}}" class="form-control" placeholder="密码">
+          <p class="help-block">密码长度至少8位，最好使用字母、数字、特殊字符等组合</p>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">开始安装</button>
+    {% endif %}
+    <input type="hidden" name="step" value="{{step}}" />
+  </form>
+</div>
+<div class="container">
+  <hr>
+  <footer class="footer">
+    <p>&copy; Firekylin</p>
+  </footer>
+</div>
+</body>
+</html>
