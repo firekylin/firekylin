@@ -8,7 +8,7 @@
     "copy-package": "node bin/copy_package.js",
     "webpack": "webpack --watch",
     "webpack.build": "webpack",
-    "webpack.build.production": "webpack --config=webpack.production.config.babel.js",
+    "webpack.build.production": "webpack --config=webpack.production.config.js",
     "lint": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache -f table --ext .js,.jsx || true",
     "lint-fix": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore -f table --ext .js,.jsx --fix || true",
     "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore -f table --ext .js,.jsx",
