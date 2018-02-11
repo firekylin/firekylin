@@ -104,7 +104,7 @@
   "repository": "",
   "license": "MIT",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.9.4"
   },
   "readmeFilename": "README.md",
   "thinkjs": {
@@ -115,7 +115,7 @@
       "babel": false,
       "defaultModule": "home"
     },
-    "projectName": "firekylin3",
+    "projectName": "firekylin",
     "templateName": "/usr/local/lib/node_modules/think-cli/default_template",
     "cacheTemplatePath": "/Users/lizheming/.think-templates/-usr-local-lib-node_modules-think-cli-default_template",
     "clone": false,
