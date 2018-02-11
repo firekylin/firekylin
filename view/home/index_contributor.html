@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{options.title}}</title>
+  <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
+  <style>
+.container{width: 800px;}
+</style>
+</head>
+<body>
+ <div class="container">
+  <div class="header clearfix">
+    <h3 class="text-muted">Firekylin - 投稿者申请</h3>
+  </div>
+</div>
+<div class="container">
+  <form method="post" action="?">
+    {% if message %}
+      {% if message == 'success' %}
+      <div class="alert alert-success" role="alert">申请成功</div>
+      <script>setTimeout(function(){
+        location.href = '/';
+        }, 1500)</script>
+      {% else %}
+      <div class="alert alert-danger" role="alert">{{message}}</div>
+      {% endif %}
+    {% endif %}
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>用户名</label>
+          <input type="text" name="name" value="" required class="form-control" placeholder="昵称">
+        </div>
+        <div class="form-group">
+          <label>邮箱</label>
+          <input type="text" name="email" value="" class="form-control"  placeholder="邮箱">
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">提交申请</button>
+
+  </form>
+</div>
+<div class="container">
+  <hr>
+  <footer class="footer">
+    <p>&copy; Firekylin</p>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+
+@font-face {
+  font-family: iconfont;
+  src: url(/theme/firekylin/res/font/iconfont.eot);
+  src: url(/theme/firekylin/res/font/iconfont.eot?#iefix) format("embedded-opentype"),url(/theme/firekylin/res/font/iconfont.ttf) format("truetype"),url(/theme/firekylin/res/font/iconfont.svg#iconfont) format("svg");
+}
+.iconfont {
+  font-family: iconfont!important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: .2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-weibo:before {
+  content: "\e600";
+}
+.icon-archive:before {
+  content: "\e601";
+}
+.icon-user:before {
+  content: "\e602";
+}
+.icon-rss-v:before {
+  content: "\e603";
+}
+.icon-tags:before {
+  content: "\e604";
+}
+.icon-home:before {
+  content: "\e605";
+}
+.icon-search:before {
+  content: "\e606";
+}
+.icon-googleplus:before {
+  content: "\e607";
+}
+.icon-weixin:before {
+  content: "\e608";
+}
+.icon-mail:before {
+  content: "\e609";
+}
+.icon-twitter-v:before {
+  content: "\e60a";
+}
+.icon-linkedin:before {
+  content: "\e60b";
+}
+.icon-stackoverflow:before {
+  content: "\e60c";
+}
+.icon-github-v:before {
+  content: "\e60d";
+}
+.icon-facebook:before {
+  content: "\e60e";
+}
+.icon-right:before {
+  content: "\e60f";
+}
+.icon-left:before {
+  content: "\e610";
+}
+.icon-link:before {
+  content: "\e611";
+}
+.icon-https:before {
+  content: "\e612";
+}

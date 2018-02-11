@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+  - '8'
+cache:
+  directories:
+    - node_modules
+addons:
+  ssh_known_hosts: firekylin.org
+
+install: npm install
+script: npm run check-extraneous-pkgs
+before_depoly:
+  - openssl aes-256-cbc -K $encrypted_b487d5435939_key -iv $encrypted_b487d5435939_iv -in .travis/deploy_rsa.enc -out ~/.ssh/id_rsa -d
+  - chmod 600 ~/.ssh/id_rsa
+  - eval $(ssh-agent)
+  - ssh-add ~/.ssh/id_rsa
+deploy:
+  provider: script
+  script: sh bin/build.sh
+  on:
+    tags: true  

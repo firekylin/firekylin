@@ -1,0 +1,19 @@
+{% extends '../layout.html' %}
+
+{% block title -%}
+{{page.title}} - {{options.title}}
+{%- endblock %}
+
+{% block content %}
+<article class="post tags">
+  <h1 class="title">分类</h1>
+  <div class="entry-content">
+    <section>
+      {% for cate in categories %}
+      <a href="/cate/{{cate.pathname}}" data-cate="{{cate.name}}">{{cate.name}}({{cate.count}})</a>
+      {% endfor %}
+
+    </section>
+  </div>
+</article>
+{% endblock %}
