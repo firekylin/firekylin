@@ -6,7 +6,6 @@ try {
   const dbConfig = require('../db.js');
   msc = (dbConfig.default ? dbConfig.default : dbConfig).adapter.mysql;
 } catch (e) {
-  think.logger.warn(e);
 }
 
 module.exports = {

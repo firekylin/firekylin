@@ -35,11 +35,11 @@ module.exports = class extends think.Logic {
         },
         username: {
           requiredIf: ['step', 2],
-          length: [4]
+          length: {min: 4}
         },
         password: {
           requiredIf: ['step', 2],
-          length: [8]
+          length: {min: 8}
         }
       }, this.rules);
     }

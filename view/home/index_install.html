@@ -72,7 +72,7 @@
       <div class="col-md-6">
         <div class="form-group">
           <label>网站地址</label>
-          <input type="text" required name="site_url" class="form-control" placeholder="网站地址" value="{{data.site_url|default('http://'+http.host)}}">
+          <input type="text" required name="site_url" class="form-control" placeholder="网站地址" value="{{data.site_url|default('http://'+ctx.host)}}">
           <p class="help-block">网站地址主要用于生成内容的永久访问链接</p>
         </div>
       </div>

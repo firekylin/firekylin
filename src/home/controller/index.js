@@ -139,6 +139,7 @@ module.exports = class extends Base {
         };
         try {
           await instance.saveDbInfo(dbInfo);
+          process.send('think-cluster-reload-workers');
           message = 'success';
         } catch(e) {
           message = e;
