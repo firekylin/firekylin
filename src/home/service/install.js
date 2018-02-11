@@ -124,12 +124,12 @@ module.exports = class extends think.Service {
       for(let item of content) {
         item = item.trim();
         if(item) {
-          think.log(item);
+          think.logger.debug(item);
           await model.query(item);
         }
       }
     }catch(e) {
-      think.log(e);
+      think.logger.error(e);
       return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
     }
 
@@ -259,7 +259,7 @@ module.exports = class extends think.Service {
       }
       return installed;
     } catch(e) {
-      think.log(e);
+      think.logger.error(e);
       return false;
     }
   }
