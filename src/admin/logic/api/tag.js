@@ -13,7 +13,9 @@ module.exports = class extends think.Logic {
 
   postAction() {
     this.rules = {
-      name: 'required'
+      name: {
+        required: true
+      }
     };
 
     this.checkPathname();
@@ -21,7 +23,9 @@ module.exports = class extends think.Logic {
 
   putAction() {
     this.rules = {
-      name: 'required'
+      name: {
+        required: true
+      }
     };
 
     this.checkPathname();

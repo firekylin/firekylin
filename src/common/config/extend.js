@@ -12,7 +12,9 @@ module.exports = [
   {
     think: {
       RUNTIME_PATH: path.join(think.ROOT_PATH, 'runtime'),
-      RESOURCE_PATH: path.join(think.ROOT_PATH, 'www')
+      RESOURCE_PATH: path.join(think.ROOT_PATH, 'www'),
+      UPLOAD_PATH: path.join(think.ROOT_PATH, 'www', 'static/upload'),
+      UPLOAD_BASE_URL: ''
     }
   }
 ];

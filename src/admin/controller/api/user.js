@@ -78,7 +78,7 @@ module.exports = class extends Base {
     }
 
     let data = this.post();
-    let insertId = await this.modelInstance.addUser(data, this.ip());
+    let insertId = await this.modelInstance.addUser(data, this.ctx.ip);
 
     if (insertId.type === 'exist') {
       return this.fail('USER_EXIST');
@@ -136,7 +136,7 @@ module.exports = class extends Base {
 
     let data = this.post();
     data.id = this.id;
-    let rows = await this.modelInstance.saveUser(data, this.ip());
+    let rows = await this.modelInstance.saveUser(data, this.ctx.ip);
     return this.success({affectedRows: rows});
   }
 }

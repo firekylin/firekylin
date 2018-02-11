@@ -68,7 +68,7 @@ module.exports = class extends Base {
     let rows = await this.model('user').saveUser({
       password: this.post('password'),
       id: userInfo.id
-    }, this.ip());
+    }, this.ctx.ip);
 
     return this.success(rows);
   }
@@ -140,7 +140,7 @@ module.exports = class extends Base {
       let rows = await this.model('user').saveUser({
         password,
         id: findUser.id
-      }, this.ip());
+      }, this.ctx.ip);
 
       await think.cache(token, null);
 

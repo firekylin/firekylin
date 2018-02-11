@@ -95,7 +95,7 @@ module.exports = class extends Base {
 
   //MIME过滤
   extWhiteList(file) {
-    return ALLOW_EXTS.some(reg => reg.test(file.originalFilename));
+    return ALLOW_EXTS.some(reg => reg.test(file.name));
   }
 
   // 获取上传设置
@@ -110,9 +110,10 @@ module.exports = class extends Base {
   async serviceUpload(service, file, config) {
     try {
       const uploader = think.service(`upload/${service}`, 'admin');
-      const result = await (new uploader()).run(file, config);
+      const result = await uploader.run(file, config);
       return this.success(result);
     } catch (e) {
+      console.log(e);
       return this.fail(e || 'FILE_UPLOAD_ERROR');
     }
   }
@@ -175,7 +176,7 @@ module.exports = class extends Base {
     if(!uploadDir) {
       uploadDir = path.join(os.tmpdir(), 'thinkjs/upload');
     }
-    if(!think.isDir(uploadDir)) {
+    if(!think.isDirectory(uploadDir)) {
       think.mkdir(uploadDir);
     }
 
@@ -184,10 +185,10 @@ module.exports = class extends Base {
     await writeFileAsync(uploadPath, resp.body, 'binary');
 
     return {
-      fieldName: 'file',
-      originalFilename: path.basename(url),
+      name: path.basename(url),
       path: uploadPath,
-      size: resp.headers['content-length']
+      size: resp.headers['content-length'],
+      type: resp.headers['content-type']
     };
   }
 }

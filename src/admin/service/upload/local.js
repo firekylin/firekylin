@@ -13,7 +13,7 @@ module.exports = class extends Base {
 
     let destDir = this.formatNow();
     let destPath = path.join(think.UPLOAD_PATH, destDir);
-    if(!think.isDir(destPath)) {
+    if(!think.isDirectory(destPath)) {
       think.mkdir(destPath);
     }
 
