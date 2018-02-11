@@ -1,6 +1,6 @@
 {
   "name": "firekylin",
-  "description": "A Simple &amp; Fast Node Bloging Platform Base On ThinkJS 3.0 &amp; ReactJS &amp; ES2015+",
+  "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS ^ ES2015+",
   "version": "1.0.0",
   "author": "lizheming <i@imnerd.org>",
   "scripts": {
@@ -110,7 +110,7 @@
   "thinkjs": {
     "metadata": {
       "name": "firekylin",
-      "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.0 & ReactJS & ES2015+",
+      "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
       "author": "lizheming <i@imnerd.org>",
       "babel": false,
       "defaultModule": "home"
