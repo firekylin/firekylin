@@ -48,7 +48,9 @@ module.exports = [
   },
   {
     handle: 'router',
-    options: {}
+    options: {
+      prefix: ['/']
+    }
   },
   {
     handle: routerREST
