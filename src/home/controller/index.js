@@ -1,3 +1,4 @@
+const path = require('path');
 const Base = require('./base');
 
 module.exports = class extends Base {
@@ -41,7 +42,7 @@ module.exports = class extends Base {
     this.assign('currentTime', (new Date()).toString());
 
     this.ctx.type = 'text/xml';
-    return super.display(this.HOME_VIEW_PATH + 'rss.xml');
+    return super.display(path.join(this.HOME_VIEW_PATH, 'rss.xml'));
   }
 
   /**
@@ -54,7 +55,7 @@ module.exports = class extends Base {
     this.assign('postList', postList);
 
     this.ctx.type = 'text/xml';
-    return this.display(this.HOME_VIEW_PATH + 'sitemap.xml');
+    return this.display(path.join(this.HOME_VIEW_PATH, 'sitemap.xml'));
   }
   /**
    * install
