@@ -19,14 +19,15 @@ module.exports = class extends Base {
    * 输出opensearch
    */
   opensearchAction() {
-    this.http.type('text/xml');
-
-    return this.end(`<?xml version="1.0" encoding="UTF-8"?>
+    this.ctx.type = 'text/xml';
+    this.ctx.body = `<?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
     <ShortName>${this.options.title}</ShortName>
     <Description>${this.options.description}</Description>
     <Url type="text/html" template="${this.options.site_url}/search.html?s={searchTerms}" />
-</OpenSearchDescription>`);
+</OpenSearchDescription>`;
+
+    return true;
   }
 
   /**
