@@ -94,8 +94,9 @@ module.exports = class extends think.Controller {
         }
       })
 
-      this.type('application/json');
-      return this.end(jsonOutput);
+      this.ctx.type = 'application/json';
+      this.ctx.body = jsonOutput;
+      return true;
     }
 
     return this.display(path.join(this.THEME_VIEW_PATH, name + '.html'));

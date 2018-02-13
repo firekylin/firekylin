@@ -40,7 +40,7 @@ module.exports = class extends Base {
     this.assign('list', list);
     this.assign('currentTime', (new Date()).toString());
 
-    this.type('text/xml');
+    this.ctx.type = 'text/xml';
     return super.display(this.HOME_VIEW_PATH + 'rss.xml');
   }
 
@@ -53,7 +53,7 @@ module.exports = class extends Base {
     let postList = postModel.getPostSitemapList();
     this.assign('postList', postList);
 
-    this.type('text/xml');
+    this.ctx.type = 'text/xml';
     return this.display(this.HOME_VIEW_PATH + 'sitemap.xml');
   }
   /**
