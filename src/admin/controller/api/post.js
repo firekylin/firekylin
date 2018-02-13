@@ -206,7 +206,7 @@ module.exports = class extends Base {
     let push_sites_keys = postOpt.push_sites;
 
     if(post.markdown_content.slice(0, 5) !== '> 原文：') {
-      let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.http.host}`;
+      let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
       post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
 
 ${post.markdown_content}`;
