@@ -21,7 +21,7 @@
         <div class="entry-content">
             {{post.content | replace(r/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') | safe}}
         </div>
-        <p>本文链接：<a href="{{site_url + http.url | safe}}">{{site_url + http.url | safe}}</a></p>
+        <p>本文链接：<a href="{{site_url + ctx.url | safe}}">{{site_url + ctx.url | safe}}</a></p>
         <p>-- <acronym title="End of File">EOF</acronym> --</p>
 
         <div class="post-info">

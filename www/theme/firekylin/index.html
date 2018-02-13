@@ -12,9 +12,9 @@
 <section id="page-index">
 
   {% if tag %}
-  <h1 class="intro">标签<a href="{{site_url}}{{http.url}}">{{tag}}</a>下的文章</h1>
+  <h1 class="intro">标签<a href="{{site_url}}{{ctx.url}}">{{tag}}</a>下的文章</h1>
   {% elif cate %}
-  <h1 class="intro">分类<a href="{{site_url}}{{http.url}}">{{cate}}</a>下的文章</h1>
+  <h1 class="intro">分类<a href="{{site_url}}{{ctx.url}}">{{cate}}</a>下的文章</h1>
   {% endif %}
 
   {% for post in posts %}
