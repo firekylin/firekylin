@@ -170,8 +170,9 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async searchAction() {
-    let keyword = this.get('keyword').trim();
+    let keyword = this.get('keyword');
     if(keyword) {
+      keyword = keyword.trim();
       let postModel = this.model('post');
       let searchResult = await postModel.getPostSearch(keyword, this.get('page'));
       this.assign('searchData', searchResult);
