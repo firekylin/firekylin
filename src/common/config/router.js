@@ -1,5 +1,5 @@
 module.exports = [
-  [/^admin/, 'admin'],
+  // [/^admin/, 'admin'],
 
   [/^cate\/(.+)(?:\.html|\.json)$/i, 'post/list?cate=:1'],
   [/^tag\/(.+)(?:\.html|\.json)$/i, 'post/list?tag=:1'],
