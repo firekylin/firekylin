@@ -34,7 +34,7 @@ export default class extends Base {
       ldap_baseDn: options.ldap_baseDn, //ldap baseDn, required
       ldap_whiteList: options.ldap_whiteList ? options.ldap_whiteList.split(',') : [], //sep by ",", accounts in this string will not be varified with LDAP when LDAP is opened, and these accounts can be edited by itself instead of LDAP administrator, required
       ldap_user_page: options.ldap_user_page, //url for ldap user to change userinfo, maybe, default ''
-      ldap_log: options.ldap_log === '0' ? false : true //logconf, maybe, default '1', '0' => close, '1' => open
+      ldap_log: !options.ldap_log === '0' //logconf, maybe, default '1', '0' => close, '1' => open
     }
 
     if(ldapConfig.ldap_on && ldapConfig.ldap_whiteList.indexOf(username) === -1) {
