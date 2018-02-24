@@ -161,7 +161,7 @@ module.exports = class extends Base {
     if(!this.options.hasOwnProperty('push') || +this.options.push === 0) {
       return this.fail('PUSH_CLOSED');
     }
-    if(this.isGet()) {
+    if(this.isGet) {
       return this.display();
     }
 
@@ -170,8 +170,8 @@ module.exports = class extends Base {
     user.status = firekylin.USER_DISABLED;
     user.create_time = think.datetime();
     user.last_login_time = user.create_time;
-    user.create_ip = this.ip();
-    user.last_login_ip = this.ip();
+    user.create_ip = this.ctx.ip;
+    user.last_login_ip = this.ctx.ip;
 
     await this.model('user').where({name: user.name, email: user.email, _logic: 'OR'}).thenAdd(user);
     this.assign('message', 'success');
