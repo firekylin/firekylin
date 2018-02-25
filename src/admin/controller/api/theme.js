@@ -137,7 +137,8 @@ module.exports = class extends Base {
       let infoFile = path.join(THEME_DIR, theme, 'package.json');
       try {
         /*let stat = */await statsAsync(infoFile);
-        result.push(think.extend({id: theme}, think.require(infoFile)));
+        const infoData = JSON.parse(await readFileAsync(infoFile));
+        result.push(think.extend({id: theme}, infoData));
       } catch(e) {
         console.log(e);  // eslint-disable-line no-console
       }
