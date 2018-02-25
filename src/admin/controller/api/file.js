@@ -113,8 +113,12 @@ module.exports = class extends Base {
       const result = await uploader.run(file, config);
       return this.success(result);
     } catch (e) {
+      if(think.isPrevent(e)) {
+        return true;
+      }
+    
       console.log(e);
-      return this.fail(e || 'FILE_UPLOAD_ERROR');
+      return this.fail(e.message || 'FILE_UPLOAD_ERROR');
     }
   }
 
@@ -172,10 +176,10 @@ module.exports = class extends Base {
       throw new Error('UPLOAD_TYPE_ERROR');
     }
 
-    let uploadDir = this.config('post').file_upload_path;
-    if(!uploadDir) {
-      uploadDir = path.join(os.tmpdir(), 'thinkjs/upload');
-    }
+    // let uploadDir = this.config('post').file_upload_path;
+    // if(!uploadDir) {
+    const uploadDir = path.join(os.tmpdir(), 'thinkjs/upload');
+    // }
     if(!think.isDirectory(uploadDir)) {
       think.mkdir(uploadDir);
     }
