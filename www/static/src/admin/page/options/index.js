@@ -18,6 +18,7 @@ module.exports = {
       require('./general'),
       require('./reading'),
       require('./two_factor_auth'),
+      require('./ldap'),
       require('./comment'),
       require('./upload'),
       require('./analytic'),

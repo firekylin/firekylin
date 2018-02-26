@@ -1,6 +1,7 @@
 import React from 'react';
 import md5 from 'md5';
 import { Form, ValidatedInput } from 'react-bootstrap-validation';
+import classnames from 'classnames';
 
 import UserAction from '../action/user';
 import UserStore from '../store/user';
@@ -58,6 +59,7 @@ module.exports = class extends Base {
     }
   }
   handleValidSubmit(values) {
+    values['oripassword'] = values.password;
     values.password = md5(window.SysConfig.options.password_salt + values.password);
     UserAction.login(values);
   }
@@ -189,12 +191,21 @@ module.exports = class extends Base {
                     name="password"
                     ref="password"
                     className="form-control"
-                    validate="required,isLength:8:30"
+                    validate="required,isLength:6:30"
                     placeholder="密码"
                     errorHelp={{
                       required: '请填写密码',
-                      isLength: '密码长度为8到30个字符'
+                      isLength: '密码长度为6到30个字符'
                     }}
+                  />
+                </div>
+                <div className="form-group" style={{display: 'none'}}>
+                  <ValidatedInput
+                    type="hidden"
+                    name="oripassword"
+                    ref="oripassword"
+                    className="form-control"
+                    placeholder="原密码"
                   />
                 </div>
                 {this.getTwoFactorAuth()}
@@ -204,7 +215,13 @@ module.exports = class extends Base {
                 <div className="left back-site">
                   <a href="/">← 回到{window.SysConfig.options.title}</a>
                 </div>
-                <div className="right forgot-password">
+                <div
+                    className={classnames({
+                        right: true,
+                        'forgot-password': true,
+                        hidden: window.SysConfig.options.ldap_on === '1' ? true : false
+                    })}
+                >
                   <a href="javascript:void(0)" onClick={this.toggleForgot.bind(this)}>找回密码</a>
                 </div>
               </div>
