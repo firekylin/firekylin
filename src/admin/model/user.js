@@ -97,7 +97,7 @@ module.exports = class extends Base {
     if(think.isEmpty(updateData)) {
       return Promise.reject('DATA_EMPTY');
     }
-    if(!info.email && data.email) {
+    if(data.email) {
       let count = await this.where({email: data.email}).count('email');
       if(!count) {
         updateData.email = data.email;
