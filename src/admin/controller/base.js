@@ -4,7 +4,7 @@ module.exports = class extends think.Controller {
     if(controller === 'user' && action === 'login') {
       return;
     }
-    
+
     let userInfo = await this.session('userInfo') || {};
     if(think.isEmpty(userInfo)) {
       if(this.isAjax()) {
@@ -16,7 +16,7 @@ module.exports = class extends think.Controller {
       this.assign('userInfo', {id: userInfo.id, name: userInfo.name, type: userInfo.type});
     }
   }
-  
+
   async __call() {
     if(this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');

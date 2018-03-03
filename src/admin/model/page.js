@@ -5,7 +5,7 @@ module.exports = class extends Post {
     super(...args);
     this.modelName = 'post';
   }
-  
+
   addPost(data) {
     let create_time = think.datetime();
     data = Object.assign({

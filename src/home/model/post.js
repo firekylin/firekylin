@@ -15,7 +15,7 @@ module.exports = class extends think.Model {
       }
     };
   }
-  
+
   async getFeedFullText() {
     const {feedFullText} = await this.model('options').getOptions();
     return feedFullText;

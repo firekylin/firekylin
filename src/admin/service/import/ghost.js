@@ -103,7 +103,7 @@ module.exports = class extends Base {
         };
         await this.postModelInstance.addPost(post);
       } catch(e) {
-        console.log(e);  // eslint-disable-line no-console
+        console.log(e); // eslint-disable-line no-console
       }
     });
     Promise.all(postsPromise);

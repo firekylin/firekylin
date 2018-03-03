@@ -6,7 +6,7 @@ module.exports = class extends BaseRest {
     super(...args);
     this.allowList = ['api/post/put', 'api/post/post', 'api/post/delete', 'api/file/post', 'api/file/get'];
   }
-  
+
   async __before() {
     let userInfo = await this.session('userInfo') || {};
     if(think.isEmpty(userInfo)) {

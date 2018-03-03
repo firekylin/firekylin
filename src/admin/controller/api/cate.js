@@ -28,7 +28,7 @@ module.exports = class extends Base {
     }
     return this.success({id: ret.id});
   }
-  
+
   async putAction() {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');

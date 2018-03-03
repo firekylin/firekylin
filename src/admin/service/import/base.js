@@ -57,7 +57,7 @@ class Base extends think.Service {
   /**
    * 处理上传文件获取导入数据
    */
-  async parseFile(file) {  // eslint-disable-line no-unused-vars
+  async parseFile(file) { // eslint-disable-line no-unused-vars
 
   }
 

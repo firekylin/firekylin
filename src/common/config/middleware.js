@@ -1,5 +1,6 @@
 const path = require('path');
 const routerREST = require('think-router-rest');
+
 const isDev = think.env === 'development';
 
 module.exports = [
@@ -15,7 +16,7 @@ module.exports = [
     // enable: isDev,
     options: {
       root: path.join(think.ROOT_PATH, 'www'),
-      publicPath: /^\/(static\/|theme\/|[^\/]+\.(?!js|html|xml)\w+$)/
+      publicPath: /^\/(static\/|theme\/|[^/]+\.(?!js|html|xml)\w+$)/
     }
   },
   {
@@ -24,7 +25,8 @@ module.exports = [
     options: {
       debug: isDev,
       contentType(ctx) {
-        // All request url starts of /api or request header contains `X-Requested-With: XMLHttpRequest` will output json error
+        // All request url starts of /api or
+        // request header contains `X-Requested-With: XMLHttpRequest` will output json error
         if (!isDev) {
           return 'json';
         }

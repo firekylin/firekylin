@@ -5,7 +5,6 @@ const semver = require('semver');
 const request = require('request');
 const pack = require('../../../../package.json');
 const Base = require('./base');
-const cluster = require('cluster');
 
 request.defaults({
   timeout: 1000,
@@ -31,7 +30,7 @@ module.exports = class extends Base {
         needUpdate = onlineVersion;
       }
     } catch(e) {
-      console.log(e);  // eslint-disable-line no-console
+      console.log(e); // eslint-disable-line no-console
     }
 
     let mysql = await this.modelInstance.query('SELECT VERSION() as version');

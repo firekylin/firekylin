@@ -63,18 +63,18 @@ module.exports = class extends think.Service {
   async render(content) {
     var mathLexer = new marked.Lexer();
     var tokens = mathLexer.lex(content);
-  
+
     for (let i = 0; i < tokens.length; i++) {
       const item = tokens[i];
-  
+
       // 处理块级表达式
       if (item.type === 'code' && item.lang === 'math') {
         tokens[i] = {
           type: 'paragraph',
-          text: await _renderMathJax(item.text),
+          text: await this._renderMathJax(item.text),
         }
       }
-  
+
       // 处理表格
       if (item.type === 'table') {
         // 处理表头
@@ -89,13 +89,13 @@ module.exports = class extends think.Service {
           }
         }
       }
-  
+
       // 处理行内表达式
       if (item.text) {
         item.text = await this._mathSpanRender(item.text);
       }
     }
-  
+
     return marked.Parser.parse(tokens);
   }
 }

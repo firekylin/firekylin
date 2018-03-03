@@ -6,6 +6,7 @@ try {
   const dbConfig = require('../db.js');
   msc = (dbConfig.default ? dbConfig.default : dbConfig).adapter.mysql;
 } catch (e) {
+  //eslint-disable-line
 }
 
 module.exports = {

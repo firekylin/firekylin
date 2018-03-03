@@ -116,8 +116,8 @@ module.exports = class extends Base {
       if(think.isPrevent(e)) {
         return true;
       }
-    
-      console.log(e);
+
+      console.log(e); //eslint-disable-line no-console
       return this.fail(e.message || 'FILE_UPLOAD_ERROR');
     }
   }

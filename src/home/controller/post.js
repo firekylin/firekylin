@@ -144,7 +144,7 @@ module.exports = class extends Base {
           template = path.join('template', detail.options.template.slice(0, -5));
         }
       } catch(e) {
-        console.log(e);  // eslint-disable-line no-console
+        console.log(e); // eslint-disable-line no-console
       }
     }
 

@@ -79,7 +79,7 @@ module.exports = class extends think.Service {
       if (!response) {
         continue;
       }
-      let data = response.body.match(/DISQUSWIDGETS.displayCount\(([^\(\)]+)\);/);
+      let data = response.body.match(/DISQUSWIDGETS.displayCount\(([^()]+)\);/);
       if (!data) {
         continue;
       }
@@ -333,7 +333,7 @@ module.exports = class extends think.Service {
     //get gtalk and github config
     let gtalkConfig = JSON.parse(comment.name);
 
-    const base64Header = new Buffer(gtalkConfig.githubUserName + ':' + gtalkConfig.githubPassWord).toString('base64');
+    const base64Header = Buffer.from(gtalkConfig.githubUserName + ':' + gtalkConfig.githubPassWord).toString('base64');
 
     let url='https://api.github.com/search/issues?q=author:'+gtalkConfig.owner;
     const options = {

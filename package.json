@@ -14,6 +14,9 @@
     "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore -f table --ext .js,.jsx",
     "check-extraneous-pkgs": "npm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && npm prune)"
   },
+  "pre-commit": [
+    "lint-break-on-errors"
+  ],
   "dependencies": {
     "ali-oss": "^4.12.2",
     "co": "^4.6.0",
@@ -54,7 +57,7 @@
     "ava": "^0.18.0",
     "babel-cli": "6.x.x",
     "babel-core": "6.x.x",
-    "babel-eslint": "^6.0.4",
+    "babel-eslint": "^8.2.2",
     "babel-loader": "^6.2.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-runtime": "6.x.x",

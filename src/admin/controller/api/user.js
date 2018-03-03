@@ -98,7 +98,7 @@ module.exports = class extends Base {
     let app_secret = think.uuid();
 
     await this.modelInstance.generateKey(this.id, app_key, app_secret, status);
-    
+
     let user = await this.modelInstance.where({id: this.id}).find();
     let options = await this.model('options').getOptions();
     let transporter = nodemailer.createTransport();

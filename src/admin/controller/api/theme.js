@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+const cluster = require('cluster');
 const Base = require('./base');
 
-const cluster = require('cluster');
 
 const statsAsync = think.promisify(fs.stat);
 const readdirAsync = think.promisify(fs.readdir);
@@ -140,7 +140,7 @@ module.exports = class extends Base {
         const infoData = JSON.parse(await readFileAsync(infoFile));
         result.push(think.extend({id: theme}, infoData));
       } catch(e) {
-        console.log(e);  // eslint-disable-line no-console
+        console.log(e); // eslint-disable-line no-console
       }
     }
     return this.success(result);

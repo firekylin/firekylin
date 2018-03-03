@@ -141,7 +141,7 @@ module.exports = class extends Base {
     if(!postTocManual) {
       showToc = data.type/1 === 0;
     } else {
-      showToc = /(?:^|[\r\n]+)\s*\<\!--toc--\>\s*[\r\n]+/i.test(data.markdown_content);
+      showToc = /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
     }
     data.content = await this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
     data.summary = await this.getSummary(data.markdown_content, auto_summary)
@@ -166,7 +166,7 @@ module.exports = class extends Base {
       summary_length = parseInt(options.auto_summary);
     }
 
-    const hasMoreTag = /(?:^|[\r\n]+)\s*\<\!--more--\>\s*[\r\n]+/i.test(markdown_content);
+    const hasMoreTag = /(?:^|[\r\n]+)\s*<!--more-->\s*[\r\n]+/i.test(markdown_content);
 
     if (hasMoreTag || summary_length === 0) {
       summary = markdown_content.split('<!--more-->')[0];
@@ -202,7 +202,7 @@ module.exports = class extends Base {
      * 增加 TOC 目录
      */
     if(option.toc) {
-      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^\"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
+      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
 
@@ -220,8 +220,8 @@ module.exports = class extends Base {
         text = text.replace(/&#39;/g, '\'')
           .replace(/&gt;/g, '>')
           .replace(/&lt;/g, '<')
-          .replace(/\&quot;/g, '"')
-          .replace(/\&amp;/g, '&');
+          .replace(/&quot;/g, '"')
+          .replace(/&amp;/g, '&');
         var result = highlight.highlightAuto(text, language ? [language] : undefined);
         return `<pre><code class="hljs lang-${result.language}">${result.value}</code></pre>`;
       });
@@ -257,9 +257,9 @@ module.exports = class extends Base {
     name = name.trim()
       .replace(/\s+/g, '')
       .replace(/\)/g, '')
-      .replace(/[\(\,]/g, '-')
+      .replace(/[(,]/g, '-')
       .toLowerCase();
-    if(/^[\w\-]+$/.test(name)) {
+    if(/^[\w-]+$/.test(name)) {
       return name;
     }
     return `toc-${think.md5(name).slice(0, 3)}`;

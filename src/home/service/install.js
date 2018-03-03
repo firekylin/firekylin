@@ -242,7 +242,7 @@ module.exports = class extends think.Service {
       database = dbConfig[dbConfig.type].database;
       prefix = dbConfig[dbConfig.type].prefix;
     }
-  
+
     try {
       let existTables = await think.model('user', dbConfig).query(
         'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
@@ -251,7 +251,7 @@ module.exports = class extends think.Service {
       if(think.isEmpty(existTables)) {
         return false;
       }
-  
+
       existTables = existTables.map(table => table.TABLE_NAME);
       let installed = tables.every(table => existTables.indexOf(prefix+table) > -1);
       if(installed) {

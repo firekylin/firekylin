@@ -21,7 +21,7 @@ module.exports = class extends Base {
     if(this.get('type') === 'lastest') {
       return this.lastest();
     }
-    
+
     let data;
     if(this.id) {
       data = await this.modelInstance.where({id: this.id}).find();
@@ -223,7 +223,7 @@ ${post.markdown_content}`;
       return p2fk.push(post);
     });
     let result = await Promise.all(pushes);
-    console.log('push result for debug: ', result);  // eslint-disable-line no-console
+    console.log('push result for debug: ', result); // eslint-disable-line no-console
   }
 
   async lastest() {

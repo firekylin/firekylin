@@ -113,12 +113,12 @@ export default class extends Base {
     );
   }
 
-  btnClick(callback) {
+  btnClick(fn) {
     if(this._btnClicked) {
       return;
     }
     this._btnClicked = true;
-    return Promise.resolve(callback(this)).then(data => {
+    return Promise.resolve(fn(this)).then(data => {
       if(data === false) {
         return Promise.reject();
       }
