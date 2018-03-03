@@ -184,7 +184,7 @@ module.exports = class extends Base {
       props.disabled = true;
     }
     let options = window.SysConfig.options;
-    let ldapOn = options.ldap_on === '1' ? true : false;
+    let ldapOn = options.ldap_on === '1';
 
     if(!this.id && ldapOn) {
       let ldap_user_page = options.ldap_user_page;

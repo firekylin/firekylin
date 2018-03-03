@@ -27,21 +27,30 @@ export default class extends Base {
         return this.fail('TWO_FACTOR_AUTH_ERROR');
       }
     }
+
     const ldapConfig = {
-      ldap_on: options.ldap_on === '1', //switch, maybe, default '0', '0' => close, '1' => open
-      ldap_url: options.ldap_url, //ldap url, required，'ldap://xxx.xx.x.xx:xxx'
-      ldap_connect_timeout: parseInt(options.ldap_connect_timeout), // ldap connect timeout, maybe, default 20000ms
-      ldap_baseDn: options.ldap_baseDn, //ldap baseDn, required
-      ldap_whiteList: options.ldap_whiteList ? options.ldap_whiteList.split(',') : [], //sep by ",", accounts in this string will not be varified with LDAP when LDAP is opened, and these accounts can be edited by itself instead of LDAP administrator, required
-      ldap_user_page: options.ldap_user_page, //url for ldap user to change userinfo, maybe, default ''
-      ldap_log: options.ldap_log !== '0' //logconf, maybe, default '1', '0' => close, '1' => open
-    }
+      //switch, maybe, default '0', '0' => close, '1' => open
+      ldap_on: options.ldap_on === '1',
+      //ldap url, required，'ldap://xxx.xx.x.xx:xxx'
+      ldap_url: options.ldap_url,
+      // ldap connect timeout, maybe, default 20000ms
+      ldap_connect_timeout: parseInt(options.ldap_connect_timeout),
+      //ldap baseDn, required
+      ldap_baseDn: options.ldap_baseDn,
+      //sep by ",", accounts in this string will not be varified with LDAP when LDAP is opened
+      //and these accounts can be edited by itself instead of LDAP administrator, required
+      ldap_whiteList: options.ldap_whiteList ? options.ldap_whiteList.split(',') : [],
+      //url for ldap user to change userinfo, maybe, default ''
+      ldap_user_page: options.ldap_user_page,
+      //logconf, maybe, default '1', '0' => close, '1' => open
+      ldap_log: options.ldap_log !== '0'
+    };
 
     if(ldapConfig.ldap_on && ldapConfig.ldap_whiteList.indexOf(username) === -1) {
-      think.log('LDAP', 'VARIFY TYPE');
-      userInfo = await this.ldapVarify(username, ldapConfig);
+      think.log('LDAP', 'VERIFY TYPE');
+      userInfo = await this.ldapVerify(username, ldapConfig);
     }else {
-      think.log('NORMAL', 'VARIFY TYPE');
+      think.log('NORMAL', 'VERIFY TYPE');
       userInfo = await this.normalVerify(username);
     }
 
@@ -51,7 +60,6 @@ export default class extends Base {
     }
 
     await this.session('userInfo', userInfo);
-
     return this.success();
   }
   /**
@@ -165,11 +173,6 @@ export default class extends Base {
       return this.fail('ACCOUNT_ERROR');
     }
 
-    //帐号是否被禁用，且投稿者不允许登录
-   /*  if((userInfo.status | 0) !== 1 || userInfo.type === 3) {
-      return this.fail('ACCOUNT_FORBIDDEN');
-    } */
-
     //校验密码
     let password = this.post('password');
     if(!userModel.checkPassword(userInfo, password)) {
@@ -179,11 +182,11 @@ export default class extends Base {
     return userInfo;
   }
 
-  async ldapVarify(username, ldapConfig) {
+  async ldapVerify(username, ldapConfig) {
     //ldap校验
     const oripassword = this.post('oripassword');
 
-    const Ldap = think.service('ldap/index', 'admin');
+    const Ldap = think.service('ldap', 'admin');
     const ldap = new Ldap(ldapConfig);
     const ldapRes = await ldap.validate(username, oripassword);
 
