@@ -69,8 +69,8 @@ cd build;
 tar zxvfm $TARNAME;
 
 
-# HOST="root@firekylin.org";
-# REMOTE_TAR="/var/www/firekylin.org/www/release";
-# scp $TARNAME $HOST:$REMOTE_TAR;
-# ssh $HOST cp $REMOTE_TAR/$TARNAME $REMOTE_TAR/latest.tar.gz;
-# ssh $HOST "echo $VERSION > $REMOTE_TAR/.latest";
+HOST="root@firekylin.org";
+REMOTE_TAR="/var/www/firekylin.org/www/release/v1";
+scp $TARNAME $HOST:$REMOTE_TAR;
+ssh $HOST cp $REMOTE_TAR/$TARNAME $REMOTE_TAR/latest.tar.gz;
+ssh $HOST "echo $VERSION > $REMOTE_TAR/.latest";
