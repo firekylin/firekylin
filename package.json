@@ -24,6 +24,7 @@
     "highlight.js": "^9.12.0",
     "https": "^1.0.0",
     "jszip": "^3.1.5",
+    "ldapjs": "^1.0.2",
     "markdown-toc": "^1.2.0",
     "marked": "^0.3.12",
     "mathjax": "^2.7.3",
