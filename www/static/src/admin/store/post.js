@@ -33,7 +33,7 @@ export default Reflux.createStore({
     );
   },
   onSelectLastest() {
-    let req = superagent.get('/admin/api/post/lastest');
+    let req = superagent.get('/admin/api/post?type=lastest');
     return firekylin.request(req).then(
       data => this.trigger(data, 'getPostLastest')
     );
