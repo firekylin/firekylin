@@ -73,7 +73,7 @@ module.exports = class extends Base {
       }
 
       /** check db config exist */
-      let dbConfig = this.config('model');
+      let dbConfig = this.config('model', undefined, 'common');
       dbConfig = dbConfig[dbConfig.type];
       let isDBConfig = think.isObject(dbConfig)
                         && dbConfig.host

@@ -46,8 +46,10 @@ module.exports = class extends think.Service {
     this.ip = ip;
 
     let dbConfig = think.config('model');
-    if(think.isObject(dbConfig[dbConfig.type])) {
-      this.dbConfig = dbConfig[dbConfig.type];
+    this.type = dbConfig.type || 'mysql';
+
+    if(think.isObject(dbConfig[this.type])) {
+      this.dbConfig = dbConfig[this.type];
     }
   }
 
@@ -61,7 +63,8 @@ module.exports = class extends think.Service {
       dbConfig = this.dbConfig;
     }
     return this.model(name || 'user', {
-      mysql: dbConfig
+      type: this.type,
+      [this.type]: dbConfig
     }, module)
   }
 
@@ -155,27 +158,26 @@ module.exports = class extends think.Service {
 
   updateConfig() {
     let data = {
-      type: 'mysql',
+      type: this.type,
       adapter: {
-        mysql: this.dbConfig
+        [this.type]: this.dbConfig
       }
-    }
-    let content = `
-      "use strict";
-      exports.__esModule = true;
-      exports.default = ${JSON.stringify(data, undefined, 4)}
+    };
+    let content = `"use strict";
+exports.__esModule = true;
+exports.default = ${JSON.stringify(data, undefined, 4)}
     `;
 
-    let dbConfigFile;
-    try {
-      let srcPath = path.join(think.ROOT_PATH, 'src/common/config');
-      fs.statSync(srcPath);
-      dbConfigFile = path.join(srcPath, 'db.js');
-    } catch(e) {
-      dbConfigFile = path.join(think.APP_PATH, '/common/config/db.js');
-    }
+    const dbConfigFile = path.join(think.ROOT_PATH, 'src/common/config/db.js');
     fs.writeFileSync(dbConfigFile, content);
-    think.config('db', data);
+
+    for(const i in this.dbConfig) {
+      think.config(`model.${this.type}.${i}`, this.dbConfig[i], 'common');
+    }
+    // think.config('model', {
+    //   type: this.type,
+    //   [this.type]: this.dbConfig
+    // });
   }
 
   async createAccount(username, password) {
@@ -217,7 +219,6 @@ module.exports = class extends think.Service {
 
   async saveDbInfo(dbConfig) {
     this.dbConfig = dbConfig;
-    this.dbConfig.type = 'mysql';
     await this.checkDbInfo();
     this.updateConfig();
   }
