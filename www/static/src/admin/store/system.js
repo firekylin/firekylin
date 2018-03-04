@@ -20,7 +20,7 @@ export default Reflux.createStore({
   },
   onUpdateSystem(step) {
     let url = '/admin/api/system?method=update&step='+step;
-    let req = superagent.get(url);
+    let req = superagent.post(url);
     return firekylin.request(req).then(
       () => this.trigger(null, 'updateSystem')
     );

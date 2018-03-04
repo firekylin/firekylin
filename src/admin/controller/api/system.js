@@ -70,35 +70,48 @@ module.exports = class extends Base {
       /** 下载文件 */
       case '1':
       default:
-        return request({uri: 'http://firekylin.org/release/v1/latest.tar.gz'})
+        return new Promise((resolve, reject) => {
+          request({uri: 'http://firekylin.org/release/v1/latest.tar.gz'})
           .pipe(fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz')))
-          .on('close', () => this.success())
-          .on('error', err => this.fail(err));
+          .on('close', resolve)
+          .on('error', reject)
+        }).then(
+          () => this.success(),
+          ({message}) => this.fail(message)
+        );
 
       /** 解压覆盖，删除更新文件 */
       case '2':
-        return exec(`
+        return new Promise((resolve, reject) => {
+          exec(`
           cd ${think.RESOURCE_PATH};
           tar zvxf latest.tar.gz;
           cp -r firekylin/* ../;
           rm -rf firekylin latest.tar.gz`, error => {
-          if(error) {
-            this.fail(error);
-          }
-
-          this.success();
-        });
+            if(error) {
+              reject(error);
+            }
+            resolve();
+          });
+        }).then(
+          () => this.success(),
+          ({message}) => this.fail(message)
+        );
 
       /** 安装依赖 */
       case '3':
-        let registry = think.config('registry') || 'https://registry.npm.taobao.org';
-        return exec(`npm install --registry=${registry}`, error => {
-          if(error) {
-            this.fail(error);
-          }
-
-          this.success();
-        });
+        const registry = think.config('registry') || 'https://registry.npm.taobao.org';
+        return new Promise((resolve, reject) => {
+          exec(`npm install --registry=${registry}`, error => {
+            if(error) {
+              reject(error);
+            }
+            resolve();
+          });
+        }).then(
+          () => this.success(),
+          ({message}) => this.fail(message)
+        );
 
       /** 重启服务 */
       case '4':
