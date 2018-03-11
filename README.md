@@ -51,17 +51,13 @@
 ## 用户列表
 
 [奇舞团博客](http://www.75team.com/) / 
-[奇虎360-addops](https://addops.cn) / 
+[奇虎360-addops](https://opsdev.cn) / 
 [十年踪迹的博客](http://h5jun.com/) / 
 [光宇的博客](http://gyblog.cn/) / 
 [welefen的博客](http://welefen.com/) / 
-[耗子么](https://haozi.me/) /
-[江涛的博客](https://imjiangtao.com) / 
 [Aztack's blog](http://aztack.wang/) / 
 [且等风来](https://blog.cosli.top/) / 
 [为之漫笔](http://lisongfeng.cn) / 
-[Steven's Club](https://g.32ph.com/) / 
-[大路小兵的博客](https://cooxa.com/) / 
 [小撸的博客](http://www.60sky.com/) / 
 [花花的博客](https://imwineki.cn/) / 
 [刘涛的个人小站](https://imliutao.com) / 
