@@ -19,6 +19,8 @@ import CateAction from 'admin/action/cate';
 import CateStore from 'admin/store/cate';
 import TagAction from 'admin/action/tag';
 import TagStore from 'admin/store/tag';
+import UserAction from 'admin/action/user';
+import UserStore from 'admin/store/user';
 import TipAction from 'common/action/tip';
 import firekylin from 'common/util/firekylin';
 import PushStore from 'admin/store/push';
@@ -54,7 +56,8 @@ module.exports = class extends Base {
       cateList: [],
       tagList: [],
       push_sites: [],
-      templateList: []
+      templateList: [],
+      users: []
     }));
   }
 
@@ -73,10 +76,12 @@ module.exports = class extends Base {
     this.listenTo(CateStore, this.getCateList.bind(this));
     this.listenTo(TagStore, tagList => this.setState({tagList}));
     this.listenTo(OptionsStore, this.getDefaultCate.bind(this));
+    this.listenTo(UserStore, this.getUserList.bind(this));
 
     CateAction.select();
     TagAction.select();
     PushAction.select();
+    UserAction.select();
     OptionsAction.defaultCategory();
     if(this.id) { PostAction.select(this.id); }
   }
@@ -118,6 +123,10 @@ module.exports = class extends Base {
     let postInfo = this.state.postInfo;
     postInfo.cate.push({id: +data});
     this.setState({postInfo});
+  }
+
+  getUserList(users) {
+    this.setState({users});
   }
 
   /**
@@ -221,6 +230,7 @@ module.exports = class extends Base {
     values.push_sites = this.state.postInfo.push_sites;
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
+    values.user_id = this.state.postInfo.user_id;
 
     let push_sites = this.state.push_sites.map(({appKey}) => appKey);
     this.state.postInfo.options.push_sites =
@@ -372,6 +382,42 @@ module.exports = class extends Base {
     );
   }
 
+  /**
+   * 当前用户为管理员是，渲染用户列表
+   * @param {Object} postInfo
+   */
+  renderUserList(postInfo = this.state.postInfo) {
+    if(window.SysConfig.userInfo.type !== 1) { return null; }
+    if(this.isPage()) { return null; }
+
+    const user = postInfo.hasOwnProperty('user_id') ? postInfo.user_id : window.SysConfig.userInfo.id;
+
+    return (
+      <div className="form-group">
+        <label className="control-label">选择作者</label>
+        <div>
+          <Select
+            style={{width: '100%'}}
+            value={user}
+            optionLabelProp="children"
+            onChange={val => {
+              postInfo.user_id = val;
+              this.setState({postInfo});
+            }}
+          >
+              {this.state.users.map(user =>
+                <Option
+                    key={user.id}
+                    value={user.id}
+                >
+                  {user.display_name||user.name}
+                </Option>
+              )}
+          </Select>
+        </div>
+      </div>
+    );
+  }
   /**
    * 当前用户为管理员且存在推送网站时，渲染推送列表
    */
@@ -712,6 +758,7 @@ module.exports = class extends Base {
                 {this.renderAllowComment()}
                 {this.renderFeaturedImage()}
                 {this.renderPushList()}
+                {this.renderUserList()}
               </div>
             </div>
           </Form>
