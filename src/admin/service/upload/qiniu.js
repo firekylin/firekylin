@@ -5,7 +5,7 @@ const Base = require('./base');
  * makeUploadToken
  * @desc 构建上传认证凭证
  *
- * @param {String} key - 上传到七牛后保存的路径
+ * @param {String} saveKey - 自定义资源名
  * @param {string} bucket - 要上传的空间
  * @param {string} accessKey - 七牛秘钥AccessKey
  * @param {string} secretKey - 七牛秘钥SecretKey
@@ -26,9 +26,9 @@ const makeUploadToken = (saveKey, bucket, accessKey, secretKey) => {
 
 const QINIU_CONF = new qiniu.conf.Config();
 // 是否使用https域名
-QINIU_CONF.useHttpsDomain = true;
+// QINIU_CONF.useHttpsDomain = true;
 // 上传是否使用cdn加速
-QINIU_CONF.useCdnDomain = true;
+// QINIU_CONF.useCdnDomain = true;
 // 机房 Zone 对象
 // 华东 qiniu.zone.Zone_z0
 // 华北 qiniu.zone.Zone_z1
@@ -41,6 +41,7 @@ const formUploader = new qiniu.form_up.FormUploader(QINIU_CONF);
 module.exports = class extends Base {
   // 导入方法
   async uploadMethod(filename, config) {
+    // @see https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
     const saveKey = (config.prefix && (`${config.prefix}`).length) ? `${config.prefix.replace(/\/$/, '')}/$(year)$(mon)$(day)/$(etag)$(ext)` : null;
     return new Promise((resolve, reject) => {
       formUploader.putFile(
