@@ -28,8 +28,8 @@ module.exports = class extends Base {
    * @returns {String} - 上传认证凭证
    */
   makeUploadToken({bucket, accessKey, secretKey, prefix}) {
-    let saveKey;
-    if(think.isEmpty(prefix)) {
+    let saveKey = '$(etag)$(ext)';
+    if(!think.isEmpty(prefix)) {
       // @see https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
       saveKey = path.join(prefix, '$(year)$(mon)$(day)', '$(etag)$(ext)');
     }
