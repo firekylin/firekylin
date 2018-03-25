@@ -46,7 +46,9 @@ module.exports = [
   },
   {
     handle: 'payload',
-    options: {}
+    options: {
+      uploadDir: think.TMPDIR_PATH
+    }
   },
   {
     handle: 'router',

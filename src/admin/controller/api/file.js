@@ -1,8 +1,8 @@
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const {parse} = require('url');
 const request = require('request');
+const onFinish = require('on-finished');
 const Base = require('./base');
 
 const INTERNAL_AREAS = [
@@ -26,6 +26,7 @@ request.defaults({
 
 const getFileContent = think.promisify(request.get, request);
 const writeFileAsync = think.promisify(fs.writeFile, fs);
+const unlinkAsync = think.promisify(fs.unlink, fs);
 
 const ALLOW_EXTS = [
   /** 图片文件 */
@@ -178,7 +179,7 @@ module.exports = class extends Base {
 
     // let uploadDir = this.config('post').file_upload_path;
     // if(!uploadDir) {
-    const uploadDir = path.join(os.tmpdir(), 'thinkjs/upload');
+    const uploadDir = think.TMPDIR_PATH;
     // }
     if(!think.isDirectory(uploadDir)) {
       think.mkdir(uploadDir);
@@ -187,6 +188,11 @@ module.exports = class extends Base {
     let uploadName = think.uuid(20) + path.extname(url);
     let uploadPath = path.join(uploadDir, uploadName);
     await writeFileAsync(uploadPath, resp.body, 'binary');
+
+    //after upload delete file
+    onFinish(this.ctx.res, () =>
+      think.isExist(uploadPath) && unlinkAsync(uploadPath)
+    );
 
     return {
       name: path.basename(url),
