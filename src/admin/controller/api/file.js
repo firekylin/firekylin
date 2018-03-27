@@ -30,7 +30,7 @@ const unlinkAsync = think.promisify(fs.unlink, fs);
 
 const ALLOW_EXTS = [
   /** 图片文件 */
-  /\.(gif|jpe?g|png|tiff|bmp)$/i,
+  /\.(gif|jpe?g|png|tiff|bmp|ico)$/i,
   /** 多媒体文件 */
   /\.(mp3|wmv|mp4|avi|flv)$/i,
   /** 常用档案文件 */
