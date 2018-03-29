@@ -58,12 +58,12 @@ module.exports = class extends Base {
       await writeFileAsync(filePath, content, {encoding: 'utf-8'});
 
       if(cluster.isWorker) {
-        setTimeout(() => cluster.worker.kill(), 200);
+        process.send('think-cluster-reload-workers');
       }
-      this.success();
     } catch(e) {
       return this.fail(e);
     }
+    return this.success();
   }
 
   /**
