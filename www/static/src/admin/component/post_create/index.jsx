@@ -539,6 +539,27 @@ module.exports = class extends Base {
   renderPublicRadio() {
     return (
       <RadioGroup
+        name="weight"
+        label="置顶"
+        wrapperClassName="col-xs-12 is-public-radiogroup"
+      >
+        <Radio value="1" label="置顶" />
+        <Radio value="0" label="取消置顶" />
+      </RadioGroup>
+    );
+  }
+
+  renderWeightInput(){
+    /*return (
+      <div className="form-group">
+        <label className="control-label">排序权重</label>
+        <div>
+          <input type ="number" placeholder="请输入排序权重"/>
+        </div>
+      </div>
+    );*/
+    return (
+      <RadioGroup
         name="is_public"
         label="公开度"
         wrapperClassName="col-xs-12 is-public-radiogroup"
@@ -754,6 +775,7 @@ module.exports = class extends Base {
                 {this.renderPageTemplateSelect()}
                 {this.renderCategory()}
                 {this.renderTag()}
+                {this.renderWeightInput()}
                 {this.renderPublicRadio()}
                 {this.renderAllowComment()}
                 {this.renderFeaturedImage()}

@@ -31,7 +31,8 @@
         <span class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</span>
       </div>
       <div class="comment">
-          <a href="/post/{{post.pathname}}.html#comments">{{post.comment_num}} comments</a>
+          <span style="padding-right: 10px">阅读({{post.pv}})</span>
+          <a href="/post/{{post.pathname}}.html#comments">评论({{post.comment_num}})</a>
       </div>
     </div>
 

@@ -67,7 +67,7 @@ module.exports = class extends think.Model {
     page = page | 0 || 1;
     const postsListSize = await this.getPostsListSize();
 
-    let field = options.field || 'id,title,pathname,create_time,summary,comment_num,options';
+    let field = options.field || 'id,title,pathname,create_time,summary,comment_num,options,pv';
     if((await this.model('user').count()) > 0) { field += ',user_id'; }
 
     if(options.tag || options.cate) {
@@ -109,7 +109,7 @@ module.exports = class extends think.Model {
     return this.field(field)
       .page(page, postsListSize)
       .setRelation('user')
-      .order('create_time DESC')
+      .order('weight DESC,create_time DESC')
       .where(where)
       .countSelect();
   }

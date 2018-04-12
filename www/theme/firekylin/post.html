@@ -14,7 +14,10 @@
         <div class="meta">
             <div class="date">{{think.datetime(post.create_time, 'MM月DD, YYYY')}}</div>
             <div class="comment">
-                <a href="#comments">{{post.comment_num}} comments</a>
+                <a href="#comments">评论({{post.comment_num}})</a>
+            </div>
+            <div class="comment">
+                <a href="#comments">阅读({{post.pv}})</a>
             </div>
         </div>
         <h1 class="title">{{post.title}}</h1>

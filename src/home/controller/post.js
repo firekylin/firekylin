@@ -88,7 +88,31 @@ module.exports = class extends Base {
       }
     }
 
-    detail = detail || await this.model('post').getPostDetail(pathname);
+    //如果不是预览，访问量加1
+    if(!detail){
+      detail = await this.model('post').getPostDetail(pathname);
+      let yesterday = new Date();
+      yesterday.setTime(yesterday.getTime()-24*60*60*1000);
+      let tomorrow = new Date();
+      tomorrow.setTime(yesterday.getTime()+24*60*60*1000);
+
+      const count = await think.model('pv')
+        .where({
+        ip:this.ctx.hostname,
+        post_id: detail.id,
+        time:{'<=':think.datetime(yesterday,'YYYY-MM-DD')},
+        time:{'>=':think.datetime(tomorrow,'YYYY-MM-DD')}
+      }).count('id');
+      if(count <= 0){
+        await think.model('post').where({id:detail.id}).increment('pv',1);
+        await think.model("pv").add({
+          ip:this.ctx.hostname,
+          post_id: detail.id,
+          time: new Date(),
+          post_title:detail.title,
+        });
+      }
+    }
     if(think.isEmpty(detail)) {
       return this.redirect('/');
     }
