@@ -68,7 +68,25 @@ module.exports = class extends Base {
       cate: cateName,
       pathname: where.tag || where.cate
     });
-    return this.displayView('index');
+
+    let template = 'index';
+    if(where.tag) {
+      const tagView = await stats(path.join(this.THEME_VIEW_PATH, 'tag.html'))
+        .then(() => true)
+        .catch(() => false);
+      if(tagView) {
+        template = 'tag';
+      }
+    }
+    if(where.cate) {
+      const cateView = await stats(path.join(this.THEME_VIEW_PATH, 'cate.html'))
+        .then(() => true)
+        .catch(() => false);
+      if(cateView) {
+        template = 'cate';
+      }
+    }
+    return this.displayView(template);
   }
   /**
    * post detail
