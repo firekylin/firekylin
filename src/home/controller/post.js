@@ -95,8 +95,13 @@ module.exports = class extends Base {
   async detailAction() {
     this.ctx.url = decodeURIComponent(this.ctx.url);
     let pathname = this.get('pathname');
-    if(pathname === 'list') { return this.listAction(); }
+    //列表页
+    if(pathname === 'list') {
+      return this.listAction();
+    }
+
     let detail;
+    //在线预览
     if(this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));

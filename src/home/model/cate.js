@@ -1,44 +1,46 @@
 module.exports = class extends think.Model {
-  get relation() {
-      return {
-      post_cate: {
-        type: think.Model.HAS_MANY,
-        field: 'cate_id'
-      }
-    };
-  }
-
   async getCateArchive() {
-    let data = await this.model('post_cate')
-      .join({
+    const cates = {};
+    const catesData = await this.select();
+
+    for(const cate of catesData) {
+      cate.posts = await this.model('post').getPostList(1, {cate: cate.pathname});
+      cate.posts = cate.posts.data;
+
+      cate.count = await this.model('post_cate').join({
         table: 'post',
         on: ['post_id', 'id']
-      })
-      .join({
-        table: 'cate',
-        on: ['cate_id', 'id']
-      })
-      .where({
+      }).where({
         type: 0,
         status: 3,
-        is_public: 1
+        is_public: 1,
+        cate_id: cate.id
       })
-      .order('update_time DESC')
-      .select();
+      .count();
 
-    let result = {};
-    for(let cate of data) {
-      if(result[cate.pathname]) {
-        result[cate.pathname].count += 1;
-      } else {
-        result[cate.pathname] = {
-          name: cate.name,
-          pathname: encodeURIComponent(cate.pathname),
-          update_time: cate.update_time,
-          count: 1
-        };
+      if(cate.pid) {
+        continue;
       }
+      cates[cate.id] = cate;
     }
-    return Object.values(result).sort((a, b)=> a.count>b.count ? -1 : 1);
+
+    for(const cate of catesData) {
+      if(!cate.pid) {
+        continue;
+      }
+      const parentCate = cates[cate.pid];
+      if(!parentCate.children) {
+        parentCate.children = {};
+      }
+      parentCate.children[cate.id] = cate;
+    }
+
+    return Object.keys(cates).map(id => {
+      const cate = cates[id];
+      if(cate.children) {
+        cate.children = Object.values(cate.children).sort((a, b)=> a.count>b.count ? -1 : 1);
+      }
+      return cate;
+    }).sort((a, b)=> a.count>b.count ? -1 : 1);
   }
 }
