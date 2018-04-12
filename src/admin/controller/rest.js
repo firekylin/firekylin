@@ -94,20 +94,4 @@ module.exports = class extends think.Controller {
   __call() {
 
   }
-
-  async getPerfs(site_id) {
-    const result = {};
-    const perfs = await this.model('perf').where({site_id}).select();
-    if (think.isEmpty(perfs)) {
-      return result;
-    }
-
-    result.length = perfs.length;
-    for (let i = 0; i < perfs.length; i++) {
-      const {id, name} = perfs[i];
-      result[id] = name;
-      result[name] = id;
-    }
-    return result;
-  }
 };

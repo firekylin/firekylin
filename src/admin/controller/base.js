@@ -31,6 +31,10 @@ module.exports = class extends think.Controller {
       options.navigation = JSON.parse(options.navigation);
     } catch(e) { options.navigation = []; }
     delete options.push_sites; //不显示推送的配置，会有安全问题
+
+    if(firekylin.require('auth')) {
+      options.intranet = true;
+    }
     this.assign('options', options);
     // this.assign('JSON', JSON);
     return this.display('admin/index_index');

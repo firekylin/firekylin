@@ -71,6 +71,28 @@ module.exports = class extends Base {
   }
 
   /**
+   * 域账号登录
+   */
+  async intranetAction() {
+    const {res, req} = this.ctx;
+
+    const authModule = firekylin.require('auth');
+    if(!authModule) {
+      return this.fail('no auth module');
+    }
+
+    const {name, email} = await authModule(req, res);
+    const userModel = this.model('user');
+    const userInfo = await userModel.where({name, email, _logic: 'OR'}).find();
+
+    if (think.isEmpty(userInfo)) {
+      return this.fail('user not exist!');
+    }
+
+    await this.session('userInfo', userInfo);
+    return this.redirect('/admin');
+  }
+  /**
    * update user password
    */
   async passwordAction() {

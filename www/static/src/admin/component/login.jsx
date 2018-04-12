@@ -215,13 +215,11 @@ module.exports = class extends Base {
                 <div className="left back-site">
                   <a href="/">← 回到{window.SysConfig.options.title}</a>
                 </div>
-                <div
-                    className={classnames({
-                        right: true,
-                        'forgot-password': true,
-                        hidden: window.SysConfig.options.ldap_on === '1' ? true : false
-                    })}
-                >
+                <div className={classnames('right', 'forgot-password', {
+                  hidden: window.SysConfig.options.ldap_on === '1'
+                })}>
+                  {!window.SysConfig.options.intranet ? null : <a href="/admin/user/intranet">域账号登录</a>}
+                  {!window.SysConfig.options.intranet ? null : <a href="javascript:void(0)"> | </a>}
                   <a href="javascript:void(0)" onClick={this.toggleForgot.bind(this)}>找回密码</a>
                 </div>
               </div>

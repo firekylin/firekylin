@@ -48,3 +48,19 @@ firekylin.setInstalled = () => {
   const installedFile = path.join(think.ROOT_PATH, '.installed');
   fs.writeFileSync(installedFile, 'firekylin');
 };
+
+firekylin.require = name => {
+  const pkgName = path.join(think.ROOT_PATH, 'package.json');
+  const reg = new RegExp(`firekylin-${name}-\\w+$`, 'i');
+  try {
+    const {dependencies} = require(pkgName);
+    for(const depName in dependencies) {
+      if(!reg.test(depName)) {
+        continue;
+      }
+      return require(depName);
+    }
+  } catch(e) {
+    return false;
+  }
+}
