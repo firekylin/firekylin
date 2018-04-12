@@ -15,5 +15,12 @@ if (think.isFile(hostFile)) {
 
 module.exports = {
   host: host || process.env.HOST || '0.0.0.0',
-  port: port || process.env.PORT || 8360
+  port: port || process.env.PORT || 8360,
+  email:{
+    service: 'qiye.aliyun',
+    auth: {
+      user: 'xxxx@qiangshuidiyu.xin',
+      pass: 'password'
+    }
+  }
 };

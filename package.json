@@ -30,7 +30,7 @@
     "mathjax": "^2.7.3",
     "mathjax-node": "^1.3.0",
     "moment": "^2.20.1",
-    "nodemailer": "^2.7.2",
+    "nodemailer": "^4.6.4",
     "on-finished": "^2.3.0",
     "phpass": "^0.1.1",
     "push-to-firekylin": "^0.2.3",

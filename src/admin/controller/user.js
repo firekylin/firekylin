@@ -114,13 +114,19 @@ module.exports = class extends Base {
       let resetToken = think.md5(user.email + resetTime + Math.random());
       let resetUrl = options.site_url + `/admin/dashboard?reset=1&token=${resetToken}`;
 
-      let transporter = nodemailer.createTransport();
-      transporter.sendMail({
-        from: 'no-reply@firekylin.org',
-        to: user.email,
+      let emailConfig = think.config('email');
+      let mailTransport = nodemailer.createTransport(emailConfig);
+      const sendMail = think.promisify(mailTransport.sendMail, mailTransport);
+      let result = await sendMail({
+        from: `"${options.title}" <${emailConfig.auth.user}>`,
+        to: `"${user.name}" <${user.email}>`,
         subject: `【${options.title}】密码重置`,
         text: `你好，${user.name}，点击 ${resetUrl} 进行密码重置，该地址有效期为 1 小时，请及时修改密码。如果您没有申请过密码重置，请忽略该邮件！`
       });
+
+      if(result instanceof Error){
+        return this.fail(result,"邮件发送失败");
+      }
 
       await think.cache(resetToken, user.name, {
         timeout: 60 * 60 * 1000
