@@ -7,7 +7,7 @@ exports.default = {
             "host": "localhost",
             "port": "3306",
             "database": "firekylin",
-            "user": "test",
+            "user": "root",
             "password": "1234",
             "prefix": "fk_",
             "encoding": "utf8mb4"

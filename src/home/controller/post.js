@@ -98,7 +98,7 @@ module.exports = class extends Base {
 
       const count = await think.model('pv')
         .where({
-        ip:this.ctx.hostname,
+        ip:this.header('x-real-ip'),
         post_id: detail.id,
         time:{'<=':think.datetime(yesterday,'YYYY-MM-DD')},
         time:{'>=':think.datetime(tomorrow,'YYYY-MM-DD')}
@@ -106,7 +106,7 @@ module.exports = class extends Base {
       if(count <= 0){
         await think.model('post').where({id:detail.id}).increment('pv',1);
         await think.model("pv").add({
-          ip:this.ctx.hostname,
+          ip:this.header('x-real-ip'),
           post_id: detail.id,
           time: new Date(),
           post_title:detail.title,
