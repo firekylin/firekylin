@@ -231,6 +231,7 @@ module.exports = class extends Base {
     values.cate = Object.keys(this.cate).filter(item => this.cate[item]);
     values.tag = this.state.postInfo.tag;
     values.user_id = this.state.postInfo.user_id;
+    values.weight = this.state.postInfo.weight;
 
     let push_sites = this.state.push_sites.map(({appKey}) => appKey);
     this.state.postInfo.options.push_sites =
@@ -273,11 +274,11 @@ module.exports = class extends Base {
 
     return (
       <ValidatedInput
-          name="title"
-          type="text"
-          placeholder="标题"
-          validate="required"
-          {...props}
+        name="title"
+        type="text"
+        placeholder="标题"
+        validate="required"
+        {...props}
       />
     );
   }
@@ -341,9 +342,9 @@ module.exports = class extends Base {
         <span>.html </span>
         <span> </span>
         {this.state.postInfo.status === 3 && this.state.postInfo.is_public ?
-        <a href={postUrl} target="_blank">
-          <span className="glyphicon glyphicon-link" />
-        </a> : null}
+          <a href={postUrl} target="_blank">
+            <span className="glyphicon glyphicon-link" />
+          </a> : null}
         <span> </span>
         <a onClick={previewOnClick}>
           <span className="glyphicon glyphicon-eye-open" />
@@ -405,14 +406,14 @@ module.exports = class extends Base {
               this.setState({postInfo});
             }}
           >
-              {this.state.users.map(user =>
-                <Option
-                    key={user.id}
-                    value={user.id}
-                >
-                  {user.display_name||user.name}
-                </Option>
-              )}
+            {this.state.users.map(user =>
+              <Option
+                key={user.id}
+                value={user.id}
+              >
+                {user.display_name||user.name}
+              </Option>
+            )}
           </Select>
         </div>
       </div>
@@ -471,13 +472,13 @@ module.exports = class extends Base {
         <div className="checkbox">
           <label>
             <input
-                type="checkbox"
-                name="allow_comment"
-                checked={postInfo.allow_comment}
-                onChange={()=> {
-                  postInfo.allow_comment = !postInfo.allow_comment;
-                  this.setState({postInfo});
-                }}
+              type="checkbox"
+              name="allow_comment"
+              checked={postInfo.allow_comment}
+              onChange={()=> {
+                postInfo.allow_comment = !postInfo.allow_comment;
+                this.setState({postInfo});
+              }}
             />
             允许评论
           </label>
@@ -523,10 +524,10 @@ module.exports = class extends Base {
           />
           {featuredImage
             ? <div className="text-center">
-                <img src={featuredImage} title={featuredImage}
-                  className="img-thumbnail featured-image"
-                  onClick={() => window.open(featuredImage, '_blank')} />
-              </div>
+              <img src={featuredImage} title={featuredImage}
+                   className="img-thumbnail featured-image"
+                   onClick={() => window.open(featuredImage, '_blank')} />
+            </div>
             : null}
         </div>
       </div>
@@ -534,30 +535,33 @@ module.exports = class extends Base {
   }
 
   /**
-   * 渲染公开度选择
+   * 渲染权重
    */
-  renderPublicRadio() {
+  renderWeight(postInfo = this.state.postInfo) {
     return (
-      <RadioGroup
-        name="weight"
-        label="置顶"
-        wrapperClassName="col-xs-12 is-public-radiogroup"
-      >
-        <Radio value="1" label="置顶" />
-        <Radio value="0" label="取消置顶" />
-      </RadioGroup>
-    );
-  }
-
-  renderWeightInput(){
-    /*return (
       <div className="form-group">
         <label className="control-label">排序权重</label>
         <div>
-          <input type ="number" placeholder="请输入排序权重"/>
+          <input
+            type="number"
+            className="form-control"
+            placeholder="请输入排序权重"
+            value={postInfo.weight}
+            onInput={val => {
+              postInfo.weight = val.target.value;
+              this.setState({postInfo});
+            }}
+          />
         </div>
       </div>
-    );*/
+    );
+  }
+
+
+  /**
+   * 渲染公开度选择
+   */
+  renderPublicRadio() {
     return (
       <RadioGroup
         name="is_public"
@@ -581,18 +585,18 @@ module.exports = class extends Base {
         <label className="control-label">标签</label>
         <div>
           <Select
-              tags
-              style={{width: '100%'}}
-              maxTagTextLength={5}
-              value={postInfo.tag}
-              onChange={val => {
-                postInfo.tag = val;
-                this.setState({postInfo});
-              }}
+            tags
+            style={{width: '100%'}}
+            maxTagTextLength={5}
+            value={postInfo.tag}
+            onChange={val => {
+              postInfo.tag = val;
+              this.setState({postInfo});
+            }}
           >
-              {this.state.tagList.map(tag =>
-                <Option key={tag.name} value={tag.name}>{tag.name}</Option>
-              )}
+            {this.state.tagList.map(tag =>
+              <Option key={tag.name} value={tag.name}>{tag.name}</Option>
+            )}
           </Select>
         </div>
       </div>
@@ -620,15 +624,15 @@ module.exports = class extends Base {
               {cate.pid !== 0 ? '　' : null}
               <label>
                 <input
-                    type="checkbox"
-                    name="cate"
-                    value={cate.id}
-                    checked={cateInitial.includes(cate.id)}
-                    onChange={()=>{
-                      this.cate[cate.id] = !this.cate[cate.id];
-                      postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
-                      this.setState({postInfo});
-                    }}
+                  type="checkbox"
+                  name="cate"
+                  value={cate.id}
+                  checked={cateInitial.includes(cate.id)}
+                  onChange={()=>{
+                    this.cate[cate.id] = !this.cate[cate.id];
+                    postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
+                    this.setState({postInfo});
+                  }}
                 />
                 <span style={{fontWeight: 'normal'}}>{cate.name}</span>
               </label>
@@ -654,14 +658,14 @@ module.exports = class extends Base {
         <label>自定义模板</label>
         <div>
           <Select
-              optionLabelProp="label"
-              showSearch={false}
-              style={{width: '100%'}}
-              value={template}
-              onChange={val => {
-                postInfo.options.template = val;
-                this.setState({postInfo});
-              }}
+            optionLabelProp="label"
+            showSearch={false}
+            style={{width: '100%'}}
+            value={template}
+            onChange={val => {
+              postInfo.options.template = val;
+              this.setState({postInfo});
+            }}
           >
 
             {templateList.map(({id, name}) =>
@@ -723,10 +727,10 @@ module.exports = class extends Base {
         >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
         <span> </span>
         <button
-            type="submit"
-            {...props}
-            className="btn btn-primary"
-            onClick={publishOnClick}
+          type="submit"
+          {...props}
+          className="btn btn-primary"
+          onClick={publishOnClick}
         >{this.state.postSubmitting ? '发布中...' : `发布${this.isPage() ? '页面' : '文章'}`}</button>
       </div>
     );
@@ -775,7 +779,7 @@ module.exports = class extends Base {
                 {this.renderPageTemplateSelect()}
                 {this.renderCategory()}
                 {this.renderTag()}
-                {this.renderWeightInput()}
+                {this.renderWeight()}
                 {this.renderPublicRadio()}
                 {this.renderAllowComment()}
                 {this.renderFeaturedImage()}
