@@ -194,6 +194,22 @@ CREATE TABLE `fk_user` (
 
 
 
+CREATE TABLE `fk_pv` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `ip` varchar(255) NOT NULL COMMENT '访问者的ip地址',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '访问时间',
+  `post_id` int(11) NOT NULL COMMENT '文章id',
+  `post_title` varchar(255) NOT NULL COMMENT '文章标题',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+ALTER TABLE `fk_post`
+ADD COLUMN `pv`  int(10) NOT NULL DEFAULT 0 COMMENT '浏览量' AFTER `options`;
+
+ALTER TABLE `fk_post`
+ADD COLUMN `weight`  int(10) NOT NULL DEFAULT 0 COMMENT '排序序号' AFTER `pv`;
+
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
