@@ -142,10 +142,10 @@ module.exports = class extends Base {
   async serviceExport(service) {
     try {
       let exporter = think.service(`export/${service}`, 'admin');
-      let file = await (new exporter()).run();
+      let file = await exporter.run();
       return this.download(file);
     } catch(e) {
-      return this.fail(e);
+      return this.fail(e.message);
     }
   }
 
