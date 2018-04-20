@@ -1,9 +1,8 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const url = require('url');
 const path = require('path');
 const Base = require('./base');
 
-const renameAsync = think.promisify(fs.rename, fs);
 module.exports = class extends Base {
   async uploadMethod(file, {name}) {
     let ext = /^\.\w+$/.test(path.extname(file)) ? path.extname(file) : '.png';
@@ -20,9 +19,10 @@ module.exports = class extends Base {
     try {
       // 上传文件路径
       let filepath = path.join(destPath, basename);
-      await renameAsync(file, filepath);
+      await fs.move(file, filepath);
       return url.resolve(think.UPLOAD_BASE_URL, filepath.replace(think.RESOURCE_PATH, ''));
     } catch(e) {
+      console.error(e);
       throw Error('FILE_UPLOAD_MOVE_ERROR');
     }
   }
