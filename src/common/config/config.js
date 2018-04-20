@@ -15,5 +15,8 @@ if (think.isFile(hostFile)) {
 
 module.exports = {
   host: host || process.env.HOST || '0.0.0.0',
-  port: port || process.env.PORT || 8360
+  port: port || process.env.PORT || 8360,
+
+  /** disable theme editor */
+  DISALLOW_FILE_EDIT: false
 };

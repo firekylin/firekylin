@@ -14,6 +14,9 @@
 window.SysConfig = {
   userInfo: {{JSON.stringify(userInfo) | safe}},
   options: {{JSON.stringify(options) | safe}},
+  config: {
+    disallow_file_edit: {{think.config('DISALLOW_FILE_EDIT')}}
+  }
 };
 </script>
 <div id="app"></div>
