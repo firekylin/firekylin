@@ -1,3 +1,9 @@
+## 1.0.3
+
+- 增加 DISALLOW_FILE_EDIT 禁止编辑主题配置项
+- 修复文件上传跨磁盘报错的问题
+- 修复子分类列表页404问题
+
 ## 1.0.2
 
 - 增加内网登录支持，具体实现可参考[如何实现内网登录](https://github.com/firekylin/firekylin/wiki/%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%94#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%86%85%E7%BD%91%E7%99%BB%E5%BD%95)
