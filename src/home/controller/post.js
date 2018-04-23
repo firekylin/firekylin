@@ -39,11 +39,9 @@ module.exports = class extends Base {
       }
     }
     if(where.cate) {
-      [cateName] = this.assign('categories').filter(cate =>
-        cate.pathname.toLowerCase() === where.cate.toLowerCase()
-      );
-      if (cateName && cateName.name) {
-        cateName = cateName.name;
+      const cate = await this.model('cate').where({pathname: where.cate}).find();
+      if(!think.isEmpty(cate) && cate.name) {
+        cateName = cate.name;
       } else {
         return this.ctx.throw(404);
       }
