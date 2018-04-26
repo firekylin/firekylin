@@ -1,4 +1,5 @@
 const fs = require('fs');
+const dns = require('dns');
 const path = require('path');
 const {parse} = require('url');
 const request = require('request');
@@ -27,6 +28,7 @@ request.defaults({
 const getFileContent = think.promisify(request.get, request);
 const writeFileAsync = think.promisify(fs.writeFile, fs);
 const unlinkAsync = think.promisify(fs.unlink, fs);
+const lookupAsync = think.promisify(dns.lookup, dns);
 
 const ALLOW_EXTS = [
   /** 图片文件 */
@@ -150,15 +152,16 @@ module.exports = class extends Base {
   }
 
   async getUrlFile(url) {
-    const {hostname} = parse(url);
-    if(/^\d+\.\d+\.\d+\.\d+/i.test(hostname)) {
-      const longIP = ip2long(hostname);
-      for(let [start, end] of INTERNAL_AREAS) {
-        start = ip2long(start);
-        end = ip2long(end);
-        if(longIP>=start && longIP<=end) {
-          throw new Error('URL ILLEGAL');
-        }
+    let {hostname} = parse(url);
+    if(!/^\d+\.\d+\.\d+\.\d+/i.test(hostname)) {
+      hostname = await lookupAsync(hostname);
+    }
+    const longIP = ip2long(hostname);
+    for(let [start, end] of INTERNAL_AREAS) {
+      start = ip2long(start);
+      end = ip2long(end);
+      if(longIP>=start && longIP<=end) {
+        throw new Error('URL ILLEGAL');
       }
     }
 
