@@ -87,6 +87,12 @@ export default class extends Base {
         let title = file.split('.').slice(0, -1).join('');
         let content = fs.readFileSync(tar, {encoding: 'utf-8'});
         let stat = fs.statSync(tar);
+
+        //add symbilic link check
+        if(fs.lstatSync(tar).isSymbolicLink()) {
+          return null;
+        }
+
         return {
           created_at: stat.birthtime.getTime(),
           updated_at: stat.mtime.getTime(),
@@ -94,7 +100,7 @@ export default class extends Base {
           pathname: title,
           markdown_content: content
         };
-      });
+      }).filter(v => v);
     } catch(e) {
       throw new Error(e);
     }
