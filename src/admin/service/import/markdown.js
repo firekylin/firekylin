@@ -89,7 +89,7 @@ module.epxorts = class extends Base {
         let stat = fs.statSync(tar);
 
         //add symbilic link check
-        if(stat.isSymbolicLink()) {
+        if(fs.lstatSync(tar).isSymbolicLink()) {
           return null;
         }
 
