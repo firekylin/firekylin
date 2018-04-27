@@ -45,7 +45,6 @@ release/
 
 runtime/
 www/static/upload/
-sitemap.xml
 
 output/
 output.theme/

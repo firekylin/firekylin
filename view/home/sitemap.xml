@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+      <loc>{{site_url}}</loc>
+      <lastmod>{{think.datetime(postList[0] and postList[0].update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.8</priority>
+  </url>
+  {%- for item in postList %}
+  <url>
+      <loc>{{site_url}}/{{'page' if item.type === 1 else 'post'}}/{{item.pathname}}.html</loc>
+      <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>{{0.7 if item.type === 1 else 0.6}}</priority>
+  </url>
+  {%- endfor %}
+  {%- if tagList[0] %}
+  <url>
+      <loc>{{site_url}}/tags</loc>
+      <lastmod>{{think.datetime(tagList[0].update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.5</priority>
+  </url>
+  {%- endif %}
+  {%- for item in tags %}
+  {%- for pageNum in range(1, item.count / options.postsListSize + 1) %}
+  <url>
+      <loc>{{site_url}}/tag/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
+      <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.5</priority>
+  </url>
+  {%- endfor %}
+  {%- endfor %}
+  {%- for item in categories %}
+  {%- for pageNum in range(1, item.count / options.postsListSize + 1) %}
+  <url>
+      <loc>{{site_url}}/cate/{{item.pathname}}{{'?page='+pageNum if pageNum > 1 else ''}}</loc>
+      <lastmod>{{think.datetime(item.update_time, 'YYYY-MM-DD')}}</lastmod>
+      <priority>0.5</priority>
+  </url>
+  {%- endfor %}
+  {%- endfor %}
+</urlset>
