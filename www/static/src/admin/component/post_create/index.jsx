@@ -605,6 +605,10 @@ module.exports = class extends Base {
                     checked={cateInitial.includes(cate.id)}
                     onChange={()=>{
                       this.cate[cate.id] = !this.cate[cate.id];
+                      //如果勾选了子分类父分类也需要选中
+                      if(cate.pid && this.cate[cate.id]) {
+                        this.cate[cate.pid] = true;
+                      }
                       postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
                       this.setState({postInfo});
                     }}
