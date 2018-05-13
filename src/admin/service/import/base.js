@@ -4,11 +4,11 @@ const toMarkdown = require('to-markdown');
 class Base extends think.Service {
   constructor(...args) {
     super(...args);
-    this.userModelInstance = this.model('user');
-    this.cateModelInstance = this.model('cate');
-    this.tagModelInstance = this.model('tag');
-    this.postModelInstance = this.model('post');
-    this.pageModelInstance = this.model('page').setRelation('user');
+    this.userModelInstance = this.model('user', null, 'admin');
+    this.cateModelInstance = this.model('cate', null, 'admin');
+    this.tagModelInstance = this.model('tag', null, 'admin');
+    this.postModelInstance = this.model('post', null, 'admin');
+    this.pageModelInstance = this.model('page', null, 'admin').setRelation('user');
   }
 
   formatDate(date) {

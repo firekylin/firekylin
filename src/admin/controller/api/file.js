@@ -129,13 +129,14 @@ module.exports = class extends Base {
    * 从其他平台导入数据
    */
   async serviceImport(service, file) {
+    let ret = {post: 0, page: 0, category: 0, tag: 0};
     try {
-      let importor = think.service(`import/${service}`, 'admin');
-      let {post, page, category, tag} = await (new importor(this)).run(file);
-      return this.success(`共导入文章 ${post} 篇，页面 ${page} 页，分类 ${category} 个，标签 ${tag} 个`);
+      const importor = think.service(`import/${service}`, 'admin', this);
+      ret = await importor.run(file);
     } catch(e) {
       return this.fail(e);
     }
+    return this.success(`共导入文章 ${ret.post} 篇，页面 ${ret.page} 页，分类 ${ret.category} 个，标签 ${ret.tag} 个`);
   }
 
   /**
