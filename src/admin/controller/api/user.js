@@ -58,7 +58,7 @@ module.exports = class extends Base {
       return this.fail('DELETE_CURRENT_USER_ERROR');
     }
 
-    let pk = await this.modelInstance.getPk();
+    let pk = await this.modelInstance.pk;
     let rows = await this.modelInstance.where({
       [pk]: id
     }).delete();
