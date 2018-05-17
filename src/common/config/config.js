@@ -18,5 +18,5 @@ module.exports = {
   port: port || process.env.PORT || 8360,
 
   /** disable theme editor */
-  DISALLOW_FILE_EDIT: false
+  DISALLOW_FILE_EDIT: process.env.DISALLOW_FILE_EDIT || false
 };

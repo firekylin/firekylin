@@ -44,6 +44,7 @@
     "think-logger3": "^1.0.0",
     "think-model": "^1.2.2",
     "think-model-mysql": "^1.0.0",
+    "think-model-sqlite": "^1.1.1",
     "think-router-rest": "^1.0.4",
     "think-session": "^1.0.0",
     "think-session-file": "^1.0.5",

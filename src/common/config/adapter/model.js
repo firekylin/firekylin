@@ -1,7 +1,16 @@
 const mysql = require('think-model-mysql');
+const sqlite = require('think-model-sqlite');
 
 const isDev = think.env === 'development';
-let msc = {};
+let msc = {
+  host: process.env.FK_DB_HOST,
+  port: process.env.FK_DB_PORT,
+  database: process.env.FK_DB_DATABASE,
+  user: process.env.FK_DB_USER,
+  password: process.env.FK_DB_PASSWORD,
+  prefix: process.env.FK_DB_PREFIX,
+  encoding: process.env.FK_DB_ENCODING
+};
 try {
   const dbConfig = require('../db.js');
   msc = (dbConfig.default ? dbConfig.default : dbConfig).adapter.mysql;
@@ -10,7 +19,7 @@ try {
 }
 
 module.exports = {
-  type: 'mysql',
+  type: process.env.FK_DB_MODE || 'mysql',
   common: {
     logConnect: isDev,
     logSql: isDev,
@@ -26,5 +35,11 @@ module.exports = {
     password: msc.password,
     prefix: msc.prefix,
     encoding: msc.encoding
+  },
+  sqlite: {
+    handle: sqlite,
+    prefix: 'fk_',
+    database: 'firekylin',
+    path: think.ROOT_PATH + '/db'
   }
 };
