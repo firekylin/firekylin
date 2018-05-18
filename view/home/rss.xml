@@ -7,23 +7,25 @@
         <atom:link href="{{site_url}}/rss.html" rel="self" />
         <language>zh-cn</language>
         <lastBuildDate>{{ currentTime | utc }}</lastBuildDate>
-        {% for item in list %}
+        {%- for item in list %}
         <item>
             <title>{{item.title}}</title>
             <link>{{site_url}}/post/{{item.pathname}}.html</link>
             <description><![CDATA[
-            {% if item.summary %}
+            {%- if item.summary %}
             {{item.summary | xml | safe}}
-            {% if item.summary != item.content %}
+            {%- if item.summary != item.content %}
             <p class="more">
                 <a href="{{site_url}}/post/{{item.pathname}}.html" title="{{item.title}}">[...]</a>
             </p>
-            {% endif %}
-            {% else %}{{item.content | xml | safe}}{% endif %}
+            {%- endif %}
+            {%- else %}
+            {{item.content | xml | safe}}
+            {%- endif %}
             ]]></description>
             <pubDate>{{ item.create_time | utc }}</pubDate>
             <guid>{{site_url}}/post/{{item.pathname}}.html</guid>
         </item>
-        {% endfor %}
+        {%- endfor %}
     </channel>
 </rss>
