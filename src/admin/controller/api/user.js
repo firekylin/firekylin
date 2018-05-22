@@ -10,7 +10,6 @@ module.exports = class extends Base {
     let where = {};
     let modelInstance = this.modelInstance
       .field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
-
     if(this.id) {
       where.id = this.id;
       let user = await modelInstance.where(where).find();
@@ -74,7 +73,7 @@ module.exports = class extends Base {
    */
   async postAction(self) {
     if(this.get('type') === 'key') {
-      return await this.generateKey(self);
+      return this.generateKey(self);
     }
 
     let data = this.post();
@@ -91,7 +90,7 @@ module.exports = class extends Base {
     let isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
     // let isMine = this.userInfo.id === this.id;
     if(!isAdmin) {
-      return this.failed();
+      return this.fail();
     }
 
     let app_key = think.uuid();
@@ -116,7 +115,7 @@ module.exports = class extends Base {
     });
 
 
-    if(status !== null) { this.id = null; }
+    // if(status !== null) { this.id = null; }
     return await this.getAction(self);
   }
   /**
