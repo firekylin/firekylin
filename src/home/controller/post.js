@@ -69,19 +69,19 @@ module.exports = class extends Base {
 
     let template = 'index';
     if(where.tag) {
-      const tagView = await stats(path.join(this.THEME_VIEW_PATH, 'tag.html'))
+      const tagView = await stats(path.join(this.THEME_VIEW_PATH, 'tag_index.html'))
         .then(() => true)
         .catch(() => false);
       if(tagView) {
-        template = 'tag';
+        template = 'tag_index';
       }
     }
     if(where.cate) {
-      const cateView = await stats(path.join(this.THEME_VIEW_PATH, 'cate.html'))
+      const cateView = await stats(path.join(this.THEME_VIEW_PATH, 'cate_index.html'))
         .then(() => true)
         .catch(() => false);
       if(cateView) {
-        template = 'cate';
+        template = 'cate_index';
       }
     }
     return this.displayView(template);
