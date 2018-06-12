@@ -27,10 +27,15 @@ module.exports = class extends Post {
   }
 
   async updatePost(post) {
-    if(post.markdown_content) { post = this.postModelInstance.getContentAndSummary(post); }
-    if(post.create_time) { post = this.postModelInstance.getPostTime(post); }
+    const postModel = this.postModelInstance;
+    if(post.markdown_content) {
+      post = await postModel.getContentAndSummary(post);
+    }
+    if(post.create_time) {
+      post = postModel.getPostTime(post);
+    }
     if(post.tag) { post = await this.getTagIds(post.tag); }
-    let rows = await this.postModelInstance.savePost(post);
+    let rows = await postModel.savePost(post);
     return this.success({affectedRows: rows});
   }
 

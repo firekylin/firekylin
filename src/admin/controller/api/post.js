@@ -214,6 +214,7 @@ ${post.markdown_content}`;
 
     delete post.id;
     delete post.cate;
+    delete post.user_id;
     post.options = JSON.stringify({
       featuredImage: postOpt.featuredImage
     });
