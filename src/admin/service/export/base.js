@@ -3,7 +3,7 @@ const JSZip = require('jszip');
 
 module.exports = class extends think.Service {
   async getPosts() {
-    return this.model('post').select();
+    return this.model('post', null, 'admin').select();
   }
 
   generateZipFile(file, fn = new Function()) {
