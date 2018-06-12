@@ -31,17 +31,28 @@ module.exports = class extends Base {
 
     let tagName = '', cateName = '';
     if(where.tag) {
-      tagName = await this.model('tag').where({pathname: where.tag}).find();
+      tagName = await this.model('tag').where({
+        _logic: 'OR',
+        name: where.tag,
+        pathname: where.tag
+      }).find();
       if(!think.isEmpty(tagName)) {
         tagName = tagName.name;
+        where.tag = tagName.pathname;
       } else {
         return this.ctx.throw(404);
       }
     }
     if(where.cate) {
-      const cate = await this.model('cate').where({pathname: where.cate}).find();
+      const cate = await this.model('cate').where({
+        _logic: 'OR',
+        name: where.cate,
+        pathname: where.cate
+      }).find();
+
       if(!think.isEmpty(cate) && cate.name) {
         cateName = cate.name;
+        where.cate = cate.pathname;
       } else {
         return this.ctx.throw(404);
       }
