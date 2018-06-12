@@ -214,7 +214,9 @@ ${post.markdown_content}`;
 
     delete post.id;
     delete post.cate;
-    delete post.options;
+    post.options = JSON.stringify({
+      featuredImage: postOpt.featuredImage
+    });
 
     if(!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys]; }
     let pushes = push_sites_keys.map(key => {
