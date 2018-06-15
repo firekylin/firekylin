@@ -1,28 +1,37 @@
-const upyun = require('upyun');
-const Base = require('./base');
+const path = require("path");
+const fs = require("fs");
+const upyun = require("upyun");
+const Base = require("./base");
 
 module.exports = class extends Base {
   // 导入方法
   async uploadMethod(filename, config) {
-    const upyunInstance = new upyun(
-      config.upyunBucket, config.operater, config.password, 'v0.api.upyun.com', { apiVersion: 'v2' }
+    const upyunInstance = new upyun.Client(
+      new upyun.Service(config.upyunBucket, config.operater, config.password)
     );
-    const savePath = this.getSavePath(filename, config.upyunPrefix);
+    let savePath = this.getSavePath(filename, config.upyunPrefix);
+    if (!path.extname(savePath)) {
+      savePath += path.extname(config.originalFileName);
+    }
     return new Promise((resolve, reject) => {
-      upyunInstance.putFile(savePath, filename, null, false, {
-        'save-key': '/{year}{mon}{day}/{filename}{.suffix}'
-      }, (err, res) => {
+      fs.readFile(filename, (err, data) => {
         if (err) {
-          reject(err);
-        } else {
-          if (res.statusCode === 200) {
-            const origin = this.getAbsOrigin(config.upyunOrigin);
-            const compeletePath = `${origin}/${savePath}`;
-            resolve(compeletePath);
-          } else {
-            reject(res);
-          }
+          return reject(err);
         }
+        upyunInstance
+          .putFile(savePath, data)
+          .then(res => {
+            if (res === true || typeof res === "object") {
+              const origin = this.getAbsOrigin(config.upyunOrigin);
+              const compeletePath = `${origin}/${savePath}`;
+              resolve(compeletePath);
+            } else {
+              reject(res);
+            }
+          })
+          .catch(err => {
+            reject(err);
+          });
       });
     });
   }
@@ -31,4 +40,4 @@ module.exports = class extends Base {
   async run(file, config) {
     return await this.upload(file, config);
   }
-}
+};

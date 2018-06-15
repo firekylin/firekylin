@@ -82,7 +82,9 @@ module.exports = class extends Base {
     // 处理其它上传
     if(!type) { return this.fail(); }
     if(type === 'local') {
-      config = {name: this.post('name')};
+      config = { name: this.post('name') };
+    } else if(type === 'upyun') {
+      config = Object.assign({ originalFileName: file.name }, config);
     }
 
     return this.serviceUpload(type, file.path, config);
