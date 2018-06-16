@@ -1,34 +1,32 @@
+const fs = require('fs');
+const path = require('path');
 const upyun = require('upyun');
 const Base = require('./base');
 
+const readFileAsync = think.promisify(fs.readFile);
 module.exports = class extends Base {
   // 导入方法
-  async uploadMethod(filename, config) {
-    const upyunInstance = new upyun(
-      config.upyunBucket, config.operater, config.password, 'v0.api.upyun.com', { apiVersion: 'v2' }
-    );
-    const savePath = this.getSavePath(filename, config.upyunPrefix);
-    return new Promise((resolve, reject) => {
-      upyunInstance.putFile(savePath, filename, null, false, {
-        'save-key': '/{year}{mon}{day}/{filename}{.suffix}'
-      }, (err, res) => {
-        if (err) {
-          reject(err);
-        } else {
-          if (res.statusCode === 200) {
-            const origin = this.getAbsOrigin(config.upyunOrigin);
-            const compeletePath = `${origin}/${savePath}`;
-            resolve(compeletePath);
-          } else {
-            reject(res);
-          }
-        }
-      });
-    });
+  async uploadMethod(filename, {upyunBucket, operater, password, upyunPrefix, upyunOrigin, file}) {
+    const service = new upyun.Service(upyunBucket, operater, password);
+    const upyunInstance = new upyun.Client(service);
+    let savePath = this.getSavePath(filename, upyunPrefix);
+    if (!path.extname(savePath)) {
+      savePath += path.extname(file.name);
+    }
+
+    const fileData = await readFileAsync(filename);
+    const resp = await upyunInstance.putFile(savePath, fileData);
+    if(resp !== true && typeof resp !== 'object') {
+      throw new Error(resp);
+    }
+
+    const origin = this.getAbsOrigin(upyunOrigin);
+    const compeletePath = `${origin}/${savePath}`;
+    return compeletePath;
   }
 
   // 执行方法
   async run(file, config) {
-    return await this.upload(file, config);
+    return this.upload(file, config);
   }
-}
+};
