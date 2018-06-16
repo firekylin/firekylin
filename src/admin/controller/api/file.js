@@ -83,10 +83,9 @@ module.exports = class extends Base {
     if(!type) { return this.fail(); }
     if(type === 'local') {
       config = { name: this.post('name') };
-    } else if(type === 'upyun') {
-      config = Object.assign({ originalFileName: file.name }, config);
     }
 
+    config.file = file;
     return this.serviceUpload(type, file.path, config);
   }
 
