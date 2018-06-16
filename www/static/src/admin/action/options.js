@@ -7,5 +7,6 @@ export default Reflux.createActions({
   comment: {children: ['completed', 'failed'], asyncResult: true},
   upload: {children: ['completed', 'failed'], asyncResult: true},
   navigation: {children: ['completed', 'failed'], asyncResult: true},
+  rssImportList: {children: ['completed', 'failed'], asyncResult: true},
   defaultCategory: {children: ['completed', 'failed'], asyncResult: true}
 });

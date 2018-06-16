@@ -65,6 +65,14 @@ export default Reflux.createStore({
       err => this.trigger(err, 'saveNavigationFailed')
     );
   },
+  onRssImportList(data) {
+    let req = superagent.post('/admin/api/options?method=put');
+    req.type('form').send({'rssImportList': JSON.stringify(data)});
+    return firekylin.request(req).then(
+      data => this.trigger(data, 'saveRSSImportListSuccess'),
+      err => this.trigger(err, 'saveRSSImportListFailed')
+    );
+  },
   onDefaultCategory(id) {
     let url = '/admin/api/options?type=defaultCategory', req;
     if(id) {

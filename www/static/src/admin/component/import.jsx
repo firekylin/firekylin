@@ -1,16 +1,44 @@
 import React from 'react';
+import { Tabs, Tab } from 'react-bootstrap';
 import { Radio, RadioGroup, Form, ValidatedInput, FileValidator } from 'react-bootstrap-validation';
 import Base from 'base';
 import firekylin from 'common/util/firekylin';
 
 import BreadCrumb from 'admin/component/breadcrumb';
+import OptionsAction from 'admin/action/options';
+import OptionsStore from 'admin/store/options';
 import TipAction from 'common/action/tip';
 
 module.exports = class extends Base {
-  state = {
-    uploading: false,
-    uploadType: 'wordpress'
-  };
+  state = this.initState();
+
+  initState() {
+    let options = window.SysConfig.options;
+    if(!options.rssImportList) {
+      options.rssImportList = [];
+    } else if(typeof(options.rssImportList) === 'string') {
+      options.rssImportList = JSON.parse(options.rssImportList);
+    }
+    return {
+      key: 'normal',
+      uploading: false,
+      uploadType: 'wordpress',
+      rssImportList: options.rssImportList
+    };
+  }
+
+  componentWillMount() {
+    this.listenTo(OptionsStore, this.handleTrigger.bind(this));
+  }
+
+  handleTrigger(data, type) {
+    switch (type) {
+      case 'saveRSSImportListSuccess':
+        TipAction.success('更新成功');
+        break;
+    }
+  }
+
   handleValidSubmit(e) {
     this.setState({uploading: true});
     var form = new FormData();
@@ -26,7 +54,35 @@ module.exports = class extends Base {
     });
   }
 
-  render() {
+  onValidRSSSubmit(e) {
+    const {rssImportList} = this.state;
+    rssImportList.push({
+      url: e['rss-url']
+    });
+    this.setState({rssImportList});
+    this.updateRSS();
+  }
+
+  handleSelect(key) {
+    this.setState({key});
+  }
+
+  updateRSS() {
+    const {rssImportList} = this.state;
+    window.SysConfig.options.rssImportList = rssImportList;
+    OptionsAction.rssImportList(rssImportList);
+    this.forceUpdate();
+  }
+
+  edit(idx, rss) {
+    const {rssImportList} = this.state;
+    rssImportList[idx] = rss;
+
+    this.setState({rssImportList});
+    this.updateRSS();
+  }
+
+  renderNormalImport() {
     let uploadType = this.state.uploadType;
     const radio = (
       <RadioGroup
@@ -123,19 +179,153 @@ module.exports = class extends Base {
       )
     };
     return (
+      <Form onValidSubmit={this.handleValidSubmit.bind(this)} className="clearfix options-import">
+        <div className="form-group">
+          <label>请选择导入的博客平台</label>
+          { radio }
+        </div>
+        {uploadInput[this.state.uploadType]}
+        <button type="submit" className="btn btn-primary">
+          上传{this.state.uploading?'中...':''}
+        </button>
+      </Form>
+    );
+  }
+
+  normalRow(rss, i) {
+    return (
+      <tr
+        key={i}
+        className="fk-dragable-row"
+      >
+        <td>{rss.url}</td>
+        <td>
+          <button
+              type="button"
+              className="btn btn-primary btn-xs"
+              onClick={()=> {
+                this.setState({editingRow: i, editingRSS: Object.assign({}, rss)});
+              }}
+          >
+            <span className="glyphicon glyphicon-edit"></span>
+            <span>编辑</span>
+          </button>
+          <span> </span>
+          <button
+              type="button"
+              disabled={this.state.editingRow !== -1}
+              className="btn btn-danger btn-xs"
+              onClick={()=> {
+                this.state.rssImportList.splice(i, 1);
+                this.updateRSS();
+              }}
+          >
+            <span className="glyphicon glyphicon-trash"></span>
+            <span>删除</span>
+          </button>
+        </td>
+      </tr>
+    )
+  }
+
+  editingRow(nav, i) {
+    return (
+      <tr
+        key={`editing-${i}`}
+        className="fk-dragable-row"
+      >
+        <td>
+          <ValidatedInput
+              type="text"
+              name="rss-url"
+              validate="required"
+              defaultValue={this.state.editingRSS.url}
+              onChange={e => {
+                this.state.editingRSS.url = e.target.value;
+              }}
+          />
+        </td>
+        <td>
+          <button
+              type="button"
+              className="btn btn-primary btn-xs"
+              onClick={()=> {
+                if (this.state.editingRSS.url) {
+                  this.edit(this.state.editingRow, this.state.editingRSS);
+                  this.setState({editingRow: -1, editingRSS: null});
+                }
+              }}
+          >
+            <span className="glyphicon glyphicon-edit"></span>
+            <span>保存</span>
+          </button>
+          <span> </span>
+          <button
+              type="button"
+              className="btn btn-default btn-xs"
+              onClick={()=> {
+                this.setState({editingRow: -1, editingRSS: null});
+              }}
+          >
+            <span className="glyphicon glyphicon-remove"></span>
+            <span>取消</span>
+          </button>
+        </td>
+      </tr>
+    )
+  }
+
+  renderRSSImport() {
+    const {rssImportList} = this.state;
+
+    const rows = rssImportList.map((nav, i) =>
+      this.state.editingRow !== i ? this.normalRow(nav, i) : this.editingRow(nav, i)
+    );
+
+    rows.push(
+      <tr key="form">
+        <td>
+          <ValidatedInput
+              type="text"
+              name="rss-url"
+              validate="required"
+          />
+        </td>
+        <td>
+          <button type="submit" className="btn btn-primary btn-xs">
+            <span className="glyphicon glyphicon-edit"></span>
+            <span>新增</span>
+          </button>
+        </td>
+      </tr>
+    );
+    return (
+      <Form onValidSubmit={this.onValidRSSSubmit.bind(this)}>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>RSS地址</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody children={rows} />
+        </table>
+      </Form>
+    );
+  }
+
+  render() {
+    const {key} = this.state;
+    return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
         <div className="manage-container">
-          <Form onValidSubmit={this.handleValidSubmit.bind(this)} className="clearfix options-import">
-            <div className="form-group">
-              <label>请选择导入的博客平台</label>
-              { radio }
-            </div>
-            {uploadInput[this.state.uploadType]}
-            <button type="submit" className="btn btn-primary">
-              上传{this.state.uploading?'中...':''}
-            </button>
-          </Form>
+          <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
+            <Tab eventKey="normal" title="普通导入"></Tab>
+            <Tab eventKey="rss" title="RSS导入"></Tab>
+          </Tabs>
+          {key === 'normal' ? this.renderNormalImport() : null}
+          {key === 'rss' ? this.renderRSSImport() : null}
         </div>
       </div>
     );
