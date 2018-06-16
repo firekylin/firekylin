@@ -1,13 +1,21 @@
 import React from 'react';
+import Select, {Option} from 'rc-select';
 import { Tabs, Tab } from 'react-bootstrap';
 import { Radio, RadioGroup, Form, ValidatedInput, FileValidator } from 'react-bootstrap-validation';
+
 import Base from 'base';
 import firekylin from 'common/util/firekylin';
 
 import BreadCrumb from 'admin/component/breadcrumb';
 import OptionsAction from 'admin/action/options';
 import OptionsStore from 'admin/store/options';
+import UserAction from 'admin/action/user';
+import CateAction from 'admin/action/cate';
 import TipAction from 'common/action/tip';
+import UserStore from 'admin/store/user';
+import CateStore from 'admin/store/cate';
+
+import 'rc-select/assets/index.css';
 
 module.exports = class extends Base {
   state = this.initState();
@@ -20,7 +28,12 @@ module.exports = class extends Base {
       options.rssImportList = JSON.parse(options.rssImportList);
     }
     return {
+      users: [],
+      cateList: [],
       key: 'normal',
+      editingRow: -1,
+      selectCate: null,
+      selectUser: null,
       uploading: false,
       uploadType: 'wordpress',
       rssImportList: options.rssImportList
@@ -29,6 +42,20 @@ module.exports = class extends Base {
 
   componentWillMount() {
     this.listenTo(OptionsStore, this.handleTrigger.bind(this));
+    this.listenTo(UserStore, this.getUserList.bind(this));
+    this.listenTo(CateStore, this.getCateList.bind(this));
+
+    CateAction.select();
+    UserAction.select();
+  }
+
+  getCateList(cateList) {
+    this.setState({cateList});
+  }
+
+  getUserList(users) {
+    const selectUser = users[0].id;
+    this.setState({users, selectUser});
   }
 
   handleTrigger(data, type) {
@@ -55,11 +82,17 @@ module.exports = class extends Base {
   }
 
   onValidRSSSubmit(e) {
-    const {rssImportList} = this.state;
+    const {rssImportList, selectCate, selectUser, users} = this.state;
     rssImportList.push({
-      url: e['rss-url']
+      url: e['rss-url'],
+      user: selectUser,
+      cate: selectCate
     });
-    this.setState({rssImportList});
+    this.setState({
+      rssImportList,
+      selectCate: null,
+      selectUser: users[0].id
+    });
     this.updateRSS();
   }
 
@@ -193,12 +226,17 @@ module.exports = class extends Base {
   }
 
   normalRow(rss, i) {
+    const {users, cateList} = this.state;
+    const user = users.find(user => user.id === rss.user);
+    const cate = cateList.find(cate => cate.id === rss.cate);
     return (
       <tr
         key={i}
         className="fk-dragable-row"
       >
         <td>{rss.url}</td>
+        <td>{user ? (user.display_name||user.name) : '/'}</td>
+        <td>{cate ? cate.name : '/'}</td>
         <td>
           <button
               type="button"
@@ -229,6 +267,7 @@ module.exports = class extends Base {
   }
 
   editingRow(nav, i) {
+    const {users, cateList, editingRSS} = this.state;
     return (
       <tr
         key={`editing-${i}`}
@@ -239,18 +278,59 @@ module.exports = class extends Base {
               type="text"
               name="rss-url"
               validate="required"
-              defaultValue={this.state.editingRSS.url}
+              defaultValue={editingRSS.url}
               onChange={e => {
-                this.state.editingRSS.url = e.target.value;
+                editingRSS.url = e.target.value;
+                this.setState({editingRSS});
               }}
           />
+        </td>
+        <td>
+          <Select
+            value={editingRSS.user}
+            style={{width: '100%'}}
+            optionLabelProp="children"
+            onChange={val => {
+              editingRSS.user = val;
+              this.setState({editingRSS})
+            }}
+          >
+              {users.map(user =>
+                <Option
+                    key={user.id}
+                    value={user.id}
+                >
+                  {user.display_name||user.name}
+                </Option>
+              )}
+          </Select>
+        </td>
+        <td>
+          <Select
+            value={editingRSS.cate}
+            style={{width: '100%'}}
+            optionLabelProp="children"
+            onChange={val => {
+              editingRSS.cate = val;
+              this.setState({editingRSS});
+            }}
+          >
+              {cateList.map(cate =>
+                <Option
+                    key={cate.id}
+                    value={cate.id}
+                >
+                  {cate.name}
+                </Option>
+              )}
+          </Select>
         </td>
         <td>
           <button
               type="button"
               className="btn btn-primary btn-xs"
               onClick={()=> {
-                if (this.state.editingRSS.url) {
+                if (editingRSS.url && editingRSS.user && editingRSS.cate) {
                   this.edit(this.state.editingRow, this.state.editingRSS);
                   this.setState({editingRow: -1, editingRSS: null});
                 }
@@ -276,7 +356,7 @@ module.exports = class extends Base {
   }
 
   renderRSSImport() {
-    const {rssImportList} = this.state;
+    const {rssImportList, users, selectUser, cateList, selectCate} = this.state;
 
     const rows = rssImportList.map((nav, i) =>
       this.state.editingRow !== i ? this.normalRow(nav, i) : this.editingRow(nav, i)
@@ -292,6 +372,40 @@ module.exports = class extends Base {
           />
         </td>
         <td>
+          <Select
+            value={selectUser}
+            style={{width: '100%'}}
+            optionLabelProp="children"
+            onChange={val => this.setState({selectUser: val})}
+          >
+              {users.map(user =>
+                <Option
+                    key={user.id}
+                    value={user.id}
+                >
+                  {user.display_name||user.name}
+                </Option>
+              )}
+          </Select>
+        </td>
+        <td>
+          <Select
+            value={selectCate}
+            style={{width: '100%'}}
+            optionLabelProp="children"
+            onChange={val => this.setState({selectCate: val})}
+          >
+              {cateList.map(cate =>
+                <Option
+                    key={cate.id}
+                    value={cate.id}
+                >
+                  {cate.name}
+                </Option>
+              )}
+          </Select>
+        </td>
+        <td>
           <button type="submit" className="btn btn-primary btn-xs">
             <span className="glyphicon glyphicon-edit"></span>
             <span>新增</span>
@@ -305,6 +419,8 @@ module.exports = class extends Base {
           <thead>
             <tr>
               <th>RSS地址</th>
+              <th>导入至用户</th>
+              <th>导入至分类</th>
               <th>操作</th>
             </tr>
           </thead>
