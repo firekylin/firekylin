@@ -212,16 +212,18 @@ module.exports = class extends Base {
       )
     };
     return (
-      <Form onValidSubmit={this.handleValidSubmit.bind(this)} className="clearfix options-import">
-        <div className="form-group">
-          <label>请选择导入的博客平台</label>
-          { radio }
-        </div>
-        {uploadInput[this.state.uploadType]}
-        <button type="submit" className="btn btn-primary">
-          上传{this.state.uploading?'中...':''}
-        </button>
-      </Form>
+      <div style={{paddingTop: 8}}>
+        <Form onValidSubmit={this.handleValidSubmit.bind(this)} className="clearfix options-import">
+          <div className="form-group">
+            <label>请选择导入的博客平台</label>
+            { radio }
+          </div>
+          {uploadInput[this.state.uploadType]}
+          <button type="submit" className="btn btn-primary">
+            上传{this.state.uploading?'中...':''}
+          </button>
+        </Form>
+      </div>
     );
   }
 
@@ -426,6 +428,11 @@ module.exports = class extends Base {
           </thead>
           <tbody children={rows} />
         </table>
+        <p>
+          <span className="pull-lef">
+          注：后台会每隔1小时自动抓取 RSS 列表新增内容导入到对应的用户和分类下。
+          </span>
+        </p>
       </Form>
     );
   }
