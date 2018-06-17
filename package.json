@@ -12,7 +12,9 @@
     "lint": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache -f table --ext .js,.jsx || true",
     "lint-fix": "eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore -f table --ext .js,.jsx --fix || true",
     "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore -f table --ext .js,.jsx",
-    "check-extraneous-pkgs": "npm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && npm prune)"
+    "check-extraneous-pkgs": "npm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && npm prune)",
+    "cron:rss": "npm start -- \"admin/cron/rss\"",
+    "cron:comment": "npm start -- \"crontab/sync_comment\""
   },
   "pre-commit": [
     "lint-break-on-errors"
