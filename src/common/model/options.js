@@ -46,6 +46,12 @@ module.exports = class extends think.Model {
       if(!ret.push_sites) {
         ret.push_sites = {};
       }
+      if(ret.rssImportList && think.isString(ret.rssImportList)) {
+        ret.rssImportList = JSON.parse(ret.rssImportList);
+      }
+      if(!ret.rssImportList) {
+        ret.rssImportList = [];
+      }
     }
     return ret;
   }
