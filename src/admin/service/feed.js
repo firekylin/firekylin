@@ -31,23 +31,25 @@ module.exports = class extends think.Service {
   }
 
   /**
-   * 获取文章的地址，解析失败则返回当前时间作为标志
+   * 获取文章的地址，解析失败则返回当前内容md5作为标志
    * @param {String} url 文章URL
+   * @param {String} description 文章简介
    */
-  pathnamePaser(url) {
+  pathnamePaser(url, description) {
     url = parse(url);
+    const guid = think.md5(description);
     if(!url) {
-      return Date.now();
+      return guid;
     }
 
     const pathname = url.pathname.replace(/\/+$/, '').split('/').pop();
     if(!pathname) {
-      return Date.now();
+      return guid;
     }
 
     const ret = pathname.replace(/\..+$/, '');
     if(!ret) {
-      return Date.now();
+      return guid;
     }
 
     return ret;
@@ -67,7 +69,7 @@ module.exports = class extends think.Service {
       title,
       markdown_content,
       create_time: pubDate,
-      pathname: this.pathnamePaser(link)
+      pathname: this.pathnamePaser(link, description)
     };
   }
 
