@@ -38,8 +38,12 @@ module.exports = class extends think.Controller {
           post.cate = [post.cate];
         }
 
-        const insertId = await postModel.addPost(post);
-        think.logger.info(`导入文章 ${insertId} 成功`);
+        const {id, type} = await postModel.addPost(post);
+        if(type === 'exist') {
+          think.logger.warn(`《${post.title}》已存在`);
+        } else {
+          think.logger.info(`《${post.title}》导入成功，ID 为 ${id}`);
+        }
       }
     }
 
