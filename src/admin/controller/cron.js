@@ -29,7 +29,6 @@ module.exports = class extends think.Controller {
       });
 
       for(let post of feeds) {
-        post.addIns
         post.user_id = rss.user || user_id;
         post = await postModel.getContentAndSummary(post);
         post = postModel.getPostTime(post);

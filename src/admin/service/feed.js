@@ -26,8 +26,7 @@ module.exports = class extends think.Service {
     if(resp.errno) {
       return false;
     }
-
-    return resp.data.content;
+    return resp.data;
   }
 
   /**
@@ -60,7 +59,11 @@ module.exports = class extends think.Service {
    * @param {Object} feed 解析出来的 feed 数据
    */
   async transformPost({title, link, pubDate, description}) {
-    let markdown_content = await this.contentParser(link);
+    let {
+      content: markdown_content,
+      firstImageUrl: featuredImage
+    } = await this.contentParser(link);
+
     if(!markdown_content) {
       markdown_content = description;
     }
@@ -69,7 +72,8 @@ module.exports = class extends think.Service {
       title,
       markdown_content,
       create_time: pubDate,
-      pathname: this.pathnamePaser(link, description)
+      pathname: this.pathnamePaser(link, description),
+      options: !featuredImage ? { } : { featuredImage }
     };
   }
 
