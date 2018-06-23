@@ -320,3 +320,28 @@ article .entry-content pre code {
   padding: 0;
   line-height: 26px;
 }
+/** toc 目录样式 **/
+.toc {
+  float: right;
+  border: 1px solid #e2e2e2;
+  font-size: 14px;
+  margin: 0 0 15px 20px;
+  max-width: 260px;
+  min-width: 120px;
+  padding: 6px;
+  background: #FFF;
+}
+.toc::before {
+  content: '文章目录';
+  font-weight: bold;
+  border-bottom: 1px solid #e2e2e2;
+  display: block;
+}
+.toc:empty {
+    display: none;
+}
+@media screen and (max-width: 640px) {
+  .toc {
+      float: none;
+  }
+}
