@@ -70,6 +70,7 @@ module.exports = class extends Base {
         <Radio value='upyun' label='又拍云' />
         <Radio value='aliyun' label='阿里云' />
         <Radio value='smms' label='SM.MS 图床' />
+        <Radio value='s3' label='AWS S3' />
       </RadioGroup>
     );
     let qiniu = (
@@ -271,6 +272,67 @@ module.exports = class extends Base {
       </div>
     )
 
+    let s3 = (
+      <div>
+        <div className="form-group">
+          <label>accessKeyId</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('accessKeyId')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写 AWS S3 的accessKeyId'
+              }}
+              name='accessKeyId'
+            />
+        </div>
+        <div className="form-group">
+          <label>accessKeySecret</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('accessKeySecret')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写 AWS S3 的accessKeySecret'
+              }}
+              name='accessKeySecret'
+            />
+        </div>
+        <div className="form-group">
+          <label>存储桶(Bucket)</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('bucket')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写 AWS S3 的存储桶名'
+              }}
+              name='bucket'
+            />
+        </div>
+        <div className="form-group">
+        <label>服务区域/终端节点</label>
+        <ValidatedInput
+              type='text'
+              {...this.getProps('region')}
+              validate="required"
+              errorHelp={{
+                  required: '请填写 S3 的服务区域或者终端节点'
+              }}
+              name='region'
+            />
+        </div>
+        <div className="form-group">
+          <label>路径前缀</label>
+          <ValidatedInput
+              type='text'
+              {...this.getProps('prefix')}
+              name='prefix'
+            />
+        </div>
+      </div>
+    );
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -284,6 +346,7 @@ module.exports = class extends Base {
           { upload.type === 'upyun' && upyun }
           { upload.type === 'aliyun' && aliyun }
           { upload.type === 'smms' && smms }
+          { upload.type === 's3' && s3 }
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
             { this.state.submitting ? '提交中...' : '提交' }
           </button>
