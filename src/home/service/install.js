@@ -180,14 +180,14 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     // });
   }
 
-  async createAccount(username, password) {
+  async createAccount(username, password, email) {
     password = think.md5(this.password_salt + password);
 
     let model = this.getModel('user', 'admin');
     let data = {
       username,
       password,
-      email: '',
+      email,
       type: 1,
       status: 1,
       ip: this.ip
@@ -223,9 +223,9 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     this.updateConfig();
   }
 
-  async saveSiteInfo({title, site_url, username, password}) {
+  async saveSiteInfo({title, site_url, username, password, email}) {
     await this.insertData(title, site_url);
-    await this.createAccount(username, password);
+    await this.createAccount(username, password, email);
     await this.addStartPost();
 
     firekylin.setInstalled();

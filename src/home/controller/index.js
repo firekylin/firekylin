@@ -116,11 +116,17 @@ module.exports = class extends Base {
 
     switch(data.step) {
       case 2:
+        if(data.password !== data.repeatpwd) {
+          message = '两次密码输入不一致请重新输入';
+          break;
+        }
+
         let siteInfo = {
           title: data.title,
           site_url: data.site_url,
           username: data.username,
-          password: data.password
+          password: data.password,
+          email: data.email
         }
         try {
           await instance.saveSiteInfo(siteInfo);

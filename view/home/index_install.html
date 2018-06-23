@@ -87,9 +87,22 @@
       </div>
       <div class="col-md-6">
         <div class="form-group">
+          <label>邮箱</label>
+          <input type="email" required name="email" value="{{data.email}}" class="form-control" placeholder="管理员邮箱">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
           <label>密码</label>
-          <input type="text" required name="password" value="{{data.password}}" class="form-control" placeholder="密码">
+          <input type="password" required name="password" value="{{data.password}}" class="form-control" placeholder="密码">
           <p class="help-block">密码长度至少8位，最好使用字母、数字、特殊字符等组合</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>再次输入密码</label>
+          <input type="password" required name="repeatpwd" value="{{data.repeatpwd}}" class="form-control" placeholder="密码">
+          <p class="help-block"></p>
         </div>
       </div>
     </div>
