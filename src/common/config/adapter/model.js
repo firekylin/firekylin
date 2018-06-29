@@ -1,5 +1,4 @@
 const mysql = require('think-model-mysql');
-const sqlite = require('think-model-sqlite');
 
 const isDev = think.env === 'development';
 let msc = {
@@ -35,11 +34,5 @@ module.exports = {
     password: msc.password,
     prefix: msc.prefix,
     encoding: msc.encoding
-  },
-  sqlite: {
-    handle: sqlite,
-    prefix: 'fk_',
-    database: 'firekylin',
-    path: think.ROOT_PATH + '/db'
   }
 };
