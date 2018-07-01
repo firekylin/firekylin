@@ -31,7 +31,9 @@ module.exports = class extends think.Logic {
         },
         site_url: {
           requiredIf: ['step', 2],
-          url: true
+          url: {
+            require_tld: false
+          }
         },
         username: {
           requiredIf: ['step', 2],

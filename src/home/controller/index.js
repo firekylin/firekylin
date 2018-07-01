@@ -157,7 +157,7 @@ module.exports = class extends Base {
 
     this.assign('message', message);
     this.assign('data', data);
-    this.display();
+    return this.display();
   }
   /**
    * 申请成为投稿者
