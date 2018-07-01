@@ -26,32 +26,34 @@ module.exports = class extends think.Model {
       return result;
     }, this.cacheOptions);
     //comment type
-    if(ret) {
-      if(ret.comment && think.isString(ret.comment)) {
-        ret.comment = JSON.parse(ret.comment);
-      }
-      if(!ret.comment) {
-        ret.comment = {type: 'disqus'};
-      }
-      // upload settings
-      if(ret.upload && think.isString(ret.upload)) {
-        ret.upload = JSON.parse(ret.upload);
-      }
-      if(!ret.upload) {
-        ret.upload = {type: 'local'};
-      }
-      if(ret.push_sites && think.isString(ret.push_sites)) {
-        ret.push_sites = JSON.parse(ret.push_sites);
-      }
-      if(!ret.push_sites) {
-        ret.push_sites = {};
-      }
-      if(ret.rssImportList && think.isString(ret.rssImportList)) {
-        ret.rssImportList = JSON.parse(ret.rssImportList);
-      }
-      if(!ret.rssImportList) {
-        ret.rssImportList = [];
-      }
+    if(think.isEmpty(ret)) {
+      return {};
+    }
+
+    if(ret.comment && think.isString(ret.comment)) {
+      ret.comment = JSON.parse(ret.comment);
+    }
+    if(!ret.comment) {
+      ret.comment = {type: 'disqus'};
+    }
+    // upload settings
+    if(ret.upload && think.isString(ret.upload)) {
+      ret.upload = JSON.parse(ret.upload);
+    }
+    if(!ret.upload) {
+      ret.upload = {type: 'local'};
+    }
+    if(ret.push_sites && think.isString(ret.push_sites)) {
+      ret.push_sites = JSON.parse(ret.push_sites);
+    }
+    if(!ret.push_sites) {
+      ret.push_sites = {};
+    }
+    if(ret.rssImportList && think.isString(ret.rssImportList)) {
+      ret.rssImportList = JSON.parse(ret.rssImportList);
+    }
+    if(!ret.rssImportList) {
+      ret.rssImportList = [];
     }
     return ret;
   }
