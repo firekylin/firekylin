@@ -1,30 +1,15 @@
 module.exports = class extends think.Model {
-  constructor(...args) {
-    super(...args);
-
-    this.cacheKey = 'website_options';
-    this.cacheOptions = {
-      timeout: 30 * 24 * 3600 * 1000,
-      // type: !think.isMaster ? 'file' : 'memory'
-    }
-  }
-
   /**
    * get options
    * @return {} []
    */
   async getOptions(flag) {
-    if(flag === true) {
-      await think.cache(this.cacheKey, null);
-    }
-    let ret = await think.cache(this.cacheKey, async () => {
-      let data = await this.select();
-      let result = {};
-      data.forEach(item => {
-        result[item.key] = item.value;
-      });
-      return result;
-    }, this.cacheOptions);
+    let data = await this.select();
+    let ret = {};
+    data.forEach(item => {
+      ret[item.key] = item.value;
+    });
+
     //comment type
     if(think.isEmpty(ret)) {
       return {};
@@ -63,24 +48,9 @@ module.exports = class extends think.Model {
    */
   async updateOptions(key, value) {
     let data = think.isObject(key) ? think.extend({}, key) : {[key] : value};
-    let cacheData = await think.cache(this.cacheKey, undefined, this.cacheOptions);
-    if(think.isEmpty(cacheData)) {
-      cacheData = await this.getOptions();
-    }
-    let changedData = {};
+    let promises = [];
     for(let key in data) {
-      if(data[key] !== cacheData[key]) {
-        changedData[key] = data[key];
-      }
-    }
-    //data is not changed
-    if(think.isEmpty(changedData)) {
-      return;
-    }
-    let p1 = think.cache(this.cacheKey, think.extend(cacheData, changedData), this.cacheOptions);
-    let promises = [p1];
-    for(let key in changedData) {
-      let value = changedData[key];
+      let value = data[key];
       let exist = await this.where({key: key}).count('key');
       let p;
       if(exist) {
@@ -94,7 +64,7 @@ module.exports = class extends think.Model {
     await this.getOptions(true);
 
     // if `auto_summary` is changed, then rebuild all summaries of posts
-    if (typeof changedData.auto_summary !== 'undefined') {
+    if (typeof data.auto_summary !== 'undefined') {
       const postModel = think.model('post', {}, 'admin');
       // doesn't wait for return
       await postModel.updateAllPostSummaries();
