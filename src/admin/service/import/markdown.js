@@ -4,7 +4,7 @@ const {execSync} = require('child_process');
 const Base = require('./base');
 
 const PATH = path.join(think.RUNTIME_PATH, 'importMarkdownFileToFirekylin');
-module.epxorts = class extends Base {
+module.exports = class extends Base {
   constructor(think) {
     super(think);
     this._think = think;
