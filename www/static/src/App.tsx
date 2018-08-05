@@ -1,22 +1,33 @@
 import * as React from 'react';
-import { Button } from 'antd';
-import './App.scss';
-
-class App extends React.Component {
-  public render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src="./static/img/firekylin.jpg" className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-          <Button type="primary">Primary</Button>
-        </p>
-      </div>
-    );
-  }
+import * as ReactDOM from 'react-dom';
+import { Provider } from 'mobx-react';
+import './app.scss';
+import routes from './routes';
+import AppStore from './store/app.store';
+declare global {
+    interface Window {
+        SysConfig: {
+            userInfo: any
+        };
+    }
 }
 
-export default App;
+// interface WebpackRequire extends NodeRequire {
+//     ensure(
+//         dependencies: string[],
+//         callback: (require: WebpackRequire) => void,
+//         errorCallback?: (error: Error) => void,
+//         chunkName?: string
+//     ): void;
+// };
+
+if (Object.freeze) {
+   Object.freeze(window.SysConfig.userInfo);
+}
+
+ReactDOM.render(
+    <Provider {...AppStore}>
+        {routes}
+    </Provider>,
+    document.getElementById('app') as HTMLElement
+);

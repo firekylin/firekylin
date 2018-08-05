@@ -3,7 +3,7 @@ const helpers = require('./helpers');
 
 const commonConfig = {
     entry: {
-        admin: './www/static/src/index.tsx'
+        admin: './www/static/src/app.tsx'
     },
     resolve: {
         extensions: ['*', '.ts', '.tsx', 'jsx', '.js', 'json']
