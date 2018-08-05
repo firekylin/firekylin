@@ -67,7 +67,7 @@ const commonConfig = {
                 use: [
                     {loader: 'style-loader'},
                     {loader: 'css-loader'},
-                    {loader: 'less-loader'}
+                    {loader: 'less-loader', options: {javascriptEnabled: true}}
                 ]
             }
         ]
