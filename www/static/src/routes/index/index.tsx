@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button } from 'antd';
-import './index.scss';
+import './index.less';
 import { observer, inject } from 'mobx-react';
 import { IndexProps } from './index.model';
 

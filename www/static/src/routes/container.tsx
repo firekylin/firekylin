@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { HashRouter, Route } from 'react-router-dom';
-import './container.scss';
+import './container.less';
 import Index from './index';
 
 class Container extends React.Component<any, {}> {

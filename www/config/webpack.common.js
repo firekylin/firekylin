@@ -63,14 +63,6 @@ const commonConfig = {
                 ]
             },
             {
-                test: /\.scss$/,
-                use: [
-                    {loader: 'style-loader'},
-                    {loader: 'css-loader'},
-                    {loader: 'sass-loader'}
-                ]
-            },
-            {
                 test: /\.less$/,
                 use: [
                     {loader: 'style-loader'},
