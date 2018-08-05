@@ -96,6 +96,7 @@
     "md5": "^2.0.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
+    "node-sass": "^4.9.2",
     "nyc": "^7.0.0",
     "pre-commit": "^1.2.2",
     "qrcode-react": "0.1.14",
