@@ -1,32 +1,9 @@
-// import { appSrc } from './paths';
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const tsImportPluginFactory = require('ts-import-plugin');
 const helpers = require('./helpers');
-const paths = require('./paths');
 
 const commonConfig = {
     entry: {
-        admin: './www/static/src/index.tsx',
-        vendor: [
-            // 'md5',
-            'react',
-            // 'moment',
-            'react-dom',
-            'classnames',
-            'react-router',
-            // 'qrcode-react',
-        ]
-    },
-    optimization: {
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    chunks: 'all',
-                    name: 'vendor'
-                }
-            }
-        },
-        minimize: true
+        admin: './www/static/src/index.tsx'
     },
     resolve: {
         extensions: ['*', '.ts', '.tsx', 'jsx', '.js', 'json']
@@ -41,26 +18,30 @@ const commonConfig = {
             },
             {
                 test: /\.(js|jsx|mjs)$/,
-                // include: paths.appSrc,
                 loader: require.resolve('babel-loader'),
-                options: {
-                  
+                options: {   
                   compact: true,
                 },
             },
-            // Compile .tsx?
             {
                 test: /\.(ts|tsx)$/,
-                // include: paths.appSrc,
-                use: [
-                    {
-                        loader: require.resolve('ts-loader'),
-                        options: {
-                        // disable type checker
-                        transpileOnly: true,
-                        },
-                    },
-                ],
+                loader: 'ts-loader',
+                options: {
+                    // disable type checker
+                    transpileOnly: true,
+                    // ts import plugin
+                    getCustomTransformers: () => ({
+                        before: [ tsImportPluginFactory({
+                            libraryName: 'antd',
+                            libraryDirectory: 'lib',
+                            style: true
+                        }) ]
+                    }),
+                    compilerOptions: {
+                        module: 'es2015'
+                    }
+                },
+                exclude: /node_modules/
             },
             {
                 test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
@@ -82,10 +63,21 @@ const commonConfig = {
                 ]
             },
             {
-                test: /\.(scss|sass)$/,
-                exclude: helpers.root('node_modules'),
-                loader: 'raw-loader!sass-loader'
+                test: /\.scss$/,
+                use: [
+                    {loader: 'style-loader'},
+                    {loader: 'css-loader'},
+                    {loader: 'sass-loader'}
+                ]
             },
+            {
+                test: /\.less$/,
+                use: [
+                    {loader: 'style-loader'},
+                    {loader: 'css-loader'},
+                    {loader: 'less-loader'}
+                ]
+            }
         ]
     },
     plugins: [

@@ -1,14 +1,25 @@
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const commonConfig = require('./webpack.common.js');
-const helpers = require('./helpers');
+const paths = require('./paths');
 
 module.exports = webpackMerge(commonConfig, {
     mode: 'production',
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    chunks: 'all',
+                }
+            }
+        },
+        minimize: true
+    },
     output: {
-        path: helpers.root('dist'),
-        filename: '[name].[chunkhash].js',
-        chunkFilename: '[id].[chunkhash].chunk.js'
+        path: paths.distSrc,
+        filename: '[name].js',
+        chunkFilename: 'vendor.chunk.js',
     },
     plugins: [
         new webpack.DefinePlugin({

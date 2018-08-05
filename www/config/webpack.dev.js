@@ -1,10 +1,9 @@
-const path = require('path');
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const commonConfig = require('./webpack.common.js');
 const helpers = require('./helpers');
-const paths = require('./paths.js');
+const paths = require('./paths');
 
 if (process.env.NODE_ENV === 'analyzer') {
     commonConfig.plugins.push(
@@ -29,11 +28,23 @@ module.exports = webpackMerge(commonConfig, {
 
     devtool: 'cheap-module-eval-source-map',
 
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    chunks: 'all',
+                }
+            }
+        },
+        minimize: false
+    },
+
     output: {
-        path: helpers.root('static/js/'),
+        path: paths.distSrc,
         filename: '[name].js',
-        chunkFilename: '[id].chunk.js',
-        publicPath: helpers.root('static/js/'),
+        chunkFilename: 'vendor.chunk.js',
+        publicPath: paths.distSrc,
     },
 
     plugins: [
