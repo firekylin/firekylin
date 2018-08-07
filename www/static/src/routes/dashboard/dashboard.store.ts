@@ -1,7 +1,7 @@
 import { observable, action } from 'mobx';
 import { AppStore } from '../../app.store';
 
-class IndexStore {
+class DashBoardStore {
   appStore;
   @observable data = [];
   constructor(appStore: AppStore) {
@@ -13,4 +13,4 @@ class IndexStore {
 
 }
 
-export default IndexStore;
+export default DashBoardStore;

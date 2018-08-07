@@ -1,19 +1,19 @@
 import * as React from 'react';
 import { Button } from 'antd';
-import './index.less';
+import './dashboard.less';
 import { observer, inject } from 'mobx-react';
-import { IndexProps } from './index.model';
+import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
 
-@inject('indexStore')
-@observer class Index extends React.Component<IndexProps, any> {
+@inject('dashBoardStore')
+@observer class Index extends React.Component<DashBoardProps, any> {
 
   handleClick() {
-    this.props.indexStore.setData('hello');
+    this.props.dashBoardStore.setData('hello');
   }
 
   public render() {
-      const { data } = this.props.indexStore;
+      const { data } = this.props.dashBoardStore;
       return (
         <div className="App">
           <BreadCrumb {...this.props} />
