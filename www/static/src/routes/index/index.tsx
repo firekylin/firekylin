@@ -3,6 +3,7 @@ import { Button } from 'antd';
 import './index.less';
 import { observer, inject } from 'mobx-react';
 import { IndexProps } from './index.model';
+import BreadCrumb from '../../components/breadcrumb';
 
 @inject('indexStore')
 @observer class Index extends React.Component<IndexProps, any> {
@@ -15,6 +16,7 @@ import { IndexProps } from './index.model';
       const { data } = this.props.indexStore;
       return (
         <div className="App">
+          <BreadCrumb {...this.props} />
           <header className="App-header">
             <img src="/static/img/firekylin.jpg" className="App-logo" alt="logo" />
             <h1 className="App-title">Welcome to React</h1>

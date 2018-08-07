@@ -1,7 +1,25 @@
 import * as React from 'react';
-import { HashRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Redirect } from 'react-router-dom';
 import './container.less';
 import Index from './index';
+import Sidebar from '../components/sidebar';
+
+const routerOptions = {
+    basename: '/admin',
+    forceRefresh: false,
+    children: getChildren()
+};
+
+function getChildren() {
+    return (
+        <>
+            <Route exact={true} path="/" render={() => (
+                <Redirect to="/dashboard" />
+            )}/>
+            <Route path="/dashboard" component={Index}/>
+        </>
+    );
+}
 
 class Container extends React.Component<any, {}> {
     componentDidMount() {
@@ -9,9 +27,10 @@ class Container extends React.Component<any, {}> {
     }
     render() {
         return (
-            <HashRouter>
-                <Route exact={true} path="/" component={Index}/>
-            </HashRouter>
+            <>
+                <Sidebar />
+                <BrowserRouter {...routerOptions} />
+            </>
         );
     }
 }

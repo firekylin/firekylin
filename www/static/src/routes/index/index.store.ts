@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import { AppStore } from '../../store/app.store';
+import { AppStore } from '../../app.store';
 
 class IndexStore {
   appStore;

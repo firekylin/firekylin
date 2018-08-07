@@ -1,14 +1,19 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-// import { Redirect } from 'react-router';
+import { BrowserRouter, Route, Redirect } from 'react-router-dom';
 import Container from './routes/container';
+import Index from './routes/index';
 
 const routes = (
-    <Router>
-        <Route path="/" render={() => (
-            <Container />
-        )} />
-    </Router>
+    <BrowserRouter basename="/admin">
+        <>
+            <Route path="/" render={() => (
+                <Container />
+            )} />
+            <Route path="/passport/login" render={() => (
+                <Container />
+            )} />
+        </>
+    </BrowserRouter>
 );
 
 export default routes;

@@ -1,5 +1,5 @@
 import { observable, action, configure } from 'mobx';
-import IndexStore from '../routes/index/index.store';
+import IndexStore from './routes/index/index.store';
 
 configure({
     enforceActions: true

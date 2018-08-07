@@ -3,11 +3,17 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'mobx-react';
 import './app.less';
 import routes from './routes';
-import AppStore from './store/app.store';
+import AppStore from './app.store';
 declare global {
     interface Window {
         SysConfig: {
-            userInfo: any
+            userInfo: any,
+            config: {
+                disallow_file_edit: any;
+            };
+            options: {
+                title: string;
+            }
         };
     }
 }

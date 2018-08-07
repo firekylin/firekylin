@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node development.js",
     "copy-package": "node bin/copy_package.js",
-    "webpack": "rimraf www/static/js && webpack --watch --progress --hot",
+    "webpack": "rimraf www/static/js && webpack --watch --progress",
     "build": "rimraf www/static/js && cross-env NODE_ENV=prod webpack",
     "analyzer": "cross-env NODE_ENV=analyzer npm run webpack",
     "webpack.build": "webpack",
@@ -61,6 +61,7 @@
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.6",
     "@types/history": "^4.7.0",
     "@types/node": "^10.5.6",
     "@types/react": "^16.4.7",
@@ -80,7 +81,7 @@
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "6.x.x",
     "babel-preset-stage-1": "^6.5.0",
-    "classnames": "^2.2.3",
+    "classnames": "^2.2.6",
     "codemirror": "^5.26.0",
     "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
