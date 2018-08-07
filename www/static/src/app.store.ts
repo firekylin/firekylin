@@ -1,5 +1,5 @@
 import { observable, action, configure } from 'mobx';
-import IndexStore from './routes/index/index.store';
+import DashBoardStore from './routes/dashboard/dashboard.store';
 
 configure({
     enforceActions: true
@@ -7,11 +7,11 @@ configure({
 
 export class AppStore {
 
-    readonly indexStore: IndexStore;
+    readonly dashBoardStore: DashBoardStore;
     @observable say = '';
 
     constructor() {
-        this.indexStore = new IndexStore(this);
+        this.dashBoardStore = new DashBoardStore(this);
     }
 
     @action setSay = text => this.say = text;

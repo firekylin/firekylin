@@ -31,8 +31,6 @@ class SideBar extends React.Component<any, any> {
    * @return {Boolean}          [description]
    */
   isActive(routeUrl: string): boolean {
-    console.log(history);
-    console.log(history.location.pathname.includes(routeUrl));
     return history.location.pathname.includes(routeUrl);
   }
   getClassName(icon: string | undefined, routeUrl: string) {

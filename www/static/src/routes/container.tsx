@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { BrowserRouter, Route, Redirect } from 'react-router-dom';
 import './container.less';
-import Index from './index';
+import DashBoard from './dashboard/dashboard';
 import Sidebar from '../components/sidebar';
 
 const routerOptions = {
@@ -16,7 +16,7 @@ function getChildren() {
             <Route exact={true} path="/" render={() => (
                 <Redirect to="/dashboard" />
             )}/>
-            <Route path="/dashboard" component={Index}/>
+            <Route path="/dashboard" component={DashBoard}/>
         </>
     );
 }
