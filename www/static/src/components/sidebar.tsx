@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import classnames from 'classnames';
 import { SideBarItem } from './types/routes.model';
 import { InitiateRoutes } from './data/routes.data';
-import { history } from '../utils/history';
+import { firekylinHistory } from '../utils/history';
 
 class SideBar extends React.Component<any, any> {
   state = this.initState();
@@ -31,7 +31,7 @@ class SideBar extends React.Component<any, any> {
    * @return {Boolean}          [description]
    */
   isActive(routeUrl: string): boolean {
-    return history.location.pathname.includes(routeUrl);
+    return firekylinHistory.location.pathname.includes(routeUrl);
   }
   getClassName(icon: string | undefined, routeUrl: string) {
     let active = this.isActive(routeUrl);
@@ -53,7 +53,7 @@ class SideBar extends React.Component<any, any> {
     });
   }
   open(routeUrl: string) {
-    history.push(routeUrl);
+    firekylinHistory.push(routeUrl);
   }
 
   render() {

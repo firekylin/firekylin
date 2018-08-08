@@ -1,22 +1,18 @@
 import * as React from 'react';
-import { BrowserRouter, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import './container.less';
 import DashBoard from './dashboard/dashboard';
 import Sidebar from '../components/sidebar';
 
 const routerOptions = {
     basename: '/admin',
-    forceRefresh: false,
-    children: getChildren()
+    forceRefresh: false
 };
 
 function getChildren() {
     return (
         <>
-            <Route exact={true} path="/" render={() => (
-                <Redirect to="/dashboard" />
-            )}/>
-            <Route path="/dashboard" component={DashBoard}/>
+            
         </>
     );
 }
@@ -27,10 +23,15 @@ class Container extends React.Component<any, {}> {
     }
     render() {
         return (
-            <>
-                <Sidebar />
-                <BrowserRouter {...routerOptions} />
-            </>
+            <Router {...routerOptions}>
+                <>
+                    <Sidebar />
+                    <Route exact={true} path="/" render={() => (
+                        <Redirect to="/dashboard" />
+                    )}/>
+                    <Route path="/dashboard" component={DashBoard}/>
+                </>
+            </Router>
         );
     }
 }

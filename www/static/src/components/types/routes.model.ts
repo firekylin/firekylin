@@ -5,7 +5,7 @@ export interface SideBarItem {
     children?: Array<SideBarChildItem>;
     type?: number;
   }
-  
+
 export interface SideBarChildItem {
     url: string;
     title: string;

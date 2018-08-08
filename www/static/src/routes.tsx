@@ -1,19 +1,27 @@
 import * as React from 'react';
-import { BrowserRouter, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Container from './routes/container';
-import Index from './routes/index';
+import { auth } from './utils/auth';
+import Login from './routes/login/login';
 
 const routes = (
-    <BrowserRouter basename="/admin">
+    <Router basename="/admin">
         <>
             <Route path="/" render={() => (
-                <Container />
+                auth.checkLogin() ? (
+                    <Container />
+                ) : (
+                    <Redirect to="/login" />
+                )
             )} />
-            <Route path="/passport/login" render={() => (
-                <Container />
+            <Route path="/login" render={() => (
+                auth.checkLogin() ? 
+                    <Redirect to="/" />
+                :
+                    <Login />
             )} />
         </>
-    </BrowserRouter>
+    </Router>
 );
 
 export default routes;

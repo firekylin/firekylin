@@ -13,7 +13,12 @@ declare global {
             };
             options: {
                 title: string;
-            }
+                two_factor_auth: true;
+                ldap_on: string;
+                intranet: boolean;
+                password_salt: string;
+            },
+            token: string;
         };
     }
 }

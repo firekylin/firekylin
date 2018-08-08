@@ -19,7 +19,7 @@ const commonConfig = {
             {
                 test: /\.(js|jsx|mjs)$/,
                 loader: require.resolve('babel-loader'),
-                options: {   
+                options: {
                   compact: true,
                 },
             },
@@ -65,14 +65,15 @@ const commonConfig = {
             {
                 test: /\.less$/,
                 use: [
-                    {loader: 'style-loader'},
-                    {loader: 'css-loader'},
-                    {loader: 'less-loader', options: {javascriptEnabled: true}}
+                    { loader: 'style-loader' },
+                    { loader: 'css-loader' },
+                    { loader: 'less-loader', options: { javascriptEnabled: true } }
                 ]
             }
         ]
     },
     plugins: [
+
     ]
 }
 

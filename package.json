@@ -114,6 +114,7 @@
     "react-ui-tree": "^2.6.0",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.5",
+    "rxjs": "^6.2.2",
     "stc": "^2.0.14",
     "stc-css-combine": "^1.0.1",
     "stc-css-compress": "^1.0.1",
