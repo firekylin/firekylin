@@ -1,21 +1,14 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import './container.less';
 import DashBoard from './dashboard/dashboard';
 import Sidebar from '../components/sidebar';
+import { firekylinHistory } from '../utils/history';
 
 const routerOptions = {
     basename: '/admin',
     forceRefresh: false
 };
-
-function getChildren() {
-    return (
-        <>
-            
-        </>
-    );
-}
 
 class Container extends React.Component<any, {}> {
     componentDidMount() {
@@ -26,10 +19,11 @@ class Container extends React.Component<any, {}> {
             <Router {...routerOptions}>
                 <>
                     <Sidebar />
-                    <Route exact={true} path="/" render={() => (
+                    <Switch>
+                        <Route path="/"  component={DashBoard}/>
+                        <Route path="/dashboard" component={DashBoard}/>
                         <Redirect to="/dashboard" />
-                    )}/>
-                    <Route path="/dashboard" component={DashBoard}/>
+                    </Switch>
                 </>
             </Router>
         );

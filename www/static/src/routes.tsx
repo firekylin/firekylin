@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import Container from './routes/container';
 import { auth } from './utils/auth';
 import Login from './routes/login/login';
+import { firekylinHistory } from './utils/history';
 
 const routes = (
     <Router basename="/admin">
@@ -11,12 +12,12 @@ const routes = (
                 auth.checkLogin() ? (
                     <Container />
                 ) : (
-                    <Redirect to="/login" />
+                    firekylinHistory.location.pathname === '/admin/login' ? <Login /> : <Redirect to="/login" />
                 )
             )} />
             <Route path="/login" render={() => (
                 auth.checkLogin() ? 
-                    <Redirect to="/" />
+                    <Redirect to="/dashboard" />
                 :
                     <Login />
             )} />

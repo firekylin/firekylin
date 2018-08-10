@@ -13,7 +13,7 @@ class LoginStore {
   }
 
   @action
-  setLoading = (data) => this.loading = data
+  setLoading = data => this.loading = data
 
   login(values: {username: string, password: string}): void {
     this.setLoading(true);
@@ -29,7 +29,12 @@ class LoginStore {
           if (res.errno === 0) {
             message.success('登陆成功');
             setTimeout(() => { location.reload(); }, 1000);
+          } else {
+            message.error(res.errmsg);
           }
+        },
+        err => {
+          message.error(err);
         }
       );
   }
