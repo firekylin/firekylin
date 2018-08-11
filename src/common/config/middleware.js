@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const routerREST = require('think-router-rest');
 
@@ -27,10 +28,6 @@ module.exports = [
       contentType(ctx) {
         // All request url starts of /api or
         // request header contains `X-Requested-With: XMLHttpRequest` will output json error
-        if (!isDev) {
-          return 'json';
-        }
-
         const APIRequest = /^\/admin\/api/.test(ctx.request.path);
         const AJAXRequest = ctx.is('X-Requested-With', 'XMLHttpRequest');
 
@@ -41,6 +38,18 @@ module.exports = [
           return false;
         }
         console.error(err);
+      },
+      async templates() {
+        const optionsModel = new think.model('options');
+        const { theme } = await optionsModel.getOptions();
+
+        let themeErrorFilePath = path.join(think.RESOURCE_PATH, 'theme', theme, 'error');
+        try {
+          fs.statSync(themeErrorFilePath);
+        } catch (e) {
+          console.log(e); // eslint-disable-line no-console
+        }
+        return themeErrorFilePath;
       }
     }
   },
