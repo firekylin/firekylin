@@ -53,6 +53,7 @@ class SideBar extends React.Component<any, any> {
     });
   }
   open(routeUrl: string) {
+    console.log(routeUrl);
     firekylinHistory.push(routeUrl);
   }
 
@@ -99,7 +100,7 @@ class SideBar extends React.Component<any, any> {
                   <ul style={{height: 49 * (this.isActive(route.url) ? route.children.length : 0)}}>
                     {route.children.map((child, j) =>
                       <li key={j}>
-                        <NavLink to={child.url} onClick={this.open.bind(this, child.url)}
+                        <NavLink to={child.url} onClick={() => this.open(child.url)}
                           className={this.getSubLinkClassName(child.url)}>
                           <span>{child.title}</span>
                         </NavLink>

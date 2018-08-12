@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-d
 import './container.less';
 import DashBoard from './dashboard/dashboard';
 import Sidebar from '../components/sidebar';
-import { firekylinHistory } from '../utils/history';
+import Post from './post/post';
 
 const routerOptions = {
     basename: '/admin',
@@ -20,8 +20,8 @@ class Container extends React.Component<any, {}> {
                 <>
                     <Sidebar />
                     <Switch>
-                        <Route path="/"  component={DashBoard}/>
-                        <Route path="/dashboard" component={DashBoard}/>
+                        <Route exact={true} path="/dashboard" component={DashBoard}/>
+                        <Route exact={true} path="/post" component={Post}/>
                         <Redirect to="/dashboard" />
                     </Switch>
                 </>
