@@ -1,4 +1,4 @@
-import ReactDom from 'react-dom';
+import * as ReactDom from 'react-dom';
 import classnames from 'classnames';
 import { Link } from 'react-router-dom';
 import * as React from 'react';
@@ -18,8 +18,10 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
   crumbs: {};
 
   bindHandleDocumentClick: (e: Event) => void;
+  userInfoRef: React.Ref<any>;
   constructor(props: any) {
     super(props);
+    this.userInfoRef = React.createRef();
     this.bindHandleDocumentClick = this.handleDocumentClick.bind(this);
 
     const themePages = [
@@ -55,12 +57,12 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
     document.removeEventListener('click', this.bindHandleDocumentClick, false);
   }
 
-  handleDocumentClick(event: Event) {
-    if (!ReactDom.findDOMNode(this.refs.userinfo).contains(event.target)) {
-      this.setState({
-        userOpen: false
-      });
-    }
+  handleDocumentClick(event: MouseEvent) {
+    // if (!ReactDom.findDOMNode(this.refs.userInfo).contains(event.target)) {
+    //   this.setState({
+    //     userOpen: false
+    //   });
+    // }
   }
 
   toggleUser() {
@@ -108,7 +110,7 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
         <div className="pull-left">
           {breadcrumb}
         </div>
-        <ul className="nav navbar-nav navbar-right userinfo" ref={() => 'userInfo'}>
+        <ul className="nav navbar-nav navbar-right userinfo">
           <li className={this.getUserClass()}>
             <a onClick={() => this.toggleUser()} className="dropdown-toggle" data-toggle="dropdown">
               {window.SysConfig.userInfo.name} <b className="caret" />

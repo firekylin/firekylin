@@ -6,7 +6,7 @@ class PostCreate extends React.Component<any, {}> {
     }
     render() {
         return (
-            <h3>I'm List</h3>
+            <h3>I'm Create</h3>
         );
     }
 }

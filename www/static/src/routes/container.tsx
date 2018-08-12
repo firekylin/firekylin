@@ -4,6 +4,7 @@ import './container.less';
 import DashBoard from './dashboard/dashboard';
 import Sidebar from '../components/sidebar';
 import Post from './post/post';
+import PostList from './post/list/list';
 
 const routerOptions = {
     basename: '/admin',
@@ -21,7 +22,7 @@ class Container extends React.Component<any, {}> {
                     <Sidebar />
                     <Switch>
                         <Route exact={true} path="/dashboard" component={DashBoard}/>
-                        <Route exact={true} path="/post" component={Post}/>
+                        <Route path="/post" component={Post}/>
                         <Redirect to="/dashboard" />
                     </Switch>
                 </>
