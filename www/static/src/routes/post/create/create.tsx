@@ -1,4 +1,5 @@
 import * as React from 'react';
+import BreadCrumb from '../../../components/breadcrumb';
 
 class PostCreate extends React.Component<any, {}> {
     componentDidMount() {
@@ -6,7 +7,10 @@ class PostCreate extends React.Component<any, {}> {
     }
     render() {
         return (
-            <h3>I'm Create</h3>
+            <div className="fk-content-wrap">
+                <BreadCrumb {...this.props} />
+                <h3>I'm Create</h3>
+            </div>
         );
     }
 }
