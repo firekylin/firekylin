@@ -2,6 +2,7 @@ import * as React from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import './container.less';
 import DashBoard from './dashboard/dashboard';
+import User from './user/user';
 import Sidebar from '../components/sidebar';
 
 const routerOptions = {
@@ -30,6 +31,7 @@ class Container extends React.Component<any, {}> {
                         <Redirect to="/dashboard" />
                     )}/>
                     <Route path="/dashboard" component={DashBoard}/>
+                    <Route path="/user" component={User} />
                 </>
             </Router>
         );
