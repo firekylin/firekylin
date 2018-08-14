@@ -3,10 +3,10 @@ import * as React from 'react';
 import {Tabs} from 'antd';
 import { observer, inject } from 'mobx-react';
 // import UserAction from '../action/user';
-import { UserProps } from './user.model';
+import { UserProps } from '../user.model';
 // import UserStore from '../store/user';
 // import ModalAction from '../../common/action/modal';
-import BreadCrumb from '../../components/breadcrumb';
+import BreadCrumb from '../../../components/breadcrumb';
 // import TipAction from 'common/action/tip';
 
 @inject('userStore')

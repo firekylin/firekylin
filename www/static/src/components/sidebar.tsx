@@ -81,11 +81,11 @@ class SideBar extends React.Component<any, any> {
               {
                 route.children 
                 ?
-                  <a onClick={() => this.open(route.children && route.children[0].url || route.url)}
+                  <NavLink to={route.url} onClick={() => this.open(route.children && route.children[0].url || route.url)}
                   className={this.getClassName(route.icon, route.url)}
                   >
                     <span>{route.title}</span>
-                  </a>
+                  </NavLink>
                 :
                   <NavLink to={route.url} onClick={() => this.open(route.children && route.children[0].url || route.url)}
                   className={this.getClassName(route.icon, route.url)}
@@ -99,7 +99,7 @@ class SideBar extends React.Component<any, any> {
                   <ul style={{height: 49 * (this.isActive(route.url) ? route.children.length : 0)}}>
                     {route.children.map((child, j) =>
                       <li key={j}>
-                        <NavLink to={child.url} onClick={this.open.bind(this, child.url)}
+                        <NavLink to={child.url} onClick={() => this.open(child.url)}
                           className={this.getSubLinkClassName(child.url)}>
                           <span>{child.title}</span>
                         </NavLink>

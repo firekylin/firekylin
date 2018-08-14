@@ -25,7 +25,8 @@ module.exports = webpackMerge(commonConfig, {
         new webpack.DefinePlugin({
             'process.env': {
                 url: JSON.stringify('http://www.api.com/'),
-                environment: JSON.stringify('prod')
+                environment: JSON.stringify('prod'),
+                basename: JSON.stringify('/admin'),
             }
         })
     ]

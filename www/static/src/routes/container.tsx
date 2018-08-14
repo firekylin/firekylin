@@ -1,22 +1,16 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
 import './container.less';
 import DashBoard from './dashboard/dashboard';
 import User from './user/user';
 import Sidebar from '../components/sidebar';
+import PostList from './post/list/list';
+import PostCreate from './post/create/create';
 
 const routerOptions = {
     basename: '/admin',
     forceRefresh: false
 };
-
-function getChildren() {
-    return (
-        <>
-            
-        </>
-    );
-}
 
 class Container extends React.Component<any, {}> {
     componentDidMount() {
@@ -27,11 +21,17 @@ class Container extends React.Component<any, {}> {
             <Router {...routerOptions}>
                 <>
                     <Sidebar />
-                    <Route exact={true} path="/" render={() => (
+                    <Switch>
+
+                        <Route exact={true} path="/dashboard" component={DashBoard}/>
+                        <Route exact={true} path="/post" render={() =>
+                            <Redirect to="/post/list" />
+                        }/>
+                        <Route exact={true} path="/post/list" component={PostList}/>
+                        <Route exact={true} path="/post/create" component={PostCreate}/>
+                        <Route path={`/user`} component={User}/>
                         <Redirect to="/dashboard" />
-                    )}/>
-                    <Route path="/dashboard" component={DashBoard}/>
-                    <Route path="/user" component={User} />
+                    </Switch>
                 </>
             </Router>
         );
