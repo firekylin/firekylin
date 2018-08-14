@@ -1,9 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import * as querystring from 'querystring';
 import { IResult } from '../models/http.model';
 import { auth } from './auth';
-import { parseToString } from './utils';
 
 axios.defaults.transformRequest = [function (data: any) {
     let newData = '';
@@ -11,7 +11,7 @@ axios.defaults.transformRequest = [function (data: any) {
     if (auth.token) {
         data.web_token = auth.token;
     }
-    newData = parseToString(data, false);
+    newData = querystring.stringify(data);
     return newData;
 }];
 
@@ -23,7 +23,10 @@ class HttpClient {
      * @param url 
      * @param config
      */
-    get<T>(url: string, config?: AxiosRequestConfig): Observable<IResult<T>> {
+    get<T>(url: string, data?: any, config?: AxiosRequestConfig): Observable<IResult<T>> {
+        if (data && config) {
+            config.data = data;
+        }
         return from(axios.get(url, config))
             .pipe(
                 map(response => response.data)
