@@ -8,7 +8,7 @@ import {
 } from 'react-bootstrap-validation';
 import classnames from 'classnames';
 import Datetime from 'react-datetime';
-import Select, {Option} from 'rc-select';
+import Select, { Option } from 'rc-select';
 import Base from 'base';
 import Editor from 'common/component/editor';
 
@@ -74,7 +74,7 @@ module.exports = class extends Base {
     this.listenTo(PostStore, this.handleTrigger.bind(this));
     this.listenTo(PushStore, this.pushHandleTrigger.bind(this));
     this.listenTo(CateStore, this.getCateList.bind(this));
-    this.listenTo(TagStore, tagList => this.setState({tagList}));
+    this.listenTo(TagStore, tagList => this.setState({ tagList }));
     this.listenTo(OptionsStore, this.getDefaultCate.bind(this));
     this.listenTo(UserStore, this.getUserList.bind(this));
 
@@ -83,16 +83,16 @@ module.exports = class extends Base {
     PushAction.select();
     UserAction.select();
     OptionsAction.defaultCategory();
-    if(this.id) { PostAction.select(this.id); }
+    if (this.id) { PostAction.select(this.id); }
   }
 
   componentWillReceiveProps(nextProps) {
     this.id = nextProps.params.id | 0;
-    if(this.id) {
+    if (this.id) {
       PostAction.select(this.id);
     }
-    let {postInfo} = this.initialState();
-    this.setState({postInfo});
+    let { postInfo } = this.initialState();
+    this.setState({ postInfo });
   }
 
   /**
@@ -113,7 +113,7 @@ module.exports = class extends Base {
    * 获取页面自定义模板列表
    */
   getThemeTemplateList(templateList) {
-    this.setState({templateList});
+    this.setState({ templateList });
   }
 
   /**
@@ -121,12 +121,12 @@ module.exports = class extends Base {
    */
   getDefaultCate(data) {
     let postInfo = this.state.postInfo;
-    postInfo.cate.push({id: +data});
-    this.setState({postInfo});
+    postInfo.cate.push({ id: +data });
+    this.setState({ postInfo });
   }
 
   getUserList(users) {
-    this.setState({users});
+    this.setState({ users });
   }
 
   /**
@@ -134,18 +134,18 @@ module.exports = class extends Base {
    */
   getCateList(cateList) {
     let list = cateList.filter(cate => cate.pid === 0);
-    for(let i=0, l=list.length; i<l; i++) {
+    for (let i = 0, l = list.length; i < l; i++) {
       let child = cateList.filter(cate => cate.pid === list[i].id);
-      if(child.length === 0) continue;
-      list.splice.apply(list, [i+1, 0].concat(child));
+      if (child.length === 0) continue;
+      list.splice.apply(list, [i + 1, 0].concat(child));
     }
-    this.setState({cateList: list});
+    this.setState({ cateList: list });
   }
 
   pushHandleTrigger(data, type) {
-    switch(type) {
+    switch (type) {
       case 'getPushList':
-        this.setState({push_sites: data});
+        this.setState({ push_sites: data });
         break;
     }
   }
@@ -156,9 +156,9 @@ module.exports = class extends Base {
    * @return {[type]}      [description]
    */
   handleTrigger(data, type) {
-    switch(type) {
+    switch (type) {
       case 'savePostFail':
-        this.setState({draftSubmitting: false, postSubmitting: false});
+        this.setState({ draftSubmitting: false, postSubmitting: false });
         break;
       case 'savePostSuccess':
         if (!this.id && data.id) {
@@ -173,10 +173,10 @@ module.exports = class extends Base {
           TipAction.success('保存成功');
         }
         PostAction.select(this.id);
-        this.setState({draftSubmitting: false, postSubmitting: false});
+        this.setState({ draftSubmitting: false, postSubmitting: false });
         break;
       case 'getPostInfo':
-        if(data.create_time === '0000-00-00 00:00:00') {
+        if (data.create_time === '0000-00-00 00:00:00') {
           data.create_time = '';
         }
         data.create_time = data.create_time ?
@@ -184,14 +184,14 @@ module.exports = class extends Base {
           data.create_time;
         data.tag = data.tag.map(tag => tag.name);
         data.cate.forEach(item => this.cate[item.id] = true);
-        if(!data.options) {
-          data.options = {push_sites: []};
-        } else if(typeof(data.options) === 'string') {
+        if (!data.options) {
+          data.options = { push_sites: [] };
+        } else if (typeof (data.options) === 'string') {
           data.options = JSON.parse(data.options);
         } else {
           data.options.push_sites = data.options.push_sites || [];
         }
-        this.setState({postInfo: data});
+        this.setState({ postInfo: data });
         break;
     }
   }
@@ -200,13 +200,13 @@ module.exports = class extends Base {
    * @return {}       []
    */
   handleValidSubmit(values) {
-    if(!this.state.status) {
-      this.setState({draftSubmitting: true});
+    if (!this.state.status) {
+      this.setState({ draftSubmitting: true });
     } else {
-      this.setState({postSubmitting: true});
+      this.setState({ postSubmitting: true });
     }
 
-    if(this.id) {
+    if (this.id) {
       values.id = this.id;
     }
 
@@ -220,8 +220,8 @@ module.exports = class extends Base {
 
     values.status = this.state.status;
     values.markdown_content = this.state.postInfo.markdown_content;
-    if(values.status === 3 && !values.markdown_content) {
-      this.setState({draftSubmitting: false, postSubmitting: false});
+    if (values.status === 3 && !values.markdown_content) {
+      this.setState({ draftSubmitting: false, postSubmitting: false });
       return TipAction.fail('没有内容不能提交呢！');
     }
 
@@ -232,7 +232,7 @@ module.exports = class extends Base {
     values.tag = this.state.postInfo.tag;
     values.user_id = this.state.postInfo.user_id;
 
-    let push_sites = this.state.push_sites.map(({appKey}) => appKey);
+    let push_sites = this.state.push_sites.map(({ appKey }) => appKey);
     this.state.postInfo.options.push_sites =
       this.state.postInfo.options.push_sites.filter(appKey => push_sites.includes(appKey));
     values.options = JSON.stringify(this.state.postInfo.options);
@@ -247,7 +247,7 @@ module.exports = class extends Base {
     var pattern = /[a-zA-Z0-9_\u0392-\u03c9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
     var m = data.match(pattern);
     var count = 0;
-    if(m === null) return count;
+    if (m === null) return count;
     for (var i = 0; i < m.length; i++) {
       if (m[i].charCodeAt(0) >= 0x4E00) {
         count += m[i].length;
@@ -265,19 +265,19 @@ module.exports = class extends Base {
     let props = {
       value: postInfo.title,
       label: `${this.id ? '编辑' : '撰写'}${this.isPage() ? '页面' : '文章'}`,
-      onChange:(e)=>{
+      onChange: (e) => {
         postInfo.title = e.target.value;
-        this.setState({postInfo});
+        this.setState({ postInfo });
       }
     };
 
     return (
       <ValidatedInput
-          name="title"
-          type="text"
-          placeholder="标题"
-          validate="required"
-          {...props}
+        name="title"
+        type="text"
+        placeholder="标题"
+        validate="required"
+        {...props}
       />
     );
   }
@@ -289,9 +289,9 @@ module.exports = class extends Base {
     let props = {
       disabled: postInfo.status === 3,
       value: postInfo.pathname,
-      onChange:(e)=>{
+      onChange: (e) => {
         postInfo.pathname = e.target.value;
-        this.setState({postInfo});
+        this.setState({ postInfo });
       }
     };
     //baseUrl
@@ -310,9 +310,9 @@ module.exports = class extends Base {
         allow_comment: 0,
         options: JSON.stringify(this.state.postInfo.options),
       }
-      if(this.type === 0) {
+      if (this.type === 0) {
         previewData.tag = this.state.postInfo.tag
-          .map(tagName=>{return this.state.tagList.filter(tag => tag.name === tagName)[0] || {name: tagName}});
+          .map(tagName => { return this.state.tagList.filter(tag => tag.name === tagName)[0] || { name: tagName } });
         previewData.cate = this.state.postInfo.cate;
       }
 
@@ -341,9 +341,9 @@ module.exports = class extends Base {
         <span>.html </span>
         <span> </span>
         {this.state.postInfo.status === 3 && this.state.postInfo.is_public ?
-        <a href={postUrl} target="_blank">
-          <span className="glyphicon glyphicon-link" />
-        </a> : null}
+          <a href={postUrl} target="_blank">
+            <span className="glyphicon glyphicon-link" />
+          </a> : null}
         <span> </span>
         <a onClick={previewOnClick}>
           <span className="glyphicon glyphicon-eye-open" />
@@ -362,12 +362,12 @@ module.exports = class extends Base {
           content={postInfo.markdown_content}
           onChange={content => {
             postInfo.markdown_content = content;
-            this.setState({postInfo});
+            this.setState({ postInfo });
           }}
-          onFullScreen={isFullScreen => this.setState({isFullScreen})}
-          info = {{id: this.id, type: this.type}}
+          onFullScreen={isFullScreen => this.setState({ isFullScreen })}
+          info={{ id: this.id, type: this.type }}
         />
-        <p style={{lineHeight: '30px'}}>
+        <p style={{ lineHeight: '30px' }}>
           <span className="pull-left">
             文章使用 markdown 格式，格式说明请见
             <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">
@@ -387,32 +387,32 @@ module.exports = class extends Base {
    * @param {Object} postInfo
    */
   renderUserList(postInfo = this.state.postInfo) {
-    if(window.SysConfig.userInfo.type !== 1) { return null; }
-    if(this.isPage()) { return null; }
+    if (window.SysConfig.userInfo.type !== 1) { return null; }
+    if (this.isPage()) { return null; }
 
     const user = postInfo.hasOwnProperty('user_id') ? postInfo.user_id : window.SysConfig.userInfo.id;
-
     return (
       <div className="form-group">
         <label className="control-label">选择作者</label>
         <div>
           <Select
-            style={{width: '100%'}}
+            style={{ width: '100%' }}
             value={user}
             optionLabelProp="children"
+            optionFilterProp="children"
             onChange={val => {
               postInfo.user_id = val;
-              this.setState({postInfo});
+              this.setState({ postInfo });
             }}
           >
-              {this.state.users.map(user =>
-                <Option
-                    key={user.id}
-                    value={user.id}
-                >
-                  {user.display_name||user.name}
-                </Option>
-              )}
+            {this.state.users.map(user =>
+              <Option
+                key={user.id}
+                value={user.id}
+              >
+                {user.display_name || user.name}
+              </Option>
+            )}
           </Select>
         </div>
       </div>
@@ -422,8 +422,8 @@ module.exports = class extends Base {
    * 当前用户为管理员且存在推送网站时，渲染推送列表
    */
   renderPushList(postInfo = this.state.postInfo) {
-    if(window.SysConfig.userInfo.type !== 1) { return null; }
-    if(this.state.push_sites.length === 0) { return null; }
+    if (window.SysConfig.userInfo.type !== 1) { return null; }
+    if (this.state.push_sites.length === 0) { return null; }
 
     let push_sites = postInfo.options.push_sites || [];
     let list = this.state.push_sites.map((site, i) => {
@@ -433,13 +433,13 @@ module.exports = class extends Base {
         value: site.appKey,
         onChange() {
           let new_push_sites = postInfo.options.push_sites;
-          if(checked) {
+          if (checked) {
             new_push_sites = push_sites.filter(appKey => appKey !== site.appKey);
           } else {
             new_push_sites.push(site.appKey);
           }
           postInfo.options.push_sites = new_push_sites;
-          this.setState({postInfo});
+          this.setState({ postInfo });
         }
       };
 
@@ -447,7 +447,7 @@ module.exports = class extends Base {
         <li key={i} className="checkbox">
           <label>
             <input type="checkbox" name="push_sites" {...props} />
-            <span style={{fontWeight: 'normal'}}>{site.title}</span>
+            <span style={{ fontWeight: 'normal' }}>{site.title}</span>
           </label>
         </li>
       );
@@ -471,13 +471,13 @@ module.exports = class extends Base {
         <div className="checkbox">
           <label>
             <input
-                type="checkbox"
-                name="allow_comment"
-                checked={postInfo.allow_comment}
-                onChange={()=> {
-                  postInfo.allow_comment = !postInfo.allow_comment;
-                  this.setState({postInfo});
-                }}
+              type="checkbox"
+              name="allow_comment"
+              checked={postInfo.allow_comment}
+              onChange={() => {
+                postInfo.allow_comment = !postInfo.allow_comment;
+                this.setState({ postInfo });
+              }}
             />
             允许评论
           </label>
@@ -495,7 +495,7 @@ module.exports = class extends Base {
     let handleTestImageLoad = e => {
       if (e.target.id === lastTestImageId) {
         postInfo.options.featuredImage = e.target.src;
-        this.setState({postInfo});
+        this.setState({ postInfo });
       }
     }
 
@@ -511,7 +511,7 @@ module.exports = class extends Base {
             onInput={e => {
               if (!e.target.value) {
                 postInfo.options.featuredImage = '';
-                this.setState({postInfo});
+                this.setState({ postInfo });
               } else {
                 let img = new Image();
                 img.id = `featured-image-test-${new Date().getTime()}`;
@@ -523,10 +523,10 @@ module.exports = class extends Base {
           />
           {featuredImage
             ? <div className="text-center">
-                <img src={featuredImage} title={featuredImage}
-                  className="img-thumbnail featured-image"
-                  onClick={() => window.open(featuredImage, '_blank')} />
-              </div>
+              <img src={featuredImage} title={featuredImage}
+                className="img-thumbnail featured-image"
+                onClick={() => window.open(featuredImage, '_blank')} />
+            </div>
             : null}
         </div>
       </div>
@@ -553,25 +553,25 @@ module.exports = class extends Base {
    * 渲染标签选择，编辑页面的时候无标签
    */
   renderTag(postInfo = this.state.postInfo) {
-    if(this.isPage()) { return null; }
+    if (this.isPage()) { return null; }
 
     return (
       <div className="form-group">
         <label className="control-label">标签</label>
         <div>
           <Select
-              tags
-              style={{width: '100%'}}
-              maxTagTextLength={5}
-              value={postInfo.tag}
-              onChange={val => {
-                postInfo.tag = val;
-                this.setState({postInfo});
-              }}
+            tags
+            style={{ width: '100%' }}
+            maxTagTextLength={5}
+            value={postInfo.tag}
+            onChange={val => {
+              postInfo.tag = val;
+              this.setState({ postInfo });
+            }}
           >
-              {this.state.tagList.map(tag =>
-                <Option key={tag.name} value={tag.name}>{tag.name}</Option>
-              )}
+            {this.state.tagList.map(tag =>
+              <Option key={tag.name} value={tag.name}>{tag.name}</Option>
+            )}
           </Select>
         </div>
       </div>
@@ -583,10 +583,10 @@ module.exports = class extends Base {
    * 嵌套分类树最大支持两层
    */
   renderCategory(postInfo = this.state.postInfo) {
-    if(this.isPage()) { return null; }
+    if (this.isPage()) { return null; }
 
     let cateInitial = [];
-    if(Array.isArray(this.state.postInfo.cate)) {
+    if (Array.isArray(this.state.postInfo.cate)) {
       cateInitial = postInfo.cate.map(item => item.id);
     }
 
@@ -599,21 +599,21 @@ module.exports = class extends Base {
               {cate.pid !== 0 ? '　' : null}
               <label>
                 <input
-                    type="checkbox"
-                    name="cate"
-                    value={cate.id}
-                    checked={cateInitial.includes(cate.id)}
-                    onChange={()=>{
-                      this.cate[cate.id] = !this.cate[cate.id];
-                      //如果勾选了子分类父分类也需要选中
-                      if(cate.pid && this.cate[cate.id]) {
-                        this.cate[cate.pid] = true;
-                      }
-                      postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
-                      this.setState({postInfo});
-                    }}
+                  type="checkbox"
+                  name="cate"
+                  value={cate.id}
+                  checked={cateInitial.includes(cate.id)}
+                  onChange={() => {
+                    this.cate[cate.id] = !this.cate[cate.id];
+                    //如果勾选了子分类父分类也需要选中
+                    if (cate.pid && this.cate[cate.id]) {
+                      this.cate[cate.pid] = true;
+                    }
+                    postInfo.cate = this.state.cateList.filter(cate => this.cate[cate.id]);
+                    this.setState({ postInfo });
+                  }}
                 />
-                <span style={{fontWeight: 'normal'}}>{cate.name}</span>
+                <span style={{ fontWeight: 'normal' }}>{cate.name}</span>
               </label>
             </li>
           )}
@@ -626,28 +626,28 @@ module.exports = class extends Base {
    * 渲染页面模板选择控件，仅对页面编辑有效
    */
   renderPageTemplateSelect(postInfo = this.state.postInfo) {
-    if(this.isPost()) { return null; }
+    if (this.isPost()) { return null; }
 
     let template = postInfo.options.template || '';
-    let templateList = this.state.templateList.map(t => ({id: t, name: t}));
-    templateList = [{id: '', name: '不选择'}].concat(templateList);
+    let templateList = this.state.templateList.map(t => ({ id: t, name: t }));
+    templateList = [{ id: '', name: '不选择' }].concat(templateList);
 
     return (
-      <div style={{marginBottom: 15}}>
+      <div style={{ marginBottom: 15 }}>
         <label>自定义模板</label>
         <div>
           <Select
-              optionLabelProp="label"
-              showSearch={false}
-              style={{width: '100%'}}
-              value={template}
-              onChange={val => {
-                postInfo.options.template = val;
-                this.setState({postInfo});
-              }}
+            optionLabelProp="label"
+            showSearch={false}
+            style={{ width: '100%' }}
+            value={template}
+            onChange={val => {
+              postInfo.options.template = val;
+              this.setState({ postInfo });
+            }}
           >
 
-            {templateList.map(({id, name}) =>
+            {templateList.map(({ id, name }) =>
               <Option key={name} value={id} label={name}>{name}</Option>
             )}
           </Select>
@@ -661,7 +661,7 @@ module.exports = class extends Base {
    */
   renderDatetime(postInfo = this.state.postInfo) {
     return (
-      <div style={{marginBottom: 15}}>
+      <div style={{ marginBottom: 15 }}>
         <label>发布日期</label>
         <div>
           <Datetime
@@ -671,7 +671,7 @@ module.exports = class extends Base {
             value={postInfo.create_time}
             onChange={val => {
               postInfo.create_time = val;
-              this.setState({postInfo});
+              this.setState({ postInfo });
             }}
           />
         </div>
@@ -685,7 +685,7 @@ module.exports = class extends Base {
   renderPostButton(props = {}) {
     let draftOnClick = () => {
       this.state.status = 0;
-      localStorage.removeItem('unsavetype'+this.type+'id'+this.id);
+      localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
 
       // 让表单提交
       this.refs.form.submit();
@@ -693,7 +693,7 @@ module.exports = class extends Base {
 
     let publishOnClick = () => {
       this.state.status = 3;
-      localStorage.removeItem('unsavetype'+this.type+'id'+this.id);
+      localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
     }
 
     return (
@@ -706,10 +706,10 @@ module.exports = class extends Base {
         >{this.state.draftSubmitting ? '保存中...' : '保存草稿'}</button>
         <span> </span>
         <button
-            type="submit"
-            {...props}
-            className="btn btn-primary"
-            onClick={publishOnClick}
+          type="submit"
+          {...props}
+          className="btn btn-primary"
+          onClick={publishOnClick}
         >{this.state.postSubmitting ? '发布中...' : `发布${this.isPage() ? '页面' : '文章'}`}</button>
       </div>
     );
@@ -721,18 +721,18 @@ module.exports = class extends Base {
    */
   render() {
     let props = {}
-    if(this.state.draftSubmitting || this.state.postSubmitting) {
+    if (this.state.draftSubmitting || this.state.postSubmitting) {
       props.disabled = true;
     }
 
     //如果是在编辑状态下在没有拿到数据之前不做渲染
     //针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-    if(this.id && !this.state.postInfo.pathname && this.state.postInfo.status !== 0) {
+    if (this.id && !this.state.postInfo.pathname && this.state.postInfo.status !== 0) {
       return null;
     }
 
     //针对 RadioGroup 只有在值为字符串才正常的情况做处理
-    if(firekylin.isNumber(this.state.postInfo.is_public)) {
+    if (firekylin.isNumber(this.state.postInfo.is_public)) {
       this.state.postInfo.is_public += '';
     }
 
@@ -747,7 +747,7 @@ module.exports = class extends Base {
             onValidSubmit={this.handleValidSubmit.bind(this)}
           >
             <div className="row">
-              <div className={classnames({'col-xs-9': !this.state.isFullScreen})}>
+              <div className={classnames({ 'col-xs-9': !this.state.isFullScreen })}>
                 {this.renderTitle()}
                 {this.renderPathname()}
                 {this.renderEditor()}
