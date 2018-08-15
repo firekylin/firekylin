@@ -12,7 +12,7 @@ const routes = (
                 auth.checkLogin() ? (
                     <Container />
                 ) : (
-                    firekylinHistory.location.pathname === '/admin/login' ? <Login /> : <Redirect to="/login" />
+                    firekylinHistory.location.pathname === '/login' ? <Login /> : <Redirect to="/login" />
                 )
             )} />
             <Route path="/login" render={() => (
