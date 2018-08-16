@@ -1,13 +1,13 @@
 import { observable, action } from 'mobx';
-import { AppStore } from '../../app.store';
-import { http } from '../../utils/http';
 import { message } from 'antd';
 import { tap } from 'rxjs/operators';
-import { PostRequestParams } from './post.model';
-
+import { http } from '../../utils/http';
+import { AppStore } from '../../app.store';
+import { PostListRequestParams, PostListResponseData } from './post.model';
 class PostStore {
   appStore;
   @observable loading = false;
+  @observable postList;
   constructor(appStore: AppStore) {
     this.appStore = appStore;
   }
@@ -15,9 +15,19 @@ class PostStore {
   @action
   setLoading = data => this.loading = data
 
-  getPostList(params: PostRequestParams): void {
+  @action
+  setPostList = data => {
+    data.map((post, i) => {
+      post.key = post.id;
+      post.author = post.user.name;
+      post.status = post.status;
+    });
+    this.postList = data; 
+  }
+
+  getPostList(params: PostListRequestParams): void {
     this.setLoading(true);
-    http.get<''>('/admin/api/post', params)
+    http.get<PostListResponseData>('/admin/api/post', params)
       .pipe(
         tap(
           this.setLoading(false),
@@ -26,9 +36,7 @@ class PostStore {
       .subscribe(
         res => {
           if (res.errno === 0) {
-                //
-          } else {
-            message.error(res.errmsg);
+              this.setPostList(res.data.data);
           }
         },
         err => {

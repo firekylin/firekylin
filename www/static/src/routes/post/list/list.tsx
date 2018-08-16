@@ -1,26 +1,35 @@
 import * as React from 'react';
-import BreadCrumb from '../../../components/breadcrumb';
 import { Tabs } from 'antd';
 import './list.less';
-import PostListTable from './list-table';
-import { PostListProps } from './list.model';
+import { observer, inject } from 'mobx-react';
+import PostListTable from './table/list-table';
+import { PostProps } from '../post.model';
 const TabPane = Tabs.TabPane;
-class PostList extends React.Component<PostListProps, {}> {
+@inject('postStore')
+@observer class PostList extends React.Component<PostProps, {}> {
     componentDidMount() {
-        // this.props.postStore.getPostList();
+        this.getPostList({});
+    }
+    getPostList(params: any) {
+        this.props.postStore.getPostList({
+            page: 1,
+            status: params.status
+        });
     }
     tabChanged(key: string) {
-        console.log(key);
+        this.getPostList({
+            // status: key
+        });
     }
     render() {
         return (
             <div>
-                <Tabs className="tabs" defaultActiveKey="1" type="card" onChange={() => this.tabChanged}>
+                <Tabs className="tabs" defaultActiveKey="1" type="card" onChange={key => {this.tabChanged(key); }}>
                     <TabPane tab="全部" key="1">
-                        <PostListTable/>
+                        <PostListTable />
                     </TabPane>
-                    <TabPane tab="已发布" key="2">Content of Tab Pane 2</TabPane>
-                    <TabPane tab="审核中" key="3">Content of Tab Pane 3</TabPane>
+                    <TabPane tab="已发布" key="3">Content of Tab Pane 2</TabPane>
+                    <TabPane tab="审核中" key="2">Content of Tab Pane 3</TabPane>
                     <TabPane tab="已拒绝" key="4">Content of Tab Pane 3</TabPane>
                 </Tabs>
             </div>

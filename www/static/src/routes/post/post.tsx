@@ -2,9 +2,7 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import PostList from './list/list';
 import PostCreate from './create/create';
-import { inject } from 'mobx-react';
 
-@inject('postStore')
 export default class Post extends React.Component<any, any> {
     render() {
         const { match } = this.props;
