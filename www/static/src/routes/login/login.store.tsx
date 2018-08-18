@@ -19,11 +19,6 @@ class LoginStore {
     this.setLoading(true);
     values.password = md5(window.SysConfig.options.password_salt + values.password);
     http.post<''>('/admin/user/login', values)
-      .pipe(
-        tap(
-          this.setLoading(false),
-        )
-      )
       .subscribe(
         res => {
           if (res.errno === 0) {

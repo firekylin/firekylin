@@ -7,9 +7,13 @@ import { auth } from './auth';
 import { message } from 'antd';
 
 axios.interceptors.request.use((config: AxiosRequestConfig) => {
-    config.params._r = Math.random();
+    let query = 'data';
+    if (config.method === 'get') {
+        query = 'params';
+    }
+    config[query]._r = Math.random();
     if (auth.token) {
-        config.params.web_token = auth.token;
+        config[query].web_token = auth.token;
     }
     return config;
 });

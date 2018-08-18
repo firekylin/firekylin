@@ -5,32 +5,38 @@ import { observer, inject } from 'mobx-react';
 import PostListTable from './table/list-table';
 import { PostProps } from '../post.model';
 const TabPane = Tabs.TabPane;
+
 @inject('postStore')
 @observer class PostList extends React.Component<PostProps, {}> {
     componentDidMount() {
-        this.getPostList({});
+        this.props.postStore.getPostList();
     }
-    getPostList(params: any) {
-        this.props.postStore.getPostList({
-            page: 1,
-            status: params.status
+    pageChanged(page: number) {
+        this.props.postStore.setPlReqParams({
+            page
         });
     }
     tabChanged(key: string) {
-        this.getPostList({
-            // status: key
+        this.props.postStore.setPlReqParams({
+            status: key
         });
     }
     render() {
         return (
             <div>
-                <Tabs className="tabs" defaultActiveKey="1" type="card" onChange={key => {this.tabChanged(key); }}>
-                    <TabPane tab="全部" key="1">
+                <Tabs className="tabs" defaultActiveKey="" type="card" onChange={key => {this.tabChanged(key); }}>
+                    <TabPane tab="全部" key="">
                         <PostListTable />
                     </TabPane>
-                    <TabPane tab="已发布" key="3">Content of Tab Pane 2</TabPane>
-                    <TabPane tab="审核中" key="2">Content of Tab Pane 3</TabPane>
-                    <TabPane tab="已拒绝" key="4">Content of Tab Pane 3</TabPane>
+                    <TabPane tab="已发布" key="3">
+                        <PostListTable />
+                    </TabPane>
+                    <TabPane tab="审核中" key="1">
+                        <PostListTable />
+                    </TabPane>
+                    <TabPane tab="已拒绝" key="2">
+                        <PostListTable />
+                    </TabPane>
                 </Tabs>
             </div>
         );

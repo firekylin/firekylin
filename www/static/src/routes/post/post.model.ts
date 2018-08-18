@@ -5,8 +5,8 @@ export interface PostProps {
 }
 // Post列表
 export interface PostListRequestParams {
-    page: number;
-    status?: number;
+    page?: number;
+    status?: number | string;
     keyword?: string;
     cate?: string;
 }

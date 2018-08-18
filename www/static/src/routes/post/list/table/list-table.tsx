@@ -1,23 +1,30 @@
 import * as React from 'react';
-import { Table, Divider, Icon } from 'antd';
+import { Table, Button } from 'antd';
 import './list-table.less';
 import { observer, inject } from 'mobx-react';
+import { Link } from 'react-router-dom';
 
 @inject('postStore')
 @observer 
 class PostListTable extends React.Component<any, {}> {
-    componentDidMount() {
-        console.log('app mounted!');
-    }
     render() {
         const Column = Table.Column;
-        const data = this.props.postStore.postList;
+        const { postList, loading, pagination } = this.props.postStore;
         return (
-            <Table dataSource={data}>
+            <Table 
+                dataSource={postList}
+                loading={loading}
+                pagination={pagination}
+                onChange={e => {this.props.postStore.setPlReqParams({
+                    page: e.current
+                }); }}
+            >
                 <Column
                     title="标题"
-                    dataIndex="title"
                     key="title"
+                    render={(post) => (
+                        <Link to={`/post/edit/${post.id}`}>{post.title}</Link>
+                    )}
                 />
                 <Column
                     title="作者"
@@ -26,8 +33,8 @@ class PostListTable extends React.Component<any, {}> {
                 />
                 <Column
                     title="状态"
-                    dataIndex="status"
-                    key="status"
+                    dataIndex="statusText"
+                    key="statusText"
                 />
                 <Column
                     title="发布日期"
@@ -38,15 +45,10 @@ class PostListTable extends React.Component<any, {}> {
                     title="操作"
                     key="action"
                     render={(text, record) => (
-                        <span>
-                        <a href="javascript:;">Action</a>
-                        <Divider type="vertical" />
-                        <a href="javascript:;">Delete</a>
-                        <Divider type="vertical" />
-                        <a href="javascript:;" className="ant-dropdown-link">
-                            More actions <Icon type="down" />
-                        </a>
-                        </span>
+                        <>
+                            <Button type="primary" icon="edit" size="small">编辑</Button>
+                            <Button style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                        </>
                     )}
                 />
             </Table>
