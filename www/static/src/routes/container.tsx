@@ -5,7 +5,6 @@ import DashBoard from './dashboard/dashboard';
 import User from './user/user';
 import Sidebar from '../components/sidebar';
 import Post from './post/post';
-import BreadCrumb from '../components/breadcrumb';
 
 const routerOptions = {
     basename: '/admin',
@@ -13,15 +12,11 @@ const routerOptions = {
 };
 
 class Container extends React.Component<any, {}> {
-    componentDidMount() {
-        console.log('app mounted!');
-    }
     render() {
         return (
             <Router {...routerOptions}>
                 <>
                     <Sidebar />
-                    <BreadCrumb className="breadcrumb" {...this.props} />
                     <div className="content">
                         <Switch>
                             <Route exact={true} path="/dashboard" component={DashBoard}/>

@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react';
 import PostListTable from './table/list-table';
 import { Tabs, Input, Form, Icon, Button, Select } from 'antd';
 import { PostListProps } from './list.model';
+import BreadCrumb from '../../../components/breadcrumb';
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -49,27 +50,30 @@ const Option = Select.Option;
     }
     render() {
         return (
-            <div className="post-list">
-                <Tabs className="tabs" 
-                    defaultActiveKey="" 
-                    type="card" 
-                    onChange={key => {this.tabChanged(key); }}
-                    tabBarExtraContent={this.getOperations()}
-                >
-                    <TabPane tab="全部" key="">
-                        <PostListTable />
-                    </TabPane>
-                    <TabPane tab="已发布" key="3">
-                        <PostListTable />
-                    </TabPane>
-                    <TabPane tab="审核中" key="1">
-                        <PostListTable />
-                    </TabPane>
-                    <TabPane tab="已拒绝" key="2">
-                        <PostListTable />
-                    </TabPane>
-                </Tabs>
-            </div>
+            <>
+                <BreadCrumb className="breadcrumb" {...this.props} />
+                <div className="post-list">
+                    <Tabs className="tabs" 
+                        defaultActiveKey="" 
+                        type="card" 
+                        onChange={key => {this.tabChanged(key); }}
+                        tabBarExtraContent={this.getOperations()}
+                    >
+                        <TabPane tab="全部" key="">
+                            <PostListTable />
+                        </TabPane>
+                        <TabPane tab="已发布" key="3">
+                            <PostListTable />
+                        </TabPane>
+                        <TabPane tab="审核中" key="1">
+                            <PostListTable />
+                        </TabPane>
+                        <TabPane tab="已拒绝" key="2">
+                            <PostListTable />
+                        </TabPane>
+                    </Tabs>
+                </div>
+            </>
         );
     }
 }

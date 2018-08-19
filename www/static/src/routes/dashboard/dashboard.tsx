@@ -64,6 +64,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
 
     return (
       <div className="fk-content-wrap">
+        <BreadCrumb className="breadcrumb" {...this.props} />
         <div className="manage-container">
           {this.state.needUpdate ?
             <p className="bg-info update-message">
