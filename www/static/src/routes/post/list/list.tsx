@@ -1,13 +1,17 @@
 import * as React from 'react';
-import { Tabs } from 'antd';
 import './list.less';
 import { observer, inject } from 'mobx-react';
 import PostListTable from './table/list-table';
-import { PostProps } from '../post.model';
+import { Tabs, Input, Form, Icon, Button, Select } from 'antd';
+import { PostListProps } from './list.model';
 const TabPane = Tabs.TabPane;
-
+const FormItem = Form.Item;
+const Option = Select.Option;
 @inject('postStore')
-@observer class PostList extends React.Component<PostProps, {}> {
+@observer class PostListForm extends React.Component<PostListProps, {}> {
+    constructor(props: any) {
+        super(props);
+    }
     componentDidMount() {
         this.props.postStore.getPostList();
     }
@@ -21,10 +25,37 @@ const TabPane = Tabs.TabPane;
             status: key
         });
     }
+    handleSubmit() {
+        // 
+    }
+
+    getOperations() {
+        const Search = Input.Search;
+        return (
+            <>
+                <FormItem className="forms">
+                    <Select defaultValue="" style={{float: 'left'}} placeholder="请选择分类">
+                        <Option value="">全部分类</Option>
+                    </Select>
+                    <Search
+                        placeholder="请输入关键字"
+                        onSearch={keyword => this.props.postStore.setPlReqParams({keyword})}
+                        enterButton={true}
+                        style={{ width: 200, marginLeft: 10 }}
+                    />
+                </FormItem>
+            </>
+        );
+    }
     render() {
         return (
-            <div>
-                <Tabs className="tabs" defaultActiveKey="" type="card" onChange={key => {this.tabChanged(key); }}>
+            <div className="post-list">
+                <Tabs className="tabs" 
+                    defaultActiveKey="" 
+                    type="card" 
+                    onChange={key => {this.tabChanged(key); }}
+                    tabBarExtraContent={this.getOperations()}
+                >
                     <TabPane tab="全部" key="">
                         <PostListTable />
                     </TabPane>
@@ -42,5 +73,5 @@ const TabPane = Tabs.TabPane;
         );
     }
 }
-
+const PostList = Form.create()(PostListForm);
 export default PostList;

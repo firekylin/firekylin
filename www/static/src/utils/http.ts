@@ -11,10 +11,16 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
     if (config.method === 'get') {
         query = 'params';
     }
-    config[query]._r = Math.random();
-    if (auth.token) {
-        config[query].web_token = auth.token;
+    try {
+        config[query] = Object.assign({}, config[query]);
+        config[query]._r = Math.random();
+        if (auth.token) {
+            config[query].web_token = auth.token;
+        }
+    } catch (err) {
+        console.error(err);
     }
+    
     return config;
 });
 
@@ -22,9 +28,8 @@ axios.interceptors.response.use(
     (result: AxiosResponse<IResult<any>>) => {
         if (result.data.errno !== 0) {
             message.error(result.data.errmsg);
-            return Promise.reject(result);
         }
-        return result;
+        return Promise.resolve(result);
     }, 
     result => {
         return Promise.reject(result);

@@ -126,6 +126,7 @@
     "stc-uglify": "^1.0.1",
     "style-loader": "^0.13.0",
     "superagent": "^1.7.2",
+    "sweetalert2": "6.9.1",
     "think-watcher": "^3.0.0",
     "ts-import-plugin": "^1.5.4",
     "ts-loader": "^4.4.2",

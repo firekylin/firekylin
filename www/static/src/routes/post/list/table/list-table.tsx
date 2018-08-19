@@ -3,10 +3,24 @@ import { Table, Button } from 'antd';
 import './list-table.less';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
+// import { modal } from '../../../../components/modal';
+import { Modal, message } from 'antd';
+
+const confirm = Modal.confirm;
 
 @inject('postStore')
 @observer 
 class PostListTable extends React.Component<any, {}> {
+    delete(id: number) {
+        confirm({
+          title: '提示',
+          content: '确定删除吗?',
+          onOk: () => {
+            this.props.postStore.deletePostById(id);
+          }
+        });
+      }
+
     render() {
         const Column = Table.Column;
         const { postList, loading, pagination } = this.props.postStore;
@@ -44,10 +58,10 @@ class PostListTable extends React.Component<any, {}> {
                 <Column
                     title="操作"
                     key="action"
-                    render={(text, record) => (
+                    render={post => (
                         <>
                             <Button type="primary" icon="edit" size="small">编辑</Button>
-                            <Button style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                            <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
                         </>
                     )}
                 />

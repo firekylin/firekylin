@@ -24,6 +24,7 @@ class PostStore {
   appStore;
   @observable loading = false;
   @observable postList;
+  @observable categoryList;
   @observable pagination: PaginationConfig = {
     current: 1,
     pageSize: 0,
@@ -53,6 +54,9 @@ class PostStore {
     this.postList = data; 
   }
 
+  @action
+  setCategoryList = data => this.categoryList = data
+
   @action 
   setPagination = (pagination: PaginationConfig) => {
     this.pagination = pagination;
@@ -64,6 +68,7 @@ class PostStore {
     this.getPostList();
   }
 
+  // 获取文章列表
   getPostList(): void {
     this.setLoading(true);
     http.get<PostListResponseData>('/admin/api/post', this.plReqParams)
@@ -94,6 +99,37 @@ class PostStore {
         err => {
           message.error(err);
           this.setLoading(false);
+        }
+      );
+  }
+
+  // 获取分类列表
+  getCategoryList() {
+    http.get<any>('/admin/api/cate', this.plReqParams)
+      .subscribe(
+        res => {
+          if (res.errno === 0) {
+              this.setCategoryList(res.data.data);
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+  }
+
+  // 删除文章
+  deletePostById(id: number) {
+    http.post<any>(`/admin/api/post/${id}?method=delete`)
+      .subscribe(
+        res => {
+          if (res.errno === 0) {
+              message.success('删除成功');
+              this.getPostList();
+          }
+        },
+        err => {
+          message.error(err);
         }
       );
   }
