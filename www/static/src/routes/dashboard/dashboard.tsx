@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Button } from 'antd';
 import './dashboard.less';
 import { observer, inject } from 'mobx-react';
 import { DashBoardProps } from './dashboard.model';
@@ -18,18 +17,7 @@ const COUNT_DOWN = 3;
 @observer 
 class DashBoard extends React.Component<DashBoardProps, any> {
   state = {
-    platform: '',
-    nodeVersion: '',
-    v8Version: '',
-    mysqlVersion: '',
-    thinkjsVersion: '',
-    firekylinVersion: '',
     posts: [],
-    count: {
-      posts: 0,
-      comments: 0,
-      cates: 0
-    },
     step: 1,
     downCount: COUNT_DOWN,
     needUpdate: ''
@@ -37,6 +25,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
 
   componentWillMount() {
     this.props.dashBoardStore.getSelectLast();
+    this.props.dashBoardStore.getSystemInfo();
   }
 
   handleClick() {
@@ -55,12 +44,15 @@ class DashBoard extends React.Component<DashBoardProps, any> {
   }
 
   render() {
-    let links = [
+    const links = [
       {url: '/post/create', title: '撰写新文章', type: 2},
       {url: '/page/create', title: '创建页面', type: 1},
       {url: '/appearance/theme', title: '更改外观', type: 1},
       {url: '/options/general', title: '系统设置', type: 1}
     ].filter(link => link.type >= window.SysConfig.userInfo.type);
+
+    const { versions, count } = this.props.dashBoardStore.systemInfo;
+    const { posts } = this.props.dashBoardStore;
 
     return (
       <div className="fk-content-wrap">
@@ -76,8 +68,8 @@ class DashBoard extends React.Component<DashBoardProps, any> {
             </p>
           : null}
           <h3 style={{marginBottom: '30px'}}>网站概要</h3>
-          <p>目前有 {this.state.count.posts} 篇文章,
-            并有 {this.state.count.comments} 条关于你的评论在 {this.state.count.cates} 个分类中. </p>
+          <p>目前有 {count.posts} 篇文章,
+            并有 {count.comments} 条关于你的评论在 {count.cates} 个分类中. </p>
           <p>点击下面的链接快速开始:</p>
           <div className="quick-link">
             {links.map(link => <Link key={link.url} to={link.url}>{link.title}</Link>)}
@@ -87,23 +79,23 @@ class DashBoard extends React.Component<DashBoardProps, any> {
             <div className="col-md-5">
               <h4>最近发布的文章</h4>
               <ul>
-                {/* {this.state.posts.map(post =>
+                {(posts as any[]).map(post =>
                   <li key={post.id}>
                     <label>{moment(new Date(post.create_time)).format('MM.DD')}：</label>
                     <a href={`/post/${post.pathname}`} target="_blank">{post.title}</a>
                   </li>
-                )} */}
+                )}
               </ul>
             </div>
             <div className="col-md-3">
               <h4>系统概况</h4>
               <ul>
-                <li><label>服务器系统：</label>{this.state.platform}</li>
-                <li><label>Node.js版本：</label>{this.state.nodeVersion}</li>
-                <li><label>V8引擎版本：</label>{this.state.v8Version}</li>
-                <li><label>MySQL版本：</label>{this.state.mysqlVersion}</li>
-                <li><label>ThinkJS版本：</label>{this.state.thinkjsVersion}</li>
-                <li><label>FireKylin版本：</label>{this.state.firekylinVersion}</li>
+                <li><label>服务器系统：</label>{versions.platform}</li>
+                <li><label>Node.js版本：</label>{versions.nodeVersion}</li>
+                <li><label>V8引擎版本：</label>{versions.v8Version}</li>
+                <li><label>MySQL版本：</label>{versions.mysqlVersion}</li>
+                <li><label>ThinkJS版本：</label>{versions.thinkjsVersion}</li>
+                <li><label>FireKylin版本：</label>{versions.firekylinVersion}</li>
               </ul>
             </div>
             <div className="col-md-4">
