@@ -1,18 +1,21 @@
 import * as React from 'react';
-// import {Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {Tabs} from 'antd';
 import { observer, inject } from 'mobx-react';
 // import UserAction from '../action/user';
 import { UserProps } from '../user.model';
 // import UserStore from '../store/user';
 // import ModalAction from '../../common/action/modal';
+import { message, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 // import TipAction from 'common/action/tip';
 
 @inject('userStore')
 @observer
 export default class extends React.Component<UserProps,any> {
+
     public userStore:any;
+
     constructor(props) {
         super(props);
         this.userStore = this.props.userStore;
@@ -20,8 +23,16 @@ export default class extends React.Component<UserProps,any> {
     componentDidMount() {
         // this.listenTo(UserStore, this.handleTrigger.bind(this));
         // UserAction.select();
-        this.userStore.getSelect();
+        this.userStore.select((data)=>{
+            this.userStore.setUserList(data);
+            this.userStore.setLoading(false);
+        },()=> {
+            console.log('加载用户列表失败');
+        });
         // console.log(this.props.userStore.userList);
+    }
+    pass(user) {
+        this.userStore.pass(user.id);
     }
     // handleTrigger(data, type) {
     //     switch(type) {
@@ -35,27 +46,45 @@ export default class extends React.Component<UserProps,any> {
     //             this.setState({userList: data, loading: false});
     //     }
     // }
-    // handleDelete(userId) {
-    //     return ModalAction.confirm('提示', <div className="center">确定删除该用户吗？<br />
-    //         <p className="gray">删除后无法恢复</p></div>, () => {
-    //         UserAction.delete(userId);
-    //     }, 'modal-sm');
-    // }
-    // handleSelect(type) {
-    //     this.state.key = type;
-    //     this.state.page = 1;
-    //     return UserAction.select(null, type===3?'contributor':'');
-    // }
-    // pass(user) {
-    //     UserAction.pass(user.id);
-    // }
+    handleDelete(userId) {
+        const that = this;
+        return Modal.confirm({
+            title: '确定删除该用户吗？',
+            content: '删除后无法恢复',
+            onOk()  {
+                // message.success('删除成功');
+                that.userStore.Delete(userId,()=>{
+                    message.success('删除成功');
+                    that.userStore.select(null, that.userStore.key===3?'contributor':'')
+                },()=>{
+                    message.success('删除失败，请稍后重试');
+                });
+            },
+        });
+    }
+    handleSelect(type) {
+        this.userStore.key = type;
+        this.userStore.page = 1;
+        return this.userStore.select(null, type===3?'contributor':'');
+    }
 
-    // deny(user) {
-    //     return ModalAction.confirm('提示', <div className="center">拒绝该用户的申请后会直接删除该账号<br />
-    //         <p className="gray">删除后无法恢复</p></div>, () => {
-    //         UserAction.delete(user.id);
-    //     }, 'modal-sm');
-    // }
+
+    deny(user) {
+        const that = this;
+        return Modal.confirm({
+            title: '拒绝该用户的申请后会直接删除该账号',
+            content: '删除后无法恢复',
+            onOk()  {
+                // message.success('删除成功');
+                that.userStore.delete(user.id,()=>{
+                    message.success('删除成功');
+                    that.userStore.select(null, that.userStore.key===3?'contributor':'')
+                },()=>{
+                    message.success('删除失败，请稍后重试');
+                });
+            },
+        })
+    }
 
     getUserType(user) {
         switch(user.type) {
@@ -67,13 +96,13 @@ export default class extends React.Component<UserProps,any> {
     }
 
     getUserList() {
-        if(this.props.userStore.loading) {
+        if(this.userStore.loading) {
             return (<tr><td className="center">加载中……</td></tr>);
         }
-        if(!this.props.userStore.userList.length) {
+        if(!this.userStore.userList.length) {
             return (<tr><td className="center">无相关用户</td></tr>);
         }
-        return this.props.userStore.userList.map(item => {
+        return this.userStore.userList.map(item => {
             return (
                 <tr key={item.id}>
                     <td scope="row">{item.id}</td>
@@ -89,28 +118,28 @@ export default class extends React.Component<UserProps,any> {
                     <td>{item.comment_num}</td>
                     <td>{item.create_time}</td>
                     <td>{item.last_login_time}</td>
-                    {/*<td>*/}
-                        {/*{!this.state.key ? <Link to={'user/edit/' + item.id}>*/}
-                                {/*<button type="button" className="btn btn-primary btn-xs">*/}
-                                    {/*<span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑*/}
-                                {/*</button>*/}
-                            {/*</Link> :*/}
-                            {/*<button type="button" className="btn btn-success btn-xs" onClick={this.pass.bind(this, item)}>*/}
-                                {/*<span className="glyphicon glyphicon-ok"></span>*/}
-                                {/*通过*/}
-                            {/*</button>*/}
-                        {/*}*/}
-                        {/*&nbsp;*/}
-                        {/*{!this.state.key ? <button type="button" className="btn btn-danger btn-xs"*/}
-                                                   {/*onClick={this.handleDelete.bind(this, item.id)}>*/}
-                                {/*<span className="glyphicon glyphicon-trash" aria-hidden="true"></span> 删除*/}
-                            {/*</button> :*/}
-                            {/*<button type="button" className="btn btn-warning btn-xs" onClick={this.deny.bind(this, item)}>*/}
-                                {/*<span className="glyphicon glyphicon-remove"></span>*/}
-                                {/*拒绝*/}
-                            {/*</button>*/}
-                        {/*}*/}
-                    {/*</td>*/}
+                    <td>
+                        {!this.userStore.key ? <Link to={'user/edit/' + item.id}>
+                                <button type="button" className="btn btn-primary btn-xs">
+                                    <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
+                                </button>
+                            </Link> :
+                            <button type="button" className="btn btn-success btn-xs" onClick={this.pass.bind(this, item)}>
+                                <span className="glyphicon glyphicon-ok"></span>
+                                通过
+                            </button>
+                        }
+                        &nbsp;
+                        {!this.userStore.key ? <button type="button" className="btn btn-danger btn-xs"
+                                                   onClick={this.handleDelete.bind(this, item.id)}>
+                                <span className="glyphicon glyphicon-trash" aria-hidden="true"></span> 删除
+                            </button> :
+                            <button type="button" className="btn btn-warning btn-xs" onClick={this.deny.bind(this, item)}>
+                                <span className="glyphicon glyphicon-remove"></span>
+                                拒绝
+                            </button>
+                        }
+                    </td>
                 </tr>
             );
         })

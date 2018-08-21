@@ -7,19 +7,36 @@ import firekylin from '../../utils/firekylin';
 
 export default class UserStore{
     appStore;
-    @observable userList:any = [];
-    @observable loading = true;
-    @observable key = 0;
 
     constructor(appStore: AppStore) {
         this.appStore = appStore;
     }
+
+    @observable userList:any = [];
+    @observable loading = true;
+    @observable key = 0;
+
+    @observable submitting: false;
+    @observable userInfo: {};
+    @observable hasEmail: false;
 
     @action
     setUserList = data => this.userList = data;
 
     @action
     setLoading = data => this.loading = data;
+
+    @action
+    setKey= data => this.key = data;
+
+    @action
+    setSubmitting = data => this.submitting = data;
+
+    @action
+    setUserInfo = data => this.userInfo = data;
+
+    @action
+    setHasEmail = data => this.hasEmail = data;
 
     /**
      * select user data
@@ -28,7 +45,7 @@ export default class UserStore{
      * @return {[type]}    [description]
      */
     @action
-    getSelect(id ?: number, filter ?: string) {
+    select(id ?: number, filter ?: string) {
         let url = '/admin/api/user';
         if(id) {
             url += '/' + id;
@@ -38,36 +55,92 @@ export default class UserStore{
         }
         let req = superagent.get(url);
         return firekylin.request(req).then(data => {
+            // todo
             // this.trigger(data, id ? 'getUserInfo' : 'getUserList');
-            this.setUserList(data);
+            if (id){
+                this.setUserList(data);
+            } else {
+                this.setUserInfo(data);
+                this.setHasEmail(!!data.email);
+            }
             this.setLoading(false);
             // this.loading = false;
-
         }).catch(() => {
 
         })
     }
+    @action
+    pass(userId) {
+        let url = '/admin/api/user/' + userId + '?method=put&type=contributor';
+        let req = superagent.post(url);
+        req.type('form').send();
+        return firekylin.request(req).then(
+            // data => this.trigger(data, 'passUserSuccess'),
+            // err => this.trigger(err, 'passUserFailed')
+            //todo
+            data => {
+                this.setUserList(data);
+                this.setLoading(false);
+            }
+        );
+    }
 
-    // /**
-    //  * save user
-    //  * @param  {Object} data []
-    //  * @return {Promise}      []
-    //  */
-    // onSave(data) {
-    //     let id = data.id;
-    //     delete data.id;
-    //     let url = '/admin/api/user';
-    //     if(id) {
-    //         url += '/' + id + '?method=put';
-    //     }
-    //     let req = superagent.post(url);
-    //     req.type('form').send(data);
-    //     return firekylin.request(req).then(data => {
-    //         this.trigger(data, 'saveUserSuccess');
-    //     }).catch(err => {
-    //         this.trigger(err, 'saveUserFail');
-    //     })
-    // },
+    @action
+    delete(userId,resolve,reject) {
+        let url = '/admin/api/user/' + userId + '?method=delete';
+        let req = superagent.post(url);
+        req.type('form').send();
+        return firekylin.request(req).then(data => {
+            resolve();
+            // this.trigger(data, 'deleteUserSuccess');
+        }).catch(err => {
+            reject();
+            // this.trigger(err, 'deleteUserFail');
+        })
+    }
+
+
+    /**
+     * save user
+     * @param  {Object} data []
+     * @return {Promise}      []
+     */
+    @action
+    save(data,resolve,reject) {
+        let id = data.id;
+        delete data.id;
+        let url = '/admin/api/user';
+        if(id) {
+            url += '/' + id + '?method=put';
+        }
+        let req = superagent.post(url);
+        req.type('form').send(data);
+        return firekylin.request(req).then(data => {
+            resolve();
+            // this.trigger(data, 'saveUserSuccess');
+        }).catch(err => {
+            reject();
+            // this.trigger(err, 'saveUserFail');
+        })
+    }
+
+    @action
+    generateKey(userId,resolve,reject) {
+        let url = '/admin/api/user/' + userId + '?type=key';
+        let req = superagent.post(url);
+        req.type('form').send();
+        return firekylin.request(req).then(
+            data => {
+                // this.trigger(data, 'getUserInfo')
+                resolve();
+            },
+            err => {
+                // this.trigger(err, 'getUserInfoFailed')
+                reject();
+            }
+        );
+    }
+
     // onSavepwd(data) {
     //     let url = '/admin/user/password';
     //     let req = superagent.post(url);
@@ -113,34 +186,7 @@ export default class UserStore{
     //     );
     // },
     //
-    // onDelete(userId) {
-    //     let url = '/admin/api/user/' + userId + '?method=delete';
-    //     let req = superagent.post(url);
-    //     req.type('form').send();
-    //     return firekylin.request(req).then(data => {
-    //         this.trigger(data, 'deleteUserSuccess');
-    //     }).catch(err => {
-    //         this.trigger(err, 'deleteUserFail');
-    //     })
-    // },
-    //
-    // onPass(userId) {
-    //     let url = '/admin/api/user/' + userId + '?method=put&type=contributor';
-    //     let req = superagent.post(url);
-    //     req.type('form').send();
-    //     return firekylin.request(req).then(
-    //         data => this.trigger(data, 'passUserSuccess'),
-    //         err => this.trigger(err, 'passUserFailed')
-    //     );
-    // },
-    //
-    // onGenerateKey(userId) {
-    //     let url = '/admin/api/user/' + userId + '?type=key';
-    //     let req = superagent.post(url);
-    //     req.type('form').send();
-    //     return firekylin.request(req).then(
-    //         data => this.trigger(data, 'getUserInfo'),
-    //         err => this.trigger(err, 'getUserInfoFailed')
-    //     );
-    // }
+
+
+
 }
