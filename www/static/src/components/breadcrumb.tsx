@@ -15,7 +15,7 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
     userOpen: false,
     crumb: [],
   };
-  crumbs: {};
+  crumbs: any;
 
   bindHandleDocumentClick: (e: Event) => void;
   userInfoRef: React.Ref<any>;
@@ -33,20 +33,20 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
     }
 
     const InitiatedRoutes = InitiateRoutes(themePages);
+    this.crumbs = {};
+    InitiatedRoutes.forEach(route => {
+      if (!route.children) { return; }
+      route.children.forEach(child => {
+        this.crumbs[child.url] = [
+          {title: route.title, url: route.url, children: route.children},
+          child
+        ];
+      });
+    });
 
-    // InitiatedRoutes.forEach(route => {
-    //   if (!route.children) { return; }
-    //   route.children.forEach(child => {
-    //     this.crumbs[child.url] = [
-    //       {title: route.title, url: route.url, children: route.children},
-    //       child
-    //     ];
-    //   });
-    // });
-
-    // if (this.crumbs[this.props.location.pathname]) {
-    //   this.state.crumb = this.crumbs[this.props.location.pathname];
-    // }
+    if (this.crumbs[this.props.location.pathname]) {
+      this.state.crumb = this.crumbs[this.props.location.pathname];
+    }
   }
 
   componentDidMount() {

@@ -4,8 +4,7 @@ import './container.less';
 import DashBoard from './dashboard/dashboard';
 import User from './user/user';
 import Sidebar from '../components/sidebar';
-import PostList from './post/list/list';
-import PostCreate from './post/create/create';
+import Post from './post/post';
 
 const routerOptions = {
     basename: '/admin',
@@ -13,25 +12,19 @@ const routerOptions = {
 };
 
 class Container extends React.Component<any, {}> {
-    componentDidMount() {
-        console.log('app mounted!');
-    }
     render() {
         return (
             <Router {...routerOptions}>
                 <>
                     <Sidebar />
-                    <Switch>
-
-                        <Route exact={true} path="/dashboard" component={DashBoard}/>
-                        <Route exact={true} path="/post" render={() =>
-                            <Redirect to="/post/list" />
-                        }/>
-                        <Route exact={true} path="/post/list" component={PostList}/>
-                        <Route exact={true} path="/post/create" component={PostCreate}/>
-                        <Route path={`/user`} component={User}/>
-                        <Redirect to="/dashboard" />
-                    </Switch>
+                    <div className="content">
+                        <Switch>
+                            <Route exact={true} path="/dashboard" component={DashBoard}/>
+                            <Route path="/post" component={Post}/>
+                            <Route path={`/user`} component={User}/>
+                            <Redirect to="/dashboard" />
+                        </Switch>
+                    </div>
                 </>
             </Router>
         );
