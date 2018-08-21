@@ -1,14 +1,21 @@
 import * as React from 'react';
+import BreadCrumb from '../../../components/breadcrumb';
+import PostArticle from '../../../components/article/article';
+import './create.less';
 
 class PostCreate extends React.Component<any, {}> {
-    componentDidMount() {
-        console.log('app mounted!');
+
+    constructor(props: any) {
+        super(props);
     }
     render() {
         return (
-            <div>
-                <h3>I'm Create</h3>
-            </div>
+            <>
+                <BreadCrumb className="breadcrumb" {...this.props} />
+                <div className="post-create">
+                    <PostArticle {...this.props} />
+                </div>
+            </>
         );
     }
 }
