@@ -8,7 +8,7 @@ interface SharedLoading {
 }
 
 class SharedStore {
-  @observable categoryList: Category[];
+  @observable categoryList: Category[] = [];
   @observable loading: SharedLoading = {
     category: true,
   };

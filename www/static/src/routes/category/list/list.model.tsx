@@ -1,7 +1,6 @@
 import CategoryStore from '../category.store';
-import SharedStore from '../../../shared.store';
+import { BaseProps } from '../../../models/baseprops.model';
 
-export interface CategoryListProps {
+export interface CategoryListProps extends BaseProps {
     categoryStore: CategoryStore;
-    sharedStore: SharedStore;
 }

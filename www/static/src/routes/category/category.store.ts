@@ -2,6 +2,7 @@
 import { message } from 'antd';
 import { http } from '../../utils/http';
 import { AppStore } from '../../app.store';
+import { CategoryCreateParams } from './category.model';
 
 class CategoryStore {
   appStore;
@@ -17,6 +18,21 @@ class CategoryStore {
         res => {
           if (res.errno === 0) {
               message.success('删除成功');
+              this.appStore.sharedStore.getCategoryList();
+          }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+  }
+  // 创建标签
+  createCategory(params: CategoryCreateParams) {
+    http.post<any>('/admin/api/cate', params)
+      .subscribe(
+        res => {
+          if (res.errno === 0) {
+              message.success('创建成功');
               this.appStore.sharedStore.getCategoryList();
           }
         },
