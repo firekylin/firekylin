@@ -5,6 +5,7 @@ import DashBoard from './dashboard/dashboard';
 import User from './user/user';
 import Sidebar from '../components/sidebar';
 import Post from './post/post';
+import Category from './category/category';
 
 const routerOptions = {
     basename: '/admin',
@@ -21,6 +22,7 @@ class Container extends React.Component<any, {}> {
                         <Switch>
                             <Route exact={true} path="/dashboard" component={DashBoard}/>
                             <Route path="/post" component={Post}/>
+                            <Route path="/cate" component={Category}/>
                             <Route path={`/user`} component={User}/>
                             <Redirect to="/dashboard" />
                         </Switch>
