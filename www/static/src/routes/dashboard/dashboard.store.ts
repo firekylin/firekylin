@@ -22,6 +22,7 @@ class DashBoardStore {
       mysqlVersion: '',
       thinkjsVersion: '',
       firekylinVersion: '',
+      needUpdate: ''
     }
   };
   constructor(appStore: AppStore) {

@@ -22,8 +22,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
     posts: [],
     step: 1,
     downCount: COUNT_DOWN,
-    needUpdate: '',
-    showUpdate: false
+    showUpdate: false,
   };
 
   componentWillMount() {
