@@ -38,6 +38,11 @@ class SharedStore {
         }
       );
   }
+
+  // 更新系统
+  updateSystem(step: number) {
+    return http.post<any>('/admin/api/system?method=update&step=' + step);
+  }
 }
 
 export default SharedStore;

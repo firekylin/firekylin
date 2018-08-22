@@ -5,6 +5,8 @@ import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
 import { Link } from 'react-router-dom';
 import * as moment from 'moment';
+import { Modal } from 'antd';
+const confirm = Modal.confirm;
 
 const UPDATE_STEPS = [
   [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
@@ -13,14 +15,15 @@ const UPDATE_STEPS = [
   [4, '正在重启程序...', '程序重启成功，将在 %d 秒后刷新页面！']
 ];
 const COUNT_DOWN = 3;
-@inject('dashBoardStore')
+@inject('dashBoardStore', 'sharedStore')
 @observer 
 class DashBoard extends React.Component<DashBoardProps, any> {
   state = {
     posts: [],
     step: 1,
     downCount: COUNT_DOWN,
-    needUpdate: ''
+    needUpdate: '',
+    showUpdate: false
   };
 
   componentWillMount() {
@@ -32,15 +35,64 @@ class DashBoard extends React.Component<DashBoardProps, any> {
     this.props.dashBoardStore.setPosts('hello');
   }
 
+  renderUpdate() {
+    return (
+      <div className="modal fade in" style={{display: this.state.showUpdate ? 'block' : 'none'}}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+              <h4 className="modal-title" >在线更新</h4>
+            </div>
+            <div className="modal-body" >
+              <div className="dialog-panel anim-modal " >
+                <a href="###" className="close-btn" />
+                <div className="dialog-content" >
+                  <ul className="update-step">
+                    {UPDATE_STEPS.map(step =>
+                      <li key={step[0]} className={this.state.step >= step[0] ? 'show' : ''}>
+                        <i className={this.state.step > step[0] ? 'success' : ''}>{step[0]}</i>
+                        <div className="pipe">
+                          <div className="half"/>
+                        </div>
+                        <span className="loading">{step[1]}</span>
+                        <span className="ok">{(step[2] as string).replace('%d', this.state.downCount.toString())}</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   renderUpdateConfirm() {
-    // ModalAction.confirm(
-    //   '在线更新警告!',
-    //   <div>在线更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。</div>,
-    //   ()=> {
-    //     this.setState({showUpdate: true});
-    //     SystemAction.updateSystem(this.state.step);
-    //   }
-    // );
+    confirm({
+        title: '在线更新警告!',
+        content: '在线更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。',
+        onOk: () => {
+            this.setState({showUpdate: true});
+            this.props.sharedStore.updateSystem(this.state.step)
+            .subscribe(
+              res => {
+                if (res.errno === 0) {
+                  if (this.state.step <= UPDATE_STEPS.length) {
+                    this.setState({step: this.state.step + 1}, () => this.props.sharedStore.updateSystem(this.state.step));
+                  }
+                  if (this.state.step > UPDATE_STEPS.length) {
+                    setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
+                    setInterval(() => this.setState({downCount: Math.max(0, --this.state.downCount)}), 1000);
+                  }
+                }
+              }
+            );
+        }
+    });
   }
 
   render() {
@@ -58,11 +110,11 @@ class DashBoard extends React.Component<DashBoardProps, any> {
       <div className="fk-content-wrap">
         <BreadCrumb className="breadcrumb" {...this.props} />
         <div className="manage-container">
-          {this.state.needUpdate ?
+          {versions.needUpdate ?
             <p className="bg-info update-message">
               Firekylin <a
-              href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${this.state.needUpdate.replace(/\./g, '')}`}
-              >{this.state.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz"
+              href={`https://github.com/firekylin/firekylin/blob/master/CHANGELOG.md#${(versions.needUpdate as string).replace(/\./g, '')}`}
+              >{versions.needUpdate}</a> 已经发布，请立即 <a href="http://firekylin.org/release/latest.tar.gz"
               >下载更新</a> 或者使用 <a href="javascript:void(0)" onClick={() => this.renderUpdateConfirm()}
               >在线更新</a>！
             </p>
@@ -132,7 +184,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
             </div>
           </div>
         </div>
-        {/* {this.renderUpdate()} */}
+        {this.renderUpdate()}
       </div>
     );
   }

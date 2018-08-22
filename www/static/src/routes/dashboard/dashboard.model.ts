@@ -1,7 +1,9 @@
 import DashBoardStore from './dashboard.store';
+import SharedStore from '../../shared.store';
 
 export interface DashBoardProps {
     dashBoardStore: DashBoardStore;
+    sharedStore: SharedStore;
 }
 
 export interface SystemInfo {
@@ -17,6 +19,7 @@ export interface SystemInfo {
         v8Version: string;
         mysqlVersion: string;
         thinkjsVersion: string;
-        firekylinVersion: string
+        firekylinVersion: string;
+        needUpdate: boolean | string;
     };
 }
