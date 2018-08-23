@@ -5,7 +5,7 @@ import { AppStore } from '../../app.store';
 import { CategoryCreateParams } from './category.model';
 
 class CategoryStore {
-  appStore;
+  appStore: AppStore;
 
   constructor(appStore: AppStore) {
     this.appStore = appStore;
@@ -35,6 +35,19 @@ class CategoryStore {
               message.success('创建成功');
               this.appStore.sharedStore.getCategoryList();
           }
+        },
+        err => {
+          message.error(err);
+        }
+      );
+  }
+  // 设置默认标签
+  setDefaultCategory(id: number) {
+    http.post<any>('/admin/api/options?type=defaultCategory&method=put', {id})
+      .subscribe(
+        res => {
+            message.success('设置默认分类成功');
+            this.appStore.sharedStore.getDefaultCategory();
         },
         err => {
           message.error(err);

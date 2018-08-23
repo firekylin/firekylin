@@ -3,7 +3,6 @@ import { AppStore } from '../../app.store';
 import md5 from 'md5';
 import { http } from '../../utils/http';
 import { message } from 'antd';
-import { tap } from 'rxjs/operators';
 
 class LoginStore {
   appStore;

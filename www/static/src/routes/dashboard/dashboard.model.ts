@@ -1,9 +1,8 @@
 import DashBoardStore from './dashboard.store';
-import SharedStore from '../../shared.store';
+import { BaseProps } from '../../models/baseprops.model';
 
-export interface DashBoardProps {
+export interface DashBoardProps extends BaseProps {
     dashBoardStore: DashBoardStore;
-    sharedStore: SharedStore;
 }
 
 export interface SystemInfo {

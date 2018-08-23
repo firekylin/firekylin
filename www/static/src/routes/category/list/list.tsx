@@ -3,7 +3,10 @@ import { observer, inject } from 'mobx-react';
 import { Button, Table, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { CategoryListProps } from './list.model';
+import './list.less';
+import { Category } from '../../../models/category.model';
 const confirm = Modal.confirm;
+import classnames from 'classnames';
 
 @inject('categoryStore', 'sharedStore')
 @observer class CategoryList extends React.Component<CategoryListProps, {}> {
@@ -12,6 +15,7 @@ const confirm = Modal.confirm;
     }
     componentDidMount() {
         this.props.sharedStore.getCategoryList();
+        this.props.sharedStore.getDefaultCategory();
     }
 
     delete(id: number) {
@@ -23,11 +27,15 @@ const confirm = Modal.confirm;
             }
         });
     }
+
+    setDefault(id: number) {
+        this.props.categoryStore.setDefaultCategory(id);
+    }
     render() {
         const Column = Table.Column;
-        const { categoryList, loading } = this.props.sharedStore;
+        const { categoryList, defaultCategory, loading } = this.props.sharedStore;
         return (
-            <>
+            <div className="category-list">
                 <BreadCrumb {...this.props} />
                 <Table 
                     dataSource={categoryList}
@@ -53,16 +61,25 @@ const confirm = Modal.confirm;
                     <Column
                         title="操作"
                         key="action"
-                        render={post => (
+                        render={(post: Category) => (
                             <>
-                                <Button type="primary" icon="star" size="small" style={{backgroundColor: '#5cb85c', borderColor: '#449d44'}}>默认</Button>
+                                <Button 
+                                    disabled={defaultCategory === post.id.toString()}
+                                    onClick={() => this.setDefault(post.id)} 
+                                    className={classnames({'defaultCatButton': !(defaultCategory === post.id.toString())})}
+                                    type="primary" 
+                                    icon="star" 
+                                    size="small"
+                                >
+                                    默认
+                                </Button>
                                 <Button type="primary" icon="edit" size="small" style={{marginLeft: 8}}>编辑</Button>
                                 <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
                             </>
                         )}
                     />
                 </Table>
-            </>
+            </div>
         );
     }
 }

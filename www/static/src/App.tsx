@@ -4,7 +4,7 @@ import { Provider } from 'mobx-react';
 import './app.less';
 import routes from './routes';
 import AppStore from './app.store';
-import SharedStore from './shared.store';
+
 declare global {
     interface Window {
         SysConfig: {
