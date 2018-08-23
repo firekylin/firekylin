@@ -5,6 +5,7 @@ import UserStore from './routes/user/user.store';
 import PostStore from './routes/post/post.store';
 import SharedStore from './shared.store';
 import CategoryStore from './routes/category/category.store';
+import TagStore from './routes/tag/tag.store';
 
 configure({
     enforceActions: true
@@ -17,6 +18,7 @@ export class AppStore {
     userStore: UserStore;
     postStore: PostStore;
     categoryStore: CategoryStore;
+    tagStore: TagStore;
     sharedStore: SharedStore;
 
     constructor() {
@@ -25,6 +27,7 @@ export class AppStore {
         this.userStore = new UserStore(this);
         this.postStore = new PostStore(this);
         this.categoryStore = new CategoryStore(this);
+        this.tagStore = new TagStore(this);
         this.sharedStore = new SharedStore();
     }
 

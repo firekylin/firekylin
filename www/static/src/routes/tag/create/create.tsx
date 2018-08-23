@@ -1,22 +1,28 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, Input, Button, Select } from 'antd';
+// import './create.less';
+import { Form, Input, Button } from 'antd';
 import { inject, observer } from 'mobx-react';
-import { CategoryCreateProps } from './create.model';
+import { TagCreateProps } from './create.model';
 const FormItem = Form.Item;
-const Option = Select.Option;
-@inject('categoryStore', 'sharedStore')
+@inject('tagStore', 'sharedStore')
 @observer
-class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
+class TagCreateForm extends React.Component<TagCreateProps, {}> {
 
-    constructor(props: CategoryCreateProps) {
+    constructor(props: TagCreateProps) {
         super(props);
     }
 
     componentDidMount() {
-        this.props.categoryStore.getRootCategory();
         if (this.props.match.params.id) {
-            this.props.categoryStore.getCategoryInfoById(this.props.match.params.id);
+            this.props.tagStore.getTagById(this.props.match.params.id);
+        } else {
+            this.props.tagStore.setTag({
+                id: 0,
+                name: '',
+                pathname: '',
+                post_tag: 0
+            });
         }
     }
 
@@ -24,23 +30,23 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-                const { createCategory, updateCategory } = this.props.categoryStore;
+                const { tagCreate, tagUpdate } = this.props.tagStore;
                 const id = this.props.match.params.id;
                 if (id) {
-                    updateCategory(id, Object.assign({}, values))
+                    tagUpdate(id, Object.assign({}, values))
                     .subscribe(
                         res => {
                             if (res.errno === 0) {
-                                this.props.history.push('/cate/list');
+                                this.props.history.push('/tag/list');
                             }
                         }
                     );
                 } else {
-                    createCategory(Object.assign({}, values))
+                    tagCreate(Object.assign({}, values))
                     .subscribe(
                         res => {
                             if (res.errno === 0) {
-                                this.props.history.push('/cate/list');
+                                this.props.history.push('/tag/list');
                             }
                         }
                     );
@@ -71,7 +77,7 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
             },
         };
         
-        const { rootCategoryList, categoryInfo } = this.props.categoryStore;
+        const { tag } = this.props.tagStore;
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
@@ -79,13 +85,13 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
                     <Form onSubmit={this.handleSubmit}>
                         <FormItem
                             {...formItemLayout}
-                            label="分类名称"
+                            label="标签名称"
                         >
                             {getFieldDecorator('name', {
                                 rules: [{
-                                    required: true, message: '请填写分类名称',
+                                    required: true, message: '请填写标签名称',
                                 }],
-                                initialValue: categoryInfo ? categoryInfo.name : '',
+                                initialValue: tag ? tag.name : '',
                             })(
                                 <Input />
                             )}
@@ -95,26 +101,9 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
                             label="缩略名"
                         >
                             {getFieldDecorator('pathname', {
-                                initialValue: categoryInfo ? categoryInfo.pathname : ''
+                                initialValue: tag ? tag.pathname : ''
                             })(
                                 <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
-                            {...formItemLayout}
-                            label="父级分类"
-                        >
-                            {getFieldDecorator('pid', {
-                                initialValue: categoryInfo ? categoryInfo.pid : 0
-                            })(
-                                <Select
-                                    placeholder="请选择分类"
-                                >
-                                    <Option value={0}>不选择</Option>
-                                    {rootCategoryList.map((category, key) => {
-                                        return <Option key={key + 1} value={category.id}>{category.name}</Option>;
-                                    })}
-                                </Select>
                             )}
                         </FormItem>
                         <FormItem {...tailFormItemLayout}>
@@ -126,5 +115,5 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
         );
     }
 }
-const CategoryCreate = Form.create()(CategoryCreateForm);
-export default CategoryCreate;
+const TagCreate = Form.create()(TagCreateForm);
+export default TagCreate;

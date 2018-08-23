@@ -2,16 +2,20 @@ import { observable, action } from 'mobx';
 import { message } from 'antd';
 import { http } from './utils/http';
 import { Category } from './models/category.model';
+import { Tag } from './models/tag.model';
 
 interface SharedLoading {
   category?: boolean;
+  tag?: boolean;
 }
 
 class SharedStore {
   @observable defaultCategory = '';
   @observable categoryList: Category[] = [];
+  @observable tagList: Tag[];
   @observable loading: SharedLoading = {
     category: true,
+    tag: true,
   };
 
   @action
@@ -19,6 +23,9 @@ class SharedStore {
 
   @action
   setCategoryList = (data: Category[]) => this.categoryList = data
+
+  @action
+  setTagList = (data: Tag[]) => this.tagList = data
 
   @action
   setLoading(loading: SharedLoading) {
@@ -53,6 +60,24 @@ class SharedStore {
         }
       }
     );
+  }
+
+  // 获取标签列表
+  getTagList() {
+    this.setLoading({tag: true});
+    http.get<Tag[]>('/admin/api/tag')
+      .subscribe(
+        res => {
+          if (res.errno === 0) {
+              this.setLoading({tag: false});
+              this.setTagList(res.data);
+          }
+        },
+        err => {
+          this.setLoading({tag: false});
+          message.error(err);
+        }
+      );
   }
 
   // 更新系统
