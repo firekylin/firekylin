@@ -2,8 +2,8 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 import CategoryList from './list/list';
 import CategoryCreate from './create/create';
-
-export default class Post extends React.Component<any, any> {
+import { CategoryProps } from './category.model';
+export default class Post extends React.Component<CategoryProps, any> {
     render() {
         const { match } = this.props;
         return (
@@ -11,6 +11,7 @@ export default class Post extends React.Component<any, any> {
                 <Switch>
                     <Route path={`${match.path}/list`} component={CategoryList}/>
                     <Route path={`${match.path}/create`} component={CategoryCreate}/>
+                    <Route path={`${match.path}/edit/:id`} component={CategoryCreate}/>
                     <Redirect to={`${match.path}/list`}/>
                 </Switch>
             </>

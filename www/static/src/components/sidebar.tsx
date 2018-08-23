@@ -34,7 +34,6 @@ class SideBar extends React.Component<any, any> {
     return firekylinHistory.location.pathname.includes(routeUrl);
   }
   getClassName(icon: string | undefined, routeUrl: string) {
-    console.log(firekylinHistory.location.pathname);
     let active = this.isActive(routeUrl);
     return classnames({
       icon: true,

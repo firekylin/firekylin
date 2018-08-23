@@ -3,10 +3,10 @@ import { observer, inject } from 'mobx-react';
 import { Button, Table, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { CategoryListProps } from './list.model';
+import classnames from 'classnames';
 import './list.less';
 import { Category } from '../../../models/category.model';
 const confirm = Modal.confirm;
-import classnames from 'classnames';
 
 @inject('categoryStore', 'sharedStore')
 @observer class CategoryList extends React.Component<CategoryListProps, {}> {
@@ -73,7 +73,15 @@ import classnames from 'classnames';
                                 >
                                     默认
                                 </Button>
-                                <Button type="primary" icon="edit" size="small" style={{marginLeft: 8}}>编辑</Button>
+                                <Button 
+                                    onClick={() => this.props.history.push(`/cate/edit/${post.id}`)}
+                                    type="primary" 
+                                    icon="edit" 
+                                    size="small" 
+                                    style={{marginLeft: 8}}
+                                >
+                                    编辑
+                                </Button>
                                 <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
                             </>
                         )}

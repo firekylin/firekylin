@@ -1,8 +1,8 @@
-export interface IResult<T> {
+export interface IResult<T, U = string> {
     // Code
     errno: number;
     // Message
-    errmsg: string;
+    errmsg: U;
     // Data
     data: T;
 }

@@ -15,18 +15,42 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
     }
 
     componentDidMount() {
-        this.props.sharedStore.getCategoryList();
+        this.props.categoryStore.getRootCategory();
+        if (this.props.match.params.id) {
+            this.props.categoryStore.getCategoryInfoById(this.props.match.params.id);
+        }
     }
 
     handleSubmit = (e: React.FormEvent<any>) => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
-        if (!err) {
-            console.log('Received values of form: ', values);
-            this.props.categoryStore.createCategory(Object.assign({}, values, {pid: 1}));
-        }
+            if (!err) {
+                const { createCategory, updateCategory } = this.props.categoryStore;
+                const id = this.props.match.params.id;
+                if (id) {
+                    updateCategory(id, Object.assign({}, values))
+                    .subscribe(
+                        res => {
+                            if (res.errno === 0) {
+                                this.props.history.push('/cate/list');
+                            }
+                        }
+                    );
+                } else {
+                    createCategory(Object.assign({}, values))
+                    .subscribe(
+                        res => {
+                            if (res.errno === 0) {
+                                this.props.history.push('/cate/list');
+                            }
+                        }
+                    );
+                }
+                
+            }
         });
     }
+    
     render() {
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
@@ -48,7 +72,7 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
             },
         };
         
-        const { categoryList } = this.props.sharedStore;
+        const { rootCategoryList, categoryInfo } = this.props.categoryStore;
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
@@ -62,6 +86,7 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
                                 rules: [{
                                     required: true, message: '请填写分类名称',
                                 }],
+                                initialValue: categoryInfo ? categoryInfo.name : '',
                             })(
                                 <Input />
                             )}
@@ -70,7 +95,9 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
                             {...formItemLayout}
                             label="缩略名"
                         >
-                            {getFieldDecorator('pathname')(
+                            {getFieldDecorator('pathname', {
+                                initialValue: categoryInfo ? categoryInfo.pathname : ''
+                            })(
                                 <Input />
                             )}
                         </FormItem>
@@ -79,14 +106,14 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
                             label="父级分类"
                         >
                             {getFieldDecorator('pid', {
-                                initialValue: 0
+                                initialValue: categoryInfo ? categoryInfo.pid : 0
                             })(
                                 <Select
                                     placeholder="请选择分类"
                                 >
                                     <Option value={0}>不选择</Option>
-                                    {categoryList.map((category, key) => {
-                                        return <Option key={key} value={category.id}>{category.name}</Option>;
+                                    {rootCategoryList.map((category, key) => {
+                                        return <Option key={key + 1} value={category.id}>{category.name}</Option>;
                                     })}
                                 </Select>
                             )}
