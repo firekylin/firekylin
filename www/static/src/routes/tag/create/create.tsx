@@ -17,13 +17,25 @@ class TagCreateForm extends React.Component<TagCreateProps, {}> {
         if (this.props.match.params.id) {
             this.props.tagStore.getTagById(this.props.match.params.id);
         } else {
-            this.props.tagStore.setTag({
-                id: 0,
-                name: '',
-                pathname: '',
-                post_tag: 0
-            });
+            this.setTagEmpty();
+
         }
+    }
+
+    componentWillReceiveProps(nextProps: TagCreateProps) {
+        if (nextProps.match.params.id !== this.props.match.params.id) {
+            this.setTagEmpty();
+        }
+    }
+
+    // 置空Create列表
+    setTagEmpty() {
+        this.props.tagStore.setTag({
+            id: 0,
+            name: '',
+            pathname: '',
+            post_tag: 0
+        });
     }
 
     handleSubmit = (e: React.FormEvent<any>) => {

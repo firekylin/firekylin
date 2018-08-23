@@ -17,7 +17,26 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
         this.props.categoryStore.getRootCategory();
         if (this.props.match.params.id) {
             this.props.categoryStore.getCategoryInfoById(this.props.match.params.id);
+        } else {
+            this.setCategoryEmpty();
         }
+    }
+
+    componentWillReceiveProps(nextProps: CategoryCreateProps) {
+        if (nextProps.match.params.id !== this.props.match.params.id) {
+            this.setCategoryEmpty();
+        }
+    }
+
+    // 置空Create列表
+    setCategoryEmpty() {
+        this.props.categoryStore.setCurrentCatInfo({
+            id: 0,
+            name: '',
+            pathname: '',
+            post_cate: 0,
+            pid: 0
+        });
     }
 
     handleSubmit = (e: React.FormEvent<any>) => {
