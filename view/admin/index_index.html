@@ -13,7 +13,7 @@
 
 <body>
   <script>
-    {% if true %}
+    {% if userInfo.id %}
       window.SysConfig = {
         userInfo: {{ JSON.stringify(userInfo) | safe }},
         options: {{ JSON.stringify(options) | safe }},
