@@ -70,7 +70,7 @@ export default class UserStore{
         })
     }
     @action
-    pass(userId) {
+    pass(userId,resolve,reject) {
         let url = '/admin/api/user/' + userId + '?method=put&type=contributor';
         let req = superagent.post(url);
         req.type('form').send();
@@ -79,14 +79,15 @@ export default class UserStore{
             // err => this.trigger(err, 'passUserFailed')
             //todo
             data => {
-                this.setUserList(data);
-                this.setLoading(false);
-            }
-        );
+                resolve(data);
+
+            }).catch(err => {
+                reject(err);
+        });
     }
 
     @action
-    delete(userId,resolve,reject) {
+    deleteUser(userId,resolve,reject) {
         let url = '/admin/api/user/' + userId + '?method=delete';
         let req = superagent.post(url);
         req.type('form').send();

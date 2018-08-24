@@ -99,8 +99,8 @@ class UserCreateForm extends React.Component<UserProps,any> {
                     this.userStore.setSubmitting(false);
                     setTimeout(() => this.redirect('user/list'), 1000);
                 },()=>{
-                    console.log('保存失败');
-                    debugger;
+                    message.error('保存失败');
+                    // debugger;
                     this.userStore.setSubmitting(false);
                 });
             }
@@ -203,10 +203,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
         }
         return {};
     }
-
-    // formCreate (option) {
-    //     return Form.create(option || {})(this)
-    // }
 
     /**
      * render
@@ -371,31 +367,46 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                 {/*{getFieldDecorator('username',{*/}
                                 {/*})(<Input placeholder="显示名称"></Input>)}*/}
                             {/*</FormItem>*/}
-                            <div className="form-group">
-                                <label>用户组</label>
-                                <Select className="form-control" ref="type">
+                            <FormItem label="用户组">
+                                {getFieldDecorator('type',{
+                                })(<Select className="form-control">
                                     <Option value="2">编辑</Option>
                                     <Option value="1">管理员</Option>
                                     <Option value="3">投稿者</Option>
-                                </Select>
-                            </div>
-                            <div className="form-group">
-                                <label>状态</label>
-                                <Select className="form-control" ref="status">
-                                    <Option value="1">有效</Option>
-                                    <Option value="2">禁用</Option>
-                                </Select>
-                            </div>
-                            {/*<filedset>*/}
-                                {/*<legend>*/}
-                                    {/*认证*/}
-                                    {/*<button*/}
-                                        {/*type="button"*/}
-                                        {/*className="btn btn-primary"*/}
-                                        {/*style={{marginLeft: 15, marginBottom: 5, padding: '3px 5px'}}*/}
-                                        {/*onClick={this.generateKey.bind(this)}*/}
-                                    {/*>重新生成</button>*/}
-                                {/*</legend>*/}
+                                </Select>)}
+                            </FormItem>
+                            {/*<div className="form-group">*/}
+                                {/*<label>用户组</label>*/}
+                                {/*<Select className="form-control" ref="type">*/}
+                                    {/*<Option value="2">编辑</Option>*/}
+                                    {/*<Option value="1">管理员</Option>*/}
+                                    {/*<Option value="3">投稿者</Option>*/}
+                                {/*</Select>*/}
+                            {/*</div>*/}
+                            <FormItem label="状态">
+                                {getFieldDecorator('status',{
+                                })(<Select className="form-control">
+                                        <Option value="1">有效</Option>
+                                        <Option value="2">禁用</Option>
+                                    </Select>)}
+                            </FormItem>
+                            {/*<div className="form-group">*/}
+                                {/*<label>状态</label>*/}
+                                {/*<Select className="form-control" ref="status">*/}
+                                    {/*<Option value="1">有效</Option>*/}
+                                    {/*<Option value="2">禁用</Option>*/}
+                                {/*</Select>*/}
+                            {/*</div>*/}
+                            <filedset>
+                                <legend>
+                                    认证
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        style={{marginLeft: 15, marginBottom: 5, padding: '3px 5px'}}
+                                        onClick={this.generateKey.bind(this)}
+                                    >重新生成</button>
+                                </legend>
                                 {/*<div className="form-group">*/}
                                     {/*<label>App Key</label>*/}
                                     {/*<div>*/}
@@ -408,7 +419,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                     {/*<input type="text" className="form-control" disabled={true}*/}
                                            {/*value={this.userStore.userInfo.app_secret} />*/}
                                 {/*</div>*/}
-                            {/*</filedset>*/}
+                            </filedset>
                         </div>
                     </Form>
                 </div>

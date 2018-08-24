@@ -32,7 +32,12 @@ export default class extends React.Component<UserProps,any> {
         // console.log(this.props.userStore.userList);
     }
     pass(user) {
-        this.userStore.pass(user.id);
+        this.userStore.pass(user.id,(data) => {
+            this.userStore.setUserList(data);
+            this.userStore.setLoading(false);
+        },(err) => {
+            message.error(err);
+        });
     }
     // handleTrigger(data, type) {
     //     switch(type) {
@@ -53,18 +58,20 @@ export default class extends React.Component<UserProps,any> {
             content: '删除后无法恢复',
             onOk()  {
                 // message.success('删除成功');
-                that.userStore.Delete(userId,()=>{
+                that.userStore.deleteUser(userId,()=>{
                     message.success('删除成功');
                     that.userStore.select(null, that.userStore.key===3?'contributor':'')
                 },()=>{
-                    message.success('删除失败，请稍后重试');
+                    message.error('删除失败，请稍后重试');
                 });
             },
         });
     }
     handleSelect(type) {
-        this.userStore.key = type;
-        this.userStore.page = 1;
+        this.userStore.setKey(type);
+        // this.userStore.setPage(1);
+        // this.userStore.key = type;
+        // this.userStore.page = 1;
         return this.userStore.select(null, type===3?'contributor':'');
     }
 
@@ -150,7 +157,7 @@ export default class extends React.Component<UserProps,any> {
             <div className="fk-content-wrap">
                 <BreadCrumb {...this.props} />
                 <div className="manage-container">
-                    <Tabs defaultActiveKey={this.props.userStore.key.toString()}>
+                    <Tabs defaultActiveKey={this.props.userStore.key.toString()} onChange={this.handleSelect.bind(this)}>
                         <TabPane key='0' tab="全　部" />
                         <TabPane key='1' tab="审核中" />
                     </Tabs>
