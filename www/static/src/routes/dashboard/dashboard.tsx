@@ -6,6 +6,7 @@ import BreadCrumb from '../../components/breadcrumb';
 import { Link } from 'react-router-dom';
 import * as moment from 'moment';
 import { Modal } from 'antd';
+import { Subscription } from 'rxjs';
 const confirm = Modal.confirm;
 
 const UPDATE_STEPS = [
@@ -18,6 +19,7 @@ const COUNT_DOWN = 3;
 @inject('dashBoardStore', 'sharedStore')
 @observer 
 class DashBoard extends React.Component<DashBoardProps, any> {
+  updateSubscription$: Subscription;
   state = {
     posts: [],
     step: 1,
@@ -40,8 +42,12 @@ class DashBoard extends React.Component<DashBoardProps, any> {
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span>
+              <button type="button" 
+                onClick={() => {this.setState({showUpdate: false}); this.updateSubscription$.unsubscribe(); }} 
+                className="close" 
+                data-dismiss="modal" 
+                aria-label="Close">
+                  <span aria-hidden="true">×</span>
               </button>
               <h4 className="modal-title" >在线更新</h4>
             </div>
@@ -76,22 +82,24 @@ class DashBoard extends React.Component<DashBoardProps, any> {
         content: '在线更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。',
         onOk: () => {
             this.setState({showUpdate: true});
-            this.props.sharedStore.updateSystem(this.state.step)
-            .subscribe(
-              res => {
-                if (res.errno === 0) {
-                  if (this.state.step <= UPDATE_STEPS.length) {
-                    this.setState({step: this.state.step + 1}, () => this.props.sharedStore.updateSystem(this.state.step));
-                  }
-                  if (this.state.step > UPDATE_STEPS.length) {
-                    setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
-                    setInterval(() => this.setState({downCount: Math.max(0, --this.state.downCount)}), 1000);
-                  }
-                }
-              }
-            );
+            this.updateSystem();
         }
     });
+  }
+
+  updateSystem() {
+    this.updateSubscription$ = this.props.sharedStore.updateSystem(this.state.step)
+    .subscribe(
+        res => {
+            if (this.state.step <= UPDATE_STEPS.length) {
+              this.setState({step: this.state.step + 1}, () => this.updateSystem());
+            }
+            if (this.state.step > UPDATE_STEPS.length) {
+              setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
+              setInterval(() => this.setState({downCount: Math.max(0, --this.state.downCount)}), 1000);
+            }
+        }
+      );
   }
 
   render() {
