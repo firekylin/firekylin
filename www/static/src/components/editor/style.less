@@ -1,0 +1,391 @@
+.editor-title {
+	font-size: 1pc;
+}
+.md-editor textarea,
+.md-preview,
+.tag-input input {
+	line-height: 1.5;
+}
+.md-panel {
+	display: block;
+	position: relative;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	font-size: 14px;
+	overflow: hidden;
+}
+.md-panel.fullscreen {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+	z-index: 500;
+}
+.md-panel.fullscreen .md-editor {
+	height: 100%;
+}
+.md-menubar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	border-bottom: 1px solid #ccc;
+	box-shadow: 0 0 1px #ccc;
+	z-index: 10;
+	background-color: #fff;
+}
+.md-modebar,
+.md-toolbar {
+	margin: 0;
+}
+.md-modebar li, .md-toolbar li {
+  float: left;
+  margin: 0 2px;
+  vertical-align: text-top;
+}
+.md-modebar a, .md-toolbar a {
+  cursor: pointer;
+  display: block;
+  border: 5px solid #fff;
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-size: 380px 60px;
+  background-image: url(/static/img/editor@2x.png);
+  text-indent: 110%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-transform: capitalize;
+  box-sizing: content-box;
+}
+
+.editor-toolbar.bold {
+    background-position: -1px 0
+}
+.editor-toolbar.italic {
+    background-position: -21px 0
+}
+.editor-toolbar.link {
+    background-position: -40px 0
+}
+.editor-toolbar.quote {
+    background-position: -60px 0
+}
+.editor-toolbar.code {
+    background-position: -80px 0
+}
+.editor-toolbar.img {
+    background-position: -100px 0
+}
+.editor-toolbar.ol {
+    background-position: -120px 0
+}
+.editor-toolbar.ul {
+    background-position: -140px 0
+}
+.editor-toolbar.title {
+    background-position: -160px 0
+}
+.editor-toolbar.hr {
+    background-position: -180px 0
+}
+.editor-toolbar.undo {
+    background-position: -200px 0
+}
+.editor-toolbar.redo {
+    background-position: -220px 0
+}
+.editor-toolbar.zen {
+    background-position: -240px 0
+}
+
+.editor-toolbar.unzen {
+    background-position: -260px 0
+}
+
+.editor-toolbar.two {
+    background-position: -280px 0
+}
+
+.editor-toolbar.help {
+    background-position: -300px 0
+}
+.editor-toolbar.edit {
+    background-position: -320px 0
+}
+
+.editor-toolbar.live {
+    background-position: -340px 0
+}
+
+.editor-toolbar.preview {
+    background-position: -360px 0
+}
+.editor-toolbar:hover {
+    border-color: #f6f6f6;
+    background-color: #f6f6f6;
+    background-position-y: -40px;
+    text-decoration: none;
+}
+.editor-toolbar.active {
+    background-position-y: -20px;
+    background-color: #f6f6f6;
+    border-color: #f6f6f6;
+    cursor: default;
+}
+.md-panel.disabled .tb-btn a,
+.md-panel.disabled textarea {
+	cursor: default;
+}
+.md-panel.disabled .tb-btn a:hover {
+	color: #aaa;
+	background-color: #fff;
+}
+.md-panel.disabled .tb-btn a:active {
+	box-shadow: none;
+}
+.tb-btn.spliter, .tb-func-btn.spliter {
+  margin: 5px 4px;
+  width: 0;
+  height: 20px;
+  padding-left: 0;
+  padding-right: 0;
+  border-right: 1px solid #ddd;
+  text-indent: 110%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-transform: capitalize;
+}
+/*
+.md-toolbar {
+	padding: 0 5px;
+	background-color: #fff;
+}
+.tb-btn,
+.tb-func-btn {
+	float: left;
+	font-size: 14px;
+	list-style: none;
+	margin: 0 2px;
+}
+.tb-btn.spliter,
+.tb-func-btn.spliter {
+	border-left: 1px solid #ccc;
+	margin: 6px 2px;
+	height: 24px;
+}
+.tb-btn a,
+.tb-func-btn a {
+	display: inline-block;
+	position: relative;
+	width: 36px;
+	height: 36px;
+	text-align: center;
+	padding: 9px 0;
+	cursor: pointer;
+	color: #aaa;
+}
+.tb-btn a.active,
+.tb-btn a:hover,
+.tb-func-btn a.active,
+.tb-func-btn a:hover {
+	color: #0081ff;
+	background-color: #eee;
+}
+.tb-btn a:active,
+.tb-func-btn a:active {
+	box-shadow: inset 0 1px 5px rgba(0,0,0,.2);
+}
+.tb-btn input[type=file],
+.tb-func-btn input[type=file] {
+	display: none;
+}
+.tb-btn .badge,
+.tb-func-btn .badge {
+	position: absolute;
+	padding: 1px 5px;
+	right: 0;
+	bottom: 0;
+}*/
+.md-editor {
+	width: 50%;
+	height: 100%;
+	transition: width .3s;
+	background-color: #fff;
+}
+.md-editor.expand {
+	width: 100%;
+}
+.md-editor textarea {
+	display: block;
+	border-style: none;
+	resize: none;
+	outline: 0;
+	height: 100%;
+	width: 100%;
+	padding: 47px 15px 15px;
+}
+.md-preview {
+	position: absolute;
+	width: 50%;
+	height: 100%;
+	left: 50%;
+	top: 0;
+	background-color: #f6f6f6;
+	padding: 45px 20px 20px;
+	border-left: 1px solid #ccc;
+	overflow: auto;
+	transition: left .3s,width .3s;
+}
+.md-preview.expand {
+	left: 0;
+	width: 100%;
+	border-left-style: none;
+}
+.md-preview.shrink {
+	left: 100%;
+	width: 0;
+}
+.md-spliter {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	height: 30px;
+	border-left: 1px solid #ccc;
+	z-index: 105;
+}
+.md-btngroup {
+	margin-top: 20px;
+}
+.md-btngroup .help-text {
+	margin-left: 15px;
+}
+.markdown {
+	line-height: 1.5;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+	margin: 9pt 0;
+}
+.markdown h1,
+.markdown h2 {
+	margin-top: 20px;
+	padding-bottom: 8px;
+	border-bottom: 1px dotted #ccc;
+}
+.markdown a {
+	color: #4682b4;
+	text-decoration: none;
+}
+.markdown a:hover {
+	color: #0081ff;
+}
+.markdown pre {
+	background-color: #eee;
+	color: #555;
+	border-radius: 3px;
+	padding: 10px;
+	max-height: 700px;
+	overflow: auto;
+	border: none;
+	font-size: .9em;
+	line-height: 1.33;
+}
+.markdown pre code {
+	font-size: inherit;
+	color: inherit;
+	padding: 0;
+	background-color: transparent;
+}
+.markdown code {
+	color: #d82451;
+	background-color: #f6f6f6;
+	font-size: .9em;
+	padding: 2px 4px;
+	margin: 0 2px;
+}
+.markdown blockquote {
+	margin: 0;
+	padding: 5px 10px 5px 15px;
+	border-left: 5px solid #4682b4;
+	background-color: #eee;
+}
+.markdown table {
+	border: 1px solid #ccc;
+}
+.markdown table thead tr {
+	background-color: #eee;
+}
+.markdown table tbody tr {
+	border-top: 1px solid #ccc;
+	background-color: #fff;
+}
+.markdown table td,
+.markdown table th {
+	padding: 8px;
+	border-left: 1px solid #ccc;
+}
+.markdown hr {
+	border-style: solid;
+	border-color: #ccc;
+}
+.markdown img {
+	max-width: 80%;
+}
+.markdown ul {
+	list-style: disc;
+	padding-left: 40px;
+}
+.markdown ol {
+	list-style: decimal;
+	padding-left: 40px;
+}
+* {
+	box-sizing: border-box;
+}
+html {
+	font-size: 1pc;
+}
+body,
+html {
+	height: 100%;
+}
+body {
+	font-family: Helvetica Neue,Helvetica,Microsoft YaHei,Arial,sans-serif;
+	color: #555;
+	margin: 0;
+}
+a,
+a:focus,
+a:hover {
+	text-decoration: none;
+	outline: 0;
+}
+input {
+	outline: 0;
+}
+.pull-right {
+	float: right;
+}
+.editor a.editor__resize {
+  user-select: none;
+  position: absolute;
+  width: 120px;
+  height: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 2px;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  cursor: row-resize;
+  text-indent: 110%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-transform: capitalize;
+}

@@ -25,9 +25,11 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
 });
 
 axios.interceptors.response.use(
-    (result: AxiosResponse<IResult<any>>) => {
+    (result: AxiosResponse<IResult<any, any>>) => {
         if (result.data.errno !== 0) {
-            message.error(result.data.errmsg);
+            if (typeof result.data.errmsg === 'string') {
+                message.error(result.data.errmsg);
+            }
         }
         return Promise.resolve(result);
     }, 
@@ -45,7 +47,7 @@ class HttpClient {
      * @param data
      * @param config
      */
-    get<T>(url: string, data?: any, config: AxiosRequestConfig = {}): Observable<IResult<T>> {
+    get<T, U = string>(url: string, data?: any, config: AxiosRequestConfig = {}): Observable<IResult<T, U>> {
         if (data) {
             config.params = data;
         }
@@ -60,7 +62,7 @@ class HttpClient {
      * @param data
      * @param config 
      */
-    post<T>(url: string, data?: any, config: AxiosRequestConfig = {}): Observable<IResult<T>> {
+    post<T, U = string>(url: string, data?: any, config: AxiosRequestConfig = {}): Observable<IResult<T, U>> {
         return from(axios.post(url, data, config))
                 .pipe(
                     map(response => response.data)

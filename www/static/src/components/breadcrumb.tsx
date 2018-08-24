@@ -18,10 +18,9 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
   crumbs: any;
 
   bindHandleDocumentClick: (e: Event) => void;
-  userInfoRef: React.Ref<any>;
+  userInfoRef: HTMLUListElement | null;
   constructor(props: any) {
     super(props);
-    this.userInfoRef = React.createRef();
     this.bindHandleDocumentClick = this.handleDocumentClick.bind(this);
 
     const themePages = [
@@ -58,11 +57,11 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
   }
 
   handleDocumentClick(event: MouseEvent) {
-    // if (!ReactDom.findDOMNode(this.refs.userInfo).contains(event.target)) {
-    //   this.setState({
-    //     userOpen: false
-    //   });
-    // }
+    if (!(this.userInfoRef as HTMLUListElement).contains((event.target as Node))) {
+      this.setState({
+        userOpen: false
+      });
+    }
   }
 
   toggleUser() {
@@ -110,7 +109,7 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
         <div className="pull-left">
           {breadcrumb}
         </div>
-        <ul className="nav navbar-nav navbar-right userinfo">
+        <ul className="nav navbar-nav navbar-right userinfo" ref={ul => this.userInfoRef = ul}>
           <li className={this.getUserClass()}>
             <a onClick={() => this.toggleUser()} className="dropdown-toggle" data-toggle="dropdown">
               {window.SysConfig.userInfo.name} <b className="caret" />

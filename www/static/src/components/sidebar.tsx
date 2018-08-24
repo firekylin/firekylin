@@ -41,12 +41,6 @@ class SideBar extends React.Component<any, any> {
       active: active
     });
   }
-  // getSubUlClassName(routeUrl){
-  //   if(this.isActive(routeUrl)){
-  //     return 'block';
-  //   }
-  //   return 'hide';
-  // }
   getSubLinkClassName(routeUrl: string) {
     return classnames({
       active: this.isActive(routeUrl)
