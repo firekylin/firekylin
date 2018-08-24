@@ -14,10 +14,10 @@ module.exports = class extends Base {
     this.listenTo(UserStore, this.handleTrigger.bind(this));
   }
   handleTrigger(data, type) {
-    switch(type) {
+    switch (type) {
       case 'LoginSuccess':
         TipAction.success('登录成功');
-        setTimeout(() => {location.reload()}, 1000)
+        setTimeout(() => { location.reload() }, 1000)
         break;
       case 'forgotSuccess':
         TipAction.success('重置密码邮件发送成功');
@@ -39,7 +39,7 @@ module.exports = class extends Base {
    * @return {} []
    */
   getTwoFactorAuth() {
-    if(window.SysConfig.options.two_factor_auth) {
+    if (window.SysConfig.options.two_factor_auth) {
       return (
         <div className="form-group">
           <ValidatedInput
@@ -59,7 +59,9 @@ module.exports = class extends Base {
     }
   }
   handleValidSubmit(values) {
-    values['oripassword'] = values.password;
+    if (parseInt(window.SysConfig.options.ldap_on)) {
+      values['oripassword'] = values.password;
+    }
     values.password = md5(window.SysConfig.options.password_salt + values.password);
     UserAction.login(values);
   }
@@ -77,7 +79,7 @@ module.exports = class extends Base {
   }
 
   toggleForgot() {
-    this.setState({forgot: !this.state.forgot});
+    this.setState({ forgot: !this.state.forgot });
   }
 
   renderReset() {
@@ -92,14 +94,14 @@ module.exports = class extends Base {
             onValidSubmit={this.handleResetSubmit.bind(this)}
           >
             <ValidatedInput
-                type="text"
-                name="password"
-                validate="required,isLength:8:30"
-                placeholder="请输入新密码"
-                errorHelp={{
-                  required: '请填写密码',
-                  isLength: '密码长度为8到30个字符'
-                }}
+              type="text"
+              name="password"
+              validate="required,isLength:8:30"
+              placeholder="请输入新密码"
+              errorHelp={{
+                required: '请填写密码',
+                isLength: '密码长度为8到30个字符'
+              }}
             />
             <button type="submit" className="btn btn-primary btn-lg btn-block">设置新密码</button>
           </Form>
@@ -128,12 +130,12 @@ module.exports = class extends Base {
             onValidSubmit={this.handleForgotSubmit.bind(this)}
           >
             <ValidatedInput
-                type="text"
-                name="user"
-                validate="required"
-                placeholder="用户名或电子邮箱地址"
-                help="您会收到一封包含创建新密码链接的电子邮件。"
-                errorHelp="请输入您的用户名或电子邮箱地址"
+              type="text"
+              name="user"
+              validate="required"
+              placeholder="用户名或电子邮箱地址"
+              help="您会收到一封包含创建新密码链接的电子邮件。"
+              errorHelp="请输入您的用户名或电子邮箱地址"
             />
             <button type="submit" className="btn btn-primary btn-lg btn-block">获取新密码</button>
           </Form>
@@ -151,79 +153,79 @@ module.exports = class extends Base {
   }
 
   render() {
-    if(this.props.location.query.reset) {
+    if (this.props.location.query.reset) {
       return this.renderReset();
     }
 
-    if(this.state.forgot) {
+    if (this.state.forgot) {
       return this.renderForgot();
     }
 
     return (
       <div className="container">
         <div className="row">
-            <div className="login">
-              <h1 className="text-center">
+          <div className="login">
+            <h1 className="text-center">
               <a href="/">{window.SysConfig.options.title}</a>
-              </h1>
-              <Form
+            </h1>
+            <Form
               className="clearfix"
               onValidSubmit={this.handleValidSubmit.bind(this)}
               onInvalidSubmit={this.handleInvalidSubmit.bind(this)}
-              >
-                <div className="form-group">
-                  <ValidatedInput
-                    type="text"
-                    name="username"
-                    ref="username"
-                    className="form-control"
-                    validate="required,isLength:4:20"
-                    placeholder="用户名"
-                    errorHelp={{
-                      required: '请填写用户名',
-                      isLength: '长度为4到20个字符'
-                    }}
-                  />
-                </div>
-                <div className="form-group">
-                  <ValidatedInput
-                    type="password"
-                    name="password"
-                    ref="password"
-                    className="form-control"
-                    validate="required,isLength:6:30"
-                    placeholder="密码"
-                    errorHelp={{
-                      required: '请填写密码',
-                      isLength: '密码长度为6到30个字符'
-                    }}
-                  />
-                </div>
-                <div className="form-group" style={{display: 'none'}}>
-                  <ValidatedInput
-                    type="hidden"
-                    name="oripassword"
-                    ref="oripassword"
-                    className="form-control"
-                    placeholder="原密码"
-                  />
-                </div>
-                {this.getTwoFactorAuth()}
-                <button type="submit" className="btn btn-primary btn-lg btn-block">登录</button>
-              </Form>
-              <div className="form-footer">
-                <div className="left back-site">
-                  <a href="/">← 回到{window.SysConfig.options.title}</a>
-                </div>
-                <div className={classnames('right', 'forgot-password', {
-                  hidden: window.SysConfig.options.ldap_on === '1'
-                })}>
-                  {!window.SysConfig.options.intranet ? null : <a href="/admin/user/intranet">域账号登录</a>}
-                  {!window.SysConfig.options.intranet ? null : <a href="javascript:void(0)"> | </a>}
-                  <a href="javascript:void(0)" onClick={this.toggleForgot.bind(this)}>找回密码</a>
-                </div>
+            >
+              <div className="form-group">
+                <ValidatedInput
+                  type="text"
+                  name="username"
+                  ref="username"
+                  className="form-control"
+                  validate="required,isLength:4:20"
+                  placeholder="用户名"
+                  errorHelp={{
+                    required: '请填写用户名',
+                    isLength: '长度为4到20个字符'
+                  }}
+                />
+              </div>
+              <div className="form-group">
+                <ValidatedInput
+                  type="password"
+                  name="password"
+                  ref="password"
+                  className="form-control"
+                  validate="required,isLength:6:30"
+                  placeholder="密码"
+                  errorHelp={{
+                    required: '请填写密码',
+                    isLength: '密码长度为6到30个字符'
+                  }}
+                />
+              </div>
+              <div className="form-group" style={{ display: 'none' }}>
+                <ValidatedInput
+                  type="hidden"
+                  name="oripassword"
+                  ref="oripassword"
+                  className="form-control"
+                  placeholder="原密码"
+                />
+              </div>
+              {this.getTwoFactorAuth()}
+              <button type="submit" className="btn btn-primary btn-lg btn-block">登录</button>
+            </Form>
+            <div className="form-footer">
+              <div className="left back-site">
+                <a href="/">← 回到{window.SysConfig.options.title}</a>
+              </div>
+              <div className={classnames('right', 'forgot-password', {
+                hidden: window.SysConfig.options.ldap_on === '1'
+              })}>
+                {!window.SysConfig.options.intranet ? null : <a href="/admin/user/intranet">域账号登录</a>}
+                {!window.SysConfig.options.intranet ? null : <a href="javascript:void(0)"> | </a>}
+                <a href="javascript:void(0)" onClick={this.toggleForgot.bind(this)}>找回密码</a>
               </div>
             </div>
+          </div>
         </div>
       </div>
     );
