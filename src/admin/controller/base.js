@@ -1,24 +1,24 @@
 module.exports = class extends think.Controller {
   async __before() {
-    const {controller, action} = this.ctx;
-    if(controller === 'user' && action === 'login') {
+    const { controller, action } = this.ctx;
+    if (controller === 'user' && action === 'login') {
       return;
     }
 
     let userInfo = await this.session('userInfo') || {};
-    if(think.isEmpty(userInfo)) {
-      if(this.isAjax()) {
+    if (think.isEmpty(userInfo)) {
+      if (this.isAjax()) {
         return this.fail('NOT_LOGIN');
       }
     }
     this.userInfo = userInfo;
-    if(!this.isAjax()) {
-      this.assign('userInfo', {id: userInfo.id, name: userInfo.name, type: userInfo.type});
+    if (!this.isAjax()) {
+      this.assign('userInfo', { id: userInfo.id, name: userInfo.name, type: userInfo.type });
     }
   }
 
   async __call() {
-    if(this.isAjax()) {
+    if (this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
     let model = this.model('options');
@@ -29,12 +29,23 @@ module.exports = class extends think.Controller {
     options.comment.name = escape(options.comment.name);
     try {
       options.navigation = JSON.parse(options.navigation);
-    } catch(e) { options.navigation = []; }
+    } catch (e) { options.navigation = []; }
     delete options.push_sites; //不显示推送的配置，会有安全问题
 
-    if(firekylin.require('auth')) {
+    if (firekylin.require('auth')) {
       options.intranet = true;
     }
+
+    if (think.isEmpty(this.userInfo)) {
+      options = {
+        title: options.title,
+        two_factor_auth: options.two_factor_auth,
+        password_salt: options.password_salt,
+        ldap_on: options.ldap_on,
+        intranet: options.intranet
+      };
+    }
+
     this.assign('options', options);
     // this.assign('JSON', JSON);
     return this.display('admin/index_index');
