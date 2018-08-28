@@ -10,6 +10,7 @@ import './style.less';
 import firekylin from '../../utils/firekylin';
 import { Modal, Tabs, Form, Input } from 'antd';
 import EditorLinkModal from './link-modal/link-modal';
+import { WrappedFormUtils } from 'antd/lib/form/Form';
 const confirm = Modal.confirm;
 
 interface MdEditorProps {
@@ -18,6 +19,8 @@ interface MdEditorProps {
   children?: Node;
   info: any;
   onChange: any;
+  innerLinks: any[];
+  fetchData: (e: any) => void;
 }
 
 class MarkDownEditor extends React.Component<MdEditorProps, any> {
@@ -35,6 +38,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   preview: HTMLDivElement | null;
   resizebar: HTMLAnchorElement | null;
 
+  linkRef: Form;
+
   state = this.initialState();
 
   initialState () {
@@ -43,8 +48,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       mode: 'split',
       isFullScreen: false,
       result: this.toHtml(this.props.content),
-      linkUrl: null,
-      linkText: null,
+      linkUrl: '',
+      linkText: '',
       content: null,
       fileUrl: '',
       file: [],
@@ -176,18 +181,36 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this.previewControl = null;
   }
 
+  handleLinkCreate() {
+    const form = this.linkRef.props.form;
+    (form as WrappedFormUtils).validateFields((err, values) => {
+      if (err) {
+        return;
+      }
+
+      console.log('Received values of form: ', values);
+      this.setState({linkText: values.linkText, linkUrl: values.linkUrl});
+
+      if (values.innerLinkUrl || values.innerLinkText) {
+        values.linkUrl = values.innerLinkUrl;
+        values.linkText = values.innerLinkText;
+      }
+
+      if (values.linkUrl && values.linkText) {
+        this._linkText(values.linkUrl, values.linkText, false);
+      } else {
+        this._linkText();
+      }
+
+      (form as WrappedFormUtils).resetFields();
+      this.setState({ visible: Object.assign({}, this.state.visible, {link: false}) });
+    });
+  }
+
   render () {
     const panelClass = classnames([ 'md-panel', { 'fullscreen': this.state.isFullScreen } ]);
     const editorClass = classnames([ 'md-editor', { 'expand': this.state.mode === 'edit' } ]);
     const previewClass = classnames([ 'md-preview', 'markdown', { 'expand': this.state.mode === 'preview', 'shrink': this.state.mode === 'edit' } ]);
-    const formItemLayout = {
-        labelCol: {
-            xl: { span: 4 },
-        },
-        wrapperCol: {
-            xl: { span: 20 },
-        },
-    };
 
     return (
       <div className="editor">
@@ -208,9 +231,13 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           <div className={classnames({hide: this.state.mode !== 'split'}, 'md-spliter')} />
         </div>
         <a ref={a => this.resizebar = a} href="javascript:void(0);" className="editor__resize">调整高度</a>
-        <EditorLinkModal 
+        <EditorLinkModal
           visible={this.state.visible.link} 
-          onCancel={() => this.setState({visible: Object.assign({}, this.state.visible, {link: false})})}
+          onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); (this.linkRef.props.form as WrappedFormUtils).resetFields(); }}
+          onCreate={() => this.handleLinkCreate()}
+          wrappedComponentRef={linkRef => this.linkRef = linkRef}
+          innerLinks={this.props.innerLinks}
+          fetchData={this.props.fetchData}
         />
       </div>
     );

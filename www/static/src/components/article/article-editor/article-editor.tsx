@@ -2,8 +2,9 @@ import * as React from 'react';
 import './article-editor.less';
 import MarkDownEditor from '../../editor';
 import { ArticleEditorState, PostInfo } from './article-editor.model';
-
-class PostArticleEditor extends React.Component<any, ArticleEditorState> {
+import { inject, observer } from 'mobx-react';
+@inject('postStore')
+@observer class PostArticleEditor extends React.Component<any, ArticleEditorState> {
     id;
     type;
     state: ArticleEditorState = {
@@ -35,6 +36,13 @@ class PostArticleEditor extends React.Component<any, ArticleEditorState> {
     constructor(props: any) {
         super(props);
     }
+
+    handleFetchData(keyword: string) {
+        this.props.postStore.setPlReqParams({
+            status: 3,
+            keyword: keyword
+        });
+    }
     render(postInfo: PostInfo = this.state.postInfo) {
 
         return (
@@ -47,6 +55,8 @@ class PostArticleEditor extends React.Component<any, ArticleEditorState> {
                     }}
                     onFullScreen={isFullScreen => this.setState({isFullScreen})}
                     info={{id: this.id, type: this.type}}
+                    innerLinks={this.props.postStore.postList}
+                    fetchData={keyword => this.handleFetchData(keyword)}
                 />
             </>
         );
