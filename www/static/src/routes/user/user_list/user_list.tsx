@@ -23,21 +23,11 @@ export default class extends React.Component<UserProps,any> {
     componentDidMount() {
         // this.listenTo(UserStore, this.handleTrigger.bind(this));
         // UserAction.select();
-        this.userStore.select((data)=>{
-            this.userStore.setUserList(data);
-            this.userStore.setLoading(false);
-        },()=> {
-            console.log('加载用户列表失败');
-        });
+        this.userStore.getUserList();
         // console.log(this.props.userStore.userList);
     }
     pass(user) {
-        this.userStore.pass(user.id,(data) => {
-            this.userStore.setUserList(data);
-            this.userStore.setLoading(false);
-        },(err) => {
-            message.error(err);
-        });
+        this.userStore.passUser(user.id);
     }
     // handleTrigger(data, type) {
     //     switch(type) {
@@ -58,21 +48,13 @@ export default class extends React.Component<UserProps,any> {
             content: '删除后无法恢复',
             onOk()  {
                 // message.success('删除成功');
-                that.userStore.deleteUser(userId,()=>{
-                    message.success('删除成功');
-                    that.userStore.select(null, that.userStore.key===3?'contributor':'')
-                },()=>{
-                    message.error('删除失败，请稍后重试');
-                });
+                that.userStore.deleteUser(userId);
             },
         });
     }
     handleSelect(type) {
         this.userStore.setKey(type);
-        // this.userStore.setPage(1);
-        // this.userStore.key = type;
-        // this.userStore.page = 1;
-        return this.userStore.select(null, type===3?'contributor':'');
+        return this.userStore.getUserList(type==='3'?'contributor':'');
     }
 
 
@@ -85,7 +67,7 @@ export default class extends React.Component<UserProps,any> {
                 // message.success('删除成功');
                 that.userStore.delete(user.id,()=>{
                     message.success('删除成功');
-                    that.userStore.select(null, that.userStore.key===3?'contributor':'')
+                    that.userStore.getUserList(that.userStore.key===3?'contributor':'')
                 },()=>{
                     message.success('删除失败，请稍后重试');
                 });
@@ -126,7 +108,7 @@ export default class extends React.Component<UserProps,any> {
                     <td>{item.create_time}</td>
                     <td>{item.last_login_time}</td>
                     <td>
-                        {!this.userStore.key ? <Link to={'user/edit/' + item.id}>
+                        {this.userStore.key == '0' ? <Link to={'user/edit/' + item.id}>
                                 <button type="button" className="btn btn-primary btn-xs">
                                     <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
                                 </button>
@@ -137,7 +119,7 @@ export default class extends React.Component<UserProps,any> {
                             </button>
                         }
                         &nbsp;
-                        {!this.userStore.key ? <button type="button" className="btn btn-danger btn-xs"
+                        {this.userStore.key == '0' ? <button type="button" className="btn btn-danger btn-xs"
                                                    onClick={this.handleDelete.bind(this, item.id)}>
                                 <span className="glyphicon glyphicon-trash" aria-hidden="true"></span> 删除
                             </button> :
@@ -159,7 +141,7 @@ export default class extends React.Component<UserProps,any> {
                 <div className="manage-container">
                     <Tabs defaultActiveKey={this.props.userStore.key.toString()} onChange={this.handleSelect.bind(this)}>
                         <TabPane key='0' tab="全　部" />
-                        <TabPane key='1' tab="审核中" />
+                        <TabPane key='3' tab="审核中" />
                     </Tabs>
                     <table className="table table-striped">
                         <thead>

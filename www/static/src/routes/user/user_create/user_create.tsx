@@ -204,6 +204,14 @@ class UserCreateForm extends React.Component<UserProps,any> {
         return {};
     }
 
+    compareToFirstPassword = (rule, value, callback) => {
+        const form = this.props.form;
+        if (value && value !== form.getFieldValue('password')) {
+            callback('两次输入密码不一致!');
+        } else {
+            callback();
+        }
+    }
     /**
      * render
      * @return {} []
@@ -260,46 +268,18 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                 })(<Input placeholder="4-20个字符"></Input>)}
                                 <p className="help-block">登录时所用的名称，不能重复。</p>
                             </FormItem>
-                            {/*<div className="form-group">*/}
-                                {/*<label>用户名</label>*/}
-                                {/*<ValidatedInput*/}
-                                    {/*type="text"*/}
-                                    {/*name="username"*/}
-                                    {/*ref="username"*/}
-                                    {/*className="form-control"*/}
-                                    {/*placeholder="4到20个字符"*/}
-                                    {/*{...this.getProps('name')}*/}
-                                    {/*errorHelp={{*/}
-                                        {/*required: '请输入用户名',*/}
-                                        {/*isLength: '长度为4到20个字符'*/}
-                                    {/*}}*/}
-                                {/*/>*/}
-                                {/*<p className="help-block">登录时所用的名称，不能重复。</p>*/}
-                            {/*</div>*/}
                             <FormItem label="邮箱">
                                 {getFieldDecorator('email',{
                                     rules: [{
                                             required: true,
                                             message: '请输入邮箱!'
-                                        }]
-                                })(<Input placeholder="输入邮箱"></Input>)}
+                                        },{
+                                        type: 'email',
+                                        message: '邮箱格式错误!'
+                                    }]
+                                })(<Input autoComplete='email' placeholder="输入邮箱"></Input>)}
                                 <p className="help-block">用户主要联系方式，不能重复。</p>
                             </FormItem>
-                            {/*<div className="form-group">*/}
-                                {/*<label>邮箱</label>*/}
-                                {/*<ValidatedInput*/}
-                                    {/*type="text"*/}
-                                    {/*name="email"*/}
-                                    {/*ref="email"*/}
-                                    {/*className="form-control"*/}
-                                    {/*{...this.getProps('email')}*/}
-                                    {/*errorHelp={{*/}
-                                        {/*required: '请输入邮箱',*/}
-                                        {/*isEmail: '邮箱格式不正确'*/}
-                                    {/*}}*/}
-                                {/*/>*/}
-                                {/*<p className="help-block">用户主要联系方式，不能重复。</p>*/}
-                            {/*</div>*/}
                             <FormItem label="密码">
                                 {getFieldDecorator('password',{
                                     rules: [{
@@ -307,29 +287,17 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                         max: 30,
                                         message: '长度为8到30个字符'
                                     }]
-                                })(<Input placeholder="长度为8到30个字符"></Input>)}
+                                })(<Input type='password' placeholder="长度为8到30个字符"></Input>)}
                                 <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
                             </FormItem>
-                            {/*<div className="form-group">*/}
-                                {/*<label>密码</label>*/}
-                                {/*<ValidatedInput*/}
-                                    {/*type="password"*/}
-                                    {/*name="password"*/}
-                                    {/*ref="password"*/}
-                                    {/*className="form-control"*/}
-                                    {/*placeholder="8到30个字符"*/}
-                                    {/*{...this.getProps('password')}*/}
-                                {/*/>*/}
-                                {/*<p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>*/}
-                            {/*</div>*/}
                             <FormItem label="确认密码">
                                 {getFieldDecorator('repassword',{
                                     rules: [{
-                                        min: 8,
-                                        max: 30,
-                                        message: '长度为8到30个字符'
+                                        required: true, message: '请再次确认密码!',
+                                    }, {
+                                        validator: this.compareToFirstPassword,
                                     }]
-                                })(<Input placeholder="长度为8到30个字符"></Input>)}
+                                })(<Input type='password' placeholder="请再次输入密码"></Input>)}
                             </FormItem>
                             {/*<div className="form-group ">*/}
                                 {/*<label>确认密码</label>*/}
@@ -352,21 +320,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                 {getFieldDecorator('display_name',{
                                 })(<Input placeholder="显示名称"></Input>)}
                             </FormItem>
-                            {/*<div className="form-group">*/}
-                                {/*<label>别名</label>*/}
-                                {/*<ValidatedInput*/}
-                                    {/*type="text"*/}
-                                    {/*name="display_name"*/}
-                                    {/*ref="display_name"*/}
-                                    {/*className="form-control"*/}
-                                    {/*placeholder="显示名称"*/}
-                                    {/*{...this.getProps('display_name')}*/}
-                                {/*/>*/}
-                            {/*</div>*/}
-                            {/*<FormItem label="用户组">*/}
-                                {/*{getFieldDecorator('username',{*/}
-                                {/*})(<Input placeholder="显示名称"></Input>)}*/}
-                            {/*</FormItem>*/}
                             <FormItem label="用户组">
                                 {getFieldDecorator('type',{
                                 })(<Select className="form-control">
@@ -375,14 +328,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                     <Option value="3">投稿者</Option>
                                 </Select>)}
                             </FormItem>
-                            {/*<div className="form-group">*/}
-                                {/*<label>用户组</label>*/}
-                                {/*<Select className="form-control" ref="type">*/}
-                                    {/*<Option value="2">编辑</Option>*/}
-                                    {/*<Option value="1">管理员</Option>*/}
-                                    {/*<Option value="3">投稿者</Option>*/}
-                                {/*</Select>*/}
-                            {/*</div>*/}
                             <FormItem label="状态">
                                 {getFieldDecorator('status',{
                                 })(<Select className="form-control">
@@ -390,13 +335,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                         <Option value="2">禁用</Option>
                                     </Select>)}
                             </FormItem>
-                            {/*<div className="form-group">*/}
-                                {/*<label>状态</label>*/}
-                                {/*<Select className="form-control" ref="status">*/}
-                                    {/*<Option value="1">有效</Option>*/}
-                                    {/*<Option value="2">禁用</Option>*/}
-                                {/*</Select>*/}
-                            {/*</div>*/}
                             <filedset>
                                 <legend>
                                     认证
