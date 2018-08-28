@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
+import { Link } from 'react-router';
 import {
   Pagination,
   Tabs,
@@ -27,7 +27,7 @@ module.exports = class extends Base {
       postList: [],
       cateList: [],
       keyword: '',
-      page: this.props.location.query.page/1 || 1
+      page: this.props.location.query.page / 1 || 1
     }
   }
   componentDidMount() {
@@ -37,10 +37,10 @@ module.exports = class extends Base {
     CateAction.select();
   }
   handleTrigger(data, type) {
-    switch(type) {
+    switch (type) {
       case 'savePostSuccess':
         TipAction.success('审核成功');
-        this.setState({loading: true},
+        this.setState({ loading: true },
           PostAction.selectList.bind(PostAction, this.state.page, this.state.key === 4 ? null : this.state.key));
         break;
       case 'savePostFail':
@@ -49,7 +49,7 @@ module.exports = class extends Base {
         break;
       case 'deletePostSuccess':
         TipAction.success('删除成功');
-        this.setState({loading: true}, ()=> PostAction.selectList(
+        this.setState({ loading: true }, () => PostAction.selectList(
           this.state.page,
           this.state.key !== 4 ? this.state.key : null,
           this.state.keyword,
@@ -57,10 +57,10 @@ module.exports = class extends Base {
         ));
         break;
       case 'getPostList':
-        this.setState({postList: data.data, total: data.totalPages, loading: false});
+        this.setState({ postList: data.data, total: data.totalPages, loading: false });
         break;
       case 'getCateList':
-        this.setState({cateList: data, loading: false});
+        this.setState({ cateList: data, loading: false });
         break;
     }
   }
@@ -69,7 +69,7 @@ module.exports = class extends Base {
     this.state.page = 1;
     this.state.keyword = '';
 
-    return PostAction.selectList(this.state.page, key !== 4 ? key : null, this.state.keyword);
+    return PostAction.selectList(this.state.page, key !== 4 ? key : null, this.state.keyword, this.state.searchCate);
   }
 
   handleSearch(e) {
@@ -85,10 +85,10 @@ module.exports = class extends Base {
   }
 
   getPostList() {
-    if(this.state.loading) {
+    if (this.state.loading) {
       return (<tr><td colSpan="8" className="center">加载中……</td></tr>);
     }
-    if(!this.state.postList.length) {
+    if (!this.state.postList.length) {
       return (<tr><td colSpan="8" className="center">暂无文章</td></tr>);
     }
     return this.state.postList.map(item => {
@@ -112,15 +112,15 @@ module.exports = class extends Base {
    * 当文章为公开且发布状态时渲染文章链接
    */
   renderPostLink(post) {
-    if(post.status !== 3 || !post.is_public) {
+    if (post.status !== 3 || !post.is_public) {
       return null;
     }
 
     return (
       <a
-          href={`/post/${post.pathname}.html`}
-          target="_blank"
-          className="admin-post-link"
+        href={`/post/${post.pathname}.html`}
+        target="_blank"
+        className="admin-post-link"
       >
         <span className="glyphicon glyphicon-link" />
       </a>
@@ -131,29 +131,29 @@ module.exports = class extends Base {
     //管理员在审核和拒绝tab上显示更多按钮
     let isAdmin = window.SysConfig.userInfo.type === 1;
     let showPassAndDeny = isAdmin && [1, 2, 3].includes(this.state.key);
-    let showEditAndDel = !isAdmin || this.state.key===4;
+    let showEditAndDel = !isAdmin || this.state.key === 4;
     return (
       <td>
         {showPassAndDeny ?
-        <button
+          <button
             type="button"
             className="btn btn-success btn-xs"
             disabled={[0, 3].includes(post.status)}
             onClick={PostAction.pass.bind(PostAction, post)}
-        >
-          <span className="glyphicon glyphicon-ok"></span>
-          通过
+          >
+            <span className="glyphicon glyphicon-ok"></span>
+            通过
         </button> : null}
         {showPassAndDeny ? <span> </span> : null}
         {showPassAndDeny ?
-        <button
+          <button
             type="button"
             className="btn btn-warning btn-xs"
             disabled={[0, 2].includes(post.status)}
             onClick={PostAction.deny.bind(PostAction, post.id)}
-        >
-          <span className="glyphicon glyphicon-remove"></span>
-          拒绝
+          >
+            <span className="glyphicon glyphicon-remove"></span>
+            拒绝
         </button> : null}
         {showPassAndDeny ? <span> </span> : null}
         {showEditAndDel ? <Link to={`/post/edit/${post.id}`} title={post.title}>
@@ -164,16 +164,16 @@ module.exports = class extends Base {
         </Link> : null}
         {showEditAndDel ? <span> </span> : null}
         {showEditAndDel ? <button
-            type="button"
-            className="btn btn-danger btn-xs"
-            onClick={()=>
-              ModalAction.confirm(
-                '提示',
-                <div className="center">确定删除吗？</div>,
-                PostAction.delete.bind(PostAction, post.id),
-                'modal-sm'
-              )
-            }
+          type="button"
+          className="btn btn-danger btn-xs"
+          onClick={() =>
+            ModalAction.confirm(
+              '提示',
+              <div className="center">确定删除吗？</div>,
+              PostAction.delete.bind(PostAction, post.id),
+              'modal-sm'
+            )
+          }
         >
           <span className="glyphicon glyphicon-trash"></span>
           删除
@@ -182,19 +182,19 @@ module.exports = class extends Base {
     );
   }
 
-  renderStatus({status, is_public, create_time}) {
+  renderStatus({ status, is_public, create_time }) {
     const isFuture = time => time && (new Date(time)).getTime() > Date.now();
     let text = '';
-    switch(status) {
+    switch (status) {
       case 0: text += '草稿'; break;
       case 1: text += '待审核'; break;
       case 2: text += '已拒绝'; break;
       case 3:
         text += isFuture(create_time) ? '即将发布' : '已发布';
-      break;
+        break;
     }
 
-    if(status !== '') {
+    if (status !== '') {
       return (
         <span className="admin-post-status">
           <em className="status">{text}</em>
@@ -209,14 +209,14 @@ module.exports = class extends Base {
   render() {
     return (
       <div className="fk-content-wrap">
-        <BreadCrumb {...this.props}/>
+        <BreadCrumb {...this.props} />
         <div className="manage-container">
           <form className="fk-post-search form-inline" onSubmit={this.handleSearch.bind(this)}>
             <div className="form-group">
               <select
                 className="form-control"
                 name="cate"
-                onChange={e=> this.setState({searchCate: e.target.value})}
+                onChange={e => this.setState({ searchCate: e.target.value })}
               >
                 <option value="">全部分类</option>
                 {this.state.cateList.map(cate =>
@@ -226,12 +226,12 @@ module.exports = class extends Base {
             </div>
             <div className="fk-search form-group">
               <input
-                  type="text"
-                  className="fk-search-input"
-                  placeholder="请输入关键字"
-                  value={this.state.keyword}
-                  onChange={e=> this.setState({keyword: e.target.value})}
-                  onKeyDown={e=> e.keyCode === 13 && this.handleSearch(e)}
+                type="text"
+                className="fk-search-input"
+                placeholder="请输入关键字"
+                value={this.state.keyword}
+                onChange={e => this.setState({ keyword: e.target.value })}
+                onKeyDown={e => e.keyCode === 13 && this.handleSearch(e)}
               />
               <button className="fk-search-btn icon-search"></button>
             </div>
@@ -256,28 +256,29 @@ module.exports = class extends Base {
               {this.getPostList()}
             </tbody>
           </table>
-          <div className="col-xs-12" style={{textAlign: 'center'}}>
+          <div className="col-xs-12" style={{ textAlign: 'center' }}>
             {this.state.total > 1 ? <Pagination
-                prev
-                next
-                first
-                last
-                ellipsis
-                boundaryLinks
-                maxButton={5}
-                items={this.state.total}
-                activePage={this.state.page}
-                onSelect={(e, selectEvent) =>
-                  this.setState({page: selectEvent.eventKey}, ()=>
-                    PostAction.selectList(
-                      this.state.page,
-                      this.state.key === 4 ? null : this.state.key,
-                      this.state.keyword
-                    )
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              maxButton={5}
+              items={this.state.total}
+              activePage={this.state.page}
+              onSelect={(e, selectEvent) =>
+                this.setState({ page: selectEvent.eventKey }, () =>
+                  PostAction.selectList(
+                    this.state.page,
+                    this.state.key === 4 ? null : this.state.key,
+                    this.state.keyword,
+                    this.state.searchCate
                   )
-                }
+                )
+              }
             />
-            : ''}
+              : ''}
           </div>
         </div>
       </div>
