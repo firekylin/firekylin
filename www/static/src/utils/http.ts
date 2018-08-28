@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-// import * as qs from 'querystring';
 import { IResult } from '../models/http.model';
 import { auth } from './auth';
 import { message } from 'antd';

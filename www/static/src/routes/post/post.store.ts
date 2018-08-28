@@ -4,7 +4,8 @@ import { http } from '../../utils/http';
 import { AppStore } from '../../app.store';
 import { PostListRequestParams, PostListResponseData } from './post.model';
 import { PaginationConfig } from 'antd/lib/table';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
+import { interval } from 'rxjs';
 
 const isFuture = time => time && (new Date(time)).getTime() > Date.now();
 function getStatusText(status: number, createTime: Date) {
@@ -23,7 +24,7 @@ function getStatusText(status: number, createTime: Date) {
 class PostStore {
   appStore;
   @observable loading = false;
-  @observable postList;
+  @observable postList = [];
   @observable categoryList;
   @observable pagination: PaginationConfig = {
     current: 1,

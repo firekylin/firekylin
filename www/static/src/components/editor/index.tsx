@@ -8,6 +8,10 @@ import * as React from 'react';
 // import Search from './search';
 import './style.less';
 import firekylin from '../../utils/firekylin';
+import { Modal, Tabs, Form, Input } from 'antd';
+import EditorLinkModal from './link-modal/link-modal';
+import { WrappedFormUtils } from 'antd/lib/form/Form';
+const confirm = Modal.confirm;
 
 interface MdEditorProps {
   onFullScreen: (isFullScreen: any) => void;
@@ -15,6 +19,8 @@ interface MdEditorProps {
   children?: Node;
   info: any;
   onChange: any;
+  innerLinks: any[];
+  fetchData: (e: any) => void;
 }
 
 class MarkDownEditor extends React.Component<MdEditorProps, any> {
@@ -25,12 +31,14 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   previewControl: any;
   _syncScroll: any;
   _isDirty = false;
-  _ltr;
+  _ltr: any;
 
   editorPanel: HTMLDivElement | null;
   editor: HTMLTextAreaElement | null;
   preview: HTMLDivElement | null;
   resizebar: HTMLAnchorElement | null;
+
+  linkRef: Form;
 
   state = this.initialState();
 
@@ -40,11 +48,14 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       mode: 'split',
       isFullScreen: false,
       result: this.toHtml(this.props.content),
-      linkUrl: null,
-      linkText: null,
+      linkUrl: '',
+      linkText: '',
       content: null,
       fileUrl: '',
       file: [],
+      visible: {
+        link: false
+      }
     };
   }
 
@@ -76,14 +87,18 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     })();
 
     if (localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + '']) {
-        // ModalAction.confirm('提示', '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章', () => {
-        //   let content = localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id];
-        //   this.setState({ result: marked(content) });
-        //   this.props.onChange(content);
-        //   return true;
-        // }, '', '', ()=>{
-        //   localStorage.removeItem('unsavetype'+this.props.info.type+'id'+this.props.info.id);
-        // })
+        confirm({
+          title: '提示',
+          content: '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章?',
+            onOk: () => {
+                let content = localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id];
+                this.setState({ result: marked(content) });
+                this.props.onChange(content);
+            },
+            onCancel: () => {
+              localStorage.removeItem('unsavetype' + this.props.info.type + 'id' + this.props.info.id);
+            }
+        });
     }
     this.textControl.addEventListener('keydown', this._bindKey);
     this.textControl.addEventListener('paste', this._bindPaste.bind(this));
@@ -166,6 +181,32 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this.previewControl = null;
   }
 
+  handleLinkCreate() {
+    const form = this.linkRef.props.form;
+    (form as WrappedFormUtils).validateFields((err, values) => {
+      if (err) {
+        return;
+      }
+
+      console.log('Received values of form: ', values);
+      this.setState({linkText: values.linkText, linkUrl: values.linkUrl});
+
+      if (values.innerLinkUrl || values.innerLinkText) {
+        values.linkUrl = values.innerLinkUrl;
+        values.linkText = values.innerLinkText;
+      }
+
+      if (values.linkUrl && values.linkText) {
+        this._linkText(values.linkUrl, values.linkText, false);
+      } else {
+        this._linkText();
+      }
+
+      (form as WrappedFormUtils).resetFields();
+      this.setState({ visible: Object.assign({}, this.state.visible, {link: false}) });
+    });
+  }
+
   render () {
     const panelClass = classnames([ 'md-panel', { 'fullscreen': this.state.isFullScreen } ]);
     const editorClass = classnames([ 'md-editor', { 'expand': this.state.mode === 'edit' } ]);
@@ -182,7 +223,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
             <textarea
                 ref={textarea => this.editor = textarea}
                 name="content"
-                onChange={() => this._onChange}
+                onChange={e => this._onChange(e)}
                 value={this.props.content}
             />
           </div>
@@ -190,6 +231,14 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           <div className={classnames({hide: this.state.mode !== 'split'}, 'md-spliter')} />
         </div>
         <a ref={a => this.resizebar = a} href="javascript:void(0);" className="editor__resize">调整高度</a>
+        <EditorLinkModal
+          visible={this.state.visible.link} 
+          onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); (this.linkRef.props.form as WrappedFormUtils).resetFields(); }}
+          onCreate={() => this.handleLinkCreate()}
+          wrappedComponentRef={linkRef => this.linkRef = linkRef}
+          innerLinks={this.props.innerLinks}
+          fetchData={this.props.fetchData}
+        />
       </div>
     );
   }
@@ -210,20 +259,20 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   _getToolBar () {
     return (
       <ul className={classnames('md-toolbar clearfix', {hide: this.state.mode === 'preview'})}>
-        <li className="tb-btn"><a title="加粗(Ctrl + B)" onClick={this._boldText} className="editor-toolbar bold"><span /></a></li>{/* bold */}
-        <li className="tb-btn"><a title="斜体(Ctrl + I)" onClick={this._italicText} className="editor-toolbar italic"/></li>{/* italic */}
+        <li className="tb-btn"><a title="加粗(Ctrl + B)" onClick={() => this._boldText()} className="editor-toolbar bold"><span /></a></li>{/* bold */}
+        <li className="tb-btn"><a title="斜体(Ctrl + I)" onClick={() => this._italicText()} className="editor-toolbar italic"/></li>{/* italic */}
         <li className="tb-btn spliter" />
         <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={() => this._linkModal()} className="editor-toolbar link"/></li>{/* link */}
-        <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={this._blockquoteText} className="editor-toolbar quote"/></li>{/* blockquote */}
-        <li className="tb-btn"><a title="代码段(Ctrl + K)" onClick={this._codeText} className="editor-toolbar code"/></li>{/* code */}
-        <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={this._pictureText} className="editor-toolbar img"/></li>{/* picture-o */}
+        <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={() => this._blockquoteText()} className="editor-toolbar quote"/></li>{/* blockquote */}
+        <li className="tb-btn"><a title="代码段(Ctrl + K)" onClick={() => this._codeText()} className="editor-toolbar code"/></li>{/* code */}
+        <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={() => this._pictureText()} className="editor-toolbar img"/></li>{/* picture-o */}
         <li className="tb-btn spliter"/>
-        <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={this._listOlText} className="editor-toolbar ol"/></li>{/* list-ol */}
-        <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={this._listUlText} className="editor-toolbar ul"/></li>{/* list-ul */}
-        <li className="tb-btn"><a title="标题(Ctrl + H)" onClick={this._headerText} className="editor-toolbar title"/></li>{/* header */}
+        <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={() => this._listOlText()} className="editor-toolbar ol"/></li>{/* list-ol */}
+        <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={() => this._listUlText()} className="editor-toolbar ul"/></li>{/* list-ul */}
+        <li className="tb-btn"><a title="标题(Ctrl + H)" onClick={() => this._headerText()} className="editor-toolbar title"/></li>{/* header */}
         <li className="tb-btn spliter"/>
-        <li className="tb-btn"><a title="分割线(Ctrl + R)" onClick={this._insertHr} className="editor-toolbar hr"/></li>
-        <li className="tb-btn"><a title="插入 more 标签(Ctrl + M)" onClick={this._insertMore} className="editor-toolbar two"/></li>{/* more */}
+        <li className="tb-btn"><a title="分割线(Ctrl + R)" onClick={() => this._insertHr()} className="editor-toolbar hr"/></li>
+        <li className="tb-btn"><a title="插入 more 标签(Ctrl + M)" onClick={() => this._insertMore()} className="editor-toolbar two"/></li>{/* more */}
         {this._getExternalBtn()}
       </ul>
     );
@@ -244,25 +293,26 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
     return (
       <ul className="md-modebar">
+        {/* preview mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('preview'), 'editor-toolbar preview')} onClick={this._changeMode('preview')} title="预览模式"/>
         </li> 
-        {/* preview mode */}
+        {/* split mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('split'), 'editor-toolbar live')} onClick={this._changeMode('split')} title="分屏模式"/>
         </li> 
-        {/* split mode */}
+        {/* edit mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('edit'), 'editor-toolbar edit')} onClick={this._changeMode('edit')} title="编辑模式"/>
         </li> 
-        {/* edit mode */}
         <li className="tb-btn spliter pull-right" />
+        {/* full-screen */}
         <li className="tb-btn pull-right">
           <a title="全屏模式"
-            onClick={this._toggleFullScreen} 
+            onClick={() => this._toggleFullScreen()} 
             className={classnames({unzen: this.state.isFullScreen, zen: !this.state.isFullScreen}, 'editor-toolbar')}
           />
-        </li> {/* full-screen */}
+        </li> 
       </ul>
     );
   }
@@ -278,7 +328,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       this.setState({ result: this.toHtml(content) }); // change state
       localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + ''] = content;
     },                     300);
-
     this.props.onChange(content);
   }
 
@@ -351,7 +400,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _linkModal() {
-    // let _linkText = this._linkText;
+    let _linkText = this._linkText;
+    this.setState({visible: Object.assign({}, this.state.visible, {link: true})});
     // ModalAction.confirm(
     //   '插入链接',
     //   <Tabs defaultActiveKey={1}>

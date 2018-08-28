@@ -19,7 +19,7 @@ class SharedStore {
   };
 
   @action
-  setDefaultCategory = (data: any) => this.defaultCategory = data
+  setDefaultCategory = (data: string) => this.defaultCategory = data
 
   @action
   setCategoryList = (data: Category[]) => this.categoryList = data
