@@ -6,18 +6,21 @@ const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 import './image-modal.less';
 import { UploadChangeParam } from 'antd/lib/upload';
+import { ChangeEvent } from 'react';
 
 interface EditorImageModalProps extends ModalProps, FormComponentProps {
+    imageUrl: string;
+    fileLink: string;
+    tabKey: string;
     onOk: (e: any, ...params: any[]) => void;
     fileDone: (info: UploadChangeParam) => void;
-    imageUrl: string;
+    fileLinkChange: (fileLink: string) => void;
+    tabChanged: (key: string) => void;
 }
 
-class EditorImageModalForm extends React.Component<EditorImageModalProps, any> {
+class EditorImageModalForm extends React.Component<EditorImageModalProps, {loading: boolean}> {
     state = {
         loading: false,
-        imageUrl: '',
-        path: '',
     };
 
     constructor(props: any) {
@@ -50,8 +53,7 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, any> {
     }
 
     render() {
-        const { onCancel, form } = this.props;
-        const { getFieldDecorator } = form;
+        const { onCancel, fileLink } = this.props;
         const formItemLayout = {
             labelCol: {
                 xl: { span: 4 },
@@ -77,8 +79,10 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, any> {
                 className="eidtor-image-modal"
             >
                 <Tabs className="tabs" 
-                    defaultActiveKey="0" 
+                    defaultActiveKey="0"
                     type="card" 
+                    onChange={key => {this.props.tabChanged(key); }}
+                    activeKey={this.props.tabKey}
                 >
                     <TabPane tab="本地上传" key="0">
                         <Upload
@@ -101,9 +105,7 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, any> {
                                 {...formItemLayout}
                                 label="链接地址："
                             >
-                                {getFieldDecorator('innerLinkUrl')(
-                                    <Input />
-                                )}
+                                <Input value={fileLink} onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.fileLinkChange(e.target.value)} />
                             </FormItem>
                         </Form>
                     </TabPane>

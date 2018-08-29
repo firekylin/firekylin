@@ -67,6 +67,26 @@ class HttpClient {
                     map(response => response.data)
                 );
     }
+
+    upload(data: any, url: string = '/admin/api/file'): Promise<any> {
+        return new Promise(function(resolve: Function, reject: Function) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.onload = function() {
+                let res = JSON.parse(xhr.responseText);
+                if (res.errno !== 0) {
+                reject(res);
+                } else {
+                resolve(res);
+                }
+        
+            };
+            xhr.onerror = function() {
+                reject(xhr);
+            };
+            xhr.send(data);
+            });
+    }
 }
 // Export A HttpClient Instance
 export const http = new HttpClient();

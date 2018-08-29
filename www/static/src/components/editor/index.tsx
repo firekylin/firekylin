@@ -7,12 +7,12 @@ import * as React from 'react';
 
 // import Search from './search';
 import './style.less';
-import firekylin from '../../utils/firekylin';
-import { Modal, Tabs, Form, Input } from 'antd';
+import { Modal, Form, message } from 'antd';
 import EditorLinkModal from './link-modal/link-modal';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import EditorImageModal from './image-modal/image-modal';
 import { UploadChangeParam } from 'antd/lib/upload';
+import { http } from '../../utils/http';
 const confirm = Modal.confirm;
 
 interface MdEditorProps {
@@ -29,7 +29,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   static defaultProps = {
     content: ''
   };
-  textControl: any;
+  textControl: HTMLTextAreaElement | null;
   previewControl: any;
   _syncScroll: any;
   _isDirty = false;
@@ -43,6 +43,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   linkRef: Form;
   imageRef: Form;
   imagePath: string;
+  fileInfo: UploadChangeParam;
+
+  sectionRangeEnd: number;
 
   state = this.initialState();
 
@@ -62,12 +65,13 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         image: false,
       },
       imageUrl: '',
+      fileLink: '',
+      imageTabKey: '0',
     };
   }
 
   componentDidMount () {
     // cache dom node
-    this.textControl = this.editor;
     this.previewControl = this.preview;
     this._syncScroll = (() => {
       let leftSync = false, rightSync = false;
@@ -106,9 +110,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
             }
         });
     }
-    this.textControl.addEventListener('keydown', this._bindKey);
-    this.textControl.addEventListener('paste', this._bindPaste.bind(this));
-    this.textControl.addEventListener('scroll', this._syncScroll, false);
+    (this.textControl as HTMLTextAreaElement).addEventListener('keydown', (e) => this._bindKey(e));
+    (this.textControl as HTMLTextAreaElement).addEventListener('paste', this._bindPaste.bind(this));
+    (this.textControl as HTMLTextAreaElement).addEventListener('scroll', this._syncScroll, false);
     this.previewControl.addEventListener('scroll', this._syncScroll, false);
     this._bindMouse();
     // this.listen(ModalStore, () => this.textControl.focus(), 'removeModal');
@@ -126,7 +130,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     e.preventDefault();
     let data = new FormData();
     data.append('file', FileList[0]);
-    this._uploadImage.call(this, data, {type: 'image'});
+    this.upLoadImage(data, FileList[0].name);
   }
 
   _bindMouse() {
@@ -193,8 +197,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       if (err) {
         return;
       }
-
-      console.log('Received values of form: ', values);
       this.setState({linkText: values.linkText, linkUrl: values.linkUrl});
 
       if (values.innerLinkUrl || values.innerLinkText) {
@@ -213,11 +215,49 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     });
   }
 
-  handleImageOk(params?: any[]) {
-    console.log(params);
-    const start = this._cleanSelect();
-    this._preInputText(`![alt](${location.origin + this.imagePath})`, 2, 5, start);
-    this.imageModalClose();
+  handleImageOk() {
+    if (!this.state.imageUrl && !this.state.fileLink) {
+      message.warning('请插入图片');
+      return;
+    }
+    const start = (this._cleanSelect() as number);
+    if (this.state.imageTabKey === '0') {
+      const fileName = this.fileInfo.file.name;
+      this._preInputText(`![${fileName}](${location.origin + this.imagePath})`, 2, fileName.length + 2, start);
+      this.imageModalClose();
+    } else {
+      if (this.state.fileLink) {
+        const data = new FormData();
+        data.append('fileUrl', this.state.fileLink);
+        this.upLoadImage(data);
+      }
+    }
+    
+  }
+
+  upLoadImage(data: FormData, fileName: string = 'alt') {
+    const start = (this._cleanSelect() as number);
+    http.upload(data)
+      .then(
+        res => {
+          const reg = /^(https?:)?\/\/.+/;
+          if (!reg.test(res.data)) {
+            res.data = location.origin + res.data;
+          }
+          const text = this.state.fileLink ? '链接文本' : fileName;
+          if (text === 'alt') {
+            this._preInputText(`![${text}](${res.data})`, 2, 5, start);
+          } else {
+            this._preInputText(`![${text}](${res.data})`, 2, text.length + 2, start);
+          }
+          
+          this.imageModalClose();
+        }
+      )
+      .catch((res) => {
+        this._cleanSelect();
+        message.error(res.errmsg);
+      });
   }
 
   getBase64(img: any, callback: Function) {
@@ -227,14 +267,24 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   handleFile(fileInfo: UploadChangeParam) {
-    this.getBase64(fileInfo.file.originFileObj, imageUrl => this.setState({
-      imageUrl
-    }));
-    this.imagePath = fileInfo.file.response.data;
+    if (fileInfo.file.response.errno !== 0) {
+      message.error(fileInfo.file.response.errmsg);
+    } else {
+      this.fileInfo = fileInfo;
+      this.getBase64(fileInfo.file.originFileObj, imageUrl => this.setState({
+        imageUrl
+      }));
+      this.imagePath = fileInfo.file.response.data;
+    }
+  }
+
+  handleFileLinkChange(fileLink: string) {
+    this.setState({fileLink: fileLink});
   }
 
   imageModalClose() {
-    this.setState({visible: Object.assign({}, this.state.visible, {image: false}), imageUrl: '', imageLoading: false});
+    this.setState({visible: Object.assign({}, this.state.visible, {image: false}), imageUrl: '', imagePath: '', fileLink: ''});
+    this.imagePath = '';
   }
 
   render () {
@@ -251,7 +301,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           </div>
           <div className={editorClass}>
             <textarea
-                ref={textarea => this.editor = textarea}
+                ref={textarea => this.textControl = textarea}
                 name="content"
                 onChange={e => this._onChange(e)}
                 value={this.props.content}
@@ -272,10 +322,14 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         <EditorImageModal
           visible={this.state.visible.image} 
           onCancel={() => this.imageModalClose()}
-          onOk={(e, ...params) => {this.handleImageOk(...params); }}
+          onOk={() => this.handleImageOk()}
           wrappedComponentRef={imageRef => this.imageRef = imageRef}
           fileDone={(fileInfo: UploadChangeParam) => this.handleFile(fileInfo)}
           imageUrl={this.state.imageUrl}
+          fileLinkChange={(fileLink: string) => this.handleFileLinkChange(fileLink)}
+          fileLink={this.state.fileLink}
+          tabChanged={key => this.setState({imageTabKey: key})}
+          tabKey={this.state.imageTabKey}
         />
       </div>
     );
@@ -380,14 +434,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _cleanSelect() {
-    const start = this.textControl.selectionStart;
-    const end = this.textControl.selectionEnd;
-    if (start === end) {
-      return true;
-    }
-
+    const start = (this.textControl as HTMLTextAreaElement).selectionStart;
     let text = this.props.content;
-    text = text.slice(0, start) + text.slice(end);
+
     this.setState({ result: marked(text) });
     this.props.onChange(text);
 
@@ -395,9 +444,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   // default text processors
-  _preInputText (text: string, preStart: any, preEnd: any, selectStart?: any) {
-    const start = selectStart || this.textControl.selectionStart;
-    const end = selectStart || this.textControl.selectionEnd;
+  _preInputText (text: string, preStart: number, preEnd: number, selectStart?: number) {
+    const start = selectStart || (this.textControl as HTMLTextAreaElement).selectionStart;
+    const end = selectStart || (this.textControl as HTMLTextAreaElement).selectionEnd;
     const origin = this.props.content;
 
     if (start !== end) {
@@ -406,9 +455,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       preEnd = preStart + exist.length;
     }
     let content = origin.slice(0, start) + text + origin.slice(end);
+
     // pre-select
-    setTimeout(() => this.textControl.setSelectionRange(start + preStart, start + preEnd), 20);
+    setTimeout(() => (this.textControl as HTMLTextAreaElement).setSelectionRange(start + preStart, start + preEnd), 20);
     this.setState({ result: marked(content) }); // change state
+    this.sectionRangeEnd = start + preEnd;
     this.props.onChange(content);
   }
 
@@ -443,59 +494,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   _pictureText () {
     this.setState({visible: Object.assign({}, this.state.visible, {image: true})});
-    // ModalAction.confirm(
-    //   '插入图片',
-    //   <Tabs defaultActiveKey={1}>
-    //     <Tab eventKey={1} title="本地上传">
-    //       <div style={{margin: '20px 0'}}>
-    //         <input type="file" name="file" accept="image/*" onChange={e=> this.setState({file: e.target.files[0], fileUrl: null})} />
-    //       </div>
-    //     </Tab>
-    //     <Tab eventKey={2} title="从网络上抓取">
-    //       <div style={{margin: '20px 0'}}>
-    //         <input type="text" name="url" className="form-control" onChange={e=> this.setState({fileUrl: e.target.value, file: null})} />
-    //       </div>
-    //     </Tab>
-    //   </Tabs>,
-    //   () => {
-    //     if(!this.state.file && !this.state.fileUrl) {
-    //       return false;
-    //     }
-
-    //     var data = new FormData();
-    //     if(this.state.fileUrl) {
-    //       data.append('fileUrl', this.state.fileUrl);
-    //     } else {
-    //       if(this.state.file.size > 5 * 1024 * 1024) {
-    //         return TipAction.fail('图片大小超过 5M！');
-    //       }
-    //       data.append('file', this.state.file);
-    //     }
-
-    //     this._uploadImage.call(this, data, {});
-    //   }
-    // );
-  }
-
-  // tslint:disable-next-line:typedef
-  _uploadImage(data: any, {type = ''}) {
-    this._preInputText('![图片上传中…]', 0, 9);
-    return firekylin.upload(data).then((res: any) => {
-      let start = this._cleanSelect();
-      const reg = /^(https?:)?\/\/.+/;
-      if (!reg.test(res.data)) {
-        res.data = location.origin + res.data;
-      }
-      if (type.includes('image') || res.data.match(/\.(?:jpg|jpeg|png|bmp|gif|webp|svg|wmf|tiff|ico)$/i)) {
-        this._preInputText(`![alt](${res.data})`, 2, 5, start);
-      } else {
-        let text = this.state.fileUrl ? '链接文本' : (this.state.file[0] as any).name;
-        this._preInputText(`[${text}](${res.data})`, 1, text.length + 1, start);
-      }
-    }).catch((res) => {
-      this._cleanSelect();
-      // TipAction.fail(res.errmsg);
-    });
   }
 
   _listUlText () {
