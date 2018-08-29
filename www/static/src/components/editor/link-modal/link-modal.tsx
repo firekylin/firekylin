@@ -13,25 +13,9 @@ interface EditorLinkModalProps extends ModalProps, FormComponentProps {
 }
 
 class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
-    tabKey = '';
     constructor(props: any) {
         super(props);
     }
-    // handleSubmit = (e: React.FormEvent<any>) => {
-    //     e.preventDefault();
-    //     this.props.form.validateFieldsAndScroll((err, values) => {
-    //         if (!err) {
-    //             if (this.tabKey === '0') {
-    //                 // 
-    //             } else {
-    //                 values.linkUrl = `${location.origin}/post/${values.innerLinkUrl}.html`,
-    //                 values.linkText = values.innerLinkText;
-    //             }
-    //             debugger;
-    //             console.log(values);
-    //         }
-    //     });
-    // }
     
     handleChange = (value) => {
         const selectedLink = this.props.innerLinks.filter(link => link.title === value)[0];
@@ -68,7 +52,6 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                 <Tabs className="tabs" 
                     defaultActiveKey="0" 
                     type="card" 
-                    onChange={key => {this.tabKey = key; }}
                 >
                     <TabPane tab="插入外链" key="0">
                         <Form>

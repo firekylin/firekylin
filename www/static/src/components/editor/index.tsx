@@ -11,6 +11,8 @@ import firekylin from '../../utils/firekylin';
 import { Modal, Tabs, Form, Input } from 'antd';
 import EditorLinkModal from './link-modal/link-modal';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
+import EditorImageModal from './image-modal/image-modal';
+import { UploadChangeParam } from 'antd/lib/upload';
 const confirm = Modal.confirm;
 
 interface MdEditorProps {
@@ -39,6 +41,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   resizebar: HTMLAnchorElement | null;
 
   linkRef: Form;
+  imageRef: Form;
+  imagePath: string;
 
   state = this.initialState();
 
@@ -54,8 +58,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       fileUrl: '',
       file: [],
       visible: {
-        link: false
-      }
+        link: false,
+        image: false,
+      },
+      imageUrl: '',
     };
   }
 
@@ -207,6 +213,30 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     });
   }
 
+  handleImageOk(params?: any[]) {
+    console.log(params);
+    const start = this._cleanSelect();
+    this._preInputText(`![alt](${location.origin + this.imagePath})`, 2, 5, start);
+    this.imageModalClose();
+  }
+
+  getBase64(img: any, callback: Function) {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+  }
+
+  handleFile(fileInfo: UploadChangeParam) {
+    this.getBase64(fileInfo.file.originFileObj, imageUrl => this.setState({
+      imageUrl
+    }));
+    this.imagePath = fileInfo.file.response.data;
+  }
+
+  imageModalClose() {
+    this.setState({visible: Object.assign({}, this.state.visible, {image: false}), imageUrl: '', imageLoading: false});
+  }
+
   render () {
     const panelClass = classnames([ 'md-panel', { 'fullscreen': this.state.isFullScreen } ]);
     const editorClass = classnames([ 'md-editor', { 'expand': this.state.mode === 'edit' } ]);
@@ -238,6 +268,14 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           wrappedComponentRef={linkRef => this.linkRef = linkRef}
           innerLinks={this.props.innerLinks}
           fetchData={this.props.fetchData}
+        />
+        <EditorImageModal
+          visible={this.state.visible.image} 
+          onCancel={() => this.imageModalClose()}
+          onOk={(e, ...params) => {this.handleImageOk(...params); }}
+          wrappedComponentRef={imageRef => this.imageRef = imageRef}
+          fileDone={(fileInfo: UploadChangeParam) => this.handleFile(fileInfo)}
+          imageUrl={this.state.imageUrl}
         />
       </div>
     );
@@ -400,58 +438,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _linkModal() {
-    let _linkText = this._linkText;
     this.setState({visible: Object.assign({}, this.state.visible, {link: true})});
-    // ModalAction.confirm(
-    //   '插入链接',
-    //   <Tabs defaultActiveKey={1}>
-    //     <Tab eventKey={1} title="插入外链">
-    //       <div style={{margin: '20px 0'}}>
-    //         <div className="form-group">
-    //           <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接地址：</label>
-    //           <div style={{display: 'inline-block', width: '80%'}}>
-    //             <input type="text" className="form-control" onChange={e => this.setState({linkUrl: e.target.value})}/>
-    //           </div>
-    //         </div>
-    //         <div className="form-group">
-    //           <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接文本：</label>
-    //           <div style={{display: 'inline-block', width: '80%'}}>
-    //             <input type="text" className="form-control" onChange={e => this.setState({linkText: e.target.value})}/>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </Tab>
-    //     <Tab eventKey={2} title="插入内链">
-    //       <div style={{margin: '20px 0'}}>
-    //         <div className="form-group">
-    //           <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接地址：</label>
-    //           <div style={{display: 'inline-block', width: '80%'}}>
-    //             <Search onSelect={(val, opt) => {
-    //                 document.getElementsByClassName('inner-link-text')[0].value = opt.props.children;
-    //                 this.setState({linkUrl: `${location.origin}/post/${val}.html`, linkText: opt.props.children})
-    //             }}/>
-    //           </div>
-    //         </div>
-    //         <div className="form-group">
-    //           <label className="control-label" style={{display: 'inline-block', lineHeight: '30px'}}>链接文本：</label>
-    //           <div style={{display: 'inline-block', width: '80%'}}>
-    //             <input type="text" className="form-control inner-link-text" onChange={e => this.setState({linkText: e.target.value})}/>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </Tab>
-    //   </Tabs>,
-    //   () => {
-    //     if(this.state.linkUrl && this.state.linkText) {
-    //       _linkText(this.state.linkUrl, this.state.linkText, false);
-    //     } else {
-    //       _linkText();
-    //     }
-    //   }
-    // )
   }
 
   _pictureText () {
+    this.setState({visible: Object.assign({}, this.state.visible, {image: true})});
     // ModalAction.confirm(
     //   '插入图片',
     //   <Tabs defaultActiveKey={1}>
