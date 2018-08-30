@@ -15,7 +15,7 @@ const startPost = `
 Firekylin 的后台登录入口在 [~/admin](/admin)
 
 ### 网站基本设置
-后台的 [系统设置](/admin/options/) 提供了与网站相关的选项，例如可在其中的 [基本设置](admin/options/general) 中设置网站名称、Logo地址等。  
+后台的 [系统设置](/admin/options/) 提供了与网站相关的选项，例如可在其中的 [基本设置](/admin/options/general) 中设置网站名称、Logo地址等。  
 更多的设置，请参考 [官方 WIKI](https://github.com/firekylin/firekylin/wiki/) 的 [系统设置](https://github.com/firekylin/firekylin/wiki/系统设置)
 
 ### 评论设置
