@@ -345,7 +345,7 @@ module.exports = class extends Base {
             <span className="glyphicon glyphicon-link" />
           </a> : null}
         <span> </span>
-        <a onClick={previewOnClick}>
+        <a onClick={previewOnClick} title="预览">
           <span className="glyphicon glyphicon-eye-open" />
         </a>
       </div>
