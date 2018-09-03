@@ -2,7 +2,6 @@ import * as React from 'react';
 import { inject, observer } from 'mobx-react';
 import SharedStore from '../../../shared.store';
 import PostStore from '../../../routes/post/post.store';
-import { Category } from 'aws-sdk/clients/support';
 
 interface ACCategoryProps {
     sharedStore?: SharedStore;

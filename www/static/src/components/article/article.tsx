@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { Row, Col, DatePicker } from 'antd';
-import './article.less';
+import { inject, observer } from 'mobx-react';
+import moment from 'moment';
+import { zip } from 'rxjs';
 import ArticleHeader from './article-header/article-header';
 import ArticleEditor from './article-editor/article-editor';
 import ArticleControlHeader from './control-header/control-header';
-import * as moment from 'moment';
 import ArticleControlCategory from './control-category/control-category';
+import ArticleControlTag from './control-tag/control-tag';
 import { ArticleProps } from './article.model';
-import { inject, observer } from 'mobx-react';
-import { merge, zip } from 'rxjs';
+import './article.less';
+
 @inject('sharedStore', 'postStore')
 @observer
 class PostArticle extends React.Component<ArticleProps, {}> {
@@ -30,13 +32,18 @@ class PostArticle extends React.Component<ArticleProps, {}> {
             const defaultCategoryAry = res[0].data.filter(cat => cat.id === +res[1].data);
             postStore.setPostInfo({cate: defaultCategoryAry});
         });
+        sharedStore.getTagList();
     }
     // 发布日期
     onDateChange(date: moment.Moment, dateString: string) {
         console.log(date, dateString);
     }
+    handleTagChanged(tags: string[]) {
+        console.log(tags);
+    }
     render() {
         const { postInfo } = this.props.postStore;
+        const tagList = this.props.sharedStore.tagList;
         return (
             <div className="post-article">
                 <Row type="flex">
@@ -53,6 +60,10 @@ class PostArticle extends React.Component<ArticleProps, {}> {
                         <section className="category">
                             <h5>分类</h5>
                             <ArticleControlCategory catInitial={postInfo.cate && postInfo.cate.length > 0 ? postInfo.cate.map(item => item.id) : []} />
+                        </section>
+                        <section className="category">
+                            <h5>标签</h5>
+                            <ArticleControlTag tagList={tagList} handleTagChanged={(values) => this.handleTagChanged(values)} />
                         </section>
                     </Col>
                 </Row>

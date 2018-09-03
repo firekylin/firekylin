@@ -1,9 +1,9 @@
-import { observable, action, set } from 'mobx';
+import { observable, action } from 'mobx';
 import { message } from 'antd';
 import { http } from './utils/http';
 import { Category } from './models/category.model';
 import { Tag } from './models/tag.model';
-import { Observable, Subject, from } from 'rxjs';
+import { Observable } from 'rxjs';
 import { IResult } from './models/http.model';
 
 interface SharedLoading {
@@ -15,9 +15,8 @@ class SharedStore {
   getCategoryList$: Observable<IResult<Category[]>> = http.get<Category[]>('/admin/api/cate');
   getDefaultCategory$: Observable<IResult<string>> = this.getDefaultCategory$ = http.get('/admin/api/options?type=defaultCategory');
   @observable defaultCategory = '';
-  defaultCategoryAry: Category[];
   @observable categoryList: Category[] = [];
-  @observable tagList: Tag[];
+  @observable tagList: Tag[] = [];
   @observable loading: SharedLoading = {
     category: true,
     tag: true,
@@ -26,7 +25,6 @@ class SharedStore {
   @action
   setDefaultCategory = (data: string) => {
     this.defaultCategory = data;
-    this.defaultCategoryAry = this.categoryList.filter(cat => cat.id === +this.defaultCategory);
   }
 
   @action

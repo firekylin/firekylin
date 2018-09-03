@@ -33,7 +33,7 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
     render() {
         const { onCancel, onCreate, form } = this.props;
         const { getFieldDecorator } = form;
-        const { innerLinks } = this.props ;
+        const { innerLinks } = this.props;
         const formItemLayout = {
             labelCol: {
                 xl: { span: 4 },

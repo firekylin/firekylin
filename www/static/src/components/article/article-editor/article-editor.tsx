@@ -4,8 +4,10 @@ import MarkDownEditor from '../../editor';
 import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from 'mobx-react';
 import { tools } from '../../../utils/tools';
+import { PostInfo } from '../../../routes/post/post.model';
 @inject('postStore')
-@observer class ArticleEditor extends React.Component<any, ArticleEditorState> {
+@observer
+class ArticleEditor extends React.Component<any, ArticleEditorState> {
     id;
     type;
     state: ArticleEditorState = {
