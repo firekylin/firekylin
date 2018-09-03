@@ -24,11 +24,12 @@ class LoginStore {
             message.success('登陆成功');
             setTimeout(() => { location.reload(); }, 1000);
           } else {
-            message.error(res.errmsg);
+            this.setLoading(false);
           }
         },
         err => {
           message.error(err);
+          this.setLoading(false);
         }
       );
   }

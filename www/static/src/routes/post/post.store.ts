@@ -2,10 +2,9 @@ import { observable, action } from 'mobx';
 import { message } from 'antd';
 import { http } from '../../utils/http';
 import { AppStore } from '../../app.store';
-import { PostListRequestParams, PostListResponseData } from './post.model';
+import { PostListRequestParams, PostListResponseData, PostInfo } from './post.model';
 import { PaginationConfig } from 'antd/lib/table';
-import { map, switchMap } from 'rxjs/operators';
-import { interval } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 const isFuture = time => time && (new Date(time)).getTime() > Date.now();
 function getStatusText(status: number, createTime: Date) {
@@ -25,7 +24,21 @@ class PostStore {
   appStore;
   @observable loading = false;
   @observable postList = [];
-  @observable categoryList;
+  @observable postInfo: PostInfo = {
+    title: '',
+    pathname: '',
+    markdown_content: '',
+    tag: [],
+    cate: [],
+    is_public: '1',
+    create_time: '',
+    allow_comment: true,
+    options: {
+      template: '',
+      featuredImage: '',
+      push_sites: []
+    }
+  };
   @observable pagination: PaginationConfig = {
     current: 1,
     pageSize: 0,
@@ -56,7 +69,9 @@ class PostStore {
   }
 
   @action
-  setCategoryList = data => this.categoryList = data
+  setPostInfo = info => {
+    this.postInfo = Object.assign({}, this.postInfo, info);
+  }
 
   @action 
   setPagination = (pagination: PaginationConfig) => {
@@ -100,21 +115,6 @@ class PostStore {
         err => {
           message.error(err);
           this.setLoading(false);
-        }
-      );
-  }
-
-  // 获取分类列表
-  getCategoryList() {
-    http.get<any>('/admin/api/cate', this.plReqParams)
-      .subscribe(
-        res => {
-          if (res.errno === 0) {
-              this.setCategoryList(res.data.data);
-          }
-        },
-        err => {
-          message.error(err);
         }
       );
   }

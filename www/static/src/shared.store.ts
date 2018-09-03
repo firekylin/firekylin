@@ -1,8 +1,10 @@
-import { observable, action } from 'mobx';
+import { observable, action, set } from 'mobx';
 import { message } from 'antd';
 import { http } from './utils/http';
 import { Category } from './models/category.model';
 import { Tag } from './models/tag.model';
+import { Observable, Subject, from } from 'rxjs';
+import { IResult } from './models/http.model';
 
 interface SharedLoading {
   category?: boolean;
@@ -10,7 +12,10 @@ interface SharedLoading {
 }
 
 class SharedStore {
+  getCategoryList$: Observable<IResult<Category[]>> = http.get<Category[]>('/admin/api/cate');
+  getDefaultCategory$: Observable<IResult<string>> = this.getDefaultCategory$ = http.get('/admin/api/options?type=defaultCategory');
   @observable defaultCategory = '';
+  defaultCategoryAry: Category[];
   @observable categoryList: Category[] = [];
   @observable tagList: Tag[];
   @observable loading: SharedLoading = {
@@ -19,10 +24,23 @@ class SharedStore {
   };
 
   @action
-  setDefaultCategory = (data: string) => this.defaultCategory = data
+  setDefaultCategory = (data: string) => {
+    this.defaultCategory = data;
+    this.defaultCategoryAry = this.categoryList.filter(cat => cat.id === +this.defaultCategory);
+  }
 
   @action
-  setCategoryList = (data: Category[]) => this.categoryList = data
+  setCategoryList = (data: Category[]) => {
+    let list = data.filter(cat => cat.pid === 0);
+    for (let i = 0, l = list.length; i < l; i++) {
+        let child = data.filter(cat => cat.pid === list[i].id);
+        if (child.length === 0) {
+            continue;
+        }
+        list.splice.apply(list, ([i + 1, 0] as any).concat(child));
+    }
+    this.categoryList = list;
+  }
 
   @action
   setTagList = (data: Tag[]) => this.tagList = data
@@ -35,8 +53,7 @@ class SharedStore {
   // 获取分类列表
   getCategoryList() {
     this.setLoading({category: true});
-    http.get<Category[]>('/admin/api/cate')
-      .subscribe(
+    this.getCategoryList$.subscribe(
         res => {
           if (res.errno === 0) {
               this.setLoading({category: false});
@@ -52,8 +69,7 @@ class SharedStore {
 
   // 获取默认分类
   getDefaultCategory() {
-    http.get<string>('/admin/api/options?type=defaultCategory')
-    .subscribe(
+    this.getDefaultCategory$.subscribe(
       res => {
         if (res.errno === 0) {
           this.setDefaultCategory(res.data);

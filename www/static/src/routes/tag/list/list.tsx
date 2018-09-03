@@ -2,13 +2,13 @@ import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import { Button, Table, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
-import { TagListProps } from './list.model';
 import './list.less';
 import { Tag } from '../../../models/tag.model';
+import { TagProps } from '../tag.model';
 const confirm = Modal.confirm;
 
 @inject('tagStore', 'sharedStore')
-@observer class TagList extends React.Component<TagListProps, {}> {
+@observer class TagList extends React.Component<TagProps, {}> {
     constructor(props: any) {
         super(props);
     }

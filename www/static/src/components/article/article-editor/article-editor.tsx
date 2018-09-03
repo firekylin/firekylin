@@ -1,10 +1,11 @@
 import * as React from 'react';
 import './article-editor.less';
 import MarkDownEditor from '../../editor';
-import { ArticleEditorState, PostInfo } from './article-editor.model';
+import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from 'mobx-react';
+import { tools } from '../../../utils/tools';
 @inject('postStore')
-@observer class PostArticleEditor extends React.Component<any, ArticleEditorState> {
+@observer class ArticleEditor extends React.Component<any, ArticleEditorState> {
     id;
     type;
     state: ArticleEditorState = {
@@ -32,6 +33,7 @@ import { inject, observer } from 'mobx-react';
         templateList: [],
         users: [],
         isFullScreen: false,
+        wordCount: 0,
     };
     constructor(props: any) {
         super(props);
@@ -46,21 +48,32 @@ import { inject, observer } from 'mobx-react';
     render(postInfo: PostInfo = this.state.postInfo) {
 
         return (
-            <>
+            <div className="article-editor">
                 <MarkDownEditor
                     content={postInfo.markdown_content}
                     onChange={content => {
                         postInfo.markdown_content = content;
-                        this.setState({postInfo});
+                        this.setState({postInfo, wordCount: tools.wordCount(this.state.postInfo.markdown_content)});
                     }}
                     onFullScreen={isFullScreen => this.setState({isFullScreen})}
                     info={{id: this.id, type: this.type}}
                     innerLinks={this.props.postStore.postList}
                     fetchData={keyword => this.handleFetchData(keyword)}
                 />
-            </>
+                <p style={{ lineHeight: '30px' }}>
+                    <span className="pull-left">
+                        文章使用 markdown 格式，格式说明请见
+                        <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">
+                        这里
+                        </a>
+                    </span>
+                    <span className="pull-right">
+                        字数：{this.state.wordCount}
+                    </span>
+                </p>
+            </div>
         );
     }
 }
 
-export default PostArticleEditor;
+export default ArticleEditor;

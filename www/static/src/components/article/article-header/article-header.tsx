@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Input } from 'antd';
 import './article-header.less';
 
-class PostArticleHeader extends React.Component<any, {}> {
+class ArticleHeader extends React.Component<any, {}> {
 
     id: number = 0;
     type: number = 0;
@@ -35,4 +35,4 @@ class PostArticleHeader extends React.Component<any, {}> {
     }
 }
 
-export default PostArticleHeader;
+export default ArticleHeader;

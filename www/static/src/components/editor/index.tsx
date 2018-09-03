@@ -110,7 +110,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
             }
         });
     }
-    (this.textControl as HTMLTextAreaElement).addEventListener('keydown', (e) => this._bindKey(e));
+    (this.textControl as HTMLTextAreaElement).addEventListener('keydown', this._bindKey);
     (this.textControl as HTMLTextAreaElement).addEventListener('paste', this._bindPaste.bind(this));
     (this.textControl as HTMLTextAreaElement).addEventListener('scroll', this._syncScroll, false);
     this.previewControl.addEventListener('scroll', this._syncScroll, false);

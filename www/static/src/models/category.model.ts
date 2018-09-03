@@ -5,3 +5,7 @@ export interface Category {
     pid: number;
     post_cate: number;
 }
+
+export interface CheckboxCategory extends Category {
+    checked?: boolean;
+}
