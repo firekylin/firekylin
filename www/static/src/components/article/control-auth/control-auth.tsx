@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Checkbox } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
-interface ACTagProps {
+interface ACAuthProps {
     comment: boolean;
     handleAuthChange: (e: CheckboxChangeEvent) => void;
 }
 
-class ArticleControlAuth extends React.Component<ACTagProps, any> {
+class ArticleControlAuth extends React.Component<ACAuthProps, any> {
     constructor(props: any) {
         super(props);
     }

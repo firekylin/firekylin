@@ -11,4 +11,5 @@ export interface ArticleState {
     auth: {
         comment: boolean;
     };
+    imageUrl: string;
 }

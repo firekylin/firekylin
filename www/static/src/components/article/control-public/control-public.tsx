@@ -3,12 +3,12 @@ import { Radio } from 'antd';
 import RadioGroup from 'antd/lib/radio/group';
 import { RadioChangeEvent } from 'antd/lib/radio';
 
-interface ACTagProps {
+interface ACPublicProps {
     public: number;
     handlePublicChange: (e: RadioChangeEvent) => void;
 }
 
-class ArticleControlPublic extends React.Component<ACTagProps, any> {
+class ArticleControlPublic extends React.Component<ACPublicProps, any> {
     constructor(props: any) {
         super(props);
     }

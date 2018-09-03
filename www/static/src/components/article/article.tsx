@@ -14,6 +14,7 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 import ArticleControlPublic from './control-public/control-public';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import ArticleControlAuth from './control-auth/control-auth';
+import ArticleControlImage from './control-image/control-image';
 
 @inject('sharedStore', 'postStore')
 @observer
@@ -27,6 +28,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         auth: {
             comment: true,
         },
+        imageUrl: '',
     };
 
     constructor(props: any) {
@@ -60,6 +62,10 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         console.log(e.target.checked);
         this.setState({auth: {comment: e.target.checked}});
     }
+    handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+        console.log(e.target.value);
+        this.setState({imageUrl: e.target.value});
+    }
     render() {
         const { postInfo } = this.props.postStore;
         const tagList = this.props.sharedStore.tagList;
@@ -91,6 +97,10 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
                         <section className="category">
                             <h5>权限控制</h5>
                             <ArticleControlAuth comment={this.state.auth.comment} handleAuthChange={e => this.handleAuthChange(e)} />
+                        </section>
+                        <section className="category">
+                            <h5>封面图片</h5>
+                            <ArticleControlImage imageUrl={this.state.imageUrl} handleImageChange={e => this.handleImageChange(e)} />
                         </section>
                     </Col>
                 </Row>
