@@ -12,6 +12,8 @@ import { ArticleProps, ArticleState } from './article.model';
 import './article.less';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import ArticleControlPublic from './control-public/control-public';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import ArticleControlAuth from './control-auth/control-auth';
 
 @inject('sharedStore', 'postStore')
 @observer
@@ -20,8 +22,11 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
     id: number = 0;
     type: number = 0;
 
-    state = {
-        public: 1
+    state: ArticleState = {
+        public: 1,
+        auth: {
+            comment: true,
+        },
     };
 
     constructor(props: any) {
@@ -51,6 +56,10 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         console.log(e.target.value);
         this.setState({public: e.target.value});
     }
+    handleAuthChange(e: CheckboxChangeEvent) {
+        console.log(e.target.checked);
+        this.setState({auth: {comment: e.target.checked}});
+    }
     render() {
         const { postInfo } = this.props.postStore;
         const tagList = this.props.sharedStore.tagList;
@@ -78,6 +87,10 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
                         <section className="category">
                             <h5>公开度</h5>
                             <ArticleControlPublic public={this.state.public} handlePublicChange={e => this.handlePublicChange(e)} />
+                        </section>
+                        <section className="category">
+                            <h5>权限控制</h5>
+                            <ArticleControlAuth comment={this.state.auth.comment} handleAuthChange={e => this.handleAuthChange(e)} />
                         </section>
                     </Col>
                 </Row>

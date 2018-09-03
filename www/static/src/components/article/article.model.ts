@@ -8,4 +8,7 @@ export interface ArticleProps extends BaseProps, RouteComponentProps<any> {
 
 export interface ArticleState {
     public: number;
+    auth: {
+        comment: boolean;
+    };
 }
