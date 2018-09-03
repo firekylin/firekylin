@@ -12,6 +12,8 @@ import {message} from "antd";
 export default class UserStore{
     appStore;
 
+    getUserList$ = (type?: string) => http.get<any>(`/admin/api/user`, {type});
+
     constructor(appStore: AppStore) {
         this.appStore = appStore;
     }
