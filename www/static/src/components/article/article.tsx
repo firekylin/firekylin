@@ -8,15 +8,21 @@ import ArticleEditor from './article-editor/article-editor';
 import ArticleControlHeader from './control-header/control-header';
 import ArticleControlCategory from './control-category/control-category';
 import ArticleControlTag from './control-tag/control-tag';
-import { ArticleProps } from './article.model';
+import { ArticleProps, ArticleState } from './article.model';
 import './article.less';
+import { RadioChangeEvent } from 'antd/lib/radio';
+import ArticleControlPublic from './control-public/control-public';
 
 @inject('sharedStore', 'postStore')
 @observer
-class PostArticle extends React.Component<ArticleProps, {}> {
+class PostArticle extends React.Component<ArticleProps, ArticleState> {
 
     id: number = 0;
     type: number = 0;
+
+    state = {
+        public: 1
+    };
 
     constructor(props: any) {
         super(props);
@@ -38,8 +44,12 @@ class PostArticle extends React.Component<ArticleProps, {}> {
     onDateChange(date: moment.Moment, dateString: string) {
         console.log(date, dateString);
     }
-    handleTagChanged(tags: string[]) {
+    handleTagChange(tags: string[]) {
         console.log(tags);
+    }
+    handlePublicChange(e: RadioChangeEvent) {
+        console.log(e.target.value);
+        this.setState({public: e.target.value});
     }
     render() {
         const { postInfo } = this.props.postStore;
@@ -63,7 +73,11 @@ class PostArticle extends React.Component<ArticleProps, {}> {
                         </section>
                         <section className="category">
                             <h5>标签</h5>
-                            <ArticleControlTag tagList={tagList} handleTagChanged={(values) => this.handleTagChanged(values)} />
+                            <ArticleControlTag tagList={tagList} handleTagChange={(values) => this.handleTagChange(values)} />
+                        </section>
+                        <section className="category">
+                            <h5>公开度</h5>
+                            <ArticleControlPublic public={this.state.public} handlePublicChange={e => this.handlePublicChange(e)} />
                         </section>
                     </Col>
                 </Row>

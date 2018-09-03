@@ -5,7 +5,7 @@ const Option = Select.Option;
 
 interface ACTagProps {
     tagList: Tag[];
-    handleTagChanged: (value: string[]) => void;
+    handleTagChange: (value: string[]) => void;
 }
 
 class ArticleControlTag extends React.Component<ACTagProps, any> {
@@ -22,7 +22,7 @@ class ArticleControlTag extends React.Component<ACTagProps, any> {
                 showSearch={true}
                 placeholder="请输入标签"
                 style={{width: '100%'}}
-                onChange={this.props.handleTagChanged}
+                onChange={this.props.handleTagChange}
             >
                 {tagList.map(tag => <Option key={tag.id} value={tag.name}>{tag.name}</Option>)}
             </Select>
