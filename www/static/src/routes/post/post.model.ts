@@ -33,4 +33,7 @@ export interface PostInfo {
         featuredImage: string;
         push_sites: any[];
     };
+    user_id: string;
+    status: number;
+    user?: string;
 }

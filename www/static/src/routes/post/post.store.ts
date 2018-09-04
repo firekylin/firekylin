@@ -31,13 +31,15 @@ class PostStore {
     tag: [],
     cate: [],
     is_public: '1',
-    create_time: '',
+    create_time: new Date().toUTCString(),
     allow_comment: true,
     options: {
       template: '',
       featuredImage: '',
       push_sites: []
-    }
+    },
+    status: 3,
+    user_id: '',
   };
   @observable pagination: PaginationConfig = {
     current: 1,
@@ -133,6 +135,11 @@ class PostStore {
           message.error(err);
         }
       );
+  }
+
+  // 发布文章 / 草稿
+  postSubmit(params: any) {
+    return http.post<any>('/admin/api/post', params);
   }
 }
 

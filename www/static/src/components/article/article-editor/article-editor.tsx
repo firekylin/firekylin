@@ -23,10 +23,11 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
             create_time: '',
             allow_comment: true,
             options: {
-            template: '',
-            featuredImage: '',
-            push_sites: []
-            }
+                template: '',
+                featuredImage: '',
+                push_sites: [],
+            },
+            user_id: '',
         },
         status: 3,
         cateList: [],
@@ -55,6 +56,7 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
                     content={postInfo.markdown_content}
                     onChange={content => {
                         postInfo.markdown_content = content;
+                        this.props.postStore.setPostInfo({markdown_content: content});
                         this.setState({postInfo, wordCount: tools.wordCount(this.state.postInfo.markdown_content)});
                     }}
                     onFullScreen={isFullScreen => this.setState({isFullScreen})}

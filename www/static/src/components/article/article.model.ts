@@ -16,3 +16,17 @@ export interface ArticleState {
     imageUrl: string;
     user: string;
 }
+
+export interface PreviewData {
+    title: string | 'Untitled';
+    pathname: string | 'untitled';
+    markdown_content: string;
+    create_time: string;
+    update_time: string;
+    user: string;
+    comment_num: number;
+    allow_comment: number;
+    options: string;
+    tag?: any[];
+    cate?: number[];
+}

@@ -19,8 +19,8 @@ class ArticleControlHeader extends React.Component<any, {}> {
     render() {
         return (
             <div className="article-control-header" style={{display: 'flex', justifyContent: 'space-between'}}>
-                <Button type="default">保存草稿</Button>
-                <Button type="primary">发布文章</Button>
+                <Button onClick={this.props.saveDraft} type="default">保存草稿</Button>
+                <Button onClick={this.props.save} type="primary">发布文章</Button>
             </div>
         );
     }

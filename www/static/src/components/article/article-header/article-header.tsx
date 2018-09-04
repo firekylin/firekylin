@@ -17,18 +17,22 @@ class ArticleHeader extends React.Component<any, {}> {
     isPage() {
         return this.type;
     }
+
     render() {
         const baseUrl = `${location.origin}/${['post', 'page'][this.type]}/`;
         return (
             <div className="article-header">
                 <div className="article-header-title">
                     <h5>{`${this.id ? '编辑' : '撰写'}${this.isPage() ? '页面' : '文章'}`}</h5>
-                    <Input placeholder="标题" />
+                    <Input value={this.props.title} onChange={e => this.props.handleTitle(e)} placeholder="标题" />
                 </div>
                 <div className="article-header-pathname">
                     <span>{baseUrl}</span>
-                    <Input className="pathname-input" />
+                    <Input disabled={this.props.status === 3} value={this.props.pathname} onChange={e => this.props.handlePath(e)} className="pathname-input" />
                     <span>.html </span>
+                    <a title="预览" style={{marginLeft: 8}} onClick={() => this.props.preview()}>
+                        <span className="glyphicon glyphicon-eye-open" />
+                    </a>
                 </div>
             </div>
         );
