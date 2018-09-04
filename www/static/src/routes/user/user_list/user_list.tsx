@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {Link} from 'react-router-dom';
-import {Tabs} from 'antd';
+import { Link } from 'react-router-dom';
+import { Tabs } from 'antd';
 import { observer, inject } from 'mobx-react';
 // import UserAction from '../action/user';
 import { UserProps } from '../user.model';

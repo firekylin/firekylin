@@ -150,7 +150,7 @@ export default class UserStore{
             .catch(err => {
                 this.setUserEditPwdState({submitting: false});
                 message.error('更新失败，请稍后重试');
-            })
+            });
     }
     // /**
     //  * login
