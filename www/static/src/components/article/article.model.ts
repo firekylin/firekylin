@@ -11,14 +11,6 @@ export interface ArticleProps extends RouteComponentProps<ArticleMatchParams> {
     sharedStore?: SharedStore;
 }
 
-export interface ArticleState {
-    isPublic: number;
-    auth: {
-        comment: boolean;
-    };
-    user: string;
-}
-
 export interface PreviewData {
     title: string | 'Untitled';
     pathname: string | 'untitled';

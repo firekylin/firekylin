@@ -15,7 +15,7 @@ import ArticleControlUser from './control-user/control-user';
 
 import Checkbox from 'antd/lib/checkbox';
 import { RadioChangeEvent } from 'antd/lib/radio';
-import { ArticleProps, ArticleState, PreviewData } from './article.model';
+import { ArticleProps, PreviewData } from './article.model';
 
 import './article.less';
 import PostStore from '../../routes/post/post.store';
@@ -29,26 +29,17 @@ enum ArticleEnum {
 
 @inject('sharedStore', 'postStore', 'userStore')
 @observer
-class Article extends React.Component<ArticleProps, ArticleState> {
+class Article extends React.Component<ArticleProps, {}> {
 
     id: number = 0;
     type: number = 0;
 
     postInfo = (this.props.postStore as PostStore).postInfo;
-
-    state: ArticleState = {
-        isPublic: 1,
-        auth: {
-            comment: true,
-        },
-        user: ''
-    };
-
     constructor(props: any) {
         super(props);
         this.id = +this.props.match.params.id || 0;
     }
-    componentDidMount() {
+    init() {
         const sharedStore = (this.props.sharedStore as SharedStore);
         const postStore = (this.props.postStore as PostStore);
         const userStore = (this.props.userStore as UserStore);
@@ -71,32 +62,17 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                 postStore.setPostInfo({user_id: userStore.userList.length > 0 ? userStore.userList[0].id : ''});
             }
         );
+    }
+    componentDidMount() {
+        this.init();
         if (this.id) {
-            postStore.getPostsById(this.id)
-            .subscribe(
-                res => {
-                    if (res.errno === 0) {
-                        if (res.data.create_time === '0000-00-00 00:00:00') {
-                            res.data.create_time = '';
-                        }
-                        res.data.create_time = res.data.create_time 
-                            ? moment(new Date(res.data.create_time)).format('YYYY-MM-DD HH:mm:ss') 
-                            : res.data.create_time;
-                        res.data.tag = res.data.tag.map(tag => tag.name);
-                        res.data.cate.forEach(cat => cat.id);
-                        res.data.is_public = res.data.is_public.toString();
-                        if (!res.data.options) {
-                            res.data.options = { push_sites: [] };
-                        } else if (typeof (res.data.options) === 'string') {
-                            res.data.options = JSON.parse(res.data.options);
-                        } else {
-                            res.data.options.push_sites = res.data.options.push_sites || [];
-                        }
-                        console.log(res.data);
-                        postStore.setPostInfo({ ...res.data });
-                    }
-                }
-            );
+            (this.props.postStore as PostStore).getPostsById(this.id);
+        }
+    }
+    componentWillReceiveProps(nextProps: any) {
+        if (nextProps.match.params.id !== this.props.match.params.id) {
+            (this.props.postStore as PostStore).resetPostInfo();
+            this.init();
         }
     }
     // 发布日期
@@ -109,7 +85,6 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     }
     // 是否公开
     handlePublicChange(e: RadioChangeEvent) {
-        this.setState({isPublic: e.target.value});
         (this.props.postStore as PostStore).setPostInfo({is_public: e.target.value});
     }
     // 封面图片
@@ -120,7 +95,6 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     }
     // 选择作者
     handleUserChange(value: string) {
-        this.setState({user: value});
         (this.props.postStore as PostStore).setPostInfo({user_id: value});
     }
 

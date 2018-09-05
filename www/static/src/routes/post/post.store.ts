@@ -5,6 +5,7 @@ import { AppStore } from '../../app.store';
 import { PostListRequestParams, PostListResponseData, PostInfo } from './post.model';
 import { PaginationConfig } from 'antd/lib/table';
 import { map } from 'rxjs/operators';
+import moment from 'moment';
 
 const isFuture = time => time && (new Date(time)).getTime() > Date.now();
 function getStatusText(status: number, createTime: Date) {
@@ -38,7 +39,7 @@ class PostStore {
       featuredImage: '',
       push_sites: []
     },
-    status: 3,
+    status: 1,
     user_id: '',
   };
   @observable pagination: PaginationConfig = {
@@ -168,7 +169,30 @@ class PostStore {
     );
   }
   getPostsById(id: number) {
-    return http.get<any>(`/admin/api/post/${id}`);
+    http.get<any>(`/admin/api/post/${id}`)
+      .subscribe(
+        res => {
+            if (res.errno === 0) {
+                if (res.data.create_time === '0000-00-00 00:00:00') {
+                    res.data.create_time = '';
+                }
+                res.data.create_time = res.data.create_time 
+                    ? moment(new Date(res.data.create_time)).format('YYYY-MM-DD HH:mm:ss') 
+                    : res.data.create_time;
+                res.data.tag = res.data.tag.map(tag => tag.name);
+                res.data.cate.forEach(cat => cat.id);
+                res.data.is_public = res.data.is_public.toString();
+                if (!res.data.options) {
+                    res.data.options = { push_sites: [] };
+                } else if (typeof (res.data.options) === 'string') {
+                    res.data.options = JSON.parse(res.data.options);
+                } else {
+                    res.data.options.push_sites = res.data.options.push_sites || [];
+                }
+                this.setPostInfo({ ...res.data });
+            }
+        }
+    );
   }
  
   // 发布文章 / 草稿
@@ -178,6 +202,26 @@ class PostStore {
         url += '/' + params.id + '?method=put';
     }
     return http.post<any>(url, params);
+  }
+  // 重置
+  resetPostInfo() {
+    this.setPostInfo({
+      title: '',
+      pathname: '',
+      markdown_content: '',
+      tag: [],
+      cate: [],
+      is_public: '1',
+      create_time: new Date().toUTCString(),
+      allow_comment: true,
+      options: {
+        template: '',
+        featuredImage: '',
+        push_sites: []
+      },
+      status: 1,
+      user_id: '',
+    });
   }
 }
 
