@@ -17,6 +17,11 @@ import ArticleControlAuth from './control-auth/control-auth';
 import ArticleControlImage from './control-image/control-image';
 import ArticleControlUser from './control-user/control-user';
 
+enum ArticleEnum {
+    SAVE = 3,
+    UNSAVE = 1,
+}
+
 @inject('sharedStore', 'postStore', 'userStore')
 @observer
 class PostArticle extends React.Component<ArticleProps, ArticleState> {
@@ -102,8 +107,16 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
     }
 
     handleSave(): void {
+        this.props.postStore.setPostInfo({status: ArticleEnum.SAVE});
+        this.handleSubmit();
+    }
+    handleSaveDraft() {
+        this.props.postStore.setPostInfo({status: ArticleEnum.UNSAVE});
+        this.handleSubmit();
+    }
+
+    handleSubmit() {
         const { postInfo } = this.props.postStore;
-        this.props.postStore.setPostInfo({status: 3});
         const params: any = {};
         if (this.id) {
             params.id = this.id;
@@ -124,7 +137,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         params.cate = postInfo.cate.map(cate => cate.id);
         params.tag = postInfo.tag;
         params.user_id = postInfo.user_id;
-        params.options = JSON.stringify(postInfo.options);
+        params.options = postInfo.options;
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
         // 保存
@@ -133,23 +146,26 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
             res => {
                 console.log(postInfo.pathname);
                 if (res.errno === 0) {
-                    message.success(
-                        <>
-                            发布成功,
-                            <a href={`/post/${postInfo.pathname}.html`} target="_blank">
-                                点此查看文章
-                            </a>
-                        </>
-                    );
+                    if (!this.id && res.data.id) {
+                        this.id = res.data.id;
+                    }
+                    if (postInfo.status === ArticleEnum.SAVE && postInfo.is_public) {
+                        message.success(
+                            <>
+                                发布成功, &nbsp;&nbsp;
+                                <a href={`/post/${postInfo.pathname}.html`} target="_blank">
+                                    点此查看文章
+                                </a>
+                            </>
+                        );
+                    } else {
+                        message.success('保存成功');
+                    }
                 } else {
-                    this.props.postStore.setPostInfo({status: 0});
+                    this.props.postStore.setPostInfo({status: ArticleEnum.UNSAVE});
                 }
             }
         );
-    }
-    handleSaveDraft() {
-        this.props.postStore.setPostInfo({status: 0});
-        localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
     }
 
     handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
@@ -210,6 +226,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
                             title={postInfo.title}
                             pathname={postInfo.pathname}
                             status={postInfo.status}
+                            isPublic={postInfo.is_public}
                         />
                         <ArticleEditor type={this.type} id={this.id} />
                     </Col>

@@ -20,6 +20,7 @@ class ArticleHeader extends React.Component<any, {}> {
 
     render() {
         const baseUrl = `${location.origin}/${['post', 'page'][this.type]}/`;
+        let postUrl = `/${['post', 'page'][this.type]}/${this.props.pathname}.html`;
         return (
             <div className="article-header">
                 <div className="article-header-title">
@@ -30,6 +31,11 @@ class ArticleHeader extends React.Component<any, {}> {
                     <span>{baseUrl}</span>
                     <Input disabled={this.props.status === 3} value={this.props.pathname} onChange={e => this.props.handlePath(e)} className="pathname-input" />
                     <span>.html </span>
+                    {this.props.status === 3 && this.props.isPublic ?
+                        <a style={{marginLeft: 8}} href={postUrl} target="_blank">
+                            <span className="glyphicon glyphicon-link" />
+                        </a> : null
+                    }
                     <a title="预览" style={{marginLeft: 8}} onClick={() => this.props.preview()}>
                         <span className="glyphicon glyphicon-eye-open" />
                     </a>

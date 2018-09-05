@@ -139,7 +139,11 @@ class PostStore {
 
   // 发布文章 / 草稿
   postSubmit(params: any) {
-    return http.post<any>('/admin/api/post', params);
+    let url = '/admin/api/post';
+    if (params.id) {
+        url += '/' + params.id + '?method=put';
+    }
+    return http.post<any>(url, params);
   }
 }
 
