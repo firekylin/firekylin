@@ -67,10 +67,12 @@ class Article extends React.Component<ArticleProps, {}> {
         this.init();
         if (this.id) {
             (this.props.postStore as PostStore).getPostsById(this.id);
+        } else {
+            (this.props.postStore as PostStore).resetPostInfo();
         }
     }
     componentWillReceiveProps(nextProps: any) {
-        if (nextProps.match.params.id !== this.props.match.params.id) {
+        if (nextProps.match.params.id !== this.props.match.params.id || !this.props.match.params.id) {
             (this.props.postStore as PostStore).resetPostInfo();
             this.init();
         }
