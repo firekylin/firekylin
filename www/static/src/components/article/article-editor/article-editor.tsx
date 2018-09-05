@@ -8,8 +8,8 @@ import { PostInfo } from '../../../routes/post/post.model';
 @inject('postStore')
 @observer
 class ArticleEditor extends React.Component<any, ArticleEditorState> {
-    id;
-    type;
+    id: number;
+    type: number;
     state: ArticleEditorState = {
         postSubmitting: false,
         draftSubmitting: false,
@@ -20,13 +20,14 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
             tag: [],
             cate: [],
             is_public: '1',
-            create_time: '',
+            create_time: new Date().toUTCString(),
             allow_comment: true,
             options: {
                 template: '',
                 featuredImage: '',
-                push_sites: [],
+                push_sites: []
             },
+            status: 3,
             user_id: '',
         },
         status: 3,
@@ -40,6 +41,8 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
     };
     constructor(props: any) {
         super(props);
+        this.id = this.props.id;
+        this.type = this.props.type;
     }
 
     handleFetchData(keyword: string) {

@@ -141,6 +141,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       e.preventDefault();
 
       const start = e.pageY, oHeight = (panel as HTMLElement).clientHeight;
+      // tslint:disable-next-line:no-shadowed-variable
       const resize = e => {
         e.preventDefault();
         (panel as HTMLElement).style.height = oHeight + e.pageY - start + 'px';

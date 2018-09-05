@@ -3,9 +3,13 @@ import { RouteComponentProps } from 'react-router';
 import PostStore from '../../routes/post/post.store';
 import UserStore from '../../routes/user/user.store';
 
-export interface ArticleProps extends BaseProps, RouteComponentProps<any> {
+export interface ArticleProps extends BaseProps, RouteComponentProps<ArticleParams> {
     postStore: PostStore;
     userStore: UserStore;
+}
+
+interface ArticleParams {
+    id: number;
 }
 
 export interface ArticleState {

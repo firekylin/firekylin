@@ -38,6 +38,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
     constructor(props: any) {
         super(props);
         this.id = this.props.match.params.id || 0;
+        console.log(this.id);
     }
     componentDidMount() {
         const sharedStore = this.props.sharedStore;
@@ -59,9 +60,6 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         .subscribe(
             res => {
                 userStore.setUserList(res.data);
-                // this.setState({
-                //     user: this.props.userStore.userList.length > 0 ? this.props.userStore.userList[0].id : '',
-                // });
                 postStore.setPostInfo({user_id: this.props.userStore.userList.length > 0 ? this.props.userStore.userList[0].id : ''});
             }
         );
@@ -103,22 +101,23 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         this.props.postStore.setPostInfo({user_id: value});
     }
 
-    handleSubmit() {
+    handleSave(): void {
         const { postInfo } = this.props.postStore;
         this.props.postStore.setPostInfo({status: 3});
         const params: any = {};
         if (this.id) {
             params.id = this.id;
         }
-        params.status = postInfo.status;
+        params.status = 3;
         params.title = postInfo.title;
         params.pathname = postInfo.pathname;
+        params.markdown_content = postInfo.markdown_content;
         if (params.status === 3 && !params.markdown_content) {
             // this.setState({ draftSubmitting: false, postSubmitting: false });
-            return message.error('没有内容不能提交呢！');
+            message.error('没有内容不能提交呢！');
+            return;
         }
         params.create_time = postInfo.create_time;
-        params.markdown_content = postInfo.markdown_content;
         params.type = this.type; // type: 0为文章，1为页面
         params.allow_comment = Number(postInfo.allow_comment);
         params.push_sites = postInfo.options.push_sites;
@@ -132,8 +131,18 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         this.props.postStore.postSubmit(params)
         .subscribe(
             res => {
+                console.log(postInfo.pathname);
                 if (res.errno === 0) {
-                    message.success('发布成功');
+                    message.success(
+                        <>
+                            发布成功,
+                            <a href={`/post/${postInfo.pathname}.html`} target="_blank">
+                                点此查看文章
+                            </a>
+                        </>
+                    );
+                } else {
+                    this.props.postStore.setPostInfo({status: 0});
                 }
             }
         );
@@ -202,10 +211,10 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
                             pathname={postInfo.pathname}
                             status={postInfo.status}
                         />
-                        <ArticleEditor />
+                        <ArticleEditor type={this.type} id={this.id} />
                     </Col>
                     <Col span={6}>
-                        <ArticleControlHeader save={() => this.handleSubmit()} saveDraft={() => this.handleSaveDraft()} />
+                        <ArticleControlHeader save={() => this.handleSave()} saveDraft={() => this.handleSaveDraft()} />
                         <section className="release-date">
                             <h5>发布日期</h5>
                             <DatePicker placeholder="请选择日期" onChange={(date: moment.Moment, dateString: string) => this.onDateChange(date, dateString)} />
