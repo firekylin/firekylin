@@ -4,7 +4,7 @@ import RadioGroup from 'antd/lib/radio/group';
 import { RadioChangeEvent } from 'antd/lib/radio';
 
 interface ACPublicProps {
-    public: number;
+    isPublic: string;
     handlePublicChange: (e: RadioChangeEvent) => void;
 }
 
@@ -20,9 +20,9 @@ class ArticleControlPublic extends React.Component<ACPublicProps, any> {
           lineHeight: '30px',
         };
         return (
-          <RadioGroup onChange={this.props.handlePublicChange} value={this.props.public}>
-            <Radio style={radioStyle} value={1}>公开</Radio>
-            <Radio style={radioStyle} value={2}>不公开</Radio>
+          <RadioGroup onChange={this.props.handlePublicChange} value={this.props.isPublic}>
+            <Radio style={radioStyle} value={'1'}>公开</Radio>
+            <Radio style={radioStyle} value={'2'}>不公开</Radio>
           </RadioGroup>
         );
     }

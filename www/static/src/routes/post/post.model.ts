@@ -30,7 +30,7 @@ export interface PostInfo {
     cate: any[];
     is_public: string;
     create_time: string;
-    allow_comment: true;
+    allow_comment: boolean;
     options: {
         template: string;
         featuredImage: string;

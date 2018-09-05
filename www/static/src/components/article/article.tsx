@@ -10,11 +10,10 @@ import ArticleControlHeader from './control-header/control-header';
 import ArticleControlCategory from './control-category/control-category';
 import ArticleControlTag from './control-tag/control-tag';
 import ArticleControlPublic from './control-public/control-public';
-import ArticleControlAuth from './control-auth/control-auth';
 import ArticleControlImage from './control-image/control-image';
 import ArticleControlUser from './control-user/control-user';
 
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import Checkbox from 'antd/lib/checkbox';
 import { RadioChangeEvent } from 'antd/lib/radio';
 import { ArticleProps, ArticleState, PreviewData } from './article.model';
 
@@ -38,17 +37,16 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     postInfo = (this.props.postStore as PostStore).postInfo;
 
     state: ArticleState = {
-        public: 1,
+        isPublic: 1,
         auth: {
             comment: true,
         },
-        imageUrl: '',
         user: ''
     };
 
     constructor(props: any) {
         super(props);
-        this.id = this.props.match.params.id || 0;
+        this.id = +this.props.match.params.id || 0;
     }
     componentDidMount() {
         const sharedStore = (this.props.sharedStore as SharedStore);
@@ -73,6 +71,33 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                 postStore.setPostInfo({user_id: userStore.userList.length > 0 ? userStore.userList[0].id : ''});
             }
         );
+        if (this.id) {
+            postStore.getPostsById(this.id)
+            .subscribe(
+                res => {
+                    if (res.errno === 0) {
+                        if (res.data.create_time === '0000-00-00 00:00:00') {
+                            res.data.create_time = '';
+                        }
+                        res.data.create_time = res.data.create_time 
+                            ? moment(new Date(res.data.create_time)).format('YYYY-MM-DD HH:mm:ss') 
+                            : res.data.create_time;
+                        res.data.tag = res.data.tag.map(tag => tag.name);
+                        res.data.cate.forEach(cat => cat.id);
+                        res.data.is_public = res.data.is_public.toString();
+                        if (!res.data.options) {
+                            res.data.options = { push_sites: [] };
+                        } else if (typeof (res.data.options) === 'string') {
+                            res.data.options = JSON.parse(res.data.options);
+                        } else {
+                            res.data.options.push_sites = res.data.options.push_sites || [];
+                        }
+                        console.log(res.data);
+                        postStore.setPostInfo({ ...res.data });
+                    }
+                }
+            );
+        }
     }
     // 发布日期
     onDateChange(date: moment.Moment, dateString: string) {
@@ -84,17 +109,11 @@ class Article extends React.Component<ArticleProps, ArticleState> {
     }
     // 是否公开
     handlePublicChange(e: RadioChangeEvent) {
-        this.setState({public: e.target.value});
+        this.setState({isPublic: e.target.value});
         (this.props.postStore as PostStore).setPostInfo({is_public: e.target.value});
-    }
-    // 权限控制
-    handleAuthChange(e: CheckboxChangeEvent) {
-        this.setState({auth: {comment: e.target.checked}});
-        (this.props.postStore as PostStore).setPostInfo({allow_comment: e.target.value});
     }
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({imageUrl: e.target.value});
         (this.props.postStore as PostStore).setPostInfo({options: {
             featuredImage: e.target.value
         }});
@@ -135,6 +154,7 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         params.cate = postInfo.cate.map(cate => cate.id);
         params.tag = postInfo.tag;
         params.user_id = postInfo.user_id;
+        params.is_public = postInfo.is_public;
         params.options = postInfo.options;
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
@@ -209,7 +229,8 @@ class Article extends React.Component<ArticleProps, ArticleState> {
         document.body.removeChild(form);
     }
     render() {
-        const { postInfo } = (this.props.postStore as PostStore);
+        const postStore = (this.props.postStore as PostStore);
+        const { postInfo } = postStore;
         const tagList = (this.props.sharedStore as SharedStore).tagList;
         return (
             <div className="post-article">
@@ -231,7 +252,11 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                         <ArticleControlHeader save={() => this.handleSave()} saveDraft={() => this.handleSaveDraft()} />
                         <section className="release-date">
                             <h5>发布日期</h5>
-                            <DatePicker placeholder="请选择日期" onChange={(date: moment.Moment, dateString: string) => this.onDateChange(date, dateString)} />
+                            <DatePicker 
+                                value={moment(postInfo.create_time)} 
+                                placeholder="请选择日期" 
+                                onChange={(date: moment.Moment, dateString: string) => this.onDateChange(date, dateString)} 
+                            />
                         </section>
                         <section className="category">
                             <h5>分类</h5>
@@ -239,19 +264,19 @@ class Article extends React.Component<ArticleProps, ArticleState> {
                         </section>
                         <section className="category">
                             <h5>标签</h5>
-                            <ArticleControlTag tagList={tagList} handleTagChange={(values) => this.handleTagChange(values)} />
+                            <ArticleControlTag tag={postInfo.tag} tagList={tagList} handleTagChange={(values) => this.handleTagChange(values)} />
                         </section>
                         <section className="category">
                             <h5>公开度</h5>
-                            <ArticleControlPublic public={this.state.public} handlePublicChange={e => this.handlePublicChange(e)} />
+                            <ArticleControlPublic isPublic={postInfo.is_public} handlePublicChange={e => this.handlePublicChange(e)} />
                         </section>
                         <section className="category">
                             <h5>权限控制</h5>
-                            <ArticleControlAuth comment={this.state.auth.comment} handleAuthChange={e => this.handleAuthChange(e)} />
+                            <Checkbox onChange={e => postStore.setPostInfo({allow_comment: e.target.checked})} checked={postInfo.allow_comment}>允许评论</Checkbox>
                         </section>
                         <section className="category">
                             <h5>封面图片</h5>
-                            <ArticleControlImage imageUrl={this.state.imageUrl} handleImageChange={e => this.handleImageChange(e)} />
+                            <ArticleControlImage imageUrl={postInfo.options.featuredImage} handleImageChange={e => this.handleImageChange(e)} />
                         </section>
                         <section className="category">
                             <h5>选择作者</h5>

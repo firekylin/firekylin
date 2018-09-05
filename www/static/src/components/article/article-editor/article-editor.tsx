@@ -52,11 +52,10 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
         });
     }
     render(postInfo: PostInfo = this.state.postInfo) {
-
         return (
             <div className="article-editor">
                 <MarkDownEditor
-                    content={postInfo.markdown_content}
+                    content={this.props.postStore.postInfo.markdown_content}
                     onChange={content => {
                         postInfo.markdown_content = content;
                         this.props.postStore.setPostInfo({markdown_content: content});

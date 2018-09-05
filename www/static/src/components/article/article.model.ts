@@ -12,11 +12,10 @@ export interface ArticleProps extends RouteComponentProps<ArticleMatchParams> {
 }
 
 export interface ArticleState {
-    public: number;
+    isPublic: number;
     auth: {
         comment: boolean;
     };
-    imageUrl: string;
     user: string;
 }
 

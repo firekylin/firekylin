@@ -167,6 +167,9 @@ class PostStore {
         }
     );
   }
+  getPostsById(id: number) {
+    return http.get<any>(`/admin/api/post/${id}`);
+  }
  
   // 发布文章 / 草稿
   postSubmit(params: any) {

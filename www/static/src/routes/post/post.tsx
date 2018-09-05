@@ -12,7 +12,7 @@ export default class Post extends React.Component<PostProps, any> {
                 <Switch>
                     <Route path={`${match.path}/list`} component={PostList}/>
                     <Route path={`${match.path}/create`} component={PostCreate}/>
-                    <Route path={`${match.path}/edit/:${match.params.id}`} component={PostCreate}/>
+                    <Route path={`${match.path}/edit/:id`} component={PostCreate}/>
                     <Redirect to={`${match.path}/list`}/>
                 </Switch>
             </>
