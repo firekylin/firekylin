@@ -136,7 +136,38 @@ class PostStore {
         }
       );
   }
+  // 通过
+  passPostById(id: number) {
+    http.post<any>(`/admin/api/post/${id}?method=put`, {status: 3})
+      .subscribe(
+        res => {
+          if (res.errno === 0) {
+              message.success('通过成功');
+              this.getPostList();
+          }
+        },
+        err => {
+          message.error(err);
+        }
+    );
+  }
 
+  // 拒绝
+  refusePostById(id: number) {
+    http.post<any>(`/admin/api/post/${id}?method=put`, {status: 2})
+      .subscribe(
+        res => {
+          if (res.errno === 0) {
+              message.success('拒绝成功');
+              this.getPostList();
+          }
+        },
+        err => {
+          message.error(err);
+        }
+    );
+  }
+ 
   // 发布文章 / 草稿
   postSubmit(params: any) {
     let url = '/admin/api/post';

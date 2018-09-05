@@ -3,8 +3,7 @@ import { Table, Button } from 'antd';
 import './list-table.less';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
-// import { modal } from '../../../../components/modal';
-import { Modal, message } from 'antd';
+import { Modal } from 'antd';
 
 const confirm = Modal.confirm;
 
@@ -19,7 +18,34 @@ class PostListTable extends React.Component<any, {}> {
             this.props.postStore.deletePostById(id);
           }
         });
-      }
+    }
+
+    pass(id: number) {
+        this.props.postStore.passPostById(id);
+    }
+
+    refuse(id: number) {
+        this.props.postStore.refusePostById(id);
+    }
+
+    renderActions(post: any) {
+        const status = (this.props.postStore.plReqParams.status as string);
+        if (status === '') {
+            return (
+                <>
+                    <Button type="primary" icon="edit" size="small">编辑</Button>
+                    <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                </>
+            );
+        } else {
+            return (
+                <>
+                    <Button disabled={status === '3'} type="primary"  onClick={() => this.pass(post.id)} className="success-button" icon="check" size="small">通过</Button>
+                    <Button disabled={status === '2'} onClick={() => this.refuse(post.id)} style={{marginLeft: 8}} type="danger" icon="close" size="small">拒绝</Button>
+                </>
+            );
+        }
+    }
 
     render() {
         const Column = Table.Column;
@@ -37,7 +63,23 @@ class PostListTable extends React.Component<any, {}> {
                     title="标题"
                     key="title"
                     render={(post) => (
-                        <Link to={`/post/edit/${post.id}`}>{post.title}</Link>
+                        <>
+                            <Link to={`/post/edit/${post.id}`}>{post.title}</Link>
+                            {/* 当文章为公开且发布状态时渲染文章链接 */}
+                            {
+                                post.status === 3 && post.is_public 
+                                ?
+                                    <a
+                                        href={`/post/${post.pathname}.html`}
+                                        target="_blank"
+                                        className="admin-post-link"
+                                    >
+                                        <span className="glyphicon glyphicon-link" />
+                                    </a>
+                                :
+                                    null
+                            }
+                        </>
                     )}
                 />
                 <Column
@@ -58,12 +100,7 @@ class PostListTable extends React.Component<any, {}> {
                 <Column
                     title="操作"
                     key="action"
-                    render={post => (
-                        <>
-                            <Button type="primary" icon="edit" size="small">编辑</Button>
-                            <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
-                        </>
-                    )}
+                    render={post => this.renderActions(post)}
                 />
             </Table>
         );
