@@ -1,8 +1,11 @@
 import PostStore from './post.store';
+import { RouteComponentProps } from 'react-router';
+import { ArticleMatchParams } from '../../models/article.model';
 
-export interface PostProps {
-    postStore: PostStore;
+export interface PostProps extends RouteComponentProps<ArticleMatchParams> {
+    postStore?: PostStore;
 }
+
 // Post列表
 export interface PostListRequestParams {
     page?: number;

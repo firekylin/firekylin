@@ -4,12 +4,13 @@ import './list-table.less';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
+import { PostListProps } from '../list.model';
 
 const confirm = Modal.confirm;
 
 @inject('postStore')
 @observer 
-class PostListTable extends React.Component<any, {}> {
+class PostListTable extends React.Component<PostListProps, {}> {
     delete(id: number) {
         confirm({
           title: '提示',
@@ -33,7 +34,7 @@ class PostListTable extends React.Component<any, {}> {
         if (status === '') {
             return (
                 <>
-                    <Button type="primary" icon="edit" size="small">编辑</Button>
+                    <Button onClick={() => this.props.history.push(`/post/edit/${post.id}`)} type="primary" icon="edit" size="small">编辑</Button>
                     <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
                 </>
             );

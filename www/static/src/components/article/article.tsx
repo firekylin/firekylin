@@ -19,6 +19,9 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 import { ArticleProps, ArticleState, PreviewData } from './article.model';
 
 import './article.less';
+import PostStore from '../../routes/post/post.store';
+import SharedStore from '../../shared.store';
+import UserStore from '../../routes/user/user.store';
 
 enum ArticleEnum {
     SAVE = 3,
@@ -27,12 +30,12 @@ enum ArticleEnum {
 
 @inject('sharedStore', 'postStore', 'userStore')
 @observer
-class PostArticle extends React.Component<ArticleProps, ArticleState> {
+class Article extends React.Component<ArticleProps, ArticleState> {
 
     id: number = 0;
     type: number = 0;
 
-    postInfo = this.props.postStore.postInfo;
+    postInfo = (this.props.postStore as PostStore).postInfo;
 
     state: ArticleState = {
         public: 1,
@@ -48,9 +51,9 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         this.id = this.props.match.params.id || 0;
     }
     componentDidMount() {
-        const sharedStore = this.props.sharedStore;
-        const postStore = this.props.postStore;
-        const userStore = this.props.userStore;
+        const sharedStore = (this.props.sharedStore as SharedStore);
+        const postStore = (this.props.postStore as PostStore);
+        const userStore = (this.props.userStore as UserStore);
         postStore.setPostInfo({status: 0});
 
         // Get Cats
@@ -67,52 +70,52 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         .subscribe(
             res => {
                 userStore.setUserList(res.data);
-                postStore.setPostInfo({user_id: this.props.userStore.userList.length > 0 ? this.props.userStore.userList[0].id : ''});
+                postStore.setPostInfo({user_id: userStore.userList.length > 0 ? userStore.userList[0].id : ''});
             }
         );
     }
     // 发布日期
     onDateChange(date: moment.Moment, dateString: string) {
-        this.props.postStore.setPostInfo({create_time: date});
+        (this.props.postStore as PostStore).setPostInfo({create_time: date});
     }
     // Tag
     handleTagChange(tags: string[]) {
-        this.props.postStore.setPostInfo({tag: tags});
+        (this.props.postStore as PostStore).setPostInfo({tag: tags});
     }
     // 是否公开
     handlePublicChange(e: RadioChangeEvent) {
         this.setState({public: e.target.value});
-        this.props.postStore.setPostInfo({is_public: e.target.value});
+        (this.props.postStore as PostStore).setPostInfo({is_public: e.target.value});
     }
     // 权限控制
     handleAuthChange(e: CheckboxChangeEvent) {
         this.setState({auth: {comment: e.target.checked}});
-        this.props.postStore.setPostInfo({allow_comment: e.target.value});
+        (this.props.postStore as PostStore).setPostInfo({allow_comment: e.target.value});
     }
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         this.setState({imageUrl: e.target.value});
-        this.props.postStore.setPostInfo({options: {
+        (this.props.postStore as PostStore).setPostInfo({options: {
             featuredImage: e.target.value
         }});
     }
     // 选择作者
     handleUserChange(value: string) {
         this.setState({user: value});
-        this.props.postStore.setPostInfo({user_id: value});
+        (this.props.postStore as PostStore).setPostInfo({user_id: value});
     }
 
     handleSave(): void {
-        this.props.postStore.setPostInfo({status: ArticleEnum.SAVE});
+        (this.props.postStore as PostStore).setPostInfo({status: ArticleEnum.SAVE});
         this.handleSubmit();
     }
     handleSaveDraft() {
-        this.props.postStore.setPostInfo({status: ArticleEnum.UNSAVE});
+        (this.props.postStore as PostStore).setPostInfo({status: ArticleEnum.UNSAVE});
         this.handleSubmit();
     }
 
     handleSubmit() {
-        const { postInfo } = this.props.postStore;
+        const { postInfo } = (this.props.postStore as PostStore);
         const params: any = {};
         if (this.id) {
             params.id = this.id;
@@ -136,7 +139,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
         // 保存
-        this.props.postStore.postSubmit(params)
+        (this.props.postStore as PostStore).postSubmit(params)
         .subscribe(
             res => {
                 if (res.errno === 0) {
@@ -156,27 +159,27 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
                         message.success('保存成功');
                     }
                 } else {
-                    this.props.postStore.setPostInfo({status: ArticleEnum.UNSAVE});
+                    (this.props.postStore as PostStore).setPostInfo({status: ArticleEnum.UNSAVE});
                 }
             }
         );
     }
 
     handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
-        this.props.postStore.setPostInfo({title: e.target.value});
+        (this.props.postStore as PostStore).setPostInfo({title: e.target.value});
     }
     handlePath(e: React.ChangeEvent<HTMLInputElement>) {
-        this.props.postStore.setPostInfo({pathname: e.target.value});
+        (this.props.postStore as PostStore).setPostInfo({pathname: e.target.value});
     }
     preview() {
-        const { postInfo } = this.props.postStore;
+        const { postInfo } = (this.props.postStore as PostStore);
         const previewData: PreviewData = {
             title: postInfo.title || 'Untitled',
             pathname: postInfo.pathname || 'untitled',
             markdown_content: postInfo.markdown_content,
             create_time: postInfo.create_time,
             update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-            user: this.props.userStore.userList.filter(user => +user.id === +postInfo.user_id)[0],
+            user: (this.props.userStore as UserStore).userList.filter(user => +user.id === +postInfo.user_id)[0],
             comment_num: 0,
             allow_comment: 0,
             options: JSON.stringify(postInfo.options),
@@ -184,7 +187,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
 
         if (this.type === 0) {
             previewData.tag = postInfo.tag
-            .map(tagName => { return this.props.sharedStore.tagList.filter(tag => tag.name === tagName)[0] || { name: tagName }; });
+            .map(tagName => { return (this.props.sharedStore as SharedStore).tagList.filter(tag => tag.name === tagName)[0] || { name: tagName }; });
             previewData.cate = postInfo.cate;
         }
     
@@ -206,8 +209,8 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         document.body.removeChild(form);
     }
     render() {
-        const { postInfo } = this.props.postStore;
-        const tagList = this.props.sharedStore.tagList;
+        const { postInfo } = (this.props.postStore as PostStore);
+        const tagList = (this.props.sharedStore as SharedStore).tagList;
         return (
             <div className="post-article">
                 <Row type="flex">
@@ -252,7 +255,11 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
                         </section>
                         <section className="category">
                             <h5>选择作者</h5>
-                            <ArticleControlUser user={postInfo.user_id} users={this.props.userStore.userList} handleUserChange={value => this.handleUserChange(value)} />
+                            <ArticleControlUser 
+                                user={postInfo.user_id} 
+                                users={(this.props.userStore as UserStore).userList} 
+                                handleUserChange={value => this.handleUserChange(value)} 
+                            />
                         </section>
                     </Col>
                 </Row>
@@ -261,4 +268,4 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
     }
 }
 
-export default PostArticle;
+export default Article;

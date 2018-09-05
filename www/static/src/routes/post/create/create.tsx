@@ -1,11 +1,15 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import PostArticle from '../../../components/article/article';
 import './create.less';
+import Article from '../../../components/article/article';
+import { PostProps } from '../post.model';
 
-class PostCreate extends React.Component<any, {}> {
+interface PostCreateProps extends PostProps {
+}
 
-    constructor(props: any) {
+class PostCreate extends React.Component<PostCreateProps, {}> {
+
+    constructor(props: PostCreateProps) {
         super(props);
     }
     render() {
@@ -13,7 +17,7 @@ class PostCreate extends React.Component<any, {}> {
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <div className="post-create">
-                    <PostArticle {...this.props} />
+                    <Article {...this.props} />
                 </div>
             </>
         );

@@ -69,16 +69,16 @@ class PostListForm extends React.Component<PostListProps, {}> {
                         tabBarExtraContent={this.getOperations()}
                     >
                         <TabPane tab="全部" key="">
-                            <PostListTable />
+                            <PostListTable {...this.props} />
                         </TabPane>
                         <TabPane tab="已发布" key="3">
-                            <PostListTable />
+                            <PostListTable {...this.props} />
                         </TabPane>
                         <TabPane tab="审核中" key="1">
-                            <PostListTable />
+                            <PostListTable {...this.props} />
                         </TabPane>
                         <TabPane tab="已拒绝" key="2">
-                            <PostListTable />
+                            <PostListTable {...this.props} />
                         </TabPane>
                     </Tabs>
                 </div>
