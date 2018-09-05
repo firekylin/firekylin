@@ -3,19 +3,22 @@ import { Row, Col, DatePicker, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import moment from 'moment';
 import { zip } from 'rxjs';
+
 import ArticleHeader from './article-header/article-header';
 import ArticleEditor from './article-editor/article-editor';
 import ArticleControlHeader from './control-header/control-header';
 import ArticleControlCategory from './control-category/control-category';
 import ArticleControlTag from './control-tag/control-tag';
-import { ArticleProps, ArticleState, PreviewData } from './article.model';
-import './article.less';
-import { RadioChangeEvent } from 'antd/lib/radio';
 import ArticleControlPublic from './control-public/control-public';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import ArticleControlAuth from './control-auth/control-auth';
 import ArticleControlImage from './control-image/control-image';
 import ArticleControlUser from './control-user/control-user';
+
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { RadioChangeEvent } from 'antd/lib/radio';
+import { ArticleProps, ArticleState, PreviewData } from './article.model';
+
+import './article.less';
 
 enum ArticleEnum {
     SAVE = 3,
@@ -43,7 +46,6 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
     constructor(props: any) {
         super(props);
         this.id = this.props.match.params.id || 0;
-        console.log(this.id);
     }
     componentDidMount() {
         const sharedStore = this.props.sharedStore;
@@ -71,30 +73,24 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
     }
     // 发布日期
     onDateChange(date: moment.Moment, dateString: string) {
-        console.log(date, dateString);
         this.props.postStore.setPostInfo({create_time: date});
     }
     // Tag
     handleTagChange(tags: string[]) {
-        console.log(tags);
-        console.log(this.props);
         this.props.postStore.setPostInfo({tag: tags});
     }
     // 是否公开
     handlePublicChange(e: RadioChangeEvent) {
-        console.log(e.target.value);
         this.setState({public: e.target.value});
         this.props.postStore.setPostInfo({is_public: e.target.value});
     }
     // 权限控制
     handleAuthChange(e: CheckboxChangeEvent) {
-        console.log(e.target.checked);
         this.setState({auth: {comment: e.target.checked}});
         this.props.postStore.setPostInfo({allow_comment: e.target.value});
     }
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        console.log(e.target.value);
         this.setState({imageUrl: e.target.value});
         this.props.postStore.setPostInfo({options: {
             featuredImage: e.target.value
@@ -121,12 +117,11 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         if (this.id) {
             params.id = this.id;
         }
-        params.status = 3;
+        params.status = ArticleEnum.SAVE;
         params.title = postInfo.title;
         params.pathname = postInfo.pathname;
         params.markdown_content = postInfo.markdown_content;
-        if (params.status === 3 && !params.markdown_content) {
-            // this.setState({ draftSubmitting: false, postSubmitting: false });
+        if (params.status === ArticleEnum.SAVE && !params.markdown_content) {
             message.error('没有内容不能提交呢！');
             return;
         }
@@ -144,7 +139,6 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         this.props.postStore.postSubmit(params)
         .subscribe(
             res => {
-                console.log(postInfo.pathname);
                 if (res.errno === 0) {
                     if (!this.id && res.data.id) {
                         this.id = res.data.id;
