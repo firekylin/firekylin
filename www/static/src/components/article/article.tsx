@@ -127,7 +127,7 @@ class PostArticle extends React.Component<ArticleProps, ArticleState> {
         }
         params.create_time = postInfo.create_time;
         params.type = this.type; // type: 0为文章，1为页面
-        params.allow_comment = Number(postInfo.allow_comment);
+        params.allow_comment = postInfo.allow_comment ? 1 : 0;
         params.push_sites = postInfo.options.push_sites;
         params.cate = postInfo.cate.map(cate => cate.id);
         params.tag = postInfo.tag;
