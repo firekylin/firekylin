@@ -46,6 +46,7 @@ class Article extends React.Component<ArticleProps, {}> {
         postStore.setPostInfo({status: 0});
 
         // Get Cats
+        sharedStore.set$();
         const merged$ = zip(sharedStore.getCategoryList$, sharedStore.getDefaultCategory$);
         merged$.subscribe(res => {
             sharedStore.setCategoryList(res[0].data);

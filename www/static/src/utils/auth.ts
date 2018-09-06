@@ -8,12 +8,10 @@ class Auth {
 
     checkLogin(): boolean {
         const user = window.SysConfig.userInfo;
-        if (user.type !== 1) {
-            // firekylinHistory.replace('/login');
-            return false;
-        } else {
+        if (user && user.name) {
             return true;
         }
+        return false;
     }
 }
 

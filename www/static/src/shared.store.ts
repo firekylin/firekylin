@@ -12,8 +12,8 @@ interface SharedLoading {
 }
 
 class SharedStore {
-  getCategoryList$: Observable<IResult<Category[]>> = http.get<Category[]>('/admin/api/cate');
-  getDefaultCategory$: Observable<IResult<string>> = this.getDefaultCategory$ = http.get('/admin/api/options?type=defaultCategory');
+  getCategoryList$: Observable<IResult<Category[]>>;
+  getDefaultCategory$: Observable<IResult<string>>;
   @observable defaultCategory = '';
   @observable categoryList: Category[] = [];
   @observable tagList: Tag[] = [];
@@ -48,9 +48,15 @@ class SharedStore {
     this.loading = Object.assign({}, this.loading, loading);
   }
 
+  set$() {
+    this.getCategoryList$ = http.get<Category[]>('/admin/api/cate');    
+    this.getDefaultCategory$ = http.get('/admin/api/options?type=defaultCategory');
+  }
+
   // 获取分类列表
   getCategoryList() {
     this.setLoading({category: true});
+    this.getCategoryList$ = http.get<Category[]>('/admin/api/cate');    
     this.getCategoryList$.subscribe(
         res => {
           if (res.errno === 0) {
@@ -67,6 +73,7 @@ class SharedStore {
 
   // 获取默认分类
   getDefaultCategory() {
+    this.getDefaultCategory$ = http.get('/admin/api/options?type=defaultCategory');
     this.getDefaultCategory$.subscribe(
       res => {
         if (res.errno === 0) {
