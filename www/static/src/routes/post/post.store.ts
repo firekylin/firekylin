@@ -6,21 +6,8 @@ import { PostListRequestParams, PostListResponseData, PostInfo } from './post.mo
 import { PaginationConfig } from 'antd/lib/table';
 import { map } from 'rxjs/operators';
 import moment from 'moment';
+import { tools } from '../../utils/tools';
 
-const isFuture = time => time && (new Date(time)).getTime() > Date.now();
-function getStatusText(status: number, createTime: Date) {
-    let statusText = '未知';
-    switch (status) {
-      case 0: statusText = '草稿'; break;
-      case 1: statusText = '待审核'; break;
-      case 2: statusText = '已拒绝'; break;
-      case 3:
-        statusText = isFuture(createTime) ? '即将发布' : '已发布';
-        break;
-      default:
-    }
-    return statusText;
-}
 class PostStore {
   appStore;
   @observable loading = false;
@@ -66,7 +53,7 @@ class PostStore {
     data.map((post, i) => {
       post.key = post.id;
       post.author = post.user.name;
-      post.statusText = getStatusText(post.status, post.create_time);
+      post.statusText = tools.getStatusText(post.status, post.create_time);
     });
     this.postList = data; 
   }
@@ -97,7 +84,7 @@ class PostStore {
             res.data.data.map((post, i) => {
               post.key = post.id;
               post.author = post.user.name;
-              post.statusText = getStatusText(post.status, post.create_time);
+              post.statusText = tools.getStatusText(post.status, post.create_time);
             });
             return res;
           }

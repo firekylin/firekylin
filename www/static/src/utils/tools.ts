@@ -19,10 +19,31 @@ function wordCount(data: string): number {
     return count;
 }
 
+const isFuture = time => time && (new Date(time)).getTime() > Date.now();
+function getStatusText(status: number, createTime?: Date) {
+    let statusText = '未知';
+    switch (status) {
+      case 0: statusText = '草稿'; break;
+      case 1: statusText = '待审核'; break;
+      case 2: statusText = '已拒绝'; break;
+      case 3:
+        if (createTime) {
+            statusText = isFuture(createTime) ? '即将发布' : '已发布';
+        } else {
+            statusText = '已发布';
+        }
+        break;
+      default:
+    }
+    return statusText;
+}
+
 interface Tools {
     wordCount: (data: string) => number;
+    getStatusText: (status: number, createTime?: Date) => string;
 }
 
 export const tools: Tools = {
     wordCount,
+    getStatusText,
 };

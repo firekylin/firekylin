@@ -5,6 +5,7 @@ import DashBoard from './dashboard/dashboard';
 import User from './user/user';
 import Sidebar from '../components/sidebar';
 import Post from './post/post';
+import Page from './page/page';
 import Category from './category/category';
 import Tag from './tag/tag';
 import Push from './push/push';
@@ -24,6 +25,7 @@ class Container extends React.Component<any, {}> {
                         <Switch>
                             <Route exact={true} path="/dashboard" component={DashBoard}/>
                             <Route path="/post" component={Post}/>
+                            <Route path="/page" component={Page}/>
                             <Route path="/cate" component={Category}/>
                             <Route path="/tag" component={Tag}/>
                             <Route path={`/user`} component={User}/>

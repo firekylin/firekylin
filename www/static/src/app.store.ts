@@ -7,6 +7,7 @@ import SharedStore from './shared.store';
 import CategoryStore from './routes/category/category.store';
 import TagStore from './routes/tag/tag.store';
 import PushStore from './routes/push/push.store';
+import PageStore from './routes/page/page.store';
 
 configure({
     enforceActions: true
@@ -22,16 +23,18 @@ export class AppStore {
     tagStore: TagStore;
     sharedStore: SharedStore;
     pushStore: PushStore;
+    pageStore: PageStore;
 
     constructor() {
+        this.sharedStore = new SharedStore();
         this.dashBoardStore = new DashBoardStore(this);
         this.loginStore = new LoginStore(this);
         this.userStore = new UserStore(this);
         this.postStore = new PostStore(this);
         this.categoryStore = new CategoryStore(this);
         this.tagStore = new TagStore(this);
-        this.sharedStore = new SharedStore();
         this.pushStore = new PushStore(this);
+        this.pageStore = new PageStore();
     }
 
 }
