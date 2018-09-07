@@ -300,7 +300,7 @@ class Article extends React.Component<ArticleProps, {}> {
                             <ArticleControlImage imageUrl={articleInfo.options.featuredImage} handleImageChange={e => this.handleImageChange(e)} />
                         </section>
                         {
-                            this.isPage() ? 
+                            this.isPage() || window.SysConfig.userInfo.type !== 1 ? 
                                 null
                             :
                                 <section className="category">
