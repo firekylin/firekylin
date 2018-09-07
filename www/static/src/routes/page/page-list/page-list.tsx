@@ -31,25 +31,6 @@ class PageList extends React.Component<PageListProps, {}> {
         });
     }
 
-    renderActions(post: any) {
-        const status = post.status;
-        if (status === '' || status === 3) {
-            return (
-                <>
-                    <Button onClick={() => this.props.history.push(`/page/edit/${post.id}`)} type="primary" icon="edit" size="small">编辑</Button>
-                    <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
-                </>
-            );
-        } else {
-            return (
-                <>
-                    {/* <Button disabled={status === '3'} type="primary"  onClick={() => this.pass(post.id)} className="success-button" icon="check" size="small">通过</Button>
-                    <Button disabled={status === '2'} onClick={() => this.refuse(post.id)} style={{marginLeft: 8}} type="danger" icon="close" size="small">拒绝</Button> */}
-                </>
-            );
-        }
-    }
-
     render() {
         const Column = Table.Column;
         const pageStore = this.props.pageStore;
@@ -71,15 +52,15 @@ class PageList extends React.Component<PageListProps, {}> {
                     <Column
                         title="标题"
                         key="title"
-                        render={(post) => (
+                        render={(page) => (
                             <>
-                                <Link to={`/post/edit/${post.id}`}>{post.title}</Link>
+                                <Link to={`/page/edit/${page.id}`}>{page.title}</Link>
                                 {/* 当文章为公开且发布状态时渲染文章链接 */}
                                 {
-                                    post.status === 3 && post.is_public 
+                                    page.status === 3 && page.is_public 
                                     ?
                                         <a
-                                            href={`/page/${post.pathname}.html`}
+                                            href={`/page/${page.pathname}.html`}
                                             target="_blank"
                                             className="admin-post-link"
                                         >
@@ -114,7 +95,12 @@ class PageList extends React.Component<PageListProps, {}> {
                     <Column
                         title="操作"
                         key="action"
-                        render={post => this.renderActions(post)}
+                        render={page => (
+                            <>
+                                <Button onClick={() => this.props.history.push(`/page/edit/${page.id}`)} type="primary" icon="edit" size="small">编辑</Button>
+                                <Button onClick={() => this.delete(page.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                            </>
+                        )}
                     />
                 </Table>
             </>

@@ -26,7 +26,7 @@ export interface PostInfo {
     title: string;
     pathname: string;
     markdown_content: string;
-    tag: any[];
+    tag: string[];
     cate: any[];
     is_public: string;
     create_time: string;

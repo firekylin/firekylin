@@ -4,12 +4,30 @@ import { message } from 'antd';
 import { map, tap } from 'rxjs/operators';
 import { tools } from '../../utils/tools';
 import { String } from 'aws-sdk/clients/sns';
+import { PageInfo } from './page.model';
 
 class PageStore {
   @observable loading = false;
   @observable page = '1';
   @observable pageList = [];
   @observable pagination = {};
+  @observable pageInfo: PageInfo = {
+    title: '',
+    pathname: '',
+    markdown_content: '',
+    tag: [],
+    cate: [],
+    is_public: '1',
+    create_time: new Date().toUTCString(),
+    allow_comment: true,
+    options: {
+      template: '',
+      featuredImage: '',
+      push_sites: []
+    },
+    status: 1,
+    user_id: '',
+  };
 
   @action
   setPageList = data => this.pageList = data

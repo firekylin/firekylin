@@ -18,32 +18,37 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 import { ArticleProps, PreviewData } from './article.model';
 
 import './article.less';
-import PostStore from '../../routes/post/post.store';
 import SharedStore from '../../shared.store';
 import UserStore from '../../routes/user/user.store';
+import { ArticleTypeEnum } from '../../enums/article-type.enum';
+import ArticleControlTemplate from './control-template/control-template';
 
 enum ArticleEnum {
     SAVE = 3,
-    UNSAVE = 1,
+    DRAFT = 0,
 }
 
-@inject('sharedStore', 'postStore', 'userStore')
+@inject('sharedStore', 'userStore', 'articleStore')
 @observer
 class Article extends React.Component<ArticleProps, {}> {
 
     id: number = 0;
-    type: number = 0;
+    type: ArticleTypeEnum;
+    articleInfo = this.props.articleStore.articleInfo;
 
-    postInfo = (this.props.postStore as PostStore).postInfo;
     constructor(props: any) {
         super(props);
         this.id = +this.props.match.params.id || 0;
     }
     init() {
         const sharedStore = (this.props.sharedStore as SharedStore);
-        const postStore = (this.props.postStore as PostStore);
         const userStore = (this.props.userStore as UserStore);
-        postStore.setPostInfo({status: 0});
+        const articleStore = this.props.articleStore;
+        articleStore.setArticleInfo({status: ArticleEnum.DRAFT});
+
+        if (this.isPage()) {
+            sharedStore.getTemplateList(window.SysConfig.options.theme || 'firekylin');
+        }
 
         // Get Cats
         sharedStore.set$();
@@ -51,7 +56,7 @@ class Article extends React.Component<ArticleProps, {}> {
         merged$.subscribe(res => {
             sharedStore.setCategoryList(res[0].data);
             const defaultCategoryAry = res[0].data.filter(cat => cat.id === +res[1].data);
-            postStore.setPostInfo({cate: defaultCategoryAry});
+            articleStore.setArticleInfo({cate: defaultCategoryAry});
         });
         // Get Tags
         sharedStore.getTagList();
@@ -60,95 +65,108 @@ class Article extends React.Component<ArticleProps, {}> {
         .subscribe(
             res => {
                 userStore.setUserList(res.data);
-                postStore.setPostInfo({user_id: userStore.userList.length > 0 ? userStore.userList[0].id : ''});
+                articleStore.setArticleInfo({user_id: userStore.userList.length > 0 ? userStore.userList[0].id : ''});
             }
         );
     }
+    // 是否是页面
+    isPage() {
+        return this.type;
+    }
     componentDidMount() {
+        this.type = this.props.type;
         this.init();
         if (this.id) {
-            (this.props.postStore as PostStore).getPostsById(this.id);
+            this.props.articleStore.getArticleInfoById(this.id, this.type); 
         } else {
-            (this.props.postStore as PostStore).resetPostInfo();
+            this.props.articleStore.resetArticleInfo();
         }
     }
     componentWillReceiveProps(nextProps: any) {
         if (nextProps.match.params.id !== this.props.match.params.id || !this.props.match.params.id) {
-            (this.props.postStore as PostStore).resetPostInfo();
+            this.props.articleStore.resetArticleInfo();
             this.init();
         }
     }
     // 发布日期
     onDateChange(date: moment.Moment, dateString: string) {
-        (this.props.postStore as PostStore).setPostInfo({create_time: date});
+        this.props.articleStore.setArticleInfo({create_time: date});
     }
     // Tag
     handleTagChange(tags: string[]) {
-        (this.props.postStore as PostStore).setPostInfo({tag: tags});
+        this.props.articleStore.setArticleInfo({tag: tags});
     }
     // 是否公开
     handlePublicChange(e: RadioChangeEvent) {
-        (this.props.postStore as PostStore).setPostInfo({is_public: e.target.value});
+        this.props.articleStore.setArticleInfo({is_public: e.target.value});
     }
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        (this.props.postStore as PostStore).setPostInfo({options: {
+        this.props.articleStore.setArticleInfo({options: {
             featuredImage: e.target.value
         }});
     }
     // 选择作者
     handleUserChange(value: string) {
-        (this.props.postStore as PostStore).setPostInfo({user_id: value});
+        this.props.articleStore.setArticleInfo({user_id: value});
     }
 
     handleSave(): void {
-        (this.props.postStore as PostStore).setPostInfo({status: ArticleEnum.SAVE});
+        this.props.articleStore.setArticleInfo({status: ArticleEnum.SAVE});
         this.handleSubmit();
     }
     handleSaveDraft() {
-        (this.props.postStore as PostStore).setPostInfo({status: ArticleEnum.UNSAVE});
+        this.props.articleStore.setArticleInfo({status: ArticleEnum.DRAFT});
         this.handleSubmit();
     }
 
     handleSubmit() {
-        const { postInfo } = (this.props.postStore as PostStore);
+        const { articleInfo } = this.props.articleStore;
+
         const params: any = {};
         if (this.id) {
             params.id = this.id;
         }
-        params.status = ArticleEnum.SAVE;
-        params.title = postInfo.title;
-        params.pathname = postInfo.pathname;
-        params.markdown_content = postInfo.markdown_content;
+        params.status = articleInfo.status;
+        params.title = articleInfo.title;
+        params.pathname = articleInfo.pathname;
+        params.markdown_content = articleInfo.markdown_content;
         if (params.status === ArticleEnum.SAVE && !params.markdown_content) {
             message.error('没有内容不能提交呢！');
             return;
         }
-        params.create_time = postInfo.create_time;
+        params.create_time = articleInfo.create_time;
         params.type = this.type; // type: 0为文章，1为页面
-        params.allow_comment = postInfo.allow_comment ? 1 : 0;
-        params.push_sites = postInfo.options.push_sites;
-        params.cate = postInfo.cate.map(cate => cate.id);
-        params.tag = postInfo.tag;
-        params.user_id = postInfo.user_id;
-        params.is_public = postInfo.is_public;
-        params.options = postInfo.options;
+        params.allow_comment = articleInfo.allow_comment ? 1 : 0;
+        params.push_sites = articleInfo.options.push_sites;
+
+        if (this.type === ArticleTypeEnum.POST) {
+            params.cate = articleInfo.cate.map(cate => cate.id);
+            params.tag = articleInfo.tag;
+            params.user_id = articleInfo.user_id;
+        }
+        
+        params.is_public = articleInfo.is_public;
+        params.options = articleInfo.options;
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
         // 保存
-        (this.props.postStore as PostStore).postSubmit(params)
+        const type = this.isPage() ? 'page' : 'post';
+        this.props.articleStore.articleSubmit(params, this.type)
         .subscribe(
             res => {
                 if (res.errno === 0) {
                     if (!this.id && res.data.id) {
                         this.id = res.data.id;
                     }
-                    if (postInfo.status === ArticleEnum.SAVE && postInfo.is_public) {
+                    if (articleInfo.status === ArticleEnum.SAVE && articleInfo.is_public) {
                         message.success(
                             <>
                                 发布成功, &nbsp;&nbsp;
-                                <a href={`/post/${postInfo.pathname}.html`} target="_blank">
-                                    点此查看文章
+                                <a href={`/${type}/${articleInfo.pathname}.html`} target="_blank">
+                                    {
+                                        this.isPage() ? '点此查看页面' : '点此查看文章'
+                                    }
                                 </a>
                             </>
                         );
@@ -156,36 +174,36 @@ class Article extends React.Component<ArticleProps, {}> {
                         message.success('保存成功');
                     }
                 } else {
-                    (this.props.postStore as PostStore).setPostInfo({status: ArticleEnum.UNSAVE});
+                    this.props.articleStore.setArticleInfo({status: ArticleEnum.DRAFT});
                 }
             }
         );
     }
 
     handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
-        (this.props.postStore as PostStore).setPostInfo({title: e.target.value});
+        this.props.articleStore.setArticleInfo({title: e.target.value});
     }
     handlePath(e: React.ChangeEvent<HTMLInputElement>) {
-        (this.props.postStore as PostStore).setPostInfo({pathname: e.target.value});
+        this.props.articleStore.setArticleInfo({pathname: e.target.value});
     }
     preview() {
-        const { postInfo } = (this.props.postStore as PostStore);
+        const { articleInfo } = this.props.articleStore;
         const previewData: PreviewData = {
-            title: postInfo.title || 'Untitled',
-            pathname: postInfo.pathname || 'untitled',
-            markdown_content: postInfo.markdown_content,
-            create_time: postInfo.create_time,
+            title: articleInfo.title || 'Untitled',
+            pathname: articleInfo.pathname || 'untitled',
+            markdown_content: articleInfo.markdown_content,
+            create_time: articleInfo.create_time,
             update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-            user: (this.props.userStore as UserStore).userList.filter(user => +user.id === +postInfo.user_id)[0],
+            user: (this.props.userStore as UserStore).userList.filter(user => +user.id === +articleInfo.user_id)[0],
             comment_num: 0,
             allow_comment: 0,
-            options: JSON.stringify(postInfo.options),
+            options: JSON.stringify(articleInfo.options),
         };
 
         if (this.type === 0) {
-            previewData.tag = postInfo.tag
+            previewData.tag = articleInfo.tag
             .map(tagName => { return (this.props.sharedStore as SharedStore).tagList.filter(tag => tag.name === tagName)[0] || { name: tagName }; });
-            previewData.cate = postInfo.cate;
+            previewData.cate = articleInfo.cate;
         }
     
         const previewUrl = `/${['post', 'page'][this.type]}/${previewData.pathname}.html?preview=true`;
@@ -206,9 +224,11 @@ class Article extends React.Component<ArticleProps, {}> {
         document.body.removeChild(form);
     }
     render() {
-        const postStore = (this.props.postStore as PostStore);
-        const { postInfo } = postStore;
-        const tagList = (this.props.sharedStore as SharedStore).tagList;
+        const sharedStore = (this.props.sharedStore as SharedStore);
+        const articleStore = this.props.articleStore;
+        const { articleInfo } = articleStore;
+        const { tagList, templateList } = sharedStore;
+        const template = this.articleInfo.options.template;
         return (
             <div className="post-article">
                 <Row type="flex">
@@ -218,51 +238,80 @@ class Article extends React.Component<ArticleProps, {}> {
                             handleTitle={(e: React.ChangeEvent<HTMLInputElement>) => this.handleTitle(e)}
                             handlePath={(e: React.ChangeEvent<HTMLInputElement>) => this.handlePath(e)}
                             preview={() => this.preview()}
-                            title={postInfo.title}
-                            pathname={postInfo.pathname}
-                            status={postInfo.status}
-                            isPublic={postInfo.is_public}
+                            title={articleInfo.title}
+                            pathname={articleInfo.pathname}
+                            status={articleInfo.status}
+                            isPublic={articleInfo.is_public}
+                            type={this.type}
                         />
-                        <ArticleEditor type={this.type} id={this.id} />
+                        <ArticleEditor type={this.props.type} id={this.id} />
                     </Col>
                     <Col span={6}>
                         <ArticleControlHeader save={() => this.handleSave()} saveDraft={() => this.handleSaveDraft()} />
                         <section className="release-date">
                             <h5>发布日期</h5>
                             <DatePicker 
-                                value={moment(postInfo.create_time)} 
+                                value={moment(articleInfo.create_time)} 
                                 placeholder="请选择日期" 
                                 onChange={(date: moment.Moment, dateString: string) => this.onDateChange(date, dateString)} 
                             />
                         </section>
-                        <section className="category">
-                            <h5>分类</h5>
-                            <ArticleControlCategory catInitial={postInfo.cate && postInfo.cate.length > 0 ? postInfo.cate.map(item => item.id) : []} />
-                        </section>
-                        <section className="category">
-                            <h5>标签</h5>
-                            <ArticleControlTag tag={postInfo.tag} tagList={tagList} handleTagChange={(values) => this.handleTagChange(values)} />
-                        </section>
+                        {
+                            this.isPage() ? 
+                                null
+                            :
+                                <section className="category">
+                                    <h5>分类</h5>
+                                    <ArticleControlCategory catInitial={articleInfo.cate && articleInfo.cate.length > 0 ? articleInfo.cate.map(item => item.id) : []} />
+                                </section>
+                        }
+                        {
+                            this.isPage() ? 
+                                null
+                            :
+                                <section className="category">
+                                    <h5>标签</h5>
+                                    <ArticleControlTag tag={articleInfo.tag} tagList={tagList} handleTagChange={(values) => this.handleTagChange(values)} />
+                                </section>
+                        }
+                        {
+                            this.isPage() ? 
+                                <section className="category">
+                                    <h5>自定义模版</h5>
+                                    <ArticleControlTemplate
+                                        template={articleInfo.options.template} 
+                                        templateList={templateList} 
+                                        handleTemplateChange={value => articleStore.setArticleInfo({options: {template: value}})} 
+                                    />
+                                </section>
+                            :
+                                null
+                        }
                         <section className="category">
                             <h5>公开度</h5>
-                            <ArticleControlPublic isPublic={postInfo.is_public} handlePublicChange={e => this.handlePublicChange(e)} />
+                            <ArticleControlPublic isPublic={articleInfo.is_public} handlePublicChange={e => this.handlePublicChange(e)} />
                         </section>
                         <section className="category">
                             <h5>权限控制</h5>
-                            <Checkbox onChange={e => postStore.setPostInfo({allow_comment: e.target.checked})} checked={postInfo.allow_comment}>允许评论</Checkbox>
+                            <Checkbox onChange={e => articleStore.setArticleInfo({allow_comment: e.target.checked})} checked={articleInfo.allow_comment}>允许评论</Checkbox>
                         </section>
                         <section className="category">
                             <h5>封面图片</h5>
-                            <ArticleControlImage imageUrl={postInfo.options.featuredImage} handleImageChange={e => this.handleImageChange(e)} />
+                            <ArticleControlImage imageUrl={articleInfo.options.featuredImage} handleImageChange={e => this.handleImageChange(e)} />
                         </section>
-                        <section className="category">
-                            <h5>选择作者</h5>
-                            <ArticleControlUser 
-                                user={postInfo.user_id} 
-                                users={(this.props.userStore as UserStore).userList} 
-                                handleUserChange={value => this.handleUserChange(value)} 
-                            />
-                        </section>
+                        {
+                            this.isPage() ? 
+                                null
+                            :
+                                <section className="category">
+                                    <h5>选择作者</h5>
+                                    <ArticleControlUser 
+                                        user={articleInfo.user_id} 
+                                        users={(this.props.userStore as UserStore).userList} 
+                                        handleUserChange={value => this.handleUserChange(value)} 
+                                    />
+                                </section>
+                        }
                     </Col>
                 </Row>
             </div>

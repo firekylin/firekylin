@@ -18,6 +18,7 @@ declare global {
                 ldap_on: string;
                 intranet: boolean;
                 password_salt: string;
+                theme: string;
             },
             token: string;
         };

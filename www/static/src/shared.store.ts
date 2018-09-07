@@ -16,6 +16,7 @@ class SharedStore {
   getDefaultCategory$: Observable<IResult<string>>;
   @observable defaultCategory = '';
   @observable categoryList: Category[] = [];
+  @observable templateList: string[] = [];
   @observable tagList: Tag[] = [];
   @observable loading: SharedLoading = {
     category: true,
@@ -39,6 +40,9 @@ class SharedStore {
     }
     this.categoryList = list;
   }
+
+  @action
+  setTemplateList = data => this.templateList = data
 
   @action
   setTagList = (data: Tag[]) => this.tagList = data
@@ -99,6 +103,17 @@ class SharedStore {
           message.error(err);
         }
       );
+  }
+  // 获取模版
+  getTemplateList(theme: string) {
+    http.get('/admin/api/theme?type=templateList', {theme})
+    .subscribe(
+      res => {
+        if (res.errno === 0) {
+          this.setTemplateList(res.data);
+        }
+      }
+    );
   }
 
   // 更新系统

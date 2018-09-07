@@ -1,28 +1,25 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import './create.less';
+import './page-create.less';
+import { PageCreateProps } from '../page.model';
 import Article from '../../../components/article/article';
-import { PostProps } from '../post.model';
 import { ArticleTypeEnum } from '../../../enums/article-type.enum';
 
-interface PostCreateProps extends PostProps {
-}
+class PageCreate extends React.Component<PageCreateProps, {}> {
 
-class PostCreate extends React.Component<PostCreateProps, {}> {
-
-    constructor(props: PostCreateProps) {
+    constructor(props: PageCreateProps) {
         super(props);
     }
     render() {
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
-                <div className="post-create">
-                    <Article type={ArticleTypeEnum.POST} {...this.props} />
+                <div className="page-create">
+                    <Article type={ArticleTypeEnum.PAGE} {...this.props} />
                 </div>
             </>
         );
     }
 }
 
-export default PostCreate;
+export default PageCreate;

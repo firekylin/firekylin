@@ -5,7 +5,7 @@ import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from 'mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
-@inject('postStore')
+@inject('postStore', 'articleStore')
 @observer
 class ArticleEditor extends React.Component<any, ArticleEditorState> {
     id: number;
@@ -55,10 +55,10 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
         return (
             <div className="article-editor">
                 <MarkDownEditor
-                    content={this.props.postStore.postInfo.markdown_content}
+                    content={this.props.articleStore.articleInfo.markdown_content}
                     onChange={content => {
                         postInfo.markdown_content = content;
-                        this.props.postStore.setPostInfo({markdown_content: content});
+                        this.props.articleStore.setArticleInfo({markdown_content: content});
                         this.setState({postInfo, wordCount: tools.wordCount(this.state.postInfo.markdown_content)});
                     }}
                     onFullScreen={isFullScreen => this.setState({isFullScreen})}
