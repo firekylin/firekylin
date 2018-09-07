@@ -3,9 +3,11 @@ import { http } from '../../utils/http';
 import { message } from 'antd';
 import { map, tap } from 'rxjs/operators';
 import { tools } from '../../utils/tools';
+import { String } from 'aws-sdk/clients/sns';
 
 class PageStore {
   @observable loading = false;
+  @observable page = '1';
   @observable pageList = [];
   @observable pagination = {};
 
@@ -13,11 +15,14 @@ class PageStore {
   setPageList = data => this.pageList = data
 
   @action
+  setPage = page => this.page = page
+
+  @action
   setLoading = data => this.loading = data
 
-  getPageList(page: string): void {
+  getPageList(): void {
     this.setLoading(true);
-    http.get<any[]>('/admin/api/page', {page})
+    http.get<any[]>('/admin/api/page', {page: this.page})
       .pipe(
         map(res => {
           res.data.map((item, key) => {
@@ -44,8 +49,16 @@ class PageStore {
       );
   }
 
-  pageDeleteById(id: number) {
-    // 
+  pageDeleteById(id: String) {
+    http.post<any>(`/admin/api/page/${id}?method=delete`)
+    .subscribe(
+      res => {
+        if (res.errno === 0) {
+          message.success('删除成功');
+          this.getPageList();
+        }
+      }
+    );
   }
 }
 

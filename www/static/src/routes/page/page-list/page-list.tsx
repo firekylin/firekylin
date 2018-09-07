@@ -11,17 +11,17 @@ const confirm = Modal.confirm;
 @inject('pageStore')
 @observer 
 class PageList extends React.Component<PageListProps, {}> {
-    page = '1';
     constructor(props: PageListProps) {
         super(props);
     }
     componentDidMount() {
-        const search = this.props.location.search;
-        this.page = new URLSearchParams(search).get('page') || '1';
         const pageStore = this.props.pageStore;
-        pageStore.getPageList(this.page);
+        const search = this.props.location.search;
+        const page = new URLSearchParams(search).get('page') || '1';
+        this.props.pageStore.setPage(page);
+        pageStore.getPageList();
     }
-    delete(id: number) {
+    delete(id: string) {
         confirm({
           title: '提示',
           content: '确定删除吗?',
@@ -61,6 +61,7 @@ class PageList extends React.Component<PageListProps, {}> {
                     dataSource={pageList}
                     loading={loading}
                     pagination={pagination}
+                    style={{margin: '10px 20px'}}
                     onChange={e => {
                         // pageStore.setPlReqParams({
                         //     page: e.current
@@ -101,7 +102,12 @@ class PageList extends React.Component<PageListProps, {}> {
                         key="statusText"
                     />
                     <Column
-                        title="发布日期"
+                        title="创建日期"
+                        dataIndex="create_time"
+                        key="create_time"
+                    />
+                    <Column
+                        title="修改日期"
                         dataIndex="update_time"
                         key="update_time"
                     />
