@@ -134,7 +134,7 @@ module.exports = class extends Base {
 
       let resetTime = Date.now();
       let resetToken = think.md5(user.email + resetTime + Math.random());
-      let resetUrl = options.site_url + `/admin/dashboard?reset=1&token=${resetToken}`;
+      let resetUrl = options.site_url + `/admin/login?reset=1&token=${resetToken}`;
 
       let transporter = nodemailer.createTransport();
       transporter.sendMail({

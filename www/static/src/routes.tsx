@@ -11,13 +11,13 @@ const routes = (
                 auth.checkLogin() ? 
                     <Container />
                 :
-                    props.history.location.pathname === '/login' ? <Login /> : <Redirect to="/login" />
+                    props.history.location.pathname === '/login' ? <Login {...props} /> : <Redirect to="/login" />
             )} />
             <Route path="/login" render={(props) => (
                 auth.checkLogin() ? 
                     <Redirect to="/dashboard" />
                 :
-                    <Login />
+                    <Login {...props} />
             )} />
         </Switch>
     </Router>

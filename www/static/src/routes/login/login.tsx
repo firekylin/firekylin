@@ -2,11 +2,15 @@ import * as React from 'react';
 import classnames from 'classnames';
 import { Input, Form, Icon, Button } from 'antd';
 import { observer, inject } from 'mobx-react';
+import { LoginProps } from './login.model';
 const FormItem = Form.Item;
 
 @inject('loginStore')
 @observer 
-class LoginForm extends React.Component<any, any> {
+class LoginForm extends React.Component<LoginProps, any> {
+  state = {
+    forgot: false,
+  };
   constructor(props: any) {
     super(props);
   }
@@ -39,6 +43,7 @@ class LoginForm extends React.Component<any, any> {
    * @return {} []
    */
   getTwoFactorAuth() {
+    const { getFieldDecorator } = this.props.form;
     if (window.SysConfig.options.two_factor_auth) {
       return (
         <div className="form-group">
@@ -55,58 +60,102 @@ class LoginForm extends React.Component<any, any> {
               isLength: '长度为6个字符'
             }}
           /> */}
+          <Form onSubmit={e => this.handleForgotSubmit(e)} className="login-form">
+              <FormItem
+                extra="您会收到一封包含创建新密码链接的电子邮件。"
+              >
+                {getFieldDecorator('user', {
+                  rules: [{
+                    required: true, 
+                    message: '请输入您的用户名或电子邮箱地址!'
+                  }],
+                })(
+                  <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名或电子邮箱地址" />
+                )}
+              </FormItem>
+              <FormItem>
+                <Button 
+                  style={{width: '100%'}} 
+                  type="primary" 
+                  htmlType="submit" 
+                  className="login-form-button"
+                  loading={this.props.loginStore.loading}
+                  size="large"
+                >
+                  获取新密码
+                </Button>
+              </FormItem>
+          </Form>
         </div>
       );
     }
   }
   // 登陆
-  handleSubmit = (e) => {
-    e.preventDefault();
+  handleSubmit(event: React.FormEvent<any>) {
+    event.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         this.props.loginStore.login(values);
-        console.log('Received values of form: ', values);
+      }
+    });
+  }
+  // 重置密码
+  handleForgotSubmit(event: React.FormEvent<any>) {
+    event.preventDefault();
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+        this.props.loginStore.forgot(values);
       }
     });
   }
 
-  // handleForgotSubmit(values) {
-  //   UserAction.forgot(values);
-  // }
-
-  // handleResetSubmit(values) {
-  //   values.password = md5(window.SysConfig.options.password_salt + values.password);
-  //   values.token = this.props.location.query.token;
-  //   UserAction.reset(values);
-  // }
+  handleResetSubmit(event: React.FormEvent<any>) {
+    event.preventDefault();
+    this.props.form.validateFieldsAndScroll((err, values) => {
+      if (!err) {
+        const search = this.props.location.search;
+        const token = new URLSearchParams(search).get('token');
+        this.props.loginStore.reset({password: values.password, token: token});
+      }
+    });
+  }
 
   toggleForgot() {
     this.setState({forgot: !this.state.forgot});
   }
 
   renderReset() {
+    const { getFieldDecorator } = this.props.form;
     return (
       <div className="container">
         <div className="row forgot">
           <h1 className="text-center">
             <a href="/">{window.SysConfig.options.title}</a>
           </h1>
-          {/* <Form
-            className="clearfix"
-            onValidSubmit={this.handleResetSubmit.bind(this)}
-          >
-            <ValidatedInput
-                type="text"
-                name="password"
-                validate="required,isLength:8:30"
-                placeholder="请输入新密码"
-                errorHelp={{
-                  required: '请填写密码',
-                  isLength: '密码长度为8到30个字符'
-                }}
-            />
-            <button type="submit" className="btn btn-primary btn-lg btn-block">设置新密码</button>
-          </Form> */}
+          <Form onSubmit={e => this.handleResetSubmit(e)} className="login-form">
+              <FormItem>
+                {getFieldDecorator('password', {
+                  rules: [{ min: 8, max: 20,  message: '密码长度为8到30个字符' }, {
+                    required: true, 
+                    message: '请填写密码!'
+                  }],
+                })(
+                  <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="请输入新密码" />
+                )}
+              </FormItem>
+              <FormItem>
+                <Button 
+                  style={{width: '100%'}} 
+                  type="primary" 
+                  htmlType="submit" 
+                  className="login-form-button"
+                  loading={this.props.loginStore.loading}
+                  size="large"
+                >
+                  设置新密码
+                </Button>
+              </FormItem>
+          </Form>
           <div className="form-footer">
             <div className="left back-site">
               <a href="/">← 回到{window.SysConfig.options.title}</a>
@@ -121,32 +170,45 @@ class LoginForm extends React.Component<any, any> {
   }
 
   renderForgot() {
+    const { getFieldDecorator } = this.props.form;
     return (
       <div className="container">
         <div className="row forgot">
           <h1 className="text-center">
             <a href="/">{window.SysConfig.options.title}</a>
           </h1>
-          {/* <Form
-            className="clearfix"
-            onValidSubmit={this.handleForgotSubmit.bind(this)}
-          >
-            <ValidatedInput
-                type="text"
-                name="user"
-                validate="required"
-                placeholder="用户名或电子邮箱地址"
-                help="您会收到一封包含创建新密码链接的电子邮件。"
-                errorHelp="请输入您的用户名或电子邮箱地址"
-            />
-            <button type="submit" className="btn btn-primary btn-lg btn-block">获取新密码</button>
-          </Form> */}
+          <Form onSubmit={e => this.handleForgotSubmit(e)} className="login-form">
+              <FormItem
+                extra="您会收到一封包含创建新密码链接的电子邮件。"
+              >
+                {getFieldDecorator('user', {
+                  rules: [{
+                    required: true, 
+                    message: '请输入您的用户名或电子邮箱地址!'
+                  }],
+                })(
+                  <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名或电子邮箱地址" />
+                )}
+              </FormItem>
+              <FormItem>
+                <Button 
+                  style={{width: '100%'}} 
+                  type="primary" 
+                  htmlType="submit" 
+                  className="login-form-button"
+                  loading={this.props.loginStore.loading}
+                  size="large"
+                >
+                  获取新密码
+                </Button>
+              </FormItem>
+          </Form>
           <div className="form-footer">
             <div className="left back-site">
               <a href="/">← 回到{window.SysConfig.options.title}</a>
             </div>
             <div className="right forgot-password">
-              {/* <a href="javascript:void(0)" onClick={this.toggleForgot.bind(this)}>重新登录</a> */}
+              <a href="javascript:void(0)" onClick={() => this.toggleForgot()}>重新登录</a>
             </div>
           </div>
         </div>
@@ -155,13 +217,16 @@ class LoginForm extends React.Component<any, any> {
   }
 
   render() {
-    // if (this.props.location.query.reset) {
-    //   return this.renderReset();
-    // }
+    const search = this.props.location.search;
+    const reset = new URLSearchParams(search).get('reset');
+    console.log(reset);
+    if (reset) {
+      return this.renderReset();
+    }
 
-    // if (this.state.forgot) {
-    //   return this.renderForgot();
-    // }
+    if (this.state.forgot) {
+      return this.renderForgot();
+    }
 
     const { getFieldDecorator } = this.props.form;
 
@@ -172,7 +237,7 @@ class LoginForm extends React.Component<any, any> {
               <h1 className="text-center">
                 <a href="/">{window.SysConfig.options.title}</a>
               </h1>
-              <Form onSubmit={this.handleSubmit} className="login-form">
+              <Form onSubmit={e => this.handleSubmit(e)} className="login-form">
                 <FormItem>
                   {getFieldDecorator('username', {
                     rules: [{ min: 4, max: 20,  message: '长度为4到20个字符' }, {

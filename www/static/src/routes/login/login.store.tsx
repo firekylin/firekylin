@@ -33,6 +33,31 @@ class LoginStore {
         }
       );
   }
+  forgot(params: any) {
+    http.post('/admin/user/forgot', params)
+    .subscribe(
+      res => {
+        if (res.errno === 0) {
+          message.success('重置密码邮件发送成功');
+        }
+      }
+    );
+  }
+
+  reset(params: any) {
+    params.password = md5(window.SysConfig.options.password_salt + params.password);
+    http.post('/admin/user/reset', params)
+    .subscribe(
+      res => {
+        if (res.errno === 0) {
+          message.success('新密码设置成功');
+          setTimeout(() => location.href = '/admin', 1000);
+        } else {
+          message.error(res.errmsg);
+        }
+      }
+    );
+  }
 }
 
 export default LoginStore;

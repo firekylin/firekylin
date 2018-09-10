@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IResult } from '../models/http.model';
@@ -32,8 +32,14 @@ axios.interceptors.response.use(
         }
         return Promise.resolve(result);
     }, 
-    result => {
-        return Promise.reject(result);
+    (error: AxiosError) => {
+        try {
+            message.error((error.response as AxiosResponse).statusText);
+        } catch {
+            message.error('未知错误');
+            console.log(error);
+        }
+        return Promise.reject(error);
     }
 );
 
