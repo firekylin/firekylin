@@ -42,53 +42,25 @@ class LoginForm extends React.Component<LoginProps, any> {
    * get two factor auth
    * @return {} []
    */
-  getTwoFactorAuth() {
+  getTwoFactorAuth(): JSX.Element | null  {
     const { getFieldDecorator } = this.props.form;
     if (window.SysConfig.options.two_factor_auth) {
       return (
-        <div className="form-group">
-          {/* <ValidatedInput
-            type="text"
-            name="two_factor_auth"
-            // tslint:disable-next-line:jsx-no-string-ref
-            ref="two_factor_auth"
-            className="form-control"
-            validate="required,isLength:6:6"
-            placeholder="二步验证码"
-            errorHelp={{
-              required: '请填写二步验证码',
-              isLength: '长度为6个字符'
-            }}
-          /> */}
           <Form onSubmit={e => this.handleForgotSubmit(e)} className="login-form">
-              <FormItem
-                extra="您会收到一封包含创建新密码链接的电子邮件。"
-              >
-                {getFieldDecorator('user', {
-                  rules: [{
+              <FormItem>
+                {getFieldDecorator('two_factor_auth', {
+                  rules: [{ len: 6,  message: '长度为6个字符' }, {
                     required: true, 
-                    message: '请输入您的用户名或电子邮箱地址!'
+                    message: '请填写二步验证码'
                   }],
                 })(
-                  <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名或电子邮箱地址" />
+                  <Input prefix={<Icon type="safety" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="二步验证码" />
                 )}
               </FormItem>
-              <FormItem>
-                <Button 
-                  style={{width: '100%'}} 
-                  type="primary" 
-                  htmlType="submit" 
-                  className="login-form-button"
-                  loading={this.props.loginStore.loading}
-                  size="large"
-                >
-                  获取新密码
-                </Button>
-              </FormItem>
           </Form>
-        </div>
       );
     }
+    return null;
   }
   // 登陆
   handleSubmit(event: React.FormEvent<any>) {
@@ -255,6 +227,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                     <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="密码" />
                   )}
                 </FormItem>
+                {this.getTwoFactorAuth()}
                 <FormItem>
                   <Button 
                     style={{width: '100%'}} 
