@@ -9,6 +9,7 @@ import Page from './page/page';
 import Category from './category/category';
 import Tag from './tag/tag';
 import Push from './push/push';
+import Appearance from './appearance/appearance';
 
 const routerOptions = {
     basename: '/admin',
@@ -30,6 +31,7 @@ class Container extends React.Component<any, {}> {
                             <Route path="/tag" component={Tag}/>
                             <Route path={`/user`} component={User}/>
                             <Route path={`/push`} component={Push}/>
+                            <Route path="/appearance" component={Appearance}/>
                             <Redirect to="/dashboard" />
                         </Switch>
                     </div>

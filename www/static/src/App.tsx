@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'mobx-react';
 import './app.less';
 import routes from './routes';
-import AppStore from './app.store';
+import store from './app.store';
 
 declare global {
     interface Window {
@@ -39,7 +39,7 @@ if (Object.freeze) {
 }
 
 ReactDOM.render(
-    <Provider {...AppStore}>
+    <Provider {...store}>
         {routes}
     </Provider>,
     document.getElementById('app') as HTMLElement

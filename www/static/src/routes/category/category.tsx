@@ -3,7 +3,7 @@ import { Redirect, Route, Switch } from 'react-router';
 import CategoryList from './list/list';
 import CategoryCreate from './create/create';
 import { CategoryProps } from './category.model';
-export default class Post extends React.Component<CategoryProps, any> {
+export default class Category extends React.Component<CategoryProps, any> {
     render() {
         const { match } = this.props;
         return (
