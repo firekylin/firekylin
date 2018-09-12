@@ -52,8 +52,6 @@ class LoginStore {
         if (res.errno === 0) {
           message.success('新密码设置成功');
           setTimeout(() => location.href = '/admin', 1000);
-        } else {
-          message.error(res.errmsg);
         }
       }
     );
