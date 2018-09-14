@@ -9,7 +9,7 @@ import ArticleStore from './article.store';
 export interface ArticleProps extends RouteComponentProps<ArticleMatchParams> {
     userStore?: UserStore;
     sharedStore?: SharedStore;
-    articleStore: ArticleStore;
+    articleStore?: ArticleStore;
     type: ArticleTypeEnum;
 }
 

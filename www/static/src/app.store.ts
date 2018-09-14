@@ -27,7 +27,6 @@ export class AppStore {
     pushStore: PushStore;
     pageStore: PageStore;
     articleStore: ArticleStore;
-    appearanceStore: AppearanceStore;
 
     constructor() {
         this.sharedStore = new SharedStore();
@@ -40,7 +39,6 @@ export class AppStore {
         this.pushStore = new PushStore(this);
         this.pageStore = new PageStore();
         this.articleStore = new ArticleStore();
-        this.appearanceStore = new AppearanceStore();
     }
 
 }

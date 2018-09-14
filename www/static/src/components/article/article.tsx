@@ -22,6 +22,7 @@ import SharedStore from '../../shared.store';
 import UserStore from '../../routes/user/user.store';
 import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleControlTemplate from './control-template/control-template';
+import ArticleStore from './article.store';
 
 enum ArticleEnum {
     SAVE = 3,
@@ -34,7 +35,7 @@ class Article extends React.Component<ArticleProps, {}> {
 
     id: number = 0;
     type: ArticleTypeEnum;
-    articleInfo = this.props.articleStore.articleInfo;
+    articleInfo = (this.props.articleStore as ArticleStore).articleInfo;
 
     constructor(props: any) {
         super(props);
@@ -43,7 +44,7 @@ class Article extends React.Component<ArticleProps, {}> {
     init() {
         const sharedStore = (this.props.sharedStore as SharedStore);
         const userStore = (this.props.userStore as UserStore);
-        const articleStore = this.props.articleStore;
+        const articleStore = (this.props.articleStore as ArticleStore);
         articleStore.setArticleInfo({status: ArticleEnum.DRAFT});
 
         if (this.isPage()) {
@@ -77,51 +78,51 @@ class Article extends React.Component<ArticleProps, {}> {
         this.type = this.props.type;
         this.init();
         if (this.id) {
-            this.props.articleStore.getArticleInfoById(this.id, this.type); 
+            (this.props.articleStore as ArticleStore).getArticleInfoById(this.id, this.type); 
         } else {
-            this.props.articleStore.resetArticleInfo();
+            (this.props.articleStore as ArticleStore).resetArticleInfo();
         }
     }
     componentWillReceiveProps(nextProps: any) {
         if (nextProps.match.params.id !== this.props.match.params.id || !this.props.match.params.id) {
-            this.props.articleStore.resetArticleInfo();
+            (this.props.articleStore as ArticleStore).resetArticleInfo();
             this.init();
         }
     }
     // 发布日期
     onDateChange(date: moment.Moment, dateString: string) {
-        this.props.articleStore.setArticleInfo({create_time: date});
+        (this.props.articleStore as ArticleStore).setArticleInfo({create_time: date});
     }
     // Tag
     handleTagChange(tags: string[]) {
-        this.props.articleStore.setArticleInfo({tag: tags});
+        (this.props.articleStore as ArticleStore).setArticleInfo({tag: tags});
     }
     // 是否公开
     handlePublicChange(e: RadioChangeEvent) {
-        this.props.articleStore.setArticleInfo({is_public: e.target.value});
+        (this.props.articleStore as ArticleStore).setArticleInfo({is_public: e.target.value});
     }
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        this.props.articleStore.setArticleInfo({options: {
+        (this.props.articleStore as ArticleStore).setArticleInfo({options: {
             featuredImage: e.target.value
         }});
     }
     // 选择作者
     handleUserChange(value: string) {
-        this.props.articleStore.setArticleInfo({user_id: value});
+        (this.props.articleStore as ArticleStore).setArticleInfo({user_id: value});
     }
 
     handleSave(): void {
-        this.props.articleStore.setArticleInfo({status: ArticleEnum.SAVE});
+        (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.SAVE});
         this.handleSubmit();
     }
     handleSaveDraft() {
-        this.props.articleStore.setArticleInfo({status: ArticleEnum.DRAFT});
+        (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.DRAFT});
         this.handleSubmit();
     }
 
     handleSubmit() {
-        const { articleInfo } = this.props.articleStore;
+        const { articleInfo } = (this.props.articleStore as ArticleStore);
 
         const params: any = {};
         if (this.id) {
@@ -152,7 +153,7 @@ class Article extends React.Component<ArticleProps, {}> {
         localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
         // 保存
         const type = this.isPage() ? 'page' : 'post';
-        this.props.articleStore.articleSubmit(params, this.type)
+        (this.props.articleStore as ArticleStore).articleSubmit(params, this.type)
         .subscribe(
             res => {
                 if (res.errno === 0) {
@@ -174,20 +175,20 @@ class Article extends React.Component<ArticleProps, {}> {
                         message.success('保存成功');
                     }
                 } else {
-                    this.props.articleStore.setArticleInfo({status: ArticleEnum.DRAFT});
+                    (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.DRAFT});
                 }
             }
         );
     }
 
     handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
-        this.props.articleStore.setArticleInfo({title: e.target.value});
+        (this.props.articleStore as ArticleStore).setArticleInfo({title: e.target.value});
     }
     handlePath(e: React.ChangeEvent<HTMLInputElement>) {
-        this.props.articleStore.setArticleInfo({pathname: e.target.value});
+        (this.props.articleStore as ArticleStore).setArticleInfo({pathname: e.target.value});
     }
     preview() {
-        const { articleInfo } = this.props.articleStore;
+        const { articleInfo } = (this.props.articleStore as ArticleStore);
         const previewData: PreviewData = {
             title: articleInfo.title || 'Untitled',
             pathname: articleInfo.pathname || 'untitled',
@@ -225,10 +226,9 @@ class Article extends React.Component<ArticleProps, {}> {
     }
     render() {
         const sharedStore = (this.props.sharedStore as SharedStore);
-        const articleStore = this.props.articleStore;
+        const articleStore = (this.props.articleStore as ArticleStore);
         const { articleInfo } = articleStore;
         const { tagList, templateList } = sharedStore;
-        const template = this.articleInfo.options.template;
         return (
             <div className="post-article">
                 <Row type="flex">

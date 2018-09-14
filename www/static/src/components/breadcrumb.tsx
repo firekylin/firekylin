@@ -1,4 +1,3 @@
-import * as ReactDom from 'react-dom';
 import classnames from 'classnames';
 import { Link } from 'react-router-dom';
 import * as React from 'react';

@@ -1,4 +1,3 @@
-import { firekylinHistory } from './history';
 /**
  * Auth
  */
