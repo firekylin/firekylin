@@ -22,6 +22,7 @@
     "lint-break-on-errors"
   ],
   "dependencies": {
+    "@types/react-color": "^2.13.6",
     "ali-oss": "^4.14.2",
     "aws-sdk": "^2.263.1",
     "co": "^4.6.0",
@@ -62,10 +63,12 @@
   },
   "devDependencies": {
     "@types/classnames": "^2.2.6",
+    "@types/codemirror": "0.0.60",
     "@types/history": "^4.7.0",
     "@types/moment": "^2.13.0",
     "@types/node": "^10.5.6",
     "@types/react": "^16.4.7",
+    "@types/react-codemirror": "^1.0.2",
     "@types/react-dom": "^16.0.7",
     "@types/react-router": "^4.0.30",
     "@types/react-router-dom": "^4.3.0",

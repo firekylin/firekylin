@@ -18,4 +18,5 @@ export interface ConfigElement {
     label: string;
     name: string;
     type: string;
+    options: any;
 }

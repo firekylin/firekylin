@@ -18,6 +18,8 @@
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
+    "noImplicitUseStrict": true,
+    "alwaysStrict": false,
   },
   "exclude": [
     "node_modules",

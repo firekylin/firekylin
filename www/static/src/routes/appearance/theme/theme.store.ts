@@ -7,11 +7,17 @@ import { Theme } from './theme.model';
 class ThemeStore {
     appearanceStore: AppearanceStore;
     @observable themeList: Theme[] = []; 
+    @observable data = {
+        theme: window.SysConfig.options.theme || 'firekylin',
+    };
     constructor(appearanceStore: AppearanceStore) {
         this.appearanceStore = appearanceStore;
     }
 
     @action setThemeList = themes => this.themeList = themes;
+    @action setData = data => {
+        this.data = Object.assign({}, this.data, data);
+    }
 
     getThemeList() {
         http.get<Theme[]>('/admin/api/theme')

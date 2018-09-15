@@ -19,6 +19,7 @@ declare global {
                 intranet: boolean;
                 password_salt: string;
                 theme: string;
+                themeConfig: any;
             },
             token: string;
         };
