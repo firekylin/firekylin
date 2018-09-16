@@ -7,7 +7,7 @@ import { SketchPicker } from 'react-color';
 // import { Button} from 'antd';
 import './theme.less';
 import RadioGroup from 'antd/lib/radio/group';
-import CodeMirror from 'react-codemirror';
+import { UnControlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
@@ -60,7 +60,9 @@ const FormItem = Form.Item;
                 onSubmit={e => this.saveThemeConfig(e)}
             >
                 {theme.configElements.map(this.renderConfigElement.bind(this))}
-                <button type="submit" className="btn btn-primary">保存配置</button>
+                <FormItem>
+                    <Button type="primary" htmlType="submit">保存配置</Button>
+                </FormItem>
             </Form>
           </div>
         );
@@ -82,7 +84,7 @@ const FormItem = Form.Item;
                     key={i}
                     label={element.label}
                 >
-                    <Input style={{width: 600}} />
+                    <Input style={{width: 600}} onChange={e => this.state.themeConfig[element.name] = e.target.value} />
                     <p style={{width: 600}}>{element.help}</p>
                 </FormItem>
             );
@@ -199,8 +201,8 @@ const FormItem = Form.Item;
                             mode: element.type
                         }}
                         value={this.state.themeConfig[element.name]}
-                        onChange={val => {
-                            this.state.themeConfig[element.name] = val;
+                        onChange={(editor, data, value) => {
+                            this.state.themeConfig[element.name] = value;
                             this.forceUpdate();
                         }}
                     />
@@ -217,7 +219,8 @@ const FormItem = Form.Item;
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-                console.log(values);
+                window.SysConfig.options.themeConfig = this.state.themeConfig;
+                this.props.themeStore.themeConfigSave({themeConfig: this.state.themeConfig});
             }
         });
     }
@@ -225,17 +228,18 @@ const FormItem = Form.Item;
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-                console.log(values);
+                this.props.themeStore.themeSelect(values);
             }
         });
     }
-    handleThemeChanged(themeName: string) {
-        // const configElements = this.props.themeStore.themeList.filter(theme => theme.name)[0].configElements;
+    handleThemeChanged(theme: string) {
+        this.props.form.setFieldsValue({theme});
     }
     render() {
         const Option = Select.Option;
         const { themeStore } = this.props;
         const { themeList, data } = themeStore;
+        const { getFieldDecorator } = this.props.form;
         return (
             <div className="appearance-theme">
                 <BreadCrumb {...this.props} />
@@ -245,16 +249,21 @@ const FormItem = Form.Item;
                         <FormItem
                             label="主题选择"
                         >
-                            <Select
-                                style={{width: 600}}
-                                placeholder="请选择主题"
-                                value={data.theme}
-                                onChange={(theme: string) => this.handleThemeChanged(theme)}
-                            >
-                                {themeList.map((theme, key) => {
-                                    return <Option key={key} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
-                                })}
-                            </Select>
+                            {
+                                getFieldDecorator('theme', {
+                                    initialValue: data.theme
+                                })(
+                                    <Select
+                                        style={{width: 600}}
+                                        placeholder="请选择主题"
+                                        onChange={(theme: string) => this.handleThemeChanged(theme)}
+                                    >
+                                        {themeList.map((theme, key) => {
+                                            return <Option key={key} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
+                                        })}
+                                    </Select>
+                                )
+                            }
                         </FormItem>
                         <FormItem>
                             <Button type="primary" htmlType="submit">提交</Button>

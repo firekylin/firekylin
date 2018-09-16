@@ -33,6 +33,24 @@ class ThemeStore {
         );
     }
 
+    themeSelect(params: {theme: string}) {
+        http.post('/admin/api/options?method=put', params)
+        .subscribe(
+            res => {
+                message.success('设置成功');
+            }
+        );
+    }
+
+    themeConfigSave(params: any) {
+        http.post('/admin/api/options?method=put', params)
+        .subscribe(
+            res => {
+                message.success('设置成功');
+            }
+        );
+    } 
+
 }
 
 export default ThemeStore;
