@@ -20,6 +20,7 @@ declare global {
                 password_salt: string;
                 theme: string;
                 themeConfig: any;
+                navigation: any,
             },
             token: string;
         };
