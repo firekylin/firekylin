@@ -129,7 +129,7 @@ class Navigation extends React.Component<any, any> {
                                 <Button 
                                     disabled={i === 0}
                                     onClick={() => this.move(i - 1, i)}
-                                    type="success" 
+                                    className="ant-btn-success"
                                     size="small" 
                                     icon="arrow-up"
                                 >
@@ -139,6 +139,7 @@ class Navigation extends React.Component<any, any> {
                                 <Button 
                                     disabled={i === this.state.list.length - 1}
                                     onClick={() => this.move(i, i + 1)}
+                                    className="ant-btn-success"
                                     type="primary" 
                                     size="small" 
                                     icon="arrow-down"

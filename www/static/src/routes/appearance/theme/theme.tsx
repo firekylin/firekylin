@@ -7,7 +7,7 @@ import { SketchPicker } from 'react-color';
 // import { Button} from 'antd';
 import './theme.less';
 import RadioGroup from 'antd/lib/radio/group';
-import { UnControlled as CodeMirror } from 'react-codemirror2';
+import { Controlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
@@ -201,7 +201,7 @@ const FormItem = Form.Item;
                             mode: element.type
                         }}
                         value={this.state.themeConfig[element.name]}
-                        onChange={(editor, data, value) => {
+                        onBeforeChange={(editor, data, value) => {
                             this.state.themeConfig[element.name] = value;
                             this.forceUpdate();
                         }}
@@ -220,7 +220,7 @@ const FormItem = Form.Item;
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 window.SysConfig.options.themeConfig = this.state.themeConfig;
-                this.props.themeStore.themeConfigSave({themeConfig: this.state.themeConfig});
+                this.props.themeStore.themeConfigSave({themeConfig: JSON.stringify(this.state.themeConfig)});
             }
         });
     }

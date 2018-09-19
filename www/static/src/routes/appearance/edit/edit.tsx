@@ -1,7 +1,7 @@
 import  React from 'react';
 import { observer, inject } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { UnControlled as CodeMirror } from 'react-codemirror2';
+import { Controlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
@@ -128,7 +128,7 @@ const TreeNode = Tree.TreeNode;
                                     mode: this.getEditorMode(path.split('.').pop())
                                 }}
                                 value={themeContent}
-                                onChange={(editor, data, content) => {
+                                onBeforeChange={(editor, data, content) => {
                                     editStore.setData({themeContent: content});
                                 }}
                             />
