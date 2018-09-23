@@ -4,7 +4,7 @@ import { AppStore } from '../../app.store';
 import firekylin from '../../utils/firekylin';
 import { http } from '../../utils/http';
 import { UserEditPwdState } from './user.model';
-import {message} from "antd";
+import { message } from 'antd';
 // import {Object} from "aws-sdk/clients/s3";
 
 // import UserAction from '../action/user';
@@ -23,10 +23,10 @@ export default class UserStore{
     @observable key = 0;
 
     @observable submitting: false;
-    @observable userInfo: {};
+    @observable userInfo;
     @observable hasEmail: false;
 
-    @observable userEditPwdState:UserEditPwdState = {
+    @observable userEditPwdState: UserEditPwdState = {
         submitting: false,
         userInfo: {}
     };
@@ -51,7 +51,7 @@ export default class UserStore{
 
     @action
     setUserEditPwdState = (data:UserEditPwdState) => {
-        this.userEditPwdState = Object.assign({},this.userEditPwdState,data);
+        this.userEditPwdState = Object.assign({}, this.userEditPwdState, data);
     }
 
     // 获取用户列表
@@ -65,7 +65,21 @@ export default class UserStore{
             })
             .catch(err => {
                 message.error('加载用户列表失败，请稍后重试');
+            });
+    }
+
+    // 获取用户信息
+    @action
+    getUserInfo(id: string) {
+        http.get<any>(`/admin/api/user/${id}`)
+            .toPromise()
+            .then(data => {
+                this.setUserInfo(data.data);
+                this.setHasEmail(!!data.data.email);
             })
+            .catch(err => {
+                message.error('加载用户信息失败，请稍后重试');
+            });
     }
 
     // 通过
@@ -79,7 +93,7 @@ export default class UserStore{
             })
             .catch(err => {
                 message.error('加载用户列表失败，请稍后重试');
-            })
+            });
     }
 
     // 删除用户
@@ -89,7 +103,7 @@ export default class UserStore{
             .toPromise()
             .then(data => {
                 message.success('删除成功');
-                this.getUserList(this.key===3?'contributor':'')
+                this.getUserList(this.key === 3 ? 'contributor' : '' );
             })
             .catch(err => {
                 message.error('删除失败，请稍后重试');
@@ -118,20 +132,29 @@ export default class UserStore{
 
     // 生成钥匙
     @action
-    generateKey(userId,resolve,reject) {
-        let url = '/admin/api/user/' + userId + '?type=key';
-        let req = superagent.post(url);
-        req.type('form').send();
-        return firekylin.request(req).then(
-            data => {
-                // this.trigger(data, 'getUserInfo')
-                resolve();
-            },
-            err => {
-                // this.trigger(err, 'getUserInfoFailed')
-                reject();
-            }
-        );
+    generateKey(userId) {
+        // let url = '/admin/api/user/' + userId + '?type=key';
+        // let req = superagent.post(url);
+        // req.type('form').send();
+        // return firekylin.request(req).then(
+        //     data => {
+        //         // this.trigger(data, 'getUserInfo')
+        //         resolve();
+        //     },
+        //     err => {
+        //         // this.trigger(err, 'getUserInfoFailed')
+        //         reject();
+        //     }
+        // );
+        http.post<any>(`/admin/api/user/${userId}?type=key`,)
+            .toPromise()
+            .then(data => {
+                this.setUserInfo(data.data);
+                this.setHasEmail(!!data.data.email);
+            })
+            .catch(err => {
+                message.error(err);
+            });
     }
 
     savePwd(data) {

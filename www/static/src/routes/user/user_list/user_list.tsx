@@ -2,13 +2,9 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Tabs } from 'antd';
 import { observer, inject } from 'mobx-react';
-// import UserAction from '../action/user';
 import { UserProps } from '../user.model';
-// import UserStore from '../store/user';
-// import ModalAction from '../../common/action/modal';
 import { message, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
-// import TipAction from 'common/action/tip';
 
 @inject('userStore')
 @observer
@@ -57,7 +53,6 @@ export default class extends React.Component<UserProps,any> {
         return this.userStore.getUserList(type==='3'?'contributor':'');
     }
 
-
     deny(user) {
         const that = this;
         return Modal.confirm({
@@ -65,14 +60,14 @@ export default class extends React.Component<UserProps,any> {
             content: '删除后无法恢复',
             onOk()  {
                 // message.success('删除成功');
-                that.userStore.delete(user.id,()=>{
+                that.userStore.deleteUser(user.id,()=>{
                     message.success('删除成功');
-                    that.userStore.getUserList(that.userStore.key===3?'contributor':'')
-                },()=>{
+                    that.userStore.getUserList(that.userStore.key === 3 ? 'contributor' : '' );
+                },() => {
                     message.success('删除失败，请稍后重试');
                 });
             },
-        })
+        });
     }
 
     getUserType(user) {
@@ -108,16 +103,16 @@ export default class extends React.Component<UserProps,any> {
                     <td>{item.create_time}</td>
                     <td>{item.last_login_time}</td>
                     <td>
-                        {this.userStore.key == '0' ? <Link to={'user/edit/' + item.id}>
-                                <button type="button" className="btn btn-primary btn-xs">
+                        {this.userStore.key == '0'
+                            ?
+                                <button type="button" className="btn btn-primary btn-xs" onClick={() => this.props.history.push(`/user/edit/${item.id}`)}>
                                     <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
                                 </button>
-                            </Link> :
-                            <button type="button" className="btn btn-success btn-xs" onClick={this.pass.bind(this, item)}>
+
+                            : <button type="button" className="btn btn-success btn-xs" onClick={this.pass.bind(this, item)}>
                                 <span className="glyphicon glyphicon-ok"></span>
                                 通过
-                            </button>
-                        }
+                            </button>}
                         &nbsp;
                         {this.userStore.key == '0' ? <button type="button" className="btn btn-danger btn-xs"
                                                    onClick={this.handleDelete.bind(this, item.id)}>

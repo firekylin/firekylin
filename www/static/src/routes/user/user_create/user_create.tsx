@@ -1,29 +1,23 @@
 import * as React from 'react';
-import ReactDom from 'react-dom';
-// import {Link} from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
-// import UserAction from '../action/user';
 import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
-import {Form, message, Input ,Select} from 'antd';
+import { Form, message, Input, Select } from 'antd';
 import md5 from 'md5';
-// import {create} from "domain";
-// import UserStore from '../store/user';
-// import ModalAction from '../../common/action/modal';
-// import TipAction from 'common/action/tip';
 
 @inject('userStore')
 @observer
 class UserCreateForm extends React.Component<UserProps,any> {
 
-    private id:number;
-    public userStore:any;
+    private id: string;
+    public userStore: any;
 
-    constructor(props) {
+    constructor(props: UserProps) {
         super(props);
         this.userStore = this.props.userStore;
         // this.state = this.initialState();
-        this.id = this.props.match.params.id | 0;
+        this.id = this.props.match.params.id;
+        this.setUserInfoEmpty();
         // console.log('id',this.id);
     }
 
@@ -37,18 +31,36 @@ class UserCreateForm extends React.Component<UserProps,any> {
 
     componentDidMount() {
         // this.listenTo(UserStore, this.handleTrigger.bind(this));
-        if(this.id) {
-            this.userStore.select(this.id);
+        if (this.id) {
+            this.userStore.getUserInfo(this.id);
             // console.log('userInfo',this.userStore.userInfo);
+        }else{
+            this.setUserInfoEmpty();
         }
+
     }
 
     componentWillReceiveProps(nextProps) {
-        this.id = nextProps.match.params.id | 0;
-        if(this.id) {
-            this.userStore.select(this.id);
+        this.id = nextProps.match.params.id;
+        if (this.id) {
+            this.userStore.getUserInfo(this.id);
+        }else{
+            this.setUserInfoEmpty();
         }
         // this.setState(this.initialState());
+    }
+
+    // 置空User列表
+    setUserInfoEmpty() {
+        this.userStore.setUserInfo({
+            name: '',
+            display_name: '',
+            status: '',
+            type: '',
+            email: '',
+            app_key: '',
+            app_secret: ''
+        });
     }
 
     // /**
@@ -77,8 +89,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
      * @return {}       []
      */
     handleValidSubmit(e) {
-        // values.type = ReactDom.findDOMNode(this.refs.type).value;
-        // values.status = ReactDom.findDOMNode(this.refs.status).value;
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
@@ -94,10 +104,10 @@ class UserCreateForm extends React.Component<UserProps,any> {
                     values.id = this.id;
                 }
                 // debugger;
-                this.userStore.save(values,()=>{
+                this.userStore.saveUser(values,()=>{
                     message.success(this.id ? '保存成功' : '添加成功');
                     this.userStore.setSubmitting(false);
-                    setTimeout(() => this.redirect('user/list'), 1000);
+                    setTimeout(() => this.props.history.push('user/list'), 1000);
                 },()=>{
                     message.error('保存失败');
                     // debugger;
@@ -108,48 +118,28 @@ class UserCreateForm extends React.Component<UserProps,any> {
 
     }
 
+    // 生成密钥
     generateKey() {
-        this.userStore.generateKey(this.id,(data)=>{
-            // this.setState({userInfo: data, hasEmail: !!data.email});
-            this.userStore.setUserInfo(data);
-            this.userStore.setHasEmail(!!data.email);
-        },(err)=>{});
+        this.userStore.generateKey(this.id);
     }
-    /**
-     * handle invalid
-     * @return {} []
-     */
-    handleInvalidSubmit() {
 
-    }
     /**
-     * change input value
-     * @param  {[type]} type  [description]
-     * @param  {[type]} event [description]
-     * @return {[type]}       [description]
-     */
-    // changeInput(type, event) {
-    //     let value = event.target.value;
-    //     let userInfo = this.userStore.userInfo;
-    //     userInfo[type] = value;
-    //     this.userStore.setUserInfo(userInfo);
-    // }
-    /**
-     * 获取属性
+     * 获取readonly属性
      * @param  {[type]} type [description]
      * @return {[type]}      [description]
      */
-    getProps(type) {
+    isReadOnly(type: string) {
         let prop = {
-            value: this.userStore.userInfo[type] || '',
+            readOnly: false
+            // value: this.userStore.userInfo[type] || '',
             // onChange: this.changeInput.bind(this, type)
         };
-        if(this.id && ['name', 'email'].indexOf(type) > -1) {
-            if(type === 'email') {
-                if(this.userStore.hasEmail) {
+        if (this.id && ['name', 'email'].indexOf(type) > -1) {
+            if (type === 'email') {
+                if (this.userStore.hasEmail) {
                     prop.readOnly = true;
                 }
-            }else{
+            } else {
                 prop.readOnly = true;
             }
         }
@@ -158,7 +148,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
         let ldapOn = options.ldap_on === '1' ? true : false;
         let ldap_whiteList = options.ldap_whiteList ? options.ldap_whiteList.split(',') : [];
         let editUserName = this.userStore.userInfo.name || '';
-        if(this.id && ldapOn && ['type', 'status'].indexOf(type) === -1 && ldap_whiteList.indexOf(editUserName) === -1) {
+        if (this.id && ldapOn && ['type', 'status'].indexOf(type) === -1 && ldap_whiteList.indexOf(editUserName) === -1) {
             prop.readOnly = true;
         }
 
@@ -198,7 +188,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
 
     getOptionProp(type, value) {
         let val = this.userStore.userInfo[type];
-        if(val === value) {
+        if (val === value) {
             return {selected: true}
         }
         return {};
@@ -217,8 +207,9 @@ class UserCreateForm extends React.Component<UserProps,any> {
      * @return {} []
      */
     render() {
+        const { userInfo } = this.props.userStore;
         let props = {}
-        if(this.userStore.submitting) {
+        if (this.userStore.submitting) {
             props.disabled = true;
         }
         let options = window.SysConfig.options;
@@ -227,7 +218,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
         const Option = Select.Option;
         const { getFieldDecorator } = this.props.form;
 
-        if(!this.id && ldapOn) {
+        if (!this.id && ldapOn) {
             let ldap_user_page = options.ldap_user_page;
             return (
                 <div className="fk-content-wrap">
@@ -264,8 +255,9 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                         {
                                             required: true,
                                             message: '请输入用户名!'
-                                        }]
-                                })(<Input placeholder="4-20个字符"></Input>)}
+                                        }],
+                                    initialValue: userInfo.name ? userInfo.name : '',
+                                })(<Input {...this.isReadOnly('name')} placeholder="4-20个字符"/>)}
                                 <p className="help-block">登录时所用的名称，不能重复。</p>
                             </FormItem>
                             <FormItem label="邮箱">
@@ -276,8 +268,9 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                         },{
                                         type: 'email',
                                         message: '邮箱格式错误!'
-                                    }]
-                                })(<Input autoComplete='email' placeholder="输入邮箱"></Input>)}
+                                    }],
+                                    initialValue: userInfo.email ? userInfo.email : '',
+                                })(<Input {...this.isReadOnly('email')} autoComplete='email' placeholder="输入邮箱"/>)}
                                 <p className="help-block">用户主要联系方式，不能重复。</p>
                             </FormItem>
                             <FormItem label="密码">
@@ -286,8 +279,8 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                         min: 8,
                                         max: 30,
                                         message: '长度为8到30个字符'
-                                    }]
-                                })(<Input type='password' placeholder="长度为8到30个字符"></Input>)}
+                                    }],
+                                })(<Input {...this.isReadOnly('password')} type='password' placeholder="长度为8到30个字符" />)}
                                 <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
                             </FormItem>
                             <FormItem label="确认密码">
@@ -297,32 +290,22 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                     }, {
                                         validator: this.compareToFirstPassword,
                                     }]
-                                })(<Input type='password' placeholder="请再次输入密码"></Input>)}
+                                })(<Input {...this.isReadOnly('repassword')} type='password' placeholder="请再次输入密码" />)}
                             </FormItem>
-                            {/*<div className="form-group ">*/}
-                                {/*<label>确认密码</label>*/}
-                                {/*<ValidatedInput*/}
-                                    {/*type="password"*/}
-                                    {/*name="repassword"*/}
-                                    {/*ref="repassword"*/}
-                                    {/*className="form-control"*/}
-                                    {/*placeholder=""*/}
-                                    {/*{...this.getProps('repassword')}*/}
-                                    {/*errorHelp='密码不一致'*/}
-                                {/*/>*/}
-                            {/*</div>*/}
                             <button type="submit" {...props} className="btn btn-primary">
                                 {this.userStore.submitting ? '提交中...' : '提交'}
                             </button>
                         </div>
                         <div className="pull-left">
                             <FormItem label="别名">
-                                {getFieldDecorator('display_name',{
-                                })(<Input placeholder="显示名称"></Input>)}
+                                {getFieldDecorator('display_name', {
+                                    initialValue: userInfo.display_name ? userInfo.display_name : '',
+                                })(<Input {...this.isReadOnly('display_name')} placeholder="显示名称" />)}
                             </FormItem>
                             <FormItem label="用户组">
                                 {getFieldDecorator('type',{
-                                })(<Select className="form-control">
+                                    initialValue:  userInfo.type ? userInfo.type.toString() : '',
+                                })(<Select {...this.isReadOnly('type')} className="form-control">
                                     <Option value="2">编辑</Option>
                                     <Option value="1">管理员</Option>
                                     <Option value="3">投稿者</Option>
@@ -330,34 +313,35 @@ class UserCreateForm extends React.Component<UserProps,any> {
                             </FormItem>
                             <FormItem label="状态">
                                 {getFieldDecorator('status',{
-                                })(<Select className="form-control">
+                                    initialValue: userInfo.status ? userInfo.status.toString() : '',
+                                })(<Select {...this.isReadOnly('status')} className="form-control">
                                         <Option value="1">有效</Option>
                                         <Option value="2">禁用</Option>
                                     </Select>)}
                             </FormItem>
-                            <filedset>
+                            {/*<filedset>*/}
                                 <legend>
                                     认证
                                     <button
                                         type="button"
                                         className="btn btn-primary"
                                         style={{marginLeft: 15, marginBottom: 5, padding: '3px 5px'}}
-                                        onClick={this.generateKey.bind(this)}
+                                        onClick={() => this.generateKey()}
                                     >重新生成</button>
                                 </legend>
-                                {/*<div className="form-group">*/}
-                                    {/*<label>App Key</label>*/}
-                                    {/*<div>*/}
-                                        {/*<input type="text" className="form-control" disabled={true}*/}
-                                               {/*value={this.userStore.userInfo.app_key} />*/}
-                                    {/*</div>*/}
-                                {/*</div>*/}
-                                {/*<div className="form-group">*/}
-                                    {/*<label>App Secret</label>*/}
-                                    {/*<input type="text" className="form-control" disabled={true}*/}
-                                           {/*value={this.userStore.userInfo.app_secret} />*/}
-                                {/*</div>*/}
-                            </filedset>
+                                <div className="form-group">
+                                    <label>App Key</label>
+                                    <div>
+                                        <Input type="text" className="form-control" disabled={true}
+                                               value={this.userStore.userInfo.app_key} />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label>App Secret</label>
+                                    <Input type="text" className="form-control" disabled={true}
+                                           value={this.userStore.userInfo.app_secret} />
+                                </div>
+                            {/*</filedset>*/}
                         </div>
                     </Form>
                 </div>
