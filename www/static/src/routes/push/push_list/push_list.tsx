@@ -12,29 +12,15 @@ export default class PushList extends React.Component<PushProps, any> {
 
     pushStore: any;
 
-    constructor(props) {
+    constructor(props: PushProps) {
         super(props);
         this.pushStore = this.props.pushStore
     }
     componentDidMount() {
         this.pushStore.getPushList();
     }
-    // handleTrigger(data, type) {
-    //     switch(type) {
-    //         case 'deletePushFail':
-    //             TipAction.fail(data);
-    //             break;
-    //         case 'deletePushSuccess':
-    //             TipAction.success('删除成功');
-    //             this.setState({loading: true}, PushAction.select.bind(PushAction));
-    //             break;
-    //         case 'getPushList':
-    //             this.setState({pushList: data, loading: false});
-    //             break;
-    //     }
-    // }
 
-    handleDeletePush (appKey) {
+    handleDeletePush (appKey: string) {
         Modal.confirm({
             title: '提示',
             content: '确定删除嘛',

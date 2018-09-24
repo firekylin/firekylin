@@ -3,7 +3,6 @@ import { message } from 'antd';
 import { http } from '../../utils/http';
 import { observable, action } from 'mobx';
 import { PushCreateParams } from './push.model';
-// import { Object } from 'aws-sdk/clients/s3';
 
 export default class PushStore {
     appStore;
@@ -17,8 +16,10 @@ export default class PushStore {
     @observable pushCreateParam: PushCreateParams = {
         submitting: false,
         pushInfo: {
-            key: '',
-            title: ''
+            appKey : '',
+            appSecret : '',
+            title : '',
+            url : '',
         }
     };
 
@@ -30,55 +31,44 @@ export default class PushStore {
 
     @action
     getPushList() {
-        // let url = '/admin/api/options?type=push';
-        // if(id) { url += `&key=${id}`; }
-        // let req = superagent.get(url);
-        // return firekylin.request(req).then(
-        //     data => this.trigger(data, id ? 'getPushInfo' : 'getPushList')
-        // );
         http.get('/admin/api/options?type=push')
             .toPromise()
             .then((data) => {
-                this.setPushList(data);
+                this.setPushList(data.data);
                 this.setLoading(false);
             });
     }
 
     @action
-    getPushInfo(id) {
+    getPushInfo(id: string) {
         http.get(`/admin/api/options?type=push&key=${id}`)
             .toPromise()
             .then((data) => {
                 this.setPushCreateParam({
-                    pushInfo: data
+                    pushInfo: data.data
                 });
+                console.log(data.data);
+                console.log(this.pushCreateParam);
             });
     }
 
     @action
     savePush(data: any) {
-        // let url = '/admin/api/options?method=put&type=push';
-        // let req = superagent.post(url);
-        // req.type('form').send(data);
-        // return firekylin.request(req).then(
-        //     data => this.trigger(data, 'savePushSuccess'),
-        //     err => this.trigger(err, 'savePushFailed')
-        // );
-        http.post(`/admin/api/options?method=put&type=push`, data)
+        return http.post(`/admin/api/options?method=put&type=push`, data)
             .toPromise()
             .then((res) => {
                 message.success(data.id ? '保存成功' : '添加成功');
                 this.setPushCreateParam({submitting: false});
                 // setTimeout(() => this.redirect('push/list'), 1000);
             },(err) => {
-                message.error(err);
+                // message.error(err);
                 this.setPushCreateParam({submitting: false})
             });
     }
 
     @action
-    deletePush(id) {
-        http.get(`/admin/api/options?method=delete&type=push&key=${id}`)
+    deletePush(id: string) {
+        http.post(`/admin/api/options?method=delete&type=push&key=${id}`)
             .toPromise()
             .then((data) => {
                 message.success('删除成功');

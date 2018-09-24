@@ -38,7 +38,7 @@ export default class UserStore{
     setLoading = data => this.loading = data;
 
     @action
-    setKey= data => this.key = data;
+    setKey = data => this.key = data;
 
     @action
     setSubmitting = data => this.submitting = data;
@@ -50,8 +50,8 @@ export default class UserStore{
     setHasEmail = data => this.hasEmail = data;
 
     @action
-    setUserEditPwdState = (data:UserEditPwdState) => {
-        this.userEditPwdState = Object.assign({}, this.userEditPwdState, data);
+    setUserEditPwdState = (data: UserEditPwdState) => {
+        this.userEditPwdState = Object.assign(this.userEditPwdState, data);
     }
 
     // 获取用户列表
@@ -84,7 +84,7 @@ export default class UserStore{
 
     // 通过
     @action
-    passUser(userId : number) {
+    passUser(userId: number) {
         http.post<any>(`/admin/api/user/${userId}?method=put&type=contributor`,)
             .toPromise()
             .then(data => {
@@ -116,7 +116,7 @@ export default class UserStore{
         let id = data.id;
         delete data.id;
         let url = '/admin/api/user';
-        if(id) {
+        if (id) {
             url += '/' + id + '?method=put';
         }
         let req = superagent.post(url);
@@ -127,25 +127,12 @@ export default class UserStore{
         }).catch(err => {
             reject();
             // this.trigger(err, 'saveUserFail');
-        })
+        });
     }
 
     // 生成钥匙
     @action
-    generateKey(userId) {
-        // let url = '/admin/api/user/' + userId + '?type=key';
-        // let req = superagent.post(url);
-        // req.type('form').send();
-        // return firekylin.request(req).then(
-        //     data => {
-        //         // this.trigger(data, 'getUserInfo')
-        //         resolve();
-        //     },
-        //     err => {
-        //         // this.trigger(err, 'getUserInfoFailed')
-        //         reject();
-        //     }
-        // );
+    generateKey(userId: string) {
         http.post<any>(`/admin/api/user/${userId}?type=key`,)
             .toPromise()
             .then(data => {
@@ -157,7 +144,7 @@ export default class UserStore{
             });
     }
 
-    savePwd(data) {
+    savePwd(data: any) {
         // let url = '/admin/user/password';
         // let req = superagent.post(url);
         // req.type('form').send(data);
@@ -166,9 +153,9 @@ export default class UserStore{
         // }).catch(err => {
         //     this.trigger(err, 'saveUserFail');
         // })
-        http.post<any>(`/admin/user/password`,data)
+        http.post<any>(`/admin/user/password`, data)
             .toPromise()
-            .then(data => {
+            .then(() => {
                 message.success('更新成功');
                 this.setUserEditPwdState({submitting: false});
             })

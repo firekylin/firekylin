@@ -104,11 +104,11 @@ export default class extends React.Component<UserProps,any> {
                     <td>{item.last_login_time}</td>
                     <td>
                         {this.userStore.key == '0'
-                            ?
-                                <button type="button" className="btn btn-primary btn-xs" onClick={() => this.props.history.push(`/user/edit/${item.id}`)}>
+                            ? <Link to={`/user/edit/${item.id}`}>
+                                <button type="button" className="btn btn-primary btn-xs">
                                     <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
                                 </button>
-
+                            </Link>
                             : <button type="button" className="btn btn-success btn-xs" onClick={this.pass.bind(this, item)}>
                                 <span className="glyphicon glyphicon-ok"></span>
                                 通过
@@ -135,8 +135,8 @@ export default class extends React.Component<UserProps,any> {
                 <BreadCrumb {...this.props} />
                 <div className="manage-container">
                     <Tabs defaultActiveKey={this.props.userStore.key.toString()} onChange={this.handleSelect.bind(this)}>
-                        <TabPane key='0' tab="全　部" />
-                        <TabPane key='3' tab="审核中" />
+                        <TabPane key="0" tab="全　部" />
+                        <TabPane key="3" tab="审核中" />
                     </Tabs>
                     <table className="table table-striped">
                         <thead>

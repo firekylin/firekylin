@@ -15,26 +15,14 @@ class UserCreateForm extends React.Component<UserProps,any> {
     constructor(props: UserProps) {
         super(props);
         this.userStore = this.props.userStore;
-        // this.state = this.initialState();
         this.id = this.props.match.params.id;
         this.setUserInfoEmpty();
-        // console.log('id',this.id);
     }
 
-    // initialState() {
-    //     return {
-    //         submitting: false,
-    //         userInfo: {},
-    //         hasEmail: false
-    //     };
-    // }
-
     componentDidMount() {
-        // this.listenTo(UserStore, this.handleTrigger.bind(this));
         if (this.id) {
             this.userStore.getUserInfo(this.id);
-            // console.log('userInfo',this.userStore.userInfo);
-        }else{
+        } else {
             this.setUserInfoEmpty();
         }
 
@@ -44,10 +32,9 @@ class UserCreateForm extends React.Component<UserProps,any> {
         this.id = nextProps.match.params.id;
         if (this.id) {
             this.userStore.getUserInfo(this.id);
-        }else{
+        } else {
             this.setUserInfoEmpty();
         }
-        // this.setState(this.initialState());
     }
 
     // 置空User列表
@@ -63,27 +50,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
         });
     }
 
-    // /**
-    //  * hanle trigger
-    //  * @param  {[type]} data [description]
-    //  * @param  {[type]} type [description]
-    //  * @return {[type]}      [description]
-    //  */
-    // handleTrigger(data, type) {
-    //     switch(type) {
-    //         case 'saveUserFail':
-    //             this.setState({submitting: false});
-    //             break;
-    //         case 'saveUserSuccess':
-    //             TipAction.success(this.id ? '保存成功' : '添加成功');
-    //             this.setState({submitting: false});
-    //             setTimeout(() => this.redirect('user/list'), 1000);
-    //             break;
-    //         case 'getUserInfo':
-    //             this.setState({userInfo: data, hasEmail: !!data.email});
-    //             break;
-    //     }
-    // }
     /**
      * save
      * @return {}       []
@@ -93,22 +59,23 @@ class UserCreateForm extends React.Component<UserProps,any> {
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 delete values.repassword;
-                if(this.id && values.password === '') {
+                if (this.id && values.password === '') {
                     delete values.password;
                 } else {
                     let password = md5(window.SysConfig.options.password_salt + values.password);
                     values.password = password;
                 }
                 this.userStore.setSubmitting(true);
-                if(this.id) {
+                if (this.id) {
                     values.id = this.id;
                 }
-                // debugger;
+
                 this.userStore.saveUser(values,()=>{
                     message.success(this.id ? '保存成功' : '添加成功');
                     this.userStore.setSubmitting(false);
-                    setTimeout(() => this.props.history.push('user/list'), 1000);
-                },()=>{
+                    console.log('this.props.history',this.props.history);
+                    setTimeout(() => this.props.history.push('/user/list'), 1000);
+                }, () => {
                     message.error('保存失败');
                     // debugger;
                     this.userStore.setSubmitting(false);
@@ -120,7 +87,9 @@ class UserCreateForm extends React.Component<UserProps,any> {
 
     // 生成密钥
     generateKey() {
-        this.userStore.generateKey(this.id);
+        if (this.id) {
+            this.userStore.generateKey(this.id);
+        }
     }
 
     /**
@@ -186,14 +155,6 @@ class UserCreateForm extends React.Component<UserProps,any> {
         return prop;
     }
 
-    getOptionProp(type, value) {
-        let val = this.userStore.userInfo[type];
-        if (val === value) {
-            return {selected: true}
-        }
-        return {};
-    }
-
     compareToFirstPassword = (rule, value, callback) => {
         const form = this.props.form;
         if (value && value !== form.getFieldValue('password')) {
@@ -202,6 +163,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
             callback();
         }
     }
+
     /**
      * render
      * @return {} []
@@ -276,6 +238,8 @@ class UserCreateForm extends React.Component<UserProps,any> {
                             <FormItem label="密码">
                                 {getFieldDecorator('password',{
                                     rules: [{
+                                        required: true, message: '请输入密码!',
+                                    }, {
                                         min: 8,
                                         max: 30,
                                         message: '长度为8到30个字符'

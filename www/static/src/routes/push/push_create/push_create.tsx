@@ -11,7 +11,7 @@ class PushCreateForm extends React.Component<PushProps,any> {
     pushStore;
     id;
 
-    constructor(props) {
+    constructor(props: PushProps) {
         super(props);
         this.pushStore = this.props.pushStore;
         this.id = this.props.match.params.id;
@@ -21,61 +21,50 @@ class PushCreateForm extends React.Component<PushProps,any> {
         this.pushStore.setPushCreateParam({
             submitting: false,
             pushInfo: {
-                key: '',
-                title: ''
+                appKey : '',
+                appSecret : '',
+                title : '',
+                url : '',
             }
         });
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if (this.id) {
             this.pushStore.getPushInfo(this.id);
+        } else {
+            this.resetPushCreateParams();
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.id = nextProps.match.params.id | 0;
+    componentWillReceiveProps(nextProps: any) {
+        this.id = nextProps.match.params.id;
         if (this.id) {
             this.pushStore.getPushInfo(this.id);
+        } else {
+            this.resetPushCreateParams();
         }
-        // this.setState(this.initialState());
-        this.resetPushCreateParams();
     }
-
-    // handleTrigger(data, type) {
-    //     switch(type) {
-    //         case 'savePushFailed':
-    //             TipAction.fail(data.message);
-    //             this.setState({submitting: false});
-    //             break;
-    //         case 'savePushSuccess':
-    //             TipAction.success(this.id ? '保存成功' : '添加成功');
-    //             this.setState({submitting: false});
-    //             setTimeout(() => this.redirect('push/list'), 1000);
-    //             break;
-    //         case 'getPushInfo':
-    //             this.setState({pushInfo: data});
-    //             break;
-    //     }
-    // }
 
     /**
      * save
      * @return {}       []
      */
-    handleValidSubmit() {
+    handleValidSubmit(e: any) {
+        e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 this.pushStore.setPushCreateParam({submitting: true});
                 if (this.id) {
                     values.id = this.id;
                 }
-                // console.log(values);
-                // debugger;
-                this.pushStore.savePush(values);
+                this.pushStore.savePush(values).then(() => {
+                    setTimeout(() => this.props.history.push('/push/list'), 1000);
+                });
             }
         });
     }
+
     /**
      * render
      * @return {} []
@@ -84,19 +73,27 @@ class PushCreateForm extends React.Component<PushProps,any> {
         const FormItem = Form.Item;
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
-            labelCol: { span: 1 },
-            wrapperCol: { span: 4 },
+            labelCol: {
+                xl: { span: 2 },
+                sm: { span: 8 },
+            },
+            wrapperCol: {
+                xl: { span: 8 },
+                sm: { span: 16 },
+            },
         };
-
+        const tailFormItemLayout = {
+            wrapperCol: {
+                xl: {
+                    span: 16,
+                    offset: 1,
+                }
+            },
+        };
+        const { pushInfo } = this.pushStore.pushCreateParam;
         let props = {};
         if (this.pushStore.pushCreateParam.submitting) {
             props.disabled = true;
-        }
-
-        // 如果是在编辑状态下在没有拿到数据之前不做渲染
-        // 针对 react-bootstrap-validation 插件在 render 之后不更新 defaultValue 做的处理
-        if (this.id && !this.pushStore.pushCreateParam.pushInfo.title) {
-            return null;
         }
 
         return (
@@ -104,7 +101,6 @@ class PushCreateForm extends React.Component<PushProps,any> {
                 <BreadCrumb {...this.props} />
                 <div className="manage-container">
                     <Form
-                        // model={this.pushStore.pushCreateParam.pushInfo}
                         className="tag-create clearfix"
                         onSubmit={this.handleValidSubmit.bind(this)}
                     >
@@ -118,82 +114,42 @@ class PushCreateForm extends React.Component<PushProps,any> {
                                 rules: [{
                                         required: true,
                                         message: '请填写网站名称!'
-                                    }]
+                                    }],
+                                initialValue: pushInfo.title ? pushInfo.title : '',
                             })(<Input placeholder="请填写网站名称" />)}
                         </FormItem>
-                        {/*<ValidatedInput*/}
-                            {/*name="title"*/}
-                            {/*type="text"*/}
-                            {/*label="网站名称"*/}
-                            {/*labelClassName="col-xs-1"*/}
-                            {/*wrapperClassName="col-xs-4"*/}
-                            {/*validate="required"*/}
-                            {/*errorHelp={{*/}
-                                {/*required: '请填写网站名称'*/}
-                            {/*}}*/}
-                        {/*/>*/}
                         <FormItem label="网站地址" {...formItemLayout}>
                             {getFieldDecorator('url', {
                                 rules: [{
                                     required: true,
                                     message: '请填写网站地址!'
-                                }]
+                                }],
+                                initialValue: pushInfo.url ? pushInfo.url : '',
                             })(<Input placeholder="请填写网站地址" />)}
                         </FormItem>
-                        {/*<ValidatedInput*/}
-                        {/*name="url"*/}
-                        {/*type="text"*/}
-                        {/*label="网站地址"*/}
-                        {/*labelClassName="col-xs-1"*/}
-                        {/*wrapperClassName="col-xs-4"*/}
-                        {/*validate="required"*/}
-                        {/*errorHelp={{*/}
-                            {/*required: '请填写网站地址'*/}
-                        {/*}}*/}
-                        {/*/>*/}
                         <FormItem label="推送公钥" {...formItemLayout}>
                             {getFieldDecorator('appKey', {
                                 rules: [{
                                     required: true,
                                     message: '请填写推送公钥!'
-                                }]
+                                }],
+                                initialValue: pushInfo.appKey ? pushInfo.appKey : '',
                             })(<Input placeholder="请填写推送公钥" />)}
                         </FormItem>
-                        {/*<ValidatedInput*/}
-                            {/*name="appKey"*/}
-                            {/*type="text"*/}
-                            {/*label="推送公钥"*/}
-                            {/*labelClassName="col-xs-1"*/}
-                            {/*wrapperClassName="col-xs-4"*/}
-                            {/*validate="required"*/}
-                            {/*errorHelp={{*/}
-                                {/*required: '请填写推送公钥'*/}
-                            {/*}}*/}
-                        {/*/>*/}
                         <FormItem label="推送秘钥" {...formItemLayout}>
                             {getFieldDecorator('appSecret', {
                                 rules: [{
                                     required: true,
                                     message: '请填写推送秘钥!'
-                                }]
+                                }],
+                                initialValue: pushInfo.appSecret ? pushInfo.appSecret : '',
                             })(<Input placeholder="请填写推送秘钥" />)}
                         </FormItem>
-                        {/*<ValidatedInput*/}
-                            {/*name="appSecret"*/}
-                            {/*type="text"*/}
-                            {/*label="推送秘钥"*/}
-                            {/*labelClassName="col-xs-1"*/}
-                            {/*wrapperClassName="col-xs-4"*/}
-                            {/*validate="required"*/}
-                            {/*errorHelp={{*/}
-                                {/*required: '请填写推送秘钥'*/}
-                            {/*}}*/}
-                        {/*/>*/}
-                        <div className="form-group col-xs-12">
+                        <FormItem  {...tailFormItemLayout}>
                             <button type="submit" {...props} className="btn btn-primary">
                                 {this.pushStore.pushCreateParam.submitting ? '提交中...' : '提交'}
                             </button>
-                        </div>
+                        </FormItem>
                 </Form>
                 </div>
             </div>
