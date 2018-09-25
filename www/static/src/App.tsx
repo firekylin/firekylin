@@ -20,7 +20,11 @@ declare global {
                 password_salt: string;
                 theme: string;
                 themeConfig: any;
-                navigation: any,
+                navigation: any;
+                logo_url: string;
+                favicon_url: string;
+                description: string;
+                site_url: string;
             },
             token: string;
         };

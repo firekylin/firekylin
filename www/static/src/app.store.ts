@@ -10,6 +10,7 @@ import PushStore from './routes/push/push.store';
 import PageStore from './routes/page/page.store';
 import ArticleStore from './components/article/article.store';
 import AppearanceStore from './routes/appearance/appearance.store';
+import OptionsStore from './routes/options/options.store';
 
 configure({
     enforceActions: true
@@ -44,8 +45,9 @@ export class AppStore {
 }
 
 const store = {
-    ...new AppearanceStore(),
     ...new AppStore(),
+    ...new OptionsStore(),
+    ...new AppearanceStore(),
 };
 
 export default store;
