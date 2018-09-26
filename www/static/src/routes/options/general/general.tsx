@@ -1,6 +1,6 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, Input, Button, Select, Upload, Icon, message } from 'antd';
+import { Form, Input, Button, Upload, Icon, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { GeneralProps } from './general.model';
 import { UploadChangeParam } from 'antd/lib/upload';
@@ -22,7 +22,6 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-                console.log(values);
                 this.props.generalStore.submit(values);
             }
         });
