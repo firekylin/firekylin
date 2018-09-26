@@ -25,6 +25,11 @@ declare global {
                 favicon_url: string;
                 description: string;
                 site_url: string;
+                keywords: string;
+                github_url: string;
+                twitter_url: string;
+                miitbeian: string;
+                mpsbeian: string;
             },
             token: string;
         };

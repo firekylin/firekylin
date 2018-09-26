@@ -68,7 +68,7 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
               <Icon type={this.state.loading ? 'loading' : 'plus'} />
               <div className="ant-upload-text">Upload</div>
             </div>
-          );
+        );
         return (
             <Modal
                 title="插入图片"
