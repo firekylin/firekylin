@@ -1,9 +1,11 @@
 import { RouteComponentProps } from 'react-router';
 import PageStore from './page.store';
 import { ArticleMatchParams } from '../../models/article.model';
+import SharedStore from '../../shared.store';
 
 export interface PageListProps extends RouteComponentProps<{}> {
     pageStore: PageStore;
+    sharedStore: SharedStore;
 }
 
 export interface PageCreateProps extends RouteComponentProps<ArticleMatchParams> {

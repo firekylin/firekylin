@@ -30,6 +30,8 @@ declare global {
                 twitter_url: string;
                 miitbeian: string;
                 mpsbeian: string;
+                frontPagePage: string;
+                frontPage: 'recent' | 'page';
             },
             token: string;
         };

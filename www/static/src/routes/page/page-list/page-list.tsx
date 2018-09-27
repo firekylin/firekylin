@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table, Button } from 'antd';
+import { Table, Button, message } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
@@ -8,39 +8,48 @@ import { PageListProps } from '../page.model';
 
 const confirm = Modal.confirm;
 
-@inject('pageStore')
+@inject('pageStore', 'sharedStore')
 @observer 
 class PageList extends React.Component<PageListProps, {}> {
     constructor(props: PageListProps) {
         super(props);
     }
     componentDidMount() {
-        const pageStore = this.props.pageStore;
+        const { pageStore, sharedStore } = this.props;
         const search = this.props.location.search;
         const page = new URLSearchParams(search).get('page') || '1';
         this.props.pageStore.setPage(page);
-        pageStore.getPageList();
+        sharedStore.getPageList(pageStore.page);
     }
     delete(id: string) {
         confirm({
           title: '提示',
           content: '确定删除吗?',
           onOk: () => {
-            this.props.pageStore.pageDeleteById(id);
+            this.props.pageStore.pageDeleteById(id)
+            .subscribe(
+                res => {
+                  if (res.errno === 0) {
+                    message.success('删除成功');
+                    this.props.sharedStore.getPageList(this.props.pageStore.page);
+                  }
+                }
+            );
           }
         });
     }
 
     render() {
         const Column = Table.Column;
-        const pageStore = this.props.pageStore;
-        const { pageList, loading, pagination } = this.props.pageStore;
+        const { pageStore, sharedStore } = this.props;
+        const { pagination } = pageStore;
+        const { pageList, loading } = sharedStore;
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <Table 
                     dataSource={pageList}
-                    loading={loading}
+                    loading={loading.page}
                     pagination={pagination}
                     style={{margin: '10px 20px'}}
                     onChange={e => {

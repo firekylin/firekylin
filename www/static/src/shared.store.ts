@@ -5,10 +5,13 @@ import { Category } from './models/category.model';
 import { Tag } from './models/tag.model';
 import { Observable } from 'rxjs';
 import { IResult } from './models/http.model';
+import { map } from 'rxjs/operators';
+import { tools } from './utils/tools';
 
 interface SharedLoading {
   category?: boolean;
   tag?: boolean;
+  page?: boolean;
 }
 
 class SharedStore {
@@ -17,10 +20,12 @@ class SharedStore {
   @observable defaultCategory = '';
   @observable categoryList: Category[] = [];
   @observable templateList: string[] = [];
+  @observable pageList = [];
   @observable tagList: Tag[] = [];
   @observable loading: SharedLoading = {
     category: true,
     tag: true,
+    page: true,
   };
 
   @action
@@ -46,6 +51,9 @@ class SharedStore {
 
   @action
   setTagList = (data: Tag[]) => this.tagList = data
+
+  @action
+  setPageList = data => this.pageList = data
 
   @action
   setLoading(loading: SharedLoading) {
@@ -112,6 +120,37 @@ class SharedStore {
         if (res.errno === 0) {
           this.setTemplateList(res.data);
         }
+      }
+    );
+  }
+
+  // 获取页面
+  getPageList(page: string): void {
+    this.setLoading({page: true});
+    http.get<any[]>('/admin/api/page', {page})
+      .pipe(
+        map(res => {
+          res.data.map((item, key) => {
+            item.key = item.id;
+            item.author = item.user.name;
+            item.statusText = tools.getStatusText(item.status, item.create_time);
+          });
+          return res;
+        })
+    )
+    .subscribe(
+      res => {
+        if (res.errno === 0) {
+          this.setPageList(res.data);
+          this.setLoading({page: false});
+        } else {
+          message.error(res.errmsg);
+          this.setLoading({page: false});
+        }
+      },
+      err => {
+        message.error(err);
+        this.setLoading({page: false});
       }
     );
   }
