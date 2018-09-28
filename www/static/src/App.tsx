@@ -37,6 +37,12 @@ declare global {
                 postsListSize: number;
                 auto_summary: number;
                 feedFullText: '0' | '1';
+                ldap_url: string;
+                ldap_connect_timeout: number;
+                ldap_baseDn: string;
+                ldap_user_page: string;
+                ldap_whiteList: string;
+                ldap_log: '0' | '1';
             },
             token: string;
         };
