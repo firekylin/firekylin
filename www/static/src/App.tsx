@@ -14,7 +14,7 @@ declare global {
             };
             options: {
                 title: string;
-                two_factor_auth: true;
+                two_factor_auth: string;
                 ldap_on: string;
                 intranet: boolean;
                 password_salt: string;
