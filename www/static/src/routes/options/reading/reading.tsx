@@ -17,25 +17,16 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
 
     constructor(props: ReadingProps) {
         super(props);
-        let { frontPage, frontPagePage } = this.state.options;
+        let { frontPage } = this.state.options;
         if (!frontPage) {
             frontPage = 'recent';
-        } else if (frontPage !== 'page') {
-            this.state.options.frontPagePage = frontPage;
         } else {
-            this.state.options.frontPagePage = props.sharedStore.pageList.length ? (props.sharedStore.pageList[0] as any).pathname : '';
             frontPage = 'page';
-        } 
-        if (frontPagePage) {
-            this.state.options.frontPagePage = frontPagePage;
-        } else {
-            this.state.options.frontPagePage = props.sharedStore.pageList.length ? (props.sharedStore.pageList[0] as any).pathname : '';
         }
         this.state.options.frontPage = frontPage;
     }
 
     componentDidMount() {
-        console.log(this.state);
         this.props.sharedStore.getPageList('-1');
     }
 
@@ -43,6 +34,11 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
+                if (values.frontPage === 'recent') {
+                        values.frontPage = '';
+                    } else if (values.frontPage === 'page') {
+                        values.frontPage = this.state.options.frontPagePage;
+                }
                 this.props.readingStore.submit(values);
             }
         });
@@ -50,6 +46,9 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
 
     renderPageList() {
         const { pageList } = this.props.sharedStore;
+        if (!this.state.options.frontPagePage) {
+            this.state.options.frontPagePage = pageList.length > 0 ? (pageList[0] as any).pathname : '';
+        }
         return (
             <Select
                 placeholder="请选择页面"
@@ -89,7 +88,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
             },
         };
 
-        const { data: {options}, loading } = this.props.readingStore;
+        const { loading } = this.props.readingStore;
         const postListUrl = location.origin + '/post/list';
         
         return (
@@ -106,10 +105,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             {getFieldDecorator('frontPage', {
                                 initialValue: this.state.options.frontPage,
                             })(
-                                <RadioGroup 
-                                    onChange={e => {
-                                        console.log(e.target.value);
-                                    }}
+                                <RadioGroup
                                 >
                                     <Radio value="recent">显示最新发布的文章</Radio>
                                     <Radio value="page">
@@ -129,13 +125,9 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             label="自动生成文章TOC目录"
                         >
                             {getFieldDecorator('postTocManual', {
-                                initialValue: this.state.options.frontPage,
+                                initialValue: this.state.options.postTocManual || '0',
                             })(
-                                <RadioGroup 
-                                    onChange={e => {
-                                        console.log(e.target.value);
-                                    }}
-                                >
+                                <RadioGroup>
                                     <Radio value="0">是</Radio>
                                     <Radio value="1">否</Radio>
                                 </RadioGroup>
@@ -148,15 +140,11 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             label="文章审核通过时更新文章的发布时间"
                         >
                             {getFieldDecorator('auditFreshCreateTime', {
-                                initialValue: this.state.options.frontPage,
+                                initialValue: this.state.options.auditFreshCreateTime || '1',
                             })(
-                                <RadioGroup 
-                                    onChange={e => {
-                                        console.log(e.target.value);
-                                    }}
-                                >
-                                    <Radio value="0">是</Radio>
-                                    <Radio value="1">否</Radio>
+                                <RadioGroup>
+                                    <Radio value="1">是</Radio>
+                                    <Radio value="0">否</Radio>
                                 </RadioGroup>
                             )}
                         </FormItem>
@@ -166,7 +154,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             label="每页文章数目"
                         >
                             {getFieldDecorator('postsListSize', {
-                                initialValue: 10
+                                initialValue: this.state.options.postsListSize || 10
                             })(
                                 <Input />
                             )}
@@ -177,7 +165,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             label="自动生成摘要截取的字符数"
                         >
                             {getFieldDecorator('auto_summary', {
-                                initialValue: 0
+                                initialValue: this.state.options.auto_summary || 0
                             })(
                                 <Input />
                             )}
@@ -189,7 +177,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             label="RSS 聚合全文输出"
                         >
                             {getFieldDecorator('feedFullText', {
-                                initialValue: '1',
+                                initialValue: this.state.options.feedFullText || '1',
                             })(
                                 <RadioGroup>
                                     <Radio value="1">全文输出</Radio>

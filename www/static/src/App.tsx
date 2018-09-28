@@ -32,6 +32,11 @@ declare global {
                 mpsbeian: string;
                 frontPagePage: string;
                 frontPage: 'recent' | 'page';
+                postTocManual: '0' | '1';
+                auditFreshCreateTime: '0' | '1';
+                postsListSize: number;
+                auto_summary: number;
+                feedFullText: '0' | '1';
             },
             token: string;
         };
