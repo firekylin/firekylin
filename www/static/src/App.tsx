@@ -44,6 +44,7 @@ declare global {
                 ldap_whiteList: string;
                 ldap_log: '0' | '1';
                 comment: any;
+                analyze_code: string;
             },
             token: string;
         };
