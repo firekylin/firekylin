@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { Observable, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, from, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { IResult } from '../models/http.model';
 import { auth } from './auth';
 import { message } from 'antd';
@@ -33,13 +33,8 @@ axios.interceptors.response.use(
         return Promise.resolve(result);
     }, 
     (error: AxiosError) => {
-        try {
-            message.error((error.response as AxiosResponse).statusText);
-        } catch {
-            message.error('未知错误');
-            console.log(error);
-        }
-        return Promise.reject(error);
+        console.error(`错误'${error}`);
+        return Promise.reject(error.response);
     }
 );
 
@@ -47,6 +42,7 @@ axios.interceptors.response.use(
  * HttpClient
  */
 class HttpClient {
+    error$: Observable<AxiosResponse>;
     /**
      * @param url 
      * @param data
@@ -58,7 +54,16 @@ class HttpClient {
         }
         return from(axios.get(url, config))
             .pipe(
-                map(response => response.data)
+                map(response => response.data),
+                catchError((error: AxiosResponse | undefined) => {
+                    console.log(error);
+                    if (error === undefined) {
+                        return message.error('请求出错');
+                    }
+                    this.error$ = of(error);
+                    this.handleError();
+                    return this.error$;
+                })
             );
     }
 
@@ -81,9 +86,9 @@ class HttpClient {
             xhr.onload = function() {
                 let res = JSON.parse(xhr.responseText);
                 if (res.errno !== 0) {
-                reject(res);
+                    reject(res);
                 } else {
-                resolve(res);
+                    resolve(res);
                 }
         
             };
@@ -91,7 +96,22 @@ class HttpClient {
                 reject(xhr);
             };
             xhr.send(data);
-            });
+        });
+    }
+
+    // 处理请求错误
+    handleError() {
+        this.error$.subscribe(
+            err => {
+                switch (err.status) {
+                    case 403:
+                        // do something...
+                        break;
+                    default:
+                        message.error(`${err.status}: ${err.statusText}`);
+                }
+            }
+        );
     }
 }
 // Export A HttpClient Instance
