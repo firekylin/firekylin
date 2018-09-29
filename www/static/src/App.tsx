@@ -43,6 +43,7 @@ declare global {
                 ldap_user_page: string;
                 ldap_whiteList: string;
                 ldap_log: '0' | '1';
+                comment: any;
             },
             token: string;
         };

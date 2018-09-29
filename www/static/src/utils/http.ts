@@ -75,7 +75,16 @@ class HttpClient {
     post<T, U = string>(url: string, data?: any, config: AxiosRequestConfig = {}): Observable<IResult<T, U>> {
         return from(axios.post(url, data, config))
                 .pipe(
-                    map(response => response.data)
+                    map(response => response.data),
+                    catchError((error: AxiosResponse | undefined) => {
+                        console.log(error);
+                        if (error === undefined) {
+                            return message.error('请求出错');
+                        }
+                        this.error$ = of(error);
+                        this.handleError();
+                        return this.error$;
+                    })
                 );
     }
 
