@@ -8,6 +8,7 @@ import LDAP from './ldap/ldap';
 import Comment from './comment/comment';
 import Analysis from './analysis/analysis';
 import OptionsPush from './push/push';
+import OptionsExport from './export/export';
 
 export default class Options extends React.Component<OptionsProps, any> {
     render() {
@@ -22,6 +23,7 @@ export default class Options extends React.Component<OptionsProps, any> {
                     <Route path={`${match.path}/comment`} component={Comment}/>
                     <Route path={`${match.path}/analytic`} component={Analysis}/>
                     <Route path={`${match.path}/push`} component={OptionsPush}/>
+                    <Route path={`${match.path}/export`} component={OptionsExport}/>
                     <Redirect to={`${match.path}/general`}/>
                 </Switch>
             </>
