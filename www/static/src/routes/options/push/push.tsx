@@ -1,11 +1,10 @@
 import React from 'react';
-import { Form, Input, Button, message, Radio } from 'antd';
+import { Form, Button, Radio } from 'antd';
 import { inject, observer } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { OptionsPushProps } from './push.model';
 import RadioGroup from 'antd/lib/radio/group';
 const FormItem = Form.Item;
-const TextArea = Input.TextArea;
 
 @inject('optionsPushStore')
 @observer
