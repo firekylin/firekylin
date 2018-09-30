@@ -45,6 +45,7 @@ declare global {
                 ldap_log: '0' | '1';
                 comment: any;
                 analyze_code: string;
+                push: '0' | '1';
             },
             token: string;
         };
