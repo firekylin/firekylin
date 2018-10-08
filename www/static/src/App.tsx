@@ -46,6 +46,7 @@ declare global {
                 comment: any;
                 analyze_code: string;
                 push: '0' | '1';
+                upload: any;
             },
             token: string;
         };

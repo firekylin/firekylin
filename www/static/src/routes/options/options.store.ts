@@ -5,6 +5,7 @@ import LDAPStore from './ldap/ldap.store';
 import CommentStore from './comment/comment.store';
 import AnalysisStore from './analysis/analysis.store';
 import OptionsPushStore from './push/push.store';
+import OptionsUploadStore from './upload/upload.store';
 
 class OptionsStore {
     generalStore: GeneralStore;
@@ -14,6 +15,7 @@ class OptionsStore {
     commentStore: CommentStore;
     analysisStore: AnalysisStore;
     optionsPushStore: OptionsPushStore;
+    optionsUploadStore: OptionsUploadStore;
     constructor() {
         this.generalStore = new GeneralStore();
         this.readingStore = new ReadingStore();
@@ -22,6 +24,7 @@ class OptionsStore {
         this.commentStore = new CommentStore();
         this.analysisStore = new AnalysisStore();
         this.optionsPushStore = new OptionsPushStore();
+        this.optionsUploadStore = new OptionsUploadStore();
     }
 }
 
