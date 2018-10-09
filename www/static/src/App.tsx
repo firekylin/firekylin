@@ -47,6 +47,7 @@ declare global {
                 analyze_code: string;
                 push: '0' | '1';
                 upload: any;
+                rssImportList: any[];
             },
             token: string;
         };

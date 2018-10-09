@@ -6,6 +6,7 @@ import CommentStore from './comment/comment.store';
 import AnalysisStore from './analysis/analysis.store';
 import OptionsPushStore from './push/push.store';
 import OptionsUploadStore from './upload/upload.store';
+import OptionsImportStore from './import/import.store';
 
 class OptionsStore {
     generalStore: GeneralStore;
@@ -16,6 +17,7 @@ class OptionsStore {
     analysisStore: AnalysisStore;
     optionsPushStore: OptionsPushStore;
     optionsUploadStore: OptionsUploadStore;
+    optionsImportStore: OptionsImportStore;
     constructor() {
         this.generalStore = new GeneralStore();
         this.readingStore = new ReadingStore();
@@ -25,6 +27,7 @@ class OptionsStore {
         this.analysisStore = new AnalysisStore();
         this.optionsPushStore = new OptionsPushStore();
         this.optionsUploadStore = new OptionsUploadStore();
+        this.optionsImportStore = new OptionsImportStore();
     }
 }
 

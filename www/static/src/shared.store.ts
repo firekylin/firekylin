@@ -19,6 +19,7 @@ class SharedStore {
   getDefaultCategory$: Observable<IResult<string>>;
   @observable defaultCategory = '';
   @observable categoryList: Category[] = [];
+  @observable userList: any = [];
   @observable templateList: string[] = [];
   @observable pageList = [];
   @observable tagList: Tag[] = [];
@@ -32,6 +33,9 @@ class SharedStore {
   setDefaultCategory = (data: string) => {
     this.defaultCategory = data;
   }
+
+  @action
+  setUserList = data => this.userList = data
 
   @action
   setCategoryList = (data: Category[]) => {
@@ -81,6 +85,10 @@ class SharedStore {
           message.error(err);
         }
       );
+  }
+
+  getUserList(type?: string) {
+    return http.get<any>(`/admin/api/user`, {type})
   }
 
   // 获取默认分类

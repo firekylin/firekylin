@@ -95,7 +95,7 @@ class HttpClient {
             xhr.onload = function() {
                 let res = JSON.parse(xhr.responseText);
                 if (res.errno !== 0) {
-                    reject(res);
+                    resolve(res);
                 } else {
                     resolve(res);
                 }

@@ -10,6 +10,7 @@ import Analysis from './analysis/analysis';
 import OptionsPush from './push/push';
 import OptionsExport from './export/export';
 import OptionsUpload from './upload/upload';
+import OptionsImport from './import/import';
 
 export default class Options extends React.Component<OptionsProps, any> {
     render() {
@@ -26,6 +27,7 @@ export default class Options extends React.Component<OptionsProps, any> {
                     <Route path={`${match.path}/push`} component={OptionsPush}/>
                     <Route path={`${match.path}/export`} component={OptionsExport}/>
                     <Route path={`${match.path}/upload`} component={OptionsUpload}/>
+                    <Route path={`${match.path}/import`} component={OptionsImport}/>
                     <Redirect to={`${match.path}/general`}/>
                 </Switch>
             </>
