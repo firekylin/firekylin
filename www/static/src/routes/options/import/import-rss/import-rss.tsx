@@ -162,7 +162,6 @@ class OptionsImportRss extends React.Component<any, any> {
                 <a 
                     onClick={() => {
                         if (editingRSS.url && editingRSS.user && editingRSS.cate) {
-                            console.log(editingRSS);
                             this.edit(this.state.editingRow, this.state.editingRSS);
                             this.setState({editingRow: -1, editingRSS: null});
                         }
@@ -201,7 +200,6 @@ class OptionsImportRss extends React.Component<any, any> {
             cate: selectCate
         });
         this.updateRSS(rssImportList);
-        console.log(rssImportList);
     }
 
     setHasError(key: string, error: boolean) {

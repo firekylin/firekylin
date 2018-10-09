@@ -47,8 +47,6 @@ export default class PushStore {
                 this.setPushCreateParam({
                     pushInfo: data.data
                 });
-                console.log(data.data);
-                console.log(this.pushCreateParam);
             });
     }
 

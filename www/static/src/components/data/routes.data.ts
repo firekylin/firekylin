@@ -1,12 +1,13 @@
-// const themePages = [{
-//     url: '/appearance/theme',
-//         title: '主题管理'
-//     },
-//     {
-//         url: '/appearance/navigation',
-//         title: '菜单管理'
-//     }
-// ];
+export const InitiateThemePages = [
+    {
+        url: '/appearance/theme',
+        title: '主题管理'
+    },
+    {
+        url: '/appearance/navigation',
+        title: '菜单管理'
+    }
+];
 
 export const InitiateRoutes = (themePages) => [{
         url: '/dashboard',

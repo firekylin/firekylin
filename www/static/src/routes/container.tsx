@@ -18,11 +18,14 @@ const routerOptions = {
 };
 
 class Container extends React.Component<any, {}> {
+    constructor(props: any) {
+        super(props);
+    }
     render() {
         return (
             <Router {...routerOptions}>
                 <>
-                    <Sidebar />
+                    <Sidebar {...this.props} />
                     <div className="content">
                         <Switch>
                             <Route exact={true} path="/dashboard" component={DashBoard}/>

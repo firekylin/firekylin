@@ -191,7 +191,6 @@ class LoginForm extends React.Component<LoginProps, any> {
   render() {
     const search = this.props.location.search;
     const reset = new URLSearchParams(search).get('reset');
-    console.log(reset);
     if (reset) {
       return this.renderReset();
     }
