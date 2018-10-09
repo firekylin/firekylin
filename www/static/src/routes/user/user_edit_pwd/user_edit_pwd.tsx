@@ -1,18 +1,21 @@
 import * as React from 'react';
-// import ReactDom from 'react-dom';
-// import {Link} from 'react-router-dom';
 import { observer, inject } from 'mobx-react';
-import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, Input } from 'antd';
 import md5 from 'md5';
+import { FormComponentProps } from 'antd/lib/form';
+import UserStore from '../user.store';
+
+interface UserEditPWDProps extends FormComponentProps {
+    userStore: UserStore;
+}
 
 @inject('userStore')
 @observer
-class UserEditPwdForm extends React.Component<UserProps, any> {
+class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
     public userStore: any;
 
-    constructor(props: UserProps) {
+    constructor(props: UserEditPWDProps) {
         super(props);
         this.userStore = this.props.userStore;
     }
@@ -49,7 +52,9 @@ class UserEditPwdForm extends React.Component<UserProps, any> {
      * @return {} []
      */
     render() {
-        let props = {}
+        let props = {
+            disabled: false,
+        };
         if (this.userStore.userEditPwdState.submitting) {
             props.disabled = true;
         }
@@ -58,10 +63,10 @@ class UserEditPwdForm extends React.Component<UserProps, any> {
 
         let options = window.SysConfig.options;
         let ldapOn = options.ldap_on === '1' ? true : false;
-        let ldap_whiteList = options.ldap_whiteList ? options.ldap_whiteList.split(',') : [];
+        let ldapWhiteList = options.ldap_whiteList ? options.ldap_whiteList.split(',') : [];
         let userName = window.SysConfig.userInfo && window.SysConfig.userInfo.name || '';
 
-        if (ldapOn && ldap_whiteList.indexOf(userName) === -1) {
+        if (ldapOn && ldapWhiteList.indexOf(userName) === -1) {
             let ldap_user_page = options.ldap_user_page;
             return (
                 <div className="fk-content-wrap">
@@ -71,7 +76,7 @@ class UserEditPwdForm extends React.Component<UserProps, any> {
                         <p>本系统已开启LDAP认证服务，LDAP服务开启后用户的用户名、密码、邮箱、别名均由LDAP统一管理，本系统不能修改。</p>
                         <div className="alert alert-warning" role="alert">
                             如需要修改，请使用给本系统提供LDAP服务的
-                            { ldap_user_page ? <a href={ldap_user_page} target="_blank">用户管理服务</a> : '用户管理服务' }
+                            { ldap_user_page ? <a href={ldap_user_page} target="_blank">用户管理服务</a> : '用户管理服务'}
                             ，或者联系系统管理员。
                         </div>
                     </div>
@@ -85,7 +90,7 @@ class UserEditPwdForm extends React.Component<UserProps, any> {
                 <div className="manage-container">
                     <Form
                         className="user-editpwd clearfix"
-                        onSubmit={this.handleValidSubmit.bind(this)}
+                        onSubmit={this.handleValidSubmit}
                     >
                         <div className="pull-left">
                             <FormItem label="密码">

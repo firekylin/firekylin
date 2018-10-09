@@ -4,15 +4,22 @@ import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, message, Input, Select } from 'antd';
 import md5 from 'md5';
+import { FormComponentProps } from 'antd/lib/form';
+import UserStore from '../user.store';
+import { RouteComponentProps } from 'react-router';
+
+interface UserCreateProps extends FormComponentProps, RouteComponentProps<any> {
+    userStore: UserStore;
+}
 
 @inject('userStore')
 @observer
-class UserCreateForm extends React.Component<UserProps,any> {
+class UserCreateForm extends React.Component<UserCreateProps, any> {
 
     private id: string;
     public userStore: any;
 
-    constructor(props: UserProps) {
+    constructor(props: UserCreateProps) {
         super(props);
         this.userStore = this.props.userStore;
         this.id = this.props.match.params.id;
@@ -28,7 +35,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
 
     }
 
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps: any) {
         this.id = nextProps.match.params.id;
         if (this.id) {
             this.userStore.getUserInfo(this.id);
@@ -54,7 +61,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
      * save
      * @return {}       []
      */
-    handleValidSubmit(e) {
+    handleValidSubmit(e: React.FormEvent<any>) {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
@@ -70,14 +77,13 @@ class UserCreateForm extends React.Component<UserProps,any> {
                     values.id = this.id;
                 }
 
-                this.userStore.saveUser(values,()=>{
+                this.userStore.saveUser(values, () => {
                     message.success(this.id ? '保存成功' : '添加成功');
                     this.userStore.setSubmitting(false);
-                    console.log('this.props.history',this.props.history);
+                    console.log('this.props.history', this.props.history);
                     setTimeout(() => this.props.history.push('/user/list'), 1000);
-                }, () => {
+                },                      () => {
                     message.error('保存失败');
-                    // debugger;
                     this.userStore.setSubmitting(false);
                 });
             }
@@ -115,42 +121,11 @@ class UserCreateForm extends React.Component<UserProps,any> {
 
         let options = window.SysConfig.options;
         let ldapOn = options.ldap_on === '1' ? true : false;
-        let ldap_whiteList = options.ldap_whiteList ? options.ldap_whiteList.split(',') : [];
+        let ldapWhiteList = options.ldap_whiteList ? options.ldap_whiteList.split(',') : [];
         let editUserName = this.userStore.userInfo.name || '';
-        if (this.id && ldapOn && ['type', 'status'].indexOf(type) === -1 && ldap_whiteList.indexOf(editUserName) === -1) {
+        if (this.id && ldapOn && ['type', 'status'].indexOf(type) === -1 && ldapWhiteList.indexOf(editUserName) === -1) {
             prop.readOnly = true;
         }
-
-        // let validatePrefix = '';
-        // if(!this.id && ['name', 'email'].indexOf(type) > -1) {
-        //     validatePrefix = 'required,';
-        // }
-        // let validates = {
-        //     name: 'isLength:4:20',
-        //     email: 'isEmail',
-        //     password: val => {
-        //         //编辑时可以不用输入用户名
-        //         if(this.id && val === '') {
-        //             return true;
-        //         }
-        //
-        //         if(val === '') {
-        //             return '请输出密码';
-        //         }
-        //
-        //         if(val.length < 8 || val.length > 30) {
-        //             return '密码长度为8到30个字符';
-        //         }
-        //
-        //         return true;
-        //     },
-        //     repassword: (val, context) => val === context.password
-        // }
-        // if(typeof validates[type] === 'string') {
-        //     prop.validate = validatePrefix + validates[type];
-        // }else{
-        //     prop.validate = validates[type];
-        // }
 
         return prop;
     }
@@ -170,7 +145,9 @@ class UserCreateForm extends React.Component<UserProps,any> {
      */
     render() {
         const { userInfo } = this.props.userStore;
-        let props = {}
+        let props = {
+            disabled: false,
+        };
         if (this.userStore.submitting) {
             props.disabled = true;
         }
@@ -190,7 +167,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
                         <p>本系统已开启LDAP认证服务，LDAP服务开启后，本系统不能新增用户，且用户的用户名、密码、邮箱、别名均由LDAP统一管理，本系统不能修改。</p>
                         <div className="alert alert-warning" role="alert">
                             如需要修改，请使用给本系统提供LDAP服务的
-                            { ldap_user_page ? <a href={ldap_user_page} target="_blank">用户管理服务</a> : '用户管理服务'}
+                            {ldap_user_page ? <a href={ldap_user_page} target="_blank">用户管理服务</a> : '用户管理服务'}
                             ，或者联系系统管理员。
                         </div>
                     </div>
@@ -204,11 +181,11 @@ class UserCreateForm extends React.Component<UserProps,any> {
                 <div className="manage-container">
                     <Form
                         className="user-create clearfix"
-                        onSubmit={this.handleValidSubmit.bind(this)}
+                        onSubmit={this.handleValidSubmit}
                     >
                         <div className="pull-left">
                             <FormItem label="用户名">
-                                {getFieldDecorator('username',{
+                                {getFieldDecorator('username', {
                                     rules: [{
                                             min: 4,
                                             max: 20,
@@ -223,20 +200,20 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                 <p className="help-block">登录时所用的名称，不能重复。</p>
                             </FormItem>
                             <FormItem label="邮箱">
-                                {getFieldDecorator('email',{
+                                {getFieldDecorator('email', {
                                     rules: [{
                                             required: true,
                                             message: '请输入邮箱!'
-                                        },{
+                                        }, {
                                         type: 'email',
                                         message: '邮箱格式错误!'
                                     }],
                                     initialValue: userInfo.email ? userInfo.email : '',
-                                })(<Input {...this.isReadOnly('email')} autoComplete='email' placeholder="输入邮箱"/>)}
+                                })(<Input {...this.isReadOnly('email')} autoComplete="email" placeholder="输入邮箱"/>)}
                                 <p className="help-block">用户主要联系方式，不能重复。</p>
                             </FormItem>
                             <FormItem label="密码">
-                                {getFieldDecorator('password',{
+                                {getFieldDecorator('password', {
                                     rules: [{
                                         required: true, message: '请输入密码!',
                                     }, {
@@ -244,17 +221,17 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                         max: 30,
                                         message: '长度为8到30个字符'
                                     }],
-                                })(<Input {...this.isReadOnly('password')} type='password' placeholder="长度为8到30个字符" />)}
+                                })(<Input {...this.isReadOnly('password')} type="password" placeholder="长度为8到30个字符" />)}
                                 <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
                             </FormItem>
                             <FormItem label="确认密码">
-                                {getFieldDecorator('repassword',{
+                                {getFieldDecorator('repassword', {
                                     rules: [{
                                         required: true, message: '请再次确认密码!',
                                     }, {
                                         validator: this.compareToFirstPassword,
                                     }]
-                                })(<Input {...this.isReadOnly('repassword')} type='password' placeholder="请再次输入密码" />)}
+                                })(<Input {...this.isReadOnly('repassword')} type="password" placeholder="请再次输入密码" />)}
                             </FormItem>
                             <button type="submit" {...props} className="btn btn-primary">
                                 {this.userStore.submitting ? '提交中...' : '提交'}
@@ -267,7 +244,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                 })(<Input {...this.isReadOnly('display_name')} placeholder="显示名称" />)}
                             </FormItem>
                             <FormItem label="用户组">
-                                {getFieldDecorator('type',{
+                                {getFieldDecorator('type', {
                                     initialValue:  userInfo.type ? userInfo.type.toString() : '',
                                 })(<Select {...this.isReadOnly('type')} className="form-control">
                                     <Option value="2">编辑</Option>
@@ -276,7 +253,7 @@ class UserCreateForm extends React.Component<UserProps,any> {
                                 </Select>)}
                             </FormItem>
                             <FormItem label="状态">
-                                {getFieldDecorator('status',{
+                                {getFieldDecorator('status', {
                                     initialValue: userInfo.status ? userInfo.status.toString() : '',
                                 })(<Select {...this.isReadOnly('status')} className="form-control">
                                         <Option value="1">有效</Option>

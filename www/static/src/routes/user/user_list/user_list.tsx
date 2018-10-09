@@ -8,36 +8,22 @@ import BreadCrumb from '../../../components/breadcrumb';
 
 @inject('userStore')
 @observer
-export default class extends React.Component<UserProps,any> {
+export default class extends React.Component<UserProps, any> {
 
-    public userStore:any;
+    public userStore: any;
 
-    constructor(props) {
+    constructor(props: UserProps) {
         super(props);
         this.userStore = this.props.userStore;
     }
     componentDidMount() {
-        // this.listenTo(UserStore, this.handleTrigger.bind(this));
-        // UserAction.select();
         this.userStore.getUserList();
-        // console.log(this.props.userStore.userList);
     }
-    pass(user) {
+    pass(user: any) {
         this.userStore.passUser(user.id);
     }
-    // handleTrigger(data, type) {
-    //     switch(type) {
-    //         case 'deleteUserSuccess':
-    //             TipAction.success('删除成功');
-    //             UserAction.select(null, this.state.key===3?'contributor':'');
-    //             break;
-    //         case 'deleteUserFail':
-    //             break;
-    //         default:
-    //             this.setState({userList: data, loading: false});
-    //     }
-    // }
-    handleDelete(userId) {
+
+    handleDelete(userId: any) {
         const that = this;
         return Modal.confirm({
             title: '确定删除该用户吗？',
@@ -48,42 +34,41 @@ export default class extends React.Component<UserProps,any> {
             },
         });
     }
-    handleSelect(type) {
+    handleSelect(type: any) {
         this.userStore.setKey(type);
-        return this.userStore.getUserList(type==='3'?'contributor':'');
+        return this.userStore.getUserList(type === '3' ? 'contributor' : '');
     }
 
-    deny(user) {
+    deny(user: any) {
         const that = this;
         return Modal.confirm({
             title: '拒绝该用户的申请后会直接删除该账号',
             content: '删除后无法恢复',
             onOk()  {
-                // message.success('删除成功');
-                that.userStore.deleteUser(user.id,()=>{
+                that.userStore.deleteUser(user.id, () => {
                     message.success('删除成功');
                     that.userStore.getUserList(that.userStore.key === 3 ? 'contributor' : '' );
-                },() => {
+                },                        () => {
                     message.success('删除失败，请稍后重试');
                 });
             },
         });
     }
 
-    getUserType(user) {
-        switch(user.type) {
+    getUserType(user: any) {
+        switch (user.type) {
             case 1: return '管理员';
             case 2: return '编辑';
             case 3: return '投稿者';
+            default: return '';
         }
-        return '';
     }
 
     getUserList() {
-        if(this.userStore.loading) {
+        if (this.userStore.loading) {
             return (<tr><td className="center">加载中……</td></tr>);
         }
-        if(!this.userStore.userList.length) {
+        if (!this.userStore.userList.length) {
             return (<tr><td className="center">无相关用户</td></tr>);
         }
         return this.userStore.userList.map(item => {
@@ -103,30 +88,30 @@ export default class extends React.Component<UserProps,any> {
                     <td>{item.create_time}</td>
                     <td>{item.last_login_time}</td>
                     <td>
-                        {this.userStore.key == '0'
+                        {this.userStore.key === '0'
                             ? <Link to={`/user/edit/${item.id}`}>
                                 <button type="button" className="btn btn-primary btn-xs">
-                                    <span className="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
+                                    <span className="glyphicon glyphicon-edit" aria-hidden="true" /> 编辑
                                 </button>
                             </Link>
                             : <button type="button" className="btn btn-success btn-xs" onClick={this.pass.bind(this, item)}>
-                                <span className="glyphicon glyphicon-ok"></span>
+                                <span className="glyphicon glyphicon-ok" />
                                 通过
                             </button>}
                         &nbsp;
-                        {this.userStore.key == '0' ? <button type="button" className="btn btn-danger btn-xs"
+                        {this.userStore.key === '0' ? <button type="button" className="btn btn-danger btn-xs"
                                                    onClick={this.handleDelete.bind(this, item.id)}>
-                                <span className="glyphicon glyphicon-trash" aria-hidden="true"></span> 删除
+                                <span className="glyphicon glyphicon-trash" aria-hidden="true" /> 删除
                             </button> :
                             <button type="button" className="btn btn-warning btn-xs" onClick={this.deny.bind(this, item)}>
-                                <span className="glyphicon glyphicon-remove"></span>
+                                <span className="glyphicon glyphicon-remove" />
                                 拒绝
                             </button>
                         }
                     </td>
                 </tr>
             );
-        })
+        });
     }
     render() {
         const TabPane = Tabs.TabPane;
@@ -134,7 +119,7 @@ export default class extends React.Component<UserProps,any> {
             <div className="fk-content-wrap">
                 <BreadCrumb {...this.props} />
                 <div className="manage-container">
-                    <Tabs defaultActiveKey={this.props.userStore.key.toString()} onChange={this.handleSelect.bind(this)}>
+                    <Tabs defaultActiveKey={this.props.userStore.key.toString()} onChange={type => this.handleSelect(type)}>
                         <TabPane key="0" tab="全　部" />
                         <TabPane key="3" tab="审核中" />
                     </Tabs>

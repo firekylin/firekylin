@@ -7,10 +7,6 @@ import { PushCreateParams } from './push.model';
 export default class PushStore {
     appStore;
 
-    constructor(appStore: AppStore) {
-        this.appStore = appStore;
-    }
-
     @observable pushList: any = [];
     @observable loading = false;
     @observable pushCreateParam: PushCreateParams = {
@@ -23,11 +19,15 @@ export default class PushStore {
         }
     };
 
+    constructor(appStore: AppStore) {
+        this.appStore = appStore;
+    }
+
     @action setPushList = (data) => this.pushList = data;
     @action setLoading = (data) => this.loading = data;
     @action setPushCreateParam = (data) => {
         Object.assign(this.pushCreateParam, data);
-    };
+    }
 
     @action
     getPushList() {
@@ -54,26 +54,26 @@ export default class PushStore {
     savePush(data: any) {
         return http.post(`/admin/api/options?method=put&type=push`, data)
             .toPromise()
-            .then((res) => {
-                message.success(data.id ? '保存成功' : '添加成功');
-                this.setPushCreateParam({submitting: false});
-                // setTimeout(() => this.redirect('push/list'), 1000);
-            },(err) => {
-                // message.error(err);
-                this.setPushCreateParam({submitting: false})
-            });
+            .then(
+                () => {
+                    message.success(data.id ? '保存成功' : '添加成功');
+                    this.setPushCreateParam({ submitting: false });
+                },
+                () => {
+                    this.setPushCreateParam({ submitting: false });
+                }
+            );
     }
 
     @action
     deletePush(id: string) {
         http.post(`/admin/api/options?method=delete&type=push&key=${id}`)
             .toPromise()
-            .then((data) => {
+            .then(() => {
                 message.success('删除成功');
                 this.setLoading(true);
                 this.getPushList();
-                // this.setState({loading: true}, PushAction.select.bind(PushAction));
-            },(err) => {
+            },    (err) => {
                 message.error(err);
             });
     }

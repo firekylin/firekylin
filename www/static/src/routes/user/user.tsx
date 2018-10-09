@@ -1,7 +1,7 @@
 import * as React from 'react';
-import UserList from './user_list/user_list'
-import UserCreate from './user_create/user_create'
-import UserEditPwd from './user_edit_pwd/user_edit_pwd'
+import UserList from './user_list/user_list';
+import UserCreate from './user_create/user_create';
+import UserEditPwd from './user_edit_pwd/user_edit_pwd';
 import { Redirect, Route, Switch } from 'react-router';
 import { UserProps } from './user.model';
 

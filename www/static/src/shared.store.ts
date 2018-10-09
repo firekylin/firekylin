@@ -88,7 +88,7 @@ class SharedStore {
   }
 
   getUserList(type?: string) {
-    return http.get<any>(`/admin/api/user`, {type})
+    return http.get<any>(`/admin/api/user`, {type});
   }
 
   // 获取默认分类
