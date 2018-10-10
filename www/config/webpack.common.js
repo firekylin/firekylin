@@ -1,4 +1,6 @@
-const tsImportPluginFactory = require('ts-import-plugin');
+// const tsImportPluginFactory = require('ts-import-plugin');
+const transformerFactory = require('ts-import-plugin')
+const webpack = require('webpack');
 const helpers = require('./helpers');
 
 const commonConfig = {
@@ -31,11 +33,29 @@ const commonConfig = {
                     transpileOnly: true,
                     // ts import plugin
                     getCustomTransformers: () => ({
-                        before: [ tsImportPluginFactory({
-                            libraryName: 'antd',
-                            libraryDirectory: 'lib',
-                            style: true
-                        }) ]
+                        before: [
+                            transformerFactory({ style: true }),
+                            transformerFactory([
+                                {
+                                  libraryDirectory: '../_esm5/internal/operators',
+                                  libraryName: 'rxjs/operators',
+                                  camel2DashComponentName: false,
+                                  transformToDefaultImport: false
+                                },
+                                {
+                                  libraryDirectory: '../_esm5/internal/observable',
+                                  libraryName: 'rxjs',
+                                  camel2DashComponentName: false,
+                                  transformToDefaultImport: false,
+                                }
+                            ]),
+                            transformerFactory({
+                                style: false,
+                                libraryName: 'lodash',
+                                libraryDirectory: null,
+                                camel2DashComponentName: false
+                            })
+                        ]
                     }),
                     compilerOptions: {
                         module: 'es2015'
@@ -73,7 +93,10 @@ const commonConfig = {
         ]
     },
     plugins: [
-
+        new webpack.ContextReplacementPlugin(
+            /moment[\\\/]locale$/,
+            /^\.\/(zh-cn)$/
+        ),
     ]
 }
 
