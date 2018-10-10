@@ -14,7 +14,7 @@ const commonConfig = {
         rules: [
             {
                 test: /\.ts$/,
-                exclude: [helpers.root('node_modules'), helpers.root('src', 'main.ts')],
+                exclude: [helpers.root('node_modules')],
                 enforce: 'pre',
                 loader: 'tslint-loader'
             },
