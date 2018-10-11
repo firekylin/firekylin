@@ -110,12 +110,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
             }
         });
     }
-    (this.textControl as HTMLTextAreaElement).addEventListener('keydown', this._bindKey);
-    (this.textControl as HTMLTextAreaElement).addEventListener('paste', this._bindPaste.bind(this));
-    (this.textControl as HTMLTextAreaElement).addEventListener('scroll', this._syncScroll, false);
+    (this.textControl as HTMLTextAreaElement).addEventListener('keydown', e => this._bindKey(e));
+    (this.textControl as HTMLTextAreaElement).addEventListener('paste', e => this._bindPaste(e));
+    (this.textControl as HTMLTextAreaElement).addEventListener('scroll', e => this._syncScroll(e), false);
     this.previewControl.addEventListener('scroll', this._syncScroll, false);
     this._bindMouse();
-    // this.listen(ModalStore, () => this.textControl.focus(), 'removeModal');
   }
 
   _bindPaste(e: ClipboardEvent) {
@@ -177,7 +176,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     };
 
     if (keys[key]) {
-      keys[key]();
+      keys[key].bind(this)();
       return e.preventDefault();
     }
   }
@@ -206,7 +205,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       }
 
       if (values.linkUrl && values.linkText) {
-        this._linkText(values.linkUrl, values.linkText, false);
+        const linkUrl = `${location.origin}/post/${values.linkUrl}.html`;
+        this._linkText(linkUrl, values.linkText, false);
       } else {
         this._linkText();
       }

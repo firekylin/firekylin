@@ -21,7 +21,7 @@ class LoginStore {
       .subscribe(
         res => {
           if (res.errno === 0) {
-            message.success('登陆成功');
+            message.success('登录成功');
             setTimeout(() => { location.reload(); }, 1000);
           } else {
             this.setLoading(false);

@@ -42,14 +42,14 @@ class PostListForm extends React.Component<PostListProps, {}> {
                         defaultValue="" 
                         style={{float: 'left', width: 120}} 
                         placeholder="请选择分类"
-                        onChange={(selectedValue: string) => postStore.setPlReqParams({cate: selectedValue})}
+                        onChange={(selectedValue: string) => postStore.setPlReqParams({cate: selectedValue, page: 1})}
                     >
                         <Option value="">全部分类</Option>
                         {sharedStore.categoryList.map((cat, key) => <Option key={key} value={cat.id}>{cat.name}</Option>)}
                     </Select>
                     <Search
                         placeholder="请输入关键字"
-                        onSearch={keyword => this.props.postStore.setPlReqParams({keyword})}
+                        onSearch={keyword => this.props.postStore.setPlReqParams({keyword, page: 1})}
                         enterButton={true}
                         style={{ width: 200, marginLeft: 10 }}
                     />

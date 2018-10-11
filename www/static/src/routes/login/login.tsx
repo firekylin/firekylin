@@ -62,7 +62,7 @@ class LoginForm extends React.Component<LoginProps, any> {
     }
     return null;
   }
-  // 登陆
+  // 登录
   handleSubmit(event: React.FormEvent<any>) {
     event.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
@@ -235,7 +235,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                     className="login-form-button"
                     loading={this.props.loginStore.loading}
                   >
-                    登陆
+                    登录
                   </Button>
                 </FormItem>
               </Form>
