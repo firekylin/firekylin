@@ -16,7 +16,7 @@ class ArticleControlImage extends React.Component<ACImageProps, any> {
 
         return (
             <>
-                <Input onChange={this.props.handleImageChange} placeholder="请输入图片链接" />
+                <Input value={this.props.imageUrl} onChange={this.props.handleImageChange} placeholder="请输入图片链接" />
                 {
                     imageUrl 
                     ?   <img src={imageUrl} title={imageUrl}

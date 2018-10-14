@@ -36,6 +36,7 @@ export interface ArticleInfo {
     is_public: string;
     create_time: string;
     allow_comment: boolean;
+    // options: string;
     options: {
         template: string;
         featuredImage: string;
@@ -44,4 +45,10 @@ export interface ArticleInfo {
     user_id: string;
     status: number;
     user?: string;
+}
+
+export interface ArticleInfoOptions {
+    template: string;
+    featuredImage: string;
+    push_sites: any[];
 }

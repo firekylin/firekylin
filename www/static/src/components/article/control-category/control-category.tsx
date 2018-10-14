@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
 import SharedStore from '../../../shared.store';
-import PostStore from '../../../routes/post/post.store';
+import ArticleStore from '../article.store';
 
 interface ACCategoryProps {
     sharedStore?: SharedStore;
-    postStore?: PostStore;
+    articleStore?: ArticleStore;
     catInitial: number[];
 }
 
-@inject('sharedStore', 'postStore')
+@inject('sharedStore', 'articleStore')
 @observer
 class ArticleControlCategory extends React.Component<ACCategoryProps, any> {
     cat: any = {};
@@ -19,7 +19,7 @@ class ArticleControlCategory extends React.Component<ACCategoryProps, any> {
 
     render() {
         const sharedStore = (this.props.sharedStore as SharedStore);
-        const postStore = (this.props.postStore as PostStore);
+        const articleStore = (this.props.articleStore as ArticleStore);
         const { categoryList } = sharedStore;
         const catInitial = this.props.catInitial;
         return (
@@ -40,11 +40,10 @@ class ArticleControlCategory extends React.Component<ACCategoryProps, any> {
                             if (cat.pid && this.cat[cat.id]) {
                                 this.cat[cat.pid] = true;
                             }
-                            // tslint:disable-next-line:no-shadowed-variable
-                            const category = categoryList.filter(cat => {
-                                return this.cat[cat.id];
+                            const category = categoryList.filter(catItem => {
+                                return this.cat[catItem.id];
                             });
-                            postStore.setPostInfo({cate: category});
+                            articleStore.setArticleInfo({cate: category});
                         }}
                       />
                       <span style={{ fontWeight: 'normal' }}>{cat.name}</span>

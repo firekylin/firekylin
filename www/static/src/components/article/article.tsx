@@ -15,7 +15,7 @@ import ArticleControlUser from './control-user/control-user';
 
 import Checkbox from 'antd/lib/checkbox';
 import { RadioChangeEvent } from 'antd/lib/radio';
-import { ArticleProps, PreviewData } from './article.model';
+import { ArticleProps, PreviewData, ArticleInfoOptions } from './article.model';
 
 import './article.less';
 import SharedStore from '../../shared.store';
@@ -23,11 +23,7 @@ import UserStore from '../../routes/user/user.store';
 import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleControlTemplate from './control-template/control-template';
 import ArticleStore from './article.store';
-
-enum ArticleEnum {
-    SAVE = 3,
-    DRAFT = 0,
-}
+import { ArticleEnum } from './article.enum';
 
 @inject('sharedStore', 'userStore', 'articleStore')
 @observer
@@ -36,6 +32,13 @@ class Article extends React.Component<ArticleProps, {}> {
     id: number = 0;
     type: ArticleTypeEnum;
     articleInfo = (this.props.articleStore as ArticleStore).articleInfo;
+
+    state = {
+        hasError: {
+            pathname: false,
+            title: false,
+        },
+    };
 
     constructor(props: any) {
         super(props);
@@ -104,7 +107,7 @@ class Article extends React.Component<ArticleProps, {}> {
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         (this.props.articleStore as ArticleStore).setArticleInfo({options: {
-            featuredImage: e.target.value
+            featuredImage: `${location.origin}${e.target.value}`
         }});
     }
     // 选择作者
@@ -113,27 +116,45 @@ class Article extends React.Component<ArticleProps, {}> {
     }
 
     handleSave(): void {
-        (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.SAVE});
-        this.handleSubmit();
+        // (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.SAVE});
+        this.handleSubmit(ArticleEnum.SAVE);
     }
     handleSaveDraft() {
-        (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.DRAFT});
-        this.handleSubmit();
+        // (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.DRAFT});
+        this.handleSubmit(ArticleEnum.DRAFT);
     }
 
-    handleSubmit() {
+    handleSubmit(status: ArticleEnum) {
         const { articleInfo } = (this.props.articleStore as ArticleStore);
+
+        if (!articleInfo.title) {
+            this.setState({hasError: Object.assign({}, this.state.hasError, {title: true})});
+            return;
+        } else {
+            this.setState({hasError: Object.assign({}, this.state.hasError, {title: false})});
+        }
+        if (!articleInfo.pathname) {
+            this.setState({hasError: Object.assign({}, this.state.hasError, {pathname: true})});
+            return;
+        } else {
+            this.setState({hasError: Object.assign({}, this.state.hasError, {pathname: false})});
+        }
 
         const params: any = {};
         if (this.id) {
             params.id = this.id;
         }
-        params.status = articleInfo.status;
+
+        (this.props.articleStore as ArticleStore).setArticleInfo({status});
+
+        params.status = status;
         params.title = articleInfo.title;
         params.pathname = articleInfo.pathname;
         params.markdown_content = articleInfo.markdown_content;
+
         if (params.status === ArticleEnum.SAVE && !params.markdown_content) {
             message.error('没有内容不能提交呢！');
+            (this.props.articleStore as ArticleStore).setArticleInfo({status: ArticleEnum.DRAFT});
             return;
         }
         params.create_time = articleInfo.create_time;
@@ -148,7 +169,11 @@ class Article extends React.Component<ArticleProps, {}> {
         }
         
         params.is_public = articleInfo.is_public;
-        params.options = articleInfo.options;
+        params.options = JSON.stringify({
+            template: articleInfo.options.template,
+            featuredImage: articleInfo.options.featuredImage,
+            push_sites: articleInfo.options.push_sites,
+        });
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
         // 保存
@@ -161,6 +186,7 @@ class Article extends React.Component<ArticleProps, {}> {
                         this.id = res.data.id;
                     }
                     if (articleInfo.status === ArticleEnum.SAVE && articleInfo.is_public) {
+                        (this.props.articleStore as ArticleStore).getArticleInfoById(this.id, this.type); 
                         message.success(
                             <>
                                 发布成功, &nbsp;&nbsp;
@@ -182,9 +208,11 @@ class Article extends React.Component<ArticleProps, {}> {
     }
 
     handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({hasError: Object.assign({}, this.state.hasError, {title: false})});
         (this.props.articleStore as ArticleStore).setArticleInfo({title: e.target.value});
     }
     handlePath(e: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({hasError: Object.assign({}, this.state.hasError, {pathname: false})});
         (this.props.articleStore as ArticleStore).setArticleInfo({pathname: e.target.value});
     }
     preview() {
@@ -243,6 +271,7 @@ class Article extends React.Component<ArticleProps, {}> {
                             status={articleInfo.status}
                             isPublic={articleInfo.is_public}
                             type={this.type}
+                            hasError={this.state.hasError}
                         />
                         <ArticleEditor type={this.props.type} id={this.id} />
                     </Col>
@@ -251,6 +280,8 @@ class Article extends React.Component<ArticleProps, {}> {
                         <section className="release-date">
                             <h5>发布日期</h5>
                             <DatePicker 
+                                showTime={true}
+                                format="YYYY-MM-DD HH:mm:ss"
                                 value={moment(articleInfo.create_time)} 
                                 placeholder="请选择日期" 
                                 onChange={(date: moment.Moment, dateString: string) => this.onDateChange(date, dateString)} 

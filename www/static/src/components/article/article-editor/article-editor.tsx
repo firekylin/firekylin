@@ -45,6 +45,12 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
         this.type = this.props.type;
     }
 
+    componentWillReceiveProps(nextProps: any) {
+        if (nextProps) {
+            this.setState({wordCount: tools.wordCount(this.state.postInfo.markdown_content)});
+        }
+    }
+
     handleFetchData(keyword: string) {
         this.props.postStore.setPlReqParams({
             status: 3,

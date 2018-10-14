@@ -5,7 +5,6 @@ import { AppStore } from '../../app.store';
 import { PostListRequestParams, PostListResponseData, PostInfo } from './post.model';
 import { PaginationConfig } from 'antd/lib/table';
 import { map } from 'rxjs/operators';
-import moment from 'moment';
 import { tools } from '../../utils/tools';
 
 class PostStore {

@@ -1,8 +1,10 @@
 import * as React from 'react';
-import { Input } from 'antd';
+import { Input, Form } from 'antd';
 import './article-header.less';
+import classNames from 'classnames';
+const FormItem = Form.Item;
 
-class ArticleHeader extends React.Component<any, {}> {
+class ArticleHeaderForm extends React.Component<any, {}> {
 
     id: number = 0;
 
@@ -15,15 +17,34 @@ class ArticleHeader extends React.Component<any, {}> {
         const type = this.props.type;
         const baseUrl = `${location.origin}/${['post', 'page'][type]}/`;
         let postUrl = `/${['post', 'page'][type]}/${this.props.pathname}.html`;
+        const { getFieldDecorator } = this.props.form;
         return (
             <div className="article-header">
                 <div className="article-header-title">
                     <h5>{`${this.id ? '编辑' : '撰写'}${type ? '页面' : '文章'}`}</h5>
-                    <Input value={this.props.title} onChange={e => this.props.handleTitle(e)} placeholder="标题" />
+                    <FormItem>
+                        {getFieldDecorator('title', {
+                            rules: [{
+                                required: true, message: '请输入标题',
+                            }],
+                            initialValue: this.props.title,
+                        })(
+                            <Input 
+                                onChange={e => this.props.handleTitle(e)} 
+                                placeholder="标题" 
+                                className={classNames({'has-error': this.props.hasError.title})}
+                            />
+                        )}
+                    </FormItem>
                 </div>
                 <div className="article-header-pathname">
                     <span>{baseUrl}</span>
-                    <Input disabled={this.props.status === 3} value={this.props.pathname} onChange={e => this.props.handlePath(e)} className="pathname-input" />
+                    <Input 
+                        className={classNames('pathname-input', {'has-error': this.props.hasError.pathname})} 
+                        disabled={this.props.status === 3} 
+                        value={this.props.pathname} 
+                        onChange={e => this.props.handlePath(e)} 
+                    />
                     <span>.html </span>
                     {this.props.status === 3 && this.props.isPublic ?
                         <a style={{marginLeft: 8}} href={postUrl} target="_blank">
@@ -39,4 +60,5 @@ class ArticleHeader extends React.Component<any, {}> {
     }
 }
 
+const ArticleHeader = Form.create()(ArticleHeaderForm);
 export default ArticleHeader;

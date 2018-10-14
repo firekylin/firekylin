@@ -3,6 +3,7 @@ import { ArticleInfo } from './article.model';
 import { http } from '../../utils/http';
 import moment from 'moment';
 import { ArticleTypeEnum } from '../../enums/article-type.enum';
+import { ArticleEnum } from './article.enum';
 
 class ArticleStore {
   @observable articleInfo: ArticleInfo = {
@@ -19,7 +20,7 @@ class ArticleStore {
       featuredImage: '',
       push_sites: []
     },
-    status: 1,
+    status: ArticleEnum.SAVE,
     user_id: '',
   };
 
@@ -42,12 +43,12 @@ class ArticleStore {
       is_public: '1',
       create_time: new Date().toUTCString(),
       allow_comment: true,
-      options: {
+      options: JSON.stringify({
         template: '',
         featuredImage: '',
         push_sites: []
-      },
-      status: 1,
+      }),
+      status: ArticleEnum.DRAFT,
       user_id: '',
     });
   }
@@ -76,6 +77,7 @@ class ArticleStore {
                     res.data.options = { push_sites: [] };
                 } else if (typeof (res.data.options) === 'string') {
                     res.data.options = JSON.parse(res.data.options);
+                    console.log(res.data.options);
                 } else {
                     res.data.options.push_sites = res.data.options.push_sites || [];
                 }
