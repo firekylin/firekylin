@@ -80,7 +80,6 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                 this.userStore.saveUser(values, () => {
                     message.success(this.id ? '保存成功' : '添加成功');
                     this.userStore.setSubmitting(false);
-                    console.log('this.props.history', this.props.history);
                     setTimeout(() => this.props.history.push('/user/list'), 1000);
                 },                      () => {
                     message.error('保存失败');

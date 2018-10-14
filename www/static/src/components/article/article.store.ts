@@ -77,7 +77,6 @@ class ArticleStore {
                     res.data.options = { push_sites: [] };
                 } else if (typeof (res.data.options) === 'string') {
                     res.data.options = JSON.parse(res.data.options);
-                    console.log(res.data.options);
                 } else {
                     res.data.options.push_sites = res.data.options.push_sites || [];
                 }
