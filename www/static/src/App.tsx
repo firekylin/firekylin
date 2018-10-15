@@ -54,15 +54,6 @@ declare global {
     }
 }
 
-// interface WebpackRequire extends NodeRequire {
-//     ensure(
-//         dependencies: string[],
-//         callback: (require: WebpackRequire) => void,
-//         errorCallback?: (error: Error) => void,
-//         chunkName?: string
-//     ): void;
-// };
-
 if (Object.freeze) {
    Object.freeze(window.SysConfig.userInfo);
 }

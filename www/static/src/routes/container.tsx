@@ -1,16 +1,43 @@
 import * as React from 'react';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import Loadable from 'react-loadable';
+import Loading from './loading';
 import './container.less';
-import DashBoard from './dashboard/dashboard';
-import User from './user/user';
 import Sidebar from '../components/sidebar';
-import Post from './post/post';
-import Page from './page/page';
-import Category from './category/category';
-import Tag from './tag/tag';
-import Push from './push/push';
-import Appearance from './appearance/appearance';
-import Options from './options/options';
+// Components
+import DashBoard from './dashboard/dashboard';
+const User = Loadable({
+    loader: () => import('./user/user'),
+    loading: Loading
+});
+const Post = Loadable({
+    loader: () => import('./post/post'),
+    loading: Loading
+});
+const Page = Loadable({
+    loader: () => import('./page/page'),
+    loading: Loading
+});
+const Category = Loadable({
+    loader: () => import('./category/category'),
+    loading: Loading
+});
+const Tag = Loadable({
+    loader: () => import('./tag/tag'),
+    loading: Loading
+});
+const Push = Loadable({
+    loader: () => import('./push/push'),
+    loading: Loading
+});
+const Appearance = Loadable({
+    loader: () => import('./appearance/appearance'),
+    loading: Loading
+});
+const Options = Loadable({
+    loader: () => import('./options/options'),
+    loading: Loading
+});
 
 const routerOptions = {
     basename: '/admin',

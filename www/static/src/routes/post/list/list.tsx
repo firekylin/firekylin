@@ -61,7 +61,7 @@ class PostListForm extends React.Component<PostListProps, {}> {
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
-                <div className="post-list">
+                <div className="page-list post-list">
                     <Tabs className="tabs" 
                         defaultActiveKey="" 
                         type="card" 

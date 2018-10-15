@@ -88,7 +88,7 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
-                <div className="option-import-page">
+                <div className="page-list option-import-page">
                     <Tabs className="tabs" 
                         defaultActiveKey="0" 
                         type="card" 

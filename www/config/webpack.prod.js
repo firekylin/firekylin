@@ -37,7 +37,7 @@ module.exports = webpackMerge(commonConfig, {
     output: {
         path: paths.distSrc,
         filename: '[name].js',
-        chunkFilename: 'vendor.chunk.js',
+        chunkFilename: '[name].js',
     },
     plugins: [
         new webpack.DefinePlugin({
