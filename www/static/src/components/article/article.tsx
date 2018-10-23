@@ -107,7 +107,7 @@ class Article extends React.Component<ArticleProps, {}> {
     // 封面图片
     handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
         (this.props.articleStore as ArticleStore).setArticleInfo({options: {
-            featuredImage: `${location.origin}${e.target.value}`
+            featuredImage: `${e.target.value}`
         }});
     }
     // 选择作者

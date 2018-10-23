@@ -24,7 +24,6 @@ class OptionsExportForm extends React.Component<OptionsExportProps, OptionsExpor
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <div className="page-list">
                     <h3 className="page-title">导出设置</h3>
-                    <p>开启后他人可以通过 <a href={url} target="_blank">{url}</a> 申请成为投稿者。</p>
                     <div className="option-comment-page">
                         <Form>
                             <FormItem

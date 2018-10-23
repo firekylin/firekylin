@@ -52,6 +52,7 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                 <Tabs className="tabs" 
                     defaultActiveKey="0" 
                     type="card" 
+                    style={{padding: 20}}
                 >
                     <TabPane tab="插入外链" key="0">
                         <Form>
