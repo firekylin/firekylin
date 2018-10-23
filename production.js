@@ -9,3 +9,11 @@ const instance = new Application({
 });
 
 instance.run();
+
+process.on('SIGINT', () => {
+  process.exit();
+});
+
+process.on('SIGTERM', () => {
+  process.exit();
+});
