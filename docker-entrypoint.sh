@@ -2,9 +2,6 @@
 
 set -e
 
-VOLUME_PATH="/var/lib/firekylin"
-APP_PATH="/opt/firekylin"
-
 checkVolume(){
     uploadDir="$VOLUME_PATH/upload"
 

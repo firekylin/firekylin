@@ -1,14 +1,17 @@
 FROM node:8.12-alpine as builder
 
+ENV APP_PATH /opt/firekylin
+ENV VOLUME_PATH /var/lib/firekylin
+
 # dtrace-provider@0.8.7 编译安装依赖 python make
 RUN echo "https://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories \
     && apk update \
     && apk add python \
     && apk add make
 
-WORKDIR /opt/firekylin
+WORKDIR $APP_PATH
 
-COPY . /opt/firekylin
+COPY . $APP_PATH
 
 RUN mkdir output
 
@@ -32,15 +35,17 @@ RUN cp -r www/theme/ output/www/theme/ \
 
 ### 准备工作结束
 
-FROM node:8.12-alpine
+FROM keymetrics/pm2:8-alpine
 
-WORKDIR /opt/firekylin
+ENV APP_PATH /opt/firekylin
+ENV VOLUME_PATH /var/lib/firekylin
 
-COPY --from=builder /opt/firekylin/output /opt/firekylin
+COPY --from=builder $APP_PATH/output $APP_PATH
 
-VOLUME /var/lib/firekylin
+WORKDIR $APP_PATH
+VOLUME $VOLUME_PATH
 
 EXPOSE 8360
 
-ENTRYPOINT ["sh", "/opt/firekylin/docker-entrypoint.sh"]
-CMD ["node", "/opt/firekylin/production.js"]
+ENTRYPOINT ["/opt/firekylin/docker-entrypoint.sh"]
+CMD ["pm2-runtime", "start", "/opt/firekylin/production.js"]
