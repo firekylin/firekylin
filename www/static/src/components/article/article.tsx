@@ -185,7 +185,8 @@ class Article extends React.Component<ArticleProps, {}> {
                     if (!this.id && res.data.id) {
                         this.id = res.data.id;
                     }
-                    if (articleInfo.status === ArticleEnum.SAVE && articleInfo.is_public) {
+                    
+                    if (status === ArticleEnum.SAVE && articleInfo.is_public) {
                         (this.props.articleStore as ArticleStore).getArticleInfoById(this.id, this.type); 
                         message.success(
                             <>
