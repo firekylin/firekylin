@@ -1,7 +1,7 @@
 import { Input, Divider, Button, message, Select } from 'antd';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
-import './import-rss.less';
+import 'antd/lib/table/style/index';
 import classNames from 'classnames';
 
 const Option = Select.Option;

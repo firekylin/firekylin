@@ -1,60 +1,9 @@
-import { Table, Input, Form, Divider, Button, message } from 'antd';
+import { Input, Divider, Button, message } from 'antd';
 import React from 'react';
-import BreadCrumb from '../../../components/breadcrumb';
 import { inject, observer } from 'mobx-react';
-
-const FormItem = Form.Item;
-const EditableContext = React.createContext({});
-
-import './navigation.less';
-
-const EditableRow = ({ form, index, ...props }) => (
-    <EditableContext.Provider value={form}>
-        <tr {...props} />
-    </EditableContext.Provider>
-);
-
-const EditableFormRow = Form.create()(EditableRow);
-
-class EditableCell extends React.Component<any, any> {
-
-    render() {
-        const {
-        editing,
-        dataIndex,
-        title,
-        inputType,
-        record,
-        index,
-        ...restProps
-        } = this.props;
-        return (
-            <EditableContext.Consumer>
-                {(form: any) => {
-                    const { getFieldDecorator } = form;
-                    return (
-                        <td {...restProps}>
-                        {editing ? (
-                            <FormItem style={{ margin: 0 }}>
-                                {getFieldDecorator(dataIndex, {
-                                    rules: [{
-                                        required: true,
-                                        message: `请输入 ${title}!`,
-                                    }],
-                                    initialValue: record[dataIndex],
-                                })(
-                                    <Input />
-                                )}
-                            </FormItem>
-                        ) : restProps.children}
-                        </td>
-                    );
-                }}
-            </EditableContext.Consumer>
-        );
-    }
-}
-@inject('navigationStore')
+import classNames from 'classnames';
+import 'antd/lib/table/style/index';
+@inject('sharedStore', 'navigationStore', 'optionsImportStore')
 @observer
 class Navigation extends React.Component<any, any> {
     state = this.initialState();
@@ -68,14 +17,25 @@ class Navigation extends React.Component<any, any> {
             options.navigation = JSON.parse(options.navigation);
         }
         options.navigation = options.navigation.map((item, key) => {
+            if (!item) {
+                return;
+            }
             item.key = key.toString();
             return item;
         });
         return {
             list: options.navigation,
             editingRow: -1,
-            editingNav: null,
-            editingKey: '',
+            editingNav: {
+                label: '',
+                url: '',
+                option: ''
+            },
+            hasError: {
+                label: false,
+                url: false,
+                option: false,
+            },
             row: {
                 label: '',
                 url: '',
@@ -83,98 +43,150 @@ class Navigation extends React.Component<any, any> {
             }
         };
     }
+
     constructor(props: any) {
         super(props);
-        this.columns = [
-            {
-                title: '菜单文本',
-                dataIndex: 'label',
-                editable: true,
-            },
-            {
-                title: '菜单地址',
-                dataIndex: 'url',
-                editable: true,
-            },
-            {
-                title: '菜单属性',
-                dataIndex: 'option',
-                editable: true,
-            },
-            {
-                title: '操作',
-                width: '40%',
-                dataIndex: 'operation',
-                render: (text, record, i) => {
-                    const editable = this.isEditing(record);
-                    return (
-                        <div>
-                        {editable ? (
-                            <span>
-                                <EditableContext.Consumer>
-                                    {form => (
-                                        <a
-                                            href="javascript:;"
-                                            onClick={() => this.save(form, record.key)}
-                                            style={{ marginRight: 8 }}
-                                        >
-                                            保存
-                                        </a>
-                                    )}
-                                </EditableContext.Consumer>
-                                <a onClick={() => this.cancel(record.key)}>取消</a>
-                            </span>
-                        ) : (
-                            <span>
-                                <Button 
-                                    disabled={i === 0}
-                                    onClick={() => this.move(i - 1, i)}
-                                    className="ant-btn-success"
-                                    size="small" 
-                                    icon="arrow-up"
-                                >
-                                    上移
-                                </Button>
-                                <Divider type="vertical" />
-                                <Button 
-                                    disabled={i === this.state.list.length - 1}
-                                    onClick={() => this.move(i, i + 1)}
-                                    className="ant-btn-success"
-                                    type="primary" 
-                                    size="small" 
-                                    icon="arrow-down"
-                                >
-                                    下移
-                                </Button>
-                                <Divider type="vertical" />
-                                <Button 
-                                    onClick={() => this.edit(record.key)}
-                                    type="primary" 
-                                    size="small" 
-                                    icon="edit"
-                                >
-                                    编辑
-                                </Button>
-                                <Divider type="vertical" />
-                                <Button 
-                                    onClick={() => this.delete(record)}
-                                    type="danger" 
-                                    size="small" 
-                                    icon="delete"
-                                >
-                                    删除
-                                </Button>
-                            </span>
-                        )}
-                        </div>
-                    );
-                },
-            },
-        ];
+    }
+    componentDidMount() {
+        // 
     }
 
-    isEditing = (record) => {
-        return record.key === this.state.editingKey;
+    normalRow(rss: any, i: number) {
+        const {userList, categoryList} = this.props.sharedStore;
+        const user = userList.find((item: any) => item.id === rss.user);
+        const cate = categoryList.find((item: any) => item.id === rss.cate);
+        return (
+            <tr
+                key={i.toString()}
+                className="fk-dragable-row"
+            >
+                <td>{rss.label}</td>
+                <td>{rss.url}</td>
+                <td>{rss.option}</td>
+                <td>
+                <Button 
+                        disabled={i === 0}
+                        onClick={() => this.move(i - 1, i)}
+                        className="ant-btn-success"
+                        size="small" 
+                        icon="arrow-up"
+                    >
+                        上移
+                    </Button>
+                    <Divider type="vertical" />
+                    <Button 
+                        disabled={i === this.state.list.length - 1}
+                        onClick={() => this.move(i, i + 1)}
+                        className="ant-btn-success"
+                        type="primary" 
+                        size="small" 
+                        icon="arrow-down"
+                    >
+                        下移
+                    </Button>
+                    <Divider type="vertical" />
+                    <Button 
+                        onClick={() => this.setState({editingRow: i, editingNav: Object.assign({}, rss)})}
+                        type="primary" 
+                        size="small" 
+                        icon="edit"
+                    >
+                        编辑
+                    </Button>
+                    <Divider type="vertical" />
+                    <Button 
+                        onClick={() => this.delete(i)}
+                        type="danger" 
+                        size="small" 
+                        icon="delete"
+                    >
+                        删除
+                    </Button>
+                </td>
+            </tr>
+        );
+    }
+    
+    editingRow(nav: any, i: number) {
+        const { editingNav } = this.state;
+        return (
+          <tr
+            key={`editing-${i}`}
+            className="fk-dragable-row"
+          >
+            <td>
+                <Input 
+                    value={this.state.editingNav.label}
+                    type="text"
+                    name="label"
+                    className={classNames({'has-error': this.state.hasError.label})}
+                    onChange={e => {
+                        if (e.target.value !== '') {
+                            this.setHasError('label', false);
+                            editingNav.label = e.target.value;
+                            this.setState({editingNav});
+                        } else {
+                            this.setHasError('label', true);
+                        }
+                    }} 
+                />
+            </td>
+            <td>
+                <Input 
+                    value={this.state.editingNav.url}
+                    type="text"
+                    name="label"
+                    className={classNames({'has-error': this.state.hasError.url})}
+                    onChange={e => {
+                        if (e.target.value !== '') {
+                            this.setHasError('url', false);
+                            editingNav.url = e.target.value;
+                            this.setState({editingNav});
+                        } else {
+                            this.setHasError('url', true);
+                        }
+                    }} 
+                />
+            </td>
+            <td>
+                <Input 
+                    value={this.state.editingNav.option}
+                    type="text"
+                    name="option"
+                    className={classNames({'has-error': this.state.hasError.option})}
+                    onChange={e => {
+                        if (e.target.value !== '') {
+                            this.setHasError('option', false);
+                            editingNav.option = e.target.value;
+                            this.setState({editingNav});
+                        } else {
+                            this.setHasError('option', true);
+                        }
+                    }} 
+                />
+            </td>
+            <td>
+                <a 
+                    onClick={() => {
+                        if (editingNav.label && editingNav.url && editingNav.option) {
+                            this.edit(this.state.editingRow, this.state.editingNav);
+                            this.setState({editingRow: -1, editingNav: null});
+                        }
+                    }}
+                >
+                    保存
+                </a>
+                <Divider type="vertical" />
+                <a 
+                    onClick={() => {
+                        this.setState({editingRow: -1, editingNav: null});
+                    }}
+                >
+                    取消
+                </a>
+            </td>
+          </tr>
+        );
     }
 
     move(a: number, b: number) {
@@ -184,12 +196,14 @@ class Navigation extends React.Component<any, any> {
         this.updateNav('移动成功');
     }
 
-    edit(key: any) {
-        this.setState({ editingKey: key });
+    edit(idx: any, nav: any) {
+        const { list } = this.state;
+        list[idx] = nav;
+        this.updateNav('保存成功');
     }
 
-    delete(record: any) {
-        const list = this.state.list.filter((item => item.key !== record.key));
+    delete(key: number) {
+        const list = this.state.list.filter((item => item.key !== key.toString()));
         this.props.navigationStore.update(list)
         .subscribe(
             () => {
@@ -199,37 +213,19 @@ class Navigation extends React.Component<any, any> {
         );
     }
 
-    save(form: any, key: any) {
-        form.validateFields((error, row) => {
-            if (error) {
-                return;
-            }
-            const newData = [...this.state.list];
-            const index = newData.findIndex(item => key === item.key);
-            if (index > -1) {
-                const item = newData[index];
-                newData.splice(index, 1, {
-                    ...item,
-                    ...row,
-                });
-                this.setState({ data: newData, editingKey: '' });
-                this.updateNav('保存成功', newData);
-            } else {
-                newData.push(row);
-                this.setState({ data: newData, editingKey: '' });
-                this.updateNav('保存成功', newData);
-            }
-        });
-    }
-
-    cancel = (key: any) => {
-        this.setState({ editingKey: '' });
-    }
-
     add() {
+        if (!this.state.row.label || !this.state.row.url || !this.state.row.option) {
+            this.setHasError('new', true);
+            return;
+        }
         this.state.list.push(this.state.row);
         this.updateNav('添加成功');
     }
+
+    setHasError(key: string, error: boolean) {
+        this.setState({hasError: Object.assign({}, this.state.hasError, {[key]: error})});
+    }
+
     updateNav(messageText: string, data?: any) {
         const list = data || this.state.list;
         this.props.navigationStore.update(list)
@@ -246,59 +242,86 @@ class Navigation extends React.Component<any, any> {
     }
 
     render() {
-        const components = {
-            body: {
-                row: EditableFormRow,
-                cell: EditableCell,
-            },
-        };
-
-        const columns = this.columns.map((col) => {
-            if (!col.editable) {
-                return col;
+        const rows = this.state.list.map((nav, i) => {
+            if (!nav) {
+                return null;
             }
-            return {
-                ...col,
-                onCell: record => ({
-                    record,
-                    inputType: 'text',
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: this.isEditing(record),
-                }),
-            };
+            return this.state.editingRow !== i ? this.normalRow(nav, i) : this.editingRow(nav, i);
         });
 
+        rows.push(
+            <tr key="form">
+                <td>
+                    <Input 
+                        value={this.state.row.label}
+                        type="text"
+                        name="label"
+                        className={classNames({'has-error': this.state.hasError.label})}
+                        onChange={e => {
+                            if (e.target.value !== '') {
+                                this.setHasError('new', false);
+                                this.setState({row: Object.assign({}, this.state.row, {label: e.target.value})});
+                            } else {
+                                this.setHasError('new', true);
+                            }
+                        }} 
+                    />
+                </td>
+                <td>
+                    <Input 
+                        value={this.state.row.url}
+                        type="url"
+                        name="label"
+                        className={classNames({'has-error': this.state.hasError.url})}
+                        onChange={e => {
+                            if (e.target.value !== '') {
+                                this.setHasError('new', false);
+                                this.setState({row: Object.assign({}, this.state.row, {url: e.target.value})});
+                            } else {
+                                this.setHasError('new', true);
+                            }
+                        }} 
+                    />
+                </td>
+                <td>
+                    <Input 
+                        value={this.state.row.option}
+                        type="option"
+                        name="label"
+                        className={classNames({'has-error': this.state.hasError.option})}
+                        onChange={e => {
+                            if (e.target.value !== '') {
+                                this.setHasError('new', false);
+                                this.setState({row: Object.assign({}, this.state.row, {option: e.target.value})});
+                            } else {
+                                this.setHasError('new', true);
+                            }
+                        }} 
+                    />
+                </td>
+                <td>
+                    <Button 
+                        onClick={() => this.add()}
+                        type="primary" 
+                        size="small" 
+                    >
+                        新增
+                    </Button>
+                </td>
+            </tr>
+        );
         return (
-            <div className="navigation-page">
-                <BreadCrumb {...this.props} />
-                <Table
-                    rowKey="key"
-                    className="page-list"
-                    components={components}
-                    bordered={true}
-                    dataSource={this.state.list}
-                    columns={columns}
-                    rowClassName={() => 'editable-row'}
-                    pagination={false}
-                />
-                <table className="navigation-add-row">
-                    <tbody>
+            <div className="options-import-rss-page page-list">
+                <table className="ant-table ant-table-bordered" style={{width: '100%'}}>
+                    <thead className="ant-table-thead">
                         <tr>
-                            <td><Input onChange={e => this.setState({row: Object.assign({}, this.state.row, {label: e.target.value})})} /></td>
-                            <td><Input onChange={e => this.setState({row: Object.assign({}, this.state.row, {url: e.target.value})})} /></td>
-                            <td><Input onChange={e => this.setState({row: Object.assign({}, this.state.row, {option: e.target.value})})} /></td>
-                            <td>
-                                <Button 
-                                    onClick={() => this.add()}
-                                    type="primary" 
-                                    size="small" 
-                                >
-                                    新增
-                                </Button>
-                            </td>
+                            <th>菜单文本</th>
+                            <th>菜单地址</th>
+                            <th>菜单属性</th>
+                            <th>操作</th>
                         </tr>
-                    </tbody>
+                    </thead>
+                    <tbody className="ant-table-tbody" children={rows} />
                 </table>
             </div>
         );

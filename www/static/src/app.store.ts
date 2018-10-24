@@ -13,7 +13,7 @@ import AppearanceStore from './routes/appearance/appearance.store';
 import OptionsStore from './routes/options/options.store';
 
 configure({
-    enforceActions: true
+    enforceActions: 'observed'
 });
 
 export class AppStore {
