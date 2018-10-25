@@ -49,6 +49,7 @@ ul,ol{padding:0;list-style:none;}
 .options-comment .form-group{padding-left: 1px;}
 .form-group {overflow: hidden;}
 .options-2fa ul li {list-style-type: disc;margin-left: 18px;}
+.has-success .help-block{color:#737373}
 
 #app,.fk{height: 100%;}
 /* 警告提示box */

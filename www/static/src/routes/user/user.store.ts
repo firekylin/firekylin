@@ -11,7 +11,7 @@ export default class UserStore {
 
     @observable userList: any = [];
     @observable loading = true;
-    @observable key = 0;
+    @observable key = '0';
 
     @observable submitting: false;
     @observable userInfo;

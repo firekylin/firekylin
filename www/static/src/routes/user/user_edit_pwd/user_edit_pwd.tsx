@@ -90,7 +90,7 @@ class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
                 <div className="manage-container">
                     <Form
                         className="user-editpwd clearfix"
-                        onSubmit={this.handleValidSubmit}
+                        onSubmit={this.handleValidSubmit.bind(this)}
                     >
                         <div className="pull-left">
                             <FormItem label="密码">

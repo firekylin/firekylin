@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { UserProps } from '../user.model';
+// import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, message, Input, Select } from 'antd';
 import md5 from 'md5';
@@ -102,19 +102,19 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
      * @param  {[type]} type [description]
      * @return {[type]}      [description]
      */
-    isReadOnly(type: string) {
+    isDisabled(type: string) {
         let prop = {
-            readOnly: false
+            disabled: false
             // value: this.userStore.userInfo[type] || '',
             // onChange: this.changeInput.bind(this, type)
         };
         if (this.id && ['name', 'email'].indexOf(type) > -1) {
             if (type === 'email') {
                 if (this.userStore.hasEmail) {
-                    prop.readOnly = true;
+                    prop.disabled = true;
                 }
             } else {
-                prop.readOnly = true;
+                prop.disabled = true;
             }
         }
 
@@ -123,7 +123,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
         let ldapWhiteList = options.ldap_whiteList ? options.ldap_whiteList.split(',') : [];
         let editUserName = this.userStore.userInfo.name || '';
         if (this.id && ldapOn && ['type', 'status'].indexOf(type) === -1 && ldapWhiteList.indexOf(editUserName) === -1) {
-            prop.readOnly = true;
+            prop.disabled = true;
         }
 
         return prop;
@@ -180,7 +180,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                 <div className="manage-container">
                     <Form
                         className="user-create clearfix"
-                        onSubmit={this.handleValidSubmit}
+                        onSubmit={this.handleValidSubmit.bind(this)}
                     >
                         <div className="pull-left">
                             <FormItem label="用户名">
@@ -195,7 +195,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                             message: '请输入用户名!'
                                         }],
                                     initialValue: userInfo.name ? userInfo.name : '',
-                                })(<Input {...this.isReadOnly('name')} placeholder="4-20个字符"/>)}
+                                })(<Input {...this.isDisabled('name')} placeholder="4-20个字符"/>)}
                                 <p className="help-block">登录时所用的名称，不能重复。</p>
                             </FormItem>
                             <FormItem label="邮箱">
@@ -208,7 +208,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                         message: '邮箱格式错误!'
                                     }],
                                     initialValue: userInfo.email ? userInfo.email : '',
-                                })(<Input {...this.isReadOnly('email')} autoComplete="email" placeholder="输入邮箱"/>)}
+                                })(<Input {...this.isDisabled('email')} autoComplete="email" placeholder="输入邮箱"/>)}
                                 <p className="help-block">用户主要联系方式，不能重复。</p>
                             </FormItem>
                             <FormItem label="密码">
@@ -220,7 +220,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                         max: 30,
                                         message: '长度为8到30个字符'
                                     }],
-                                })(<Input {...this.isReadOnly('password')} type="password" placeholder="长度为8到30个字符" />)}
+                                })(<Input {...this.isDisabled('password')} type="password" placeholder="长度为8到30个字符" />)}
                                 <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
                             </FormItem>
                             <FormItem label="确认密码">
@@ -230,7 +230,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                     }, {
                                         validator: this.compareToFirstPassword,
                                     }]
-                                })(<Input {...this.isReadOnly('repassword')} type="password" placeholder="请再次输入密码" />)}
+                                })(<Input {...this.isDisabled('repassword')} type="password" placeholder="请再次输入密码" />)}
                             </FormItem>
                             <button type="submit" {...props} className="btn btn-primary">
                                 {this.userStore.submitting ? '提交中...' : '提交'}
@@ -240,12 +240,12 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                             <FormItem label="别名">
                                 {getFieldDecorator('display_name', {
                                     initialValue: userInfo.display_name ? userInfo.display_name : '',
-                                })(<Input {...this.isReadOnly('display_name')} placeholder="显示名称" />)}
+                                })(<Input {...this.isDisabled('display_name')} placeholder="显示名称" />)}
                             </FormItem>
                             <FormItem label="用户组">
                                 {getFieldDecorator('type', {
                                     initialValue:  userInfo.type ? userInfo.type.toString() : '',
-                                })(<Select {...this.isReadOnly('type')} className="form-control">
+                                })(<Select {...this.isDisabled('type')} className="form-control">
                                     <Option value="2">编辑</Option>
                                     <Option value="1">管理员</Option>
                                     <Option value="3">投稿者</Option>
@@ -254,7 +254,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                             <FormItem label="状态">
                                 {getFieldDecorator('status', {
                                     initialValue: userInfo.status ? userInfo.status.toString() : '',
-                                })(<Select {...this.isReadOnly('status')} className="form-control">
+                                })(<Select {...this.isDisabled('status')} className="form-control">
                                         <Option value="1">有效</Option>
                                         <Option value="2">禁用</Option>
                                     </Select>)}

@@ -15,6 +15,7 @@ export default class extends React.Component<UserProps, any> {
     constructor(props: UserProps) {
         super(props);
         this.userStore = this.props.userStore;
+        this.userStore.setKey('0');
     }
     componentDidMount() {
         this.userStore.getUserList();
@@ -66,10 +67,10 @@ export default class extends React.Component<UserProps, any> {
 
     getUserList() {
         if (this.userStore.loading) {
-            return (<tr><td className="center">加载中……</td></tr>);
+            return (<tr><td className="center" colSpan="10">加载中……</td></tr>);
         }
         if (!this.userStore.userList.length) {
-            return (<tr><td className="center">无相关用户</td></tr>);
+            return (<tr><td className="center" colSpan="10">无相关用户</td></tr>);
         }
         return this.userStore.userList.map(item => {
             return (
