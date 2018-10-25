@@ -1,24 +1,21 @@
 FROM node:8.12-alpine as builder
 
-ENV APP_PATH /opt/firekylin
-ENV VOLUME_PATH /var/lib/firekylin
-
 # dtrace-provider@0.8.7 编译安装依赖 python make
 RUN echo "https://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories \
     && apk update \
     && apk add python \
     && apk add make
 
-WORKDIR $APP_PATH
+WORKDIR /app
 
-COPY . $APP_PATH
-
-RUN mkdir output
+COPY package.json /app
 
 RUN npm install --only=prod \
-    && cp -r node_modules/ output/node_modules/
+    && mkdir output \
+    && cp -r node_modules/ output/node_modules/ \
+    && npm install --only=dev
 
-RUN npm install --only=dev
+COPY . /app
 
 RUN npm run webpack.build.production \
     && node stc.config.js \
@@ -40,7 +37,7 @@ FROM keymetrics/pm2:8-alpine
 ENV APP_PATH /opt/firekylin
 ENV VOLUME_PATH /var/lib/firekylin
 
-COPY --from=builder $APP_PATH/output $APP_PATH
+COPY --from=builder /app/output $APP_PATH
 
 WORKDIR $APP_PATH
 VOLUME $VOLUME_PATH
