@@ -71,6 +71,7 @@ module.exports = class extends Base {
         <Radio value='aliyun' label='阿里云' />
         <Radio value='smms' label='SM.MS 图床' />
         <Radio value='s3' label='AWS S3' />
+        <Radio value='tencent' label='腾讯云' />
       </RadioGroup>
     );
     let qiniu = (
@@ -333,6 +334,79 @@ module.exports = class extends Base {
       </div>
     );
 
+    let tencent = (
+      <div>
+        <div className="form-group">
+          <label>SecretId</label>
+          <ValidatedInput
+            type='text'
+            {...this.getProps('SecretId')}
+            validate="required"
+            errorHelp={{
+              required: '请填写腾讯云的 SecretId'
+            }}
+            name='SecretId'
+          />
+        </div>
+        <div className="form-group">
+          <label>SecretKey</label>
+          <ValidatedInput
+            type='text'
+            {...this.getProps('SecretKey')}
+            validate="required"
+            errorHelp={{
+              required: '请填写腾讯云的 SecretKey'
+            }}
+            name='SecretKey'
+          />
+        </div>
+        <div className="form-group">
+          <label>存储桶(Bucket)</label>
+          <ValidatedInput
+            type='text'
+            {...this.getProps('bucket')}
+            validate="required"
+            errorHelp={{
+              required: '请填写腾讯云的存储桶名称'
+            }}
+            name='bucket'
+          />
+        </div>
+        <div className="form-group">
+          <label>所属地域</label>
+          <ValidatedInput
+            type='text'
+            {...this.getProps('region')}
+            validate="required"
+            errorHelp={{
+              required: '请填写腾讯云存储桶的所属地域'
+            }}
+            name='region'
+          />
+        </div>
+        <div className="form-group">
+          <label>访问域名</label>
+          <ValidatedInput
+            type='text'
+            {...this.getProps('origin')}
+            validate="required"
+            errorHelp={{
+              required: '请填写腾讯云存储桶的访问域名'
+            }}
+            name='origin'
+          />
+        </div>
+        <div className="form-group">
+          <label>路径前缀</label>
+          <ValidatedInput
+            type='text'
+            {...this.getProps('prefix')}
+            name='prefix'
+          />
+        </div>
+      </div>
+    );
+
     return (
       <div className="fk-content-wrap">
         <BreadCrumb {...this.props} />
@@ -347,6 +421,7 @@ module.exports = class extends Base {
           { upload.type === 'aliyun' && aliyun }
           { upload.type === 'smms' && smms }
           { upload.type === 's3' && s3 }
+          { upload.type === 'tencent' && tencent }
           <button type="submit" className="btn btn-primary" style={{ margin: '20px 0 0 10px' }}>
             { this.state.submitting ? '提交中...' : '提交' }
           </button>
