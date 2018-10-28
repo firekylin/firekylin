@@ -1,14 +1,17 @@
-// const tsImportPluginFactory = require('ts-import-plugin');
 const transformerFactory = require('ts-import-plugin')
 const webpack = require('webpack');
 const helpers = require('./helpers');
+const paths = require('./paths.js');
 
 const commonConfig = {
     entry: {
         admin: './www/static/src/app.tsx'
     },
     resolve: {
-        extensions: ['*', '.ts', '.tsx', 'jsx', '.js', 'json']
+        extensions: ['*', '.ts', '.tsx', 'jsx', '.js', 'json'],
+        alias: {
+            "@ant-design/icons/lib/dist$": paths.iconsWorkaroundPath,
+        },
     },
     module: {
         rules: [
