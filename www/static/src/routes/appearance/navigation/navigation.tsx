@@ -35,6 +35,7 @@ class Navigation extends React.Component<any, any> {
                 label: false,
                 url: false,
                 option: false,
+                new: false,
             },
             row: {
                 label: '',
@@ -51,18 +52,15 @@ class Navigation extends React.Component<any, any> {
         // 
     }
 
-    normalRow(rss: any, i: number) {
-        const {userList, categoryList} = this.props.sharedStore;
-        const user = userList.find((item: any) => item.id === rss.user);
-        const cate = categoryList.find((item: any) => item.id === rss.cate);
+    normalRow(nav: any, i: number) {
         return (
             <tr
                 key={i.toString()}
                 className="fk-dragable-row"
             >
-                <td>{rss.label}</td>
-                <td>{rss.url}</td>
-                <td>{rss.option}</td>
+                <td>{nav.label}</td>
+                <td>{nav.url}</td>
+                <td>{nav.option}</td>
                 <td>
                 <Button 
                         disabled={i === 0}
@@ -86,7 +84,7 @@ class Navigation extends React.Component<any, any> {
                     </Button>
                     <Divider type="vertical" />
                     <Button 
-                        onClick={() => this.setState({editingRow: i, editingNav: Object.assign({}, rss)})}
+                        onClick={() => this.setState({editingRow: i, editingNav: Object.assign({}, nav)})}
                         type="primary" 
                         size="small" 
                         icon="edit"
@@ -121,10 +119,10 @@ class Navigation extends React.Component<any, any> {
                     name="label"
                     className={classNames({'has-error': this.state.hasError.label})}
                     onChange={e => {
+                        editingNav.label = e.target.value;
+                        this.setState({editingNav});
                         if (e.target.value !== '') {
                             this.setHasError('label', false);
-                            editingNav.label = e.target.value;
-                            this.setState({editingNav});
                         } else {
                             this.setHasError('label', true);
                         }
@@ -138,10 +136,10 @@ class Navigation extends React.Component<any, any> {
                     name="label"
                     className={classNames({'has-error': this.state.hasError.url})}
                     onChange={e => {
+                        editingNav.url = e.target.value;
+                        this.setState({editingNav});
                         if (e.target.value !== '') {
                             this.setHasError('url', false);
-                            editingNav.url = e.target.value;
-                            this.setState({editingNav});
                         } else {
                             this.setHasError('url', true);
                         }
@@ -155,10 +153,10 @@ class Navigation extends React.Component<any, any> {
                     name="option"
                     className={classNames({'has-error': this.state.hasError.option})}
                     onChange={e => {
+                        editingNav.option = e.target.value;
+                        this.setState({editingNav});
                         if (e.target.value !== '') {
                             this.setHasError('option', false);
-                            editingNav.option = e.target.value;
-                            this.setState({editingNav});
                         } else {
                             this.setHasError('option', true);
                         }
@@ -206,9 +204,11 @@ class Navigation extends React.Component<any, any> {
         const list = this.state.list.filter((item => item.key !== key.toString()));
         this.props.navigationStore.update(list)
         .subscribe(
-            () => {
-                message.success('删除成功');
-                this.setState({list});
+            res => {
+                if (res.errno === 0) {
+                    message.success('删除成功');
+                    this.setState({list});
+                }
             }
         );
     }
@@ -220,6 +220,15 @@ class Navigation extends React.Component<any, any> {
         }
         this.state.list.push(this.state.row);
         this.updateNav('添加成功');
+        this.resetRow();
+    }
+
+    resetRow() {
+        this.setState({row: {
+            label: '',
+            url: '',
+            option: ''
+        }});
     }
 
     setHasError(key: string, error: boolean) {
@@ -230,10 +239,12 @@ class Navigation extends React.Component<any, any> {
         const list = data || this.state.list;
         this.props.navigationStore.update(list)
         .subscribe(
-            () => {
-                message.success(messageText);
-                window.SysConfig.options.navigation = list;
-                this.setState({list: list});
+            res => {
+                if (res.errno === 0) {
+                    message.success(messageText);
+                    window.SysConfig.options.navigation = list;
+                    this.setState({list: list});
+                }
             },
             err => {
                 message.error(err);
@@ -256,11 +267,11 @@ class Navigation extends React.Component<any, any> {
                         value={this.state.row.label}
                         type="text"
                         name="label"
-                        className={classNames({'has-error': this.state.hasError.label})}
+                        className={classNames({'has-error': this.state.hasError.new})}
                         onChange={e => {
+                            this.setState({row: Object.assign({}, this.state.row, {label: e.target.value})});
                             if (e.target.value !== '') {
                                 this.setHasError('new', false);
-                                this.setState({row: Object.assign({}, this.state.row, {label: e.target.value})});
                             } else {
                                 this.setHasError('new', true);
                             }
@@ -272,11 +283,11 @@ class Navigation extends React.Component<any, any> {
                         value={this.state.row.url}
                         type="url"
                         name="label"
-                        className={classNames({'has-error': this.state.hasError.url})}
+                        className={classNames({'has-error': this.state.hasError.new})}
                         onChange={e => {
+                            this.setState({row: Object.assign({}, this.state.row, {url: e.target.value})});
                             if (e.target.value !== '') {
                                 this.setHasError('new', false);
-                                this.setState({row: Object.assign({}, this.state.row, {url: e.target.value})});
                             } else {
                                 this.setHasError('new', true);
                             }
@@ -288,11 +299,12 @@ class Navigation extends React.Component<any, any> {
                         value={this.state.row.option}
                         type="option"
                         name="label"
-                        className={classNames({'has-error': this.state.hasError.option})}
+                        className={classNames({'has-error': this.state.hasError.new})}
                         onChange={e => {
+                            console.log(e.target.value);
+                            this.setState({row: Object.assign({}, this.state.row, {option: e.target.value})});
                             if (e.target.value !== '') {
                                 this.setHasError('new', false);
-                                this.setState({row: Object.assign({}, this.state.row, {option: e.target.value})});
                             } else {
                                 this.setHasError('new', true);
                             }
