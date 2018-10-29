@@ -5,6 +5,11 @@ export { default as LockOutline } from '@ant-design/icons/lib/outline/LockOutlin
 export { default as SafetyOutline } from '@ant-design/icons/lib/outline/SafetyOutline';
 export { default as UserOutline } from '@ant-design/icons/lib/outline/UserOutline';
 export { default as UploadOutline } from '@ant-design/icons/lib/outline/UploadOutline';
+export { default as EditOutline } from '@ant-design/icons/lib/outline/EditOutline';
+export { default as ArrowDownOutline } from '@ant-design/icons/lib/outline/ArrowDownOutline';
+export { default as ArrowUpOutline } from '@ant-design/icons/lib/outline/ArrowUpOutline';
+export { default as StarOutline } from '@ant-design/icons/lib/outline/StarOutline';
+
 
 // antd components need
 export {
