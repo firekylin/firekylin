@@ -40,7 +40,7 @@ class Navigation extends React.Component<any, any> {
             row: {
                 label: '',
                 url: '',
-                option: ''
+                option: '',
             }
         };
     }
@@ -202,15 +202,8 @@ class Navigation extends React.Component<any, any> {
 
     delete(key: number) {
         const list = this.state.list.filter((item => item.key !== key.toString()));
-        this.props.navigationStore.update(list)
-        .subscribe(
-            res => {
-                if (res.errno === 0) {
-                    message.success('删除成功');
-                    this.setState({list});
-                }
-            }
-        );
+
+        this.updateNav('删除成功', list);
     }
 
     add() {
@@ -236,12 +229,19 @@ class Navigation extends React.Component<any, any> {
     }
 
     updateNav(messageText: string, data?: any) {
-        const list = data || this.state.list;
+        let list = data || this.state.list;
         this.props.navigationStore.update(list)
         .subscribe(
             res => {
                 if (res.errno === 0) {
                     message.success(messageText);
+                    list = list.map((item, key) => {
+                        if (!item) {
+                            return;
+                        }
+                        item.key = key.toString();
+                        return item;
+                    });
                     window.SysConfig.options.navigation = list;
                     this.setState({list: list});
                 }
@@ -301,7 +301,6 @@ class Navigation extends React.Component<any, any> {
                         name="label"
                         className={classNames({'has-error': this.state.hasError.new})}
                         onChange={e => {
-                            console.log(e.target.value);
                             this.setState({row: Object.assign({}, this.state.row, {option: e.target.value})});
                             if (e.target.value !== '') {
                                 this.setHasError('new', false);
@@ -316,6 +315,7 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.add()}
                         type="primary" 
                         size="small" 
+                        icon="plus"
                     >
                         新增
                     </Button>
