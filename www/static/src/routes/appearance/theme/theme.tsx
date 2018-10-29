@@ -259,7 +259,7 @@ const FormItem = Form.Item;
                                         onChange={(theme: string) => this.handleThemeChanged(theme)}
                                     >
                                         {themeList.map((theme, key) => {
-                                            return <Option key={key} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
+                                            return <Option key={key.toString()} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
                                         })}
                                     </Select>
                                 )
