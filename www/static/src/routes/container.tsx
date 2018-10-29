@@ -7,35 +7,35 @@ import Sidebar from '../components/sidebar';
 // Components
 import DashBoard from './dashboard/dashboard';
 const User = Loadable({
-    loader: () => import('./user/user'),
+    loader: () => import(/* webpackChunkName: 'user' */'./user/user'),
     loading: Loading
 });
 const Post = Loadable({
-    loader: () => import('./post/post'),
+    loader: () => import(/* webpackChunkName: 'post' */'./post/post'),
     loading: Loading
 });
 const Page = Loadable({
-    loader: () => import('./page/page'),
+    loader: () => import(/* webpackChunkName: 'page' */'./page/page'),
     loading: Loading
 });
 const Category = Loadable({
-    loader: () => import('./category/category'),
+    loader: () => import(/* webpackChunkName: 'category' */'./category/category'),
     loading: Loading
 });
 const Tag = Loadable({
-    loader: () => import('./tag/tag'),
+    loader: () => import(/* webpackChunkName: 'tag' */'./tag/tag'),
     loading: Loading
 });
 const Push = Loadable({
-    loader: () => import('./push/push'),
+    loader: () => import(/* webpackChunkName: 'push' */'./push/push'),
     loading: Loading
 });
 const Appearance = Loadable({
-    loader: () => import('./appearance/appearance'),
+    loader: () => import(/* webpackChunkName: 'appearance' */'./appearance/appearance'),
     loading: Loading
 });
 const Options = Loadable({
-    loader: () => import('./options/options'),
+    loader: () => import(/* webpackChunkName: 'options' */'./options/options'),
     loading: Loading
 });
 

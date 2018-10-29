@@ -1,4 +1,3 @@
-const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const commonConfig = require('./webpack.common.js');
@@ -24,14 +23,6 @@ if (process.env.NODE_ENV === 'analyzer') {
 module.exports = webpackMerge(commonConfig, {
     mode: 'production',
     optimization: {
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    chunks: 'all',
-                }
-            }
-        },
         minimize: true
     },
     output: {
@@ -40,12 +31,5 @@ module.exports = webpackMerge(commonConfig, {
         chunkFilename: '[name].js',
     },
     plugins: [
-        new webpack.DefinePlugin({
-            'process.env': {
-                url: JSON.stringify('http://www.api.com/'),
-                environment: JSON.stringify('prod'),
-                basename: JSON.stringify('/admin'),
-            }
-        })
     ]
 });

@@ -10,7 +10,7 @@ const commonConfig = {
     resolve: {
         extensions: ['*', '.ts', '.tsx', 'jsx', '.js', 'json'],
         alias: {
-            "@ant-design/icons/lib/dist$": paths.iconsWorkaroundPath,
+            '@ant-design/icons/lib/dist$': paths.iconsWorkaroundPath,
         },
     },
     module: {
@@ -94,6 +94,29 @@ const commonConfig = {
                 ]
             }
         ]
+    },
+    optimization: {
+        splitChunks: {
+            name: true,
+            minSize: 200000,
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendor',
+                    chunks: 'initial',
+                    priority: -20,
+                    minSize: 0,
+                    minChunks: 1,
+                },
+                common: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'common',
+                    chunks: 'async',
+                    minChunks: 2,
+                    priority: -10,
+                }
+            }
+        }
     },
     plugins: [
         new webpack.ContextReplacementPlugin(
