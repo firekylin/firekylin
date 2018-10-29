@@ -45,7 +45,7 @@ class PostListForm extends React.Component<PostListProps, {}> {
                         onChange={(selectedValue: string) => postStore.setPlReqParams({cate: selectedValue, page: 1})}
                     >
                         <Option value="">全部分类</Option>
-                        {sharedStore.categoryList.map((cat, key) => <Option key={key} value={cat.id}>{cat.name}</Option>)}
+                        {sharedStore.categoryList.map((cat, key) => <Option key={key.toString()} value={cat.id}>{cat.name}</Option>)}
                     </Select>
                     <Search
                         placeholder="请输入关键字"
