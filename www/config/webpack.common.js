@@ -114,6 +114,14 @@ const commonConfig = {
                     chunks: 'async',
                     minChunks: 2,
                     priority: -10,
+                },
+                app: {
+                    name: 'app',
+                    minChunks: 1,
+                    chunks: (chunk => {
+                        return chunk.name !== 'appearance' && chunk.name !== 'admin';
+                    }),
+                    priority: -30,
                 }
             }
         }
