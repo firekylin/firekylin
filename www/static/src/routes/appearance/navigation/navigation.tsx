@@ -3,6 +3,7 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import classNames from 'classnames';
 import 'antd/lib/table/style/index';
+import BreadCrumb from '../../../components/breadcrumb';
 @inject('sharedStore', 'navigationStore', 'optionsImportStore')
 @observer
 class Navigation extends React.Component<any, any> {
@@ -323,18 +324,21 @@ class Navigation extends React.Component<any, any> {
             </tr>
         );
         return (
-            <div className="options-import-rss-page page-list">
-                <table className="ant-table ant-table-bordered" style={{width: '100%'}}>
-                    <thead className="ant-table-thead">
-                        <tr>
-                            <th>菜单文本</th>
-                            <th>菜单地址</th>
-                            <th>菜单属性</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody className="ant-table-tbody" children={rows} />
-                </table>
+            <div>
+                <BreadCrumb {...this.props} />
+                <div className="options-import-rss-page page-list">
+                    <table className="ant-table ant-table-bordered" style={{width: '100%'}}>
+                        <thead className="ant-table-thead">
+                            <tr>
+                                <th>菜单文本</th>
+                                <th>菜单地址</th>
+                                <th>菜单属性</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody className="ant-table-tbody" children={rows} />
+                    </table>
+                </div>
             </div>
         );
     }
