@@ -100,20 +100,25 @@ const commonConfig = {
             name: true,
             minSize: 200000,
             cacheGroups: {
+                common: {
+                    name: 'common',
+                    chunks: 'async',
+                    minChunks: 2,
+                    priority: 30,
+                },
                 vendor: {
                     test: /[\\/]node_modules[\\/]/,
                     name: 'vendor',
                     chunks: 'initial',
-                    priority: -20,
                     minSize: 0,
                     minChunks: 1,
+                    priority: 20,
                 },
-                common: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'common',
+                appearance: {
+                    name: 'appearance',
+                    minChunks: 1,
                     chunks: 'async',
-                    minChunks: 2,
-                    priority: -10,
+                    priority: 0,
                 },
                 app: {
                     name: 'app',
@@ -121,7 +126,7 @@ const commonConfig = {
                     chunks: (chunk => {
                         return chunk.name !== 'appearance' && chunk.name !== 'admin';
                     }),
-                    priority: -30,
+                    priority: 10,
                 }
             }
         }
