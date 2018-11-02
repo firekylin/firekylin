@@ -21,7 +21,7 @@ module.exports = class extends Base {
     }
     const fileData = await readFileAsync(filename);
     const { size } = await statAsync(filename);
-    const result = await putObjectAsync({
+    await putObjectAsync({
       Bucket: bucket,
       Region: region,
       Key: savePath,
