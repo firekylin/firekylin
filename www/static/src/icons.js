@@ -103,3 +103,6 @@ export {
   export {
     default as DeleteOutline
   } from '@ant-design/icons/lib/outline/DeleteOutline';
+  export {
+    default as QuestionCircleOutline
+  } from '@ant-design/icons/lib/outline/QuestionCircleOutline';
