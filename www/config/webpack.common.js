@@ -13,6 +13,12 @@ const commonConfig = {
             '@ant-design/icons/lib/dist$': paths.iconsWorkaroundPath,
         },
     },
+    output: {
+        path: paths.distSrc,
+        filename: '[name].js',
+        chunkFilename: '[name].js',
+        publicPath: '/static/js/',
+    },
     module: {
         rules: [
             {

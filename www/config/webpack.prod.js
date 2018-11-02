@@ -25,11 +25,6 @@ module.exports = webpackMerge(commonConfig, {
     optimization: {
         minimize: true
     },
-    output: {
-        path: paths.distSrc,
-        filename: '[name].js',
-        chunkFilename: '[name].js',
-    },
     plugins: [
     ]
 });

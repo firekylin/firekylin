@@ -13,13 +13,6 @@ module.exports = webpackMerge(commonConfig, {
         minimize: false
     },
 
-    output: {
-        path: paths.distSrc,
-        filename: '[name].js',
-        chunkFilename: '[name].js',
-        publicPath: '/static/js/',
-    },
-
     plugins: [
         new webpack.DefinePlugin({
             'process.env': {
