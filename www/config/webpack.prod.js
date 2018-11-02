@@ -1,7 +1,6 @@
 const webpackMerge = require('webpack-merge');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const commonConfig = require('./webpack.common.js');
-const paths = require('./paths.js');
 
 if (process.env.NODE_ENV === 'analyzer') {
     commonConfig.plugins.push(
