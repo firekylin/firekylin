@@ -12,18 +12,18 @@
 </head>
 
 <body>
-  <script>
-    window.SysConfig = {
-      userInfo: {{ userInfo | dump('\t') | safe}},
-      options: {{ options | dump('\t') | safe | replace('<', '\\<') | replace('>', '\\>')}},
-      config: {
-        disallow_file_edit: {% if think.config('DISALLOW_FILE_EDIT') %} true{% else %} false{% endif %}
-      }
-    };
-  </script>
-  <div id="app"></div>
-  <script src="/static/js/common.js"></script>
-  <script src="/static/js/admin.js"></script>
+<script>
+window.SysConfig = {
+  userInfo: {{JSON.stringify(userInfo) | safe}},
+  options: {{JSON.stringify(options) | safe}},
+  config: {
+    disallow_file_edit: {% if think.config('DISALLOW_FILE_EDIT') %}true{% else %}false{% endif %}
+  }
+};
+</script>
+<div id="app"></div>
+<script src="/static/js/admin.js"></script>
+<script src="/static/js/vendor.js"></script>
 </body>
 
 </html>
