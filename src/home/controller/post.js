@@ -22,35 +22,35 @@ module.exports = class extends Base {
       tag: this.get('tag'),
       cate: this.get('cate')
     };
-    if(this.get('name')) {
-      let user = await this.model('user').where({name: this.get('name')}).find();
-      if(!think.isEmpty(user)) {
-        where.where = {user_id: user.id};
+    if (this.get('name')) {
+      let user = await this.model('user').where({ name: this.get('name') }).find();
+      if (!think.isEmpty(user)) {
+        where.where = { user_id: user.id };
       }
     }
 
     let tagName = '', cateName = '';
-    if(where.tag) {
-      tagName = await this.model('tag').where({
+    if (where.tag) {
+      const tag = await this.model('tag').where({
         _logic: 'OR',
         name: where.tag,
         pathname: where.tag
       }).find();
-      if(!think.isEmpty(tagName)) {
-        tagName = tagName.name;
-        where.tag = tagName.pathname;
+      if (!think.isEmpty(tag)) {
+        tagName = tag.name;
+        where.tag = tag.pathname;
       } else {
         return this.ctx.throw(404);
       }
     }
-    if(where.cate) {
+    if (where.cate) {
       const cate = await this.model('cate').where({
         _logic: 'OR',
         name: where.cate,
         pathname: where.cate
       }).find();
 
-      if(!think.isEmpty(cate) && cate.name) {
+      if (!think.isEmpty(cate) && cate.name) {
         cateName = cate.name;
         where.cate = cate.pathname;
       } else {
@@ -69,7 +69,7 @@ module.exports = class extends Base {
         post.featuredImage = '';
       }
     });
-    let {data, ...pagination} = list;
+    let { data, ...pagination } = list;
     this.assign({
       posts: data,
       pagination,
@@ -79,19 +79,19 @@ module.exports = class extends Base {
     });
 
     let template = 'index';
-    if(where.tag) {
+    if (where.tag) {
       const tagView = await stats(path.join(this.THEME_VIEW_PATH, 'tag_index.html'))
         .then(() => true)
         .catch(() => false);
-      if(tagView) {
+      if (tagView) {
         template = 'tag_index';
       }
     }
-    if(where.cate) {
+    if (where.cate) {
       const cateView = await stats(path.join(this.THEME_VIEW_PATH, 'cate_index.html'))
         .then(() => true)
         .catch(() => false);
-      if(cateView) {
+      if (cateView) {
         template = 'cate_index';
       }
     }
@@ -105,13 +105,13 @@ module.exports = class extends Base {
     this.ctx.url = decodeURIComponent(this.ctx.url);
     let pathname = this.get('pathname');
     //列表页
-    if(pathname === 'list') {
+    if (pathname === 'list') {
       return this.listAction();
     }
 
     let detail;
     //在线预览
-    if(this.get('preview')) {
+    if (this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));
         detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
@@ -121,7 +121,7 @@ module.exports = class extends Base {
     }
 
     detail = detail || await this.model('post').getPostDetail(pathname);
-    if(think.isEmpty(detail)) {
+    if (think.isEmpty(detail)) {
       return this.redirect('/');
     }
     detail.pathname = encodeURIComponent(detail.pathname);
@@ -140,7 +140,7 @@ module.exports = class extends Base {
   async pageAction() {
     let pathname = this.get('pathname');
     let detail;
-    if(this.get('preview')) {
+    if (this.get('preview')) {
       try {
         let previewData = JSON.parse(this.post('previewData'));
         detail = await think.model('post', null, 'admin').getContentAndSummary(previewData);
@@ -169,13 +169,13 @@ module.exports = class extends Base {
     this.assign('pathname', pathname);
 
     let template = 'page';
-    if(detail.options) {
+    if (detail.options) {
       try {
-        if(detail.options.template) {
+        if (detail.options.template) {
           /*let stat = */await stats(path.join(this.THEME_VIEW_PATH, 'template', detail.options.template));
           template = path.join('template', detail.options.template.slice(0, -5));
         }
-      } catch(e) {
+      } catch (e) {
         console.log(e); // eslint-disable-line no-console
       }
     }
@@ -189,7 +189,7 @@ module.exports = class extends Base {
   async archiveAction() {
     let model = this.model('post');
     let data = await model.getPostArchive();
-    for(let i in data) { data[i].map(post => post.pathname = encodeURIComponent(post.pathname)) }
+    for (let i in data) { data[i].map(post => post.pathname = encodeURIComponent(post.pathname)) }
     this.assign('list', data);
     return this.displayView('archive');
   }
@@ -203,7 +203,7 @@ module.exports = class extends Base {
    */
   async searchAction() {
     let keyword = this.get('keyword');
-    if(keyword) {
+    if (keyword) {
       keyword = keyword.trim();
       let postModel = this.model('post');
       let searchResult = await postModel.getPostSearch(keyword, this.get('page'));

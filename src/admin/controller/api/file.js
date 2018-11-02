@@ -1,7 +1,7 @@
 const fs = require('fs');
 const dns = require('dns');
 const path = require('path');
-const {parse} = require('url');
+const { parse } = require('url');
 const request = require('request');
 const onFinish = require('on-finished');
 const Base = require('./base');
@@ -36,8 +36,8 @@ const ALLOW_EXTS = [
   /** 多媒体文件 */
   /\.(mp3|wmv|mp4|avi|flv)$/i,
   /** 常用档案文件 */
-  /\.(txt|xml|json|docx?|xlsx?|pptx?)/i,
-  /\.(zip|rar|pdf|gz)/i
+  /\.(txt|xml|json|docx?|xlsx?|pptx?)$/i,
+  /\.(zip|rar|pdf|gz)$/i
 ];
 
 module.exports = class extends Base {
@@ -53,35 +53,35 @@ module.exports = class extends Base {
 
   async postAction() {
     let config = this.uploadConfig;
-    let {type} = config;
+    let { type } = config;
     let file;
 
     /** 处理远程抓取 **/
-    if(this.post('fileUrl')) {
+    if (this.post('fileUrl')) {
       try {
         file = await this.getUrlFile(this.post('fileUrl'));
-      } catch(e) {
+      } catch (e) {
         return this.fail(e.message);
       }
     } else {
       file = this.file('file');
     }
-    if(!file) { return this.fail('FILE_UPLOAD_ERROR'); }
+    if (!file) { return this.fail('FILE_UPLOAD_ERROR'); }
 
     /** 检查文件类型 */
     const ext = this.extWhiteList(file);
-    if(!ext) {
+    if (!ext) {
       return this.fail('FILE_FORMAT_NOT_ALLOWED');
     }
 
     /** 处理导入数据 **/
-    if(this.post('importor')) {
+    if (this.post('importor')) {
       return this.serviceImport(this.post('importor'), file);
     }
 
     // 处理其它上传
-    if(!type) { return this.fail(); }
-    if(type === 'local') {
+    if (!type) { return this.fail(); }
+    if (type === 'local') {
       config = { name: this.post('name') };
     }
 
@@ -91,7 +91,7 @@ module.exports = class extends Base {
 
   // 导出其他平台数据
   async getAction() {
-    if(this.get('exporter')) {
+    if (this.get('exporter')) {
       return this.serviceExport(this.get('exporter'));
     }
     return this.success();
@@ -117,7 +117,7 @@ module.exports = class extends Base {
       const result = await uploader.run(file, config);
       return this.success(result);
     } catch (e) {
-      if(think.isPrevent(e)) {
+      if (think.isPrevent(e)) {
         return true;
       }
 
@@ -130,11 +130,11 @@ module.exports = class extends Base {
    * 从其他平台导入数据
    */
   async serviceImport(service, file) {
-    let ret = {post: 0, page: 0, category: 0, tag: 0};
+    let ret = { post: 0, page: 0, category: 0, tag: 0 };
     try {
       const importor = think.service(`import/${service}`, 'admin', this);
       ret = await importor.run(file);
-    } catch(e) {
+    } catch (e) {
       return this.fail(e);
     }
     return this.success(`共导入文章 ${ret.post} 篇，页面 ${ret.page} 页，分类 ${ret.category} 个，标签 ${ret.tag} 个`);
@@ -148,21 +148,21 @@ module.exports = class extends Base {
       let exporter = think.service(`export/${service}`, 'admin');
       let file = await exporter.run();
       return this.download(file);
-    } catch(e) {
+    } catch (e) {
       return this.fail(e.message);
     }
   }
 
   async getUrlFile(url) {
-    let {hostname} = parse(url);
-    if(!/^\d+\.\d+\.\d+\.\d+/i.test(hostname)) {
+    let { hostname } = parse(url);
+    if (!/^\d+\.\d+\.\d+\.\d+/i.test(hostname)) {
       hostname = await lookupAsync(hostname);
     }
     const longIP = ip2long(hostname);
-    for(let [start, end] of INTERNAL_AREAS) {
+    for (let [start, end] of INTERNAL_AREAS) {
       start = ip2long(start);
       end = ip2long(end);
-      if(longIP>=start && longIP<=end) {
+      if (longIP >= start && longIP <= end) {
         throw new Error('URL ILLEGAL');
       }
     }
@@ -178,7 +178,7 @@ module.exports = class extends Base {
       encoding: 'binary'
     }).catch(() => { throw new Error('UPLOAD_URL_ERROR'); });
 
-    if(resp.headers['content-type'].indexOf('image') === -1) {
+    if (resp.headers['content-type'].indexOf('image') === -1) {
       throw new Error('UPLOAD_TYPE_ERROR');
     }
 
@@ -186,7 +186,7 @@ module.exports = class extends Base {
     // if(!uploadDir) {
     const uploadDir = think.TMPDIR_PATH;
     // }
-    if(!think.isDirectory(uploadDir)) {
+    if (!think.isDirectory(uploadDir)) {
       think.mkdir(uploadDir);
     }
 
