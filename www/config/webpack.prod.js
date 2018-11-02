@@ -1,7 +1,6 @@
 const webpackMerge = require('webpack-merge');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const commonConfig = require('./webpack.common.js');
-const paths = require('./paths.js');
 
 if (process.env.NODE_ENV === 'analyzer') {
     commonConfig.plugins.push(
@@ -24,11 +23,6 @@ module.exports = webpackMerge(commonConfig, {
     mode: 'production',
     optimization: {
         minimize: true
-    },
-    output: {
-        path: paths.distSrc,
-        filename: '[name].js',
-        chunkFilename: '[name].js',
     },
     plugins: [
     ]
