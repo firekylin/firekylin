@@ -22,7 +22,6 @@
     "lint-break-on-errors"
   ],
   "dependencies": {
-    "@types/react-color": "^2.13.6",
     "ali-oss": "^4.14.2",
     "aws-sdk": "^2.263.1",
     "co": "^4.6.0",
@@ -45,6 +44,8 @@
     "push-to-firekylin": "^0.2.3",
     "qiniu": "^7.1.2",
     "react-loadable": "^5.5.0",
+    "request": "^2.87.0",
+    "request-promise-native": "^1.0.5",
     "semver": "^5.5.0",
     "speakeasy": "^2.0.0",
     "think-cache": "^1.0.0",
@@ -72,6 +73,7 @@
     "@types/qrcode.react": "^0.8.1",
     "@types/react": "^16.4.7",
     "@types/react-codemirror": "^1.0.2",
+    "@types/react-color": "^2.13.6",
     "@types/react-dom": "^16.0.7",
     "@types/react-loadable": "^5.4.1",
     "@types/react-router": "^4.0.30",
@@ -125,8 +127,6 @@
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "react-ui-tree": "^4.0.0",
-    "request": "^2.87.0",
-    "request-promise-native": "^1.0.5",
     "rxjs": "^6.2.2",
     "stc": "^2.0.14",
     "stc-css-combine": "^1.0.1",
