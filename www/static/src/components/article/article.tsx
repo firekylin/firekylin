@@ -93,7 +93,7 @@ class Article extends React.Component<ArticleProps, {}> {
         }
     }
     // 发布日期
-    onDateChange(date: moment.Moment, dateString: string) {
+    onDateChange(date: moment.Moment) {
         (this.props.articleStore as ArticleStore).setArticleInfo({create_time: date});
     }
     // Tag
@@ -282,10 +282,11 @@ class Article extends React.Component<ArticleProps, {}> {
                             <h5>发布日期</h5>
                             <DatePicker 
                                 showTime={true}
+                                allowClear={false}
                                 format="YYYY-MM-DD HH:mm:ss"
                                 value={moment(articleInfo.create_time)} 
-                                placeholder="请选择日期" 
-                                onChange={(date: moment.Moment, dateString: string) => this.onDateChange(date, dateString)} 
+                                placeholder="请选择日期"
+                                onChange={date => this.onDateChange(date)} 
                             />
                         </section>
                         {
