@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, message, Radio, Modal } from 'antd';
+import { Form, Input, Button, Radio, Modal } from 'antd';
 import { inject, observer } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import './comment.less';
