@@ -61,7 +61,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                 }}
             >
                 {pageList.map((page: any, key: number) => {
-                    return <Option key={key} value={page.pathname}>{page.title}</Option>;
+                    return <Option key={key.toString()} value={page.pathname}>{page.title}</Option>;
                 })}
             </Select>
         );
