@@ -5,7 +5,7 @@ const paths = require('./paths.js');
 
 const commonConfig = {
     entry: {
-        admin: './www/static/src/app.tsx'
+        admin: './www/static/src/App.tsx'
     },
     resolve: {
         extensions: ['*', '.ts', '.tsx', 'jsx', '.js', 'json'],
