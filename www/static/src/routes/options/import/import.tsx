@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { Tabs, Form, Select, Button, Radio, Upload, Icon, message } from 'antd';
+import { Tabs, Form, Button, Radio, Upload, Icon, message } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { OptionsImportProps, OptionsImportState } from './import.model';
 const TabPane = Tabs.TabPane;
