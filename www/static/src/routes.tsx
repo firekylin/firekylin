@@ -7,18 +7,28 @@ import Container from './routes/container';
 const routes = (
     <Router basename="/admin">
         <Switch>
-            <Route path="/" render={(props) => (
-                auth.checkLogin() ? 
-                    <Container {...props} />
-                :
-                    props.history.location.pathname === '/login' ? <Login {...props} /> : <Redirect to="/login" />
-            )} />
-            <Route path="/login" render={(props) => (
-                auth.checkLogin() ? 
-                    <Redirect to="/dashboard" />
-                :
-                    <Login {...props} />
-            )} />
+            <Route
+                path="/"
+                render={props =>
+                    auth.checkLogin() ? (
+                        <Container {...props} />
+                    ) : props.history.location.pathname === '/login' ? (
+                        <Login {...props} />
+                    ) : (
+                        <Redirect to="/login" />
+                    )
+                }
+            />
+            <Route
+                path="/login"
+                render={props =>
+                    auth.checkLogin() ? (
+                        <Redirect to="/dashboard" />
+                    ) : (
+                        <Login {...props} />
+                    )
+                }
+            />
         </Switch>
     </Router>
 );

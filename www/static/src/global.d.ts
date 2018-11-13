@@ -1,6 +1,6 @@
 interface Window {
     SysConfig: {
-        userInfo: any,
+        userInfo: any;
         config: {
             disallow_file_edit: any;
         };
@@ -40,7 +40,7 @@ interface Window {
             push: '0' | '1';
             upload: any;
             rssImportList: any[];
-        },
+        };
         token: string;
     };
 }

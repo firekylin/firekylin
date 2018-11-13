@@ -9,25 +9,25 @@ interface EditorLinkModalProps extends ModalProps, FormComponentProps {
     onCreate: () => void;
     fetchData: (keyword: string) => void;
     innerLinks: any[];
-
 }
 
 class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
     constructor(props: any) {
         super(props);
     }
-    
-    handleChange = (value) => {
-        const selectedLink = this.props.innerLinks.filter(link => link.title === value)[0];
+
+    handleChange = value => {
+        const selectedLink = this.props.innerLinks.filter(
+            link => link.title === value,
+        )[0];
         const pathname = selectedLink.pathname;
         const title = selectedLink.title;
         this.props.form.setFieldsValue({
-            innerLinkUrl: pathname
+            innerLinkUrl: pathname,
         });
         this.props.form.setFieldsValue({
-            innerLinkText: title
+            innerLinkText: title,
         });
-
     }
 
     render() {
@@ -49,37 +49,25 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                 onOk={onCreate}
                 onCancel={onCancel}
             >
-                <Tabs className="tabs" 
-                    defaultActiveKey="0" 
-                    type="card" 
-                    style={{padding: 20}}
+                <Tabs
+                    className="tabs"
+                    defaultActiveKey="0"
+                    type="card"
+                    style={{ padding: 20 }}
                 >
                     <TabPane tab="插入外链" key="0">
                         <Form>
-                            <FormItem
-                                {...formItemLayout}
-                                label="链接地址："
-                            >
-                                {getFieldDecorator('linkUrl')(
-                                    <Input />
-                                )}
+                            <FormItem {...formItemLayout} label="链接地址：">
+                                {getFieldDecorator('linkUrl')(<Input />)}
                             </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="链接文本："
-                            >
-                                {getFieldDecorator('linkText')(
-                                    <Input />
-                                )}
+                            <FormItem {...formItemLayout} label="链接文本：">
+                                {getFieldDecorator('linkText')(<Input />)}
                             </FormItem>
                         </Form>
                     </TabPane>
                     <TabPane tab="插入内链" key="1">
                         <Form>
-                            <FormItem
-                                {...formItemLayout}
-                                label="链接文本："
-                            >
+                            <FormItem {...formItemLayout} label="链接文本：">
                                 {getFieldDecorator('innerLinkText')(
                                     <Select
                                         showSearch={true}
@@ -92,17 +80,16 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                                         onChange={this.handleChange}
                                         notFoundContent="未找到文章"
                                     >
-                                        {innerLinks.map((d: any) => <Option key={d.id} value={d.title}>{d.title}</Option>)}
-                                    </Select>
+                                        {innerLinks.map((d: any) => (
+                                            <Option key={d.id} value={d.title}>
+                                                {d.title}
+                                            </Option>
+                                        ))}
+                                    </Select>,
                                 )}
                             </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="链接地址："
-                            >
-                                {getFieldDecorator('innerLinkUrl')(
-                                    <Input />
-                                )}
+                            <FormItem {...formItemLayout} label="链接地址：">
+                                {getFieldDecorator('innerLinkUrl')(<Input />)}
                             </FormItem>
                         </Form>
                     </TabPane>

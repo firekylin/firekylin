@@ -7,9 +7,9 @@ import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleStore from './article.store';
 
 export interface ArticleProps extends RouteComponentProps<ArticleMatchParams> {
-    userStore?: UserStore;
-    sharedStore?: SharedStore;
-    articleStore?: ArticleStore;
+    userStore: UserStore;
+    sharedStore: SharedStore;
+    articleStore: ArticleStore;
     type: ArticleTypeEnum;
 }
 
