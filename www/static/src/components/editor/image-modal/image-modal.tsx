@@ -1,12 +1,13 @@
-import * as React from 'react';
-import { Input, Modal, Tabs, Form, Select, Upload, message, Icon } from 'antd';
+import React from 'react';
+import { Input, Modal, Tabs, Form, Upload, message, Icon } from 'antd';
+import { ChangeEvent } from 'react';
 import { ModalProps } from 'antd/lib/modal';
 import { FormComponentProps } from 'antd/lib/form';
+import { UploadChangeParam } from 'antd/lib/upload';
+import './image-modal.less';
+
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
-import './image-modal.less';
-import { UploadChangeParam } from 'antd/lib/upload';
-import { ChangeEvent } from 'react';
 
 interface EditorImageModalProps extends ModalProps, FormComponentProps {
     imageUrl: string;
@@ -22,10 +23,6 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
     state = {
         loading: false,
     };
-
-    constructor(props: any) {
-        super(props);
-    }
 
     getBase64(img: any, callback: Function) {
         const reader = new FileReader();
