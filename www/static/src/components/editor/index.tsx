@@ -200,12 +200,12 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       this.setState({linkText: values.linkText, linkUrl: values.linkUrl});
 
       if (values.innerLinkUrl || values.innerLinkText) {
-        values.linkUrl = values.innerLinkUrl;
+        values.linkUrl = `${location.origin}/post/${values.innerLinkUrl}.html`;
         values.linkText = values.innerLinkText;
       }
 
       if (values.linkUrl && values.linkText) {
-        const linkUrl = `${location.origin}/post/${values.linkUrl}.html`;
+        const linkUrl = values.linkUrl;
         this._linkText(linkUrl, values.linkText, false);
       } else {
         this._linkText();
