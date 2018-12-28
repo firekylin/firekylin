@@ -65,9 +65,11 @@ class ArticleStore {
                 if (res.data.create_time === '0000-00-00 00:00:00') {
                     res.data.create_time = '';
                 }
+                const re = /-/g;
+                res.data.create_time = res.data.create_time.replace(re, '/');
                 res.data.create_time = res.data.create_time 
-                    ? moment(new Date(res.data.create_time)).format('YYYY-MM-DD HH:mm:ss') 
-                    : res.data.create_time;
+                    ? moment(new Date(res.data.create_time)) 
+                    : new Date();
                 if (type === ArticleTypeEnum.POST) {
                   res.data.tag = res.data.tag.map(tag => tag.name);
                   res.data.cate.forEach(cat => cat.id);
