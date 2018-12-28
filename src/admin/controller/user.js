@@ -14,7 +14,7 @@ module.exports = class extends Base {
     let options = await model.getOptions();
 
     //二步验证
-    if(options.two_factor_auth) {
+    if (options.two_factor_auth) {
       let two_factor_auth = this.post('two_factor_auth');
       let verified = speakeasy.totp.verify({
         secret: options.two_factor_auth,
@@ -22,7 +22,7 @@ module.exports = class extends Base {
         token: two_factor_auth,
         window: 2
       });
-      if(!verified) {
+      if (!verified) {
         return this.fail('TWO_FACTOR_AUTH_ERROR');
       }
     }
@@ -45,19 +45,20 @@ module.exports = class extends Base {
       ldap_log: options.ldap_log !== '0'
     };
 
-    if(ldapConfig.ldap_on && ldapConfig.ldap_whiteList.indexOf(username) === -1) {
+    if (ldapConfig.ldap_on && ldapConfig.ldap_whiteList.indexOf(username) === -1) {
       think.logger.info('LDAP', 'VERIFY TYPE');
       userInfo = await this.ldapVerify(username, ldapConfig);
-    }else {
+    } else {
       think.logger.info('NORMAL', 'VERIFY TYPE');
       userInfo = await this.normalVerify(username);
     }
 
     //帐号是否被禁用，且投稿者不允许登录
-    if((userInfo.status | 0) !== 1 || userInfo.type === 3) {
+    if ((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 
+    await this.model('user').updateLoginTime(userInfo);
     await this.session('userInfo', userInfo);
     return this.success();
   }
@@ -74,21 +75,22 @@ module.exports = class extends Base {
    * 域账号登录
    */
   async intranetAction() {
-    const {res, req} = this.ctx;
+    const { res, req } = this.ctx;
 
     const authModule = firekylin.require('auth');
-    if(!authModule) {
+    if (!authModule) {
       return this.fail('no auth module');
     }
 
-    const {name, email} = await authModule(req, res);
+    const { name, email } = await authModule(req, res);
     const userModel = this.model('user');
-    const userInfo = await userModel.where({name, email, _logic: 'OR'}).find();
+    const userInfo = await userModel.where({ name, email, _logic: 'OR' }).find();
 
     if (think.isEmpty(userInfo)) {
       return this.fail('user not exist!');
     }
 
+    await this.model('user').updateLoginTime(userInfo);
     await this.session('userInfo', userInfo);
     return this.redirect('/admin');
   }
@@ -97,7 +99,7 @@ module.exports = class extends Base {
    */
   async passwordAction() {
     let userInfo = await this.session('userInfo') || {};
-    if(think.isEmpty(userInfo)) {
+    if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
 
@@ -111,11 +113,11 @@ module.exports = class extends Base {
 
   async forgotAction() {
     let userInfo = await this.session('userInfo') || {};
-    if(!think.isEmpty(userInfo)) {
+    if (!think.isEmpty(userInfo)) {
       return this.success();
     }
 
-    if(this.isPost) {
+    if (this.isPost) {
       let user = this.post('user');
       user = await this.model('user').where({
         name: user,
@@ -123,10 +125,10 @@ module.exports = class extends Base {
         _logic: 'OR'
       }).find();
 
-      if(think.isEmpty(user)) {
+      if (think.isEmpty(user)) {
         return this.fail('查无此人');
       }
-      if(!user.email) {
+      if (!user.email) {
         return this.fail('该用户未设置邮箱，不能使用找回密码功能');
       }
 
@@ -156,20 +158,20 @@ module.exports = class extends Base {
 
   async resetAction() {
     let userInfo = await this.session('userInfo') || {};
-    if(!think.isEmpty(userInfo)) {
+    if (!think.isEmpty(userInfo)) {
       return this.success();
     }
 
-    if(this.isPost) {
-      let {password, token} = this.post();
+    if (this.isPost) {
+      let { password, token } = this.post();
 
       let user = await think.cache(token);
-      if(think.isEmpty(user)) {
+      if (think.isEmpty(user)) {
         return this.fail('查无此人');
       }
 
-      let findUser = await this.model('user').where({name: user}).find();
-      if(think.isEmpty(findUser)) {
+      let findUser = await this.model('user').where({ name: user }).find();
+      if (think.isEmpty(findUser)) {
         return this.fail('查无此人');
       }
 
@@ -189,14 +191,14 @@ module.exports = class extends Base {
   async normalVerify(username) {
     //校验帐号和密码
     let userModel = this.model('user');
-    let userInfo = await userModel.where({name: username}).find();
-    if(think.isEmpty(userInfo)) {
+    let userInfo = await userModel.where({ name: username }).find();
+    if (think.isEmpty(userInfo)) {
       return this.fail('ACCOUNT_ERROR');
     }
 
     //校验密码
     let password = this.post('password');
-    if(!userModel.checkPassword(userInfo, password)) {
+    if (!userModel.checkPassword(userInfo, password)) {
       return this.fail('ACCOUNT_ERROR');
     }
 
@@ -210,11 +212,11 @@ module.exports = class extends Base {
     const ldap = this.service('ldap', 'admin', ldapConfig);
     const ldapRes = await ldap.validate(username, oripassword);
 
-    if(!ldapRes) {
+    if (!ldapRes) {
       return this.fail('ACCOUNT_ERROR');
     }
 
-    if(ldapRes === 'timeout') {
+    if (ldapRes === 'timeout') {
       return this.fail('LDAP_CONNECT_TIMEOUT');
     }
 
@@ -223,7 +225,7 @@ module.exports = class extends Base {
     let ldapUserInfo = await ldap.getUserInfo(username);
     let newData = {};
 
-    if(!think.isEmpty(ldapUserInfo)) {
+    if (!think.isEmpty(ldapUserInfo)) {
       newData = {
         username,
         email: ldapUserInfo.mail,
@@ -236,9 +238,9 @@ module.exports = class extends Base {
 
     //校验数据库中帐号是否存在
     let userModel = this.model('user');
-    let userInfo = await userModel.where({name: username}).find();
+    let userInfo = await userModel.where({ name: username }).find();
 
-    if(think.isEmpty(userInfo)) {
+    if (think.isEmpty(userInfo)) {
       //新增该用户到数据库
 
       let modelInstance = this.model('user');
@@ -246,13 +248,13 @@ module.exports = class extends Base {
 
       think.logger.info(`insertId: ${JSON.stringify(insertId)}`, 'LDAP');
 
-      if(insertId && insertId.type === 'add') {
-          userInfo = await userModel.where({name: username}).find();
+      if (insertId && insertId.type === 'add') {
+        userInfo = await userModel.where({ name: username }).find();
       }
-      if(insertId && insertId.type === 'exist') {
+      if (insertId && insertId.type === 'exist') {
         return this.fail('ACCOUNT_ERROR');
       }
-    }else {
+    } else {
       //更新数据库用户信息
 
       let updateData = {
@@ -266,8 +268,8 @@ module.exports = class extends Base {
 
       think.logger.info(`affectedRows: ${rows}`, 'USERINFO UPDATED');
 
-      if(rows) {
-        userInfo = await userModel.where({name: username}).find();
+      if (rows) {
+        userInfo = await userModel.where({ name: username }).find();
       }
     }
 
