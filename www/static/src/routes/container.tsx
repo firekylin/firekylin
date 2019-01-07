@@ -56,7 +56,6 @@ class Container extends React.Component<any, {}> {
             res => {
                 if (res.errno === 0) {
                     window.SysConfig.options = (res.data as any);
-                    console.log(res.data);
                 }
             }
         );
