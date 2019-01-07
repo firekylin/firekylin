@@ -1,6 +1,6 @@
 import * as React from 'react';
 import classnames from 'classnames';
-import { Input, Form, Icon, Button } from 'antd';
+import { Input, Form, Icon, Button, Checkbox } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { LoginProps } from './login.model';
 const FormItem = Form.Item;
@@ -228,6 +228,12 @@ class LoginForm extends React.Component<LoginProps, any> {
                 </FormItem>
                 {this.getTwoFactorAuth()}
                 <FormItem>
+                  {getFieldDecorator('remember', {
+                    valuePropName: 'checked',
+                    initialValue: true,
+                  })(
+                    <Checkbox style={{fontWeight: 'normal'}}>自动登录</Checkbox>
+                  )}
                   <Button 
                     style={{width: '100%'}} 
                     type="primary" 

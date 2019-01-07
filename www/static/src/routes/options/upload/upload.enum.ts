@@ -4,5 +4,6 @@ export enum UploadEnum {
     Upyun = 'upyun',
     AliYun = 'aliyun',
     SMMS = 'smms',
-    AWSS3 = 's3'
+    AWSS3 = 's3',
+    Tencent = 'tencent'
 }

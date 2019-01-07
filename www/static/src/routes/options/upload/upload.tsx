@@ -10,6 +10,7 @@ import './upload.less';
 import OptionsUploadUpYunFormItems from './upyun/upyun';
 import OptionsUploadAliYunFormItems from './aliyun/aliyun';
 import OptionsUploadS3FormItems from './s3/s3';
+import OptionsUploadTencentFormItems from './tencent/tencent';
 const FormItem = Form.Item;
 
 @inject('optionsUploadStore')
@@ -39,6 +40,8 @@ class OptionsUploadForm extends React.Component<OptionsUploadProps, {}> {
                 return <p>选用此功能图片将上传至第三方图床 : <a href="https://sm.ms/" target="_blank">SM.MS 图床</a></p>;
             case UploadEnum.AWSS3:
                 return <OptionsUploadS3FormItems upload={upload} form={this.props.form} />;
+            case UploadEnum.Tencent:
+                return <OptionsUploadTencentFormItems upload={upload} form={this.props.form} />;
             default:
                 return null;
         }
@@ -71,6 +74,7 @@ class OptionsUploadForm extends React.Component<OptionsUploadProps, {}> {
                                 })(
                                     <RadioGroup
                                         onChange={e => {
+                                            this.props.form.resetFields();
                                             setUpload({type: e.target.value});
                                         }}
                                     >
@@ -80,6 +84,7 @@ class OptionsUploadForm extends React.Component<OptionsUploadProps, {}> {
                                         <Radio value={UploadEnum.AliYun}>阿里云</Radio>
                                         <Radio value={UploadEnum.SMMS}>SM.MS 图床</Radio>
                                         <Radio value={UploadEnum.AWSS3}>AWS S3</Radio>
+                                        <Radio value={UploadEnum.Tencent}>腾讯云</Radio>
                                     </RadioGroup>
                                 )}
                             </FormItem>

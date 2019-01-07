@@ -7,6 +7,7 @@ import { NavLink } from 'react-router-dom';
 import * as moment from 'moment';
 import { Modal } from 'antd';
 import { Subscription } from 'rxjs';
+import { http } from '../../utils/http';
 const confirm = Modal.confirm;
 
 const UPDATE_STEPS = [
@@ -27,9 +28,22 @@ class DashBoard extends React.Component<DashBoardProps, any> {
         showUpdate: false,
     };
 
+    getOptions() {
+        http.get('/admin/api/options')
+        .subscribe(
+            res => {
+                if (res.errno === 0) {
+                    window.SysConfig.options = (res.data as any);
+                    console.log(res.data);
+                }
+            }
+        );
+    }
+
     componentWillMount() {
         this.props.dashBoardStore.getSelectLast();
         this.props.dashBoardStore.getSystemInfo();
+        this.getOptions();
     }
 
     handleClick() {
