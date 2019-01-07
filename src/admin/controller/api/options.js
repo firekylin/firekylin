@@ -35,7 +35,7 @@ module.exports = class extends Base {
     } else if(type === 'defaultCategory') {
       return this.success(options.defaultCategory || '');
     }
-    return this.success();
+    return this.success(options);
   }
 
   postAction() {
