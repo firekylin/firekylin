@@ -2,13 +2,19 @@ const nodemailer = require('nodemailer');
 const speakeasy = require('speakeasy');
 const Base = require('./base');
 
+const rememberSessionOpt = {
+  maxAge: 365 * 24 * 3600 * 1000
+};
+const normalSessionOpt = {
+  maxAge: 24 * 3600 * 1000
+}
 module.exports = class extends Base {
   /**
    * login
    * @return {} []
    */
   async loginAction() {
-    const username = this.post('username');
+    const { username, remember } = this.post();
     let userInfo = {};
     let model = this.model('options');
     let options = await model.getOptions();
@@ -59,7 +65,11 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
-    await this.session('userInfo', userInfo);
+    await this.session(
+      'userInfo',
+      userInfo,
+      remember ? rememberSessionOpt : normalSessionOpt
+    );
     return this.success();
   }
   /**
@@ -75,6 +85,7 @@ module.exports = class extends Base {
    * 域账号登录
    */
   async intranetAction() {
+    const { remember } = this.post();
     const { res, req } = this.ctx;
 
     const authModule = firekylin.require('auth');
@@ -91,7 +102,12 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
-    await this.session('userInfo', userInfo);
+    await this.model('user').updateUserLoginTime(userInfo);
+    await this.session(
+      'userInfo',
+      userInfo,
+      remember ? rememberSessionOpt : normalSessionOpt
+    );
     return this.redirect('/admin');
   }
   /**

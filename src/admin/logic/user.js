@@ -22,20 +22,23 @@ module.exports = class extends think.Logic {
    */
   loginAction() {
     this.allowMethods = 'get,post';
-    if(this.isGet) {
+    if (this.isGet) {
       return;
     }
     this.rules = {
       username: {
         required: true,
-        length: {min: 4}
+        length: { min: 4 }
       },
       password: {
         required: true,
-        length: {min: 32, max: 32}
+        length: { min: 32, max: 32 }
       },
       factor: {
         regexp: /^\d{6}$/
+      },
+      remember: {
+        boolean: true
       }
     }
   }
