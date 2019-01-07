@@ -6,6 +6,7 @@ import './container.less';
 import Sidebar from '../components/sidebar';
 // Components
 import DashBoard from './dashboard/dashboard';
+import { http } from '../utils/http';
 const User = Loadable({
     loader: () => import(/* webpackChunkName: 'user' */'./user/user'),
     loading: Loading
@@ -47,6 +48,22 @@ const routerOptions = {
 class Container extends React.Component<any, {}> {
     constructor(props: any) {
         super(props);
+    }
+
+    getOptions() {
+        http.get('/admin/api/options')
+        .subscribe(
+            res => {
+                if (res.errno === 0) {
+                    window.SysConfig.options = (res.data as any);
+                    console.log(res.data);
+                }
+            }
+        );
+    }
+    
+    componentWillMount() {
+        this.getOptions();
     }
     render() {
         return (
