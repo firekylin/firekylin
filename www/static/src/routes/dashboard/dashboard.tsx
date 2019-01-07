@@ -27,12 +27,9 @@ class DashBoard extends React.Component<DashBoardProps, any> {
         showUpdate: false,
     };
 
-    
-
     componentWillMount() {
         this.props.dashBoardStore.getSelectLast();
         this.props.dashBoardStore.getSystemInfo();
-        this.getOptions();
     }
 
     handleClick() {
