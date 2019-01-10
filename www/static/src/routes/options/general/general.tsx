@@ -94,7 +94,7 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
             },
         };
 
-        const { options } = this.props.generalStore.data;
+        const { options } = window.SysConfig;
         const { loading } = this.props.generalStore;
         const { logo_url, favicon_url } = options;
         let [logoUrl, iconUrl] = [logo_url, favicon_url];
