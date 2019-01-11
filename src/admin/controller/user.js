@@ -101,7 +101,11 @@ module.exports = class extends Base {
       return this.fail('user not exist!');
     }
 
-    await this.model('user').updateUserLoginTime(userInfo);
+    //帐号是否被禁用，且投稿者不允许登录
+    if ((userInfo.status | 0) !== 1 || userInfo.type === 3) {
+      return this.fail('ACCOUNT_FORBIDDEN');
+    }
+
     await this.model('user').updateUserLoginTime(userInfo);
     await this.session(
       'userInfo',
