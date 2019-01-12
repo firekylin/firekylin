@@ -84,7 +84,7 @@ const FormItem = Form.Item;
                     key={i}
                     label={element.label}
                 >
-                    <Input style={{width: 600}} onChange={e => this.state.themeConfig[element.name] = e.target.value} />
+                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => this.state.themeConfig[element.name] = e.target.value} />
                     <p style={{width: 600}}>{element.help}</p>
                 </FormItem>
             );
@@ -238,7 +238,7 @@ const FormItem = Form.Item;
     render() {
         const Option = Select.Option;
         const { themeStore } = this.props;
-        const { themeList, data } = themeStore;
+        const { themeList } = themeStore;
         const { getFieldDecorator } = this.props.form;
         return (
             <div className="appearance-theme">
@@ -251,7 +251,7 @@ const FormItem = Form.Item;
                         >
                             {
                                 getFieldDecorator('theme', {
-                                    initialValue: data.theme
+                                    initialValue: window.SysConfig.options.theme
                                 })(
                                     <Select
                                         style={{width: 600}}
