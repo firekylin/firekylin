@@ -8,11 +8,11 @@ const statAsync = think.promisify(fs.stat);
 module.exports = class extends Base {
   // 导入方法
   async uploadMethod(filename, config) {
-    const { SecretId, SecretKey, bucket, region, origin, file, prefix } = config;
+    const { secretId, secretKey, bucket, region, origin, file, prefix } = config;
     // 创建实例
     const cos = new COS({
-      SecretId,
-      SecretKey,
+      SecretId: secretId,
+      SecretKey: secretKey,
     });
     const putObjectAsync = think.promisify(cos.putObject);
     let savePath = this.getSavePath(filename, prefix);
