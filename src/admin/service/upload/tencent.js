@@ -14,7 +14,7 @@ module.exports = class extends Base {
       SecretId: secretId,
       SecretKey: secretKey,
     });
-    const putObjectAsync = think.promisify(cos.putObject);
+    const putObjectAsync = think.promisify(cos.putObject, cos);
     let savePath = this.getSavePath(filename, prefix);
     if (!path.extname(savePath)) {
       savePath += path.extname(file.name);
