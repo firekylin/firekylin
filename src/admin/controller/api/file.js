@@ -20,12 +20,12 @@ function ip2long(ip) {
   return longValue;
 }
 
-request.defaults({
+const reqIns = request.defaults({
   strictSSL: false,
   rejectUnauthorized: false
 });
 
-const getFileContent = think.promisify(request.get, request);
+const getFileContent = think.promisify(reqIns.get, reqIns);
 const writeFileAsync = think.promisify(fs.writeFile, fs);
 const unlinkAsync = think.promisify(fs.unlink, fs);
 const lookupAsync = think.promisify(dns.lookup, dns);

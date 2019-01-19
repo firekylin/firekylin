@@ -6,13 +6,13 @@ const request = require('request');
 const pack = require('../../../../package.json');
 const Base = require('./base');
 
-request.defaults({
+const reqIns = request.defaults({
   timeout: 1000,
   strictSSL: false,
   rejectUnauthorized: false
 });
 
-const reqIns = think.promisify(request.get);
+const reqInsAsync = think.promisify(reqIns.get);
 
 module.exports = class extends Base {
 
@@ -24,7 +24,7 @@ module.exports = class extends Base {
   async getAction() {
     let needUpdate = false;
     try {
-      let res = await reqIns('http://firekylin.org/release/v1/.latest');
+      let res = await reqInsAsync('http://firekylin.org/release/v1/.latest');
       let onlineVersion = res.body.trim();
       if(semver.gt(onlineVersion, pack.version)) {
         needUpdate = onlineVersion;
@@ -71,7 +71,7 @@ module.exports = class extends Base {
       case '1':
       default:
         return new Promise((resolve, reject) => {
-          request({uri: 'http://firekylin.org/release/v1/latest.tar.gz'})
+          reqIns({uri: 'http://firekylin.org/release/v1/latest.tar.gz'})
           .pipe(fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz')))
           .on('close', resolve)
           .on('error', reject)

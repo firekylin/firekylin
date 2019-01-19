@@ -1,13 +1,13 @@
 const request = require('request');
 
-request.defaults({
+const reqIns = request.defaults({
   strictSSL: false,
   rejectUnauthorized: false
 });
 
 const _ = {
-  get: think.promisify(request, request),
-  post: think.promisify(request.post, request)
+  get: think.promisify(reqIns, reqIns),
+  post: think.promisify(reqIns.post, reqIns)
 };
 
 module.exports = class extends think.Service {
