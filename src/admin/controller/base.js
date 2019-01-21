@@ -39,6 +39,7 @@ module.exports = class extends think.Controller {
     if (think.isEmpty(this.userInfo)) {
       options = {
         title: options.title,
+        favicon_icon: options.favicon_icon,
         two_factor_auth: options.two_factor_auth,
         password_salt: options.password_salt,
         ldap_on: options.ldap_on,
