@@ -60,3 +60,4 @@ www/theme/firekylin_new
 db/
 
 .eslintcache
+stats.json
