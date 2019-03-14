@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { TagAPI } from '../tag.api';
 import { TagCreateOrEditProps } from './create-or-edit.model';
-import BreadCrumb from '../../../components/breadcrumb';
 import { tap } from 'rxjs/operators';
+import { Tag } from '../tag.model';
+import BreadCrumb from '../../../components/breadcrumb';
 const FormItem = Form.Item;
 const formItemLayout = {
     labelCol: {
@@ -26,7 +27,7 @@ const tailFormItemLayout = {
 function TagCreateOrEditForm(props: TagCreateOrEditProps) {
     const id = props.match.params.id;
     const [loading, setLoading] = useState(false);
-    const [tag, setTag] = useState({
+    const [tag, setTag] = useState<Tag>({
         id: 0,
         name: '',
         pathname: '',

@@ -11,9 +11,9 @@ const confirm = Modal.confirm;
 const Column = Table.Column;
 
 export function TagList(props: TagProps) {
-    let subscription: Subscription;
+    let subscription: Subscription = new Subscription();
     const [loading, setLoading] = useState(false);
-    const [tagList, setTagList] = useState<Tag[]>();
+    const [tagList, setTagList] = useState<Tag[]>([]);
 
     function queryTagList() {
         setLoading(true);
