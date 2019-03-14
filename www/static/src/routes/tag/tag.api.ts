@@ -48,8 +48,6 @@ function tagCreate(params: TagCreateParams) {
         map(res => {
           if (res.errno === 0) {
             message.success('创建成功');
-          } else {
-            message.success(res.errmsg);
           }
           return res;
         })

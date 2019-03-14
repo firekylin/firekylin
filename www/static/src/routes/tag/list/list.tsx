@@ -36,7 +36,7 @@ export function TagList(props: TagProps) {
             title: '提示',
             content: '确定删除吗?',
             onOk: () => {
-                TagAPI.tagDeleteById(id)
+                return TagAPI.tagDeleteById(id)
                 .pipe(
                     tap(res => {
                         if (res.errno === 0) {
