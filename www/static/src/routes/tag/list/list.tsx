@@ -1,37 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Table, Modal, message } from 'antd';
-import { Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { tap, startWith, switchMap, catchError } from 'rxjs/operators';
+import { useEventCallback } from 'rxjs-hooks';
 import { Tag } from '../../../models/tag.model';
 import { TagAPI } from '../tag.api';
 import { TagProps } from '../tag.model';
-import './list.less';
 import BreadCrumb from '../../../components/breadcrumb';
+import './list.less';
 const confirm = Modal.confirm;
 const Column = Table.Column;
 
 export function TagList(props: TagProps) {
-    let subscription: Subscription = new Subscription();
     const [loading, setLoading] = useState(false);
-    const [tagList, setTagList] = useState<Tag[]>([]);
 
-    function queryTagList() {
-        setLoading(true);
-        subscription = TagAPI.queryTagList()
-            .pipe(tap(() => setLoading(false)))
-            .subscribe(
-                res => setTagList(res)
-            );
-    }
+    const [eventCallback, tagList] = useEventCallback((event$: Observable<React.MouseEvent<HTMLButtonElement>>) => {
+        return event$.pipe(
+            startWith([]),
+            switchMap(() => TagAPI.queryTagList()),
+            tap(() => {
+                setLoading(false);
+            }),
+            catchError(err => {
+                console.error(err);
+                return of([]);
+            })
+        );
+    }, []);
 
-    useEffect(() => {
-        queryTagList();
-        return function cleanup() {
-            subscription.unsubscribe();
-        };
-    },        []);
-
-    function tagDelete(id: number) {
+    function tagDelete(e: React.MouseEvent<HTMLButtonElement>, id: number) {
         confirm({
             title: '提示',
             content: '确定删除吗?',
@@ -41,7 +38,7 @@ export function TagList(props: TagProps) {
                     tap(res => {
                         if (res.errno === 0) {
                             message.success('删除成功');
-                            queryTagList();
+                            eventCallback(e);
                         }
                     })
                 ).toPromise();
@@ -87,7 +84,7 @@ export function TagList(props: TagProps) {
                             >
                                 编辑
                             </Button>
-                            <Button onClick={() => tagDelete(tag.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                            <Button onClick={(e) => tagDelete(e, tag.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
                         </>
                     )}
                 />
