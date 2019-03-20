@@ -139,6 +139,7 @@ const commonConfig = {
     },
     plugins: [
         new webpack.ContextReplacementPlugin(
+            // eslint-disable-next-line no-useless-escape
             /moment[\\\/]locale$/,
             /^\.\/(zh-cn)$/
         ),
