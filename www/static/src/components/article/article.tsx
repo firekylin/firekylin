@@ -94,6 +94,7 @@ class Article extends React.Component<ArticleProps, {}> {
             !this.props.match.params.id
         ) {
             this.props.articleStore.resetArticleInfo();
+            this.id = 0;
             this.init();
         }
     }
