@@ -26,8 +26,6 @@ import { ArticleEnum } from './article.enum';
 @observer
 class Article extends React.Component<ArticleProps, {}> {
     static defaultProps: ArticleProps;
-
-    id: number = 0;
     type: ArticleTypeEnum;
     articleInfo = this.props.articleStore.articleInfo;
 
@@ -40,7 +38,6 @@ class Article extends React.Component<ArticleProps, {}> {
 
     constructor(props: any) {
         super(props);
-        this.id = +this.props.match.params.id || 0;
     }
     init() {
         const sharedStore = this.props.sharedStore;
@@ -82,8 +79,9 @@ class Article extends React.Component<ArticleProps, {}> {
     componentDidMount() {
         this.type = this.props.type;
         this.init();
-        if (this.id) {
-            this.props.articleStore.getArticleInfoById(this.id, this.type);
+        const id = +this.props.match.params.id;
+        if (id) {
+            this.props.articleStore.getArticleInfoById(id, this.type);
         } else {
             this.props.articleStore.resetArticleInfo();
         }
@@ -94,7 +92,6 @@ class Article extends React.Component<ArticleProps, {}> {
             !this.props.match.params.id
         ) {
             this.props.articleStore.resetArticleInfo();
-            this.id = 0;
             this.init();
         }
     }
@@ -155,8 +152,8 @@ class Article extends React.Component<ArticleProps, {}> {
         }
 
         const params: any = {};
-        if (this.id) {
-            params.id = this.id;
+        if (this.props.match.params.id) {
+            params.id = this.props.match.params.id;
         }
 
         this.props.articleStore.setArticleInfo({ status });
@@ -189,17 +186,17 @@ class Article extends React.Component<ArticleProps, {}> {
             push_sites: articleInfo.options.push_sites,
         });
         // 删除缓存
-        localStorage.removeItem('unsavetype' + this.type + 'id' + this.id);
+        localStorage.removeItem('unsavetype' + this.type + 'id' + params.id);
         // 保存
         const type = this.isPage() ? 'page' : 'post';
         this.props.articleStore.articleSubmit(params, this.type).subscribe(res => {
             if (res.errno === 0) {
-                if (!this.id && res.data.id) {
-                    this.id = res.data.id;
+                if (!params.id && res.data.id) {
+                    params.id = res.data.id;
                 }
 
                 if (status === ArticleEnum.SAVE && articleInfo.is_public) {
-                    this.props.articleStore.getArticleInfoById(this.id, this.type);
+                    this.props.articleStore.getArticleInfoById(params.id, this.type);
                     message.success(
                         <>
                             发布成功, &nbsp;&nbsp;
@@ -303,7 +300,7 @@ class Article extends React.Component<ArticleProps, {}> {
                             type={this.type}
                             hasError={this.state.hasError}
                         />
-                        <ArticleEditor type={this.props.type} id={this.id} />
+                        <ArticleEditor type={this.props.type} id={this.props.match.params.id} />
                     </Col>
                     <Col span={6}>
                         <ArticleControlHeader
