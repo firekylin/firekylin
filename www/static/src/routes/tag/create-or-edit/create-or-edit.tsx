@@ -3,8 +3,8 @@ import { Form, Input, Button, message } from 'antd';
 import { TagAPI } from '../tag.api';
 import { TagCreateOrEditProps } from './create-or-edit.model';
 import { tap } from 'rxjs/operators';
-import { Tag } from '../tag.model';
 import BreadCrumb from '../../../components/breadcrumb';
+import { Tag } from '../../../models/tag.model';
 const FormItem = Form.Item;
 const formItemLayout = {
     labelCol: {

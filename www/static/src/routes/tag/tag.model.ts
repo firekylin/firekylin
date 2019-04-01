@@ -5,13 +5,6 @@ export interface TagCreateParams {
     pathname: string;
 }
 
-export interface Tag {
-    id: number;
-    name: string;
-    pathname: string;
-    post_tag: number;
-}
-
 export interface TagProps extends RouteComponentProps<TagMatchParams> {
 }
 
