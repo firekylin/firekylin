@@ -84,7 +84,7 @@ const FormItem = Form.Item;
                     key={i}
                     label={element.label}
                 >
-                    <Input autosize={false} value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => this.state.themeConfig[element.name] = e.target.value} />
+                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => this.state.themeConfig[element.name] = e.target.value} />
                     <p style={{width: 600}}>{element.help}</p>
                 </FormItem>
             );
