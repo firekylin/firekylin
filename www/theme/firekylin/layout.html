@@ -1,59 +1,116 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
   <title>{% block title %}{% endblock %}</title>
   <link rel="icon" href="{{options.favicon_url |default('/static/img/firekylin.jpg')}}">
-  {% if options.favicon %}<link rel="shortcut icon" href="{{options.favicon}}" type="image/x-icon">{% endif %}
+  {% if options.favicon %}
+  <link rel="shortcut icon" href="{{options.favicon}}" type="image/x-icon">{% endif %}
   <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
   <link rel=search type="application/opensearchdescription+xml" href="/opensearch.xml" title="{{ options.title }}">
-  {% if options.keywords %}<meta name="keywords" content="{{options.keywords}}">{% endif %}
-  {% if options.description %}<meta name="description" content="{{options.description}}">{% endif %}
+  {% if options.keywords %}
+  <meta name="keywords" content="{{options.keywords}}">{% endif %}
+  {% if options.description %}
+  <meta name="description" content="{{options.description}}">{% endif %}
   {%- block headers %}{% endblock -%}
   {% set lscookie = 'lscookie'%}
   <link rel="stylesheet" href="/theme/{{options.theme}}/res/css/all.css" type="text/css" data-ls="css_firekylin">
   {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor or themeConfig.customCSS or themeConfig.sidebarColor %}
   <style>
-    {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor %}
-      #sidebar {
-        {% if themeConfig.sidebarBackground %}
-        background-image: url('{{themeConfig.sidebarBackground}}');
-        background-size:cover;
-        {% endif %}
-        {% if themeConfig.sidebarBackgroundColor %}
-        background-color: {{themeConfig.sidebarBackgroundColor}};
-        {% endif %}
-      }
-    {% endif %}
-
-    {% if themeConfig.sidebarColor %}
-    #sidebar .profile span, #sidebar .buttons li a, #sidebar .buttons li a:hover{
-      color: {{themeConfig.sidebarColor}};
+    {
+      % if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor %
     }
-    {% endif %}
-    {% if themeConfig.customCSS %}{{themeConfig.customCSS | safe}}{% endif %}
+
+    #sidebar {
+        {
+        % if themeConfig.sidebarBackground %
+      }
+
+      background-image: url('{{themeConfig.sidebarBackground}}');
+      background-size:cover;
+
+        {
+        % endif %
+      }
+
+        {
+        % if themeConfig.sidebarBackgroundColor %
+      }
+
+      background-color: {
+          {
+          themeConfig.sidebarBackgroundColor
+        }
+      }
+
+      ;
+
+        {
+        % endif %
+      }
+    }
+
+      {
+      % endif %
+    }
+
+      {
+      % if themeConfig.sidebarColor %
+    }
+
+    #sidebar .profile span,
+    #sidebar .buttons li a,
+    #sidebar .buttons li a:hover {
+      color: {
+          {
+          themeConfig.sidebarColor
+        }
+      }
+
+      ;
+    }
+
+      {
+      % endif %
+    }
+
+      {
+      % if themeConfig.customCSS %
+    }
+
+      {
+        {
+        themeConfig.customCSS | safe
+      }
+    }
+
+      {
+      % endif %
+    }
   </style>
   {% endif %}
 </head>
+
 <body>
-<nav id="sidebar" class="behavior_1">
-  <div class="wrap">
+  <nav id="sidebar" class="behavior_1">
+    <div class="wrap">
       <div class="profile">
-          <a href="/">
-              <img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}" alt="{{options.title}}">
-          </a>
-          <span>{{options.title}}</span>
+        <a href="/">
+          <img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}" alt="{{options.title}}">
+        </a>
+        <span>{{options.title}}</span>
       </div>
       <ul class="buttons">
-          {% for nav in navigation %}
-          <li>
-              <a class="" href="{{nav.url}}" title="{{nav.label}}">
-                  <i class="iconfont icon-{{nav.option}}"></i>
-                  <span>{{nav.label}}</span>
-              </a>
-          </li>
-          {% endfor %}
+        {% for nav in navigation %}
+        <li>
+          <a class="" href="{{nav.url}}" title="{{nav.label}}">
+            <i class="iconfont icon-{{nav.option}}"></i>
+            <span>{{nav.label}}</span>
+          </a>
+        </li>
+        {% endfor %}
       </ul>
       <ul class="buttons">
         <li>
@@ -63,16 +120,16 @@
           </a>
           {% endif %}
           {% if options.twitter_url %}
-            {% if options.twitter_url.indexOf('twitter.com') > -1 %}
-            <a class="inline"  rel="nofollow" target="_blank" href="{{options.twitter_url}}">
-              <i class="iconfont icon-twitter-v" title="Twitter"></i>
-            </a>
-            {% endif %}
-            {% if options.twitter_url.indexOf('weibo.com') > -1 %}
-            <a class="inline" rel="nofollow" target="_blank" href="{{options.twitter_url}}">
-              <i class="iconfont icon-weibo" title="weibo"></i>
-            </a>
-            {% endif %}
+          {% if options.twitter_url.indexOf('twitter.com') > -1 %}
+          <a class="inline" rel="nofollow" target="_blank" href="{{options.twitter_url}}">
+            <i class="iconfont icon-twitter-v" title="Twitter"></i>
+          </a>
+          {% endif %}
+          {% if options.twitter_url.indexOf('weibo.com') > -1 %}
+          <a class="inline" rel="nofollow" target="_blank" href="{{options.twitter_url}}">
+            <i class="iconfont icon-weibo" title="weibo"></i>
+          </a>
+          {% endif %}
           {% endif %}
           <a class="inline" href="/rss.html">
             <i class="iconfont icon-rss-v" title="RSS"></i>
@@ -82,39 +139,45 @@
           </a>
         </li>
       </ul>
+    </div>
+  </nav>
+  <div id="header">
+    <div class="btn-bar"><i></i></div>
+    <h1><a href="/">{{options.title}}</a></h1>
+    <a class="me" href="/about/"><img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}"
+        alt="{{options.title}}"></a>
   </div>
-</nav>
-<div id="header">
-  <div class="btn-bar"><i></i></div>
-  <h1><a href="/">{{options.title}}</a></h1>
-  <a class="me" href="/about/"><img src="{{options.logo_url|default('/static/img/firekylin.jpg')}}" alt="{{options.title}}"></a>
-</div>
-<div id="sidebar-mask"></div>
-<div id="main">
-{% block content %}
+  <div id="sidebar-mask"></div>
+  <div id="main">
+    {% block content %}
 
-{% endblock %}
-<footer id="footer" class="inner">
-  &copy; {{ currentYear }}&nbsp;-&nbsp; {{options.title}}
-  {% if options.miitbeian or options.mpsbeian %}
-    {% if options.miitbeian %}
-    &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.miitbeian.gov.cn/">{{options.miitbeian}}</a>
-    {% endif %}
-    {% if options.mpsbeian %}
-    &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.beian.gov.cn/">{{options.mpsbeian}}</a>
-    {% endif %}
-  {%else%}
-    &nbsp;-&nbsp;<a href="/">{{ctx.hostname}}</a>
-  {% endif %}
-  <br />
-  Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>&nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://firekylin.org">FireKylin {{VERSION}}</a>
-</footer>
-</div>
-<script src="/theme/{{options.theme}}/res/js/firekylin.js" data-ls="js_firekylin"></script>
-{% if options.analyze_code %}
+    {% endblock %}
+    <footer id="footer" class="inner">
+      &copy; {{ currentYear }}&nbsp;-&nbsp; {{options.title}}
+      {% if options.miitbeian or options.mpsbeian %}
+      {% if options.miitbeian %}
+      &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian"
+        href="http://beian.miit.gov.cn">{{options.miitbeian}}</a>
+      {% endif %}
+      {% if options.mpsbeian %}
+      &nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian"
+        href="http://www.beian.gov.cn/">{{options.mpsbeian}}</a>
+      {% endif %}
+      {%else%}
+      &nbsp;-&nbsp;<a href="/">{{ctx.hostname}}</a>
+      {% endif %}
+      <br />
+      Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>&nbsp;&amp;&nbsp;<a target="_blank"
+        rel="nofollow" class="external" href="https://firekylin.org">FireKylin {{VERSION}}</a>
+    </footer>
+  </div>
+  <script src="/theme/{{options.theme}}/res/js/firekylin.js" data-ls="js_firekylin"></script>
+  {% if options.analyze_code %}
   {{options.analyze_code | safe}}
-{% endif %}
-{% if themeConfig.customJS %}<script>{{themeConfig.customJS | safe}}</script>{% endif %}
+  {% endif %}
+  {% if themeConfig.customJS %}
+  <script>{ { themeConfig.customJS | safe } }</script>{% endif %}
 
 </body>
+
 </html>
