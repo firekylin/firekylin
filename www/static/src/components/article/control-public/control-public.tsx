@@ -22,7 +22,7 @@ class ArticleControlPublic extends React.Component<ACPublicProps, any> {
         return (
           <RadioGroup onChange={this.props.handlePublicChange} value={this.props.isPublic}>
             <Radio style={radioStyle} value={'1'}>公开</Radio>
-            <Radio style={radioStyle} value={'2'}>不公开</Radio>
+            <Radio style={radioStyle} value={'0'}>不公开</Radio>
           </RadioGroup>
         );
     }
