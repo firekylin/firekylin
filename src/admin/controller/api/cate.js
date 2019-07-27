@@ -3,11 +3,11 @@ const Base = require('./base');
 module.exports = class extends Base {
   async getAction() {
     let result;
-    if(this.get('pid')) {
-      this.modelInstance.where({pid: this.get('pid')});
+    if (this.get('pid')) {
+      this.modelInstance.where({ pid: this.get('pid') });
     }
-    if(this.id) {
-      result = await this.modelInstance.where({id: this.id}).find();
+    if (this.id) {
+      result = await this.modelInstance.where({ id: this.id }).find();
       result.post_cate = result.post_cate.length;
     } else {
       result = await this.modelInstance.select();
@@ -23,10 +23,10 @@ module.exports = class extends Base {
     let data = this.post();
 
     let ret = await this.modelInstance.addCate(data);
-    if(ret.type === 'exist') {
+    if (ret.type === 'exist') {
       return this.fail('CATE_EXIST');
     }
-    return this.success({id: ret.id});
+    return this.success({ id: ret.id });
   }
 
   async putAction() {
@@ -35,12 +35,15 @@ module.exports = class extends Base {
     }
     let data = this.post();
     data.id = this.id;
+    if (data.id === parseInt(data.pid)) {
+      return this.fail('CATE_PARENT_ERROR');
+    }
     let rows = await this.modelInstance.saveCate(data);
-    return this.success({affectedRows: rows});
+    return this.success({ affectedRows: rows });
   }
 
   async deleteAction() {
-    if(!this.id) {
+    if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }
     await this.modelInstance.deleteCate(this.id);
