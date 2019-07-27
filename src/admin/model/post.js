@@ -32,22 +32,22 @@ module.exports = class extends Base {
       is_public: 1
     }, data);
 
-    return this.where({pathname: data.pathname}).thenAdd(data);
+    return this.where({ pathname: data.pathname }).thenAdd(data);
   }
 
   async savePost(data) {
-    let info = await this.where({id: data.id}).find();
-    if(think.isEmpty(info)) {
+    let info = await this.where({ id: data.id }).find();
+    if (think.isEmpty(info)) {
       return Promise.reject(new Error('POST_NOT_EXIST'));
     }
     data.update_time = think.datetime();
-    return this.where({id: data.id}).update(data);
+    return this.where({ id: data.id }).update(data);
   }
 
   async deletePost(post_id) {
     //await this.model('post_cate').delete({post_id});
     //await this.model('post_tag').delete({post_id});
-    return this.where({id: post_id}).delete();
+    return this.where({ id: post_id }).delete();
   }
 
   /**
@@ -56,8 +56,8 @@ module.exports = class extends Base {
    * @return {Promise}        []
    */
   getCount(userId) {
-    if(userId) {
-      return this.where({user_id: userId}).count();
+    if (userId) {
+      return this.where({ user_id: userId }).count();
     }
     return this.count();
   }
@@ -68,12 +68,12 @@ module.exports = class extends Base {
    */
   getLatest(user_id, nums = 10) {
     let where = {
-      create_time: {'<=': think.datetime()},
+      create_time: { '<=': think.datetime() },
       is_public: 1, //公开
       type: 0, //文章
       status: 3, //已经发布
     };
-    if(user_id) { where.user_id = user_id; }
+    if (user_id) { where.user_id = user_id; }
     return this.order('id DESC')
       .where(where)
       .limit(nums)
@@ -97,9 +97,10 @@ module.exports = class extends Base {
     return this.clearCache();
   }
 
-  clearCache() {
+  async clearCache() {
     think.logger.debug('clear cache');
-    return think.cache('post_1', null);
+    await think.cache('post_1', null);
+    await think.cache('lastPostList', null);
   }
 
 
@@ -108,7 +109,7 @@ module.exports = class extends Base {
    *
    * @returns {Promise.<void>}
    */
-  async updateAllPostSummaries () {
+  async updateAllPostSummaries() {
     // get all posts' id and mark down content
     const posts = await this.field('id, markdown_content').setRelation(false).select();
     const allPromises = [];
@@ -118,7 +119,7 @@ module.exports = class extends Base {
         const item = posts[i];
         const summary = await this.getSummary(item.markdown_content);
 
-        allPromises.push(this.where({id: item.id}).update({summary}))
+        allPromises.push(this.where({ id: item.id }).update({ summary }))
       }
 
       await Promise.all(allPromises)
@@ -138,12 +139,12 @@ module.exports = class extends Base {
     const auto_summary = parseInt(options.auto_summary);
 
     let showToc;
-    if(!postTocManual) {
-      showToc = data.type/1 === 0;
+    if (!postTocManual) {
+      showToc = data.type / 1 === 0;
     } else {
       showToc = /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
     }
-    data.content = await this.markdownToHtml(data.markdown_content, {toc: showToc, highlight: true});
+    data.content = await this.markdownToHtml(data.markdown_content, { toc: showToc, highlight: true });
     data.summary = await this.getSummary(data.markdown_content, auto_summary)
 
     return data;
@@ -158,10 +159,10 @@ module.exports = class extends Base {
    * @param summary_length 摘要长度（可为空）
    * @return {string}
    */
-  async getSummary (markdown_content, summary_length) {
+  async getSummary(markdown_content, summary_length) {
     let summary;
 
-    if (! summary_length) {
+    if (!summary_length) {
       const options = await this.model('options').getOptions();
       summary_length = parseInt(options.auto_summary);
     }
@@ -170,18 +171,18 @@ module.exports = class extends Base {
 
     if (hasMoreTag || summary_length === 0) {
       summary = markdown_content.split('<!--more-->')[0];
-      summary = await this.markdownToHtml(summary, {toc: false, highlight: true});
+      summary = await this.markdownToHtml(summary, { toc: false, highlight: true });
       summary.replace(/<[>]*>/g, '');
 
     } else {
-      summary = await this.markdownToHtml(markdown_content, {toc: false, highlight: true});
+      summary = await this.markdownToHtml(markdown_content, { toc: false, highlight: true });
       // 过滤掉 HTML 标签 及换行等 并截取所需的长度
       // 增加过滤 svg 内容
       summary = summary
-          .replace(/[\n\r\t]/g, '')
-          .replace(/<svg[ >].*?<\/svg>/g, '')
-          .replace(/<\/?[^>]*>/g, '')
-          .substr(0, summary_length) + '...';
+        .replace(/[\n\r\t]/g, '')
+        .replace(/<svg[ >].*?<\/svg>/g, '')
+        .replace(/<\/?[^>]*>/g, '')
+        .substr(0, summary_length) + '...';
     }
 
     return summary;
@@ -192,7 +193,7 @@ module.exports = class extends Base {
    * markdown to html
    * @return {string}
    */
-  async markdownToHtml(content, option = {toc: true, highlight: true}) {
+  async markdownToHtml(content, option = { toc: true, highlight: true }) {
 
     // 使用包含 MathJax 解析的 Markdown 引擎解析 MD 文本
     let markedWithMathJax = think.service('marked-with-mathjax');
@@ -201,7 +202,7 @@ module.exports = class extends Base {
     /**
      * 增加 TOC 目录
      */
-    if(option.toc) {
+    if (option.toc) {
       let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
@@ -215,7 +216,7 @@ module.exports = class extends Base {
     /**
      * 增加代码高亮
      */
-    if(option.highlight) {
+    if (option.highlight) {
       markedContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
         text = text.replace(/&#39;/g, '\'')
           .replace(/&gt;/g, '>')
@@ -239,9 +240,9 @@ module.exports = class extends Base {
    */
   getPostTime(data) {
     data.update_time = think.datetime();
-    if(!data.create_time) {
+    if (!data.create_time) {
       data.create_time = data.update_time;
-    }else{
+    } else {
       data.create_time = think.datetime(data.create_time);
     }
     return data;
@@ -259,7 +260,7 @@ module.exports = class extends Base {
       .replace(/\)/g, '')
       .replace(/[(,]/g, '-')
       .toLowerCase();
-    if(/^[\w-]+$/.test(name)) {
+    if (/^[\w-]+$/.test(name)) {
       return name;
     }
     return `toc-${think.md5(name).slice(0, 3)}`;
