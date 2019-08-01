@@ -24,7 +24,6 @@ export default class extends React.Component<UserProps, any> {
     }
 
     handleDelete(user: any) {
-        console.log(user.post_num);
         if (user.post_num > 0) {
             return Modal.error({
                 title: '无法删除',
