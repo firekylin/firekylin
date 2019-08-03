@@ -45,13 +45,15 @@ module.exports = class extends think.Model {
     }
 
     // 根据 ID 获取所有的文章数据，并创建哈希表
-    const { data: postsArr } = await this.model('post').getPostList(1, {
-      where: {
-        id: ['IN', postIds]
-      }
-    });
     const posts = {};
-    postsArr.forEach(post => posts[post.id] = post);
+    if (postIds.length) {
+      const { data: postsArr } = await this.model('post').getPostList(1, {
+        where: {
+          id: ['IN', postIds]
+        }
+      });
+      postsArr.forEach(post => posts[post.id] = post);
+    }
 
     // 根据分类归类文章
     for (const cate of catesData) {
