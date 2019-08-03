@@ -38,6 +38,7 @@ const FormItem = Form.Item;
         } catch (e) { 
             /* JSON Parse Error */ 
         }
+        this.props.themeStore.setData({theme: window.SysConfig.options.theme});
     }
 
     // 显示主题配置
@@ -84,7 +85,10 @@ const FormItem = Form.Item;
                     key={i}
                     label={element.label}
                 >
-                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => this.state.themeConfig[element.name] = e.target.value} />
+                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => {
+                      this.state.themeConfig[element.name] = e.target.value; 
+                      this.forceUpdate();
+                    }} />
                     <p style={{width: 600}}>{element.help}</p>
                 </FormItem>
             );
