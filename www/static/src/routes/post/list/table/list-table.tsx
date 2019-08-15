@@ -5,6 +5,7 @@ import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
 import { PostListProps } from '../list.model';
+import { TABLE_DELAY } from '../../../../config';
 
 const confirm = Modal.confirm;
 
@@ -54,7 +55,7 @@ class PostListTable extends React.Component<PostListProps, {}> {
         return (
             <Table
                 dataSource={postList}
-                loading={loading}
+                loading={{spinning: loading, delay: TABLE_DELAY}}
                 pagination={pagination}
                 onChange={e => {
                     this.props.postStore.setPlReqParams({

@@ -8,6 +8,7 @@ import { TagAPI } from '../tag.api';
 import { TagProps } from '../tag.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import './list.less';
+import { TABLE_DELAY } from '../../../config';
 const confirm = Modal.confirm;
 const Column = Table.Column;
 
@@ -51,7 +52,7 @@ export function TagList(props: TagProps) {
             <BreadCrumb {...props} />
             <Table 
                 dataSource={tagList}
-                loading={loading}
+                loading={{spinning: loading, delay: TABLE_DELAY}}
                 className="page-list"
                 rowKey={tag => tag.id.toString()}
             >

@@ -6,6 +6,7 @@ import { CategoryListProps } from './list.model';
 import classnames from 'classnames';
 import './list.less';
 import { Category } from '../../../models/category.model';
+import { TABLE_DELAY } from '../../../config';
 const confirm = Modal.confirm;
 
 @inject('categoryStore', 'sharedStore')
@@ -39,7 +40,7 @@ const confirm = Modal.confirm;
                 <BreadCrumb {...this.props} />
                 <Table 
                     dataSource={categoryList}
-                    loading={loading.category}
+                    loading={{spinning: loading.category, delay: TABLE_DELAY}}
                     className="page-list"
                     rowKey={category => category.id.toString()}
                 >

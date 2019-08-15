@@ -24,8 +24,14 @@
         "max-line-length": [ true, 180 ],
         "member-ordering": [
             true,
-            "static-before-instance",
-            "variables-before-functions"
+            {
+                "order": [
+                    "static-field",
+                    "instance-field",
+                    "static-method",
+                    "instance-method"
+                ]
+            }
         ],
         "no-any": false,
         "no-arg": true,

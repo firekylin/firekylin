@@ -24,9 +24,9 @@ class SharedStore {
   @observable pageList = [];
   @observable tagList: Tag[] = [];
   @observable loading: SharedLoading = {
-    category: true,
-    tag: true,
-    page: true,
+    category: false,
+    tag: false,
+    page: false,
   };
 
   @action
