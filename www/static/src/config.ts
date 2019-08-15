@@ -1,1 +1,1 @@
-export const TABLE_DELAY = 300;
+export const TABLE_DELAY = 150;
