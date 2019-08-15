@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
-// import Loadable from 'react-loadable';
 import Loading from './loading';
 import './container.less';
 import Sidebar from '../components/sidebar';
+import { http } from '../utils/http';
 // Components
 import DashBoard from './dashboard/dashboard';
 
-import { http } from '../utils/http';
 const User = lazy(() => import('./user/user'));
 const Post = lazy(() => import('./post/post'));
 const Page = lazy(() => import('./page/page'));
@@ -17,38 +16,6 @@ const Tag = lazy(() => import('./tag/tag'));
 const Push = lazy(() => import('./push/push'));
 const Appearance = lazy(() => import('./appearance/appearance'));
 const Options = lazy(() => import('./options/options'));
-// const User = Loadable({
-//     loader: () => import(/* webpackChunkName: 'user' */'./user/user'),
-//     loading: Loading
-// });
-// const Post = Loadable({
-//     loader: () => import(/* webpackChunkName: 'post' */'./post/post'),
-//     loading: Loading
-// });
-// const Page = Loadable({
-//     loader: () => import(/* webpackChunkName: 'page' */'./page/page'),
-//     loading: Loading
-// });
-// const Category = Loadable({
-//     loader: () => import(/* webpackChunkName: 'category' */'./category/category'),
-//     loading: Loading
-// });
-// const Tag = Loadable({
-//     loader: () => import(/* webpackChunkName: 'tag' */'./tag/tag'),
-//     loading: Loading
-// });
-// const Push = Loadable({
-//     loader: () => import(/* webpackChunkName: 'push' */'./push/push'),
-//     loading: Loading
-// });
-// const Appearance = Loadable({
-//     loader: () => import(/* webpackChunkName: 'appearance' */'./appearance/appearance'),
-//     loading: Loading
-// });
-// const Options = Loadable({
-//     loader: () => import(/* webpackChunkName: 'options' */'./options/options'),
-//     loading: Loading
-// });
 
 const routerOptions = {
     basename: '/admin',
