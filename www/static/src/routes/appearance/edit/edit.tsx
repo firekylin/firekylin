@@ -10,7 +10,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
 import { Tree, Modal, Button, message } from 'antd';
 import { ThemeEditProps } from './edit.modal';
 import { AntTreeNode } from 'antd/lib/tree';
-const confirm = Modal.confirm;
+const info = Modal.info;
 const TreeNode = Tree.TreeNode;
 
 @inject('editStore', 'sharedStore')
@@ -58,19 +58,9 @@ const TreeNode = Tree.TreeNode;
         if (this.props.editStore.data.theme !== 'firekylin') {
           return;
         }
-        confirm({
+        info({
             title: '主题修改警告！',
-            content: '您当前使用的是默认主题，升级过程中很有可能会覆盖你的修改，是否需要拷贝默认主题为新的主题来避免这个问题？',
-            onOk: () => {
-                this.props.editStore.forkTheme('firekylin', 'firekylin_new')
-                .subscribe(
-                    res => {
-                        if (res.errno === 0) {
-                            message.success('拷贝主题成功，你可以放心修改了！');
-                        }
-                    }
-                );
-            }
+            content: '你当前使用的是默认主题，升级过程中很有可能会覆盖你的修改，如需修改请自行拷贝默认主题为新的主题来避免这个问题。',
         });
     }
     // 处理Select响应

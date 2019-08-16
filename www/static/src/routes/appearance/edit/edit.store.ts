@@ -23,13 +23,6 @@ class EditStore {
         this.data = Object.assign({}, this.data, data);
     }
 
-    forkTheme(theme: string, newTheme: string) {
-        return http.post('/admin/api/theme?method=put', {
-            theme,
-            new_theme: newTheme
-        });
-    }
-
     getThemeFileList() {
         return http.get('/admin/api/theme?type=fileList&theme=' + this.data.theme);
     }
