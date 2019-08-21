@@ -19,76 +19,28 @@
   <link rel="stylesheet" href="/theme/{{options.theme}}/res/css/all.css" type="text/css" data-ls="css_firekylin">
   {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor or themeConfig.customCSS or themeConfig.sidebarColor %}
   <style>
-    {
-      % if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor %
-    }
-
+    {% if themeConfig.sidebarBackground or themeConfig.sidebarBackgroundColor %}
     #sidebar {
-        {
-        % if themeConfig.sidebarBackground %
-      }
-
+      {% if themeConfig.sidebarBackground %}
       background-image: url('{{themeConfig.sidebarBackground}}');
       background-size:cover;
-
-        {
-        % endif %
-      }
-
-        {
-        % if themeConfig.sidebarBackgroundColor %
-      }
-
-      background-color: {
-          {
-          themeConfig.sidebarBackgroundColor
-        }
-      }
-
-      ;
-
-        {
-        % endif %
-      }
+      {% endif %}
+      {% if themeConfig.sidebarBackgroundColor %}
+      background-color: {{themeConfig.sidebarBackgroundColor}};
+      {% endif %}
     }
+    {% endif %}
 
-      {
-      % endif %
-    }
-
-      {
-      % if themeConfig.sidebarColor %
-    }
-
+    {% if themeConfig.sidebarColor %}
     #sidebar .profile span,
     #sidebar .buttons li a,
     #sidebar .buttons li a:hover {
-      color: {
-          {
-          themeConfig.sidebarColor
-        }
-      }
-
-      ;
+      color: {{themeConfig.sidebarColor}};
     }
-
-      {
-      % endif %
-    }
-
-      {
-      % if themeConfig.customCSS %
-    }
-
-      {
-        {
-        themeConfig.customCSS | safe
-      }
-    }
-
-      {
-      % endif %
-    }
+    {% endif %}
+    {% if themeConfig.customCSS %}
+      {{themeConfig.customCSS | safe}}
+    {% endif %}
   </style>
   {% endif %}
 </head>
