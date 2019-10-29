@@ -138,7 +138,7 @@
     "stc-resource-version": "^1.0.0",
     "stc-uglify": "^1.0.1",
     "style-loader": "^0.13.0",
-    "superagent": "^1.7.2",
+    "superagent": "^5.0.2",
     "think-watcher": "^3.0.0",
     "ts-import-plugin": "^1.5.4",
     "ts-loader": "^4.4.2",
