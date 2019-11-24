@@ -12,5 +12,14 @@
       "src": "/(.*)",
       "dest": "/now.js"
     }
-  ]
+  ],
+  "env": {
+    "FK_DB_HOST": "@FK_DB_HOST",
+    "FK_DB_PORT": "@FK_DB_PORT",
+    "FK_DB_DATABASE": "@FK_DB_DATABASE",
+    "FK_DB_USER": "@FK_DB_USER",
+    "FK_DB_PASSWORD": "@FK_DB_PASSWORD",
+    "FK_DB_PREFIX": "@FK_DB_PREFIX",
+    "FK_DB_ENCODING": "@FK_DB_ENCODING"
+  }
 }
