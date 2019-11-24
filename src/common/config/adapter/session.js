@@ -1,5 +1,8 @@
+const os = require('os');
 const path = require('path');
 const fileSession = require('think-session-file');
+
+const ROOT_PATH = think.env === 'now' ? os.tmpdir() : think.ROOT_PATH;
 /**
  * session adapter config
  * @type {Object}
@@ -19,6 +22,6 @@ module.exports = {
   },
   file: {
     handle: fileSession,
-    sessionPath: path.join(think.ROOT_PATH, 'runtime/session')
+    sessionPath: path.join(ROOT_PATH, 'runtime/session')
   }
 };

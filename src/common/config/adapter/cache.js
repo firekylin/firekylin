@@ -1,6 +1,8 @@
+const os = require('os');
 const path = require('path');
 const fileCache = require('think-cache-file');
 
+const ROOT_PATH = think.env === 'now' ? os.tmpdir() : think.ROOT_PATH;
 /**
  * cache adapter config
  * @type {Object}
@@ -12,7 +14,7 @@ module.exports = {
   },
   file: {
     handle: fileCache,
-    cachePath: path.join(think.ROOT_PATH, 'runtime/cache'), // absoulte path is necessarily required
+    cachePath: path.join(ROOT_PATH, 'runtime/cache'), // absoulte path is necessarily required
     pathDepth: 2,
     gcInterval: 24 * 60 * 60 * 1000 // gc interval
   }

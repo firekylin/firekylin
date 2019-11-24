@@ -1,10 +1,11 @@
 const path = require('path');
-const {Console, File, DateFile} = require('think-logger3');
+const { Console, File, DateFile } = require('think-logger3');
 
 const isDev = think.env === 'development';
+const isNow = think.env === 'now';
 
 module.exports = {
-  type: isDev ? 'console' : 'dateFile',
+  type: isDev || isNow ? 'console' : 'dateFile',
   console: {
     handle: Console
   },
