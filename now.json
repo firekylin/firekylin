@@ -13,6 +13,9 @@
       "dest": "/now.js"
     }
   ],
+  "github": {
+    "silent": true
+  },
   "env": {
     "FK_DB_HOST": "@fk_db_host",
     "FK_DB_PORT": "@fk_db_port",
