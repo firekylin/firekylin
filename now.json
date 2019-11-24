@@ -14,12 +14,12 @@
     }
   ],
   "env": {
-    "FK_DB_HOST": "@FK_DB_HOST",
-    "FK_DB_PORT": "@FK_DB_PORT",
-    "FK_DB_DATABASE": "@FK_DB_DATABASE",
-    "FK_DB_USER": "@FK_DB_USER",
-    "FK_DB_PASSWORD": "@FK_DB_PASSWORD",
-    "FK_DB_PREFIX": "@FK_DB_PREFIX",
-    "FK_DB_ENCODING": "@FK_DB_ENCODING"
+    "FK_DB_HOST": "@fk_db_host",
+    "FK_DB_PORT": "@fk_db_port",
+    "FK_DB_DATABASE": "@fk_db_database",
+    "FK_DB_USER": "@fk_db_user",
+    "FK_DB_PASSWORD": "@fk_db_password",
+    "FK_DB_PREFIX": "@fk_db_prefix",
+    "FK_DB_ENCODING": "@fk_db_encoding"
   }
 }
