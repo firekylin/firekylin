@@ -38,12 +38,16 @@ module.exports = class extends Base {
         where.user_id = this.userInfo.id;
       }
 
-      if(this.get('status')) {
-        where.status = this.get('status');
+      const {status, keyword, cate: cateText} = this.get();
+      if(status) {
+        where.status = status;
+      } else {
+        //已删除的文章不展示在全部列表里
+        where.status = ['!=', 4];
       }
 
-      if(this.get('keyword')) {
-        let keywords = this.get('keyword').split(/\s+/g);
+      if(keyword) {
+        let keywords = keyword.split(/\s+/g);
         if(keywords.indexOf(':public') > -1 || keywords.indexOf(':private') > -1) {
           where.is_public = Number(keywords.indexOf(':public') > -1);
           keywords = keywords.filter(word => word !== ':public' && word !== ':private');
@@ -53,8 +57,8 @@ module.exports = class extends Base {
         }
       }
 
-      if(this.get('cate')) {
-        let cate = parseInt(this.get('cate'));
+      if(cateText) {
+        const cate = parseInt(cateText);
         if(!isNaN(cate)) {
           this.modelInstance.join({
             table: 'post_cate',

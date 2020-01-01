@@ -109,19 +109,25 @@ class PostStore {
   }
 
   // 删除文章
-  deletePostById(id: number) {
-    http.post<any>(`/admin/api/post/${id}?method=delete`)
-      .subscribe(
-        res => {
-          if (res.errno === 0) {
-              message.success('删除成功');
-              this.getPostList();
-          }
-        },
-        err => {
-          message.error(err);
+  deletePostById(id: number, force: boolean = false) {
+    let handle;
+    if(force) {
+      handle = http.post<any>(`/admin/api/post/${id}?method=delete`);
+    } else {
+      handle = http.post<any>(`/admin/api/post/${id}?method=put`, {status: 4});
+    }
+  
+    handle.subscribe(
+      res => {
+        if (res.errno === 0) {
+            message.success('删除成功');
+            this.getPostList();
         }
-      );
+      },
+      err => {
+        message.error(err);
+      }
+    );
   }
   // 通过
   passPostById(id: number) {
@@ -152,6 +158,21 @@ class PostStore {
         err => {
           message.error(err);
         }
+    );
+  }
+  //撤销删除
+  cancelPostById(id: number) {
+    http.post<any>(`/admin/api/post/${id}?method=put`, {status: 3})
+    .subscribe(
+      res => {
+        if(res.errno === 0) {
+          message.success('撤销删除成功');
+          this.getPostList();
+        }
+      },
+      err => {
+        message.error(err);
+      }
     );
   }
   // 重置

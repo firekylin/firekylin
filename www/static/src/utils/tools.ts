@@ -33,6 +33,7 @@ function getStatusText(status: number, createTime?: Date) {
             statusText = '已发布';
         }
         break;
+      case 4: statusText = '已删除'; break;
       default:
     }
     return statusText;
