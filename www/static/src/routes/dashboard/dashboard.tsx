@@ -178,7 +178,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
                                 </li>
                                 <li>
                                     <label>团队博客：</label>
-                                    <a href="https://www.75team.com/">http://www.75team.com/</a>
+                                    <a href="https://75.team">https://75.team</a>
                                 </li>
                                 <li>
                                     <label>开发成员：</label>
