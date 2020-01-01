@@ -80,6 +80,9 @@ class PostListForm extends React.Component<PostListProps, {}> {
                         <TabPane tab="已拒绝" key="2">
                             <PostListTable {...this.props} />
                         </TabPane>
+                        <TabPane tab="回收站" key="4">
+                            <PostListTable {...this.props} />
+                        </TabPane>
                     </Tabs>
                 </div>
             </>
