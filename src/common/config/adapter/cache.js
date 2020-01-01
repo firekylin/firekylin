@@ -2,7 +2,12 @@ const os = require('os');
 const path = require('path');
 const fileCache = require('think-cache-file');
 
-const ROOT_PATH = think.env === 'now' ? os.tmpdir() : think.ROOT_PATH;
+let ROOT_PATH = think.ROOT_PATH;
+if(think.env === 'now') {
+  ROOT_PATH = os.tmpdir();
+} else if(think.env === 'pkg') {
+  ROOT_PATH = think.RUNTIME_PATH;
+}
 /**
  * cache adapter config
  * @type {Object}
