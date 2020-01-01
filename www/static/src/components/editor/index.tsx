@@ -311,7 +311,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           <div className={previewClass} ref={div => this.preview = div} dangerouslySetInnerHTML={{ __html: this.state.result }}/>
           <div className={classnames({hide: this.state.mode !== 'split'}, 'md-spliter')} />
         </div>
-        <a ref={a => this.resizebar = a} href="javascript:void(0);" className="editor__resize">调整高度</a>
+        <a ref={a => this.resizebar = a} href="###" className="editor__resize">调整高度</a>
         <EditorLinkModal
           visible={this.state.visible.link} 
           onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); (this.linkRef.props.form as WrappedFormUtils).resetFields(); }}

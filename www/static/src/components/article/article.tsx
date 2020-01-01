@@ -3,6 +3,7 @@ import { Row, Col, DatePicker, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import moment from 'moment';
 import { zip } from 'rxjs';
+import pinyin from 'tiny-pinyin';
 
 import ArticleHeader from './article-header/article-header';
 import ArticleEditor from './article-editor/article-editor';
@@ -34,6 +35,7 @@ class Article extends React.Component<ArticleProps, {}> {
             pathname: false,
             title: false,
         },
+        autocompletePathname: !this.props.match.params.id
     };
 
     constructor(props: any) {
@@ -218,13 +220,39 @@ class Article extends React.Component<ArticleProps, {}> {
     }
 
     handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({
-            hasError: Object.assign({}, this.state.hasError, { title: false }),
-        });
-        this.props.articleStore.setArticleInfo({ title: e.target.value });
+        const {autocompletePathname, hasError} = this.state;
+        const nextHasError = Object.assign({}, hasError);
+        const {articleInfo, setArticleInfo} = this.props.articleStore;
+        const nextInfo = {
+            title: e.target.value,
+            pathname: articleInfo.pathname
+        };
+        hasError.title = false;
+
+        if(autocompletePathname && pinyin.isSupported()) {
+            let text = '';
+            let lastToken;
+            const format = str => str ? str.toLowerCase() : '';
+            const tokens = pinyin.parse(nextInfo.title);
+            tokens.forEach(v => {
+                if(v.type === 2) {
+                    text += text && !/\n|\s/.test(lastToken.target) ? '-' + format(v.target) : format(v.target)
+                } else {
+                    text += (lastToken && lastToken.type === 2 ? '-' : '') + v.target; 
+                }
+                lastToken = v;
+            });
+
+            nextInfo.pathname = text;
+            hasError.pathname = false;
+        }
+
+        this.setState({hasError: nextHasError});
+        setArticleInfo(nextInfo);
     }
     handlePath(e: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
+            autocompletePathname: false,
             hasError: Object.assign({}, this.state.hasError, { pathname: false }),
         });
         this.props.articleStore.setArticleInfo({ pathname: e.target.value });
