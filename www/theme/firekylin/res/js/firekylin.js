@@ -409,8 +409,7 @@
    */
   hljs.init = function () {
     [].slice.call(hljs.$code).forEach(function (elem, i) {
-      // 输出行号, -1是为了让最后一个换行忽略
-      var lines = elem.innerHTML.split(/\n/).slice(0, -1);
+      var lines = elem.innerHTML.trim().split(/[\r\n]+/);
       var html = lines.map(function (item, index) {
         return '<li><span class="line-num" data-line="' + (index + 1) + '"></span>' + item + '</li>';
       }).join('');
