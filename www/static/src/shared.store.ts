@@ -40,12 +40,13 @@ class SharedStore {
   @action
   setCategoryList = (data: Category[]) => {
     let list = data.filter(cat => cat.pid === 0);
-    for (let i = 0, l = list.length; i < l; i++) {
+    for (let i = 0; i < list.length; i++) {
         let child = data.filter(cat => cat.pid === list[i].id);
         if (child.length === 0) {
             continue;
         }
         list.splice.apply(list, ([i + 1, 0] as any).concat(child));
+        i += child.length;
     }
     this.categoryList = list;
   }
