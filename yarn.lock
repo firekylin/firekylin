@@ -594,18 +594,20 @@ agent-base@~4.2.1:
   dependencies:
     es6-promisify "^5.0.0"
 
-agentkeepalive@3.3.0:
-  version "3.3.0"
-  resolved "https://registry.npm.taobao.org/agentkeepalive/download/agentkeepalive-3.3.0.tgz#6d5de5829afd3be2712201a39275fd11c651857c"
-  integrity sha1-bV3lgpr9O+JxIgGjknX9EcZRhXw=
-  dependencies:
-    humanize-ms "^1.2.1"
-
 agentkeepalive@^3.4.1:
   version "3.5.2"
   resolved "https://registry.npm.taobao.org/agentkeepalive/download/agentkeepalive-3.5.2.tgz#a113924dd3fa24a0bc3b78108c450c2abee00f67"
   integrity sha1-oROSTdP6JKC8O3gQjEUMKr7gD2c=
   dependencies:
+    humanize-ms "^1.2.1"
+
+agentkeepalive@^4.0.2:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-4.1.0.tgz#a48e040ed16745dd29ce923675f60c9c90f39ee0"
+  integrity sha512-CW/n1wxF8RpEuuiq6Vbn9S8m0VSYDMnZESqaJ6F2cWN9fY8rei2qaxweIaRgq+ek8TqfoFIsUjaGNKGGEHElSg==
+  dependencies:
+    debug "^4.1.0"
+    depd "^1.1.2"
     humanize-ms "^1.2.1"
 
 ajv-errors@^1.0.0:
@@ -2170,6 +2172,13 @@ block-elements@^1.0.0:
   resolved "https://registry.npm.taobao.org/block-elements/download/block-elements-1.2.0.tgz#8e04ccab638c7e2596f5065fb6c1c7518c905a5d"
   integrity sha1-jgTMq2OMfiWW9QZftsHHUYyQWl0=
 
+block-stream2@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/block-stream2/-/block-stream2-2.0.0.tgz#680b9d357ca8b9d5637f4ec8a41fb5968029108f"
+  integrity sha512-1oI+RHHUEo64xomy1ozLgVJetFlHkIfQfJzTBQrj6xWnEMEPooeo2fZoqFjp0yzfHMBrgxwgh70tKp6T17+i3g==
+  dependencies:
+    readable-stream "^3.4.0"
+
 bluebird@^3.0.0, bluebird@^3.4.0, bluebird@^3.5.5:
   version "3.5.5"
   resolved "https://registry.npm.taobao.org/bluebird/download/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
@@ -3084,9 +3093,9 @@ cos-nodejs-sdk-v5@^2.5.6:
     request "^2.81.0"
     xml2js "^0.4.19"
 
-crc32@0.2.2:
+crc32@^0.2.2:
   version "0.2.2"
-  resolved "https://registry.npm.taobao.org/crc32/download/crc32-0.2.2.tgz#7ad220d6ffdcd119f9fc127a7772cacea390a4ba"
+  resolved "https://registry.yarnpkg.com/crc32/-/crc32-0.2.2.tgz#7ad220d6ffdcd119f9fc127a7772cacea390a4ba"
   integrity sha1-etIg1v/c0Rn5/BJ6d3LKzqOQpLo=
 
 create-ecdh@^4.0.0:
@@ -3372,8 +3381,8 @@ debug@4, debug@^4.1.0, debug@^4.1.1:
 
 debug@^3.0.0, debug@^3.1.0, debug@^3.2.5, debug@^3.2.6:
   version "3.2.6"
-  resolved "https://registry.npm.taobao.org/debug/download/debug-3.2.6.tgz#e83d17de16d8a7efb7717edbe5fb10135eee629b"
-  integrity sha1-6D0X3hbYp++3cX7b5fsQE17uYps=
+  resolved "https://registry.yarnpkg.com/debug/-/debug-3.2.6.tgz#e83d17de16d8a7efb7717edbe5fb10135eee629b"
+  integrity sha512-mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==
   dependencies:
     ms "^2.1.1"
 
@@ -3898,12 +3907,12 @@ es-to-primitive@^1.2.0:
 
 es6-promise@^4.0.3:
   version "4.2.8"
-  resolved "https://registry.npm.taobao.org/es6-promise/download/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
-  integrity sha1-TrIVlMlyvEBVPSduUQU5FD21Pgo=
+  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
+  integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
 
 es6-promisify@^5.0.0:
   version "5.0.0"
-  resolved "https://registry.npm.taobao.org/es6-promisify/download/es6-promisify-5.0.0.tgz#5109d62f3e56ea967c4b63505aef08291c8a5203"
+  resolved "https://registry.yarnpkg.com/es6-promisify/-/es6-promisify-5.0.0.tgz#5109d62f3e56ea967c4b63505aef08291c8a5203"
   integrity sha1-UQnWLz5W6pZ8S2NQWu8IKRyKUgM=
   dependencies:
     es6-promise "^4.0.3"
@@ -4663,7 +4672,7 @@ formidable@^1.1.1, formidable@^1.2.1:
   resolved "https://registry.npm.taobao.org/formidable/download/formidable-1.2.1.tgz#70fb7ca0290ee6ff961090415f4b3df3d2082659"
   integrity sha1-cPt8oCkO5v+WEJBBX0s989IIJlk=
 
-formstream@1.1.0, formstream@^1.1.0:
+formstream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npm.taobao.org/formstream/download/formstream-1.1.0.tgz#51f3970f26136eb0ad44304de4cebb50207b4479"
   integrity sha1-UfOXDyYTbrCtRDBN5M67UCB7RHk=
@@ -5383,9 +5392,9 @@ https-browserify@^1.0.0:
   integrity sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM=
 
 https-proxy-agent@^2.2.1:
-  version "2.2.2"
-  resolved "https://registry.npm.taobao.org/https-proxy-agent/download/https-proxy-agent-2.2.2.tgz?cache=0&sync_timestamp=1562380993888&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fhttps-proxy-agent%2Fdownload%2Fhttps-proxy-agent-2.2.2.tgz#271ea8e90f836ac9f119daccd39c19ff7dfb0793"
-  integrity sha1-Jx6o6Q+DasnxGdrM05wZ/337B5M=
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-2.2.4.tgz#4ee7a737abd92678a293d9b34a1af4d0d08c787b"
+  integrity sha512-OmvfoQ53WLjtA9HeYP9RNrWMJzzAz1JGaSFr1nijg0PVR1JaD/xbJq1mdEIIlxGpXp9eSe/O2LgU9DJmTPd0Eg==
   dependencies:
     agent-base "^4.3.0"
     debug "^3.1.0"
@@ -7106,15 +7115,10 @@ mime@1.6.0, mime@^1.3.4, mime@^1.4.1:
   resolved "https://registry.npm.taobao.org/mime/download/mime-1.6.0.tgz#32cd9e5c64553bd58d19a568af452acff04981b1"
   integrity sha1-Ms2eXGRVO9WNGaVor0Uqz/BJgbE=
 
-mime@2.3.1:
-  version "2.3.1"
-  resolved "https://registry.npm.taobao.org/mime/download/mime-2.3.1.tgz#b1621c54d63b97c47d3cfe7f7215f7d64517c369"
-  integrity sha1-sWIcVNY7l8R9PP5/chX31kUXw2k=
-
-mime@^2.0.3, mime@^2.4.0, mime@^2.4.2:
+mime@^2.0.3, mime@^2.4.0, mime@^2.4.2, mime@^2.4.4:
   version "2.4.4"
-  resolved "https://registry.npm.taobao.org/mime/download/mime-2.4.4.tgz#bd7b91135fc6b01cde3e9bae33d659b63d8857e5"
-  integrity sha1-vXuRE1/GsBzePpuuM9ZZtj2IV+U=
+  resolved "https://registry.yarnpkg.com/mime/-/mime-2.4.4.tgz#bd7b91135fc6b01cde3e9bae33d659b63d8857e5"
+  integrity sha512-LRxmNwziLPT828z+4YkNzloCFC2YM4wrB99k+AV5ZbEyfGNWfG8SO1FUXLmLDBSo89NrJZ4DIWeLjy1CHGhMGA==
 
 mimic-fn@^1.0.0:
   version "1.2.0"
@@ -8591,18 +8595,20 @@ push-to-firekylin@^0.2.3:
     phpass "^0.1.1"
     request "^2.72.0"
 
-qiniu@^7.1.2:
-  version "7.2.2"
-  resolved "https://registry.npm.taobao.org/qiniu/download/qiniu-7.2.2.tgz#94425193f6b1dbd093fd78583070a64dde6cc5e7"
-  integrity sha1-lEJRk/ax29CT/XhYMHCmTd5sxec=
+qiniu@^7.3.0:
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/qiniu/-/qiniu-7.3.0.tgz#25bbdd844136a83a1a0069b106cc334bb3324e74"
+  integrity sha512-DztD+jlTSWUmJoTtyii/j3hIF2U+5JRaGfcT37K+ysnfgz3Q9DswO6SHdUODTd9blFr9TS/0fYaVbF/0OkwSZw==
   dependencies:
-    agentkeepalive "3.3.0"
-    crc32 "0.2.2"
+    agentkeepalive "^4.0.2"
+    block-stream2 "^2.0.0"
+    crc32 "^0.2.2"
+    destroy "^1.0.4"
     encodeurl "^1.0.1"
-    formstream "1.1.0"
-    mime "2.3.1"
-    tunnel-agent "0.6.0"
-    urllib "2.22.0"
+    formstream "^1.1.0"
+    mime "^2.4.4"
+    tunnel-agent "^0.6.0"
+    urllib "^2.34.1"
 
 qr.js@0.0.0:
   version "0.0.0"
@@ -9435,6 +9441,15 @@ readable-stream@3, readable-stream@^3.0.6, readable-stream@^3.1.1, readable-stre
   version "3.4.0"
   resolved "https://registry.npm.taobao.org/readable-stream/download/readable-stream-3.4.0.tgz#a51c26754658e0a3c21dbf59163bd45ba6f447fc"
   integrity sha1-pRwmdUZY4KPCHb9ZFjvUW6b0R/w=
+  dependencies:
+    inherits "^2.0.3"
+    string_decoder "^1.1.1"
+    util-deprecate "^1.0.1"
+
+readable-stream@^3.4.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.0.tgz#337bbda3adc0706bd3e024426a286d4b4b2c9198"
+  integrity sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
   dependencies:
     inherits "^2.0.3"
     string_decoder "^1.1.1"
@@ -11197,10 +11212,10 @@ think-watcher@^3.0.0:
     debug "^2.6.1"
     think-helper "^1.0.0"
 
-thinkjs@^3.0.0:
-  version "3.2.10"
-  resolved "https://registry.npm.taobao.org/thinkjs/download/thinkjs-3.2.10.tgz#ffe8e739066a038ffedfe214fa9f5be58c0edb83"
-  integrity sha1-/+jnOQZqA4/+3+IU+p9b5YwO24M=
+thinkjs@^3.2.11:
+  version "3.2.11"
+  resolved "https://registry.yarnpkg.com/thinkjs/-/thinkjs-3.2.11.tgz#3f4addb4bed5b2d90335f920ef93105c95cfc87e"
+  integrity sha512-3UwqYhXJO+dP1JO/upTOU3naA/JQxcCjrF2kWE5HdkIAt9xAk+/F7isdXMMa7aEtr3Pri9Rg46ZGrqBrN9tJQg==
   dependencies:
     cookies "^0.7.0"
     debug "^3.1.0"
@@ -11273,6 +11288,11 @@ tiny-invariant@^1.0.2:
   version "1.0.6"
   resolved "https://registry.npm.taobao.org/tiny-invariant/download/tiny-invariant-1.0.6.tgz#b3f9b38835e36a41c843a3b0907a5a7b3755de73"
   integrity sha1-s/mziDXjakHIQ6OwkHpaezdV3nM=
+
+tiny-pinyin@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/tiny-pinyin/-/tiny-pinyin-1.3.0.tgz#4dee75ffb96fe24a448873f1d52c5a6bbc026946"
+  integrity sha512-YHsqn1zksQ4CKVvArN7MIUtGx0eV/yl15vzdiwNFwAnOQQwL1+pNSLW4ISVWUN+PrzcnX4ojLgS4kgVCmue7Pw==
 
 tiny-warning@^1.0.0:
   version "1.0.3"
@@ -11480,7 +11500,7 @@ tty-browserify@0.0.0:
   resolved "https://registry.npm.taobao.org/tty-browserify/download/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"
   integrity sha1-oVe6QC2iTpv5V/mqadUk7tQpAaY=
 
-tunnel-agent@0.6.0, tunnel-agent@^0.6.0:
+tunnel-agent@^0.6.0:
   version "0.6.0"
   resolved "https://registry.npm.taobao.org/tunnel-agent/download/tunnel-agent-0.6.0.tgz#27a5dea06b36b04a0a9966774b290868f0fc40fd"
   integrity sha1-J6XeoGs2sEoKmWZ3SykIaPD8QP0=
@@ -11717,26 +11737,31 @@ url@^0.11.0:
     punycode "1.3.2"
     querystring "0.2.0"
 
-urllib@2.22.0:
-  version "2.22.0"
-  resolved "https://registry.npm.taobao.org/urllib/download/urllib-2.22.0.tgz#2965dc4ae127a6fb695b7db27d3184f17d82cb42"
-  integrity sha1-KWXcSuEnpvtpW32yfTGE8X2Cy0I=
-  dependencies:
-    any-promise "^1.3.0"
-    content-type "^1.0.2"
-    debug "^2.6.0"
-    default-user-agent "^1.0.0"
-    digest-header "^0.0.1"
-    ee-first "~1.1.1"
-    humanize-ms "^1.2.0"
-    iconv-lite "^0.4.15"
-    qs "^6.4.0"
-    statuses "^1.3.1"
-
 urllib@^2.33.1:
   version "2.34.1"
   resolved "https://registry.yarnpkg.com/urllib/-/urllib-2.34.1.tgz#069b1603a93ab982df1aec842016eacb442326cf"
   integrity sha512-oprAn7mvU10+cId+x6aI/EmpQnn7izTM9QEqTb88l8o7EIW+thYJN4RvpU5wBQh702epQmXveMiUDn+4TDwm9Q==
+  dependencies:
+    any-promise "^1.3.0"
+    content-type "^1.0.2"
+    debug "^2.6.9"
+    default-user-agent "^1.0.0"
+    digest-header "^0.0.1"
+    ee-first "~1.1.1"
+    formstream "^1.1.0"
+    humanize-ms "^1.2.0"
+    iconv-lite "^0.4.15"
+    ip "^1.1.5"
+    proxy-agent "^3.1.0"
+    pump "^3.0.0"
+    qs "^6.4.0"
+    statuses "^1.3.1"
+    utility "^1.16.1"
+
+urllib@^2.34.1:
+  version "2.34.2"
+  resolved "https://registry.yarnpkg.com/urllib/-/urllib-2.34.2.tgz#ce8ddafdeb22a40265094c1aa961bcbe7c8662b8"
+  integrity sha512-8GzOjPS+cHJV8cOl8g8JerywYX1G+C53MgIc6KUFY9U9isX/RW2IdMxLUKld6T3SpEs3f42FxgIp9oj4WIlUbg==
   dependencies:
     any-promise "^1.3.0"
     content-type "^1.0.2"
@@ -12091,9 +12116,9 @@ websocket-driver@>=0.5.1:
     websocket-extensions ">=0.1.1"
 
 websocket-extensions@>=0.1.1:
-  version "0.1.3"
-  resolved "https://registry.npm.taobao.org/websocket-extensions/download/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
-  integrity sha1-XS/yKXcAPsaHpLhwc9+7rBRszyk=
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
+  integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
 whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
   version "1.0.5"

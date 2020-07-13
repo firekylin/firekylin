@@ -44,6 +44,7 @@
 - [添加和管理推送](https://github.com/firekylin/firekylin/wiki/%E6%8E%A8%E9%80%81)
 - [调整网站外观](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%A4%96%E8%A7%82)
 - [系统设置](https://github.com/firekylin/firekylin/wiki/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E7%BD%AE)
+- [如何优化博客主题](https://welefen.com/post/how-to-optimize-firekylin-theme.html)
 
 ## 常见问题
 
