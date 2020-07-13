@@ -217,7 +217,7 @@ module.exports = class extends Base {
      * 增加代码高亮
      */
     if (option.highlight) {
-      markedContent = markedContent.replace(/<pre><code\s*(?:class="lang-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
+      markedContent = markedContent.replace(/<pre><code\s*(?:class="lang(?:uage)?-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
         text = text.replace(/&#39;/g, '\'')
           .replace(/&gt;/g, '>')
           .replace(/&lt;/g, '<')
