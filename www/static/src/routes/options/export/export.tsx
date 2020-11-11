@@ -39,6 +39,7 @@ class OptionsExportForm extends React.Component<OptionsExportProps, OptionsExpor
                                     >
                                         <Radio value={OETypeEnum.MarkDown}>Markdown</Radio>
                                         <Radio value={OETypeEnum.Hexo}>Hexo / Jekyll</Radio>
+                                        <Radio value={OETypeEnum.Hugo}>Hugo</Radio>
                                         <Radio value={OETypeEnum.WordPress}>WordPress eXtended RSS</Radio>
                                     </RadioGroup>
                                 )}
