@@ -15,6 +15,10 @@
         <div id="SOHUCS" sid="{{think.md5(ctx.param('pathname'))}}" data-name="{{options.comment.name}}"></div>
       {% elif options.comment.type == 'gitalk'%}
         <div id="gitalk-container" data-identifier="{{think.md5(ctx.param('pathname'))}}"  data-name="{{options.comment.name}}"></div>
+      {% elif options.comment.type == 'waline' %}
+        <div id="waline-container" data-name="{{options.comment.name}}"></div>
+      {% elif options.comment.type == 'valine' %}
+        <div id="valine-container" data-name="{{options.comment.name}}"></div>
       {% else %}
       {{options.comment.name|safe}}
       {% endif %}

@@ -8,7 +8,9 @@
   "globals": {
     "think": false,
     "firekylin": false,
-    "Gitalk": false
+    "Gitalk": false,
+    "Waline": false,
+    "Valine": false
   },
   "extends": [
     "think",

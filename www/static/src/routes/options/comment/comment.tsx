@@ -73,7 +73,7 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
 
     // 评论类型是否是网站
     isCommentTypeSite() {
-        return this.state.comment.type !== 'custom' && this.state.comment.type !== 'gitalk';
+        return ['custom', 'gitalk', 'valine', 'waline'].indexOf(this.state.comment.type) === -1;
     }
     
     render() {
@@ -95,6 +95,8 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
                                     <RadioGroup
                                         onChange={e => this.handleChange(e)}
                                     >
+                                        <Radio value="waline">Waline（<a href="https://waline.js.org" target="_blank">官网</a>）</Radio>
+                                        <Radio value="valine">Valine</Radio>
                                         <Radio value="disqus">Disqus</Radio>
                                         <Radio value="hypercomments">HyperComments</Radio>
                                         <Radio value="changyan">畅言</Radio>
