@@ -1,3 +1,8 @@
+## 1.3.2
+- 新增博客导出至 Hugo 
+- 评论新增 [Waline](https://waline.js.org) 和 [Valine](https://valine.js.org) 的支持
+- 修复 #748 代码高亮的问题
+
 ## 1.3.1
 
 - 修复配置 COS 之后上传图片会带上当前域名的问题 #737
