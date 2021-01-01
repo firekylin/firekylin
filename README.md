@@ -52,12 +52,8 @@
 
 ## 用户列表
 
-[奇舞团博客](https://75.team/) / 
-[奇虎360-addops](https://blog.cloud.360.cn) / 
-[十年踪迹的博客](http://h5jun.com/) / 
-[welefen的博客](http://welefen.com/) /  
-[大官人的博客](https://www.daguanren.cc/) /
-[魔术师的帽子](https://blog.magichc7.com/) / 
+[奇舞团博客](https://75.team/) / [奇虎360-addops](https://blog.cloud.360.cn) / [十年踪迹的博客](http://h5jun.com/) / [welefen的博客](http://welefen.com/) / [大官人的博客](https://www.daguanren.cc/) /
+[魔术师的帽子](https://blog.magichc7.com/)
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/firekylin/firekylin/issues/34 提交网址。
 
