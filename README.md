@@ -52,21 +52,18 @@
 
 ## 用户列表
 
-[奇舞团博客](http://www.75team.com/) / 
-[奇虎360-addops](https://opsdev.cn) / 
+[奇舞团博客](https://75.team/) / 
+[奇虎360-addops](https://blog.cloud.360.cn) / 
 [十年踪迹的博客](http://h5jun.com/) / 
-[光宇的博客](http://gyblog.cn/) / 
-[welefen的博客](http://welefen.com/) / 
-[Aztack's blog](http://aztack.wang/) / 
-[且等风来](https://blog.cosli.top/) / 
-[为之漫笔](http://lisongfeng.cn) / 
-[小撸的博客](http://www.60sky.com/) / 
-[花花的博客](https://imwineki.cn/) / 
-[刘涛的个人小站](https://imliutao.com) / 
-[大官人的博客](https://www.daguanren.cc/) / 
-[小路口](https://imjiaolong.cn/)
+[welefen的博客](http://welefen.com/) /  
+[大官人的博客](https://www.daguanren.cc/) /
+[魔术师的帽子](https://blog.magichc7.com/) / 
 
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/firekylin/firekylin/issues/34 提交网址。
+
+## 主题分享
+
+- https://github.com/matinjugou/firekylin-theme
 
 ## 开发者文档
 
