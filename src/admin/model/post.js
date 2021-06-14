@@ -203,7 +203,7 @@ module.exports = class extends Base {
      * 增加 TOC 目录
      */
     if (option.toc) {
-      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^"]+)">([^<>]+)<\/a>/g, (a, b, c) => {
+      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^"]+)">(.+)?<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
 
