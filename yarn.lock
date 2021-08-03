@@ -3070,7 +3070,7 @@ core-js@^2.0.0, core-js@^2.4.0, core-js@^2.5.0:
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
-  resolved "https://registry.npm.taobao.org/core-util-is/download/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
+  resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
 cos-nodejs-sdk-v5@^2.5.6:
@@ -6696,6 +6696,11 @@ lodash.keys@^3.1.2:
     lodash.isarguments "^3.0.0"
     lodash.isarray "^3.0.0"
 
+lodash.merge@^4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
+  integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
@@ -7222,7 +7227,7 @@ ms@^0.7.1:
 
 ms@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.npm.taobao.org/ms/download/ms-1.0.0.tgz#59adcd22edc543f7b5381862d31387b1f4bc9473"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-1.0.0.tgz#59adcd22edc543f7b5381862d31387b1f4bc9473"
   integrity sha1-Wa3NIu3FQ/e1OBhi0xOHsfS8lHM=
 
 ms@^2.0.0, ms@^2.1.1:
@@ -10814,11 +10819,11 @@ think-cluster@^1.0.0:
     think-helper "^1.0.0"
 
 think-config@^1.0.0:
-  version "1.1.1"
-  resolved "https://registry.npm.taobao.org/think-config/download/think-config-1.1.1.tgz#0928062fc4aa4b6f2eed132503781d98e410ec18"
-  integrity sha1-CSgGL8SqS28u7RMlA3gdmOQQ7Bg=
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/think-config/-/think-config-1.1.3.tgz#c579183d12d6093d528281d68c022788b50325ef"
+  integrity sha512-BESywQ9at4xyzwtago8ApgWBxYksfHWKmlwPOqrAWUk+gkpNy1bwcPCvlCcMz5O4MZOZwBeY8wMX5dmH66548g==
   dependencies:
-    think-helper "^1.0.0"
+    think-helper "^1.1.3"
 
 think-controller@^1.0.1:
   version "1.0.4"
@@ -10851,7 +10856,17 @@ think-gc@^1.0.0:
     think-helper "^1.0.6"
     think-ms "^1.0.1"
 
-think-helper@^1.0.0, think-helper@^1.0.22, think-helper@^1.0.5, think-helper@^1.0.6, think-helper@^1.1.2, think-helper@latest:
+think-helper@^1.0.0, think-helper@^1.0.22, think-helper@^1.0.5, think-helper@^1.0.6, think-helper@^1.1.2, think-helper@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/think-helper/-/think-helper-1.1.3.tgz#6d200b5ad6d190da21bc1fa22958f0adca6cf67a"
+  integrity sha512-ZJjBoMryWxGzAu1WUh748/Y0BeGMgbcje5XOV0u62YtIw4usN1BrCepLQxQEYY9ey7PmIAqeq+H222iTYhKMdg==
+  dependencies:
+    core-util-is "^1.0.2"
+    lodash.merge "^4.6.2"
+    ms "^1.0.0"
+    uuid "^3.0.1"
+
+think-helper@latest:
   version "1.1.2"
   resolved "https://registry.npm.taobao.org/think-helper/download/think-helper-1.1.2.tgz#7768d2e20155d9940458b50c855bdf48164c30cf"
   integrity sha1-d2jS4gFV2ZQEWLUMhVvfSBZMMM8=
@@ -11694,7 +11709,7 @@ utils-merge@1.0.1:
   resolved "https://registry.npm.taobao.org/utils-merge/download/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@3.3.2, uuid@^3.0.1, uuid@^3.3.2:
+uuid@3.3.2, uuid@^3.3.2:
   version "3.3.2"
   resolved "https://registry.npm.taobao.org/uuid/download/uuid-3.3.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fuuid%2Fdownload%2Fuuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha1-G0r0lV6zB3xQHCOHL8ZROBFYcTE=
@@ -11703,6 +11718,11 @@ uuid@^2.0.1:
   version "2.0.3"
   resolved "https://registry.npm.taobao.org/uuid/download/uuid-2.0.3.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fuuid%2Fdownload%2Fuuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a"
   integrity sha1-Z+LoY3lyFVMN/zGOW/nc6/1Hsho=
+
+uuid@^3.0.1:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
+  integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
 v8-compile-cache@2.0.3:
   version "2.0.3"
