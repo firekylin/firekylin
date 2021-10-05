@@ -173,6 +173,8 @@ const FormItem = Form.Item;
             );
     
           case 'color':
+            const clr = this.state.themeConfig[element.name];
+            const [_, r, g, b, a] = clr?.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
             return (
               <div className="form-group react-color-picker" key={i}>
                 <label style={{color: 'rgba(0, 0, 0, 0.85)'}}>{element.label}</label>
@@ -182,10 +184,14 @@ const FormItem = Form.Item;
                   </div>
                   { this.state[`display${element.name}`] ? <div className="popover-color">
                     <div className="cover" onClick={() => this.setState({[`display${element.name}`]: false})}/>
-                    <SketchPicker color={this.state.themeConfig[element.name]} onChangeComplete={color => {
-                      this.state.themeConfig[element.name] = color.hex;
-                      this.forceUpdate();
-                    }} />
+                    <SketchPicker 
+                      color={{r, g, b, a: a||1}} 
+                      onChangeComplete={color => {
+                        const {r, g, b, a} = color.rgb;
+                        this.state.themeConfig[element.name] = `rgba(${r},${g},${b},${a||1})`;
+                        this.forceUpdate();
+                      }} 
+                    />
                   </div> : null}
                 </div>
               </div>
