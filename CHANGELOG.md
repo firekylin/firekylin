@@ -1,3 +1,7 @@
+## 1.3.3
+
+- 修复 #782 默认主题配置颜色选择透明度无法修改问题
+- 修复 #774 部分情况 TOC 链接错误问题
 ## 1.3.2
 - 新增博客导出至 Hugo 
 - 评论新增 [Waline](https://waline.js.org) 和 [Valine](https://valine.js.org) 的支持
