@@ -25,7 +25,7 @@
   ],
   "dependencies": {
     "ali-oss": "^6.2.1",
-    "aws-sdk": "^2.263.1",
+    "aws-sdk": "^2.814.0",
     "co": "^4.6.0",
     "cos-nodejs-sdk-v5": "^2.5.6",
     "feedparser": "^2.2.9",
