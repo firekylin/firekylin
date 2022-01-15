@@ -174,7 +174,7 @@ const FormItem = Form.Item;
     
           case 'color':
             const clr = this.state.themeConfig[element.name];
-            const [_, r, g, b, a] = clr?.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
+            const [_, r, g, b, a] = clr!.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
             return (
               <div className="form-group react-color-picker" key={i}>
                 <label style={{color: 'rgba(0, 0, 0, 0.85)'}}>{element.label}</label>

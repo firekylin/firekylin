@@ -1,4 +1,4 @@
-const marked = require('marked');
+const { marked } = require('marked');
 const toc = require('markdown-toc');
 const highlight = require('highlight.js');
 const Base = require('./base');
