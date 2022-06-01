@@ -3619,8 +3619,8 @@ events@^3.0.0:
   resolved "http://registry.npm.taobao.org/events/download/events-3.0.0.tgz"
 
 eventsource@^1.0.7:
-  version "1.0.7"
-  resolved "http://registry.npm.taobao.org/eventsource/download/eventsource-1.0.7.tgz"
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/eventsource/-/eventsource-1.1.1.tgz#4544a35a57d7120fba4fa4c86cb4023b2c09df2f"
   dependencies:
     original "^1.0.0"
 
@@ -6703,7 +6703,7 @@ optionator@^0.8.1, optionator@^0.8.2:
 
 original@^1.0.0:
   version "1.0.2"
-  resolved "http://registry.npm.taobao.org/original/download/original-1.0.2.tgz"
+  resolved "https://registry.yarnpkg.com/original/-/original-1.0.2.tgz#e442a61cffe1c5fd20a65f3261c26663b303f25f"
   dependencies:
     url-parse "^1.4.3"
 
