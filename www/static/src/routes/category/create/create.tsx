@@ -130,7 +130,7 @@ class CategoryCreateForm extends React.Component<CategoryCreateProps, {}> {
                                     placeholder="请选择分类"
                                 >
                                     <Option value={0}>不选择</Option>
-                                    {rootCategoryList.map((category, key) => {
+                                    {rootCategoryList.filter(cate => categoryInfo ? cate.id !== categoryInfo.id : true).map((category, key) => {
                                         return <Option key={(key + 1).toString()} value={category.id}>{category.name}</Option>;
                                     })}
                                 </Select>
