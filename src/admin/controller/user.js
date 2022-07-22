@@ -160,7 +160,7 @@ module.exports = class extends Base {
 
       let transporter = nodemailer.createTransport();
       transporter.sendMail({
-        from: 'no-reply@firekylin.org',
+        from: 'no-reply@firekylin.lithub.cc',
         to: user.email,
         subject: `【${options.title}】密码重置`,
         text: `你好，${user.name}，点击 ${resetUrl} 进行密码重置，该地址有效期为 1 小时，请及时修改密码。如果您没有申请过密码重置，请忽略该邮件！`

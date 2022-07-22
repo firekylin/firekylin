@@ -3,7 +3,7 @@ const FeedParser = require('feedparser');
 const request = require('request');
 const req = require('request-promise-native');
 
-const API_URL = 'https://firekylin.org/api/spider';
+const API_URL = 'https://firekylin.lithub.cc/api/spider';
 module.exports = class extends think.Service {
   constructor(options) {
     super(options);

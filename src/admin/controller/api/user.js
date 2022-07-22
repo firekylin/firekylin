@@ -103,7 +103,7 @@ module.exports = class extends Base {
     let transporter = nodemailer.createTransport();
     let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
     transporter.sendMail({
-      from: 'no-reply@firekylin.org',
+      from: 'no-reply@firekylin.lithub.cc',
       to: user.email,
       subject: `【${options.title}】网站推送申请成功`,
       text: `你的推送申请审批通过，请将下面的信息添加到自己的博客中完成最后的推送操作。
