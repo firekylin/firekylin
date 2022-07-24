@@ -2050,8 +2050,8 @@ buf-compare@^1.0.0:
   resolved "http://registry.npm.taobao.org/buf-compare/download/buf-compare-1.0.1.tgz"
 
 buffer-from@^1.0.0:
-  version "1.1.1"
-  resolved "http://registry.npm.taobao.org/buffer-from/download/buffer-from-1.1.1.tgz"
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.2.tgz#2b146a6fd72e80b4f55d255f35ed59a3a9a41bd5"
 
 buffer-indexof@^1.0.0:
   version "1.1.1"
@@ -2467,8 +2467,8 @@ commander@2.17.x:
   resolved "https://registry.npm.taobao.org/commander/download/commander-2.17.1.tgz?cache=0&sync_timestamp=1565398176321&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcommander%2Fdownload%2Fcommander-2.17.1.tgz"
 
 commander@^2.11.0, commander@^2.12.1, commander@^2.18.0, commander@^2.20.0:
-  version "2.20.0"
-  resolved "https://registry.npm.taobao.org/commander/download/commander-2.20.0.tgz?cache=0&sync_timestamp=1565398176321&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcommander%2Fdownload%2Fcommander-2.20.0.tgz"
+  version "2.20.3"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
 
 commander@~2.19.0:
   version "2.19.0"
@@ -6214,9 +6214,9 @@ moment-timezone@^0.5.31:
   dependencies:
     moment ">= 2.9.0"
 
-moment@*, moment@2.x, "moment@>= 2.9.0", moment@^2.10.6, moment@^2.24.0, moment@^2.29.2:
-  version "2.29.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
+moment@*, moment@2.x, "moment@>= 2.9.0", moment@^2.10.6, moment@^2.24.0, moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -8772,8 +8772,8 @@ source-map-support@^0.4.0, source-map-support@^0.4.15, source-map-support@^0.4.1
     source-map "^0.5.6"
 
 source-map-support@~0.5.12:
-  version "0.5.13"
-  resolved "https://registry.npm.taobao.org/source-map-support/download/source-map-support-0.5.13.tgz?cache=0&sync_timestamp=1564565500102&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fsource-map-support%2Fdownload%2Fsource-map-support-0.5.13.tgz"
+  version "0.5.21"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
@@ -8788,7 +8788,7 @@ source-map@^0.5.0, source-map@^0.5.3, source-map@^0.5.6, source-map@^0.5.7:
 
 source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.0, source-map@~0.6.1:
   version "0.6.1"
-  resolved "http://registry.npm.taobao.org/source-map/download/source-map-0.6.1.tgz"
+  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
 
 source-map@^0.7.3:
   version "0.7.3"
@@ -9312,8 +9312,8 @@ terser-webpack-plugin@^1.4.1:
     worker-farm "^1.7.0"
 
 terser@^4.1.2:
-  version "4.1.4"
-  resolved "https://registry.npm.taobao.org/terser/download/terser-4.1.4.tgz"
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-4.8.1.tgz#a00e5634562de2239fd404c649051bf6fc21144f"
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
@@ -9340,8 +9340,8 @@ thenify-all@^1.0.0:
     thenify ">= 3.1.0 < 4"
 
 "thenify@>= 3.1.0 < 4":
-  version "3.3.0"
-  resolved "http://registry.npm.taobao.org/thenify/download/thenify-3.3.0.tgz"
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/thenify/-/thenify-3.3.1.tgz#8932e686a4066038a016dd9e2ca46add9838a95f"
   dependencies:
     any-promise "^1.0.0"
 
