@@ -1,0 +1,19 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+- name: build
+  image: node:alpine
+  commands:
+  - version=$(node -e "console.log(require('./package.json').version)")
+  - echo -n "$version,latest" > .tags
+
+- name: publish
+  image: plugins/docker
+  settings:
+    repo: firekylin/firekylin
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
