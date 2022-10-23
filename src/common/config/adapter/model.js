@@ -15,6 +15,9 @@ let type = process.env.FK_DB_MODE || 'mysql';
 try {
   let dbConfig = require('../db.js');
   dbConfig = dbConfig.default || dbConfig;
+  if (!dbConfig.type) {
+    throw new Error();
+  }
 
   type = dbConfig.type;
   msc = dbConfig.adapter[type];
