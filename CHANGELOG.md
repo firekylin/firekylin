@@ -1,3 +1,5 @@
+## 1.5.0
+- 增加 PostgreSQL 数据库支持
 ## 1.4.0
 - 官网修改域名 https://firekylin.lithub.cc
 ## 1.3.4
