@@ -138,6 +138,7 @@ module.exports = class extends Base {
 
       default:
         let dbInfo = {
+          type: data.db_type,
           host: data.db_host,
           port: data.db_port,
           database: data.db_name,

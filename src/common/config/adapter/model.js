@@ -1,4 +1,5 @@
 const mysql = require('think-model-mysql');
+const pgsql = require('think-model-postgresql');
 
 const isDev = think.env === 'development';
 let msc = {
@@ -10,15 +11,19 @@ let msc = {
   prefix: process.env.FK_DB_PREFIX,
   encoding: process.env.FK_DB_ENCODING
 };
+let type = process.env.FK_DB_MODE || 'mysql';
 try {
-  const dbConfig = require('../db.js');
-  msc = (dbConfig.default ? dbConfig.default : dbConfig).adapter.mysql;
+  let dbConfig = require('../db.js');
+  dbConfig = dbConfig.default || dbConfig;
+
+  type = dbConfig.type;
+  msc = dbConfig.adapter[type];
 } catch (e) {
   //eslint-disable-line
 }
 
 module.exports = {
-  type: process.env.FK_DB_MODE || 'mysql',
+  type,
   common: {
     logConnect: isDev,
     logSql: isDev,
@@ -34,5 +39,15 @@ module.exports = {
     password: msc.password,
     prefix: msc.prefix,
     encoding: msc.encoding
+  },
+  postgresql: {
+    handle: pgsql,
+    user: msc.user,
+    password: msc.password,
+    database: msc.database,
+    host: msc.host,
+    port: msc.port,
+    prefix: msc.prefix,
+    connectionLimit: 1,
   }
 };

@@ -93,17 +93,23 @@ module.exports = class extends think.Service {
 
   async insertData(title, site_url) {
     let model = this.getModel(true);
-    let dbExist = await model.query(
-      'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`= \''+
-      this.dbConfig.database + '\''
-    );
+    const sql = {
+      mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+      this.dbConfig.database + '\'',
+      postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${this.dbConfig.database}';`
+    };
+    let dbExist = await model.query(sql[this.type]);
     if(think.isEmpty(dbExist)) {
       await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
     }
 
-    let dbFile = path.join(think.ROOT_PATH, 'firekylin.sql');
+    const fileName = {
+      mysql: 'firekylin.sql',
+      postgresql: 'firekylin.pgsql',
+    };
+    let dbFile = path.join(think.ROOT_PATH, fileName[this.type]);
     if(!think.isFile(dbFile)) {
-      return Promise.reject('数据库文件（firekylin.sql）不存在，请重新下载');
+      return Promise.reject(`数据库文件（${fileName[this.type]}）不存在，请重新下载`);
     }
 
 
@@ -217,7 +223,10 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     return insert;
   }
 
-  async saveDbInfo(dbConfig) {
+  async saveDbInfo({ type, ...dbConfig }) {
+    if (type) {
+      this.type = type;
+    }
     this.dbConfig = dbConfig;
     await this.checkDbInfo();
     this.updateConfig();
@@ -245,10 +254,12 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     }
 
     try {
-      let existTables = await think.model('user', dbConfig).query(
-        'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
-        database + '\''
-      );
+      const sql = {
+        mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+        database + '\'',
+        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`
+      };
+      let existTables = await think.model('user', dbConfig).query(sql[this.type]);
       if(think.isEmpty(existTables)) {
         return false;
       }

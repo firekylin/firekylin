@@ -26,7 +26,18 @@
       {% endif %}
     {% endif %}
     {% if step == 1 %}
-    <h3>数据库信息（MySQL）</h3>
+    <h3>数据库信息</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>数据库</label>
+          <select name="db_type" value="{{data.db_type}}" required class="form-control">
+            <option value="mysql">MySQL</option>
+            <option value="postgresql">PostgreSQL</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
