@@ -1,0 +1,18 @@
+{
+  "name": "firekylin",
+  "builds": [
+    {
+      "src": "vercel.js",
+      "use": "@vercel/node@2.5.10"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/vercel.js"
+    }
+  ],
+  "github": {
+    "silent": true
+  }
+}

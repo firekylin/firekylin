@@ -5,7 +5,7 @@ const model = require('think-model');
 const cache = require('think-cache');
 const session = require('think-session');
 
-const ROOT_PATH = think.env === 'now' ? os.tmpdir() : think.ROOT_PATH;
+const ROOT_PATH = think.env === 'vercel' ? os.tmpdir() : think.ROOT_PATH;
 module.exports = [
   view, // make application support view
   model(think.app),

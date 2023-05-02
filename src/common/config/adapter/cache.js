@@ -3,7 +3,7 @@ const path = require('path');
 const fileCache = require('think-cache-file');
 
 let ROOT_PATH = think.ROOT_PATH;
-if(think.env === 'now') {
+if(think.env === 'vercel') {
   ROOT_PATH = os.tmpdir();
 } else if(think.env === 'pkg') {
   ROOT_PATH = think.RUNTIME_PATH;

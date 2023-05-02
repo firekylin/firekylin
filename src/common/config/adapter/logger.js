@@ -2,7 +2,7 @@ const path = require('path');
 const { Console, File, DateFile } = require('think-logger3');
 
 const isDev = think.env === 'development';
-const isNow = think.env === 'now';
+const isNow = think.env === 'vercel';
 const isPkg = think.env === 'pkg';
 
 module.exports = {
