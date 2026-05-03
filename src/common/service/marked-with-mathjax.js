@@ -25,35 +25,6 @@ module.exports = class extends think.Service {
     });
   }
 
-
-  /**
-   * 渲染行内数学表达式
-   * @param text
-   * @returns {Promise.<*>}
-   */
-  async _mathSpanRender(text) {
-    const reg = /`\$(.*?)\$`/g;
-    let cap;
-
-    reg.lastIndex = 0;
-
-    while (text) {
-      cap = reg.exec(text);
-      if (cap) {
-        const strStart = cap.index;
-        const strEnd = cap.index + cap[0].length;
-        const mathContent = await this._renderMathJax(cap[1]);
-
-        text = text.substring(0, strStart) + mathContent + text.substring(strEnd);
-        reg.lastIndex += mathContent.length - cap[0].length;
-      } else {
-        break;
-      }
-    }
-
-    return text;
-  }
-
   /**
    * 渲染 Markdown 文本
    *
@@ -64,39 +35,63 @@ module.exports = class extends think.Service {
     var mathLexer = new marked.Lexer();
     var tokens = mathLexer.lex(content);
 
-    for (let i = 0; i < tokens.length; i++) {
-      const item = tokens[i];
+    // 处理LaTeX公式
+    const dfs = async (tokensArr) => {
+      for (let i = 0; i < (tokensArr?.length || 0); i++) {
+        const item = tokensArr[i];
 
-      // 处理块级表达式
-      if (item.type === 'code' && item.lang === 'math') {
-        tokens[i] = {
-          type: 'paragraph',
-          text: await this._renderMathJax(item.text),
+        // 处理块级表达式
+        if (item.type === 'code' && item.lang === 'math') {
+          tokensArr[i] = {
+            type: 'paragraph',
+            tokens: [
+              {
+                type: 'html',
+                text: await this._renderMathJax(item.text)
+              }
+            ],
+          };
         }
-      }
 
-      // 处理表格
-      if (item.type === 'table') {
-        // 处理表头
-        let j, k
-        for (j = 0; j < item.header.length; j++) {
-          item.header[j] = await this._mathSpanRender(item.header[j])
+        // 处理行内表达式
+        if (item.type === 'codespan' && item.text.startsWith('$') && item.text.endsWith('$')) {
+          tokensArr[i] = {
+            type: 'html',
+            text: await this._renderMathJax(item.text.slice(1, -1))
+          };
         }
-        // 处理单元格
-        for (j = 0; j < item.cells.length; j++) {
-          for (k = 0; k < item.cells[j].length; k++) {
-            item.cells[j][k] = await this._mathSpanRender(item.cells[j][k])
+
+        // 处理表格
+        if (item.type === 'table') {
+          // 处理表头
+          let j, k;
+          for (j = 0; j < (item?.header?.length || 0); j++) {
+            await dfs(item.header[j].tokens);
+          }
+          // 处理单元格
+          for (j = 0; j < (item?.rows?.length || 0); j++) {
+            for (k = 0; k < (item?.rows[j]?.length || 0); k++) {
+              await dfs(item.rows[j][k].tokens);
+            }
           }
         }
-      }
 
-      // 处理行内表达式
-      if (item.text) {
-        item.text = await this._mathSpanRender(item.text);
+        // 处理列表
+        if (item.type === 'list') {
+          for (let j = 0; j < (item?.items?.length || 0); j++) {
+            await dfs(item.items[j].tokens);
+          }
+        }
+
+        // 递归处理子tokens
+        if (item.tokens && Array.isArray(item.tokens)) {
+          await dfs(item.tokens);
+        }
       }
-    }
+    };
+
+    await dfs(tokens);
 
     return marked.Parser.parse(tokens);
   }
 }
-
