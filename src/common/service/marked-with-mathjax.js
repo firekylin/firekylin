@@ -6,9 +6,10 @@ module.exports = class extends think.Service {
    * 渲染具体的 MathJax 表达式
    *
    * @param content
+   * @param formulaType
    * @returns {Promise.<*>}
    */
-  async _renderMathJax(content) {
+  async _renderMathJax(content, formulaType) {
     mathJax.config({
       MathJax: {}
     });
@@ -20,7 +21,7 @@ module.exports = class extends think.Service {
         format: 'TeX',
         svg: true,
       }, function (data) {
-        resolve(data.svg);
+        resolve(`<span class="firekylin-markdown-mathjax-${formulaType}">${data.svg}</span>`);
       });
     });
   }
@@ -47,7 +48,7 @@ module.exports = class extends think.Service {
             tokens: [
               {
                 type: 'html',
-                text: await this._renderMathJax(item.text)
+                text: await this._renderMathJax(item.text, 'block')
               }
             ],
           };
@@ -57,7 +58,7 @@ module.exports = class extends think.Service {
         if (item.type === 'codespan' && item.text.startsWith('$') && item.text.endsWith('$')) {
           tokensArr[i] = {
             type: 'html',
-            text: await this._renderMathJax(item.text.slice(1, -1))
+            text: await this._renderMathJax(item.text.slice(1, -1), 'inline')
           };
         }
 
