@@ -16,7 +16,7 @@ class ArticleHeaderForm extends React.Component<any, {}> {
     render() {
         const type = this.props.type;
         const baseUrl = `${location.origin}/${['post', 'page'][type]}/`;
-        let postUrl = `/${['post', 'page'][type]}/${this.props.pathname}.html`;
+        let postUrl = `/${['post', 'page'][type]}/${encodeURIComponent(this.props.pathname)}.html`;
         const { getFieldDecorator } = this.props.form;
         return (
             <div className="article-header">

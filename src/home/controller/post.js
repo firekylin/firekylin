@@ -132,6 +132,12 @@ module.exports = class extends Base {
       detail.options = {};
       detail.featuredImage = '';
     }
+    if (!think.isEmpty(detail.prev)) {
+      detail.prev.pathname = encodeURIComponent(detail.prev.pathname);
+    }
+    if (!think.isEmpty(detail.next)) {
+      detail.next.pathname = encodeURIComponent(detail.next.pathname);
+    }
     this.assign('post', detail);
 
     return this.displayView('post');
