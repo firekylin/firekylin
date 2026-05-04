@@ -1,7 +1,10 @@
+# TODO: 当前Dockerfile已经不能正常编译运行项目，需要更新镜像版本
+
 FROM node:8.12-alpine as builder
 
 # dtrace-provider@0.8.7 编译安装依赖 python make
-RUN echo "https://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories \
+# Alpine 3.8 证书过期，只能降级使用http
+RUN echo "http://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories \
     && apk update \
     && apk add python \
     && apk add make
@@ -10,7 +13,8 @@ WORKDIR /app
 
 COPY package.json /app
 
-RUN npm install --only=prod \
+RUN npm config set registry https://registry.npmmirror.com \
+    && npm install --only=prod \
     && mkdir output \
     && cp -r node_modules/ output/node_modules/ \
     && npm install --only=dev
