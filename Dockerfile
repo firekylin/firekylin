@@ -2,18 +2,20 @@ FROM node:20-alpine as builder
 
 WORKDIR /app
 
+RUN npm install -g pnpm
+
 COPY package.json /app
 
-RUN npm install --only=prod \
+RUN pnpm install --prod \
     && mkdir output \
     && cp -r node_modules/ output/node_modules/ \
-    && npm install --only=dev
+    && pnpm install
 
 COPY . /app
 
-RUN npm run build \
+RUN pnpm run build \
     && node stc.config.js \
-    && npm run copy-package \
+    && pnpm run copy-package \
     && rm -rf src/common/runtime \
     && rm -f src/common/config/db.js \
     && rm -rf output/www/static/js/*.map
