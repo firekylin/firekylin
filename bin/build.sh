@@ -22,6 +22,8 @@ cp -r www/theme/firekylin output/www/theme;
 # cp -r www/theme/firekylin/inc www/theme/firekylin.build/html/
 # cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
+cp -r view output/view;
+cp -r www/static output/www/static;
 # node stc.view.config.js;
 
 # cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
@@ -45,6 +47,7 @@ cp -r now.json output/now.json;
 
 
 cp -r firekylin.sql output/;
+cp -r firekylin.pgsql output/;
 if [ 0 -eq `grep -c analyze_code  output/firekylin.sql` ];then
   echo 'missing analyze_code in firekylin.sql';
   exit;

@@ -4,7 +4,7 @@ import { observer, inject } from 'mobx-react';
 import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
 import { NavLink } from 'react-router-dom';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Modal } from 'antd';
 import { Subscription } from 'rxjs';
 const confirm = Modal.confirm;

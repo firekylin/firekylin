@@ -1,5 +1,5 @@
 /* eslint eqeqeq:0 */
-import * as moment from 'moment';
+import moment from 'moment';
 // import TipActions from '../action/tip';
 
 let toString = Object.prototype.toString;
