@@ -100,7 +100,7 @@ module.exports = class extends Base {
 
       /** 安装依赖 */
       case '3':
-        const registry = think.config('registry') || 'https://registry.npm.taobao.org';
+        const registry = think.config('registry') || 'https://registry.npmmirror.com';
         return new Promise((resolve, reject) => {
           exec(`npm install --registry=${registry}`, error => {
             if(error) {
