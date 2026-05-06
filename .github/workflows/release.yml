@@ -69,6 +69,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -88,6 +90,29 @@ jobs:
 
       - name: Build
         run: sh bin/build.sh
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^v${VERSION}$" | head -n 1 || true)
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H): %s")
+          else
+            COMMITS=$(git log --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H): %s" "${PREV_TAG}..HEAD")
+          fi
+          echo "$COMMITS" > /tmp/release_notes.md
+
+      - name: Create GitHub Release
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          TARBALL="build/firekylin_${VERSION}.tar.gz"
+          gh release create "v${VERSION}" \
+            --title "${VERSION}" \
+            --notes-file /tmp/release_notes.md \
+            "$TARBALL"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout firekylin.org
         uses: actions/checkout@v4
