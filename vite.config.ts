@@ -11,8 +11,8 @@ export default defineConfig(({ mode }) => ({
         react({
             babel: {
                 plugins: [
-                    // On-demand import of antd components and styles
-                    ['import', { libraryName: 'antd', libraryDirectory: 'lib', style: true }],
+                    // On-demand import of antd components and pre-compiled CSS
+                    ['import', { libraryName: 'antd', libraryDirectory: 'lib', style: 'css' }],
                 ],
             },
         }),
