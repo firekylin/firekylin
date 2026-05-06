@@ -9,13 +9,13 @@ if [ ! -d "./build" ]; then
   mkdir ./build;
 fi
 
-echo 'webpack start ...';
-npm run webpack.build.production;
-echo 'webpack end';
+echo 'vite start ...';
+npm run build;
+echo 'vite end';
 
 
 mkdir -p output/www/theme;
-cp -Xr www/theme/firekylin output/www/theme;
+cp -r www/theme/firekylin output/www/theme;
 # rm stc plugin in theme file temporary
 # mkdir -p www/theme/firekylin.build/html;
 # cp -r www/theme/firekylin/*.html www/theme/firekylin.build/html/
@@ -34,26 +34,26 @@ cp -Xr www/theme/firekylin output/www/theme;
 # npm run compile;
 npm run copy-package;
 
-cp -Xr src output;
+cp -r src output;
 rm -rf output/src/common/runtime;
 
-cp -Xr nginx.conf output/nginx_default.conf;
-cp -Xr pm2.json output/pm2_default.json;
-cp -Xr production.js output/production.js;
-cp -Xr now.js output/now.js;
-cp -Xr now.json output/now.json;
+cp -r nginx.conf output/nginx_default.conf;
+cp -r pm2.json output/pm2_default.json;
+cp -r production.js output/production.js;
+cp -r now.js output/now.js;
+cp -r now.json output/now.json;
 
 
-cp -Xr firekylin.sql output/;
+cp -r firekylin.sql output/;
 if [ 0 -eq `grep -c analyze_code  output/firekylin.sql` ];then
   echo 'missing analyze_code in firekylin.sql';
   exit;
 fi
 
 
-cp -Xr bin/ssl/auto_build.sh output/;
-cp -Xr bin/ssl/https.js output/;
-cp -Xr bin/ssl/https.sh output/;
+cp -r bin/ssl/auto_build.sh output/;
+cp -r bin/ssl/https.js output/;
+cp -r bin/ssl/https.sh output/;
 
 if [ -f output/src/common/config/db.js ]; then
   rm -r output/src/common/config/db.js;
