@@ -1,8 +1,9 @@
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 COPY package.json /app
+COPY package-lock.json /app
 
 RUN npm install --omit=dev --force \
     && mkdir output \
@@ -13,7 +14,7 @@ RUN npm install --omit=dev --force \
 COPY . /app
 
 RUN npm run build \
-    && mknpm run copy-package \
+    && npm run copy-package \
     && rm -rf src/common/runtime \
     && rm -f src/common/config/db.js \
     && rm -rf output/www/static/js/*.map
@@ -28,8 +29,8 @@ RUN cp -r www/theme/ output/www/theme/ \
 
 FROM keymetrics/pm2:20-alpine
 
-ENV APP_PATH /opt/firekylin
-ENV VOLUME_PATH /var/lib/firekylin
+ENV APP_PATH=/opt/firekylin
+ENV VOLUME_PATH=/var/lib/firekylin
 
 COPY --from=builder /app/output $APP_PATH
 
