@@ -47,8 +47,10 @@ export default defineConfig(({ mode }) => ({
                 entryFileNames: '[name].js',
                 chunkFileNames: '[name].js',
                 assetFileNames: '[name][extname]',
-                manualChunks: {
-                    vendor: ['react', 'react-dom', 'mobx', 'mobx-react'],
+                manualChunks(id) {
+                    const isVendor = ['react', 'react-dom', 'mobx', 'mobx-react'].includes(id);
+                    
+                    return isVendor ? 'vendor' : undefined;
                 },
             },
         },
