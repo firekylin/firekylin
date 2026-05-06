@@ -31,11 +31,6 @@
     "import"
   ],
   "settings": {
-    "import/resolver": {
-      "webpack": {
-        "config": "webpack.config.js"
-      }
-    }
   },
   "rules": {
     "strict": 0,

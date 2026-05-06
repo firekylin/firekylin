@@ -2,8 +2,8 @@
   "compilerOptions": {
     "outDir": "build/dist",
     "module": "esnext",
-    "target": "es5",
-    "lib": ["es7", "dom"],
+    "target": "es2015",
+    "lib": ["es2017", "dom"],
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react",
@@ -19,18 +19,19 @@
     "experimentalDecorators": true,
     "noImplicitUseStrict": true,
     "alwaysStrict": false,
+    "useDefineForClassFields": false,
+    "isolatedModules": true
   },
   "exclude": [
     "build",
     "scripts",
-    "webpack",
     "jest",
     "bin",
     "runtime",
-    "view",
+    "view"
   ],
   "include": [
-    "www/static/src/*"
+    "www/static/src/**/*"
   ],
   "types": [
     "typePatches"
