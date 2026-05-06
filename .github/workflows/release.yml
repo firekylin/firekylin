@@ -48,9 +48,12 @@ jobs:
             function gt(a, b) {
               const pa = a.split('.').map(Number);
               const pb = b.split('.').map(Number);
-              for (let i = 0; i < 3; i++) {
-                if (pa[i] > pb[i]) return true;
-                if (pa[i] < pb[i]) return false;
+              const len = Math.max(pa.length, pb.length);
+              for (let i = 0; i < len; i++) {
+                const na = pa[i] || 0;
+                const nb = pb[i] || 0;
+                if (na > nb) return true;
+                if (na < nb) return false;
               }
               return false;
             }
@@ -74,6 +77,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Install dependencies
         run: pnpm i
@@ -94,7 +99,12 @@ jobs:
       - name: Update release files
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
-          cp build/firekylin_${VERSION}.tar.gz firekylin.org/www/release/v1/latest.tar.gz
+          TARBALL="build/firekylin_${VERSION}.tar.gz"
+          if [ ! -f "$TARBALL" ]; then
+            echo "Error: expected tarball not found at $TARBALL" >&2
+            exit 1
+          fi
+          cp "$TARBALL" firekylin.org/www/release/v1/latest.tar.gz
           echo "$VERSION" > firekylin.org/www/release/v1/.latest
 
       - name: Commit and push to firekylin.org
