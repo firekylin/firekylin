@@ -1,27 +1,17 @@
-# TODO: 当前Dockerfile已经不能正常编译运行项目，需要更新镜像版本
-
-FROM node:8.12-alpine as builder
-
-# dtrace-provider@0.8.7 编译安装依赖 python make
-# Alpine 3.8 证书过期，只能降级使用http
-RUN echo "http://mirrors.aliyun.com/alpine/v3.8/main/" > /etc/apk/repositories \
-    && apk update \
-    && apk add python \
-    && apk add make
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
 COPY package.json /app
 
-RUN npm config set registry https://registry.npmmirror.com \
-    && npm install --only=prod \
+RUN npm install --only=prod \
     && mkdir output \
     && cp -r node_modules/ output/node_modules/ \
     && npm install --only=dev
 
 COPY . /app
 
-RUN npm run webpack.build.production \
+RUN npm run build \
     && node stc.config.js \
     && npm run copy-package \
     && rm -rf src/common/runtime \
@@ -36,7 +26,7 @@ RUN cp -r www/theme/ output/www/theme/ \
 
 ### 准备工作结束
 
-FROM keymetrics/pm2:8-alpine
+FROM keymetrics/pm2:20-alpine
 
 ENV APP_PATH /opt/firekylin
 ENV VOLUME_PATH /var/lib/firekylin
