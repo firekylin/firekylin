@@ -53,7 +53,6 @@ output.theme/
 build
 
 75team.sh
-stc/
 jsconfig.json
 .vscode
 www/theme/firekylin_new

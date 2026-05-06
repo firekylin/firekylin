@@ -13,7 +13,6 @@ echo 'webpack start ...';
 npm run webpack.build.production;
 echo 'webpack end';
 
-node stc.config.js;
 
 mkdir -p output/www/theme;
 cp -Xr www/theme/firekylin output/www/theme;
