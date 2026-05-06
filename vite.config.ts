@@ -42,6 +42,9 @@ export default defineConfig(({ mode }) => ({
         outDir: path.resolve(__dirname, 'www/static/js'),
         emptyOutDir: true,
         rollupOptions: {
+            input: {
+                admin: path.resolve(__dirname, 'www/static/src/index.html'),
+            },
             output: {
                 // Use fixed filenames (no content hash) for compatibility with server-side template
                 entryFileNames: '[name].js',

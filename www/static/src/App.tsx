@@ -1,9 +1,12 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'mobx-react';
-import './app.less';
+
 import routes from './routes';
 import store from './app.store';
+
+import './app.less';
+import 'antd/dist/antd.css';
 
 if (Object.freeze) {
     Object.freeze(window.SysConfig.userInfo);
