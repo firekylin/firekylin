@@ -6,7 +6,7 @@ RUN npm install -g pnpm
 
 COPY package.json /app
 
-RUN pnpm install --prod \
+RUN pnpm install --production \
     && mkdir output \
     && cp -r node_modules/ output/node_modules/ \
     && pnpm install
