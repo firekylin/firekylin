@@ -6,7 +6,7 @@ COPY package.json /app
 
 RUN npm install --omit=dev --force \
     && mkdir output \
-    && mkdir output/www
+    && mkdir output/www \
     && cp -r node_modules/ output/node_modules/ \
     && npm install --force
 
