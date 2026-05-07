@@ -23,7 +23,8 @@ cp -r www/theme/firekylin output/www/theme;
 # cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
 cp -r view output/view;
-cp -r www/static output/www/static;
+mkdir -p output/www/static;
+tar -cf - -C www/static --exclude=src --exclude=upload . | tar -xf - -C output/www/static;
 # node stc.view.config.js;
 
 # cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
