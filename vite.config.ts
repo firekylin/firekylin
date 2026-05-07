@@ -36,6 +36,8 @@ export default defineConfig(({ mode }) => ({
     define: {
         'process.env.basename': JSON.stringify('/admin'),
         'process.env.environment': JSON.stringify(mode === 'production' ? 'production' : 'dev'),
+        // Polyfill Node.js `global` for browser ESM (used by react-codemirror2)
+        global: 'globalThis',
     },
 
     build: {
