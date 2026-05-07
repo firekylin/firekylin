@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>{{options.title}}</title>
+  <title><%= options.title %></title>
   <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
   <style>
 .container{width: 800px;}
@@ -17,16 +17,16 @@
 </div>
 <div class="container">
   <form method="post" action="?">
-    {% if message %}
-      {% if message == 'success' %}
+    <% if (message) { %>
+      <% if (message === 'success') { %>
       <div class="alert alert-success" role="alert">申请成功</div>
       <script>setTimeout(function(){
         location.href = '/';
         }, 1500)</script>
-      {% else %}
-      <div class="alert alert-danger" role="alert">{{message}}</div>
-      {% endif %}
-    {% endif %}
+      <% } else { %>
+      <div class="alert alert-danger" role="alert"><%= message %></div>
+      <% } %>
+    <% } %>
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
