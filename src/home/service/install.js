@@ -124,7 +124,6 @@ module.exports = class extends think.Service {
         content = content.replace(/fk_/g, this.dbConfig.prefix || '');
         content = content.split(';');
 
-        model = this.getModel();
         try {
           for (let item of content) {
             item = item.trim();

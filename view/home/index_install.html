@@ -42,12 +42,12 @@
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label>数据库名</label>
+          <label for="db_name">数据库名</label>
           <input type="text" required name="db_name" id="db_name" value="{{data.db_name|default('firekylin')}}" class="form-control" placeholder="数据库名">
         </div>
         <div class="form-group">
-          <label>表前缀</label>
-          <input type="text" required name="db_table_prefix" value="{{data.db_table_prefix|default('fk_')}}" class="form-control" placeholder="数据表前缀">
+          <label for="db_table_prefix">表前缀</label>
+          <input type="text" required name="db_table_prefix" id="db_table_prefix" value="{{data.db_table_prefix|default('fk_')}}" class="form-control" placeholder="数据表前缀">
         </div>
       </div>
     </div>
@@ -79,7 +79,7 @@
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label>数据库文件目录</label>
+          <label for="db_path">数据库文件目录</label>
           <input type="text" id="db_path" name="db_path" value="{{data.db_path}}" class="form-control" placeholder="SQLite 数据库文件存放目录（绝对路径）">
           <p class="help-block">数据库文件将保存为该目录下的 &lt;数据库名&gt;.sqlite 文件</p>
         </div>
