@@ -31,18 +31,20 @@
       <div class="col-md-6">
         <div class="form-group">
           <label>数据库</label>
-          <select name="db_type" value="{{data.db_type}}" required class="form-control">
+          <select name="db_type" id="db_type" value="{{data.db_type}}" required class="form-control" onchange="onDbTypeChange(this.value)">
             <option value="mysql">MySQL</option>
             <option value="postgresql">PostgreSQL</option>
+            <option value="sqlite">SQLite</option>
           </select>
         </div>
       </div>
     </div>
+    <div id="db_server_fields">
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
           <label>帐号</label>
-          <input type="text" name="db_account" value="{{data.db_account}}" required class="form-control" placeholder="数据库帐号">
+          <input type="text" name="db_account" value="{{data.db_account}}" class="form-control" placeholder="数据库帐号">
         </div>
         <div class="form-group">
           <label>密码</label>
@@ -50,7 +52,7 @@
         </div>
         <div class="form-group">
           <label>数据库名</label>
-          <input type="text" required name="db_name" value="{{data.db_name}}" value="firekylin" class="form-control"  placeholder="数据库名">
+          <input type="text" name="db_name" value="{{data.db_name}}" value="firekylin" class="form-control"  placeholder="数据库名">
         </div>
       </div>
       <div class="col-md-6">
@@ -68,7 +70,41 @@
         </div>
       </div>
     </div>
+    </div>
+    <div id="db_sqlite_fields" style="display:none">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>数据库文件目录</label>
+          <input type="text" name="db_path" value="{{data.db_path}}" class="form-control" placeholder="SQLite 数据库文件存放目录（绝对路径）">
+          <p class="help-block">数据库文件将保存为该目录下的 &lt;数据库名&gt;.sqlite 文件</p>
+        </div>
+        <div class="form-group">
+          <label>数据库名</label>
+          <input type="text" name="db_name" value="{{data.db_name|default('firekylin')}}" class="form-control" placeholder="数据库名（不含 .sqlite 扩展名）">
+        </div>
+        <div class="form-group">
+          <label>表前缀</label>
+          <input type="text" name="db_table_prefix" value="{{data.db_table_prefix|default('fk_')}}" required class="form-control"  placeholder="数据表前缀">
+        </div>
+      </div>
+    </div>
+    </div>
     <button type="submit" class="btn btn-primary">下一步</button>
+    <script>
+      function onDbTypeChange(type) {
+        var serverFields = document.getElementById('db_server_fields');
+        var sqliteFields = document.getElementById('db_sqlite_fields');
+        if (type === 'sqlite') {
+          serverFields.style.display = 'none';
+          sqliteFields.style.display = '';
+        } else {
+          serverFields.style.display = '';
+          sqliteFields.style.display = 'none';
+        }
+      }
+      onDbTypeChange(document.getElementById('db_type').value);
+    </script>
     {% endif %}
 
     {% if step == 2 %}

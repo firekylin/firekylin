@@ -74,12 +74,18 @@ module.exports = class extends Base {
 
       /** check db config exist */
       let dbConfig = this.config('model', undefined, 'common');
-      dbConfig = dbConfig[dbConfig.type];
-      let isDBConfig = think.isObject(dbConfig)
-                        && dbConfig.host
-                        && dbConfig.port
-                        && dbConfig.database
-                        && dbConfig.user;
+      let dbType = dbConfig.type;
+      dbConfig = dbConfig[dbType];
+      let isDBConfig;
+      if (dbType === 'sqlite') {
+        isDBConfig = think.isObject(dbConfig) && dbConfig.path && dbConfig.database;
+      } else {
+        isDBConfig = think.isObject(dbConfig)
+                          && dbConfig.host
+                          && dbConfig.port
+                          && dbConfig.database
+                          && dbConfig.user;
+      }
 
       switch(step) {
         case 1:
@@ -144,7 +150,8 @@ module.exports = class extends Base {
           database: data.db_name,
           user: data.db_account,
           password: data.db_password,
-          prefix: data.db_table_prefix
+          prefix: data.db_table_prefix,
+          path: data.db_path
         };
         try {
           await instance.saveDbInfo(dbInfo);

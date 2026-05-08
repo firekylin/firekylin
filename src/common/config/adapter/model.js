@@ -1,5 +1,6 @@
 const mysql = require('think-model-mysql');
 const pgsql = require('think-model-postgresql');
+const sqlite = require('think-model-sqlite');
 
 const isDev = think.env === 'development';
 let msc = {
@@ -9,7 +10,8 @@ let msc = {
   user: process.env.FK_DB_USER,
   password: process.env.FK_DB_PASSWORD,
   prefix: process.env.FK_DB_PREFIX,
-  encoding: process.env.FK_DB_ENCODING
+  encoding: process.env.FK_DB_ENCODING,
+  path: process.env.FK_DB_PATH
 };
 let type = process.env.FK_DB_MODE || 'mysql';
 try {
@@ -52,5 +54,11 @@ module.exports = {
     port: msc.port,
     prefix: msc.prefix,
     connectionLimit: 1,
+  },
+  sqlite: {
+    handle: sqlite,
+    path: msc.path,
+    database: msc.database,
+    prefix: msc.prefix,
   }
 };

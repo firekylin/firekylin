@@ -69,6 +69,15 @@ module.exports = class extends think.Service {
   }
 
   checkDbInfo() {
+    if (this.type === 'sqlite') {
+      let dbInstance = this.getModel();
+      return dbInstance.query('SELECT sqlite_version() AS version').catch(() => {
+        return Promise.reject('数据库文件路径有误或不可写');
+      }).then(data => {
+        return data[0] && data[0].version;
+      });
+    }
+
     let dbInstance = this.getModel(true);
     return dbInstance.query('SELECT VERSION()').catch(() => {
       return Promise.reject('数据库信息有误');
@@ -92,54 +101,89 @@ module.exports = class extends think.Service {
   }
 
   async insertData(title, site_url) {
-    let model = this.getModel(true);
-    const sql = {
-      mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
-      this.dbConfig.database + '\'',
-      postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${this.dbConfig.database}';`
-    };
-    let dbExist = await model.query(sql[this.type]);
-    if(think.isEmpty(dbExist)) {
-      await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
-    }
+    let model = this.type === 'sqlite' ? this.getModel() : this.getModel(true);
 
-    const fileName = {
-      mysql: 'firekylin.sql',
-      postgresql: 'firekylin.pgsql',
-    };
-    let dbFile = path.join(think.ROOT_PATH, fileName[this.type]);
-    if(!think.isFile(dbFile)) {
-      return Promise.reject(`数据库文件（${fileName[this.type]}）不存在，请重新下载`);
-    }
+    if (this.type === 'sqlite') {
+      // SQLite: check existing tables via sqlite_master
+      let dbExist = await model.query(
+        `SELECT name FROM sqlite_master WHERE type='table' AND name='${this.dbConfig.prefix || 'fk_'}post'`
+      );
+      // For SQLite the database file is created automatically; no CREATE DATABASE needed
+      if (!think.isEmpty(dbExist)) {
+        // tables already exist, skip import
+      } else {
+        const fileName = 'firekylin.sqlite.sql';
+        let dbFile = path.join(think.ROOT_PATH, fileName);
+        if (!think.isFile(dbFile)) {
+          return Promise.reject(`数据库文件（${fileName}）不存在，请重新下载`);
+        }
 
+        let content = fs.readFileSync(dbFile, 'utf8');
+        content = content.replace(/fk_/g, this.dbConfig.prefix || 'fk_');
+        content = content.split(';');
 
-    let content = fs.readFileSync(dbFile, 'utf8');
-    content = content.split('\n').filter(item => {
-      item = item.trim();
-      let ignoreList = ['#', 'LOCK', 'UNLOCK'];
-      for(let it of ignoreList) {
-        if(item.indexOf(it) === 0) {
-          return false;
+        model = this.getModel();
+        try {
+          for (let item of content) {
+            item = item.trim();
+            if (item) {
+              think.logger.debug(item);
+              await model.query(item);
+            }
+          }
+        } catch (e) {
+          think.logger.error(e);
+          return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
         }
       }
-      return true;
-    }).join(' ');
-    content = content.replace(/\/\*.*?\*\//g, '').replace(/fk_/g, this.dbConfig.prefix || '');
+    } else {
+      const sql = {
+        mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+        this.dbConfig.database + '\'',
+        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${this.dbConfig.database}';`
+      };
+      let dbExist = await model.query(sql[this.type]);
+      if(think.isEmpty(dbExist)) {
+        await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
+      }
 
-    //导入数据
-    model = this.getModel();
-    content = content.split(';');
-    try{
-      for(let item of content) {
+      const fileName = {
+        mysql: 'firekylin.sql',
+        postgresql: 'firekylin.pgsql',
+      };
+      let dbFile = path.join(think.ROOT_PATH, fileName[this.type]);
+      if(!think.isFile(dbFile)) {
+        return Promise.reject(`数据库文件（${fileName[this.type]}）不存在，请重新下载`);
+      }
+
+      let content = fs.readFileSync(dbFile, 'utf8');
+      content = content.split('\n').filter(item => {
         item = item.trim();
-        if(item) {
-          think.logger.debug(item);
-          await model.query(item);
+        let ignoreList = ['#', 'LOCK', 'UNLOCK'];
+        for(let it of ignoreList) {
+          if(item.indexOf(it) === 0) {
+            return false;
+          }
         }
+        return true;
+      }).join(' ');
+      content = content.replace(/\/\*.*?\*\//g, '').replace(/fk_/g, this.dbConfig.prefix || '');
+
+      //导入数据
+      model = this.getModel();
+      content = content.split(';');
+      try{
+        for(let item of content) {
+          item = item.trim();
+          if(item) {
+            think.logger.debug(item);
+            await model.query(item);
+          }
+        }
+      }catch(e) {
+        think.logger.error(e);
+        return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
       }
-    }catch(e) {
-      think.logger.error(e);
-      return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
     }
 
     let optionsModel = this.getModel('options');
@@ -254,17 +298,28 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     }
 
     try {
-      const sql = {
-        mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
-        database + '\'',
-        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`
-      };
-      let existTables = await think.model('user', dbConfig).query(sql[this.type]);
-      if(think.isEmpty(existTables)) {
-        return false;
+      let existTables;
+      if (this.type === 'sqlite') {
+        let rows = await think.model('user', dbConfig).query(
+          'SELECT name FROM sqlite_master WHERE type=\'table\''
+        );
+        if (think.isEmpty(rows)) {
+          return false;
+        }
+        existTables = rows.map(row => row.name);
+      } else {
+        const sql = {
+          mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+          database + '\'',
+          postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`
+        };
+        let rows = await think.model('user', dbConfig).query(sql[this.type]);
+        if (think.isEmpty(rows)) {
+          return false;
+        }
+        existTables = rows.map(table => table.TABLE_NAME);
       }
 
-      existTables = existTables.map(table => table.TABLE_NAME);
       let installed = tables.every(table => existTables.indexOf(prefix+table) > -1);
       if(installed) {
         firekylin.setInstalled();
