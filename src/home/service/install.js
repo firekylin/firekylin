@@ -106,10 +106,12 @@ module.exports = class extends think.Service {
     if (this.type === 'sqlite') {
       // SQLite: check existing tables via sqlite_master
       let dbExist = await model.query(
-        `SELECT name FROM sqlite_master WHERE type='table' AND name='${this.dbConfig.prefix || 'fk_'}post'`
+        'SELECT name FROM sqlite_master WHERE type=\'table\''
       );
       // For SQLite the database file is created automatically; no CREATE DATABASE needed
-      if (!think.isEmpty(dbExist)) {
+      const tablePrefix = this.dbConfig.prefix || 'fk_';
+      const postTable = tablePrefix + 'post';
+      if (!think.isEmpty(dbExist) && dbExist.some(row => row.name === postTable)) {
         // tables already exist, skip import
       } else {
         const fileName = 'firekylin.sqlite.sql';
@@ -119,7 +121,7 @@ module.exports = class extends think.Service {
         }
 
         let content = fs.readFileSync(dbFile, 'utf8');
-        content = content.replace(/fk_/g, this.dbConfig.prefix || 'fk_');
+        content = content.replace(/fk_/g, this.dbConfig.prefix || '');
         content = content.split(';');
 
         model = this.getModel();
