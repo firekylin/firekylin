@@ -1,5 +1,5 @@
 const moment = require('moment');
-const toMarkdown = require('to-markdown');
+const TurndownService = require('turndown');
 
 class Base extends think.Service {
   constructor(...args) {
@@ -9,6 +9,7 @@ class Base extends think.Service {
     this.tagModelInstance = this.model('tag', null, 'admin');
     this.postModelInstance = this.model('post', null, 'admin');
     this.pageModelInstance = this.model('page', null, 'admin').setRelation('user');
+    this.turndownService = new TurndownService();
   }
 
   formatDate(date) {
@@ -16,7 +17,7 @@ class Base extends think.Service {
   }
 
   toMarkdown(content) {
-    return toMarkdown(content);
+    return this.turndownService.turndown(content);
   }
 
   /**

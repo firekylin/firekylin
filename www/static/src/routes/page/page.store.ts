@@ -1,7 +1,6 @@
 import { observable, action } from 'mobx';
 import { http } from '../../utils/http';
 import { message } from 'antd';
-import { String } from 'aws-sdk/clients/sns';
 import { PageInfo } from './page.model';
 
 class PageStore {
@@ -32,7 +31,7 @@ class PageStore {
   @action
   setLoading = data => this.loading = data
 
-  pageDeleteById(id: String) {
+  pageDeleteById(id: string) {
     return http.post<any>(`/admin/api/page/${id}?method=delete`);
   }
 }

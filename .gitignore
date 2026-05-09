@@ -60,3 +60,4 @@ db/
 
 .eslintcache
 stats.json
+package-lock.json
