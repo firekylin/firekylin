@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json /app
 COPY pnpm-lock.yaml /app
 
-npm i -g pnpm
+RUN npm i -g pnpm
 
 RUN pnpm install --omit=dev --force \
     && mkdir output \
