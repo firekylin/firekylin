@@ -3,18 +3,20 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json /app
-COPY package-lock.json /app
+COPY pnpm-lock.yaml /app
 
-RUN npm install --omit=dev --force \
+npm i -g pnpm
+
+RUN pnpm install --omit=dev --force \
     && mkdir output \
     && mkdir output/www \
     && cp -r node_modules/ output/node_modules/ \
-    && npm install --force
+    && pnpm install --force
 
 COPY . /app
 
-RUN npm run build \
-    && npm run copy-package \
+RUN pnpm run build \
+    && pnpm run copy-package \
     && rm -rf src/common/runtime \
     && rm -f src/common/config/db.js \
     && rm -rf output/www/static/js/*.map
