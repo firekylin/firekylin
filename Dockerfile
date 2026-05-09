@@ -7,11 +7,10 @@ COPY pnpm-lock.yaml /app
 
 RUN npm i -g pnpm
 
-RUN pnpm install --omit=dev --force \
+RUN pnpm i -P --force \
     && mkdir output \
-    && mkdir output/www \
     && cp -r node_modules/ output/node_modules/ \
-    && pnpm install --force
+    && pnpm i --force
 
 COPY . /app
 
@@ -19,10 +18,11 @@ RUN pnpm run build \
     && pnpm run copy-package \
     && rm -rf src/common/runtime \
     && rm -f src/common/config/db.js \
-    && rm -rf output/www/static/js/*.map
+    && rm -rf output/www/static/js/*.map \
+    && rm -rf output/www/static/src
 
-RUN cp -r www/theme/ output/www/theme/ \
-    && cp -r src/ output/src/ \
+RUN cp -r www output/ \
+    && cp -r src output/ \
     && cp production.js output/ \
     && cp firekylin.sql output/ \
     && cp docker-entrypoint.sh output/
