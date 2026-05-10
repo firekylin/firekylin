@@ -1,5 +1,10 @@
-const mathJax = require('mathjax-node');
+const MathJax = require('mathjax');
 const marked = require('marked');
+
+const mathJaxReady = MathJax.init({
+  loader: { load: ['input/tex', 'output/svg'] },
+  svg: { fontCache: 'none' }
+});
 
 module.exports = class extends think.Service {
   /**
@@ -10,20 +15,10 @@ module.exports = class extends think.Service {
    * @returns {Promise.<*>}
    */
   async _renderMathJax(content, formulaType) {
-    mathJax.config({
-      MathJax: {}
-    });
-    mathJax.start();
-
-    return await new Promise(resolve => {
-      mathJax.typeset({
-        math: content,
-        format: 'TeX',
-        svg: true,
-      }, function (data) {
-        resolve(`<span class="firekylin-markdown-mathjax-${formulaType}">${data.svg}</span>`);
-      });
-    });
+    await mathJaxReady;
+    const node = await MathJax.tex2svgPromise(content, { display: formulaType === 'block' });
+    const svg = MathJax.startup.adaptor.serializeXML(node);
+    return `<span class="firekylin-markdown-mathjax-${formulaType}">${svg}</span>`;
   }
 
   /**
