@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json /app
 COPY pnpm-lock.yaml /app
 
-RUN npm i -g pnpm
+RUN npm i -g pnpm@9.15.9
 
 RUN pnpm i -P --force \
     && mkdir output \
