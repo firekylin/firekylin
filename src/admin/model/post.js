@@ -1,6 +1,7 @@
-const { marked } = require('marked');
+const { Marked } = require('marked');
+const { markedHighlight } = require('marked-highlight');
 const toc = require('markdown-toc');
-const highlight = require('highlight.js');
+const hljs = require('highlight.js');
 const Base = require('./base');
 
 module.exports = class extends Base {
@@ -195,15 +196,46 @@ module.exports = class extends Base {
    */
   async markdownToHtml(content, option = { toc: true, highlight: true }) {
 
+    // 构建 marked 扩展
+    const extensions = [];
+    /**
+     * 增加 highlight
+     */
+    if (option.highlight) {
+      let detectedLang = null;
+
+      // 先加自定义钩子（后执行）：将检测到的语言写入 token
+      extensions.push({
+        walkTokens(token) {
+          if (token.type === 'code' && !token.lang && detectedLang) {
+            token.lang = detectedLang;
+          }
+          detectedLang = null;
+        }
+      });
+
+      // 再加 marked-highlight（先执行）：高亮并存储检测到的语言
+      extensions.push(markedHighlight({
+        emptyLangClass: 'hljs',
+        langPrefix: 'hljs lang-',
+        highlight(code, lang) {
+          const result = hljs.highlightAuto(code, lang ? [lang] : undefined);
+          detectedLang = result.language;
+          return result.value;
+        }
+      }));
+    }
+
     // 使用包含 MathJax 解析的 Markdown 引擎解析 MD 文本
     let markedWithMathJax = think.service('marked-with-mathjax');
-    let markedContent = await markedWithMathJax.render(content);
+    let markedContent = await markedWithMathJax.render(content, extensions);
 
     /**
      * 增加 TOC 目录
      */
+    const marked = new Marked(...extensions);
     if (option.toc) {
-      let tocContent = marked(toc(content).content).replace(/<a\s+href="#([^"]+)">(.+)?<\/a>/g, (a, b, c) => {
+      let tocContent = marked.parse(toc(content).content).replace(/<a\s+href="#([^"]+)">(.+)?<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
 
@@ -211,21 +243,6 @@ module.exports = class extends Base {
         return `<h${b}><a id="${this.generateTocName(c)}" class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
       });
       markedContent = `<div class="toc">${tocContent}</div>${markedContent}`;
-    }
-
-    /**
-     * 增加代码高亮
-     */
-    if (option.highlight) {
-      markedContent = markedContent.replace(/<pre><code\s*(?:class="lang(?:uage)?-(\w+)")?>([\s\S]+?)<\/code><\/pre>/mg, (a, language, text) => {
-        text = text.replace(/&#39;/g, '\'')
-          .replace(/&gt;/g, '>')
-          .replace(/&lt;/g, '<')
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&');
-        var result = highlight.highlightAuto(text, language ? [language] : undefined);
-        return `<pre><code class="hljs lang-${result.language}">${result.value}</code></pre>`;
-      });
     }
 
     return markedContent;

@@ -1,5 +1,5 @@
 const MathJax = require('mathjax');
-const { Lexer, Parser } = require('marked');
+const { Marked } = require('marked');
 
 const mathJaxReady = MathJax.init({
   loader: { load: ['input/tex', 'output/svg'] },
@@ -25,11 +25,12 @@ module.exports = class extends think.Service {
    * 渲染 Markdown 文本
    *
    * @param content
+   * @param {Array} extensions - marked 扩展数组
    * @returns {Promise.<void>}
    */
-  async render(content) {
-    var mathLexer = new Lexer();
-    var tokens = mathLexer.lex(content);
+  async render(content, extensions = []) {
+    const marked = new Marked(...extensions);
+    var tokens = marked.lexer(content);
 
     // 处理LaTeX公式
     const dfs = async (tokensArr) => {
@@ -88,6 +89,9 @@ module.exports = class extends think.Service {
 
     await dfs(tokens);
 
-    return Parser.parse(tokens);
+    if (marked.defaults.walkTokens) {
+      await marked.walkTokens(tokens, marked.defaults.walkTokens);
+    }
+    return marked.parser(tokens);
   }
 }
