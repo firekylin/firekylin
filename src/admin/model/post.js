@@ -1,5 +1,6 @@
 const { Marked } = require('marked');
 const { markedHighlight } = require('marked-highlight');
+const markedFootnote = require('marked-footnote');
 const toc = require('markdown-toc');
 const hljs = require('highlight.js');
 const Base = require('./base');
@@ -198,6 +199,12 @@ module.exports = class extends Base {
 
     // 构建 marked 扩展
     const extensions = [];
+
+    /**
+     * 增加 footnote 支持
+     */
+    extensions.push(markedFootnote());
+
     /**
      * 增加 highlight
      */

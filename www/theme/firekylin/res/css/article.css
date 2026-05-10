@@ -308,6 +308,32 @@ article .firekylin-code li:nth-of-type(even) {
 article .entry-content pre .firekylin-code {
   background-color: #eee;
 }
+
+/* footnote的数字添加[] */
+[data-footnote-ref]::before {
+  content: '[';
+}
+[data-footnote-ref]::after {
+  content: ']';
+}
+section.footnotes {
+  margin-top:15px;
+  border-top: 1px solid #d1d9e0;
+}
+section.footnotes h2 {
+  width: 1px;
+  height: 1px;
+  clip-path: rect(0 0 0 0);
+  overflow-wrap: normal;
+  border: 0;
+  padding: 0;
+  position: absolute;
+  overflow: hidden;
+}
+section.footnotes ol {
+  color: #59636e;
+}
+
 /*下面是覆盖默认样式, 为了防闪动*/
 article pre {
   border-left: none;

@@ -41,6 +41,9 @@ importers:
       marked:
         specifier: ^18.0.3
         version: 18.0.3
+      marked-footnote:
+        specifier: ^1.4.0
+        version: 1.4.0(marked@18.0.3)
       marked-highlight:
         specifier: ^2.2.4
         version: 2.2.4(marked@18.0.3)
@@ -2175,6 +2178,11 @@ packages:
     resolution: {integrity: sha512-eOsq7EGd3asV0oBfmyqngeEIhrbkc7XVP63OwcJBIhH2EpG2PzFcbZdhy1jutXSlRBBVMNXHvMtSr5LAxSUvUg==}
     engines: {node: '>=0.10.0'}
     hasBin: true
+
+  marked-footnote@1.4.0:
+    resolution: {integrity: sha512-fZTxAhI1TcLEs5UOjCfYfTHpyKGaWQevbxaGTEA68B51l7i87SctPFtHETYqPkEN0ka5opvy4Dy1l/yXVC+hmg==}
+    peerDependencies:
+      marked: '>=7.0.0'
 
   marked-highlight@2.2.4:
     resolution: {integrity: sha512-PZxisNMJDduSjc0q6uvjsnqqHCXc9s0eyzxDO9sB1eNGJnd/H1/Fu+z6g/liC1dfJdFW4SftMwMlLvsBhUPrqQ==}
@@ -5884,6 +5892,10 @@ snapshots:
       remarkable: 1.7.4
       repeat-string: 1.6.1
       strip-color: 0.1.0
+
+  marked-footnote@1.4.0(marked@18.0.3):
+    dependencies:
+      marked: 18.0.3
 
   marked-highlight@2.2.4(marked@18.0.3):
     dependencies:

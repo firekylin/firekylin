@@ -34,6 +34,7 @@
     "ldapjs": "^1.0.2",
     "markdown-toc": "^1.2.0",
     "marked": "^18.0.3",
+    "marked-footnote": "^1.4.0",
     "marked-highlight": "^2.2.4",
     "mathjax": "^4.1.2",
     "moment": "^2.29.4",
