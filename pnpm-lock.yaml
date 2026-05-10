@@ -39,8 +39,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       marked:
-        specifier: ^4.0.10
-        version: 4.3.0
+        specifier: ^18.0.3
+        version: 18.0.3
       mathjax:
         specifier: ^4.1.2
         version: 4.1.2
@@ -2211,9 +2211,9 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  marked@4.3.0:
-    resolution: {integrity: sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==}
-    engines: {node: '>= 12'}
+  marked@18.0.3:
+    resolution: {integrity: sha512-7VT90JOkDeaRWpfjOReRGPEKn0ecdARBkDGL+tT1wZY0efPPqkUxLUSmzy/C7TIylQYJC9STISEsCHrqb/7VIA==}
+    engines: {node: '>= 20'}
     hasBin: true
 
   material-colors@1.2.6:
@@ -5989,7 +5989,7 @@ snapshots:
       repeat-string: 1.6.1
       strip-color: 0.1.0
 
-  marked@4.3.0: {}
+  marked@18.0.3: {}
 
   material-colors@1.2.6: {}
 

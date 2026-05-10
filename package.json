@@ -33,7 +33,7 @@
     "jszip": "^3.7.0",
     "ldapjs": "^1.0.2",
     "markdown-toc": "^1.2.0",
-    "marked": "^4.0.10",
+    "marked": "^18.0.3",
     "mathjax": "^4.1.2",
     "moment": "^2.29.4",
     "nodemailer": "^6.6.1",
