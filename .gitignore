@@ -61,6 +61,5 @@ db/
 .eslintcache
 stats.json
 package-lock.json
-pnpm-workspace.yaml
 
 .claude
