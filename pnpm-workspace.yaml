@@ -1,3 +1,4 @@
+packages: []
 allowBuilds:
   aws-sdk: true
   dtrace-provider: true
