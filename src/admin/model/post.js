@@ -1,6 +1,7 @@
 const { Marked } = require('marked');
 const { markedHighlight } = require('marked-highlight');
 const markedFootnote = require('marked-footnote');
+const markedAlert = require('marked-alert');
 const toc = require('markdown-toc');
 const hljs = require('highlight.js');
 const Base = require('./base');
@@ -204,6 +205,11 @@ module.exports = class extends Base {
      * 增加 footnote 支持
      */
     extensions.push(markedFootnote());
+
+    /**
+     * 增加 alert 支持
+     */
+    extensions.push(markedAlert());
 
     /**
      * 增加 highlight
