@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from '../../../utils/http';
 import AppearanceStore from '../appearance.store';
@@ -7,12 +7,13 @@ class NavigationStore {
 
     appearanceStore: AppearanceStore;
 
-    @observable data = {
+    data = {
     };
     constructor(appearanceStore: AppearanceStore) {
         this.appearanceStore = appearanceStore;
+        makeAutoObservable(this);
     }
-    @action setData = data => {
+    setData = data => {
         this.data = Object.assign({}, this.data, data);
     }
 

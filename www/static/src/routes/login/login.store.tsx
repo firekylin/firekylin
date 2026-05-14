@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { AppStore } from '../../app.store';
 import md5 from 'md5';
 import { http } from '../../utils/http';
@@ -6,12 +6,12 @@ import { message } from 'antd';
 
 class LoginStore {
   appStore;
-  @observable loading = false;
+  loading = false;
   constructor(appStore: AppStore) {
     this.appStore = appStore;
+    makeAutoObservable(this);
   }
 
-  @action
   setLoading = data => this.loading = data
 
   login(values: {username: string, password: string}): void {

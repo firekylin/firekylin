@@ -208,11 +208,11 @@ importers:
         specifier: ^2.0.0
         version: 2.3.0
       mobx:
-        specifier: ^5.0.3
-        version: 5.0.3
+        specifier: ^6.15.3
+        version: 6.15.3
       mobx-react:
-        specifier: ^5.2.3
-        version: 5.4.4(mobx@5.0.3)(react@17.0.2)
+        specifier: ^7.6.0
+        version: 7.6.0(mobx@6.15.3)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       pre-commit:
         specifier: ^1.2.2
         version: 1.2.2
@@ -2569,14 +2569,34 @@ packages:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
 
-  mobx-react@5.4.4:
-    resolution: {integrity: sha512-2mTzpyEjVB/RGk2i6KbcmP4HWcAUFox5ZRCrGvSyz49w20I4C4qql63grPpYrS9E9GKwgydBHQlA4y665LuRCQ==}
+  mobx-react-lite@3.4.0:
+    resolution: {integrity: sha512-bRuZp3C0itgLKHu/VNxi66DN/XVkQG7xtoBVWxpvC5FhAqbOCP21+nPhULjnzEqd7xBMybp6KwytdUpZKEgpIQ==}
     peerDependencies:
-      mobx: ^4.0.0 || ^5.0.0
-      react: ^0.13.0 || ^0.14.0 || ^15.0.0 || ^16.0.0
+      mobx: ^6.1.0
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
 
-  mobx@5.0.3:
-    resolution: {integrity: sha512-8xAzE8jytXEluN5zr00nF5ThmbK8HtSLP3oR6kfpVaxgZ+jAD+WCWVl1yt+khtCgoftmmt/nm+DfyW3Epc1awQ==}
+  mobx-react@7.6.0:
+    resolution: {integrity: sha512-+HQUNuh7AoQ9ZnU6c4rvbiVVl+wEkb9WqYsVDzGLng+Dqj1XntHu79PvEWKtSMoMj67vFp/ZPXcElosuJO8ckA==}
+    peerDependencies:
+      mobx: ^6.1.0
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+
+  mobx@6.15.3:
+    resolution: {integrity: sha512-6+ZSYDs5zgH5CdGfEU2q2Lsa5PztVryL1ys7kAImTU25n2A9LAMj/yneVsQpd03MfwMLDQF+7kakJR9Z+cQxSw==}
 
   mockdate@3.0.5:
     resolution: {integrity: sha512-iniQP4rj1FhBdBYS/+eQv7j1tadJ9lJtdzgOpvsOHng/GbcDh2Fhdeq+ZRldrPYdXvCyfFUmFeEwEGXZB5I/AQ==}
@@ -6730,14 +6750,22 @@ snapshots:
     dependencies:
       minimist: 1.2.8
 
-  mobx-react@5.4.4(mobx@5.0.3)(react@17.0.2):
+  mobx-react-lite@3.4.0(mobx@6.15.3)(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
     dependencies:
-      hoist-non-react-statics: 3.3.2
-      mobx: 5.0.3
+      mobx: 6.15.3
       react: 17.0.2
-      react-lifecycles-compat: 3.0.4
+    optionalDependencies:
+      react-dom: 17.0.2(react@17.0.2)
 
-  mobx@5.0.3: {}
+  mobx-react@7.6.0(mobx@6.15.3)(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
+    dependencies:
+      mobx: 6.15.3
+      mobx-react-lite: 3.4.0(mobx@6.15.3)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
+      react: 17.0.2
+    optionalDependencies:
+      react-dom: 17.0.2(react@17.0.2)
+
+  mobx@6.15.3: {}
 
   mockdate@3.0.5: {}
 

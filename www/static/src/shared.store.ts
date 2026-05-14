@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from './utils/http';
 import { Category } from './models/category.model';
@@ -17,27 +17,28 @@ interface SharedLoading {
 class SharedStore {
   getCategoryList$: Observable<IResult<Category[]>>;
   getDefaultCategory$: Observable<IResult<string>>;
-  @observable defaultCategory = '';
-  @observable categoryList: Category[] = [];
-  @observable userList: any = [];
-  @observable templateList: string[] = [];
-  @observable pageList = [];
-  @observable tagList: Tag[] = [];
-  @observable loading: SharedLoading = {
+  defaultCategory = '';
+  categoryList: Category[] = [];
+  userList: any = [];
+  templateList: string[] = [];
+  pageList = [];
+  tagList: Tag[] = [];
+  loading: SharedLoading = {
     category: false,
     tag: false,
     page: false,
   };
 
-  @action
+  constructor() {
+    makeAutoObservable(this);
+  }
+
   setDefaultCategory = (data: string) => {
     this.defaultCategory = data;
   }
 
-  @action
   setUserList = data => this.userList = data
 
-  @action
   setCategoryList = (data: Category[]) => {
     let list = data.filter(cat => cat.pid === 0);
     for (let i = 0; i < list.length; i++) {
@@ -51,16 +52,12 @@ class SharedStore {
     this.categoryList = list;
   }
 
-  @action
   setTemplateList = data => this.templateList = data
 
-  @action
   setTagList = (data: Tag[]) => this.tagList = data
 
-  @action
   setPageList = data => this.pageList = data
 
-  @action
   setLoading(loading: SharedLoading) {
     this.loading = Object.assign({}, this.loading, loading);
   }

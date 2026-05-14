@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { AppStore } from '../../app.store';
 import superagent from 'superagent';
 import firekylin from '../../utils/firekylin';
@@ -7,8 +7,8 @@ import { SystemInfo } from './dashboard.model';
 
 class DashBoardStore {
   appStore;
-  @observable posts = [];
-  @observable systemInfo: SystemInfo = {
+  posts = [];
+  systemInfo: SystemInfo = {
     config: {},
     count: {
       cates: 0,
@@ -27,12 +27,11 @@ class DashBoardStore {
   };
   constructor(appStore: AppStore) {
     this.appStore = appStore;
+    makeAutoObservable(this);
   }
 
-  @action
   setPosts = data => this.posts = data
 
-  @action
   setSystemInfo = systemInfo => this.systemInfo = systemInfo
 
   getSelectLast() {

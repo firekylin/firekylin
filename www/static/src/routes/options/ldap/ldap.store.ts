@@ -1,13 +1,17 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { http } from '../../../utils/http';
 
 class LDAPStore {
-    @observable data = {
+    data = {
         options: window.SysConfig.options,
         step: window.SysConfig.options.ldap_on === '1' ? 0 : 1,
     };
 
-    @action setData = data => {
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    setData = data => {
         this.data = Object.assign({}, this.data, data);
     }
 

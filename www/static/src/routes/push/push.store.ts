@@ -1,15 +1,15 @@
 import { AppStore } from '../../app.store';
 import { message } from 'antd';
 import { http } from '../../utils/http';
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { PushCreateParams } from './push.model';
 
 export default class PushStore {
     appStore;
 
-    @observable pushList: any = [];
-    @observable loading = false;
-    @observable pushCreateParam: PushCreateParams = {
+    pushList: any = [];
+    loading = false;
+    pushCreateParam: PushCreateParams = {
         submitting: false,
         pushInfo: {
             appKey : '',
@@ -21,15 +21,15 @@ export default class PushStore {
 
     constructor(appStore: AppStore) {
         this.appStore = appStore;
+        makeAutoObservable(this);
     }
 
-    @action setPushList = (data) => this.pushList = data;
-    @action setLoading = (data) => this.loading = data;
-    @action setPushCreateParam = (data) => {
+    setPushList = (data) => this.pushList = data;
+    setLoading = (data) => this.loading = data;
+    setPushCreateParam = (data) => {
         Object.assign(this.pushCreateParam, data);
     }
 
-    @action
     getPushList() {
         http.get('/admin/api/options?type=push')
             .toPromise()
@@ -39,7 +39,6 @@ export default class PushStore {
             });
     }
 
-    @action
     getPushInfo(id: string) {
         http.get(`/admin/api/options?type=push&key=${id}`)
             .toPromise()
@@ -50,7 +49,6 @@ export default class PushStore {
             });
     }
 
-    @action
     savePush(data: any) {
         return http.post(`/admin/api/options?method=put&type=push`, data)
             .toPromise()
@@ -65,7 +63,6 @@ export default class PushStore {
             );
     }
 
-    @action
     deletePush(id: string) {
         http.post(`/admin/api/options?method=delete&type=push&key=${id}`)
             .toPromise()
