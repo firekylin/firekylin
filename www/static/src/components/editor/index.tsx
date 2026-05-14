@@ -471,11 +471,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _blockquoteText () {
-    this._preInputText('\n> 引用', 3, 5);
+    this._preInputText('> 引用', 2, 4);
   }
 
   _codeText () {
-    this._preInputText('\n```\ncode block\n```', 5, 15);
+    this._preInputText('```\ncode block\n```', 4, 14);
   }
 
   _linkModal() {
@@ -487,23 +487,23 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _listUlText () {
-    this._preInputText('- 无序列表项0\n- 无序列表项1', 2, 8);
+    this._preInputText('- 无序列表项', 2, 7);
   }
 
   _listOlText () {
-    this._preInputText('1. 有序列表项0\n2. 有序列表项1', 3, 9);
+    this._preInputText('1. 有序列表项', 3, 8);
   }
 
   _headerText () {
-    this._preInputText('## 标题', 3, 5);
+    this._preInputText('# 标题', 2, 4);
   }
 
   _insertMore() {
-    this._preInputText('\n<!--more-->', 12, 12);
+    this._preInputText('<!--more-->', 11, 11);
   }
 
   _insertHr() {
-    this._preInputText('\n----------', 11, 11);
+    this._preInputText('---\n\n', 5, 5);
   }
 }
 
