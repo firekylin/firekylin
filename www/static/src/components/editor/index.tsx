@@ -32,7 +32,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   textControl: HTMLTextAreaElement | null;
   previewControl: any;
   _syncScroll: any;
-  _isDirty = false;
   _ltr: any;
 
   editorPanel: HTMLDivElement | null;
@@ -54,7 +53,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       panelClass: 'md-panel',
       mode: 'split',
       isFullScreen: false,
-      result: this.toHtml(this.props.content),
+      result: marked(this.props.content),
       linkUrl: '',
       linkText: '',
       content: null,
@@ -122,7 +121,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     let FileList = Array.from(clipboard.items)
       .filter((item: any) => item.kind === 'file' && item.type.indexOf('image') > -1)
       .map((item: any) => item.getAsFile());
-    if (!FileList.length) { 
+    if (!FileList.length) {
       return true;
     }
 
@@ -237,7 +236,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         this.upLoadImage(data);
       }
     }
-    
   }
 
   upLoadImage(data: FormData, fileName: string = 'alt') {
@@ -255,7 +253,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           } else {
             this._preInputText(`![${text}](${res.data})`, 2, text.length + 2, start);
           }
-          
           this.imageModalClose();
         }
       )
@@ -316,7 +313,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         </div>
         <a ref={a => this.resizebar = a} href="###" className="editor__resize">调整高度</a>
         <EditorLinkModal
-          visible={this.state.visible.link} 
+          visible={this.state.visible.link}
           onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); (this.linkRef.props.form as WrappedFormUtils).resetFields(); }}
           onCreate={() => this.handleLinkCreate()}
           wrappedComponentRef={linkRef => this.linkRef = linkRef}
@@ -324,7 +321,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           fetchData={this.props.fetchData}
         />
         <EditorImageModal
-          visible={this.state.visible.image} 
+          visible={this.state.visible.image}
           onCancel={() => this.imageModalClose()}
           onOk={() => this.handleImageOk()}
           wrappedComponentRef={imageRef => this.imageRef = imageRef}
@@ -337,14 +334,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         />
       </div>
     );
-  }
-
-  toHtml(text: any) {
-    return marked(text, {sanitize: true});
-  }
-  // public methods
-  isDirty () {
-    return this._isDirty || false;
   }
 
   getValue () {
@@ -392,36 +381,35 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         {/* preview mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('preview'), 'editor-toolbar preview')} onClick={this._changeMode('preview')} title="预览模式"/>
-        </li> 
+        </li>
         {/* split mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('split'), 'editor-toolbar live')} onClick={this._changeMode('split')} title="分屏模式"/>
-        </li> 
+        </li>
         {/* edit mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('edit'), 'editor-toolbar edit')} onClick={this._changeMode('edit')} title="编辑模式"/>
-        </li> 
+        </li>
         <li className="tb-btn spliter pull-right" />
         {/* full-screen */}
         <li className="tb-btn pull-right">
           <a title="全屏模式"
-            onClick={() => this._toggleFullScreen()} 
+            onClick={() => this._toggleFullScreen()}
             className={classnames({unzen: this.state.isFullScreen, zen: !this.state.isFullScreen}, 'editor-toolbar')}
           />
-        </li> 
+        </li>
       </ul>
     );
   }
 
   // event handlers
   _onChange (e: any) {
-    this._isDirty = true; // set dirty
     if (this._ltr) {
       clearTimeout(this._ltr);
     }
     let content = e.target.value;
     this._ltr = setTimeout(() => {
-      this.setState({ result: this.toHtml(content) }); // change state
+      this.setState({ result: marked(content) });
       localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + ''] = content;
     },                     300);
     this.props.onChange(content);
