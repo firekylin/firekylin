@@ -1,5 +1,6 @@
 const url = require('url');
 const path = require('path');
+const fs = require('fs');
 const nunjucks = require('think-view-nunjucks');
 
 const buildQuery = obj => '?' +
@@ -23,6 +24,15 @@ module.exports = {
       env.addGlobal('think', think);
       env.addGlobal('JSON', JSON);
       env.addGlobal('eval', eval);
+
+      // 读取 Vite manifest，注入资源路径映射
+      const manifestPath = path.join(think.ROOT_PATH, 'www/static/dist/.vite/manifest.json');
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+        env.addGlobal('vite', manifest);
+      } catch (e) {
+        env.addGlobal('vite', {});
+      }
 
       env.addFilter('utc', time => (new Date(time)).toUTCString());
       env.addFilter('pagination', function(page, pageUrl) {

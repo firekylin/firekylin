@@ -1,6 +1,7 @@
 #!/bin/sh
 
-rm -rf firekylin;
+rm -rf build/firekylin;
+rm -f build/firekylin_*.tar.gz;
 rm -rf output;
 rm -rf output.theme;
 
@@ -62,7 +63,7 @@ cp -r bin/ssl/https.sh output/;
 if [ -f output/src/common/config/db.js ]; then
   rm -r output/src/common/config/db.js;
 fi
-rm -rf output/www/static/js/*.map;
+rm -rf output/www/static/dist/*.map;
 mv output firekylin;
 VERSION=`cat .version`;
 TARNAME=firekylin_${VERSION}.tar.gz;
