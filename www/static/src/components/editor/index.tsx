@@ -221,7 +221,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       message.warning('请插入图片');
       return;
     }
-    const start = (this._cleanSelect() as number);
+    const start = (this._getCursorPos() as number);
     if (this.state.imageTabKey === '0') {
       const fileName = this.fileInfo.file.name;
       let fileUrl = this.imagePath;
@@ -241,7 +241,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   upLoadImage(data: FormData, fileName: string = 'alt') {
-    const start = (this._cleanSelect() as number);
+    const start = (this._getCursorPos() as number);
     http.upload(data)
       .then(
         res => {
@@ -260,7 +260,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         }
       )
       .catch((res) => {
-        this._cleanSelect();
         message.error(res.errmsg);
       });
   }
@@ -438,34 +437,32 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   }
 
-  _cleanSelect() {
-    const start = (this.textControl as HTMLTextAreaElement).selectionStart;
-    let text = this.props.content;
-
-    this.setState({ result: marked(text) });
-    this.props.onChange(text);
-
-    return start;
+  _getCursorPos() {
+    return (this.textControl as HTMLTextAreaElement).selectionStart;
   }
 
   // default text processors
   _preInputText (text: string, preStart: number, preEnd: number, selectStart?: number) {
-    const start = selectStart || (this.textControl as HTMLTextAreaElement).selectionStart;
-    const end = selectStart || (this.textControl as HTMLTextAreaElement).selectionEnd;
-    const origin = this.props.content;
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const start = selectStart || textarea.selectionStart;
+    const end = selectStart || textarea.selectionEnd;
 
     if (start !== end) {
-      const exist = origin.slice(start, end);
+      const exist = this.props.content.slice(start, end);
       text = text.slice(0, preStart) + exist + text.slice(preEnd);
       preEnd = preStart + exist.length;
     }
-    let content = origin.slice(0, start) + text + origin.slice(end);
 
-    // pre-select
-    setTimeout(() => (this.textControl as HTMLTextAreaElement).setSelectionRange(start + preStart, start + preEnd), 20);
-    this.setState({ result: marked(content) }); // change state
+    // 聚焦并选中要替换的范围
+    textarea.focus();
+    textarea.setSelectionRange(start, end);
+
+    // 使用 execCommand 插入文本，保留浏览器的 undo/redo 栈
+    document.execCommand('insertText', false, text);
+
+    // 选中插入的占位文字，方便用户直接编辑
+    setTimeout(() => textarea.setSelectionRange(start + preStart, start + preEnd), 20);
     this.sectionRangeEnd = start + preEnd;
-    this.props.onChange(content);
   }
 
   _boldText () {
