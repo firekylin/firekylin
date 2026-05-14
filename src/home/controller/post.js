@@ -213,6 +213,10 @@ module.exports = class extends Base {
       keyword = keyword.trim();
       let postModel = this.model('post');
       let searchResult = await postModel.getPostSearch(keyword, this.get('page'));
+      searchResult.data = searchResult.data.map(item => {
+        item.pathname = encodeURIComponent(item.pathname);
+        return item;
+      });
       this.assign('searchData', searchResult);
       this.assign('pagination', searchResult);
     }
