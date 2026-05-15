@@ -1,21 +1,25 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
 
 class GeneralStore {
-    @observable loading = {
+    loading = {
         logo: false,
         favicon: false,
         submit: false
     };
-    @observable data = {
+    data = {
         options: window.SysConfig.options
     };
 
-    @action setData = data => {
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    setData = data => {
         this.data = Object.assign({}, this.data, data);
     }
-    @action setLoading = loading => {
+    setLoading = loading => {
         this.loading = Object.assign({}, this.loading, loading);
     }
 

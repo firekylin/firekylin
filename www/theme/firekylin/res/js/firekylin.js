@@ -1,20 +1,20 @@
-(function (win, doc) {
-  var getById = function (el) {
+(function(win, doc) {
+  var getById = function(el) {
     return doc.getElementById(el);
   };
 
-  //from qwrap
-  var getDocRect = function (doc) {
+  // from qwrap
+  var getDocRect = function(doc) {
     doc = doc || document;
-    var win = doc.defaultView || doc.parentWindow,
-      mode = doc.compatMode,
-      root = doc.documentElement,
-      h = win.innerHeight || 0,
-      w = win.innerWidth || 0,
-      scrollX = win.pageXOffset || 0,
-      scrollY = win.pageYOffset || 0,
-      scrollW = root.scrollWidth,
-      scrollH = root.scrollHeight;
+    var win = doc.defaultView || doc.parentWindow;
+    var mode = doc.compatMode;
+    var root = doc.documentElement;
+    var h = win.innerHeight || 0;
+    var w = win.innerWidth || 0;
+    var scrollX = win.pageXOffset || 0;
+    var scrollY = win.pageYOffset || 0;
+    var scrollW = root.scrollWidth;
+    var scrollH = root.scrollHeight;
     if (mode !== 'CSS1Compat') { // Quirks
       root = doc.body;
       scrollW = root.scrollWidth;
@@ -38,13 +38,13 @@
     };
   };
 
-  var getXY = function (node) {
-    var doc = node.ownerDocument,
-      docRect = getDocRect(doc),
-      scrollLeft = docRect.scrollX,
-      scrollTop = docRect.scrollY,
-      box = node.getBoundingClientRect(),
-      xy = [box.left, box.top];
+  var getXY = function(node) {
+    var doc = node.ownerDocument;
+    var docRect = getDocRect(doc);
+    var scrollLeft = docRect.scrollX;
+    var scrollTop = docRect.scrollY;
+    var box = node.getBoundingClientRect();
+    var xy = [box.left, box.top];
     if (scrollTop || scrollLeft) {
       xy[0] += scrollLeft;
       xy[1] += scrollTop;
@@ -52,7 +52,7 @@
     return xy;
   };
 
-  var getRect = function (el) {
+  var getRect = function(el) {
     var p = getXY(el);
     var x = p[0];
     var y = p[1];
@@ -72,12 +72,12 @@
    * load comment
    * @return {[type]} [description]
    */
-  var loadComment = function () {
+  var loadComment = function() {
     var comments = getById('comments');
     if (!comments) {
       return;
     }
-    var load = function () {
+    var load = function() {
       var dataType = comments.getAttribute('data-type');
       if (dataType === 'disqus') {
         loadDisqusComment();
@@ -92,12 +92,12 @@
       } else if (dataType === 'valine') {
         loadValineComment();
       }
-    }
+    };
 
     if (location.hash.indexOf('#comments') > -1) {
       load();
     } else {
-      var timer = setInterval(function () {
+      var timer = setInterval(function() {
         var docRect = getDocRect();
         var currentTop = docRect.scrollY + docRect.height;
         var elTop = getRect(comments).top;
@@ -105,29 +105,29 @@
           load();
           clearInterval(timer);
         }
-      }, 300)
+      }, 300);
     }
   };
   /**
    * load disqus comment
    * @return {[type]} [description]
    */
-  var loadDisqusComment = function () {
+  var loadDisqusComment = function() {
     var disqus_thread = getById('disqus_thread');
     if (!disqus_thread) {
       return;
     }
-    win.disqus_config = function () {
+    win.disqus_config = function() {
       this.page.url = disqus_thread.getAttribute('data-url');
       this.page.identifier = disqus_thread.getAttribute('data-identifier');
-    }
+    };
     var s = doc.createElement('script');
     s.src = '//' + disqus_thread.getAttribute('data-name') + '.disqus.com/embed.js';
     s.setAttribute('data-timestamp', +new Date());
     (doc.head || doc.body).appendChild(s);
   };
 
-  var loadHyperComments = function () {
+  var loadHyperComments = function() {
     var hyperComments = getById('hypercomments_widget');
     var appid = hyperComments.getAttribute('data-name');
 
@@ -137,7 +137,7 @@
       widget_id: appid
     });
 
-    (function () {
+    (function() {
       if ('HC_LOAD_INIT' in win) {
         return;
       }
@@ -151,14 +151,14 @@
       var hcc = document.createElement('script');
       hcc.type = 'text/javascript';
       hcc.async = true;
-      hcc.src = ('https:' === document.location.protocol ? 'https' : 'http') + '://w.hypercomments.com/widget/hc/' + appid + '/' + lang + '/widget.js';
+      hcc.src = (document.location.protocol === 'https:' ? 'https' : 'http') + '://w.hypercomments.com/widget/hc/' + appid + '/' + lang + '/widget.js';
 
       var s = document.getElementsByTagName('script')[0];
       s.parentNode.insertBefore(hcc, s.nextSibling);
     })();
   };
 
-  var loadChangyanComment = function () {
+  var loadChangyanComment = function() {
     var disqus_thread = getById('SOHUCS');
     if (!disqus_thread) {
       return;
@@ -172,17 +172,17 @@
       s.src = '//changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
     } else {
       s.src = '//changyan.sohu.com/upload/changyan.js';
-      s.onload = function () {
+      s.onload = function() {
         win.changyan.api.config({
           appid: appid,
           conf: conf
         });
-      }
+      };
     }
     (doc.head || doc.body).appendChild(s);
-  }
+  };
 
-  var loadGitalkComment = function () {
+  var loadGitalkComment = function() {
     var gitalk_thread = getById('gitalk-container');
     if (!gitalk_thread) {
       return;
@@ -201,17 +201,17 @@
 
     var s = doc.createElement('script');
     s.src = '//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js';
-    s.onload = function () {
+    s.onload = function() {
       var gitalk = new Gitalk(gitalkConfig);
       gitalk.render('gitalk-container');
     };
     (doc.head || doc.body).appendChild(s);
-  }
+  };
 
-  var loadWalineComment = function () {
+  var loadWalineComment = function() {
     var waline_thread = getById('waline-container');
     var walineConfig = waline_thread.getAttribute('data-name');
-    if(walineConfig) {
+    if (walineConfig) {
       walineConfig = JSON.parse(walineConfig);
     }
     walineConfig.el = '#waline-container';
@@ -220,15 +220,15 @@
     var s = document.createElement('script');
     s.src = '//cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js';
     s.onload = function() {
-      new Waline(walineConfig);
+      Waline(walineConfig);
     };
     (doc.head || doc.body).appendChild(s);
-  }
+  };
 
   var loadValineComment = function() {
     var valine_thread = getById('valine-container');
     var valineConfig = valine_thread.getAttribute('data-name');
-    if(valineConfig) {
+    if (valineConfig) {
       valineConfig = JSON.parse(valineConfig);
     }
     valineConfig.el = '#valine-container';
@@ -237,17 +237,17 @@
     var s = document.createElement('script');
     s.src = '//cdn.jsdelivr.net/npm/valine/dist/Valine.min.js';
     s.onload = function() {
-      new Valine(valineConfig);
+      Valine(valineConfig);
     };
     (doc.head || doc.body).appendChild(s);
-  }
+  };
 
-  win.addEventListener('load', function () {
+  win.addEventListener('load', function() {
     loadComment();
   });
 
   var utils = {
-    isMob: (function () {
+    isMob: (function() {
       var ua = navigator.userAgent.toLowerCase();
       var agents = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'];
       var result = false;
@@ -258,15 +258,13 @@
       }
       return result;
     })()
-  }
-
+  };
 
   if (utils.isMob) {
     doc.documentElement.className += ' mob';
   } else {
     doc.documentElement.className += ' pc';
   }
-
 
   var Dom = {
     $sidebar: doc.querySelector('#sidebar'),
@@ -277,20 +275,18 @@
     $article: doc.querySelectorAll('.mob #page-index article')
   };
 
-  Dom.bindEvent = function () {
-
-    var _this = this,
-      body_class_name = 'side',
-      eventFirst = 'click',
-      eventSecond = 'click';
+  Dom.bindEvent = function() {
+    var _this = this;
+    var body_class_name = 'side';
+    var eventFirst = 'click';
+    var eventSecond = 'click';
 
     if (utils.isMob) {
       eventFirst = 'touchstart';
       eventSecond = 'touchend';
     }
 
-    this.$btn_side.addEventListener(eventSecond, function () {
-
+    this.$btn_side.addEventListener(eventSecond, function() {
       if (_this.$body.className.indexOf(body_class_name) > -1) {
         _this.$body.className = _this.$body.className.replace(body_class_name, '');
         _this.$sidebar_mask.style.display = 'none';
@@ -298,21 +294,19 @@
         _this.$body.className += (' ' + body_class_name);
         _this.$sidebar_mask.style.display = 'block';
       }
-
     }, false);
 
-    this.$sidebar_mask.addEventListener(eventFirst, function (e) {
+    this.$sidebar_mask.addEventListener(eventFirst, function(e) {
       _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
       e.preventDefault();
     }, false);
 
-
-    win.addEventListener('resize', function () {
+    win.addEventListener('resize', function() {
       _this.$body.className = _this.$body.className.replace(body_class_name, '');
       _this.$sidebar_mask.style.display = 'none';
     }, false);
-  }
+  };
 
   Dom.bindEvent();
 
@@ -348,20 +342,18 @@
     ) < buffer;
   }
 
-
-
   // 行号和高亮行处理 @xuexb
   var hljs = {
     $code: doc.querySelectorAll('pre code'),
-    hasClass: function (ele, cls) {
+    hasClass: function(ele, cls) {
       return ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
     },
-    addClass: function (ele, cls) {
+    addClass: function(ele, cls) {
       if (!hljs.hasClass(ele, cls)) {
         ele.className += ' ' + cls;
       }
     },
-    removeClass: function (ele, cls) {
+    removeClass: function(ele, cls) {
       if (hljs.hasClass(ele, cls)) {
         ele.className = ele.className.replace(new RegExp('(\\s|^)' + cls + '(\\s|$)'), ' ');
       }
@@ -378,7 +370,7 @@
    *
    * @return {string}
    */
-  hljs.stringHash = function (data) {
+  hljs.stringHash = function(data) {
     var hash = '';
     if (data.index > 1) {
       hash += data.index + '-';
@@ -395,7 +387,7 @@
    *
    * @return {Object} {index: 当前代码块位置, 以1开始,  start: 行号开始,  end: 结束位置}
    */
-  hljs.parseHash = function () {
+  hljs.parseHash = function() {
     var parse = location.hash.substr(1).match(/((\d+)-)?L(\d+)(-L(\d+))?/);
 
     if (!parse) {
@@ -406,13 +398,13 @@
       index: parseInt(parse[2], 10) || 1,
       start: parseInt(parse[3], 10) || 1,
       end: parseInt(parse[5], 10) || parseInt(parse[3], 10) || 1
-    }
+    };
   };
 
   /**
    * 标记行颜色并跳转
    */
-  hljs.mark = function (go) {
+  hljs.mark = function(go) {
     var hash = hljs.parseHash();
     if (!hash || !hljs.$code || !hljs.$code[hash.index - 1]) {
       return;
@@ -427,7 +419,7 @@
 
     // 如果需要定位且元素存在
     if (go && $li && $li[0]) {
-      setTimeout(function () {
+      setTimeout(function() {
         window.scrollTo(0, getRect($li[0]).top - 50);
       });
     }
@@ -436,8 +428,8 @@
   /**
    * 移除所有高亮行号
    */
-  hljs.removeMark = function () {
-    [].slice.call(doc.querySelectorAll('pre code li.mark')).forEach(function (elem) {
+  hljs.removeMark = function() {
+    [].slice.call(doc.querySelectorAll('pre code li.mark')).forEach(function(elem) {
       hljs.removeClass(elem, 'mark');
     });
   };
@@ -445,10 +437,10 @@
   /**
    * 初始化
    */
-  hljs.init = function () {
-    [].slice.call(hljs.$code).forEach(function (elem, i) {
+  hljs.init = function() {
+    [].slice.call(hljs.$code).forEach(function(elem, i) {
       var lines = elem.innerHTML.trim().split(/[\r\n]+/);
-      var html = lines.map(function (item, index) {
+      var html = lines.map(function(item, index) {
         return '<li><span class="line-num" data-line="' + (index + 1) + '"></span>' + item + '</li>';
       }).join('');
       html = '<ul>' + html + '</ul>';
@@ -463,7 +455,7 @@
       hljs.addClass(elem, 'firekylin-code');
 
       // 绑定点击高亮行事件
-      elem.addEventListener('click', function (event) {
+      elem.addEventListener('click', function(event) {
         // 小小的委托
         if (!event.target || !hljs.hasClass(event.target, 'line-num')) {
           return;
@@ -498,12 +490,11 @@
   };
 
   hljs.init();
-  win.addEventListener('load', function () {
+  win.addEventListener('load', function() {
     hljs.mark(true);
   });
-  win.addEventListener('hashchange', function () {
+  win.addEventListener('hashchange', function() {
     hljs.removeMark();
     hljs.mark();
   });
-
 })(window, document);

@@ -23,11 +23,11 @@ module.exports = class extends Base {
         hostname: 'sm.ms',
         path: '/api/upload',
         headers: Object.assign({}, form.getHeaders(), {
-          'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36',
+          'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36'
         })
       }, (res) => {
         var all = '';
-        res.on('data', chunk => all += chunk)
+        res.on('data', chunk => all += chunk);
         res.on('end', () => {
           try {
             all = JSON.parse(all);
@@ -35,7 +35,7 @@ module.exports = class extends Base {
           } catch (e) {
             reject(false);
           }
-        })
+        });
       }).on('error', () => reject(false));
       form.pipe(request);
     });
@@ -45,5 +45,4 @@ module.exports = class extends Base {
   async run(file, config) {
     return await this.upload(file, config);
   }
-}
-
+};

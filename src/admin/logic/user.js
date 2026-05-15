@@ -14,7 +14,7 @@ module.exports = class extends think.Logic {
     this.allowMethods = 'post';
     this.rules = {
 
-    }
+    };
   }
   /**
    * login
@@ -40,7 +40,7 @@ module.exports = class extends think.Logic {
       remember: {
         boolean: true
       }
-    }
+    };
   }
 
   forgotAction() {
@@ -52,4 +52,4 @@ module.exports = class extends think.Logic {
       }
     };
   }
-}
+};

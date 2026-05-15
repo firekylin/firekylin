@@ -1,6 +1,7 @@
 #!/bin/sh
 
-rm -rf firekylin;
+rm -rf build/firekylin;
+rm -f build/firekylin_*.tar.gz;
 rm -rf output;
 rm -rf output.theme;
 
@@ -23,7 +24,8 @@ cp -r www/theme/firekylin output/www/theme;
 # cp -r www/theme/firekylin/package.json www/theme/firekylin.build/html/
 
 cp -r view output/view;
-cp -r www/static output/www/static;
+mkdir -p output/www/static;
+tar -cf - -C www/static --exclude=src --exclude=upload . | tar -xf - -C output/www/static;
 # node stc.view.config.js;
 
 # cp -r output.theme/www/theme/firekylin.build/html/* output.theme/www/theme/firekylin;
@@ -61,7 +63,7 @@ cp -r bin/ssl/https.sh output/;
 if [ -f output/src/common/config/db.js ]; then
   rm -r output/src/common/config/db.js;
 fi
-rm -rf output/www/static/js/*.map;
+rm -rf output/www/static/dist/*.map;
 mv output firekylin;
 VERSION=`cat .version`;
 TARNAME=firekylin_${VERSION}.tar.gz;

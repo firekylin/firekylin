@@ -15,7 +15,7 @@ module.exports = class extends think.Model {
     const catesId = catesData.map(({ id }) => id);
     catesData.forEach(cate => cates[cate.id] = cate);
 
-    //获取所有的文章 ID 并对其进行分类
+    // 获取所有的文章 ID 并对其进行分类
     const postsId = await this.model('post_cate').join({
       table: 'post',
       on: ['post_id', 'id']
@@ -36,7 +36,7 @@ module.exports = class extends think.Model {
       catePosts[cate_id].push(post_id);
     });
 
-    //规整获取需要获取的文章 ID
+    // 规整获取需要获取的文章 ID
     const pageSize = await this.getPostsListSize();
     const postIds = [];
     for (const cate_id in catePosts) {
@@ -78,7 +78,7 @@ module.exports = class extends think.Model {
       parentCate.children[cate.id] = cate;
     }
 
-    //对分类根据文章数进行排序返回
+    // 对分类根据文章数进行排序返回
     return Object.keys(cates)
       .filter(id => !cates[id].pid)
       .map(id => {
@@ -90,4 +90,4 @@ module.exports = class extends think.Model {
       })
       .sort((a, b) => a.count > b.count ? -1 : 1);
   }
-}
+};

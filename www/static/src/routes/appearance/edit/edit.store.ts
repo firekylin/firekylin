@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import AppearanceStore from '../appearance.store';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
@@ -7,7 +7,7 @@ class EditStore {
 
     appearanceStore: AppearanceStore;
 
-    @observable data = {
+    data = {
         theme: window.SysConfig.options.theme || 'firekylin',
         themeFileList: [],
         clickedNode: {},
@@ -18,8 +18,9 @@ class EditStore {
     };
     constructor(appearanceStore: AppearanceStore) {
         this.appearanceStore = appearanceStore;
+        makeAutoObservable(this);
     }
-    @action setData = data => {
+    setData = data => {
         this.data = Object.assign({}, this.data, data);
     }
 

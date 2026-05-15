@@ -10,7 +10,6 @@ export { default as ArrowDownOutline } from '@ant-design/icons/lib/outline/Arrow
 export { default as ArrowUpOutline } from '@ant-design/icons/lib/outline/ArrowUpOutline';
 export { default as StarOutline } from '@ant-design/icons/lib/outline/StarOutline';
 
-
 // antd components need
 export {
   default as CloseOutline

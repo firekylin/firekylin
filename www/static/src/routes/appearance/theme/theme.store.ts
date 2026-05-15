@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from '../../../utils/http';
 import AppearanceStore from '../appearance.store';
@@ -6,16 +6,17 @@ import { Theme } from './theme.model';
 
 class ThemeStore {
     appearanceStore: AppearanceStore;
-    @observable themeList: Theme[] = []; 
-    @observable data = {
+    themeList: Theme[] = [];
+    data = {
         theme: window.SysConfig.options.theme || 'firekylin',
     };
     constructor(appearanceStore: AppearanceStore) {
         this.appearanceStore = appearanceStore;
+        makeAutoObservable(this);
     }
 
-    @action setThemeList = themes => this.themeList = themes;
-    @action setData = data => {
+    setThemeList = themes => this.themeList = themes;
+    setData = data => {
         this.data = Object.assign({}, this.data, data);
     }
 

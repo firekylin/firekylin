@@ -8,28 +8,28 @@ module.exports = class extends Base {
    */
   async getAction() {
     let where = {};
-    let modelInstance = this.modelInstance
+    const modelInstance = this.modelInstance
       .field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
-    if(this.id) {
+    if (this.id) {
       where.id = this.id;
-      let user = await modelInstance.where(where).find();
+      const user = await modelInstance.where(where).find();
       return this.success(user);
     }
 
-    if(this.get('type') === 'contributor') {
+    if (this.get('type') === 'contributor') {
       where = {status: 2, type: 3};
     } else {
       where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
     }
 
-    let users = await modelInstance.where(where).select();
-    let posts = await this.model('post')
+    const users = await modelInstance.where(where).select();
+    const posts = await this.model('post')
       .field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num')
       .setRelation(false)
       .group('user_id')
       .select();
-    let postsNum = new Map(posts.map(({user_id, post_num}) => [user_id, post_num]));
-    let commentsNum = new Map(posts.map(({user_id, comment_num}) => [user_id, comment_num]));
+    const postsNum = new Map(posts.map(({user_id, post_num}) => [user_id, post_num]));
+    const commentsNum = new Map(posts.map(({user_id, comment_num}) => [user_id, comment_num]));
 
     users.forEach(user => {
       user.post_num = postsNum.get(user.id) || 0;
@@ -46,7 +46,7 @@ module.exports = class extends Base {
    * @return {Promise}
    */
   async deleteAction() {
-    let id = this.id;
+    const id = this.id;
 
     if (!id) {
       return this.fail('PARAMS_ERROR');
@@ -57,8 +57,8 @@ module.exports = class extends Base {
       return this.fail('DELETE_CURRENT_USER_ERROR');
     }
 
-    let pk = await this.modelInstance.pk;
-    let rows = await this.modelInstance.where({
+    const pk = await this.modelInstance.pk;
+    const rows = await this.modelInstance.where({
       [pk]: id
     }).delete();
 
@@ -72,12 +72,12 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async postAction(self) {
-    if(this.get('type') === 'key') {
+    if (this.get('type') === 'key') {
       return this.generateKey(self);
     }
 
-    let data = this.post();
-    let insertId = await this.modelInstance.addUser(data, this.ctx.ip);
+    const data = this.post();
+    const insertId = await this.modelInstance.addUser(data, this.ctx.ip);
 
     if (insertId.type === 'exist') {
       return this.fail('USER_EXIST');
@@ -87,21 +87,21 @@ module.exports = class extends Base {
   }
 
   async generateKey(self, status) {
-    let isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
+    const isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
     // let isMine = this.userInfo.id === this.id;
-    if(!isAdmin) {
+    if (!isAdmin) {
       return this.fail();
     }
 
-    let app_key = think.uuid();
-    let app_secret = think.uuid();
+    const app_key = think.uuid();
+    const app_secret = think.uuid();
 
     await this.modelInstance.generateKey(this.id, app_key, app_secret, status);
 
-    let user = await this.modelInstance.where({id: this.id}).find();
-    let options = await this.model('options').getOptions();
-    let transporter = nodemailer.createTransport();
-    let site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
+    const user = await this.modelInstance.where({id: this.id}).find();
+    const options = await this.model('options').getOptions();
+    const transporter = nodemailer.createTransport();
+    const site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
     transporter.sendMail({
       from: 'no-reply@firekylin.lithub.cc',
       to: user.email,
@@ -114,7 +114,6 @@ module.exports = class extends Base {
       `
     });
 
-
     // if(status !== null) { this.id = null; }
     return await this.getAction(self);
   }
@@ -123,19 +122,19 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async putAction(self) {
-    let type = this.get('type');
+    const type = this.get('type');
 
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }
 
-    if(type === 'contributor') {
+    if (type === 'contributor') {
       return await this.generateKey(self, 1);
     }
 
-    let data = this.post();
+    const data = this.post();
     data.id = this.id;
-    let rows = await this.modelInstance.saveUser(data, this.ctx.ip);
+    const rows = await this.modelInstance.saveUser(data, this.ctx.ip);
     return this.success({affectedRows: rows});
   }
-}
+};

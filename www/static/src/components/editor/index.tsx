@@ -32,7 +32,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   textControl: HTMLTextAreaElement | null;
   previewControl: any;
   _syncScroll: any;
-  _isDirty = false;
   _ltr: any;
 
   editorPanel: HTMLDivElement | null;
@@ -54,7 +53,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       panelClass: 'md-panel',
       mode: 'split',
       isFullScreen: false,
-      result: this.toHtml(this.props.content),
+      result: marked(this.props.content),
       linkUrl: '',
       linkText: '',
       content: null,
@@ -122,7 +121,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     let FileList = Array.from(clipboard.items)
       .filter((item: any) => item.kind === 'file' && item.type.indexOf('image') > -1)
       .map((item: any) => item.getAsFile());
-    if (!FileList.length) { 
+    if (!FileList.length) {
       return true;
     }
 
@@ -221,7 +220,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       message.warning('请插入图片');
       return;
     }
-    const start = (this._cleanSelect() as number);
+    const start = (this._getCursorPos() as number);
     if (this.state.imageTabKey === '0') {
       const fileName = this.fileInfo.file.name;
       let fileUrl = this.imagePath;
@@ -237,11 +236,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         this.upLoadImage(data);
       }
     }
-    
   }
 
   upLoadImage(data: FormData, fileName: string = 'alt') {
-    const start = (this._cleanSelect() as number);
+    const start = (this._getCursorPos() as number);
     http.upload(data)
       .then(
         res => {
@@ -255,12 +253,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           } else {
             this._preInputText(`![${text}](${res.data})`, 2, text.length + 2, start);
           }
-          
           this.imageModalClose();
         }
       )
       .catch((res) => {
-        this._cleanSelect();
         message.error(res.errmsg);
       });
   }
@@ -317,7 +313,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         </div>
         <a ref={a => this.resizebar = a} href="###" className="editor__resize">调整高度</a>
         <EditorLinkModal
-          visible={this.state.visible.link} 
+          visible={this.state.visible.link}
           onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); (this.linkRef.props.form as WrappedFormUtils).resetFields(); }}
           onCreate={() => this.handleLinkCreate()}
           wrappedComponentRef={linkRef => this.linkRef = linkRef}
@@ -325,7 +321,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           fetchData={this.props.fetchData}
         />
         <EditorImageModal
-          visible={this.state.visible.image} 
+          visible={this.state.visible.image}
           onCancel={() => this.imageModalClose()}
           onOk={() => this.handleImageOk()}
           wrappedComponentRef={imageRef => this.imageRef = imageRef}
@@ -338,14 +334,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         />
       </div>
     );
-  }
-
-  toHtml(text: any) {
-    return marked(text, {sanitize: true});
-  }
-  // public methods
-  isDirty () {
-    return this._isDirty || false;
   }
 
   getValue () {
@@ -393,36 +381,35 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         {/* preview mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('preview'), 'editor-toolbar preview')} onClick={this._changeMode('preview')} title="预览模式"/>
-        </li> 
+        </li>
         {/* split mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('split'), 'editor-toolbar live')} onClick={this._changeMode('split')} title="分屏模式"/>
-        </li> 
+        </li>
         {/* edit mode */}
         <li className="tb-btn pull-right">
           <a className={classnames(checkActive('edit'), 'editor-toolbar edit')} onClick={this._changeMode('edit')} title="编辑模式"/>
-        </li> 
+        </li>
         <li className="tb-btn spliter pull-right" />
         {/* full-screen */}
         <li className="tb-btn pull-right">
           <a title="全屏模式"
-            onClick={() => this._toggleFullScreen()} 
+            onClick={() => this._toggleFullScreen()}
             className={classnames({unzen: this.state.isFullScreen, zen: !this.state.isFullScreen}, 'editor-toolbar')}
           />
-        </li> 
+        </li>
       </ul>
     );
   }
 
   // event handlers
   _onChange (e: any) {
-    this._isDirty = true; // set dirty
     if (this._ltr) {
       clearTimeout(this._ltr);
     }
     let content = e.target.value;
     this._ltr = setTimeout(() => {
-      this.setState({ result: this.toHtml(content) }); // change state
+      this.setState({ result: marked(content) });
       localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + ''] = content;
     },                     300);
     this.props.onChange(content);
@@ -438,34 +425,32 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
   }
 
-  _cleanSelect() {
-    const start = (this.textControl as HTMLTextAreaElement).selectionStart;
-    let text = this.props.content;
-
-    this.setState({ result: marked(text) });
-    this.props.onChange(text);
-
-    return start;
+  _getCursorPos() {
+    return (this.textControl as HTMLTextAreaElement).selectionStart;
   }
 
   // default text processors
   _preInputText (text: string, preStart: number, preEnd: number, selectStart?: number) {
-    const start = selectStart || (this.textControl as HTMLTextAreaElement).selectionStart;
-    const end = selectStart || (this.textControl as HTMLTextAreaElement).selectionEnd;
-    const origin = this.props.content;
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const start = selectStart || textarea.selectionStart;
+    const end = selectStart || textarea.selectionEnd;
 
     if (start !== end) {
-      const exist = origin.slice(start, end);
+      const exist = this.props.content.slice(start, end);
       text = text.slice(0, preStart) + exist + text.slice(preEnd);
       preEnd = preStart + exist.length;
     }
-    let content = origin.slice(0, start) + text + origin.slice(end);
 
-    // pre-select
-    setTimeout(() => (this.textControl as HTMLTextAreaElement).setSelectionRange(start + preStart, start + preEnd), 20);
-    this.setState({ result: marked(content) }); // change state
+    // 聚焦并选中要替换的范围
+    textarea.focus();
+    textarea.setSelectionRange(start, end);
+
+    // 使用 execCommand 插入文本，保留浏览器的 undo/redo 栈
+    document.execCommand('insertText', false, text);
+
+    // 选中插入的占位文字，方便用户直接编辑
+    setTimeout(() => textarea.setSelectionRange(start + preStart, start + preEnd), 20);
     this.sectionRangeEnd = start + preEnd;
-    this.props.onChange(content);
   }
 
   _boldText () {
@@ -486,11 +471,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _blockquoteText () {
-    this._preInputText('\n> 引用', 3, 5);
+    this._preInputText('> 引用', 2, 4);
   }
 
   _codeText () {
-    this._preInputText('\n```\ncode block\n```', 5, 15);
+    this._preInputText('```\ncode block\n```', 4, 14);
   }
 
   _linkModal() {
@@ -502,23 +487,23 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   _listUlText () {
-    this._preInputText('- 无序列表项0\n- 无序列表项1', 2, 8);
+    this._preInputText('- 无序列表项', 2, 7);
   }
 
   _listOlText () {
-    this._preInputText('1. 有序列表项0\n2. 有序列表项1', 3, 9);
+    this._preInputText('1. 有序列表项', 3, 8);
   }
 
   _headerText () {
-    this._preInputText('## 标题', 3, 5);
+    this._preInputText('# 标题', 2, 4);
   }
 
   _insertMore() {
-    this._preInputText('\n<!--more-->', 12, 12);
+    this._preInputText('<!--more-->', 11, 11);
   }
 
   _insertHr() {
-    this._preInputText('\n----------', 11, 11);
+    this._preInputText('---\n\n', 5, 5);
   }
 }
 

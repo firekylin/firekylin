@@ -54,13 +54,13 @@ firekylin.require = name => {
   const reg = new RegExp(`firekylin-${name}-\\w+$`, 'i');
   try {
     const {dependencies} = require(pkgName);
-    for(const depName in dependencies) {
-      if(!reg.test(depName)) {
+    for (const depName in dependencies) {
+      if (!reg.test(depName)) {
         continue;
       }
       return require(depName);
     }
-  } catch(e) {
+  } catch (e) {
     return false;
   }
-}
+};

@@ -29,7 +29,7 @@ module.exports = class extends Base {
    */
   makeUploadToken({bucket, accessKey, secretKey, prefix}) {
     let saveKey = '$(etag)$(ext)';
-    if(!think.isEmpty(prefix)) {
+    if (!think.isEmpty(prefix)) {
       // @see https://developer.qiniu.com/kodo/manual/1235/vars#magicvar
       saveKey = path.join(prefix, '$(year)$(mon)$(day)', '$(etag)$(ext)');
     }
@@ -74,4 +74,4 @@ module.exports = class extends Base {
   async run(file, config) {
     return await this.upload(file, config);
   }
-}
+};

@@ -1,6 +1,7 @@
 const path = require('path');
 const eta = require('think-view-eta');
 
+
 /**
  * view adapter config
  * @type {Object}

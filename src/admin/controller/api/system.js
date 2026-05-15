@@ -15,7 +15,6 @@ const reqIns = request.defaults({
 const reqInsAsync = think.promisify(reqIns.get);
 
 module.exports = class extends Base {
-
   constructor(...args) {
     super(...args);
     this.modelInstance = this.model('options');
@@ -24,17 +23,17 @@ module.exports = class extends Base {
   async getAction() {
     let needUpdate = false;
     try {
-      let res = await reqInsAsync('http://firekylin.lithub.cc/release/v1/.latest');
-      let onlineVersion = res.body.trim();
-      if(semver.gt(onlineVersion, pack.version)) {
+      const res = await reqInsAsync('http://firekylin.lithub.cc/release/v1/.latest');
+      const onlineVersion = res.body.trim();
+      if (semver.gt(onlineVersion, pack.version)) {
         needUpdate = onlineVersion;
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e); // eslint-disable-line no-console
     }
 
-    let mysql = await this.modelInstance.query('SELECT VERSION() as version');
-    let data = {
+    const mysql = await this.modelInstance.query(`SELECT ${this.config('model').type === 'sqlite' ? 'sqlite_version()' : 'VERSION()'} as version`);
+    const data = {
       nodeVersion: process.versions.node,
       v8Version: process.versions.v8,
       platform: process.platform,
@@ -44,8 +43,8 @@ module.exports = class extends Base {
       needUpdate
     };
 
-    //非管理员只统计当前用户文章
-    let where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
+    // 非管理员只统计当前用户文章
+    const where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
     const config = await this.getConfig();
     delete config.password_salt;
 
@@ -61,20 +60,20 @@ module.exports = class extends Base {
   }
 
   async updateAction() {
-    if(/^win/.test(process.platform)) {
+    if (/^win/.test(process.platform)) {
       return this.fail('PLATFORM_NOT_SUPPORT');
     }
 
-    let {step} = this.get();
-    switch(step) {
+    const {step} = this.get();
+    switch (step) {
       /** 下载文件 */
       case '1':
       default:
         return new Promise((resolve, reject) => {
           reqIns({uri: 'http://firekylin.lithub.cc/release/v1/latest.tar.gz'})
-          .pipe(fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz')))
-          .on('close', resolve)
-          .on('error', reject)
+            .pipe(fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz')))
+            .on('close', resolve)
+            .on('error', reject);
         }).then(
           () => this.success(),
           ({message}) => this.fail(message)
@@ -88,7 +87,7 @@ module.exports = class extends Base {
           tar zvxf latest.tar.gz;
           cp -r firekylin/* ../;
           rm -rf firekylin latest.tar.gz`, error => {
-            if(error) {
+            if (error) {
               reject(error);
             }
             resolve();
@@ -103,7 +102,7 @@ module.exports = class extends Base {
         const registry = think.config('registry') || 'https://registry.npmmirror.com';
         return new Promise((resolve, reject) => {
           exec(`npm install --registry=${registry}`, error => {
-            if(error) {
+            if (error) {
               reject(error);
             }
             resolve();
@@ -122,12 +121,11 @@ module.exports = class extends Base {
   }
 
   async getConfig() {
-    let items = await this.modelInstance.select();
-    let siteConfig = {};
+    const items = await this.modelInstance.select();
+    const siteConfig = {};
 
     items.forEach(item => siteConfig[item.key] = item.value);
 
     return siteConfig;
   }
-
-}
+};

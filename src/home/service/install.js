@@ -45,46 +45,55 @@ module.exports = class extends think.Service {
     super(ip);
     this.ip = ip;
 
-    let dbConfig = think.config('model');
+    const dbConfig = think.config('model');
     this.type = dbConfig.type || 'mysql';
 
-    if(think.isObject(dbConfig[this.type])) {
+    if (think.isObject(dbConfig[this.type])) {
       this.dbConfig = dbConfig[this.type];
     }
   }
 
   getModel(name, module) {
     let dbConfig;
-    if(name === true) {
+    if (name === true) {
       dbConfig = think.extend({}, this.dbConfig);
       dbConfig.database = '';
       name = '';
-    }else{
+    } else {
       dbConfig = this.dbConfig;
     }
     return this.model(name || 'user', {
       type: this.type,
       [this.type]: dbConfig
-    }, module)
+    }, module);
   }
 
   checkDbInfo() {
-    let dbInstance = this.getModel(true);
+    if (this.type === 'sqlite') {
+      const dbInstance = this.getModel();
+      return dbInstance.query('SELECT sqlite_version() AS version').catch(() => {
+        return Promise.reject(new Error('数据库文件路径有误或不可写'));
+      }).then(data => {
+        return data[0] && data[0].version;
+      });
+    }
+
+    const dbInstance = this.getModel(true);
     return dbInstance.query('SELECT VERSION()').catch(() => {
-      return Promise.reject('数据库信息有误');
+      return Promise.reject(new Error('数据库信息有误'));
     }).then(data => {
       let version;
       try {
         /** version compatible, set encoding utf8mb4 when MySQL larger than 5.5.3 */
         version = data[0]['VERSION()'].match(/^[\d.]/);
-        if(think.isArray(version)) {
+        if (think.isArray(version)) {
           version = data[0]['VERSION()'];
         } else {
           version = version[0];
         }
 
         this.dbConfig.encoding = semver.gt(version, '5.5.3') ? 'utf8mb4' : 'utf8';
-      } catch(e) {
+      } catch (e) {
         this.dbConfig.encoding = 'utf8';
       }
       return version;
@@ -92,84 +101,120 @@ module.exports = class extends think.Service {
   }
 
   async insertData(title, site_url) {
-    let model = this.getModel(true);
-    const sql = {
-      mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
-      this.dbConfig.database + '\'',
-      postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${this.dbConfig.database}';`
-    };
-    let dbExist = await model.query(sql[this.type]);
-    if(think.isEmpty(dbExist)) {
-      await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
-    }
+    let model = this.type === 'sqlite' ? this.getModel() : this.getModel(true);
 
-    const fileName = {
-      mysql: 'firekylin.sql',
-      postgresql: 'firekylin.pgsql',
-    };
-    let dbFile = path.join(think.ROOT_PATH, fileName[this.type]);
-    if(!think.isFile(dbFile)) {
-      return Promise.reject(`数据库文件（${fileName[this.type]}）不存在，请重新下载`);
-    }
+    if (this.type === 'sqlite') {
+      // SQLite: check existing tables via sqlite_master
+      const dbExist = await model.query(
+        'SELECT name FROM sqlite_master WHERE type=\'table\''
+      );
+      // For SQLite the database file is created automatically; no CREATE DATABASE needed
+      const tablePrefix = this.dbConfig.prefix || 'fk_';
+      const postTable = tablePrefix + 'post';
+      if (!think.isEmpty(dbExist) && dbExist.some(row => row.name === postTable)) {
+        // tables already exist, skip import
+      } else {
+        const fileName = 'firekylin.sqlite.sql';
+        const dbFile = path.join(think.ROOT_PATH, fileName);
+        if (!think.isFile(dbFile)) {
+          return Promise.reject(new Error(`数据库文件（${fileName}）不存在，请重新下载`));
+        }
 
+        let content = fs.readFileSync(dbFile, 'utf8');
+        content = content.replace(/fk_/g, this.dbConfig.prefix || '');
+        content = content.split(';');
 
-    let content = fs.readFileSync(dbFile, 'utf8');
-    content = content.split('\n').filter(item => {
-      item = item.trim();
-      let ignoreList = ['#', 'LOCK', 'UNLOCK'];
-      for(let it of ignoreList) {
-        if(item.indexOf(it) === 0) {
-          return false;
+        try {
+          for (let item of content) {
+            item = item.trim();
+            if (item) {
+              think.logger.debug(item);
+              await model.query(item);
+            }
+          }
+        } catch (e) {
+          think.logger.error(e);
+          return Promise.reject(new Error('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。'));
         }
       }
-      return true;
-    }).join(' ');
-    content = content.replace(/\/\*.*?\*\//g, '').replace(/fk_/g, this.dbConfig.prefix || '');
+    } else {
+      const sql = {
+        mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+        this.dbConfig.database + '\'',
+        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${this.dbConfig.database}';`
+      };
+      const dbExist = await model.query(sql[this.type]);
+      if (think.isEmpty(dbExist)) {
+        await model.query('CREATE DATABASE `' + this.dbConfig.database + '`').catch(() => {});
+      }
 
-    //导入数据
-    model = this.getModel();
-    content = content.split(';');
-    try{
-      for(let item of content) {
+      const fileName = {
+        mysql: 'firekylin.sql',
+        postgresql: 'firekylin.pgsql'
+      };
+      const dbFile = path.join(think.ROOT_PATH, fileName[this.type]);
+      if (!think.isFile(dbFile)) {
+        return Promise.reject(new Error(`数据库文件（${fileName[this.type]}）不存在，请重新下载`));
+      }
+
+      let content = fs.readFileSync(dbFile, 'utf8');
+      content = content.split('\n').filter(item => {
         item = item.trim();
-        if(item) {
-          think.logger.debug(item);
-          await model.query(item);
+        const ignoreList = ['#', 'LOCK', 'UNLOCK'];
+        for (const it of ignoreList) {
+          if (item.indexOf(it) === 0) {
+            return false;
+          }
         }
+        return true;
+      }).join(' ');
+      content = content.replace(/\/\*.*?\*\//g, '').replace(/fk_/g, this.dbConfig.prefix || '');
+
+      // 导入数据
+      model = this.getModel();
+      content = content.split(';');
+      try {
+        for (let item of content) {
+          item = item.trim();
+          if (item) {
+            think.logger.debug(item);
+            await model.query(item);
+          }
+        }
+      } catch (e) {
+        think.logger.error(e);
+        return Promise.reject(new Error('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。'));
       }
-    }catch(e) {
-      think.logger.error(e);
-      return Promise.reject('数据表导入失败，请在控制台下查看具体的错误信息，并在 GitHub 上发 issue。');
     }
 
-    let optionsModel = this.getModel('options');
+    const optionsModel = this.getModel('options');
     await optionsModel.where('1=1').update({value: ''});
-    let salt = think.uuid(10) + '!@#$%^&*';
+    const salt = think.uuid(10) + '!@#$%^&*';
     this.password_salt = salt;
 
     await optionsModel.updateOptions('title', title);
     await optionsModel.updateOptions('site_url', site_url);
     await optionsModel.updateOptions('navigation', JSON.stringify([
-      {'label':'首页', 'url':'/', 'option':'home'},
-      {'label':'归档', 'url':'/archives/', 'option':'archive'},
-      {'label':'标签', 'url':'/tags', 'option':'tags'},
-      {'label':'关于', 'url':'/about', 'option':'user'},
-      {'label':'友链', 'url':'/links', 'option':'link'}
+      {'label': '首页', 'url': '/', 'option': 'home'},
+      {'label': '归档', 'url': '/archives/', 'option': 'archive'},
+      {'label': '标签', 'url': '/tags', 'option': 'tags'},
+      {'label': '关于', 'url': '/about', 'option': 'user'},
+      {'label': '友链', 'url': '/links', 'option': 'link'}
     ]));
     await optionsModel.updateOptions('password_salt', salt);
     await optionsModel.updateOptions('logo_url', '/static/img/firekylin.jpg');
     await optionsModel.updateOptions('theme', 'firekylin');
-    //optionsModel.close();
+    // optionsModel.close();
   }
 
   updateConfig() {
-    let data = {
+    const data = {
       type: this.type,
       adapter: {
         [this.type]: this.dbConfig
       }
     };
-    let content = `"use strict";
+    const content = `"use strict";
 exports.__esModule = true;
 exports.default = ${JSON.stringify(data, undefined, 4)}
     `;
@@ -177,7 +222,7 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     const dbConfigFile = path.join(think.ROOT_PATH, 'src/common/config/db.js');
     fs.writeFileSync(dbConfigFile, content);
 
-    for(const i in this.dbConfig) {
+    for (const i in this.dbConfig) {
       think.config(`model.${this.type}.${i}`, this.dbConfig[i], 'common');
     }
     // think.config('model', {
@@ -189,21 +234,21 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
   async createAccount(username, password, email) {
     password = think.md5(this.password_salt + password);
 
-    let model = this.getModel('user', 'admin');
-    let data = {
+    const model = this.getModel('user', 'admin');
+    const data = {
       username,
       password,
       email,
       type: 1,
       status: 1,
       ip: this.ip
-    }
+    };
     await model.addUser(data);
-    //model.close();
+    // model.close();
   }
 
   async addStartPost() {
-    let postModel = this.getModel('post', 'admin');
+    const postModel = this.getModel('post', 'admin');
     let data = {
       type: 0,
       status: 3,
@@ -212,14 +257,14 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
       comment_num: 0,
       allow_comment: 1,
       title: '欢迎使用 Firekylin',
-      markdown_content:startPost,
+      markdown_content: startPost,
       create_time: think.datetime(),
       update_time: think.datetime(),
       pathname: 'hello-world-via-firekylin'
     };
 
     data = await postModel.getContentAndSummary(data);
-    let insert = await postModel.addPost(data);
+    const insert = await postModel.addPost(data);
     return insert;
   }
 
@@ -239,16 +284,16 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
 
     firekylin.setInstalled();
 
-    let optionsModel = this.getModel('options');
+    const optionsModel = this.getModel('options');
     await optionsModel.getOptions(true);
-    //optionsModel.close();
+    // optionsModel.close();
   }
 
   async checkInstalled() {
-    let dbConfig = think.config('model');
+    const dbConfig = think.config('model');
     let database = dbConfig.database;
     let prefix = dbConfig.prefix;
-    if(!database && think.isObject(dbConfig[dbConfig.type])) {
+    if (!database && think.isObject(dbConfig[dbConfig.type])) {
       database = dbConfig[dbConfig.type].database;
       prefix = dbConfig[dbConfig.type].prefix;
     }
@@ -257,20 +302,21 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
       const sql = {
         mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
         database + '\'',
-        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`
+        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`,
+        sqlite: 'SELECT name FROM sqlite_master WHERE type=\'table\''
       };
-      let existTables = await think.model('user', dbConfig).query(sql[this.type]);
-      if(think.isEmpty(existTables)) {
+      const rows = await think.model('user', dbConfig).query(sql[this.type]);
+      if (think.isEmpty(rows)) {
         return false;
       }
+      const existTables = rows.map(table => table.TABLE_NAME || table.name);
 
-      existTables = existTables.map(table => table.TABLE_NAME);
-      let installed = tables.every(table => existTables.indexOf(prefix+table) > -1);
-      if(installed) {
+      const installed = tables.every(table => existTables.indexOf(prefix + table) > -1);
+      if (installed) {
         firekylin.setInstalled();
       }
       return installed;
-    } catch(e) {
+    } catch (e) {
       think.logger.error(e);
       return false;
     }

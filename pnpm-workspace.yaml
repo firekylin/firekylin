@@ -1,0 +1,8 @@
+packages: []
+allowBuilds:
+  aws-sdk: true
+  dtrace-provider: true
+  pre-commit: true
+  snyk: true
+  spawn-sync: true
+  sqlite3: true

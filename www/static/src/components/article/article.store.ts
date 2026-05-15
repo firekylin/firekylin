@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { ArticleInfo } from './article.model';
 import { http } from '../../utils/http';
 import moment from 'moment';
@@ -6,7 +6,7 @@ import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import { ArticleEnum } from './article.enum';
 
 class ArticleStore {
-  @observable articleInfo: ArticleInfo = {
+  articleInfo: ArticleInfo = {
     title: '',
     pathname: '',
     markdown_content: '',
@@ -24,7 +24,10 @@ class ArticleStore {
     user_id: '',
   };
 
-  @action
+  constructor() {
+    makeAutoObservable(this);
+  }
+
   setArticleInfo = info => {
     if (info.options) {
       info.options = Object.assign({}, this.articleInfo.options, info.options);

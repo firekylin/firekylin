@@ -95,7 +95,7 @@ jobs:
         id: release_notes
         run: |
           VERSION="${{ needs.check-version.outputs.version }}"
-          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${VERSION}$" | head -n 1 || true)
+          PREV_TAG=$(git tag --sort=-version:refname | grep "${VERSION}" | head -n 1 || true)
           if [ -z "$PREV_TAG" ]; then
             COMMITS=$(git log --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H): %s")
           else

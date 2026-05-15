@@ -5,7 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
     root: path.resolve(__dirname, 'www/static/src'),
-    base: '/static/js/',
+    base: '/static/dist/',
 
     plugins: [
         react({
@@ -36,20 +36,19 @@ export default defineConfig(({ mode }) => ({
     define: {
         'process.env.basename': JSON.stringify('/admin'),
         'process.env.environment': JSON.stringify(mode === 'production' ? 'production' : 'dev'),
+        // Polyfill Node.js `global` for browser ESM (used by react-codemirror2)
+        global: 'globalThis',
     },
 
     build: {
-        outDir: path.resolve(__dirname, 'www/static/js'),
+        outDir: path.resolve(__dirname, 'www/static/dist'),
         emptyOutDir: true,
+        manifest: true,
         rollupOptions: {
             input: {
                 admin: path.resolve(__dirname, 'www/static/src/index.html'),
             },
             output: {
-                // Use fixed filenames (no content hash) for compatibility with server-side template
-                entryFileNames: '[name].js',
-                chunkFileNames: '[name].js',
-                assetFileNames: '[name][extname]',
                 manualChunks(id) {
                     return /node_modules\/(react|react-dom|mobx|mobx-react)\//.test(id) ? 'vendor' : undefined;
                 },

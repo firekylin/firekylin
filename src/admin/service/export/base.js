@@ -7,7 +7,7 @@ module.exports = class extends think.Service {
   }
 
   generateZipFile(file, fn = new Function()) {
-    let zip = new JSZip();
+    const zip = new JSZip();
     fn(zip);
 
     return new Promise((resolve, reject) => {
@@ -21,4 +21,4 @@ module.exports = class extends think.Service {
         .on('error', reject);
     });
   }
-}
+};

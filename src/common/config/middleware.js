@@ -43,7 +43,7 @@ module.exports = [
         const optionsModel = new think.model('options');
         const { theme } = await optionsModel.getOptions();
 
-        let themeErrorFilePath = path.join(think.RESOURCE_PATH, 'theme', theme, 'error');
+        const themeErrorFilePath = path.join(think.RESOURCE_PATH, 'theme', theme, 'error');
         try {
           fs.statSync(themeErrorFilePath);
         } catch (e) {

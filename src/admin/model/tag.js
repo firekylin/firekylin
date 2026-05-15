@@ -7,23 +7,23 @@ module.exports = class extends Base {
         type: think.Model.HAS_MANY,
         fKey: 'tag_id'
       }
-    }
+    };
   }
 
   addTag(data) {
-    let where = {
+    const where = {
       name: data.name,
       _logic: 'OR'
     };
-    if(data.pathname) {
+    if (data.pathname) {
       where.pathname = data.pathname;
     }
     return this.where(where).thenAdd(data);
   }
 
   async saveTag(data) {
-    let info = await this.where({id: data.id}).find();
-    if(think.isEmpty(info)) {
+    const info = await this.where({id: data.id}).find();
+    if (think.isEmpty(info)) {
       return Promise.reject(new Error('TAG_NOT_EXIST'));
     }
 
@@ -34,4 +34,4 @@ module.exports = class extends Base {
     this.model('post_tag').where({tag_id}).delete();
     return this.where({id: tag_id}).delete();
   }
-}
+};

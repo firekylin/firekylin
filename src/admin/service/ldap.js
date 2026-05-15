@@ -24,7 +24,7 @@ module.exports = class Ldap {
   async getUserInfo(username) {
     const { url, ldap_baseDn, ldap_connect_timeout } = this.config;
 
-    //创建LDAP client，把服务器url传入
+    // 创建LDAP client，把服务器url传入
     const client = ldap.createClient({ url, ldap_connect_timeout });
     this.log(`connecting ${url}`, 'LDAP');
     this.log(`seasrch: ${username}`, 'LDAP');
@@ -38,24 +38,24 @@ module.exports = class Ldap {
       };
 
       client.search(ldap_baseDn, opts, (err, res) => {
-        //查询结果事件响应
+        // 查询结果事件响应
         res.on('searchENtry', entry => {
-          //获取查询的对象
+          // 获取查询的对象
           const user = entry.object;
           this.session = user;
           resolve(user);
           this.log(`search result: ${JSON.stringify(user)}`, 'LDAP');
         });
 
-        //查询错误事件
+        // 查询错误事件
         res.on('error', err => {
           this.error(`error: ${err.message}`, 'LDAP');
-          //unbind操作，必须要做
+          // unbind操作，必须要做
           client.unbind(e => this.log(e ? e.message : 'client disconnected', 'LDAP'));
           reject(err);
         });
 
-        //查询结束
+        // 查询结束
         res.on('end', result => {
           this.log(`search status: ${result.status}`, 'LDAP');
           // 校验是否有结果
@@ -63,7 +63,7 @@ module.exports = class Ldap {
             this.log('result: No such user', 'LDAP');
           }
 
-          //unbind操作，必须要做
+          // unbind操作，必须要做
           client.unbind(e => this.log(e ? e.message : 'client disconnected', 'LDAP'));
         });
       });
@@ -78,7 +78,7 @@ module.exports = class Ldap {
   async validate(username, password) {
     const { url, ldap_baseDn, ldap_connect_timeout } = this.config;
 
-    //创建LDAP client，把服务器url传入
+    // 创建LDAP client，把服务器url传入
     const client = ldap.createClient({
       url,
       ldap_connect_timeout
@@ -105,7 +105,7 @@ module.exports = class Ldap {
   }
 
   log(...args) {
-    if(!this.config.log) {
+    if (!this.config.log) {
       return true;
     }
 
@@ -113,10 +113,10 @@ module.exports = class Ldap {
   }
 
   error(...args) {
-    if(!this.config.log) {
+    if (!this.config.log) {
       return true;
     }
 
     return think.logger.error(...args);
   }
-}
+};

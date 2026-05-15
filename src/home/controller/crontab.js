@@ -9,4 +9,4 @@ module.exports = class extends Base {
     await this.service('comment', 'home').sync();
     this.success();
   }
-}
+};

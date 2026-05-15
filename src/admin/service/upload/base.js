@@ -35,4 +35,4 @@ module.exports = class extends think.Service {
     const result = await this.uploadMethod(filename, config);
     return result;
   }
-}
+};

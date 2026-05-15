@@ -1,5 +1,4 @@
 module.exports = class extends think.Model {
-
   get relation() {
     return {
       post_tag: {
@@ -14,7 +13,7 @@ module.exports = class extends think.Model {
    * @return {} []
    */
   async getHotTags() {
-    let data = await this.getTagArchive();
+    const data = await this.getTagArchive();
     return data.slice(0, 5);
   }
 
@@ -24,7 +23,7 @@ module.exports = class extends think.Model {
    * @return {Promise}
    */
   async getTagArchive() {
-    let data = await this.model('post_tag')
+    const data = await this.model('post_tag')
       .join({
         table: 'post',
         on: ['post_id', 'id']
@@ -41,9 +40,9 @@ module.exports = class extends think.Model {
       .order('update_time DESC')
       .select();
 
-    let result = {};
-    for(let tag of data) {
-      if(result[tag.pathname]) {
+    const result = {};
+    for (const tag of data) {
+      if (result[tag.pathname]) {
         result[tag.pathname].count += 1;
       } else {
         result[tag.pathname] = {
@@ -55,6 +54,6 @@ module.exports = class extends think.Model {
       }
     }
 
-    return Object.values(result).sort((a, b)=> a.count>b.count ? -1 : 1);
+    return Object.values(result).sort((a, b) => a.count > b.count ? -1 : 1);
   }
-}
+};
