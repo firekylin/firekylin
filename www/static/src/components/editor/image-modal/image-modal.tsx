@@ -1,21 +1,15 @@
 import React from 'react';
-import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Input, Modal, Tabs, Upload, message } from 'antd';
+import { Input, Modal, Tabs, Upload, message, UploadChangeParam, ModalProps } from 'antd';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { ChangeEvent } from 'react';
-import { ModalProps } from 'antd/lib/modal';
-import { FormComponentProps } from '@ant-design/compatible/lib/form';
-import { UploadChangeParam } from 'antd/lib/upload';
 import './image-modal.less';
 
-const TabPane = Tabs.TabPane;
-const FormItem = Form.Item;
-
-interface EditorImageModalProps extends ModalProps, FormComponentProps {
+interface EditorImageModalProps extends ModalProps {
     imageUrl: string;
     fileLink: string;
     tabKey: string;
     onOk: (e: any, ...params: any[]) => void;
+    onCancel: () => void;
     fileDone: (info: UploadChangeParam) => void;
     fileLinkChange: (fileLink: string) => void;
     tabChanged: (key: string) => void;
@@ -31,7 +25,7 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
         reader.addEventListener('load', () => callback(reader.result));
         reader.readAsDataURL(img);
     }
-    
+
     handleChange = (info: UploadChangeParam) => {
         if (info.file.status === 'uploading') {
           this.setState({ loading: true });
@@ -53,18 +47,10 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
 
     render() {
         const { onCancel, fileLink } = this.props;
-        const formItemLayout = {
-            labelCol: {
-                xl: { span: 4 },
-            },
-            wrapperCol: {
-                xl: { span: 20 },
-            },
-        };
         const imageUrl = this.props.imageUrl;
         const uploadButton = (
             <div>
-              <LegacyIcon type={this.state.loading ? 'loading' : 'plus'} />
+              {this.state.loading ? <LoadingOutlined /> : <PlusOutlined />}
               <div className="ant-upload-text">Upload</div>
             </div>
         );
@@ -72,48 +58,50 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
             <Modal
                 title="插入图片"
                 visible={this.props.visible}
-                // onOk={(e) => this.props.onOk(e, this.state)}
                 onOk={this.props.onOk}
                 onCancel={onCancel}
                 className="eidtor-image-modal"
             >
-                <Tabs className="tabs" 
+                <Tabs className="tabs"
                     defaultActiveKey="0"
-                    type="card" 
+                    type="card"
                     onChange={key => {this.props.tabChanged(key); }}
                     activeKey={this.props.tabKey}
-                >
-                    <TabPane tab="本地上传" key="0">
-                        <Upload
-                            name="file"
-                            listType="picture-card"
-                            accept=""
-                            className="avatar-uploader"
-                            showUploadList={false}
-                            style={{width: 100, height: 100}}
-                            action="/admin/api/file"
-                            beforeUpload={this.beforeUpload}
-                            onChange={this.handleChange}
-                        >
-                            {imageUrl ? <img src={imageUrl} alt="avatar" /> : uploadButton}
-                        </Upload>
-                    </TabPane>
-                    <TabPane tab="从网络上抓取" key="1">
-                        <Form>
-                            <FormItem
-                                {...formItemLayout}
-                                label="链接地址："
-                            >
-                                <Input value={fileLink} onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.fileLinkChange(e.target.value)} />
-                            </FormItem>
-                        </Form>
-                    </TabPane>
-                </Tabs>
+                    items={[
+                        {
+                            key: '0',
+                            label: '本地上传',
+                            children: (
+                                <Upload
+                                    name="file"
+                                    listType="picture-card"
+                                    accept=""
+                                    className="avatar-uploader"
+                                    showUploadList={false}
+                                    style={{width: 100, height: 100}}
+                                    action="/admin/api/file"
+                                    beforeUpload={this.beforeUpload}
+                                    onChange={this.handleChange}
+                                >
+                                    {imageUrl ? <img src={imageUrl} alt="avatar" /> : uploadButton}
+                                </Upload>
+                            ),
+                        },
+                        {
+                            key: '1',
+                            label: '从网络上抓取',
+                            children: (
+                                <div style={{ padding: 20 }}>
+                                    <div style={{ marginBottom: 8 }}>链接地址：</div>
+                                    <Input value={fileLink} onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.fileLinkChange(e.target.value)} />
+                                </div>
+                            ),
+                        },
+                    ]}
+                />
             </Modal>
         );
     }
 }
 
-const EditorImageModal = Form.create()(EditorImageModalForm);
-
-export default EditorImageModal;
+export default EditorImageModalForm;

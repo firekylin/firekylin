@@ -89,7 +89,7 @@ class OptionsImportRss extends React.Component<any, any> {
                             this.state.rssImportList.splice(i, 1);
                             this.updateRSS(this.state.rssImportList);
                         }}
-                        type="danger" 
+                        danger 
                         size="small" 
                         icon={<DeleteOutlined />}
                     >

@@ -1,8 +1,6 @@
 import React from 'react';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form } from 'antd';
 import { Input } from 'antd';
-const FormItem = Form.Item;
 import { OptionsUploadItemsProps } from '../upload.model';
 
 class OptionsUploadTencentFormItems extends React.Component<OptionsUploadItemsProps, {}> {
@@ -10,86 +8,73 @@ class OptionsUploadTencentFormItems extends React.Component<OptionsUploadItemsPr
     constructor(props: OptionsUploadItemsProps) {
         super(props);
     }
-    
+
     render() {
-        const { getFieldDecorator } = this.props.form;
         return (
             <>
                 {/* SecretId */}
-                <FormItem
+                <Form.Item
                     label="SecretId"
+                    name="secretId"
+                    rules={[
+                        {required: true, message: '请填写腾讯云的SecretId'}
+                    ]}
+                    initialValue={this.props.upload.secretId || ''}
                 >
-                    {getFieldDecorator('secretId', {
-                        rules: [
-                            {required: true, message: '请填写腾讯云的SecretId'}
-                        ],
-                        initialValue: this.props.upload.secretId || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* SecretKey */}
-                <FormItem
+                <Form.Item
                     label="SecretKey"
+                    name="secretKey"
+                    rules={[
+                        {required: true, message: '请填写腾讯云的SecretKeyt'}
+                    ]}
+                    initialValue={this.props.upload.secretKey || ''}
                 >
-                    {getFieldDecorator('secretKey', {
-                        rules: [
-                            {required: true, message: '请填写腾讯云的SecretKeyt'}
-                        ],
-                        initialValue: this.props.upload.secretKey || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 存储桶(Bucket) */}
-                <FormItem
+                <Form.Item
                     label="存储桶(Bucket)"
+                    name="bucket"
+                    rules={[
+                        {required: true, message: '请填写腾讯云的存储桶名称'}
+                    ]}
+                    initialValue={this.props.upload.bucket || ''}
                 >
-                    {getFieldDecorator('bucket', {
-                        rules: [
-                            {required: true, message: '请填写腾讯云的存储桶名称'}
-                        ],
-                        initialValue: this.props.upload.bucket || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 所属地域 */}
-                <FormItem
+                <Form.Item
                     label="所属地域"
+                    name="region"
+                    rules={[
+                        {required: true, message: '请填写腾讯云存储桶的所属地域'}
+                    ]}
+                    initialValue={this.props.upload.region || ''}
                 >
-                    {getFieldDecorator('region', {
-                        rules: [
-                            {required: true, message: '请填写腾讯云存储桶的所属地域'}
-                        ],
-                        initialValue: this.props.upload.region || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 访问域名 */}
-                <FormItem
+                <Form.Item
                     label="访问域名"
+                    name="origin"
+                    rules={[
+                        {required: true, message: '请填写腾讯云存储桶的访问域名'}
+                    ]}
+                    initialValue={this.props.upload.origin || ''}
                 >
-                    {getFieldDecorator('origin', {
-                        rules: [
-                            {required: true, message: '请填写腾讯云存储桶的访问域名'}
-                        ],
-                        initialValue: this.props.upload.origin || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 路径前缀 */}
-                <FormItem
+                <Form.Item
                     label="路径前缀"
+                    name="prefix"
+                    initialValue={this.props.upload.prefix || ''}
                 >
-                    {getFieldDecorator('prefix', {
-                        initialValue: this.props.upload.prefix || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
             </>
         );
     }

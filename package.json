@@ -23,7 +23,6 @@
     "lint-break-on-errors"
   ],
   "dependencies": {
-    "@ant-design/compatible": "^1.1.2",
     "ali-oss": "^6.2.1",
     "aws-sdk": "^2.814.0",
     "cos-nodejs-sdk-v5": "^2.5.6",
@@ -82,7 +81,6 @@
     "@vitejs/plugin-react": "^6.0.1",
     "antd": "^4",
     "axios": "^0.21.2",
-    "babel-plugin-import": "^1.13.8",
     "classnames": "^2.2.6",
     "codemirror": "^5.58.2",
     "eslint": "^8.0.0",

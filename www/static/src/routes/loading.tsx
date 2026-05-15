@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from 'react';
-import { SpinProps } from 'antd/lib/spin';
+import { SpinProps } from 'antd';
 import { Spin } from 'antd';
 
 export default function Loading(props: PropsWithChildren<SpinProps>) {

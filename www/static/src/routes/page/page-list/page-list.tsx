@@ -97,7 +97,7 @@ class PageList extends React.Component<PageListProps, {}> {
                             <Button
                                 onClick={() => this.delete(page.id)}
                                 style={{ marginLeft: 8 }}
-                                type="danger"
+                                danger
                                 icon={<DeleteOutlined />}
                                 size="small"
                             >

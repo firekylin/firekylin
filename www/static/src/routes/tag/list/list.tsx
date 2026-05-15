@@ -86,7 +86,7 @@ export function TagList(props: TagProps) {
                             >
                                 编辑
                             </Button>
-                            <Button onClick={(e) => tagDelete(e, tag.id)} style={{marginLeft: 8}} type="danger" icon={<DeleteOutlined />} size="small">删除</Button>
+                            <Button onClick={(e) => tagDelete(e, tag.id)} style={{marginLeft: 8}} danger icon={<DeleteOutlined />} size="small">删除</Button>
                         </>
                     )}
                 />

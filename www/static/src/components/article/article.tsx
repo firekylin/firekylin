@@ -14,8 +14,8 @@ import ArticleControlPublic from './control-public/control-public';
 import ArticleControlImage from './control-image/control-image';
 import ArticleControlUser from './control-user/control-user';
 
-import Checkbox from 'antd/lib/checkbox';
-import { RadioChangeEvent } from 'antd/lib/radio';
+import { Checkbox } from 'antd';
+import { RadioChangeEvent } from 'antd';
 import { ArticleProps, PreviewData } from './article.model';
 
 import './article.less';

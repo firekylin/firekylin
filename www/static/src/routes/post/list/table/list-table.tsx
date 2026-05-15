@@ -40,18 +40,18 @@ class PostListTable extends React.Component<PostListProps, {}> {
         if (status === '') {
             return <>
                 <Button onClick={() => this.props.history.push(`/post/edit/${post.id}`)} type="primary" icon={<EditOutlined />} size="small">编辑</Button>
-                <Button onClick={() => this.delete(post.id)} style={{ marginLeft: 8 }} type="danger" icon={<DeleteOutlined />} size="small">删除</Button>
+                <Button onClick={() => this.delete(post.id)} style={{ marginLeft: 8 }} danger icon={<DeleteOutlined />} size="small">删除</Button>
             </>;
         } else if(status === '4') {
             return <>
 
                 <Button onClick={() => this.cancel(post.id)} type="primary" icon={<EditOutlined />} size="small">撤销</Button>
-                <Button onClick={() => this.delete(post.id, true)} style={{ marginLeft: 8 }} type="danger" icon={<DeleteOutlined />} size="small">删除</Button>
+                <Button onClick={() => this.delete(post.id, true)} style={{ marginLeft: 8 }} danger icon={<DeleteOutlined />} size="small">删除</Button>
             </>;
         } else {
             return <>
                 <Button disabled={status === '3'} type="primary" onClick={() => this.pass(post.id)} className="success-button" icon={<CheckOutlined />} size="small">通过</Button>
-                <Button disabled={status === '2'} onClick={() => this.refuse(post.id)} style={{ marginLeft: 8 }} type="danger" icon={<CloseOutlined />} size="small">拒绝</Button>
+                <Button disabled={status === '2'} onClick={() => this.refuse(post.id)} style={{ marginLeft: 8 }} danger icon={<CloseOutlined />} size="small">拒绝</Button>
             </>;
         }
     }

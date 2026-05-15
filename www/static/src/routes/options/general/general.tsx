@@ -1,34 +1,30 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form, FormInstance } from 'antd';
 import { Input, Button, Upload, message } from 'antd';
+import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import { inject, observer } from 'mobx-react';
 import { GeneralProps } from './general.model';
-import { UploadChangeParam } from 'antd/lib/upload';
+import { UploadChangeParam } from 'antd';
 import './general.less';
-const FormItem = Form.Item;
 
 @inject('generalStore')
 @observer
 class GeneralForm extends React.Component<GeneralProps, {}> {
+    formRef = React.createRef<FormInstance>();
+
     constructor(props: GeneralProps) {
         super(props);
     }
 
     componentDidMount() {
-        // 
+        //
     }
 
-    handleSubmit = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                this.props.generalStore.submit(values);
-            }
-        });
+    handleSubmit = (values: any) => {
+        this.props.generalStore.submit(values);
     }
-    
+
     handleChange = (info: UploadChangeParam, type: 'logo' | 'favicon') => {
         if (info.file.status === 'uploading') {
           this.setState({ loading: true });
@@ -52,13 +48,13 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         } else {
             const url = fileInfo.file.response.data;
             if (type === 'logo') {
-                this.props.form.setFieldsValue({
+                this.formRef.current?.setFieldsValue({
                     logo_url: url
                 });
                 window.SysConfig.options.logo_url = url;
                 this.props.generalStore.setData({options: window.SysConfig.options});
             } else {
-                this.props.form.setFieldsValue({
+                this.formRef.current?.setFieldsValue({
                     favicon_url: url
                 });
                 window.SysConfig.options.favicon_url = url;
@@ -74,9 +70,8 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         }
         return isLt5M;
     }
-    
+
     render() {
-        const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
             labelCol: {
                 xl: { span: 24 },
@@ -108,31 +103,29 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         }
         const uploadButton = (
             <div>
-              <LegacyIcon type={this.props.generalStore.loading.logo ? 'loading' : 'plus'} />
+              {this.props.generalStore.loading.logo ? <LoadingOutlined /> : <PlusOutlined />}
               <div className="ant-upload-text">Upload</div>
             </div>
         );
-        
+
         return (
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <div className="options-general-page page-list">
                     <h3 className="page-title">基本设置</h3>
-                    <Form onSubmit={this.handleSubmit}>
-                        <FormItem
+                    <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                        <Form.Item
                             {...formItemLayout}
                             label="站点名称"
+                            name="title"
+                            rules={[{
+                                required: true, message: '请填写站点名称',
+                            }]}
+                            initialValue={options.title}
                         >
-                            {getFieldDecorator('title', {
-                                rules: [{
-                                    required: true, message: '请填写站点名称',
-                                }],
-                                initialValue: options.title,
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="LOGO 地址"
                         >
@@ -149,40 +142,38 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
                             >
                                 {logoUrl ? <img src={logo_url} alt="avatar" /> : uploadButton}
                             </Upload>
-                            {getFieldDecorator('logo_url', {
-                                initialValue: logo_url,
-                            })(
-                                    <Input onChange={e => {
-                                        window.SysConfig.options.logo_url = e.target.value;
-                                        this.props.generalStore.setData({options: window.SysConfig.options});
-                                    }} />
-                            )}
+                            <Form.Item
+                                name="logo_url"
+                                initialValue={logo_url}
+                                noStyle
+                            >
+                                <Input onChange={e => {
+                                    window.SysConfig.options.logo_url = e.target.value;
+                                    this.props.generalStore.setData({options: window.SysConfig.options});
+                                }} />
+                            </Form.Item>
                             <p>尺寸最好为 140x140px。</p>
-                        </FormItem>
-                        <FormItem
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="站点描述"
+                            name="description"
+                            rules={[{
+                                required: true, message: '请填写站点描述',
+                            }]}
+                            initialValue={options.description}
                         >
-                            {getFieldDecorator('description', {
-                                rules: [{
-                                    required: true, message: '请填写站点描述',
-                                }],
-                                initialValue: options.description
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="网站地址"
+                            name="site_url"
+                            initialValue={options.site_url}
                         >
-                            {getFieldDecorator('site_url', {
-                                initialValue: options.site_url
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="Favicon 地址"
                         >
@@ -199,75 +190,66 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
                             >
                                 {iconUrl ? <img src={favicon_url} alt="avatar" /> : uploadButton}
                             </Upload>
-                            {getFieldDecorator('favicon_url', {
-                                initialValue: favicon_url
-                            })(
+                            <Form.Item
+                                name="favicon_url"
+                                initialValue={favicon_url}
+                                noStyle
+                            >
                                 <Input onChange={e => {
                                     window.SysConfig.options.favicon_url = e.target.value;
                                     this.props.generalStore.setData({options: window.SysConfig.options});
                                 }} />
-                            )}
-                            <p>尺寸最好为 128x128px。</p>                            
-                        </FormItem>
-                        <FormItem
+                            </Form.Item>
+                            <p>尺寸最好为 128x128px。</p>
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="关键词"
+                            name="keywords"
+                            initialValue={options.keywords}
                         >
-                            {getFieldDecorator('keywords', {
-                                initialValue: options.keywords
-                            })(
-                                <Input />
-                            )}
-                            <p>请以半角逗号 "," 分割多个关键字.</p>
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <p>请以半角逗号 "," 分割多个关键字.</p>
+                        <Form.Item
                             {...formItemLayout}
                             label="GitHub 地址"
+                            name="github_url"
+                            initialValue={options.github_url}
                         >
-                            {getFieldDecorator('github_url', {
-                                initialValue: options.github_url
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="Twitter 地址"
+                            name="twitter_url"
+                            initialValue={options.twitter_url}
                         >
-                            {getFieldDecorator('twitter_url', {
-                                initialValue: options.twitter_url
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="网站工信部备案号"
+                            name="miitbeian"
+                            initialValue={options.miitbeian}
                         >
-                            {getFieldDecorator('miitbeian', {
-                                initialValue: options.miitbeian
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
                             {...formItemLayout}
                             label="网站公安部备案号"
+                            name="mpsbeian"
+                            initialValue={options.mpsbeian}
                         >
-                            {getFieldDecorator('mpsbeian', {
-                                initialValue: options.mpsbeian
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                        <FormItem {...tailFormItemLayout}>
+                            <Input />
+                        </Form.Item>
+                        <Form.Item {...tailFormItemLayout}>
                             <Button type="primary" htmlType="submit" loading={loading.submit}>提交</Button>
-                        </FormItem>
+                        </Form.Item>
                     </Form>
                 </div>
             </>
         );
     }
 }
-const General = Form.create()(GeneralForm);
-export default General;
+export default GeneralForm;

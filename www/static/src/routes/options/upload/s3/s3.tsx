@@ -1,8 +1,6 @@
 import React from 'react';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form } from 'antd';
 import { Input } from 'antd';
-const FormItem = Form.Item;
 import { OptionsUploadItemsProps } from '../upload.model';
 
 class OptionsUploadS3FormItems extends React.Component<OptionsUploadItemsProps, {}> {
@@ -10,73 +8,62 @@ class OptionsUploadS3FormItems extends React.Component<OptionsUploadItemsProps, 
     constructor(props: OptionsUploadItemsProps) {
         super(props);
     }
-    
+
     render() {
-        const { getFieldDecorator } = this.props.form;
         return (
             <>
                 {/* accessKeyId */}
-                <FormItem
+                <Form.Item
                     label="accessKeyId"
+                    name="accessKeyId"
+                    rules={[
+                        {required: true, message: '请填写 AWS S3 的accessKeyId'}
+                    ]}
+                    initialValue={this.props.upload.accessKeyId || ''}
                 >
-                    {getFieldDecorator('accessKeyId', {
-                        rules: [
-                            {required: true, message: '请填写 AWS S3 的accessKeyId'}
-                        ],
-                        initialValue: this.props.upload.accessKeyId || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* accessKeySecret */}
-                <FormItem
+                <Form.Item
                     label="accessKeySecret"
+                    name="accessKeySecret"
+                    rules={[
+                        {required: true, message: '请填写 AWS S3 的accessKeySecret'}
+                    ]}
+                    initialValue={this.props.upload.accessKeySecret || ''}
                 >
-                    {getFieldDecorator('accessKeySecret', {
-                        rules: [
-                            {required: true, message: '请填写 AWS S3 的accessKeySecret'}
-                        ],
-                        initialValue: this.props.upload.accessKeySecret || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 存储桶(Bucket) */}
-                <FormItem
+                <Form.Item
                     label="存储桶(Bucket)"
+                    name="bucket"
+                    rules={[
+                        {required: true, message: '请填写 AWS S3 的存储桶名'}
+                    ]}
+                    initialValue={this.props.upload.bucket || ''}
                 >
-                    {getFieldDecorator('bucket', {
-                        rules: [
-                            {required: true, message: '请填写 AWS S3 的存储桶名'}
-                        ],
-                        initialValue: this.props.upload.bucket || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 服务区域/终端节点 */}
-                <FormItem
+                <Form.Item
                     label="服务区域/终端节点"
+                    name="region"
+                    rules={[
+                        {required: true, message: '请填写 S3 的服务区域或者终端节点'}
+                    ]}
+                    initialValue={this.props.upload.region || ''}
                 >
-                    {getFieldDecorator('region', {
-                        rules: [
-                            {required: true, message: '请填写 S3 的服务区域或者终端节点'}
-                        ],
-                        initialValue: this.props.upload.region || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 路径前缀 */}
-                <FormItem
+                <Form.Item
                     label="路径前缀"
+                    name="prefix"
+                    initialValue={this.props.upload.prefix || ''}
                 >
-                    {getFieldDecorator('prefix', {
-                        initialValue: this.props.upload.prefix || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
             </>
         );
     }

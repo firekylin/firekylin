@@ -9,9 +9,7 @@ import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
 import { Tree, Modal, Button, message } from 'antd';
 import { ThemeEditProps } from './edit.modal';
-import { AntTreeNode } from 'antd/lib/tree';
 const info = Modal.info;
-const TreeNode = Tree.TreeNode;
 
 @inject('editStore', 'sharedStore')
 @observer class Edit extends React.Component<ThemeEditProps, {}> {
@@ -64,11 +62,11 @@ const TreeNode = Tree.TreeNode;
         });
     }
     // 处理Select响应
-    onSelect(node: AntTreeNode) {
-        if (node.props.children) {
+    onSelect = (selectedKeys: any, { node }: any) => {
+        if (node.children) {
             return;
         }
-        this.selectFile((node.props.eventKey as string));
+        this.selectFile(node.key as string);
     }
     // 选择文件
     selectFile(key: string) {
@@ -86,19 +84,6 @@ const TreeNode = Tree.TreeNode;
             return;
         }
         this.props.editStore.themeFileUpdate(path, themeContent);
-    }
-
-    renderTreeNodes = (data) => {
-        return data.map((item, i) => {
-            if (item.children) {
-                return (
-                    <TreeNode title={item.module} key={item.key}>
-                        {this.renderTreeNodes(item.children)}
-                    </TreeNode>
-                );
-            }
-            return <TreeNode title={item.module} key={item.key} />;
-        });
     }
 
     render() {
@@ -128,14 +113,16 @@ const TreeNode = Tree.TreeNode;
                         </div>
                         <div className="col-xs-3">
                             <Tree
+                                treeData={themeFileList}
+                                fieldNames={{ title: 'module', key: 'key', children: 'children' }}
                                 expandedKeys={expandedKeys}
                                 selectedKeys={selectedKeys}
-                                onSelect={keys => editStore.setData({selectedKeys: keys})}
+                                onSelect={(keys, info) => {
+                                    editStore.setData({selectedKeys: keys});
+                                    this.onSelect(keys, info);
+                                }}
                                 onExpand={(keys) => editStore.setData({expandedKeys: keys})}
-                                onClick={(e, node) => this.onSelect(node)}
-                            >
-                                {this.renderTreeNodes(themeFileList)}
-                            </Tree>
+                            />
                         </div>
                     </div>
                     </div>

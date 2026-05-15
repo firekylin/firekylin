@@ -84,7 +84,7 @@ const confirm = Modal.confirm;
                                 >
                                     编辑
                                 </Button>
-                                <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon={<DeleteOutlined />} size="small">删除</Button>
+                                <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} danger icon={<DeleteOutlined />} size="small">删除</Button>
                             </>
                         )}
                     />

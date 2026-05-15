@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Radio } from 'antd';
-import RadioGroup from 'antd/lib/radio/group';
-import { RadioChangeEvent } from 'antd/lib/radio';
+const RadioGroup = Radio.Group;
+import { RadioChangeEvent } from 'antd';
 
 interface ACPublicProps {
     isPublic: string;

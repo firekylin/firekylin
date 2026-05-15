@@ -2,16 +2,14 @@ import * as React from 'react';
 import './list.less';
 import { observer, inject } from 'mobx-react';
 import PostListTable from './table/list-table';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form } from 'antd';
 import { Tabs, Input, Select } from 'antd';
 import { PostListProps } from './list.model';
 import BreadCrumb from '../../../components/breadcrumb';
 const TabPane = Tabs.TabPane;
-const FormItem = Form.Item;
 const Option = Select.Option;
 @inject('postStore', 'sharedStore')
-@observer 
+@observer
 class PostListForm extends React.Component<PostListProps, {}> {
     constructor(props: any) {
         super(props);
@@ -31,7 +29,7 @@ class PostListForm extends React.Component<PostListProps, {}> {
         });
     }
     handleSubmit() {
-        // 
+        //
     }
 
     getOperations() {
@@ -39,10 +37,10 @@ class PostListForm extends React.Component<PostListProps, {}> {
         const { sharedStore, postStore } = this.props;
         return (
             <>
-                <FormItem className="forms">
-                    <Select 
-                        defaultValue="" 
-                        style={{float: 'left', width: 120}} 
+                <Form.Item className="forms">
+                    <Select
+                        defaultValue=""
+                        style={{float: 'left', width: 120}}
                         placeholder="请选择分类"
                         onChange={(selectedValue: string) => postStore.setPlReqParams({cate: selectedValue, page: 1})}
                     >
@@ -55,7 +53,7 @@ class PostListForm extends React.Component<PostListProps, {}> {
                         enterButton={true}
                         style={{ width: 200, marginLeft: 10 }}
                     />
-                </FormItem>
+                </Form.Item>
             </>
         );
     }
@@ -64,9 +62,9 @@ class PostListForm extends React.Component<PostListProps, {}> {
             <>
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <div className="page-list post-list">
-                    <Tabs className="tabs" 
-                        defaultActiveKey="" 
-                        type="card" 
+                    <Tabs className="tabs"
+                        defaultActiveKey=""
+                        type="card"
                         onChange={key => {this.tabChanged(key); }}
                         tabBarExtraContent={this.getOperations()}
                     >
@@ -91,5 +89,4 @@ class PostListForm extends React.Component<PostListProps, {}> {
         );
     }
 }
-const PostList = Form.create()(PostListForm);
-export default PostList;
+export default PostListForm;

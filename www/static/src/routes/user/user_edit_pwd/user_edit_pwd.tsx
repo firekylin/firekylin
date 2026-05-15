@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form, FormInstance } from 'antd';
 import { Input } from 'antd';
 import md5 from 'md5';
-import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import UserStore from '../user.store';
 
-interface UserEditPWDProps extends FormComponentProps {
+interface UserEditPWDProps {
     userStore: UserStore;
 }
 
 @inject('userStore')
 @observer
 class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
+    formRef = React.createRef<FormInstance>();
+
     public userStore: any;
 
     constructor(props: UserEditPWDProps) {
@@ -26,23 +26,17 @@ class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
      * save
      * @return {}       []
      */
-    handleValidSubmit(e: any) {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                delete values.repassword;
-                let password = md5(window.SysConfig.options.password_salt + values.password);
-                values.password = password;
-                this.userStore.setUserEditPwdState({submitting: true});
-                // this.setState({submitting: true});
-                this.userStore.savePwd(values);
-            }
-        });
+    handleValidSubmit = (values: any) => {
+        delete values.repassword;
+        let password = md5(window.SysConfig.options.password_salt + values.password);
+        values.password = password;
+        this.userStore.setUserEditPwdState({submitting: true});
+        // this.setState({submitting: true});
+        this.userStore.savePwd(values);
     }
 
     compareToFirstPassword = (rule, value, callback) => {
-        const form = this.props.form;
-        if (value && value !== form.getFieldValue('password')) {
+        if (value && value !== this.formRef.current?.getFieldValue('password')) {
             callback('两次输入密码不一致!');
         } else {
             callback();
@@ -60,8 +54,6 @@ class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
         if (this.userStore.userEditPwdState.submitting) {
             props.disabled = true;
         }
-        const FormItem = Form.Item;
-        const { getFieldDecorator } = this.props.form;
 
         let options = window.SysConfig.options;
         let ldapOn = options.ldap_on === '1' ? true : false;
@@ -91,27 +83,31 @@ class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
                 <BreadCrumb {...this.props} />
                 <div className="manage-container">
                     <Form
+                        ref={this.formRef}
                         className="user-editpwd clearfix"
-                        onSubmit={this.handleValidSubmit.bind(this)}
+                        onFinish={this.handleValidSubmit}
+                        scrollToFirstError
                     >
                         <div className="pull-left">
-                            <FormItem label="密码">
-                                {getFieldDecorator('password',{
-                                    rules: [{ required: true, message: '请输入密码!'}, {
-                                        min: 8,
-                                        max: 30,
-                                        message: '长度为8到30个字符'
-                                    }]
-                                })(<Input type="password" placeholder="长度为8到30个字符" />)}
-                                <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
-                            </FormItem>
-                            <FormItem label="确认密码">
-                                {getFieldDecorator('repassword', {
-                                    rules: [{required: true, message: '请再次确认密码!'}, {
-                                        validator: this.compareToFirstPassword,
-                                    }]
-                                })(<Input type="password" placeholder="请再次输入密码" />)}
-                            </FormItem>
+                            <Form.Item label="密码"
+                                name="password"
+                                rules={[{ required: true, message: '请输入密码!'}, {
+                                    min: 8,
+                                    max: 30,
+                                    message: '长度为8到30个字符'
+                                }]}
+                            >
+                                <Input type="password" placeholder="长度为8到30个字符" />
+                            </Form.Item>
+                            <p className="help-block">建议使用特殊字符与字母、数字的混编方式，增加安全性。</p>
+                            <Form.Item label="确认密码"
+                                name="repassword"
+                                rules={[{required: true, message: '请再次确认密码!'}, {
+                                    validator: this.compareToFirstPassword,
+                                }]}
+                            >
+                                <Input type="password" placeholder="请再次输入密码" />
+                            </Form.Item>
                             <button type="submit" {...props} className="btn btn-primary">
                                 {this.userStore.userEditPwdState.submitting ? '提交中...' : '提交'}
                             </button>
@@ -122,5 +118,4 @@ class UserEditPwdForm extends React.Component<UserEditPWDProps, any> {
         );
     }
 }
-const UserEditPwd = Form.create()(UserEditPwdForm);
-export default UserEditPwd;
+export default UserEditPwdForm;

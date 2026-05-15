@@ -149,7 +149,7 @@ export default class extends React.Component<UserProps, any> {
                             <Button
                                 onClick={this.handleDelete.bind(this, item)}
                                 style={{ marginLeft: 8 }}
-                                type="danger"
+                                danger
                                 icon={<DeleteOutlined />}
                                 size="small"
                             >

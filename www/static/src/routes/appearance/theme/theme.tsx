@@ -2,23 +2,22 @@ import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import { ThemeProps, ConfigElement } from './theme.model';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form, FormInstance } from 'antd';
 import { Select, Button, Input, Radio } from 'antd';
+const RadioGroup = Radio.Group;
 import { SketchPicker } from 'react-color';
-// import { Button} from 'antd';
 import './theme.less';
-import RadioGroup from 'antd/lib/radio/group';
 import { Controlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
 import 'codemirror/mode/css/css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/htmlmixed/htmlmixed';
-const FormItem = Form.Item;
 
 @inject('themeStore', 'sharedStore')
 @observer class ThemeForm extends React.Component<ThemeProps, {}> {
+    formRef = React.createRef<FormInstance>();
+
     state = {
         themeConfig: {}
     };
@@ -37,8 +36,8 @@ const FormItem = Form.Item;
                 themeConfig = JSON.parse(themeConfig);
             }
             this.state.themeConfig = themeConfig;
-        } catch (e) { 
-            /* JSON Parse Error */ 
+        } catch (e) {
+            /* JSON Parse Error */
         }
         this.props.themeStore.setData({theme: window.SysConfig.options.theme});
     }
@@ -49,23 +48,23 @@ const FormItem = Form.Item;
         if (themeStore.themeList.length === 0) {
             return null;
         }
-    
+
         let theme = themeStore.themeList.filter(themeItem => themeItem.id === themeStore.data.theme)[0];
         if (!theme.configElements || !Array.isArray(theme.configElements)) {
             return null;
         }
-    
+
         return (
           <div>
             <h3 style={{marginBottom: '20px'}}>{theme.name} 主题选项</h3>
             <Form
                 className="clearfix options-general"
-                onSubmit={e => this.saveThemeConfig(e)}
+                onFinish={() => this.saveThemeConfig()}
             >
                 {theme.configElements.map(this.renderConfigElement.bind(this))}
-                <FormItem>
+                <Form.Item>
                     <Button type="primary" htmlType="submit">保存配置</Button>
-                </FormItem>
+                </Form.Item>
             </Form>
           </div>
         );
@@ -75,7 +74,7 @@ const FormItem = Form.Item;
         if (element.type === 'html') {
           element.type = 'htmlmixed';
         }
-    
+
         switch (element.type) {
           case 'url':
           case 'text':
@@ -83,23 +82,23 @@ const FormItem = Form.Item;
           case 'textarea':
           case 'password':
             return (
-                <FormItem
+                <Form.Item
                     key={i}
                     label={element.label}
                 >
                     <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => {
-                      this.state.themeConfig[element.name] = e.target.value; 
+                      this.state.themeConfig[element.name] = e.target.value;
                       this.forceUpdate();
                     }} />
                     <p style={{width: 600}}>{element.help}</p>
-                </FormItem>
+                </Form.Item>
             );
-    
+
           case 'radio':
             if (!Array.isArray(element.options)) { return null; }
-    
+
             return (
-                <FormItem
+                <Form.Item
                     key={i}
                     label={element.label}
                 >
@@ -107,12 +106,12 @@ const FormItem = Form.Item;
                         {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
                     </RadioGroup>
                     <p style={{width: 600}}>{element.help}</p>
-                </FormItem>
+                </Form.Item>
             );
-    
+
           case 'checkbox':
             if (!Array.isArray(element.options)) { return null; }
-    
+
             return (
               <div className="form-group" key={i}>
                 <label>{element.label}</label>
@@ -148,10 +147,10 @@ const FormItem = Form.Item;
                 </div>
               </div>
             );
-    
+
           case 'select':
             if (!Array.isArray(element.options)) { return null; }
-    
+
             return (
               <div className="form-group" key={i}>
                 <label>{element.label}</label>
@@ -173,7 +172,7 @@ const FormItem = Form.Item;
                 </div>
               </div>
             );
-    
+
           case 'color':
             const clr = this.state.themeConfig[element.name];
             const [_, r, g, b, a] = (clr||'').match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
@@ -186,19 +185,19 @@ const FormItem = Form.Item;
                   </div>
                   { this.state[`display${element.name}`] ? <div className="popover-color">
                     <div className="cover" onClick={() => this.setState({[`display${element.name}`]: false})}/>
-                    <SketchPicker 
-                      color={{r, g, b, a: a||1}} 
+                    <SketchPicker
+                      color={{r, g, b, a: a||1}}
                       onChangeComplete={color => {
                         const {r, g, b, a} = color.rgb;
                         this.state.themeConfig[element.name] = `rgba(${r},${g},${b},${a||1})`;
                         this.forceUpdate();
-                      }} 
+                      }}
                     />
                   </div> : null}
                 </div>
               </div>
             );
-    
+
           case 'css':
           case 'htmlmixed':
           case 'javascript':
@@ -227,59 +226,44 @@ const FormItem = Form.Item;
         }
     }
 
-    saveThemeConfig(e: React.FormEvent) {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                window.SysConfig.options.themeConfig = this.state.themeConfig;
-                this.props.themeStore.themeConfigSave({themeConfig: JSON.stringify(this.state.themeConfig)});
-            }
-        });
+    saveThemeConfig() {
+        window.SysConfig.options.themeConfig = this.state.themeConfig;
+        this.props.themeStore.themeConfigSave({themeConfig: JSON.stringify(this.state.themeConfig)});
     }
-    handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                this.props.themeStore.themeSelect(values);
-            }
-        });
+    handleSubmit(values: any) {
+        this.props.themeStore.themeSelect(values);
     }
     handleThemeChanged(theme: string) {
-        this.props.form.setFieldsValue({theme});
+        this.formRef.current?.setFieldsValue({theme});
     }
     render() {
         const Option = Select.Option;
         const { themeStore } = this.props;
         const { themeList } = themeStore;
-        const { getFieldDecorator } = this.props.form;
         return (
             <div className="appearance-theme">
                 <BreadCrumb {...this.props} />
                 <div className="appearance-theme-wrapper">
                     <h3 className="theme-title">主题设置</h3>
-                    <Form onSubmit={e => this.handleSubmit(e)} layout="vertical">
-                        <FormItem
+                    <Form ref={this.formRef} onFinish={values => this.handleSubmit(values)} layout="vertical" scrollToFirstError>
+                        <Form.Item
                             label="主题选择"
+                            name="theme"
+                            initialValue={window.SysConfig.options.theme}
                         >
-                            {
-                                getFieldDecorator('theme', {
-                                    initialValue: window.SysConfig.options.theme
-                                })(
-                                    <Select
-                                        style={{width: 600}}
-                                        placeholder="请选择主题"
-                                        onChange={(theme: string) => this.handleThemeChanged(theme)}
-                                    >
-                                        {themeList.map((theme, key) => {
-                                            return <Option key={key.toString()} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
-                                        })}
-                                    </Select>
-                                )
-                            }
-                        </FormItem>
-                        <FormItem>
+                            <Select
+                                style={{width: 600}}
+                                placeholder="请选择主题"
+                                onChange={(theme: string) => this.handleThemeChanged(theme)}
+                            >
+                                {themeList.map((theme, key) => {
+                                    return <Option key={key.toString()} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
+                                })}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item>
                             <Button type="primary" htmlType="submit">提交</Button>
-                        </FormItem>
+                        </Form.Item>
                     </Form>
                     {this.renderThemeConfig()}
                 </div>
@@ -287,5 +271,5 @@ const FormItem = Form.Item;
         );
     }
 }
-const Theme = Form.create()(ThemeForm);
-export default Theme;
+
+export default ThemeForm;

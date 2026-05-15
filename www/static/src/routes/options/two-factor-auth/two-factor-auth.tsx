@@ -1,10 +1,8 @@
 import React from 'react';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form, FormInstance } from 'antd';
 import { Input, Button, Modal, Alert, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import QRCode from 'qrcode.react';
-const FormItem = Form.Item;
 const confirm = Modal.confirm;
 import BreadCrumb from '../../../components/breadcrumb';
 import { TwoFactorAuthProps } from './two-factor-auth.model';
@@ -13,6 +11,8 @@ import './two-factor-auth.less';
 @inject('twoFactorAuthStore')
 @observer
 class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
+    formRef = React.createRef<FormInstance>();
+
     state = {
         options: window.SysConfig.options,
         step: 1,
@@ -26,26 +26,19 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
         this.getQRCode();
     }
 
-    handleSubmit = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                const data = {
-                    code: values.code,
-                    secret: this.props.twoFactorAuthStore.data.secret,
-                };
-                this.props.twoFactorAuthStore.authQRCode(data)
-                .subscribe(
-                    res => {
-                        if (res.errno === 0) {
-                            this.updateStep(4);                            
-                        }
-                    }
-                );
-                // request
-
+    handleSubmit = (values: any) => {
+        const data = {
+            code: values.code,
+            secret: this.props.twoFactorAuthStore.data.secret,
+        };
+        this.props.twoFactorAuthStore.authQRCode(data)
+        .subscribe(
+            res => {
+                if (res.errno === 0) {
+                    this.updateStep(4);
+                }
             }
-        });
+        );
     }
 
     getQRCode() {
@@ -140,29 +133,25 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
     }
 
     step3() {
-        const { getFieldDecorator } = this.props.form;
         const { otpauth_url } = this.props.twoFactorAuthStore.data;
         return (
             <div>
                 <p>打开两步验证的应用，扫描下面的二维码</p>
                 <QRCode value={otpauth_url} size={256} />
-                <Form onSubmit={this.handleSubmit}>
-                    <FormItem
-                        // {...formItemLayout}
+                <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                    <Form.Item
                         label="填写 6 位校验码"
+                        name="code"
+                        rules={[
+                            {required: true, message: '填写 6 位校验码'},
+                            {len: 6, message: '请填写 6 位校验码'},
+                        ]}
                     >
-                        {getFieldDecorator('code', {
-                            rules: [
-                                {required: true, message: '填写 6 位校验码'},
-                                {len: 6, message: '请填写 6 位校验码'},
-                            ]
-                        })(
-                            <Input type="number" style={{width: 256}} />
-                        )}
-                    </FormItem>
-                    <FormItem>
+                        <Input type="number" style={{width: 256}} />
+                    </Form.Item>
+                    <Form.Item>
                         <Button type="primary" htmlType="submit">验证</Button>
-                    </FormItem>
+                    </Form.Item>
                 </Form>
             </div>
         );
@@ -194,7 +183,7 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
                 return this.step1();
         }
     }
-    
+
     render() {
         return (
             <>
@@ -207,5 +196,5 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
         );
     }
 }
-const TwoFactorAuth = Form.create()(TwoFactorAuthForm);
-export default TwoFactorAuth;
+
+export default TwoFactorAuthForm;

@@ -23,7 +23,7 @@ class ArticleControlUser extends React.Component<ACUserProps, any> {
                 placeholder="选择作者"
                 optionFilterProp="children"
                 onChange={this.props.handleUserChange}
-                filterOption={(input, option) => (option.props.children as string).toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                filterOption={(input, option) => ((option?.children ?? option?.label) as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0}
                 value={this.props.user}
             >
                 {users.map((user: any, key: number) => <Option key={key} value={user.id}>{user.name}</Option>)}

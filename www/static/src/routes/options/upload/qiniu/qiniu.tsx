@@ -1,8 +1,6 @@
 import React from 'react';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
+import { Form } from 'antd';
 import { Input } from 'antd';
-const FormItem = Form.Item;
 import { OptionsUploadItemsProps } from '../upload.model';
 
 class OptionsUploadQiNiuFormItems extends React.Component<OptionsUploadItemsProps, {}> {
@@ -10,73 +8,62 @@ class OptionsUploadQiNiuFormItems extends React.Component<OptionsUploadItemsProp
     constructor(props: OptionsUploadItemsProps) {
         super(props);
     }
-    
+
     render() {
-        const { getFieldDecorator } = this.props.form;
         return (
             <>
                 {/* AccessKey */}
-                <FormItem
+                <Form.Item
                     label="AccessKey"
+                    name="accessKey"
+                    rules={[
+                        {required: true, message: '请填写七牛云的accessKey'}
+                    ]}
+                    initialValue={this.props.upload.accessKey || ''}
                 >
-                    {getFieldDecorator('accessKey', {
-                        rules: [
-                            {required: true, message: '请填写七牛云的accessKey'}
-                        ],
-                        initialValue: this.props.upload.accessKey || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* SecretKey */}
-                <FormItem
+                <Form.Item
                     label="SecretKey"
+                    name="secretKey"
+                    rules={[
+                        {required: true, message: '请填写七牛云的secretKey'}
+                    ]}
+                    initialValue={this.props.upload.secretKey || ''}
                 >
-                    {getFieldDecorator('secretKey', {
-                        rules: [
-                            {required: true, message: '请填写七牛云的secretKey'}
-                        ],
-                        initialValue: this.props.upload.secretKey || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 空间名(Bucket) */}
-                <FormItem
+                <Form.Item
                     label="空间名(Bucket)"
+                    name="bucket"
+                    rules={[
+                        {required: true, message: '请填写七牛云的空间名'}
+                    ]}
+                    initialValue={this.props.upload.bucket || ''}
                 >
-                    {getFieldDecorator('bucket', {
-                        rules: [
-                            {required: true, message: '请填写七牛云的空间名'}
-                        ],
-                        initialValue: this.props.upload.bucket || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 七牛云域名 */}
-                <FormItem
+                <Form.Item
                     label="七牛云域名"
+                    name="origin"
+                    rules={[
+                        {required: true, message: '请填写七牛云的域名'}
+                    ]}
+                    initialValue={this.props.upload.origin || ''}
                 >
-                    {getFieldDecorator('origin', {
-                        rules: [
-                            {required: true, message: '请填写七牛云的域名'}
-                        ],
-                        initialValue: this.props.upload.origin || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 路径前缀 */}
-                <FormItem
+                <Form.Item
                     label="路径前缀"
+                    name="prefix"
+                    initialValue={this.props.upload.prefix || ''}
                 >
-                    {getFieldDecorator('prefix', {
-                        initialValue: this.props.upload.prefix || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
             </>
         );
     }

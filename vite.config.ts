@@ -7,16 +7,7 @@ export default defineConfig(({ mode }) => ({
     root: path.resolve(__dirname, 'www/static/src'),
     base: '/static/dist/',
 
-    plugins: [
-        react({
-            babel: {
-                plugins: [
-                    // On-demand import of antd components and pre-compiled CSS
-                    ['import', { libraryName: 'antd', libraryDirectory: 'lib', style: 'css' }],
-                ],
-            },
-        }),
-    ],
+    plugins: [react()],
 
     resolve: {},
 

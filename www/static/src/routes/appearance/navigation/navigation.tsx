@@ -103,7 +103,7 @@ class Navigation extends React.Component<any, any> {
                     <Divider type="vertical" />
                     <Button 
                         onClick={() => this.delete(i)}
-                        type="danger" 
+                        danger 
                         size="small" 
                         icon={<DeleteOutlined />}
                     >
