@@ -202,20 +202,18 @@ class LoginForm extends React.Component<LoginProps, any> {
                 <Input prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="密码" />
               </Form.Item>
               {this.getTwoFactorAuth()}
-              <Form.Item
-                name="remember"
-                valuePropName="checked"
-                initialValue={true}
-              >
-                <Checkbox style={{ fontWeight: 'normal' }}>自动登录</Checkbox>
-              </Form.Item>
               <Form.Item>
-                <div className={classnames('right', 'forgot-password', {
-                  hidden: window.SysConfig.options.ldap_on === '1'
-                })}>
-                  {!window.SysConfig.options.intranet ? null : <a href="/admin/user/intranet">域账号登录</a>}
-                  {!window.SysConfig.options.intranet ? null : <a href="javascript:void(0)"> | </a>}
-                  <a href="javascript:void(0)" onClick={() => this.toggleForgot()}>找回密码</a>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <Form.Item name="remember" valuePropName="checked" initialValue={true} noStyle>
+                    <Checkbox style={{ fontWeight: 'normal' }}>自动登录</Checkbox>
+                  </Form.Item>
+                  <div className={classnames('right', 'forgot-password', {
+                    hidden: window.SysConfig.options.ldap_on === '1'
+                  })}>
+                    {!window.SysConfig.options.intranet ? null : <a href="/admin/user/intranet">域账号登录</a>}
+                    {!window.SysConfig.options.intranet ? null : <a href="javascript:void(0)"> | </a>}
+                    <a href="javascript:void(0)" onClick={() => this.toggleForgot()}>找回密码</a>
+                  </div>
                 </div>
                 <Button
                   style={{ width: '100%' }}
@@ -225,7 +223,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                   loading={this.props.loginStore.loading}
                 >
                   登录
-                  </Button>
+                </Button>
               </Form.Item>
             </Form>
             <div className="form-footer">
