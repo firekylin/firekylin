@@ -1,28 +1,28 @@
-{% extends './layout.html' %}
+<% layout("./layout.html") %>
 
-{% block title -%}
-归档 - {{options.title}}
-{%- endblock %}
+<% block("title", function(){ %>
+归档 - <%= options.title %>
+<% }) %>
 
-{% block headers -%}
-<link rel="canonical" href="{{site_url}}/archives" />
-{%- endblock %}
+<% block("headers", function(){ %>
+<link rel="canonical" href="<%= site_url %>/archives" />
+<% }) %>
 
-{% block content %}
+<% block("content", function(){ %>
 <article class="post archive">
     <h1 class="title">归档</h1>
-    {% for yearMonth,data in list%}
+    <% for (const yearMonth in list) { const data = list[yearMonth]; %>
     <div class="entry-content">
-        <h3>{{yearMonth}} ({{data.length}})</h3>
+        <h3><%= yearMonth %> (<%= data.length %>)</h3>
         <ul>
-        {% for item in data %}
+        <% for (const item of data) { %>
         <li>
-            <a href="/post/{{item.pathname}}.html" title="{{item.title}}">{{item.title}}</a>&nbsp;
-            <span class="date">{{think.datetime(item.create_time, 'YYYY-MM-DD')}}</span>
+            <a href="/post/<%= item.pathname %>.html" title="<%= item.title %>"><%= item.title %></a>&nbsp;
+            <span class="date"><%= think.datetime(item.create_time, 'YYYY-MM-DD') %></span>
         </li>
-        {% endfor %}
+        <% } %>
         </ul>
     </div>
-    {% endfor %}
+    <% } %>
 </article>
-{% endblock %}
+<% }) %>

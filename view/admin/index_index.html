@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>{{options.title}}</title>
-  <link rel="icon" href="{{options.favicon_url |default('/static/img/firekylin.jpg')}}">
+  <title><%= options.title %></title>
+  <link rel="icon" href="<%= defaultValue(options.favicon_url, '/static/img/firekylin.jpg') %>">
   <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/css/admin.css">
   <link rel="stylesheet" href="/static/css/icon.css">
@@ -17,16 +17,16 @@
 <body>
 <script>
 window.SysConfig = {
-  userInfo: {{JSON.stringify(userInfo) | safe}},
-  options: {{JSON.stringify({
+  userInfo: <%~ JSON.stringify(userInfo) %>,
+  options: <%~ JSON.stringify({
     title: options.title,
     two_factor_auth: options.two_factor_auth,
     ldap_on: options.ldap_on,
     intranet: options.intranet,
     password_salt: options.password_salt
-  }) | safe}},
+  }) %>,
   config: {
-    disallow_file_edit: {% if think.config('DISALLOW_FILE_EDIT') %}true{% else %}false{% endif %}
+    disallow_file_edit: <% if (think.config('DISALLOW_FILE_EDIT')) { %>true<% } else { %>false<% } %>
   }
 };
 </script>
