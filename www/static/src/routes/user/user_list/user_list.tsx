@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Tabs, Button } from 'antd';
+import { Tabs, Button, Space } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { UserProps } from '../user.model';
 import { message, Modal } from 'antd';
@@ -123,48 +123,48 @@ export default class extends React.Component<UserProps, any> {
                     <td>{item.create_time}</td>
                     <td>{item.last_login_time}</td>
                     <td>
-                        {this.userStore.key === '0' ? (
-                            <Link to={`/user/edit/${item.id}`}>
-                                <Button
-                                    type="primary"
-                                    icon={<EditOutlined />}
-                                    size="small"
-                                    style={{ marginLeft: 8 }}
+                        <Space size="small">
+                            {this.userStore.key === '0' ? (
+                                <Link to={`/user/edit/${item.id}`}>
+                                    <Button
+                                        type="primary"
+                                        icon={<EditOutlined />}
+                                        size="small"
+                                    >
+                                        编辑
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn-success btn-xs"
+                                    onClick={this.pass.bind(this, item)}
                                 >
-                                    编辑
+                                    <span className="glyphicon glyphicon-ok" />
+                                    通过
+                                </button>
+                            )}
+                            {this.userStore.key === '0' ? (
+                                <Button
+                                    onClick={this.handleDelete.bind(this, item)}
+                                    type="primary"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    size="small"
+                                >
+                                    删除
                                 </Button>
-                            </Link>
-                        ) : (
-                            <button
-                                type="button"
-                                className="btn btn-success btn-xs"
-                                onClick={this.pass.bind(this, item)}
-                            >
-                                <span className="glyphicon glyphicon-ok" />
-                                通过
-                            </button>
-                        )}
-                        &nbsp;
-                        {this.userStore.key === '0' ? (
-                            <Button
-                                onClick={this.handleDelete.bind(this, item)}
-                                style={{ marginLeft: 8 }}
-                                danger
-                                icon={<DeleteOutlined />}
-                                size="small"
-                            >
-                                删除
-                            </Button>
-                        ) : (
-                            <button
-                                type="button"
-                                className="btn btn-warning btn-xs"
-                                onClick={this.deny.bind(this, item)}
-                            >
-                                <span className="glyphicon glyphicon-remove" />
-                                拒绝
-                            </button>
-                        )}
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn-warning btn-xs"
+                                    onClick={this.deny.bind(this, item)}
+                                >
+                                    <span className="glyphicon glyphicon-remove" />
+                                    拒绝
+                                </button>
+                            )}
+                        </Space>
                     </td>
                 </tr>
             );

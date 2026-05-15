@@ -74,7 +74,7 @@ class Navigation extends React.Component<any, any> {
                 <Button 
                         disabled={i === 0}
                         onClick={() => this.move(i - 1, i)}
-                        className="ant-btn-success"
+                        className="fk-btn-success"
                         size="small" 
                         icon={<ArrowUpOutlined />}
                     >
@@ -84,7 +84,7 @@ class Navigation extends React.Component<any, any> {
                     <Button 
                         disabled={i === this.state.list.length - 1}
                         onClick={() => this.move(i, i + 1)}
-                        className="ant-btn-success"
+                        className="fk-btn-success"
                         type="primary" 
                         size="small" 
                         icon={<ArrowDownOutlined />}

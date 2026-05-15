@@ -99,7 +99,7 @@ class LoginForm extends React.Component<LoginProps, any> {
             </Form.Item>
             <Form.Item>
               <Button
-                style={{ width: '100%' }}
+                block
                 type="primary"
                 htmlType="submit"
                 className="login-form-button"
@@ -143,7 +143,7 @@ class LoginForm extends React.Component<LoginProps, any> {
             </Form.Item>
             <Form.Item>
               <Button
-                style={{ width: '100%' }}
+                block
                 type="primary"
                 htmlType="submit"
                 className="login-form-button"
@@ -216,7 +216,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                   </div>
                 </div>
                 <Button
-                  style={{ width: '100%' }}
+                  block
                   type="primary"
                   htmlType="submit"
                   className="login-form-button"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Table, Modal, message } from 'antd';
+import { Button, Table, Modal, message, Space } from 'antd';
 import { Observable, of } from 'rxjs';
 import { tap, startWith, switchMap, catchError } from 'rxjs/operators';
 import { useEventCallback } from 'rxjs-hooks';
@@ -76,18 +76,17 @@ export function TagList(props: TagProps) {
                     title="操作"
                     key="action"
                     render={(tag: Tag) => (
-                        <>
-                            <Button 
+                        <Space size="small">
+                            <Button
                                 onClick={() => props.history.push(`/tag/edit/${tag.id}`)}
-                                type="primary" 
-                                icon={<EditOutlined />} 
-                                size="small" 
-                                style={{marginLeft: 8}}
+                                type="primary"
+                                icon={<EditOutlined />}
+                                size="small"
                             >
                                 编辑
                             </Button>
-                            <Button onClick={(e) => tagDelete(e, tag.id)} style={{marginLeft: 8}} danger icon={<DeleteOutlined />} size="small">删除</Button>
-                        </>
+                            <Button onClick={(e) => tagDelete(e, tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+                        </Space>
                     )}
                 />
             </Table>

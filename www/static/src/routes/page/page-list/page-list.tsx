@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Table, Button, message } from 'antd';
+import { Table, Button, message, Space } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
@@ -83,7 +83,7 @@ class PageList extends React.Component<PageListProps, {}> {
                     title="操作"
                     key="action"
                     render={page => (
-                        <>
+                        <Space size="small">
                             <Button
                                 onClick={() =>
                                     this.props.history.push(`/page/edit/${page.id}`)
@@ -96,14 +96,14 @@ class PageList extends React.Component<PageListProps, {}> {
                             </Button>
                             <Button
                                 onClick={() => this.delete(page.id)}
-                                style={{ marginLeft: 8 }}
+                                type="primary"
                                 danger
                                 icon={<DeleteOutlined />}
                                 size="small"
                             >
                                 删除
                             </Button>
-                        </>
+                        </Space>
                     )}
                 />
             </Table>

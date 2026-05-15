@@ -126,7 +126,6 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
                             </Form.Item>
                             <Form.Item>
                                 <Button
-                                    className="upload-demo-start"
                                     type="primary"
                                     onClick={() => this.handleUpload()}
                                     disabled={this.state.fileList.length === 0}
