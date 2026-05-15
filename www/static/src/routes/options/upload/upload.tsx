@@ -1,5 +1,7 @@
 import React from 'react';
-import { Form, Button, Radio } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Radio } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { OptionsUploadProps } from './upload.model';
 import { UploadEnum } from './upload.enum';

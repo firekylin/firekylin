@@ -1,5 +1,7 @@
 import React from 'react';
-import { Form, Input, Button, Radio } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, Radio } from 'antd';
 import { LDAPProps } from '../ldap.model';
 import RadioGroup from 'antd/lib/radio/group';
 const FormItem = Form.Item;

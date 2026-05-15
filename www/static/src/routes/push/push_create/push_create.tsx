@@ -2,7 +2,9 @@ import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 import { PushProps } from '../push.model';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, message, Input } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { message, Input } from 'antd';
 
 @inject('pushStore')
 @observer

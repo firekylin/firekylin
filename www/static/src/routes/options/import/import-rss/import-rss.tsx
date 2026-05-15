@@ -1,3 +1,4 @@
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Input, Divider, Button, message, Select } from 'antd';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
@@ -77,7 +78,7 @@ class OptionsImportRss extends React.Component<any, any> {
                         }}
                         type="primary" 
                         size="small" 
-                        icon="edit"
+                        icon={<EditOutlined />}
                     >
                         编辑
                     </Button>
@@ -90,7 +91,7 @@ class OptionsImportRss extends React.Component<any, any> {
                         }}
                         type="danger" 
                         size="small" 
-                        icon="delete"
+                        icon={<DeleteOutlined />}
                     >
                         删除
                     </Button>
@@ -293,7 +294,7 @@ class OptionsImportRss extends React.Component<any, any> {
                         onClick={() => this.add()}
                         type="primary" 
                         size="small" 
-                        icon="plus"
+                        icon={<PlusOutlined />}
                     >
                         新增
                     </Button>

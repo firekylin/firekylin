@@ -1,5 +1,7 @@
 import React from 'react';
-import { Form, Input, Button, Modal, Alert, message } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, Modal, Alert, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import QRCode from 'qrcode.react';
 const FormItem = Form.Item;

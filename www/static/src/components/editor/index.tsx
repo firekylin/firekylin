@@ -7,9 +7,11 @@ import * as React from 'react';
 
 // import Search from './search';
 import './style.less';
-import { Modal, Form, message } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, message } from 'antd';
 import EditorLinkModal from './link-modal/link-modal';
-import { WrappedFormUtils } from 'antd/lib/form/Form';
+import { WrappedFormUtils } from '@ant-design/compatible/lib/form/Form';
 import EditorImageModal from './image-modal/image-modal';
 import { UploadChangeParam } from 'antd/lib/upload';
 import { http } from '../../utils/http';

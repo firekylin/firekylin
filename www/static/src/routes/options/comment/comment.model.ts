@@ -1,4 +1,4 @@
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import CommentStore from './comment.store';
 
 export interface CommentProps extends FormComponentProps {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, message } from 'antd';
 import { TagAPI } from '../tag.api';
 import { TagCreateOrEditProps } from './create-or-edit.model';
 import { tap } from 'rxjs/operators';

@@ -18,12 +18,7 @@ export default defineConfig(({ mode }) => ({
         }),
     ],
 
-    resolve: {
-        alias: {
-            // Workaround for antd v3 icon bundle size: https://github.com/ant-design/ant-design/issues/12011
-            '@ant-design/icons/lib/dist': path.resolve(__dirname, 'www/static/src/icons.js'),
-        },
-    },
+    resolve: {},
 
     css: {
         preprocessorOptions: {

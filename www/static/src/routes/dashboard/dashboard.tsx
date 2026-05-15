@@ -4,7 +4,7 @@ import { observer, inject } from 'mobx-react';
 import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
 import { NavLink } from 'react-router-dom';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { Modal } from 'antd';
 import { Subscription } from 'rxjs';
 const confirm = Modal.confirm;
@@ -140,7 +140,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
                         <ul>
                             {(posts as any[]).map(post =>
                             <li key={post.id}>
-                                <label>{moment(new Date(post.create_time)).format('MM.DD')}：</label>
+                                <label>{dayjs(post.create_time).format('MM.DD')}：</label>
                                 <a href={`/post/${post.pathname}`} target="_blank">{post.title}</a>
                             </li>
                             )}

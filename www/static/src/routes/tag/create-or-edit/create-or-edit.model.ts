@@ -1,4 +1,4 @@
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import { TagProps } from '../tag.model';
 
 export interface TagCreateOrEditProps extends TagProps, FormComponentProps  {

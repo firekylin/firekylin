@@ -1,4 +1,4 @@
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import ReadingStore from './reading.store';
 import SharedStore from '../../../shared.store';
 

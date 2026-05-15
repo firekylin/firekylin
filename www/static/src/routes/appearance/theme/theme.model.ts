@@ -1,6 +1,6 @@
 import { AppearanceProps } from '../appearance.model';
 import ThemeStore from './theme.store';
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 
 export interface ThemeProps extends AppearanceProps, FormComponentProps {
     themeStore: ThemeStore;

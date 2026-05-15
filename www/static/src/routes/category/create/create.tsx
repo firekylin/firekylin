@@ -1,6 +1,8 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, Input, Button, Select } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, Select } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { CategoryCreateProps } from './create.model';
 const FormItem = Form.Item;

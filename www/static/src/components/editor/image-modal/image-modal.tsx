@@ -1,8 +1,10 @@
 import React from 'react';
-import { Input, Modal, Tabs, Form, Upload, message, Icon } from 'antd';
+import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Modal, Tabs, Upload, message } from 'antd';
 import { ChangeEvent } from 'react';
 import { ModalProps } from 'antd/lib/modal';
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import { UploadChangeParam } from 'antd/lib/upload';
 import './image-modal.less';
 
@@ -62,7 +64,7 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
         const imageUrl = this.props.imageUrl;
         const uploadButton = (
             <div>
-              <Icon type={this.state.loading ? 'loading' : 'plus'} />
+              <LegacyIcon type={this.state.loading ? 'loading' : 'plus'} />
               <div className="ant-upload-text">Upload</div>
             </div>
         );

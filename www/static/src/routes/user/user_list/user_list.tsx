@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Tabs, Button } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { UserProps } from '../user.model';
@@ -126,7 +127,7 @@ export default class extends React.Component<UserProps, any> {
                             <Link to={`/user/edit/${item.id}`}>
                                 <Button
                                     type="primary"
-                                    icon="edit"
+                                    icon={<EditOutlined />}
                                     size="small"
                                     style={{ marginLeft: 8 }}
                                 >
@@ -149,7 +150,7 @@ export default class extends React.Component<UserProps, any> {
                                 onClick={this.handleDelete.bind(this, item)}
                                 style={{ marginLeft: 8 }}
                                 type="danger"
-                                icon="delete"
+                                icon={<DeleteOutlined />}
                                 size="small"
                             >
                                 删除

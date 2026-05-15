@@ -1,6 +1,8 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, Input, Button, Upload, Icon, message } from 'antd';
+import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, Upload, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { GeneralProps } from './general.model';
 import { UploadChangeParam } from 'antd/lib/upload';
@@ -106,7 +108,7 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         }
         const uploadButton = (
             <div>
-              <Icon type={this.props.generalStore.loading.logo ? 'loading' : 'plus'} />
+              <LegacyIcon type={this.props.generalStore.loading.logo ? 'loading' : 'plus'} />
               <div className="ant-upload-text">Upload</div>
             </div>
         );

@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Input, Form } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input } from 'antd';
 import './article-header.less';
 import classNames from 'classnames';
 const FormItem = Form.Item;

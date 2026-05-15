@@ -1,7 +1,9 @@
 import * as React from 'react';
-import { Input, Modal, Tabs, Form, Select } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Modal, Tabs, Select } from 'antd';
 import { ModalProps } from 'antd/lib/modal';
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const Option = Select.Option;

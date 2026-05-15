@@ -1,4 +1,4 @@
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import { ImportBlogsEnum } from './import.enum';
 import { UploadFile } from 'antd/lib/upload/interface';
 

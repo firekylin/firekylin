@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, DatePicker, message } from 'antd';
 import { inject, observer } from 'mobx-react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { zip } from 'rxjs';
 import pinyin from 'tiny-pinyin';
 
@@ -98,7 +98,7 @@ class Article extends React.Component<ArticleProps, {}> {
         }
     }
     // 发布日期
-    onDateChange(date: moment.Moment) {
+    onDateChange(date: dayjs.Dayjs) {
         this.props.articleStore.setArticleInfo({ create_time: date });
     }
     // Tag
@@ -264,7 +264,7 @@ class Article extends React.Component<ArticleProps, {}> {
             pathname: articleInfo.pathname || 'untitled',
             markdown_content: articleInfo.markdown_content,
             create_time: articleInfo.create_time,
-            update_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+            update_time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
             user: this.props.userStore.userList.filter(
                 user => +user.id === +articleInfo.user_id,
             )[0],
@@ -341,7 +341,7 @@ class Article extends React.Component<ArticleProps, {}> {
                                 showTime={true}
                                 allowClear={false}
                                 format="YYYY-MM-DD HH:mm:ss"
-                                value={moment(articleInfo.create_time)}
+                                value={dayjs(articleInfo.create_time)}
                                 placeholder="请选择日期"
                                 onChange={date => this.onDateChange(date)}
                             />

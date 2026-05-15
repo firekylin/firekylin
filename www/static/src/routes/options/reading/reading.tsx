@@ -1,6 +1,8 @@
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, Input, Button, Radio, Select } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, Radio, Select } from 'antd';
 import { inject, observer } from 'mobx-react';
 import { ReadingProps } from './reading.model';
 import './reading.less';

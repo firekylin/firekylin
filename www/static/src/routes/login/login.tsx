@@ -1,6 +1,9 @@
 import * as React from 'react';
 import classnames from 'classnames';
-import { Input, Form, Icon, Button, Checkbox } from 'antd';
+import { LockOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Input, Button, Checkbox } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { LoginProps } from './login.model';
 const FormItem = Form.Item;
@@ -54,7 +57,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                 message: '请填写二步验证码'
               }],
             })(
-              <Input prefix={<Icon type="safety" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="二步验证码" />
+              <Input prefix={<SafetyOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="二步验证码" />
             )}
           </FormItem>
         </Form>
@@ -112,7 +115,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                   message: '请填写密码!'
                 }],
               })(
-                <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="请输入新密码" />
+                <Input prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="请输入新密码" />
               )}
             </FormItem>
             <FormItem>
@@ -159,7 +162,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                   message: '请输入您的用户名或电子邮箱地址!'
                 }],
               })(
-                <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名或电子邮箱地址" />
+                <Input prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名或电子邮箱地址" />
               )}
             </FormItem>
             <FormItem>
@@ -216,14 +219,14 @@ class LoginForm extends React.Component<LoginProps, any> {
                     message: '请输入用户名!'
                   }],
                 })(
-                  <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名" />
+                  <Input prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="text" placeholder="用户名" />
                 )}
               </FormItem>
               <FormItem>
                 {getFieldDecorator('password', {
                   rules: [{ required: true, message: '请输入密码!' }],
                 })(
-                  <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="密码" />
+                  <Input prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="密码" />
                 )}
               </FormItem>
               {this.getTwoFactorAuth()}

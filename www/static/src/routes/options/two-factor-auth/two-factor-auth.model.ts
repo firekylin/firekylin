@@ -1,4 +1,4 @@
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import TwoFactorAuthStore from './two-factor-auth.store';
 
 export interface TwoFactorAuthProps extends FormComponentProps {

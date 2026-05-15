@@ -1,5 +1,5 @@
 import { AppearanceProps } from '../appearance.model';
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import NavigationStore from './navigation.store';
 
 export interface NavigationProps extends AppearanceProps, FormComponentProps {

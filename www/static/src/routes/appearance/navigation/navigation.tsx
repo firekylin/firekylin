@@ -1,3 +1,11 @@
+import {
+    ArrowDownOutlined,
+    ArrowUpOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    PlusOutlined,
+} from '@ant-design/icons';
+
 import { Input, Divider, Button, message } from 'antd';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
@@ -68,7 +76,7 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.move(i - 1, i)}
                         className="ant-btn-success"
                         size="small" 
-                        icon="arrow-up"
+                        icon={<ArrowUpOutlined />}
                     >
                         上移
                     </Button>
@@ -79,7 +87,7 @@ class Navigation extends React.Component<any, any> {
                         className="ant-btn-success"
                         type="primary" 
                         size="small" 
-                        icon="arrow-down"
+                        icon={<ArrowDownOutlined />}
                     >
                         下移
                     </Button>
@@ -88,7 +96,7 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.setState({editingRow: i, editingNav: Object.assign({}, nav)})}
                         type="primary" 
                         size="small" 
-                        icon="edit"
+                        icon={<EditOutlined />}
                     >
                         编辑
                     </Button>
@@ -97,7 +105,7 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.delete(i)}
                         type="danger" 
                         size="small" 
-                        icon="delete"
+                        icon={<DeleteOutlined />}
                     >
                         删除
                     </Button>
@@ -316,7 +324,7 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.add()}
                         type="primary" 
                         size="small" 
-                        icon="plus"
+                        icon={<PlusOutlined />}
                     >
                         新增
                     </Button>

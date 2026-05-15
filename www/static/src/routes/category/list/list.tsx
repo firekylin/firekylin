@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
+import { DeleteOutlined, EditOutlined, StarOutlined } from '@ant-design/icons';
 import { Button, Table, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { CategoryListProps } from './list.model';
@@ -69,7 +70,7 @@ const confirm = Modal.confirm;
                                     onClick={() => this.setDefault(post.id)} 
                                     className={classnames({'defaultCatButton': !(defaultCategory === post.id.toString())})}
                                     type="primary" 
-                                    icon="star" 
+                                    icon={<StarOutlined />} 
                                     size="small"
                                 >
                                     默认
@@ -77,13 +78,13 @@ const confirm = Modal.confirm;
                                 <Button 
                                     onClick={() => this.props.history.push(`/cate/edit/${post.id}`)}
                                     type="primary" 
-                                    icon="edit" 
+                                    icon={<EditOutlined />} 
                                     size="small" 
                                     style={{marginLeft: 8}}
                                 >
                                     编辑
                                 </Button>
-                                <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                                <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon={<DeleteOutlined />} size="small">删除</Button>
                             </>
                         )}
                     />

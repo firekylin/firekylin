@@ -1,4 +1,4 @@
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import OptionsUploadStore from './upload.store';
 
 export interface OptionsUploadProps extends FormComponentProps {

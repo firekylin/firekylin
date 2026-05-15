@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Table, Modal, message } from 'antd';
 import { Observable, of } from 'rxjs';
 import { tap, startWith, switchMap, catchError } from 'rxjs/operators';
@@ -79,13 +80,13 @@ export function TagList(props: TagProps) {
                             <Button 
                                 onClick={() => props.history.push(`/tag/edit/${tag.id}`)}
                                 type="primary" 
-                                icon="edit" 
+                                icon={<EditOutlined />} 
                                 size="small" 
                                 style={{marginLeft: 8}}
                             >
                                 编辑
                             </Button>
-                            <Button onClick={(e) => tagDelete(e, tag.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
+                            <Button onClick={(e) => tagDelete(e, tag.id)} style={{marginLeft: 8}} type="danger" icon={<DeleteOutlined />} size="small">删除</Button>
                         </>
                     )}
                 />

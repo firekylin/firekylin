@@ -2,9 +2,11 @@ import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 // import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, message, Input, Select } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { message, Input, Select } from 'antd';
 import md5 from 'md5';
-import { FormComponentProps } from 'antd/lib/form';
+import { FormComponentProps } from '@ant-design/compatible/lib/form';
 import UserStore from '../user.store';
 import { RouteComponentProps } from 'react-router';
 

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Form, Button, Radio } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Radio } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import RadioGroup from 'antd/lib/radio/group';
 import { OptionsExportProps, OptionsExportState } from './export.model';
