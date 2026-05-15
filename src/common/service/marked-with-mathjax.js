@@ -33,7 +33,7 @@ module.exports = class extends think.Service {
     var tokens = marked.lexer(content);
 
     // 处理LaTeX公式
-    const dfs = async (tokensArr) => {
+    const dfs = async(tokensArr) => {
       for (let i = 0; i < (tokensArr?.length || 0); i++) {
         const item = tokensArr[i];
 
@@ -46,7 +46,7 @@ module.exports = class extends think.Service {
                 type: 'html',
                 text: await this._renderMathJax(item.text, 'block')
               }
-            ],
+            ]
           };
         }
 
@@ -94,4 +94,4 @@ module.exports = class extends think.Service {
     }
     return marked.parser(tokens);
   }
-}
+};

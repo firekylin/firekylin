@@ -22,11 +22,11 @@ module.exports = class extends think.Logic {
   }
 
   previewCheck() {
-    if(!this.isPost) {
+    if (!this.isPost) {
       return true;
     }
 
-    let rules = {
+    const rules = {
       preview: {
         method: 'GET',
         boolean: true
@@ -36,8 +36,8 @@ module.exports = class extends think.Logic {
       }
     };
 
-    if(!this.validate(rules)) {
+    if (!this.validate(rules)) {
       this.ctx.throw(400);
     }
   }
-}
+};

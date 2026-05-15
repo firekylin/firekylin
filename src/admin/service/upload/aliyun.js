@@ -20,4 +20,4 @@ module.exports = class extends Base {
   async run(file, config) {
     return await this.upload(file, config);
   }
-}
+};

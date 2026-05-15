@@ -34,14 +34,13 @@ module.exports = class extends Base {
    * 导入文章
    */
   async post(posts = []) {
-    if(!Array.isArray(posts)) {
+    if (!Array.isArray(posts)) {
       return 0;
     }
 
-
     const postsPromise = posts.map(async item => {
-      try{
-        //获取用户
+      try {
+        // 获取用户
         const user = await this._think.session('userInfo');
 
         let post = {
@@ -59,7 +58,7 @@ module.exports = class extends Base {
         };
         post = await think.model('post', null, 'admin').getContentAndSummary(post);
         await this.postModelInstance.addPost(post);
-      } catch(e) {
+      } catch (e) {
         console.log(e); // eslint-disable-line no-console
       }
     });
@@ -79,17 +78,17 @@ module.exports = class extends Base {
     try {
       const filePath = file.path.replace(/[^a-zA-Z0-9./_-]/g, '');
       execSync(`rm -rf ${PATH}; mkdir ${PATH}; cd ${PATH}; tar zxvf "${filePath}"`);
-      let files = fs.readdirSync(PATH, {encoding: 'utf-8'});
-      if(!files.length) { return []; }
+      const files = fs.readdirSync(PATH, {encoding: 'utf-8'});
+      if (!files.length) { return [] }
 
       return files.map(function(file) {
-        let tar = path.join(PATH, file);
-        let title = file.split('.').slice(0, -1).join('');
-        let content = fs.readFileSync(tar, {encoding: 'utf-8'});
-        let stat = fs.statSync(tar);
+        const tar = path.join(PATH, file);
+        const title = file.split('.').slice(0, -1).join('');
+        const content = fs.readFileSync(tar, {encoding: 'utf-8'});
+        const stat = fs.statSync(tar);
 
-        //add symbilic link check
-        if(fs.lstatSync(tar).isSymbolicLink()) {
+        // add symbilic link check
+        if (fs.lstatSync(tar).isSymbolicLink()) {
           return null;
         }
 
@@ -101,7 +100,7 @@ module.exports = class extends Base {
           markdown_content: content
         };
       }).filter(v => v);
-    } catch(e) {
+    } catch (e) {
       throw new Error(e);
     }
   }
@@ -112,4 +111,4 @@ module.exports = class extends Base {
   async run(file) {
     return await this.importData(this.parseFile(file));
   }
-}
+};

@@ -16,7 +16,7 @@ module.exports = class extends Base {
 
     const fileData = await readFileAsync(filename);
     const resp = await upyunInstance.putFile(savePath, fileData);
-    if(resp !== true && typeof resp !== 'object') {
+    if (resp !== true && typeof resp !== 'object') {
       throw new Error(resp);
     }
 

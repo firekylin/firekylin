@@ -10,7 +10,7 @@ module.exports = class extends Base {
     delete config.accessKeySecret;
 
     // 当 region 为 .(com|cn) 结尾时判断为 endpoint
-    if(/\.\w+$/.test(config.region)) {
+    if (/\.\w+$/.test(config.region)) {
       config.s3BucketEndpoint = true;
       config.endpoint = config.region;
       config.region = 'default';
@@ -37,7 +37,7 @@ module.exports = class extends Base {
       Body: fileData,
       ContentType: 'binary'
     }, {}, (err, data) => {
-      if(err) {
+      if (err) {
         return reject(err);
       }
       resolve(data.Location);
@@ -48,4 +48,4 @@ module.exports = class extends Base {
   async run(file, config) {
     return this.upload(file, config);
   }
-}
+};

@@ -13,8 +13,8 @@ module.exports = class extends Post {
   }
 
   getAction(self) {
-    if(!this.id) {
-      let field = [
+    if (!this.id) {
+      const field = [
         'id',
         'title',
         'user_id',
@@ -27,7 +27,7 @@ module.exports = class extends Post {
       this.modelInstance.order('create_time DESC').field(field);
     }
 
-    if(this.get('page') !== '-1') {
+    if (this.get('page') !== '-1') {
       this.modelInstance.page(this.get('page'), 20);
     }
     return super.getBaseAction(self);
@@ -36,10 +36,10 @@ module.exports = class extends Post {
   async postAction() {
     let data = this.post();
 
-    //check pathname
-    let post = await this.modelInstance.where({pathname: data.pathname}).find();
+    // check pathname
+    const post = await this.modelInstance.where({pathname: data.pathname}).find();
 
-    if(!think.isEmpty(post)) {
+    if (!think.isEmpty(post)) {
       return this.fail('PATHNAME_EXIST');
     }
 
@@ -48,7 +48,7 @@ module.exports = class extends Post {
     data = await this.postModel.getContentAndSummary(data);
     data = this.postModel.getPostTime(data);
 
-    let insert = await this.modelInstance.addPost(data);
+    const insert = await this.modelInstance.addPost(data);
     return this.success(insert);
   }
 
@@ -57,9 +57,9 @@ module.exports = class extends Post {
       return this.fail('PARAMS_ERROR');
     }
 
-    if(this.userInfo.type !== 1) {
-      let page = await this.modelInstance.where({id: this.id}).find();
-      if(page.user_id !== this.userInfo.id) {
+    if (this.userInfo.type !== 1) {
+      const page = await this.modelInstance.where({id: this.id}).find();
+      if (page.user_id !== this.userInfo.id) {
         return this.fail('USER_NO_PERMISSION');
       }
     }
@@ -70,8 +70,7 @@ module.exports = class extends Post {
     data = await this.postModel.getContentAndSummary(data);
     data = this.postModel.getPostTime(data);
 
-    let rows = await this.modelInstance.savePost(data);
+    const rows = await this.modelInstance.savePost(data);
     return this.success({affectedRows: rows});
   }
-
-}
+};

@@ -26,7 +26,7 @@ module.exports = class extends Base {
    * @param {[type]} ip   [description]
    */
   addPost(data) {
-    let create_time = think.datetime();
+    const create_time = think.datetime();
     data = Object.assign({
       type: 0,
       status: 0,
@@ -39,7 +39,7 @@ module.exports = class extends Base {
   }
 
   async savePost(data) {
-    let info = await this.where({ id: data.id }).find();
+    const info = await this.where({ id: data.id }).find();
     if (think.isEmpty(info)) {
       return Promise.reject(new Error('POST_NOT_EXIST'));
     }
@@ -48,8 +48,8 @@ module.exports = class extends Base {
   }
 
   async deletePost(post_id) {
-    //await this.model('post_cate').delete({post_id});
-    //await this.model('post_tag').delete({post_id});
+    // await this.model('post_cate').delete({post_id});
+    // await this.model('post_tag').delete({post_id});
     return this.where({ id: post_id }).delete();
   }
 
@@ -70,13 +70,13 @@ module.exports = class extends Base {
    * @return {}      []
    */
   getLatest(user_id, nums = 10) {
-    let where = {
+    const where = {
       create_time: { '<=': think.datetime() },
-      is_public: 1, //公开
-      type: 0, //文章
-      status: 3, //已经发布
+      is_public: 1, // 公开
+      type: 0, // 文章
+      status: 3 // 已经发布
     };
-    if (user_id) { where.user_id = user_id; }
+    if (user_id) { where.user_id = user_id }
     return this.order('id DESC')
       .where(where)
       .limit(nums)
@@ -106,7 +106,6 @@ module.exports = class extends Base {
     await think.cache('lastPostList', null);
   }
 
-
   /**
    * 更新所有文章的摘要信息并重新保存到数据库
    *
@@ -122,13 +121,12 @@ module.exports = class extends Base {
         const item = posts[i];
         const summary = await this.getSummary(item.markdown_content);
 
-        allPromises.push(this.where({ id: item.id }).update({ summary }))
+        allPromises.push(this.where({ id: item.id }).update({ summary }));
       }
 
-      await Promise.all(allPromises)
+      await Promise.all(allPromises);
     }
   }
-
 
   /**
    * 渲染 markdown
@@ -148,11 +146,10 @@ module.exports = class extends Base {
       showToc = /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
     }
     data.content = await this.markdownToHtml(data.markdown_content, { toc: showToc, highlight: true });
-    data.summary = await this.getSummary(data.markdown_content, auto_summary)
+    data.summary = await this.getSummary(data.markdown_content, auto_summary);
 
     return data;
   }
-
 
   /**
    * 渲染 markdown 并返回摘要内容
@@ -176,7 +173,6 @@ module.exports = class extends Base {
       summary = markdown_content.split('<!--more-->')[0];
       summary = await this.markdownToHtml(summary, { toc: false, highlight: true });
       summary.replace(/<[>]*>/g, '');
-
     } else {
       summary = await this.markdownToHtml(markdown_content, { toc: false, highlight: true });
       // 过滤掉 HTML 标签 及换行等 并截取所需的长度
@@ -191,13 +187,11 @@ module.exports = class extends Base {
     return summary;
   }
 
-
   /**
    * markdown to html
    * @return {string}
    */
   async markdownToHtml(content, option = { toc: true, highlight: true }) {
-
     // 构建 marked 扩展
     const extensions = [];
 
@@ -240,7 +234,7 @@ module.exports = class extends Base {
     }
 
     // 使用包含 MathJax 解析的 Markdown 引擎解析 MD 文本
-    let markedWithMathJax = think.service('marked-with-mathjax');
+    const markedWithMathJax = think.service('marked-with-mathjax');
     let markedContent = await markedWithMathJax.render(content, extensions);
 
     /**
@@ -248,7 +242,7 @@ module.exports = class extends Base {
      */
     const marked = new Marked(...extensions);
     if (option.toc) {
-      let tocContent = marked.parse(toc(content).content).replace(/<a\s+href="#([^"]+)">(.+)?<\/a>/g, (a, b, c) => {
+      const tocContent = marked.parse(toc(content).content).replace(/<a\s+href="#([^"]+)">(.+)?<\/a>/g, (a, b, c) => {
         return `<a href="#${this.generateTocName(c)}">${c}</a>`;
       });
 
@@ -260,7 +254,6 @@ module.exports = class extends Base {
 
     return markedContent;
   }
-
 
   /**
    * 获取文章创建时间
@@ -278,7 +271,6 @@ module.exports = class extends Base {
     return data;
   }
 
-
   /**
    * generate toc name
    * @param  {String} name []
@@ -295,4 +287,4 @@ module.exports = class extends Base {
     }
     return `toc-${think.md5(name).slice(0, 3)}`;
   }
-}
+};

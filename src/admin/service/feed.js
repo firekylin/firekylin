@@ -23,7 +23,7 @@ module.exports = class extends think.Service {
       json: true
     });
 
-    if(resp.errno) {
+    if (resp.errno) {
       return false;
     }
     return resp.data;
@@ -37,17 +37,17 @@ module.exports = class extends think.Service {
   pathnamePaser(url, description) {
     url = parse(url);
     const guid = think.md5(description);
-    if(!url) {
+    if (!url) {
       return guid;
     }
 
     const pathname = url.pathname.replace(/\/+$/, '').split('/').pop();
-    if(!pathname) {
+    if (!pathname) {
       return guid;
     }
 
     const ret = pathname.replace(/\..+$/, '');
-    if(!ret) {
+    if (!ret) {
       return guid;
     }
 
@@ -64,7 +64,7 @@ module.exports = class extends think.Service {
       firstImageUrl: featuredImage
     } = await this.contentParser(link);
 
-    if(!markdown_content) {
+    if (!markdown_content) {
       markdown_content = description;
     }
 
@@ -93,7 +93,7 @@ module.exports = class extends think.Service {
       feedparser.on('error', reject);
 
       req.on('response', function(res) {
-        if(res.statusCode !== 200) {
+        if (res.statusCode !== 200) {
           return reject(new Error('Bad status code'));
         }
         this.pipe(feedparser);
@@ -107,11 +107,11 @@ module.exports = class extends think.Service {
         }
       });
       feedparser.on('end', () => resolve(feeds));
-    })
+    });
   }
 
   async run(url) {
     const posts = await this.feedParser(url);
     return Promise.all(posts);
   }
-}
+};

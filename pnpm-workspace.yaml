@@ -5,3 +5,4 @@ allowBuilds:
   pre-commit: true
   snyk: true
   spawn-sync: true
+  sqlite3: true

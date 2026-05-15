@@ -5,7 +5,7 @@ module.exports = class extends think.Controller {
       return;
     }
 
-    let userInfo = await this.session('userInfo') || {};
+    const userInfo = await this.session('userInfo') || {};
     if (think.isEmpty(userInfo)) {
       if (this.isAjax()) {
         return this.fail('NOT_LOGIN');
@@ -21,16 +21,16 @@ module.exports = class extends think.Controller {
     if (this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
-    let model = this.model('options');
+    const model = this.model('options');
     let options = await model.getOptions();
-    //不显示具体的密钥
+    // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);
     options.comment.name = escape(options.comment.name);
     try {
       options.navigation = JSON.parse(options.navigation);
-    } catch (e) { options.navigation = []; }
-    delete options.push_sites; //不显示推送的配置，会有安全问题
+    } catch (e) { options.navigation = [] }
+    delete options.push_sites; // 不显示推送的配置，会有安全问题
 
     if (firekylin.require('auth')) {
       options.intranet = true;
