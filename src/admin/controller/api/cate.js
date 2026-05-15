@@ -20,9 +20,9 @@ module.exports = class extends Base {
   }
 
   async postAction() {
-    let data = this.post();
+    const data = this.post();
 
-    let ret = await this.modelInstance.addCate(data);
+    const ret = await this.modelInstance.addCate(data);
     if (ret.type === 'exist') {
       return this.fail('CATE_EXIST');
     }
@@ -33,12 +33,12 @@ module.exports = class extends Base {
     if (!this.id) {
       return this.fail('PARAMS_ERROR');
     }
-    let data = this.post();
+    const data = this.post();
     data.id = this.id;
     if (data.id === parseInt(data.pid)) {
       return this.fail('CATE_PARENT_ERROR');
     }
-    let rows = await this.modelInstance.saveCate(data);
+    const rows = await this.modelInstance.saveCate(data);
     return this.success({ affectedRows: rows });
   }
 
@@ -49,4 +49,4 @@ module.exports = class extends Base {
     await this.modelInstance.deleteCate(this.id);
     return this.success();
   }
-}
+};

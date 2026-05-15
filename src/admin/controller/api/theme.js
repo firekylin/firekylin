@@ -3,7 +3,6 @@ const path = require('path');
 const cluster = require('cluster');
 const Base = require('./base');
 
-
 const statsAsync = think.promisify(fs.stat);
 const readdirAsync = think.promisify(fs.readdir);
 const readFileAsync = think.promisify(fs.readFile);
@@ -15,7 +14,7 @@ module.exports = class extends Base {
    * forbidden ../ style path
    */
   pathCheck(themePath, basePath = THEME_DIR) {
-    if(themePath.indexOf(basePath) !== 0) {
+    if (themePath.indexOf(basePath) !== 0) {
       this.fail();
       throw Error(`theme path ${themePath} error`);
     }
@@ -23,13 +22,13 @@ module.exports = class extends Base {
   }
 
   async getAction() {
-    switch(this.get('type')) {
+    switch (this.get('type')) {
       case 'fileList':
-        let {theme} = this.get();
-        let themePath = path.join(THEME_DIR, theme);
+        const {theme} = this.get();
+        const themePath = path.join(THEME_DIR, theme);
         this.pathCheck(themePath);
 
-        let files = await this.getFileList(themePath);
+        const files = await this.getFileList(themePath);
         return this.success(files);
 
       case 'file':
@@ -37,7 +36,7 @@ module.exports = class extends Base {
         filePath = path.join(THEME_DIR, filePath);
         this.pathCheck(filePath);
 
-        let file = await readFileAsync(filePath, {encoding: 'utf-8'});
+        const file = await readFileAsync(filePath, {encoding: 'utf-8'});
         return this.success(file);
 
       case 'templateList':
@@ -57,10 +56,10 @@ module.exports = class extends Base {
     try {
       await writeFileAsync(filePath, content, {encoding: 'utf-8'});
 
-      if(cluster.isWorker) {
+      if (cluster.isWorker) {
         process.send('think-cluster-reload-workers');
       }
-    } catch(e) {
+    } catch (e) {
       return this.fail(e);
     }
     return this.success();
@@ -105,20 +104,20 @@ module.exports = class extends Base {
    * 递归获取文件夹树
    */
   async getFileList(base) {
-    let result = [];
-    let files = await readdirAsync(base);
+    const result = [];
+    const files = await readdirAsync(base);
 
-    for(let file of files) {
-      let pos = path.join(base, file);
-      let stat = await statsAsync(pos);
-      if(stat.isDirectory()) {
+    for (const file of files) {
+      const pos = path.join(base, file);
+      const stat = await statsAsync(pos);
+      if (stat.isDirectory()) {
         result.push({
           module: file,
           children: await this.getFileList(pos)
         });
       }
 
-      if(stat.isFile()) {
+      if (stat.isFile()) {
         result.push({module: file});
       }
     }
@@ -130,16 +129,16 @@ module.exports = class extends Base {
    * 获取主题列表
    */
   async getThemeList() {
-    let themes = await readdirAsync(THEME_DIR);
+    const themes = await readdirAsync(THEME_DIR);
 
-    let result = [];
-    for(let theme of themes) {
-      let infoFile = path.join(THEME_DIR, theme, 'package.json');
+    const result = [];
+    for (const theme of themes) {
+      const infoFile = path.join(THEME_DIR, theme, 'package.json');
       try {
-        /*let stat = */await statsAsync(infoFile);
+        /* let stat = */await statsAsync(infoFile);
         const infoData = JSON.parse(await readFileAsync(infoFile));
         result.push(think.extend({id: theme}, infoData));
-      } catch(e) {
+      } catch (e) {
         console.log(e); // eslint-disable-line no-console
       }
     }
@@ -150,21 +149,21 @@ module.exports = class extends Base {
    * 获取主题的自定义模板
    */
   async getPageTemplateList() {
-    let {theme} = this.get();
-    let templatePath = path.join(THEME_DIR, theme, 'template');
+    const {theme} = this.get();
+    const templatePath = path.join(THEME_DIR, theme, 'template');
     this.pathCheck(templatePath);
 
     let templates = [];
     try {
-      let stat = await statsAsync(templatePath);
-      if(!stat.isDirectory()) {
+      const stat = await statsAsync(templatePath);
+      if (!stat.isDirectory()) {
         throw Error();
       }
-    } catch(e) {
+    } catch (e) {
       return this.success(templates);
     }
     templates = await readdirAsync(templatePath);
     templates = templates.filter(t => /\.html$/.test(t));
     return this.success(templates);
   }
-}
+};

@@ -16,19 +16,19 @@ module.exports = class extends Base {
    * @param {[type]} ip   [description]
    */
   addCate(data) {
-    let where = {
+    const where = {
       name: data.name,
       _logic: 'OR'
     };
-    if(data.pathname) {
+    if (data.pathname) {
       where.pathname = data.pathname;
     }
     return this.where(where).thenAdd(data);
   }
 
   async saveCate(data) {
-    let info = await this.where({id: data.id}).find();
-    if(think.isEmpty(info)) {
+    const info = await this.where({id: data.id}).find();
+    if (think.isEmpty(info)) {
       return Promise.reject(new Error('CATE_NOT_EXIST'));
     }
 
@@ -45,9 +45,9 @@ module.exports = class extends Base {
    * @return {Promise}        []
    */
   getCount(userId) {
-    if(userId) {
+    if (userId) {
       return this.where({user_id: userId}).count();
     }
     return this.count();
   }
-}
+};

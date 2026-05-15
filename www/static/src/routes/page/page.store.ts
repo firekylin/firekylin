@@ -1,14 +1,13 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { http } from '../../utils/http';
 import { message } from 'antd';
-import { String } from 'aws-sdk/clients/sns';
 import { PageInfo } from './page.model';
 
 class PageStore {
-  @observable loading = false;
-  @observable page = '1';
-  @observable pagination = {};
-  @observable pageInfo: PageInfo = {
+  loading = false;
+  page = '1';
+  pagination = {};
+  pageInfo: PageInfo = {
     title: '',
     pathname: '',
     markdown_content: '',
@@ -26,13 +25,15 @@ class PageStore {
     user_id: '',
   };
 
-  @action
+  constructor() {
+    makeAutoObservable(this);
+  }
+
   setPage = page => this.page = page
 
-  @action
   setLoading = data => this.loading = data
 
-  pageDeleteById(id: String) {
+  pageDeleteById(id: string) {
     return http.post<any>(`/admin/api/page/${id}?method=delete`);
   }
 }

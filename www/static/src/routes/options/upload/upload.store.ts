@@ -1,10 +1,14 @@
 import { http } from '../../../utils/http';
 import { message } from 'antd';
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 class OptionsUploadStore {
-    @observable upload;
+    upload;
 
-    @action setUpload = data => {
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    setUpload = data => {
         this.upload = Object.assign({}, this.upload, data);
     }
     // 保存上传设置

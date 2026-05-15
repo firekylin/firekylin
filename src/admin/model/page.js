@@ -7,7 +7,7 @@ module.exports = class extends Post {
   }
 
   addPost(data) {
-    let create_time = think.datetime();
+    const create_time = think.datetime();
     data = Object.assign({
       type: 1,
       status: 0,
@@ -20,13 +20,12 @@ module.exports = class extends Post {
   }
 
   async savePost(data) {
-    let info = await this.where({id: data.id, type: 1}).find();
-    if(think.isEmpty(info)) {
+    const info = await this.where({id: data.id, type: 1}).find();
+    if (think.isEmpty(info)) {
       return Promise.reject(new Error('PAGE_NOT_EXIST'));
     }
 
     data.update_time = think.datetime();
     return this.where({id: data.id}).update(data);
   }
-
-}
+};

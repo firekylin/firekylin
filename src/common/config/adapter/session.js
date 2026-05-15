@@ -3,9 +3,9 @@ const path = require('path');
 const fileSession = require('think-session-file');
 
 let ROOT_PATH = think.ROOT_PATH;
-if(think.env === 'vercel') {
+if (think.env === 'vercel') {
   ROOT_PATH = os.tmpdir();
-} else if(think.env === 'pkg') {
+} else if (think.env === 'pkg') {
   ROOT_PATH = think.RUNTIME_PATH;
 }
 /**

@@ -1,22 +1,26 @@
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
 import { TFAQRCodeRes, TFAQRCodeReqAuth } from './two-factor-auth.model';
 
 class TwoFactorAuthStore {
-    @observable loading = {
+    loading = {
         step3: false,
         step4: false,
     };
-    @observable data = {
+    data = {
         otpauth_url: '',
         secret: '',
     };
 
-    @action setData = data => {
+    constructor() {
+        makeAutoObservable(this);
+    }
+
+    setData = data => {
         this.data = data;
     }
-    @action setLoading = loading => {
+    setLoading = loading => {
         this.loading = Object.assign({}, this.loading, loading);
     }
 

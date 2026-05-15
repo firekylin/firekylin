@@ -1,8 +1,8 @@
 const Base = require('./base');
 
 const GHOST_POST_STATUS = {
-  published: 3, //发布
-  draft: 0 //草稿
+  published: 3, // 发布
+  draft: 0 // 草稿
 };
 
 module.exports = class extends Base {
@@ -10,7 +10,7 @@ module.exports = class extends Base {
    * 导入用户
    */
   async user({users}) {
-    if(!users || !Array.isArray(users)) {
+    if (!users || !Array.isArray(users)) {
       return 0;
     }
 
@@ -19,8 +19,8 @@ module.exports = class extends Base {
       email: user.email,
       display_name: user.name,
       password: Base.DEFAULT_USER_PWD,
-      type: 2, //默认导入用户都为编辑
-      status: 2, //默认导入用户都处于禁用状态
+      type: 2, // 默认导入用户都为编辑
+      status: 2 // 默认导入用户都处于禁用状态
     }, '127.0.0.1'));
     await Promise.all(usersPromise);
 
@@ -40,47 +40,47 @@ module.exports = class extends Base {
     post_categories,
     posts_categories
   }) {
-    if(!Array.isArray(posts) || !Array.isArray(users)) {
+    if (!Array.isArray(posts) || !Array.isArray(users)) {
       return 0;
     }
 
     post_tags = post_tags || posts_tags;
     post_categories = post_categories || posts_categories;
-    if(!Array.isArray(post_tags)) {
+    if (!Array.isArray(post_tags)) {
       post_tags = [];
     }
-    if(!Array.isArray(post_categories)) {
+    if (!Array.isArray(post_categories)) {
       post_categories = [];
     }
-    if(!Array.isArray(tags)) {
+    if (!Array.isArray(tags)) {
       tags = [];
     }
-    if(!Array.isArray(categories)) {
+    if (!Array.isArray(categories)) {
       categories = [];
     }
 
     posts = posts.filter(item => item.page === 0);
     const postsPromise = posts.map(async item => {
-      try{
-        //获取用户
+      try {
+        // 获取用户
         const userSlug = users.filter(user => user.id === item.author_id)[0].slug;
         const user = await this.userModelInstance.where({ name: userSlug }).find();
 
-        //获取标签
+        // 获取标签
         let tag = [];
         let retTag = post_tags.filter(tag => tag.post_id === item.id).map(tag => tag.tag_id);
         retTag = tags.filter(({id}) => retTag.includes(id)).map(({name}) => name);
-        if(retTag.length) {
+        if (retTag.length) {
           tag = await this.tagModelInstance.setRelation(false).where({name: ['IN', retTag]}).select();
           tag = tag.map(item => item.id);
         }
 
-        //获取分类
+        // 获取分类
         let cate = [];
         let retCategory = post_categories.filter(({post_id}) => post_id === item.id)
           .map(({category_id}) => category_id);
         retCategory = categories.filter(({id}) => retCategory.includes(id)).map(({name}) => name);
-        if(retCategory.length) {
+        if (retCategory.length) {
           cate = await this.cateModelInstance.setRelation(false).where({name: ['IN', retCategory]}).select();
           cate = cate.map(item => item.id);
         }
@@ -102,7 +102,7 @@ module.exports = class extends Base {
           cate
         };
         await this.postModelInstance.addPost(post);
-      } catch(e) {
+      } catch (e) {
         console.log(e); // eslint-disable-line no-console
       }
     });
@@ -118,7 +118,7 @@ module.exports = class extends Base {
     posts,
     users
   }) {
-    if(!Array.isArray(posts)) {
+    if (!Array.isArray(posts)) {
       return 0;
     }
 
@@ -139,7 +139,7 @@ module.exports = class extends Base {
         user_id: user.id,
         comment_num: 0,
         allow_comment: item.hasOwnProperty('allow_comment') ? item.allow_comment : 1,
-        is_public: item.hasOwnProperty('visibility') ? Number(item.visibility === 'public') : 1,
+        is_public: item.hasOwnProperty('visibility') ? Number(item.visibility === 'public') : 1
       };
       await this.pageModelInstance.addPost(page);
     });
@@ -152,7 +152,7 @@ module.exports = class extends Base {
    * 导入标签
    */
   async tag({tags}) {
-    if(!tags || !Array.isArray(tags)) {
+    if (!tags || !Array.isArray(tags)) {
       return 0;
     }
 
@@ -178,11 +178,11 @@ module.exports = class extends Base {
   parseFile(file) {
     try {
       let jsonObj = think.safeRequire(file.path);
-      if(Array.isArray(jsonObj.db) && jsonObj.db.length) {
+      if (Array.isArray(jsonObj.db) && jsonObj.db.length) {
         jsonObj = jsonObj.db[0];
       }
       return jsonObj.data;
-    } catch(e) {
+    } catch (e) {
       throw Error('INVALID_FILE');
     }
   }
@@ -193,4 +193,4 @@ module.exports = class extends Base {
   async run(file) {
     return await this.importData(this.parseFile(file));
   }
-}
+};

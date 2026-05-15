@@ -12,7 +12,7 @@ module.exports = class extends Base {
     // 创建实例
     const cos = new COS({
       SecretId: secretId,
-      SecretKey: secretKey,
+      SecretKey: secretKey
     });
     const putObjectAsync = think.promisify(cos.putObject, cos);
     let savePath = this.getSavePath(filename, prefix);
@@ -26,7 +26,7 @@ module.exports = class extends Base {
       Region: region,
       Key: savePath,
       Body: fileData,
-      ContentLength: size,
+      ContentLength: size
     });
     // result.Location
     const absOrigin = this.getAbsOrigin(origin);

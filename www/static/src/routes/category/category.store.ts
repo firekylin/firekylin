@@ -1,24 +1,23 @@
 import { message } from 'antd';
 import { http } from '../../utils/http';
 import { AppStore } from '../../app.store';
-import { observable, action } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { CategoryCreateParams } from './category.model';
 import { map, tap } from 'rxjs/operators';
 import { Category } from '../../models/category.model';
 
 class CategoryStore {
   appStore: AppStore;
-  @observable rootCategoryList: Category[] = [];
-  @observable categoryInfo: Category;
+  rootCategoryList: Category[] = [];
+  categoryInfo: Category;
 
   constructor(appStore: AppStore) {
     this.appStore = appStore;
+    makeAutoObservable(this);
   }
 
-  @action
   setRootCategoryList = (data: Category[]) => this.rootCategoryList = data
 
-  @action
   setCurrentCatInfo = (data: Category) => this.categoryInfo = data
 
   // 删除分类

@@ -18,7 +18,7 @@ module.exports = class extends think.Logic {
       }
     };
 
-    if(!this.isGet) {
+    if (!this.isGet) {
       this.rules = think.extend({
         db_account: {
           requiredIf: ['step', 1]
@@ -46,4 +46,4 @@ module.exports = class extends think.Logic {
       }, this.rules);
     }
   }
-}
+};

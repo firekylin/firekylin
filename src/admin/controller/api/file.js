@@ -16,7 +16,9 @@ const INTERNAL_AREAS = [
 function ip2long(ip) {
   const multi = [0x1000000, 0x10000, 0x100, 1];
   let longValue = 0;
-  ip.split('.').forEach((part, i) => longValue += part * multi[i]);
+  ip.split('.').forEach((part, i) => {
+    longValue += part * multi[i];
+  });
   return longValue;
 }
 
@@ -53,7 +55,7 @@ module.exports = class extends Base {
 
   async postAction() {
     let config = this.uploadConfig;
-    let { type } = config;
+    const { type } = config;
     let file;
 
     /** 处理远程抓取 **/
@@ -66,7 +68,7 @@ module.exports = class extends Base {
     } else {
       file = this.file('file');
     }
-    if (!file) { return this.fail('FILE_UPLOAD_ERROR'); }
+    if (!file) { return this.fail('FILE_UPLOAD_ERROR') }
 
     /** 检查文件类型 */
     const ext = this.extWhiteList(file);
@@ -80,7 +82,7 @@ module.exports = class extends Base {
     }
 
     // 处理其它上传
-    if (!type) { return this.fail(); }
+    if (!type) { return this.fail() }
     if (type === 'local') {
       config = { name: this.post('name') };
     }
@@ -97,7 +99,7 @@ module.exports = class extends Base {
     return this.success();
   }
 
-  //MIME过滤
+  // MIME过滤
   extWhiteList(file) {
     return ALLOW_EXTS.some(reg => reg.test(file.name));
   }
@@ -121,7 +123,7 @@ module.exports = class extends Base {
         return true;
       }
 
-      console.log(e); //eslint-disable-line no-console
+      console.log(e); // eslint-disable-line no-console
       return this.fail(e.message || 'FILE_UPLOAD_ERROR');
     }
   }
@@ -145,8 +147,8 @@ module.exports = class extends Base {
    */
   async serviceExport(service) {
     try {
-      let exporter = think.service(`export/${service}`, 'admin');
-      let file = await exporter.run();
+      const exporter = think.service(`export/${service}`, 'admin');
+      const file = await exporter.run();
       return this.download(file);
     } catch (e) {
       return this.fail(e.message);
@@ -167,8 +169,7 @@ module.exports = class extends Base {
       }
     }
 
-
-    let resp = await getFileContent({
+    const resp = await getFileContent({
       url,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36'
@@ -176,7 +177,7 @@ module.exports = class extends Base {
       strictSSL: false,
       timeout: 1000,
       encoding: 'binary'
-    }).catch(() => { throw new Error('UPLOAD_URL_ERROR'); });
+    }).catch(() => { throw new Error('UPLOAD_URL_ERROR') });
 
     if (resp.headers['content-type'].indexOf('image') === -1) {
       throw new Error('UPLOAD_TYPE_ERROR');
@@ -190,11 +191,11 @@ module.exports = class extends Base {
       think.mkdir(uploadDir);
     }
 
-    let uploadName = think.uuid(20) + path.extname(url);
-    let uploadPath = path.join(uploadDir, uploadName);
+    const uploadName = think.uuid(20) + path.extname(url);
+    const uploadPath = path.join(uploadDir, uploadName);
     await writeFileAsync(uploadPath, resp.body, 'binary');
 
-    //after upload delete file
+    // after upload delete file
     onFinish(this.ctx.res, () =>
       think.isExist(uploadPath) && unlinkAsync(uploadPath)
     );
@@ -206,4 +207,4 @@ module.exports = class extends Base {
       type: resp.headers['content-type']
     };
   }
-}
+};

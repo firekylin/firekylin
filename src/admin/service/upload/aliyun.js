@@ -1,4 +1,3 @@
-const co = require('co');
 const OSS = require('ali-oss');
 const Base = require('./base');
 
@@ -13,19 +12,12 @@ module.exports = class extends Base {
     });
     const savePath = this.getSavePath(filename, config.prefix);
     const origin = this.getAbsOrigin(config.origin);
-    return new Promise((resolve, reject) => {
-      co(function* () {
-        const result = yield client.put(savePath, filename);
-        const compeletePath = `${origin}/${result.name}`;
-        resolve(compeletePath);
-      }).catch(function (err) {
-        reject(err);
-      });
-    });
+    const result = await client.put(savePath, filename);
+    return `${origin}/${result.name}`;
   }
 
   // 执行方法
   async run(file, config) {
     return await this.upload(file, config);
   }
-}
+};

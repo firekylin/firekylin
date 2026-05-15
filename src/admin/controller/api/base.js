@@ -8,49 +8,49 @@ module.exports = class extends BaseRest {
   }
 
   async __before() {
-    let userInfo = await this.session('userInfo') || {};
-    if(think.isEmpty(userInfo)) {
+    const userInfo = await this.session('userInfo') || {};
+    if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
 
-    let action = this.ctx.action;
-    if(action !== 'get') {
-      let referrer = this.ctx.referrer();
-      let {site_url} = await this.model('options').getOptions()
+    const action = this.ctx.action;
+    if (action !== 'get') {
+      const referrer = this.ctx.referrer();
+      const {site_url} = await this.model('options').getOptions();
 
-      if(!referrer || !site_url) {
+      if (!referrer || !site_url) {
         return this.fail('REFERRER_ERROR');
       }
 
-      let siteUrlHost = parse(site_url).host;
-      let referrerHost = parse(referrer).host;
-      if(!siteUrlHost || !referrerHost) {
+      const siteUrlHost = parse(site_url).host;
+      const referrerHost = parse(referrer).host;
+      if (!siteUrlHost || !referrerHost) {
         return this.fail('REFERRER_ERROR');
       }
 
-      if(siteUrlHost.length < referrerHost.length) {
-        if(referrerHost.slice(-siteUrlHost.length) !== siteUrlHost) {
+      if (siteUrlHost.length < referrerHost.length) {
+        if (referrerHost.slice(-siteUrlHost.length) !== siteUrlHost) {
           return this.fail('REFERRER_ERROR');
         }
       } else {
-        if(siteUrlHost.slice(-referrerHost.length) !== referrerHost) {
+        if (siteUrlHost.slice(-referrerHost.length) !== referrerHost) {
           return this.fail('REFERRER_ERROR');
         }
       }
     }
 
     this.userInfo = userInfo;
-    let type = userInfo.type | 0;
-    //not admin
-    if(type !== 1) {
-      if(action === 'get') {
+    const type = userInfo.type | 0;
+    // not admin
+    if (type !== 1) {
+      if (action === 'get') {
         return;
       }
-      let name = this.ctx.controller + '/' + this.ctx.action;
-      if(this.allowList.indexOf(name) > -1) {
+      const name = this.ctx.controller + '/' + this.ctx.action;
+      if (this.allowList.indexOf(name) > -1) {
         return;
       }
       return this.fail('USER_NO_PERMISSION');
     }
   }
-}
+};

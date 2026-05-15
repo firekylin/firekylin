@@ -7,8 +7,8 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async indexAction() {
-    let {frontPage} = await this.model('options').getOptions();
-    if(frontPage) {
+    const {frontPage} = await this.model('options').getOptions();
+    if (frontPage) {
       this.get('pathname', frontPage);
       return this.action('post', 'page');
     }
@@ -36,8 +36,8 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async rssAction() {
-    let model = this.model('post');
-    let list = await model.getPostRssList();
+    const model = this.model('post');
+    const list = await model.getPostRssList();
     this.assign('list', list);
     this.assign('currentTime', (new Date()).toString());
 
@@ -50,8 +50,8 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async sitemapAction() {
-    let postModel = this.model('post');
-    let postList = await postModel.getPostSitemapList();
+    const postModel = this.model('post');
+    const postList = await postModel.getPostSitemapList();
     this.assign('postList', postList);
 
     this.ctx.type = 'text/xml';
@@ -62,88 +62,88 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async installAction() {
-    let step = this.get('step') || this.post('step');
-    let instance = this.service('install', 'home', this.ctx.ip);
+    const step = this.get('step') || this.post('step');
+    const instance = this.service('install', 'home', this.ctx.ip);
     let message;
 
     this.assign({step});
-    if(this.isGet) {
-      if(firekylin.isInstalled) {
+    if (this.isGet) {
+      if (firekylin.isInstalled) {
         return this.redirect('/');
       }
 
       /** check db config exist */
       let dbConfig = this.config('model', undefined, 'common');
-      let dbType = dbConfig.type;
+      const dbType = dbConfig.type;
       dbConfig = dbConfig[dbType];
       let isDBConfig;
       if (dbType === 'sqlite') {
         isDBConfig = think.isObject(dbConfig) && dbConfig.path && dbConfig.database;
       } else {
-        isDBConfig = think.isObject(dbConfig)
-                          && dbConfig.host
-                          && dbConfig.port
-                          && dbConfig.database
-                          && dbConfig.user;
+        isDBConfig = think.isObject(dbConfig) &&
+                          dbConfig.host &&
+                          dbConfig.port &&
+                          dbConfig.database &&
+                          dbConfig.user;
       }
 
-      switch(step) {
+      switch (step) {
         case 1:
-          if(isDBConfig) {
+          if (isDBConfig) {
             this.redirect('/index/install?step=2');
           }
-        break;
+          break;
 
         case 2:
-          if(!isDBConfig) {
+          if (!isDBConfig) {
             this.redirect('/index/install');
           }
-          if(await instance.checkInstalled()) {
+          if (await instance.checkInstalled()) {
             message = 'success';
           }
-        break;
+          break;
       }
 
       this.assign({message});
       return this.display();
     }
 
-    if(firekylin.isInstalled) {
+    if (firekylin.isInstalled) {
       return this.fail('SYSTERM_INSTALLED');
     }
 
-    let errors = this.assign('errors');
-    if(!think.isEmpty(errors)) {
+    const errors = this.assign('errors');
+    if (!think.isEmpty(errors)) {
       this.assign('message', errors[Object.keys(errors)[0]]);
       return this.display();
     }
 
-    let data = this.post();
+    const data = this.post();
 
-    switch(data.step) {
+    switch (data.step) {
       case 2:
-        if(data.password !== data.repeatpwd) {
+        if (data.password !== data.repeatpwd) {
           message = '两次密码输入不一致请重新输入';
           break;
         }
 
-        let siteInfo = {
+        const siteInfo = {
           title: data.title,
           site_url: data.site_url,
           username: data.username,
           password: data.password,
           email: data.email
-        }
+        };
         try {
           await instance.saveSiteInfo(siteInfo);
           message = 'success';
-        } catch(e) {
+        } catch (e) {
           message = e;
         }
-      break;
+        break;
 
       default:
-        let dbInfo = {
+        const dbInfo = {
           type: data.db_type,
           host: data.db_host,
           port: data.db_port,
@@ -157,10 +157,10 @@ module.exports = class extends Base {
           await instance.saveDbInfo(dbInfo);
           process.send('think-cluster-reload-workers');
           message = 'success';
-        } catch(e) {
+        } catch (e) {
           message = e;
         }
-      break;
+        break;
     }
 
     this.assign('message', message);
@@ -172,14 +172,14 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async contributorAction() {
-    if(!this.options.hasOwnProperty('push') || +this.options.push === 0) {
+    if (!this.options.hasOwnProperty('push') || +this.options.push === 0) {
       return this.fail('PUSH_CLOSED');
     }
-    if(this.isGet) {
+    if (this.isGet) {
       return this.display();
     }
 
-    let user = this.post();
+    const user = this.post();
     user.type = firekylin.USER_CONTRIBUTOR;
     user.status = firekylin.USER_DISABLED;
     user.create_time = think.datetime();
@@ -191,4 +191,4 @@ module.exports = class extends Base {
     this.assign('message', 'success');
     this.display();
   }
-}
+};

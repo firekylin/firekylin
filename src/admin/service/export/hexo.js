@@ -9,8 +9,8 @@ module.exports = class extends Base {
 
   generate(posts) {
     return this.generateZipFile(this.outputFile, zip => {
-      for(let post of posts) {
-        let content = `
+      for (const post of posts) {
+        const content = `
 ---
 title: ${post.title}
 date: ${post.create_time}
@@ -28,7 +28,7 @@ ${post.markdown_content}`;
   }
 
   async run() {
-    let posts = await this.getPosts();
+    const posts = await this.getPosts();
     return this.generate(posts);
   }
-}
+};

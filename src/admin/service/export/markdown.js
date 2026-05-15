@@ -9,14 +9,14 @@ module.exports = class extends Base {
 
   generate(posts) {
     return this.generateZipFile(this.outputFile, zip => {
-      for (let post of posts) {
+      for (const post of posts) {
         zip.file(`${think.datetime(post.create_time, 'YYYY-MM-DD-')}${post.title}.md`, post.markdown_content);
       }
     });
   }
 
   async run() {
-    let posts = await this.getPosts();
+    const posts = await this.getPosts();
     return this.generate(posts);
   }
-}
+};

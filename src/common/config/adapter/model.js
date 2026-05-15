@@ -53,12 +53,12 @@ module.exports = {
     host: msc.host,
     port: msc.port,
     prefix: msc.prefix,
-    connectionLimit: 1,
+    connectionLimit: 1
   },
   sqlite: {
     handle: sqlite,
     path: msc.path,
     database: msc.database,
-    prefix: msc.prefix,
+    prefix: msc.prefix
   }
 };
