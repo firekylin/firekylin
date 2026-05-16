@@ -9,7 +9,7 @@ import { Category } from '../../models/category.model';
 class CategoryStore {
   appStore: AppStore;
   rootCategoryList: Category[] = [];
-  categoryInfo: Category;
+  categoryInfo: Category = { id: 0, name: '', pathname: '', post_cate: 0, pid: 0 };
 
   constructor(appStore: AppStore) {
     this.appStore = appStore;
