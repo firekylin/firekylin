@@ -36,13 +36,24 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
 
     }
 
-    componentWillReceiveProps(nextProps: any) {
-        this.id = nextProps.match.params.id;
-        if (this.id) {
-            this.userStore.getUserInfo(this.id);
-        } else {
-            this.setUserInfoEmpty();
+    componentDidUpdate(prevProps: any) {
+        if (prevProps.match.params.id !== this.props.match.params.id) {
+            this.id = this.props.match.params.id;
+            if (this.id) {
+                this.userStore.getUserInfo(this.id);
+            } else {
+                this.setUserInfoEmpty();
+            }
+            return;
         }
+        const { userInfo } = this.props.userStore;
+        this.formRef.current?.setFieldsValue({
+            username: userInfo.name,
+            email: userInfo.email,
+            display_name: userInfo.display_name,
+            type: userInfo.type ? userInfo.type.toString() : '',
+            status: userInfo.status ? userInfo.status.toString() : '',
+        });
     }
 
     // 置空User列表
@@ -188,7 +199,6 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                         required: true,
                                         message: '请输入用户名!'
                                     }]}
-                                initialValue={userInfo.name ? userInfo.name : ''}
                             >
                                 <Input {...this.isDisabled('name')} placeholder="4-20个字符"/>
                             </Form.Item>
@@ -202,7 +212,6 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                     type: 'email',
                                     message: '邮箱格式错误!'
                                 }]}
-                                initialValue={userInfo.email ? userInfo.email : ''}
                             >
                                 <Input {...this.isDisabled('email')} autoComplete="email" placeholder="输入邮箱"/>
                             </Form.Item>
@@ -237,13 +246,11 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                         <div className="pull-left">
                             <Form.Item label="别名"
                                 name="display_name"
-                                initialValue={userInfo.display_name ? userInfo.display_name : ''}
                             >
                                 <Input {...this.isDisabled('display_name')} placeholder="显示名称" />
                             </Form.Item>
                             <Form.Item label="用户组"
                                 name="type"
-                                initialValue={userInfo.type ? userInfo.type.toString() : ''}
                             >
                                 <Select {...this.isDisabled('type')} className="form-control">
                                     <Option value="2">编辑</Option>
@@ -253,7 +260,6 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                             </Form.Item>
                             <Form.Item label="状态"
                                 name="status"
-                                initialValue={userInfo.status ? userInfo.status.toString() : ''}
                             >
                                 <Select {...this.isDisabled('status')} className="form-control">
                                         <Option value="1">有效</Option>

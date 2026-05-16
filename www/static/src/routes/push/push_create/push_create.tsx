@@ -39,13 +39,23 @@ class PushCreateForm extends React.Component<PushProps,any> {
         }
     }
 
-    componentWillReceiveProps(nextProps: any) {
-        this.id = nextProps.match.params.id;
-        if (this.id) {
-            this.pushStore.getPushInfo(this.id);
-        } else {
-            this.resetPushCreateParams();
+    componentDidUpdate(prevProps: any) {
+        if (prevProps.match.params.id !== this.props.match.params.id) {
+            this.id = this.props.match.params.id;
+            if (this.id) {
+                this.pushStore.getPushInfo(this.id);
+            } else {
+                this.resetPushCreateParams();
+            }
+            return;
         }
+        const { pushInfo } = this.pushStore.pushCreateParam;
+        this.formRef.current?.setFieldsValue({
+            title: pushInfo.title,
+            url: pushInfo.url,
+            appKey: pushInfo.appKey,
+            appSecret: pushInfo.appSecret,
+        });
     }
 
     /**
@@ -85,7 +95,6 @@ class PushCreateForm extends React.Component<PushProps,any> {
                 }
             },
         };
-        const { pushInfo } = this.pushStore.pushCreateParam;
         let props = {};
         if (this.pushStore.pushCreateParam.submitting) {
             props.disabled = true;
@@ -112,7 +121,6 @@ class PushCreateForm extends React.Component<PushProps,any> {
                                     required: true,
                                     message: '请填写网站名称!'
                                 }]}
-                            initialValue={pushInfo.title ? pushInfo.title : ''}
                         >
                             <Input placeholder="请填写网站名称" />
                         </Form.Item>
@@ -122,7 +130,6 @@ class PushCreateForm extends React.Component<PushProps,any> {
                                 required: true,
                                 message: '请填写网站地址!'
                             }]}
-                            initialValue={pushInfo.url ? pushInfo.url : ''}
                         >
                             <Input placeholder="请填写网站地址" />
                         </Form.Item>
@@ -132,7 +139,6 @@ class PushCreateForm extends React.Component<PushProps,any> {
                                 required: true,
                                 message: '请填写推送公钥!'
                             }]}
-                            initialValue={pushInfo.appKey ? pushInfo.appKey : ''}
                         >
                             <Input placeholder="请填写推送公钥" />
                         </Form.Item>
@@ -142,7 +148,6 @@ class PushCreateForm extends React.Component<PushProps,any> {
                                 required: true,
                                 message: '请填写推送秘钥!'
                             }]}
-                            initialValue={pushInfo.appSecret ? pushInfo.appSecret : ''}
                         >
                             <Input placeholder="请填写推送秘钥" />
                         </Form.Item>

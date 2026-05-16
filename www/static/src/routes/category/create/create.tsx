@@ -25,10 +25,22 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
         }
     }
 
-    componentWillReceiveProps(nextProps: CategoryCreateProps) {
-        if (nextProps.match.params.id !== this.props.match.params.id) {
-            this.setCategoryEmpty();
+    componentDidUpdate(prevProps: CategoryCreateProps) {
+        if (prevProps.match.params.id !== this.props.match.params.id) {
+            this.props.categoryStore.getRootCategory();
+            if (this.props.match.params.id) {
+                this.props.categoryStore.getCategoryInfoById(this.props.match.params.id);
+            } else {
+                this.setCategoryEmpty();
+            }
+            return;
         }
+        const { categoryInfo } = this.props.categoryStore;
+        this.formRef.current?.setFieldsValue({
+            name: categoryInfo.name,
+            pathname: categoryInfo.pathname,
+            pid: categoryInfo.pid,
+        });
     }
 
     // 置空Create列表
@@ -99,7 +111,6 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
                             rules={[{
                                 required: true, message: '请填写分类名称',
                             }]}
-                            initialValue={categoryInfo ? categoryInfo.name : ''}
                         >
                             <Input />
                         </Form.Item>
@@ -107,7 +118,6 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
                             {...formItemLayout}
                             label="缩略名"
                             name="pathname"
-                            initialValue={categoryInfo ? categoryInfo.pathname : ''}
                         >
                             <Input />
                         </Form.Item>
@@ -115,7 +125,6 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
                             {...formItemLayout}
                             label="父级分类"
                             name="pid"
-                            initialValue={categoryInfo ? categoryInfo.pid : 0}
                         >
                             <Select
                                 placeholder="请选择分类"

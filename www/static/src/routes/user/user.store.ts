@@ -14,7 +14,16 @@ export default class UserStore {
     key = '0';
 
     submitting: false;
-    userInfo;
+    userInfo: any = {
+        id: 0,
+        name: '',
+        email: '',
+        display_name: '',
+        type: 0,
+        status: 0,
+        app_key: '',
+        app_secret: '',
+    };
     hasEmail: false;
 
     userEditPwdState: UserEditPwdState = {

@@ -45,6 +45,13 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
         }
     ,   []);
 
+    useEffect(() => {
+        form.setFieldsValue({
+            name: tag.name,
+            pathname: tag.pathname,
+        });
+    }, [tag]);
+
     function queryTagById() {
         TagAPI.queryTagById(id)
         .subscribe(
@@ -102,7 +109,6 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
                         rules={[{
                             required: true, message: '请填写标签名称',
                         }]}
-                        initialValue={tag ? tag.name : ''}
                     >
                         <Input />
                     </Form.Item>
@@ -110,7 +116,6 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
                         {...formItemLayout}
                         label="缩略名"
                         name="pathname"
-                        initialValue={tag ? tag.pathname : ''}
                     >
                         <Input />
                     </Form.Item>

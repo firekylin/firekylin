@@ -2,7 +2,23 @@ import { http } from '../../../utils/http';
 import { message } from 'antd';
 import { makeAutoObservable } from 'mobx';
 class OptionsUploadStore {
-    upload;
+    upload: any = {
+        type: '',
+        accessKeyId: '',
+        accessKeySecret: '',
+        region: '',
+        bucket: '',
+        origin: '',
+        prefix: '',
+        secretId: '',
+        secretKey: '',
+        accessKey: '',
+        operater: '',
+        password: '',
+        upyunBucket: '',
+        upyunOrigin: '',
+        upyunPrefix: '',
+    };
 
     constructor() {
         makeAutoObservable(this);
