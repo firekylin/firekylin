@@ -59,6 +59,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
             <h3 style={{marginBottom: '20px'}}>{theme.name} 主题选项</h3>
             <Form
                 className="clearfix options-general"
+                layout="vertical"
                 onFinish={() => this.saveThemeConfig()}
             >
                 {theme.configElements.map(this.renderConfigElement.bind(this))}

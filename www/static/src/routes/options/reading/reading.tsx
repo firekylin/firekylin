@@ -48,20 +48,23 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
             this.state.options.frontPagePage = pageList.length > 0 ? (pageList[0] as any).pathname : '';
         }
         return (
-            <Select
-                placeholder="请选择页面"
-                value={this.state.options.frontPagePage}
-                defaultActiveFirstOption={true}
-                onChange={(selectedValue: string) => {
-                    const options = this.state.options;
-                    options.frontPagePage = selectedValue;
-                    this.setState({options});
-                }}
-            >
-                {pageList.map((page: any, key: number) => {
-                    return <Option key={key.toString()} value={page.pathname}>{page.title}</Option>;
-                })}
-            </Select>
+            <span onClick={e => e.preventDefault()}>
+                <Select
+                    placeholder="请选择页面"
+                    value={this.state.options.frontPagePage}
+                    defaultActiveFirstOption={true}
+                    style={{ width: 200 }}
+                    onChange={(selectedValue: string) => {
+                        const options = this.state.options;
+                        options.frontPagePage = selectedValue;
+                        this.setState({options});
+                    }}
+                >
+                    {pageList.map((page: any, key: number) => {
+                        return <Option key={key.toString()} value={page.pathname}>{page.title}</Option>;
+                    })}
+                </Select>
+            </span>
         );
     }
 
