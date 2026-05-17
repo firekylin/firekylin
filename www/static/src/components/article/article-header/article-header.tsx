@@ -14,6 +14,10 @@ class ArticleHeaderForm extends React.Component<any, {}> {
         this.id = this.props.match.params.id || 0;
     }
 
+    componentDidUpdate(prevProps: any) {
+        this.formRef.current?.setFieldsValue({ title: this.props.title });
+    }
+
     render() {
         const type = this.props.type;
         const baseUrl = `${location.origin}/${['post', 'page'][type]}/`;
@@ -28,7 +32,6 @@ class ArticleHeaderForm extends React.Component<any, {}> {
                             rules={[{
                                 required: true, message: '请输入标题',
                             }]}
-                            initialValue={this.props.title}
                         >
                             <Input
                                 onChange={e => this.props.handleTitle(e)}
