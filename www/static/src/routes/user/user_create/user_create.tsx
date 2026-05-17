@@ -116,7 +116,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
         };
         if (this.id && ['name', 'email'].indexOf(type) > -1) {
             if (type === 'email') {
-                if (this.userStore.hasEmail) {
+                if (this.userStore.userInfo.email) {
                     prop.disabled = true;
                 }
             } else {
