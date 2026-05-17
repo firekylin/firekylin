@@ -310,7 +310,7 @@ class Article extends React.Component<ArticleProps, {}> {
         const { tagList, templateList } = sharedStore;
         return (
             <div className="post-article">
-                <Row type="flex">
+                <Row>
                     <Col span={18}>
                         <ArticleHeader
                             {...this.props}
@@ -330,7 +330,7 @@ class Article extends React.Component<ArticleProps, {}> {
                         />
                         <ArticleEditor type={this.props.type} id={this.props.match.params.id} />
                     </Col>
-                    <Col span={6}>
+                    <Col span={6} className="article-control-panel">
                         <ArticleControlHeader
                             save={() => this.handleSave()}
                             saveDraft={() => this.handleSaveDraft()}
@@ -338,6 +338,7 @@ class Article extends React.Component<ArticleProps, {}> {
                         <section className="release-date">
                             <h5>发布日期</h5>
                             <DatePicker
+                                className="release-date-picker"
                                 showTime={true}
                                 allowClear={false}
                                 format="YYYY-MM-DD HH:mm:ss"
