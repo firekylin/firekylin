@@ -101,10 +101,11 @@ class Navigation extends React.Component<any, any> {
                         编辑
                     </Button>
                     <Divider type="vertical" />
-                    <Button 
+                    <Button
+                        type="primary"
+                        danger
                         onClick={() => this.delete(i)}
-                        danger 
-                        size="small" 
+                        size="small"
                         icon={<DeleteOutlined />}
                     >
                         删除
