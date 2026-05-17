@@ -23,20 +23,13 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
     return config;
 });
 
-axios.interceptors.response.use(
-    (result: AxiosResponse<IResult<any, any>>) => {
-        if (result.data.errno !== 0) {
-            if (typeof result.data.errmsg === 'string') {
-                message.error(result.data.errmsg);
-            }
-        }
-        return Promise.resolve(result);
-    }, 
-    (error: AxiosError) => {
-        console.error(`错误'${error}`);
-        return Promise.reject(error.response);
+// 业务错误统一处理（Vite CJS→ESM 转换导致 axios 拦截器失效，改用 pipe 处理）
+function handleBusinessError<T>(res: IResult<T, any>): IResult<T, any> {
+    if (res.errno !== 0 && typeof res.errmsg === 'string') {
+        message.error(res.errmsg);
     }
-);
+    return res;
+}
 
 /**
  * HttpClient
@@ -55,10 +48,12 @@ class HttpClient {
         return from(axios.get(url, config))
             .pipe(
                 map(response => response.data),
+                map(res => handleBusinessError(res)),
                 catchError((error: AxiosResponse | undefined) => {
                     console.log(error);
                     if (error === undefined) {
-                        return message.error('请求出错');
+                        message.error('请求出错');
+                        return of({} as any);
                     }
                     this.error$ = of(error);
                     this.handleError();
@@ -76,10 +71,12 @@ class HttpClient {
         return from(axios.post(url, data, config))
                 .pipe(
                     map(response => response.data),
+                    map(res => handleBusinessError(res)),
                     catchError((error: AxiosResponse | undefined) => {
                         console.log(error);
                         if (error === undefined) {
-                            return message.error('请求出错');
+                            message.error('请求出错');
+                            return of({} as any);
                         }
                         this.error$ = of(error);
                         this.handleError();
