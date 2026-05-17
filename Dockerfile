@@ -2,10 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+RUN npm i -g pnpm@9.15.9
+
 COPY package.json /app
 COPY pnpm-lock.yaml /app
-
-RUN npm i -g pnpm@9.15.9
+COPY pnpm-workspace.yaml /app
 
 RUN pnpm i -P --force \
     && mkdir output \
@@ -23,8 +24,11 @@ RUN pnpm run build \
 
 RUN cp -r www output/ \
     && cp -r src output/ \
+    && cp -r view output/ \
     && cp production.js output/ \
     && cp firekylin.sql output/ \
+    && cp firekylin.pgsql output/ \
+    && cp firekylin.sqlite.sql output/ \
     && cp docker-entrypoint.sh output/
 
 ### 准备工作结束

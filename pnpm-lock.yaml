@@ -204,6 +204,9 @@ importers:
       immutability-helper:
         specifier: ^2.8.1
         version: 2.9.1
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
       less:
         specifier: ^3.8.0
         version: 3.8.0

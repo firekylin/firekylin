@@ -44,8 +44,7 @@ rm -rf output/src/common/runtime;
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
 cp -r production.js output/production.js;
-# cp -r now.js output/now.js;
-# cp -r now.json output/now.json;
+cp -r pnpm-lock.yaml output/pnpm-lock.yaml;
 
 
 cp -r firekylin.sql output/;
