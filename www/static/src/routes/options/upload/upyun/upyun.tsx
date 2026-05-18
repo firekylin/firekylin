@@ -1,6 +1,6 @@
 import React from 'react';
-import { Form, Input } from 'antd';
-const FormItem = Form.Item;
+import { Form } from 'antd';
+import { Input } from 'antd';
 import { OptionsUploadItemsProps } from '../upload.model';
 
 class OptionsUploadUpYunFormItems extends React.Component<OptionsUploadItemsProps, {}> {
@@ -8,73 +8,62 @@ class OptionsUploadUpYunFormItems extends React.Component<OptionsUploadItemsProp
     constructor(props: OptionsUploadItemsProps) {
         super(props);
     }
-    
+
     render() {
-        const { getFieldDecorator } = this.props.form;
         return (
             <>
                 {/* 操作员 */}
-                <FormItem
+                <Form.Item
                     label="操作员"
+                    name="operater"
+                    rules={[
+                        {required: true, message: '请填写又拍云的操作员'}
+                    ]}
+                    initialValue={this.props.upload.operater || ''}
                 >
-                    {getFieldDecorator('operater', {
-                        rules: [
-                            {required: true, message: '请填写又拍云的操作员'}
-                        ],
-                        initialValue: this.props.upload.operater || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 操作员密码 */}
-                <FormItem
+                <Form.Item
                     label="SecretKey"
+                    name="操作员密码"
+                    rules={[
+                        {required: true, message: '请填写又拍云的操作员密码'}
+                    ]}
+                    initialValue={this.props.upload.password || ''}
                 >
-                    {getFieldDecorator('操作员密码', {
-                        rules: [
-                            {required: true, message: '请填写又拍云的操作员密码'}
-                        ],
-                        initialValue: this.props.upload.password || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 空间名(Bucket) */}
-                <FormItem
+                <Form.Item
                     label="空间名(Bucket)"
+                    name="upyunBucket"
+                    rules={[
+                        {required: true, message: '请填写又拍云的服务名'}
+                    ]}
+                    initialValue={this.props.upload.upyunBucket || ''}
                 >
-                    {getFieldDecorator('upyunBucket', {
-                        rules: [
-                            {required: true, message: '请填写又拍云的服务名'}
-                        ],
-                        initialValue: this.props.upload.upyunBucket || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 又拍云域名 */}
-                <FormItem
+                <Form.Item
                     label="又拍云域名"
+                    name="upyunOrigin"
+                    rules={[
+                        {required: true, message: '请填写又拍云的域名'}
+                    ]}
+                    initialValue={this.props.upload.upyunOrigin || ''}
                 >
-                    {getFieldDecorator('upyunOrigin', {
-                        rules: [
-                            {required: true, message: '请填写又拍云的域名'}
-                        ],
-                        initialValue: this.props.upload.upyunOrigin || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 路径前缀 */}
-                <FormItem
+                <Form.Item
                     label="路径前缀"
+                    name="upyunPrefix"
+                    initialValue={this.props.upload.upyunPrefix || ''}
                 >
-                    {getFieldDecorator('upyunPrefix', {
-                        initialValue: this.props.upload.upyunPrefix || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
             </>
         );
     }

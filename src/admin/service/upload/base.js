@@ -1,5 +1,5 @@
 const path = require('path');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 module.exports = class extends think.Service {
   init(...args) {
@@ -17,7 +17,7 @@ module.exports = class extends think.Service {
 
   // 获取当前的格式化时间
   formatNow() {
-    return moment(new Date()).format('YYYYMMDD');
+    return dayjs().format('YYYYMMDD');
   }
 
   // 获取存储路径

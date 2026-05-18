@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Input, Form } from 'antd';
+import { Form, FormInstance } from 'antd';
+import { Input } from 'antd';
 import './article-header.less';
 import classNames from 'classnames';
-const FormItem = Form.Item;
 
 class ArticleHeaderForm extends React.Component<any, {}> {
+    formRef = React.createRef<FormInstance>();
 
     id: number = 0;
 
@@ -13,37 +14,40 @@ class ArticleHeaderForm extends React.Component<any, {}> {
         this.id = this.props.match.params.id || 0;
     }
 
+    componentDidUpdate(prevProps: any) {
+        this.formRef.current?.setFieldsValue({ title: this.props.title });
+    }
+
     render() {
         const type = this.props.type;
         const baseUrl = `${location.origin}/${['post', 'page'][type]}/`;
         let postUrl = `/${['post', 'page'][type]}/${encodeURIComponent(this.props.pathname)}.html`;
-        const { getFieldDecorator } = this.props.form;
         return (
             <div className="article-header">
                 <div className="article-header-title">
                     <h5>{`${this.id ? '编辑' : '撰写'}${type ? '页面' : '文章'}`}</h5>
-                    <FormItem>
-                        {getFieldDecorator('title', {
-                            rules: [{
+                    <Form ref={this.formRef}>
+                        <Form.Item
+                            name="title"
+                            rules={[{
                                 required: true, message: '请输入标题',
-                            }],
-                            initialValue: this.props.title,
-                        })(
-                            <Input 
-                                onChange={e => this.props.handleTitle(e)} 
-                                placeholder="标题" 
+                            }]}
+                        >
+                            <Input
+                                onChange={e => this.props.handleTitle(e)}
+                                placeholder="标题"
                                 className={classNames({'has-error': this.props.hasError.title})}
                             />
-                        )}
-                    </FormItem>
+                        </Form.Item>
+                    </Form>
                 </div>
                 <div className="article-header-pathname">
                     <span>{baseUrl}</span>
-                    <Input 
-                        className={classNames('pathname-input', {'has-error': this.props.hasError.pathname})} 
-                        disabled={this.props.status === 3} 
-                        value={this.props.pathname} 
-                        onChange={e => this.props.handlePath(e)} 
+                    <Input
+                        className={classNames('pathname-input', {'has-error': this.props.hasError.pathname})}
+                        disabled={this.props.status === 3}
+                        value={this.props.pathname}
+                        onChange={e => this.props.handlePath(e)}
                     />
                     <span>.html </span>
                     {this.props.status === 3 && this.props.isPublic ?
@@ -60,5 +64,4 @@ class ArticleHeaderForm extends React.Component<any, {}> {
     }
 }
 
-const ArticleHeader = Form.create()(ArticleHeaderForm);
-export default ArticleHeader;
+export default ArticleHeaderForm;

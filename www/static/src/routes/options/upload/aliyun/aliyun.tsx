@@ -1,6 +1,6 @@
 import React from 'react';
-import { Form, Input } from 'antd';
-const FormItem = Form.Item;
+import { Form } from 'antd';
+import { Input } from 'antd';
 import { OptionsUploadItemsProps } from '../upload.model';
 
 class OptionsUploadAliYunFormItems extends React.Component<OptionsUploadItemsProps, {}> {
@@ -8,86 +8,73 @@ class OptionsUploadAliYunFormItems extends React.Component<OptionsUploadItemsPro
     constructor(props: OptionsUploadItemsProps) {
         super(props);
     }
-    
+
     render() {
-        const { getFieldDecorator } = this.props.form;
         return (
             <>
                 {/* accessKeyId */}
-                <FormItem
+                <Form.Item
                     label="accessKeyId"
+                    name="accessKeyId"
+                    rules={[
+                        {required: true, message: '请填写阿里云的accessKeyId'}
+                    ]}
+                    initialValue={this.props.upload.accessKeyId || ''}
                 >
-                    {getFieldDecorator('accessKeyId', {
-                        rules: [
-                            {required: true, message: '请填写阿里云的accessKeyId'}
-                        ],
-                        initialValue: this.props.upload.accessKeyId || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* accessKeySecret */}
-                <FormItem
+                <Form.Item
                     label="accessKeySecret"
+                    name="accessKeySecret"
+                    rules={[
+                        {required: true, message: '请填写阿里云的accessKeySecret'}
+                    ]}
+                    initialValue={this.props.upload.accessKeySecret || ''}
                 >
-                    {getFieldDecorator('accessKeySecret', {
-                        rules: [
-                            {required: true, message: '请填写阿里云的accessKeySecret'}
-                        ],
-                        initialValue: this.props.upload.accessKeySecret || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 服务区域 */}
-                <FormItem
+                <Form.Item
                     label="服务区域"
+                    name="region"
+                    rules={[
+                        {required: true, message: '请填写OSS的服务区域'}
+                    ]}
+                    initialValue={this.props.upload.region || ''}
                 >
-                    {getFieldDecorator('region', {
-                        rules: [
-                            {required: true, message: '请填写OSS的服务区域'}
-                        ],
-                        initialValue: this.props.upload.region || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 空间名(Bucket) */}
-                <FormItem
+                <Form.Item
                     label="空间名(Bucket)"
+                    name="bucket"
+                    rules={[
+                        {required: true, message: '请填写阿里云的空间名'}
+                    ]}
+                    initialValue={this.props.upload.bucket || ''}
                 >
-                    {getFieldDecorator('bucket', {
-                        rules: [
-                            {required: true, message: '请填写阿里云的空间名'}
-                        ],
-                        initialValue: this.props.upload.bucket || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 阿里云域名 */}
-                <FormItem
+                <Form.Item
                     label="阿里云域名"
+                    name="origin"
+                    rules={[
+                        {required: true, message: '请填写阿里云的域名'}
+                    ]}
+                    initialValue={this.props.upload.origin || ''}
                 >
-                    {getFieldDecorator('origin', {
-                        rules: [
-                            {required: true, message: '请填写阿里云的域名'}
-                        ],
-                        initialValue: this.props.upload.origin || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
                 {/* 路径前缀 */}
-                <FormItem
+                <Form.Item
                     label="路径前缀"
+                    name="prefix"
+                    initialValue={this.props.upload.prefix || ''}
                 >
-                    {getFieldDecorator('prefix', {
-                        initialValue: this.props.upload.prefix || '',
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
+                    <Input />
+                </Form.Item>
             </>
         );
     }

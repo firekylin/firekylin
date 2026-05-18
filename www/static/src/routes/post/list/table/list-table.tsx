@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Table, Button } from 'antd';
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Button, Space } from 'antd';
 import './list-table.less';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -37,27 +38,20 @@ class PostListTable extends React.Component<PostListProps, {}> {
     renderActions(post: any) {
         const status = (this.props.postStore.plReqParams.status as string);
         if (status === '') {
-            return (
-                <>
-                    <Button onClick={() => this.props.history.push(`/post/edit/${post.id}`)} type="primary" icon="edit" size="small">编辑</Button>
-                    <Button onClick={() => this.delete(post.id)} style={{ marginLeft: 8 }} type="danger" icon="delete" size="small">删除</Button>
-                </>
-            );
+            return <Space size="small">
+                <Button onClick={() => this.props.history.push(`/post/edit/${post.id}`)} type="primary" icon={<EditOutlined />} size="small">编辑</Button>
+                <Button onClick={() => this.delete(post.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+            </Space>;
         } else if(status === '4') {
-            return (
-                <>
-
-                    <Button onClick={() => this.cancel(post.id)} type="primary" icon="edit" size="small">撤销</Button>
-                    <Button onClick={() => this.delete(post.id, true)} style={{ marginLeft: 8 }} type="danger" icon="delete" size="small">删除</Button>
-                </>
-            )
+            return <Space size="small">
+                <Button onClick={() => this.cancel(post.id)} type="primary" icon={<EditOutlined />} size="small">撤销</Button>
+                <Button onClick={() => this.delete(post.id, true)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+            </Space>;
         } else {
-            return (
-                <>
-                    <Button disabled={status === '3'} type="primary" onClick={() => this.pass(post.id)} className="success-button" icon="check" size="small">通过</Button>
-                    <Button disabled={status === '2'} onClick={() => this.refuse(post.id)} style={{ marginLeft: 8 }} type="danger" icon="close" size="small">拒绝</Button>
-                </>
-            );
+            return <Space size="small">
+                <Button disabled={status === '3'} onClick={() => this.pass(post.id)} className="fk-btn-success" icon={<CheckOutlined />} size="small">通过</Button>
+                <Button disabled={status === '2'} onClick={() => this.refuse(post.id)} type="primary" danger icon={<CloseOutlined />} size="small">拒绝</Button>
+            </Space>;
         }
     }
 

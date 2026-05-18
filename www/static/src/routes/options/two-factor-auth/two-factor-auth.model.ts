@@ -1,7 +1,6 @@
-import { FormComponentProps } from 'antd/lib/form';
 import TwoFactorAuthStore from './two-factor-auth.store';
 
-export interface TwoFactorAuthProps extends FormComponentProps {
+export interface TwoFactorAuthProps {
     twoFactorAuthStore: TwoFactorAuthStore;
 }
 

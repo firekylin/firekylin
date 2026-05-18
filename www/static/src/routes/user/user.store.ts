@@ -13,9 +13,17 @@ export default class UserStore {
     loading = true;
     key = '0';
 
-    submitting: false;
-    userInfo;
-    hasEmail: false;
+    submitting = false;
+    userInfo: any = {
+        id: 0,
+        name: '',
+        email: '',
+        display_name: '',
+        type: 0,
+        status: 0,
+        app_key: '',
+        app_secret: '',
+    };
 
     userEditPwdState: UserEditPwdState = {
         submitting: false,
@@ -38,8 +46,6 @@ export default class UserStore {
     setSubmitting = data => this.submitting = data
 
     setUserInfo = data => this.userInfo = data
-
-    setHasEmail = data => this.hasEmail = data
 
     setUserEditPwdState = (data: UserEditPwdState) => {
         this.userEditPwdState = Object.assign(this.userEditPwdState, data);
@@ -64,7 +70,6 @@ export default class UserStore {
             .toPromise()
             .then(data => {
                 this.setUserInfo(data.data);
-                this.setHasEmail(!!data.data.email);
             })
             .catch(err => {
                 message.error('加载用户信息失败，请稍后重试');
@@ -120,7 +125,6 @@ export default class UserStore {
             .toPromise()
             .then(data => {
                 this.setUserInfo(data.data);
-                this.setHasEmail(!!data.data.email);
             })
             .catch(err => {
                 message.error(err);

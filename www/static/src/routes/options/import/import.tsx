@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { Tabs, Form, Button, Radio, Upload, Icon, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Form } from 'antd';
+import { Tabs, Button, Radio, Upload, message } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { OptionsImportProps, OptionsImportState } from './import.model';
 const TabPane = Tabs.TabPane;
-const FormItem = Form.Item;
 import './import.less';
-import RadioGroup from 'antd/lib/radio/group';
+const RadioGroup = Radio.Group;
 import { ImportBlogsEnum, ImportUploadAcceptEnum } from './import.enum';
-import { RcFile } from 'antd/lib/upload/interface';
+import { RcFile } from 'antd';
 import { http } from '../../../utils/http';
 import OptionsImportRss from './import-rss/import-rss';
 @inject('sharedStore')
-@observer 
+@observer
 class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImportState> {
     state = {
         uploading: false,
@@ -31,7 +32,7 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
         super(props);
     }
     componentDidMount() {
-        // 
+        //
     }
 
     beforeUpload(file: RcFile) {
@@ -47,7 +48,7 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
             formData.append('file', file);
             formData.append('importor', this.state.uploadType);
         });
-    
+
         this.setState({uploading: true});
 
         http.upload(formData)
@@ -78,77 +79,69 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
                 return ImportUploadAcceptEnum.Hexo;
             case ImportBlogsEnum.MarkDown:
                 return ImportUploadAcceptEnum.MarkDown;
-            default: 
+            default:
                 return ImportUploadAcceptEnum.WordPress;
         }
     }
 
     render() {
-        const { getFieldDecorator } = this.props.form;
-        return (
-            <>
-                <BreadCrumb className="breadcrumb" {...this.props} />
-                <div className="page-list option-import-page">
-                    <Tabs className="tabs" 
-                        defaultActiveKey="0" 
-                        type="card" 
-                    >
-                        <TabPane tab="普通导入" key="0">
-                            <Form>
-                                <FormItem
-                                    label="请选择导入的博客平台"
+        return <>
+            <BreadCrumb className="breadcrumb" {...this.props} />
+            <div className="page-list option-import-page">
+                <Tabs className="tabs"
+                    defaultActiveKey="0"
+                    type="card"
+                >
+                    <TabPane tab="普通导入" key="0">
+                        <Form layout="vertical">
+                            <Form.Item
+                                label="请选择导入的博客平台"
+                                name="blog"
+                                initialValue={this.state.uploadType || ImportBlogsEnum.WordPress}
+                            >
+                                <RadioGroup
+                                    onChange={e => {
+                                        this.setState({uploadType: e.target.value, fileList: []});
+                                    }}
                                 >
-                                    {getFieldDecorator('blog', {
-                                        initialValue: this.state.uploadType || ImportBlogsEnum.WordPress,
-                                    })(
-                                        <RadioGroup
-                                            onChange={e => {
-                                                this.setState({uploadType: e.target.value, fileList: []});
-                                            }}
-                                        >
-                                            <Radio value={ImportBlogsEnum.WordPress}>WordPress</Radio>
-                                            <Radio value={ImportBlogsEnum.Ghost}>Ghost / Jekyll</Radio>
-                                            <Radio value={ImportBlogsEnum.Hexo}>Hexo</Radio>
-                                            <Radio value={ImportBlogsEnum.MarkDown}>Markdown文件</Radio>
-                                        </RadioGroup>
-                                    )}
-                                </FormItem>
-                                <FormItem
+                                    <Radio value={ImportBlogsEnum.WordPress}>WordPress</Radio>
+                                    <Radio value={ImportBlogsEnum.Ghost}>Ghost / Jekyll</Radio>
+                                    <Radio value={ImportBlogsEnum.Hexo}>Hexo</Radio>
+                                    <Radio value={ImportBlogsEnum.MarkDown}>Markdown文件</Radio>
+                                </RadioGroup>
+                            </Form.Item>
+                            <Form.Item>
+                                {this.uploadInput[this.state.uploadType]}
+                                <Upload
+                                    name="file"
+                                    action="/admin/api/file"
+                                    accept={this.getUploadAccept()}
+                                    fileList={this.state.fileList}
+                                    beforeUpload={file => this.beforeUpload(file)}
                                 >
-                                    {this.uploadInput[this.state.uploadType]}
-                                    <Upload 
-                                        name="file"
-                                        action="/admin/api/file"
-                                        accept={this.getUploadAccept()}
-                                        fileList={this.state.fileList}
-                                        beforeUpload={file => this.beforeUpload(file)}
-                                    >
-                                        <Button>
-                                            <Icon type="upload" /> 选择文件
-                                        </Button>
-                                    </Upload>
-                                </FormItem>
-                                <FormItem>
-                                    <Button
-                                        className="upload-demo-start"
-                                        type="primary"
-                                        onClick={() => this.handleUpload()}
-                                        disabled={this.state.fileList.length === 0}
-                                        loading={this.state.uploading}
-                                    >
-                                        {this.state.uploading ? '上传中...' : '上传'}
+                                    <Button>
+                                        <UploadOutlined /> 选择文件
                                     </Button>
-                                </FormItem>
-                            </Form>
-                        </TabPane>
-                        <TabPane tab="RSS导入" key="1">
-                            <OptionsImportRss />
-                        </TabPane>
-                    </Tabs>
-                </div>
-            </>
-        );
+                                </Upload>
+                            </Form.Item>
+                            <Form.Item>
+                                <Button
+                                    type="primary"
+                                    onClick={() => this.handleUpload()}
+                                    disabled={this.state.fileList.length === 0}
+                                    loading={this.state.uploading}
+                                >
+                                    {this.state.uploading ? '上传中...' : '上传'}
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </TabPane>
+                    <TabPane tab="RSS导入" key="1">
+                        <OptionsImportRss />
+                    </TabPane>
+                </Tabs>
+            </div>
+        </>;
     }
 }
-const OptionsImport = Form.create()(OptionsImportForm);
-export default OptionsImport;
+export default OptionsImportForm;

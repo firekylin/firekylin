@@ -1,8 +1,7 @@
-import { FormComponentProps } from 'antd/lib/form';
 import ReadingStore from './reading.store';
 import SharedStore from '../../../shared.store';
 
-export interface ReadingProps extends FormComponentProps {
+export interface ReadingProps {
     readingStore: ReadingStore;
     sharedStore: SharedStore;
 }

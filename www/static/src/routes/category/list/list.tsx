@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { Button, Table, Modal } from 'antd';
+import { DeleteOutlined, EditOutlined, StarOutlined } from '@ant-design/icons';
+import { Button, Table, Modal, Space } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { CategoryListProps } from './list.model';
 import classnames from 'classnames';
@@ -63,28 +64,27 @@ const confirm = Modal.confirm;
                         title="操作"
                         key="action"
                         render={(post: Category) => (
-                            <>
-                                <Button 
+                            <Space size="small">
+                                <Button
                                     disabled={defaultCategory === post.id.toString()}
-                                    onClick={() => this.setDefault(post.id)} 
-                                    className={classnames({'defaultCatButton': !(defaultCategory === post.id.toString())})}
-                                    type="primary" 
-                                    icon="star" 
+                                    onClick={() => this.setDefault(post.id)}
+                                    className={classnames({'fk-btn-success': !(defaultCategory === post.id.toString())})}
+                                    type="primary"
+                                    icon={<StarOutlined />}
                                     size="small"
                                 >
                                     默认
                                 </Button>
-                                <Button 
+                                <Button
                                     onClick={() => this.props.history.push(`/cate/edit/${post.id}`)}
-                                    type="primary" 
-                                    icon="edit" 
-                                    size="small" 
-                                    style={{marginLeft: 8}}
+                                    type="primary"
+                                    icon={<EditOutlined />}
+                                    size="small"
                                 >
                                     编辑
                                 </Button>
-                                <Button onClick={() => this.delete(post.id)} style={{marginLeft: 8}} type="danger" icon="delete" size="small">删除</Button>
-                            </>
+                                <Button onClick={() => this.delete(post.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+                            </Space>
                         )}
                     />
                 </Table>

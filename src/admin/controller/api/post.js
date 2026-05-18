@@ -1,5 +1,5 @@
 const push2Firekylin = require('push-to-firekylin');
-const moment = require('moment');
+const dayjs = require('dayjs');
 const Base = require('./base');
 
 module.exports = class extends Base {
@@ -162,7 +162,7 @@ module.exports = class extends Base {
         options = JSON.parse(options) || {};
       }
 
-      if (moment(data.create_time) < moment() && !options.origin_create_time) {
+      if (dayjs(data.create_time).isBefore(dayjs()) && !options.origin_create_time) {
         data.options = JSON.stringify({
           ...options,
           origin_create_time: data.create_time

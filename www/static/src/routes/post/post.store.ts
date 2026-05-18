@@ -3,7 +3,7 @@ import { message } from 'antd';
 import { http } from '../../utils/http';
 import { AppStore } from '../../app.store';
 import { PostListRequestParams, PostListResponseData, PostInfo } from './post.model';
-import { PaginationConfig } from 'antd/lib/table';
+import { TablePaginationConfig } from 'antd';
 import { map } from 'rxjs/operators';
 import { tools } from '../../utils/tools';
 
@@ -28,7 +28,7 @@ class PostStore {
     status: 1,
     user_id: '',
   };
-  pagination: PaginationConfig = {
+  pagination: TablePaginationConfig = {
     current: 1,
     pageSize: 0,
     total: 0,
@@ -60,7 +60,7 @@ class PostStore {
     this.postInfo = Object.assign({}, this.postInfo, info);
   }
 
-  setPagination = (pagination: PaginationConfig) => {
+  setPagination = (pagination: TablePaginationConfig) => {
     this.pagination = pagination;
   }
 

@@ -7,11 +7,9 @@ import * as React from 'react';
 
 // import Search from './search';
 import './style.less';
-import { Modal, Form, message } from 'antd';
+import { Modal, message, FormInstance, UploadChangeParam } from 'antd';
 import EditorLinkModal from './link-modal/link-modal';
-import { WrappedFormUtils } from 'antd/lib/form/Form';
 import EditorImageModal from './image-modal/image-modal';
-import { UploadChangeParam } from 'antd/lib/upload';
 import { http } from '../../utils/http';
 const confirm = Modal.confirm;
 
@@ -39,8 +37,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   preview: HTMLDivElement | null;
   resizebar: HTMLAnchorElement | null;
 
-  linkRef: Form;
-  imageRef: Form;
+  linkFormRef: React.RefObject<FormInstance> = React.createRef<FormInstance>();
   imagePath: string;
   fileInfo: UploadChangeParam;
 
@@ -191,11 +188,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   handleLinkCreate() {
-    const form = this.linkRef.props.form;
-    (form as WrappedFormUtils).validateFields((err, values) => {
-      if (err) {
-        return;
-      }
+    this.linkFormRef.current?.validateFields().then(values => {
       this.setState({linkText: values.linkText, linkUrl: values.linkUrl});
 
       if (values.innerLinkUrl || values.innerLinkText) {
@@ -210,8 +203,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         this._linkText();
       }
 
-      (form as WrappedFormUtils).resetFields();
+      this.linkFormRef.current?.resetFields();
       this.setState({ visible: Object.assign({}, this.state.visible, {link: false}) });
+    }).catch(() => {
+      // validation failed, do nothing
     });
   }
 
@@ -314,9 +309,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         <a ref={a => this.resizebar = a} href="###" className="editor__resize">调整高度</a>
         <EditorLinkModal
           visible={this.state.visible.link}
-          onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); (this.linkRef.props.form as WrappedFormUtils).resetFields(); }}
+          onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); this.linkFormRef.current?.resetFields(); }}
           onCreate={() => this.handleLinkCreate()}
-          wrappedComponentRef={linkRef => this.linkRef = linkRef}
+          onFormReady={ref => { this.linkFormRef = ref; }}
           innerLinks={this.props.innerLinks}
           fetchData={this.props.fetchData}
         />
@@ -324,7 +319,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           visible={this.state.visible.image}
           onCancel={() => this.imageModalClose()}
           onOk={() => this.handleImageOk()}
-          wrappedComponentRef={imageRef => this.imageRef = imageRef}
           fileDone={(fileInfo: UploadChangeParam) => this.handleFile(fileInfo)}
           imageUrl={this.state.imageUrl}
           fileLinkChange={(fileLink: string) => this.handleFileLinkChange(fileLink)}

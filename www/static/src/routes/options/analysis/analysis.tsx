@@ -1,33 +1,24 @@
 import React from 'react';
-import { Form, Input, Button } from 'antd';
+import { Form, FormInstance, Input, Button } from 'antd';
 import { inject, observer } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { AnalysisProps } from './analysis.model';
-const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
 @inject('analysisStore')
 @observer
 class AnalysisForm extends React.Component<AnalysisProps> {
+    formRef = React.createRef<FormInstance>();
+
     state = {
         submitting: false,
     };
 
-    constructor(props: AnalysisProps) {
-        super(props);
+    handleSubmit = (values: any) => {
+        this.props.analysisStore.analysisSave(values);
     }
 
-    handleSubmit = (e: React.FormEvent<any>) => {
-        e.preventDefault();
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                this.props.analysisStore.analysisSave(values);
-            }
-        });
-    }
-    
     render() {
-        const { getFieldDecorator } = this.props.form;
         const { submitting } = this.state;
         return (
             <>
@@ -35,19 +26,17 @@ class AnalysisForm extends React.Component<AnalysisProps> {
                 <div className="page-list">
                     <h3 className="page-title">网站统计代码</h3>
                     <div className="option-comment-page">
-                        <Form onSubmit={this.handleSubmit}>
-                            <FormItem
+                        <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                            <Form.Item
+                                name="analyze_code"
+                                initialValue={window.SysConfig.options.analyze_code || ''}
                                 extra="直接贴入百度统计或者 Google 统计代码"
                             >
-                                {getFieldDecorator('analyze_code', {
-                                    initialValue: window.SysConfig.options.analyze_code || '',
-                                })(
-                                    <TextArea style={{height: 240}} />
-                                )}
-                            </FormItem>
-                            <FormItem>
+                                <TextArea style={{height: 240}} />
+                            </Form.Item>
+                            <Form.Item>
                                 <Button type="primary" htmlType="submit" loading={submitting}>提交</Button>
-                            </FormItem>
+                            </Form.Item>
                         </Form>
                     </div>
                 </div>
@@ -55,5 +44,4 @@ class AnalysisForm extends React.Component<AnalysisProps> {
         );
     }
 }
-const Analysis = Form.create()(AnalysisForm);
-export default Analysis;
+export default AnalysisForm;

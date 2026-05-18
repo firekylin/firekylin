@@ -1,7 +1,6 @@
-import { FormComponentProps } from 'antd/lib/form';
 import CommentStore from './comment.store';
 
-export interface CommentProps extends FormComponentProps {
+export interface CommentProps {
     commentStore: CommentStore;
 }
 

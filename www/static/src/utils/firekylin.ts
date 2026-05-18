@@ -1,5 +1,5 @@
 /* eslint eqeqeq:0 */
-import moment from 'moment';
+import dayjs from 'dayjs';
 // import TipActions from '../action/tip';
 
 let toString = Object.prototype.toString;
@@ -278,7 +278,7 @@ let firekylin = {
   },
 
   formatTime(str: string) {
-    return str ? moment(new Date(str)).format('YYYY年MM月DD日 HH:mm') : '';
+    return str ? dayjs(str).format('YYYY年MM月DD日 HH:mm') : '';
   }
 };
 

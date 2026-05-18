@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Form } from 'antd';
+import { Input, Button, message } from 'antd';
 import { TagAPI } from '../tag.api';
 import { TagCreateOrEditProps } from './create-or-edit.model';
 import { tap } from 'rxjs/operators';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Tag } from '../../../models/tag.model';
-const FormItem = Form.Item;
 const formItemLayout = {
     labelCol: {
         xl: { span: 2 },
@@ -33,7 +33,7 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
         pathname: '',
         post_tag: 0
     });
-    const { getFieldDecorator } = props.form;
+    const [form] = Form.useForm();
 
     useEffect(
         () => {
@@ -44,6 +44,13 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
             }
         }
     ,   []);
+
+    useEffect(() => {
+        form.setFieldsValue({
+            name: tag.name,
+            pathname: tag.pathname,
+        });
+    }, [tag]);
 
     function queryTagById() {
         TagAPI.queryTagById(id)
@@ -62,75 +69,62 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
         });
     }
 
-    function handleSubmit (e: React.FormEvent<any>) {
-        e.preventDefault();
-        props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                setLoading(true);
-                if (id) {
-                    TagAPI.tagUpdateById(id, Object.assign({}, values))
-                    .pipe(tap(() => setLoading(false)))
-                    .subscribe(
-                        res => {
-                            if (res.errno === 0) {
-                                message.success('更新标签成功');
-                                props.history.push('/tag/list');
-                            } else {
-                                message.error(res.errmsg);
-                            }
-                        }
-                    );
-                } else {
-                    TagAPI.tagCreate(Object.assign({}, values))
-                    .pipe(tap(() => setLoading(false)))
-                    .subscribe(
-                        res => {
-                            if (res.errno === 0) {
-                                props.history.push('/tag/list');
-                            }
-                        }
-                    );
+    function handleSubmit (values: any) {
+        setLoading(true);
+        if (id) {
+            TagAPI.tagUpdateById(id, Object.assign({}, values))
+            .pipe(tap(() => setLoading(false)))
+            .subscribe(
+                res => {
+                    if (res.errno === 0) {
+                        message.success('更新标签成功');
+                        props.history.push('/tag/list');
+                    } else {
+                        message.error(res.errmsg);
+                    }
                 }
-                
-            }
-        });
+            );
+        } else {
+            TagAPI.tagCreate(Object.assign({}, values))
+            .pipe(tap(() => setLoading(false)))
+            .subscribe(
+                res => {
+                    if (res.errno === 0) {
+                        props.history.push('/tag/list');
+                    }
+                }
+            );
+        }
     }
-        
+
     return (
         <>
             <BreadCrumb className="breadcrumb" {...props} />
             <div className="page-create page-list">
-                <Form onSubmit={e => handleSubmit(e)}>
-                    <FormItem
+                <Form form={form} onFinish={handleSubmit} scrollToFirstError>
+                    <Form.Item
                         {...formItemLayout}
                         label="标签名称"
+                        name="name"
+                        rules={[{
+                            required: true, message: '请填写标签名称',
+                        }]}
                     >
-                        {getFieldDecorator('name', {
-                            rules: [{
-                                required: true, message: '请填写标签名称',
-                            }],
-                            initialValue: tag ? tag.name : '',
-                        })(
-                            <Input />
-                        )}
-                    </FormItem>
-                    <FormItem
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
                         {...formItemLayout}
                         label="缩略名"
+                        name="pathname"
                     >
-                        {getFieldDecorator('pathname', {
-                            initialValue: tag ? tag.pathname : ''
-                        })(
-                            <Input />
-                        )}
-                    </FormItem>
-                    <FormItem {...tailFormItemLayout}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item {...tailFormItemLayout}>
                         <Button type="primary" htmlType="submit" loading={loading}>提交</Button>
-                    </FormItem>
+                    </Form.Item>
                 </Form>
             </div>
         </>
     );
 }
-const TagCreateOrEdit = Form.create()(TagCreateOrEditForm);
-export default TagCreateOrEdit;
+export default TagCreateOrEditForm;

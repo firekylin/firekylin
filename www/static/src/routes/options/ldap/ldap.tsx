@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Modal, Alert, message } from 'antd';
+import { Button, Modal, Alert, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import './ldap.less';
@@ -107,7 +107,7 @@ class LDAPForm extends React.Component<LDAPProps, {}> {
                 <p>开启LDAP服务后，该平台可以使用LDAP账号密码登录系统后台；</p>
                 <p>
                   此时后台管理员不能进行用户的<code>新增</code>、<code>删除</code>、<code>密码修改</code>操作，
-                  这些均由LDAP统一管理，每次登录更新该用户最新的用户数据到平台；平台可编辑用户的“用户组”、“状态”。
+                  这些均由LDAP统一管理，每次登录更新该用户最新的用户数据到平台；平台可编辑用户的"用户组"、"状态"。
                 </p>
                 <Alert
                     message="如果在系统使用一段时间后开启LDAP服务，若登录用户名已存在则更新用户数据，文章等数据保持不变；如登录用户不存在，则平台会用LDAP账号信息新建账号"
@@ -148,5 +148,4 @@ class LDAPForm extends React.Component<LDAPProps, {}> {
         );
     }
 }
-const LDAP = Form.create()(LDAPForm);
-export default LDAP;
+export default LDAPForm;

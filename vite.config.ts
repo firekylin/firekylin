@@ -7,23 +7,9 @@ export default defineConfig(({ mode }) => ({
     root: path.resolve(__dirname, 'www/static/src'),
     base: '/static/dist/',
 
-    plugins: [
-        react({
-            babel: {
-                plugins: [
-                    // On-demand import of antd components and pre-compiled CSS
-                    ['import', { libraryName: 'antd', libraryDirectory: 'lib', style: 'css' }],
-                ],
-            },
-        }),
-    ],
+    plugins: [react()],
 
-    resolve: {
-        alias: {
-            // Workaround for antd v3 icon bundle size: https://github.com/ant-design/ant-design/issues/12011
-            '@ant-design/icons/lib/dist': path.resolve(__dirname, 'www/static/src/icons.js'),
-        },
-    },
+    resolve: {},
 
     css: {
         preprocessorOptions: {

@@ -1,3 +1,11 @@
+import {
+    ArrowDownOutlined,
+    ArrowUpOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    PlusOutlined,
+} from '@ant-design/icons';
+
 import { Input, Divider, Button, message } from 'antd';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
@@ -66,9 +74,9 @@ class Navigation extends React.Component<any, any> {
                 <Button 
                         disabled={i === 0}
                         onClick={() => this.move(i - 1, i)}
-                        className="ant-btn-success"
+                        className="fk-btn-success"
                         size="small" 
-                        icon="arrow-up"
+                        icon={<ArrowUpOutlined />}
                     >
                         上移
                     </Button>
@@ -76,10 +84,10 @@ class Navigation extends React.Component<any, any> {
                     <Button 
                         disabled={i === this.state.list.length - 1}
                         onClick={() => this.move(i, i + 1)}
-                        className="ant-btn-success"
+                        className="fk-btn-success"
                         type="primary" 
                         size="small" 
-                        icon="arrow-down"
+                        icon={<ArrowDownOutlined />}
                     >
                         下移
                     </Button>
@@ -88,16 +96,17 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.setState({editingRow: i, editingNav: Object.assign({}, nav)})}
                         type="primary" 
                         size="small" 
-                        icon="edit"
+                        icon={<EditOutlined />}
                     >
                         编辑
                     </Button>
                     <Divider type="vertical" />
-                    <Button 
+                    <Button
+                        type="primary"
+                        danger
                         onClick={() => this.delete(i)}
-                        type="danger" 
-                        size="small" 
-                        icon="delete"
+                        size="small"
+                        icon={<DeleteOutlined />}
                     >
                         删除
                     </Button>
@@ -316,7 +325,7 @@ class Navigation extends React.Component<any, any> {
                         onClick={() => this.add()}
                         type="primary" 
                         size="small" 
-                        icon="plus"
+                        icon={<PlusOutlined />}
                     >
                         新增
                     </Button>

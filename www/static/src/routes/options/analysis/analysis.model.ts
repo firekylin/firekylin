@@ -1,6 +1,5 @@
-import { FormComponentProps } from 'antd/lib/form';
 import AnalysisStore from './analysis.store';
 
-export interface AnalysisProps extends FormComponentProps {
+export interface AnalysisProps {
     analysisStore: AnalysisStore;
 }

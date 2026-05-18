@@ -1,4 +1,4 @@
-const moment = require('moment');
+const dayjs = require('dayjs');
 const TurndownService = require('turndown');
 
 class Base extends think.Service {
@@ -13,7 +13,7 @@ class Base extends think.Service {
   }
 
   formatDate(date) {
-    return moment(date).format('YYYY-MM-DD HH:mm:ss');
+    return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
   }
 
   toMarkdown(content) {
