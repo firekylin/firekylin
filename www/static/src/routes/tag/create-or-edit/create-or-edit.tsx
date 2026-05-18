@@ -43,7 +43,7 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
                 setTagEmpty();
             }
         }
-    ,   []);
+    ,   [id]);
 
     useEffect(() => {
         form.setFieldsValue({
