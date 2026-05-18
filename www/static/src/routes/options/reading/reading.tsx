@@ -31,6 +31,15 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
 
     componentDidMount() {
         this.props.sharedStore.getPageList('-1');
+        const options = this.state.options;
+        this.formRef.current?.setFieldsValue({
+            frontPage: options.frontPage,
+            postTocManual: options.postTocManual || '0',
+            auditFreshCreateTime: options.auditFreshCreateTime || '1',
+            postsListSize: options.postsListSize || 10,
+            auto_summary: options.auto_summary || 0,
+            feedFullText: options.feedFullText || '1',
+        });
     }
 
     handleSubmit = (values: any) => {
@@ -102,7 +111,6 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             label="自定义站点首页"
                             className="frontPage"
                             name="frontPage"
-                            initialValue={this.state.options.frontPage}
                         >
                             <RadioGroup
                             >
@@ -122,7 +130,6 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             {...formItemLayout}
                             label="自动生成文章TOC目录"
                             name="postTocManual"
-                            initialValue={this.state.options.postTocManual || '0'}
                         >
                             <RadioGroup>
                                 <Radio value="0">是</Radio>
@@ -135,7 +142,6 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             {...formItemLayout}
                             label="文章审核通过时更新文章的发布时间"
                             name="auditFreshCreateTime"
-                            initialValue={this.state.options.auditFreshCreateTime || '1'}
                         >
                             <RadioGroup>
                                 <Radio value="1">是</Radio>
@@ -147,26 +153,23 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             {...formItemLayout}
                             label="每页文章数目"
                             name="postsListSize"
-                            initialValue={this.state.options.postsListSize || 10}
                         >
                             <Input />
-                            <p>此数目用于指定文章归档输出时每页显示的文章数目.</p>
                         </Form.Item>
+                        <p>此数目用于指定文章归档输出时每页显示的文章数目.</p>
                         <Form.Item
                             {...formItemLayout}
                             label="自动生成摘要截取的字符数"
                             name="auto_summary"
-                            initialValue={this.state.options.auto_summary || 0}
                         >
                             <Input />
-                            <p>文章列表页自动截取开头的部分文字作为摘要。0 为禁用，大于 0 为截取的字符数</p>
                         </Form.Item>
+                        <p>文章列表页自动截取开头的部分文字作为摘要。0 为禁用，大于 0 为截取的字符数</p>
                         {/* RSS 聚合全文输出 */}
                         <Form.Item
                             {...formItemLayout}
                             label="RSS 聚合全文输出"
                             name="feedFullText"
-                            initialValue={this.state.options.feedFullText || '1'}
                         >
                             <RadioGroup>
                                 <Radio value="1">全文输出</Radio>
