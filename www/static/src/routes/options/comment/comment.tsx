@@ -82,7 +82,7 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
                 <div className="page-list">
                     <h3 className="page-title">评论设置</h3>
                     <div className="option-comment-page">
-                        <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                        <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                             <Form.Item
                                 label="评论类型"
                                 name="type"

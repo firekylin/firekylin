@@ -20,7 +20,7 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
         return (
             <div style={{maxWidth: 512}}>
                 <p>LDAP服务，需要填写以下信息</p>
-                <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                     <Form.Item
                         label="LDAP URL"
                         name="ldap_url"

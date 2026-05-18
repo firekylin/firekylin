@@ -20,7 +20,7 @@ class OptionsExportForm extends React.Component<OptionsExportProps, OptionsExpor
                 <div className="page-list">
                     <h3 className="page-title">导出设置</h3>
                     <div className="option-comment-page">
-                        <Form ref={this.formRef} scrollToFirstError>
+                        <Form ref={this.formRef} layout="vertical" scrollToFirstError>
                             <Form.Item
                                 label="请选择导出的文件类型"
                                 name="push"

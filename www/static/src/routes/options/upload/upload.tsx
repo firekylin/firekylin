@@ -60,7 +60,7 @@ class OptionsUploadForm extends React.Component<OptionsUploadProps, {}> {
                 <div className="page-list">
                     <h3 className="page-title">上传设置</h3>
                     <div className="option-upload-page">
-                        <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                        <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                             <Form.Item
                                 label="图片上传至"
                                 name="type"

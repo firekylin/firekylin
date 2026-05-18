@@ -105,7 +105,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <div className="option-reading-page page-list">
                     <h3 className="page-title">阅读设置</h3>
-                    <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                    <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                         <Form.Item
                             {...formItemLayout}
                             label="自定义站点首页"

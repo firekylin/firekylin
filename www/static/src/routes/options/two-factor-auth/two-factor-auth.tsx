@@ -138,7 +138,7 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
             <div>
                 <p>打开两步验证的应用，扫描下面的二维码</p>
                 <QRCode value={otpauth_url} size={256} />
-                <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                     <Form.Item
                         label="填写 6 位校验码"
                         name="code"

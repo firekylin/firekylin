@@ -113,7 +113,7 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
                 <BreadCrumb className="breadcrumb" {...this.props} />
                 <div className="options-general-page page-list">
                     <h3 className="page-title">基本设置</h3>
-                    <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                    <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                         <Form.Item
                             {...formItemLayout}
                             label="站点名称"

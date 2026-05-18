@@ -30,7 +30,7 @@ class PushForm extends React.Component<OptionsPushProps> {
                     <h3 className="page-title">推送设置</h3>
                     <p>开启后他人可以通过 <a href={url} target="_blank">{url}</a> 申请成为投稿者。</p>
                     <div className="option-comment-page">
-                        <Form ref={this.formRef} onFinish={this.handleSubmit} scrollToFirstError>
+                        <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                             <Form.Item name="push" initialValue={this.state.options.push}>
                                 <RadioGroup>
                                     <Radio value="1">开启</Radio>

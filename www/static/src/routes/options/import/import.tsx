@@ -93,7 +93,7 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
                     type="card"
                 >
                     <TabPane tab="普通导入" key="0">
-                        <Form>
+                        <Form layout="vertical">
                             <Form.Item
                                 label="请选择导入的博客平台"
                                 name="blog"
