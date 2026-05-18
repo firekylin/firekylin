@@ -11,12 +11,23 @@ interface LDAPStep2Props extends LDAPProps {
 class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
     formRef = React.createRef<FormInstance>();
 
+    componentDidMount() {
+        const { options } = this.props.ldapStore.data;
+        this.formRef.current?.setFieldsValue({
+            ldap_url: options.ldap_url || '',
+            ldap_connect_timeout: options.ldap_connect_timeout || 5000,
+            ldap_baseDn: options.ldap_baseDn || '',
+            ldap_user_page: options.ldap_user_page || '',
+            ldap_whiteList: options.ldap_whiteList || '',
+            ldap_log: options.ldap_log || '1',
+        });
+    }
+
     handleSubmit = (values: any) => {
         this.props.ldapSave(values);
     }
 
     render() {
-        const { options } = this.props.ldapStore.data;
         return (
             <div style={{maxWidth: 512}}>
                 <p>LDAP服务，需要填写以下信息</p>
@@ -25,7 +36,6 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
                         label="LDAP URL"
                         name="ldap_url"
                         rules={[{required: true, message: '填写 LDAP URL'}]}
-                        initialValue={options.ldap_url || ''}
                     >
                         <Input placeholder="ldap://xxx.xxx.xxx.xxx:xx" type="text" />
                     </Form.Item>
@@ -35,7 +45,6 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
                         label="LDAP 连接超时时间(单位：ms)"
                         name="ldap_connect_timeout"
                         rules={[{required: true, message: '填写 LDAP 连接超时时间'}]}
-                        initialValue={options.ldap_connect_timeout || 5000}
                     >
                         <Input placeholder="ldap://xxx.xxx.xxx.xxx:xx" type="number" />
                     </Form.Item>
@@ -44,7 +53,6 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
                         label="LDAP baseDn"
                         name="ldap_baseDn"
                         rules={[{required: true, message: '填写 LDAP baseDn'}]}
-                        initialValue={options.ldap_baseDn || ''}
                     >
                         <Input placeholder="dc=xxx,dc=xxx,dc=com" type="text" />
                     </Form.Item>
@@ -53,7 +61,6 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
                         label="LDAP 个人信息修改页地址"
                         name="ldap_user_page"
                         rules={[{required: true, message: '填写正确的URL'}]}
-                        initialValue={options.ldap_user_page || ''}
                     >
                         <Input placeholder="http://xxx.xx.xx" type="url" />
                     </Form.Item>
@@ -62,7 +69,6 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
                     <Form.Item
                         label="LDAP 白名单"
                         name="ldap_whiteList"
-                        initialValue={options.ldap_whiteList || ''}
                     >
                         <Input type="text" placeholder="admin" />
                     </Form.Item>
@@ -71,14 +77,13 @@ class LDAPStep2Form extends React.Component<LDAPStep2Props, {}> {
                     <Form.Item
                         label="是否打开 LDAP 日志开关"
                         name="ldap_log"
-                        initialValue={options.ldap_log || '1'}
                     >
                         <RadioGroup>
                             <Radio value="1">是</Radio>
                             <Radio value="0">否</Radio>
                         </RadioGroup>
-                        <p>打开开关，后台打印LDAP操作日志</p>
                     </Form.Item>
+                    <p>打开开关，后台打印LDAP操作日志</p>
                     <Form.Item>
                         <Button type="primary" htmlType="submit">确定</Button>
                     </Form.Item>
