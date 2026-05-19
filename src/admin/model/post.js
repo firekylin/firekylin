@@ -43,6 +43,18 @@ module.exports = class extends Base {
     if (think.isEmpty(info)) {
       return Promise.reject(new Error('POST_NOT_EXIST'));
     }
+
+    // ThinkJS 的 MANY_TO_MANY 关联处理器会跳过空数组（isEmpty([]) === true），
+    // 导致无法清除已有的分类和标签关联。这里手动删除空数组对应的关联记录。
+    if (Array.isArray(data.cate) && data.cate.length === 0) {
+      await this.model('post_cate').where({ post_id: data.id }).delete();
+      delete data.cate;
+    }
+    if (Array.isArray(data.tag) && data.tag.length === 0) {
+      await this.model('post_tag').where({ post_id: data.id }).delete();
+      delete data.tag;
+    }
+
     data.update_time = think.datetime();
     return this.where({ id: data.id }).update(data);
   }
