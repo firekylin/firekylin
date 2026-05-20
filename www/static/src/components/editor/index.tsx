@@ -158,12 +158,20 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
     if (!e.metaKey && !e.ctrlKey) { return true; }
     let key = String.fromCharCode(e.keyCode).toUpperCase();
+
+    // Ctrl+Shift+E → 代码段
+    if (e.shiftKey && key === 'E') {
+      this._codeText();
+      return e.preventDefault();
+    }
+
     let keys = {
       B: this._boldText,
       I: this._italicText,
+      K: this._insertLinkText,
       L: this._linkModal,
       Q: this._blockquoteText,
-      K: this._codeText,
+      E: this._inlineCodeText,
       G: this._pictureText,
       O: this._listOlText,
       U: this._listUlText,
@@ -345,11 +353,16 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       <ul className={classnames('md-toolbar clearfix', {hide: this.state.mode === 'preview'})}>
         <li className="tb-btn"><a title="加粗(Ctrl + B)" onClick={() => this._boldText()} className="editor-toolbar">{this._svgIcon(icons.bold)}</a></li>
         <li className="tb-btn"><a title="斜体(Ctrl + I)" onClick={() => this._italicText()} className="editor-toolbar">{this._svgIcon(icons.italic)}</a></li>
+        <li className="tb-btn"><a title="删除线" onClick={() => this._strikethroughText()} className="editor-toolbar">{this._svgIcon(icons.strikethrough)}</a></li>
+        <li className="tb-btn"><a title="下划线" onClick={() => this._underlineText()} className="editor-toolbar">{this._svgIcon(icons.underline)}</a></li>
         <li className="tb-btn spliter" />
+        <li className="tb-btn"><a title="快速链接(Ctrl + K)" onClick={() => this._insertLinkText()} className="editor-toolbar">{this._svgIcon(icons.quickLink)}</a></li>
         <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={() => this._linkModal()} className="editor-toolbar">{this._svgIcon(icons.link)}</a></li>
         <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={() => this._blockquoteText()} className="editor-toolbar">{this._svgIcon(icons.quote)}</a></li>
-        <li className="tb-btn"><a title="代码段(Ctrl + K)" onClick={() => this._codeText()} className="editor-toolbar">{this._svgIcon(icons.code)}</a></li>
+        <li className="tb-btn"><a title="行内代码(Ctrl + E)" onClick={() => this._inlineCodeText()} className="editor-toolbar">{this._svgIcon(icons.inlineCode)}</a></li>
+        <li className="tb-btn"><a title="代码段(Ctrl + Shift + E)" onClick={() => this._codeText()} className="editor-toolbar">{this._svgIcon(icons.code)}</a></li>
         <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={() => this._pictureText()} className="editor-toolbar">{this._svgIcon(icons.img)}</a></li>
+        <li className="tb-btn"><a title="键盘按键" onClick={() => this._kbdText()} className="editor-toolbar">{this._svgIcon(icons.kbd)}</a></li>
         <li className="tb-btn spliter"/>
         <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={() => this._listOlText()} className="editor-toolbar">{this._svgIcon(icons.ol)}</a></li>
         <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={() => this._listUlText()} className="editor-toolbar">{this._svgIcon(icons.ul)}</a></li>
@@ -460,6 +473,18 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this._preInputText('_斜体文字_', 1, 5);
   }
 
+  _strikethroughText () {
+    this._preInputText('~~删除线文字~~', 2, 7);
+  }
+
+  _underlineText () {
+    this._preInputText('<ins>下划线文字</ins>', 5, 10);
+  }
+
+  _insertLinkText () {
+    this._linkText();
+  }
+
   _linkText (url: string = 'www.yourlink.com', text: string = '链接文本', select: boolean = true) {
     let start = 1, end = 1 + text.length;
     if (!select) {
@@ -473,6 +498,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this._preInputText('> 引用', 2, 4);
   }
 
+  _inlineCodeText () {
+    this._preInputText('`code`', 1, 5);
+  }
+
   _codeText () {
     this._preInputText('```\ncode block\n```', 4, 14);
   }
@@ -483,6 +512,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   _pictureText () {
     this.setState({visible: Object.assign({}, this.state.visible, {image: true})});
+  }
+
+  _kbdText () {
+    this._preInputText('<kbd>键盘按键</kbd>', 5, 9);
   }
 
   _listUlText () {
