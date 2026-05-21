@@ -57,10 +57,10 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                             label: '插入外链',
                             children: (
                                 <Form ref={this.formRef}>
-                                    <Form.Item {...formItemLayout} label="链接地址：" name="linkUrl">
+                                    <Form.Item {...formItemLayout} label="链接文本：" name="linkText">
                                         <Input />
                                     </Form.Item>
-                                    <Form.Item {...formItemLayout} label="链接文本：" name="linkText">
+                                    <Form.Item {...formItemLayout} label="链接地址：" name="linkUrl">
                                         <Input />
                                     </Form.Item>
                                 </Form>

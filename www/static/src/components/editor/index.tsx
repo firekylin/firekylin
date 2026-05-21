@@ -42,8 +42,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   imagePath: string;
   fileInfo: UploadChangeParam;
 
-  sectionRangeEnd: number;
-
   state = this.initialState();
 
   initialState () {
@@ -168,7 +166,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     let keys = {
       B: this._boldText,
       I: this._italicText,
-      K: this._insertLinkText,
+      K: this._quickLinkText,
       L: this._linkModal,
       Q: this._blockquoteText,
       E: this._inlineCodeText,
@@ -205,11 +203,21 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         values.linkText = values.innerLinkText;
       }
 
-      if (values.linkUrl && values.linkText) {
-        const linkUrl = values.linkUrl;
-        this._linkText(linkUrl, values.linkText, false);
+      const hasUrl = !!values.linkUrl;
+      const hasText = !!values.linkText;
+
+      if (hasUrl && hasText) {
+        // 都输入了：光标到末尾
+        this._modalLinkText(values.linkText, values.linkUrl, 'end');
+      } else if (hasText && !hasUrl) {
+        // 有文本没地址：选中url
+        this._modalLinkText(values.linkText, 'www.yourlink.com', 'url');
+      } else if (hasUrl && !hasText) {
+        // 有地址没文本：选中text
+        this._modalLinkText('链接文本', values.linkUrl, 'text');
       } else {
-        this._linkText();
+        // 都没输入：选中text
+        this._modalLinkText('链接文本', 'www.yourlink.com', 'text');
       }
 
       this.linkFormRef.current?.resetFields();
@@ -231,7 +239,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       if(!/^(https?:)?\/\/.+/i.test(this.imagePath)) {
         fileUrl = location.origin + fileUrl;
       }
-      this._preInputText(`![${fileName}](${fileUrl})`, 2, fileName.length + 2, start);
+      this._preInputText(`![${fileName}](${fileUrl})`, 2, fileName.length + 2, { position: start });
       this.imageModalClose();
     } else {
       if (this.state.fileLink) {
@@ -253,9 +261,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           }
           const text = this.state.fileLink ? '链接文本' : fileName;
           if (text === 'alt') {
-            this._preInputText(`![${text}](${res.data})`, 2, 5, start);
+            this._preInputText(`![${text}](${res.data})`, 2, 5, { position: start });
           } else {
-            this._preInputText(`![${text}](${res.data})`, 2, text.length + 2, start);
+            this._preInputText(`![${text}](${res.data})`, 2, text.length + 2, { position: start });
           }
           this.imageModalClose();
         }
@@ -356,7 +364,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         <li className="tb-btn"><a title="删除线" onClick={() => this._strikethroughText()} className="editor-toolbar">{this._svgIcon(icons.strikethrough)}</a></li>
         <li className="tb-btn"><a title="下划线" onClick={() => this._underlineText()} className="editor-toolbar">{this._svgIcon(icons.underline)}</a></li>
         <li className="tb-btn spliter" />
-        <li className="tb-btn"><a title="快速链接(Ctrl + K)" onClick={() => this._insertLinkText()} className="editor-toolbar">{this._svgIcon(icons.quickLink)}</a></li>
+        <li className="tb-btn"><a title="快速链接(Ctrl + K)" onClick={() => this._quickLinkText()} className="editor-toolbar">{this._svgIcon(icons.quickLink)}</a></li>
         <li className="tb-btn"><a title="链接(Ctrl + L)" onClick={() => this._linkModal()} className="editor-toolbar">{this._svgIcon(icons.link)}</a></li>
         <li className="tb-btn"><a title="引用(Ctrl + Q)" onClick={() => this._blockquoteText()} className="editor-toolbar">{this._svgIcon(icons.quote)}</a></li>
         <li className="tb-btn"><a title="行内代码(Ctrl + E)" onClick={() => this._inlineCodeText()} className="editor-toolbar">{this._svgIcon(icons.inlineCode)}</a></li>
@@ -441,16 +449,22 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     return (this.textControl as HTMLTextAreaElement).selectionStart;
   }
 
-  // default text processors
-  _preInputText (text: string, preStart: number, preEnd: number, selectStart?: number) {
+  // 在光标处插入 Markdown 文本
+  // @param text            要插入的模板文本
+  // @param placeholderOffsetStart/End  占位文字在模板中的范围，用于：
+  //                               1) 有选中文本时，将选中内容合并到此范围
+  //                               2) 插入后默认选中此范围（未指定 opts.selectAfter 时）
+  // @param opts.position     覆盖插入位置（默认为当前光标位置）
+  // @param opts.selectAfter  插入后选中范围 [start, end]，相对于插入起始位置的偏移，支持负数以实现相对于插入末尾位置的偏移（-1为末尾）
+  _preInputText (text: string, placeholderOffsetStart: number, placeholderOffsetEnd: number, opts?: { position?: number, selectAfter?: [number, number] }) {
     const textarea = this.textControl as HTMLTextAreaElement;
-    const start = selectStart || textarea.selectionStart;
-    const end = selectStart || textarea.selectionEnd;
+    const start = opts?.position ?? textarea.selectionStart;
+    const end = opts?.position ?? textarea.selectionEnd;
 
     if (start !== end) {
       const exist = this.props.content.slice(start, end);
-      text = text.slice(0, preStart) + exist + text.slice(preEnd);
-      preEnd = preStart + exist.length;
+      text = text.slice(0, placeholderOffsetStart) + exist + text.slice(placeholderOffsetEnd);
+      placeholderOffsetEnd = placeholderOffsetStart + exist.length;
     }
 
     // 聚焦并选中要替换的范围
@@ -461,8 +475,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     document.execCommand('insertText', false, text);
 
     // 选中插入的占位文字，方便用户直接编辑
-    setTimeout(() => textarea.setSelectionRange(start + preStart, start + preEnd), 20);
-    this.sectionRangeEnd = start + preEnd;
+    const offsetStart = ((opts?.selectAfter?.[0] ?? placeholderOffsetStart) + text.length + 1) % (text.length + 1);
+    const offsetEnd = ((opts?.selectAfter?.[1] ?? placeholderOffsetEnd) + text.length + 1) % (text.length + 1);
+    setTimeout(() => textarea.setSelectionRange(start + offsetStart, start + offsetEnd), 20);
   }
 
   _boldText () {
@@ -481,17 +496,29 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this._preInputText('<ins>下划线文字</ins>', 5, 10);
   }
 
-  _insertLinkText () {
-    this._linkText();
+  _quickLinkText () {
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const hasSelection = start !== end;
+    if (hasSelection) {
+      // 选中文字时：选中内容作为链接文本，光标选中url
+      this._preInputText('[链接文本](www.yourlink.com)', 1, 5, { selectAfter: [-18, -2] });
+    } else {
+      // 未选中文字时：插入后选中text
+      this._preInputText('[链接文本](www.yourlink.com)', 1, 5);
+    }
   }
 
-  _linkText (url: string = 'www.yourlink.com', text: string = '链接文本', select: boolean = true) {
-    let start = 1, end = 1 + text.length;
-    if (!select) {
-      start = end = text.length + url.length + 4;
+  // 插入[text](url)并根据selectAction选中对应部分或移动光标到末尾
+  _modalLinkText (text: string = '链接文本', url: string = 'www.yourlink.com', selectAction: 'text' | 'url' | 'end' = 'end') {
+    if (selectAction === 'text') {
+      this._preInputText(`[${text}](${url})`, 1, 1 + text.length);
+    } else if (selectAction === 'url') {
+      this._preInputText(`[${text}](${url})`, text.length + 3, text.length + 3 + url.length);
+    } else {
+      this._preInputText(`[${text}](${url})`, text.length + url.length + 4, text.length + url.length + 4);
     }
-
-    this._preInputText(`[${text}](${url})`, start, end);
   }
 
   _blockquoteText () {
