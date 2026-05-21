@@ -311,7 +311,7 @@ class Article extends React.Component<ArticleProps, {}> {
         return (
             <div className="post-article">
                 <Row>
-                    <Col span={18}>
+                    <Col span={19}>
                         <ArticleHeader
                             {...this.props}
                             handleTitle={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -330,7 +330,7 @@ class Article extends React.Component<ArticleProps, {}> {
                         />
                         <ArticleEditor type={this.props.type} id={this.props.match.params.id} />
                     </Col>
-                    <Col span={6} className="article-control-panel">
+                    <Col span={5} className="article-control-panel">
                         <ArticleControlHeader
                             save={() => this.handleSave()}
                             saveDraft={() => this.handleSaveDraft()}

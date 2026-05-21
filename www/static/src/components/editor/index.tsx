@@ -8,7 +8,7 @@ import * as React from 'react';
 // import Search from './search';
 import './style.less';
 import * as icons from './icons';
-import { Modal, message, FormInstance, UploadChangeParam } from 'antd';
+import { Modal, message, FormInstance, UploadChangeParam, Dropdown } from 'antd';
 import EditorLinkModal from './link-modal/link-modal';
 import EditorImageModal from './image-modal/image-modal';
 import { http } from '../../utils/http';
@@ -371,6 +371,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         <li className="tb-btn"><a title="代码段(Ctrl + Shift + E)" onClick={() => this._codeText()} className="editor-toolbar">{this._svgIcon(icons.code)}</a></li>
         <li className="tb-btn"><a title="图片(Ctrl + G)" onClick={() => this._pictureText()} className="editor-toolbar">{this._svgIcon(icons.img)}</a></li>
         <li className="tb-btn"><a title="键盘按键" onClick={() => this._kbdText()} className="editor-toolbar">{this._svgIcon(icons.kbd)}</a></li>
+        <li className="tb-btn">
+          <Dropdown menu={{ items: this._alertMenuItems() }} trigger={['hover']}>
+            <a title="提示框" className="editor-toolbar">{this._svgIcon(icons.alert)}</a>
+          </Dropdown>
+        </li>
         <li className="tb-btn spliter"/>
         <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={() => this._listOlText()} className="editor-toolbar">{this._svgIcon(icons.ol)}</a></li>
         <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={() => this._listUlText()} className="editor-toolbar">{this._svgIcon(icons.ul)}</a></li>
@@ -543,6 +548,26 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   _kbdText () {
     this._preInputText('<kbd>键盘按键</kbd>', 5, 9);
+  }
+
+  _alertMenuItems () {
+    const types = [
+      { key: 'NOTE', label: '说明', color: '#0969da' },
+      { key: 'TIP', label: '技巧', color: '#1a7f37' },
+      { key: 'IMPORTANT', label: '重要', color: '#8250df' },
+      { key: 'WARNING', label: '警告', color: '#9a6700' },
+      { key: 'CAUTION', label: '危险', color: '#d1242f' },
+    ];
+    return types.map(t => ({
+      key: t.key,
+      label: <span style={{ color: t.color }}>{t.key} <span style={{ color: '#999', marginLeft: 8 }}>{t.label}</span></span>,
+      onClick: () => this._alertText(t.key),
+    }));
+  }
+
+  _alertText (type: string) {
+    const text = `> [!${type}]\n> 提示内容`;
+    this._preInputText(text, type.length + 8, type.length + 12);
   }
 
   _listUlText () {
