@@ -148,28 +148,19 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     });
   }
 
+  _getKeyCode(e: KeyboardEvent): string {
+    if (e.code.startsWith('Digit')) return e.code.slice(5);
+    if (e.code.startsWith('Key')) return e.code.slice(3);
+    return '';
+  }
+
   _bindKey(e: KeyboardEvent) {
-    if (e.keyCode === 9) {
+    if (e.key === 'Tab') {
       this._preInputText('    ', 4, 4);
       return e.preventDefault();
     }
 
-    if (!e.metaKey && !e.ctrlKey) { return true; }
-    let key = String.fromCharCode(e.keyCode).toUpperCase();
-
-    if (e.shiftKey) {
-      let shiftKeys = {
-        E: this._codeText,
-        7: this._listOlText,
-        8: this._listUlText
-      };
-      if (shiftKeys[key]) {
-        shiftKeys[key].bind(this)();
-        return e.preventDefault();
-      }
-    }
-
-    let keys = {
+    let ctrlShortcuts = {
       B: this._boldText,
       I: this._italicText,
       K: this._quickLinkText,
@@ -182,8 +173,18 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       R: this._insertHr
     };
 
-    if (keys[key]) {
-      keys[key].bind(this)();
+    let ctrlShiftShortcuts = {
+      E: this._codeText,
+      '7': this._listOlText,
+      '8': this._listUlText
+    };
+
+    if (!e.metaKey && !e.ctrlKey) { return true; }
+
+    let key = this._getKeyCode(e);
+    let handler = e.shiftKey ? ctrlShiftShortcuts[key] : ctrlShortcuts[key];
+    if (handler) {
+      handler.bind(this)();
       return e.preventDefault();
     }
   }
