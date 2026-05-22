@@ -570,12 +570,82 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this._preInputText(text, type.length + 8, type.length + 12);
   }
 
+  _toggleListText (type: 'ul' | 'ol') {
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const content = this.props.content;
+    const selStart = textarea.selectionStart;
+    const selEnd = textarea.selectionEnd;
+    const hasSelection = selStart !== selEnd;
+
+    // 扩展选区到整行
+    const lineStart = content.lastIndexOf('\n', selStart - 1) + 1;
+    let lineEnd = content.indexOf('\n', selEnd);
+    if (lineEnd === -1) lineEnd = content.length;
+
+    const selectedText = content.slice(lineStart, lineEnd);
+    const lines = selectedText.split('\n');
+    const isMulti = lines.length > 1;
+    const isUl = type === 'ul';
+
+    // 多行严格匹配行首，单行忽略前导空格
+    const ulPattern = /^[*+-] /;
+    const olPattern = /^\d+\. /;
+    const ulPatternLoose = /^\s*[*+-] /;
+    const olPatternLoose = /^\s*\d+\. /;
+    const checkPattern = isMulti ? (isUl ? ulPattern : olPattern) : (isUl ? ulPatternLoose : olPatternLoose);
+    const allHaveMarker = lines.every(line => checkPattern.test(line));
+
+    // 全部有标记→移除；否则→给缺标记的行添加（多行在绝对行首，单行在空格后）
+    let newLines: string[];
+    if (allHaveMarker) {
+      if (isMulti) {
+        newLines = lines.map(line =>
+          isUl ? line.replace(/^[*+-] /, '') : line.replace(/^\d+\. /, '')
+        );
+      } else {
+        newLines = lines.map(line =>
+          isUl ? line.replace(/^(\s*)[*+-] /, '$1') : line.replace(/^(\s*)\d+\. /, '$1')
+        );
+      }
+    } else {
+      if (isMulti) {
+        if (isUl) {
+          newLines = lines.map(line => '* ' + line);
+        } else {
+          newLines = lines.map((line, i) => (i + 1) + '. ' + line);
+        }
+      } else {
+        if (isUl) {
+          newLines = lines.map(line => line.replace(/^(\s*)/, '$1* '));
+        } else {
+          newLines = lines.map(line => line.replace(/^(\s*)/, '$11. '));
+        }
+      }
+    }
+
+    const newText = newLines.join('\n');
+
+    // 使用 execCommand 保留浏览器的 undo/redo 栈
+    textarea.focus();
+    textarea.setSelectionRange(lineStart, lineEnd);
+    document.execCommand('insertText', false, newText);
+
+    // 有选区→扩大到整行；无选区→根据新旧文本长度差调整光标位置
+    if (hasSelection) {
+      setTimeout(() => textarea.setSelectionRange(lineStart, lineStart + newText.length), 20);
+    } else {
+      const delta = newText.length - selectedText.length;
+      const newStart = selStart + delta;
+      setTimeout(() => textarea.setSelectionRange(newStart, newStart), 20);
+    }
+  }
+
   _listUlText () {
-    this._preInputText('- 无序列表项', 2, 7);
+    this._toggleListText('ul');
   }
 
   _listOlText () {
-    this._preInputText('1. 有序列表项', 3, 8);
+    this._toggleListText('ol');
   }
 
   _headerText () {
