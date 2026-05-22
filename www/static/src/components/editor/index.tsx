@@ -157,10 +157,16 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     if (!e.metaKey && !e.ctrlKey) { return true; }
     let key = String.fromCharCode(e.keyCode).toUpperCase();
 
-    // Ctrl+Shift+E → 代码段
-    if (e.shiftKey && key === 'E') {
-      this._codeText();
-      return e.preventDefault();
+    if (e.shiftKey) {
+      let shiftKeys = {
+        E: this._codeText,
+        7: this._listOlText,
+        8: this._listUlText
+      };
+      if (shiftKeys[key]) {
+        shiftKeys[key].bind(this)();
+        return e.preventDefault();
+      }
     }
 
     let keys = {
@@ -171,8 +177,6 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       Q: this._blockquoteText,
       E: this._inlineCodeText,
       G: this._pictureText,
-      O: this._listOlText,
-      U: this._listUlText,
       H: this._headerText,
       M: this._insertMore,
       R: this._insertHr
@@ -377,8 +381,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           </Dropdown>
         </li>
         <li className="tb-btn spliter"/>
-        <li className="tb-btn"><a title="有序列表(Ctrl + O)" onClick={() => this._listOlText()} className="editor-toolbar">{this._svgIcon(icons.ol)}</a></li>
-        <li className="tb-btn"><a title="无序列表(Ctrl + U)" onClick={() => this._listUlText()} className="editor-toolbar">{this._svgIcon(icons.ul)}</a></li>
+        <li className="tb-btn"><a title="有序列表(Ctrl + Shift + 7)" onClick={() => this._listOlText()} className="editor-toolbar">{this._svgIcon(icons.ol)}</a></li>
+        <li className="tb-btn"><a title="无序列表(Ctrl + Shift + 8)" onClick={() => this._listUlText()} className="editor-toolbar">{this._svgIcon(icons.ul)}</a></li>
         <li className="tb-btn"><a title="标题(Ctrl + H)" onClick={() => this._headerText()} className="editor-toolbar">{this._svgIcon(icons.title)}</a></li>
         <li className="tb-btn spliter"/>
         <li className="tb-btn"><a title="分割线(Ctrl + R)" onClick={() => this._insertHr()} className="editor-toolbar">{this._svgIcon(icons.hr)}</a></li>
