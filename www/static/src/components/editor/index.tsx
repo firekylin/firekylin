@@ -156,7 +156,11 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   _bindKey(e: KeyboardEvent) {
     if (e.key === 'Tab') {
-      this._preInputText('    ', 4, 4);
+      if (e.shiftKey) {
+        this._handleShiftTab();
+      } else {
+        this._handleTab();
+      }
       return e.preventDefault();
     }
 
@@ -651,6 +655,68 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   _listOlText () {
     this._toggleListText('ol');
+  }
+
+  _handleTab () {
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const content = this.props.content;
+    const selStart = textarea.selectionStart;
+    const selEnd = textarea.selectionEnd;
+    const hasSelection = selStart !== selEnd;
+
+    if (!hasSelection) {
+      document.execCommand('insertText', false, '    ');
+      return;
+    }
+
+    // 扩展选区到整行
+    const lineStart = content.lastIndexOf('\n', selStart - 1) + 1;
+    let lineEnd = content.indexOf('\n', selEnd);
+    if (lineEnd === -1) lineEnd = content.length;
+
+    const selectedText = content.slice(lineStart, lineEnd);
+    const lines = selectedText.split('\n');
+    const newLines = lines.map(line => '    ' + line);
+    const newText = newLines.join('\n');
+
+    textarea.focus();
+    textarea.setSelectionRange(lineStart, lineEnd);
+    document.execCommand('insertText', false, newText);
+    setTimeout(() => textarea.setSelectionRange(lineStart, lineStart + newText.length), 20);
+  }
+
+  _handleShiftTab () {
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const content = this.props.content;
+    const selStart = textarea.selectionStart;
+    const selEnd = textarea.selectionEnd;
+    const hasSelection = selStart !== selEnd;
+
+    // 扩展选区到整行
+    const lineStart = content.lastIndexOf('\n', selStart - 1) + 1;
+    let lineEnd = content.indexOf('\n', selEnd);
+    if (lineEnd === -1) lineEnd = content.length;
+
+    const selectedText = content.slice(lineStart, lineEnd);
+    const lines = selectedText.split('\n');
+    const newLines = lines.map(line => line.replace(/^( {1,4})/, ''));
+    const newText = newLines.join('\n');
+
+    textarea.focus();
+    textarea.setSelectionRange(lineStart, lineEnd);
+    document.execCommand('insertText', false, newText);
+
+    if (hasSelection) {
+      setTimeout(() => textarea.setSelectionRange(lineStart, lineStart + newText.length), 20);
+    } else {
+      // 计算光标在行内的相对位置
+      const cursorOffsetInLine = selStart - lineStart;
+      const oldLine = lines[0];
+      const newLine = newLines[0];
+      const removed = oldLine.length - newLine.length;
+      const newPos = Math.max(lineStart + cursorOffsetInLine - removed, lineStart);
+      setTimeout(() => textarea.setSelectionRange(newPos, newPos), 20);
+    }
   }
 
   _headerText () {
