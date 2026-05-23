@@ -6,7 +6,6 @@ class ReadingStore {
     loading = false;
     data = {
         options: window.SysConfig.options,
-        frontPage: window.SysConfig.options.frontPagePage,
     };
 
     constructor() {

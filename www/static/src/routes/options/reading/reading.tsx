@@ -15,25 +15,20 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
     formRef = React.createRef<FormInstance>();
 
     state = {
-        options: window.SysConfig.options,
+        options: { ...window.SysConfig.options },
+        frontPageType: '' as 'recent' | 'page',
     };
 
     constructor(props: ReadingProps) {
         super(props);
-        let { frontPage } = this.state.options;
-        if (!frontPage) {
-            frontPage = 'recent';
-        } else {
-            frontPage = 'page';
-        }
-        this.state.options.frontPage = frontPage;
+        this.state.frontPageType = !this.state.options.frontPage ? 'recent' : 'page';
     }
 
     componentDidMount() {
         this.props.sharedStore.getPageList('-1');
-        const options = this.state.options;
+        const { options, frontPageType } = this.state;
         this.formRef.current?.setFieldsValue({
-            frontPage: options.frontPage,
+            frontPageType,
             postTocManual: options.postTocManual || '0',
             auditFreshCreateTime: options.auditFreshCreateTime || '1',
             postsListSize: options.postsListSize || 10,
@@ -43,30 +38,30 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
     }
 
     handleSubmit = (values: any) => {
-        if (values.frontPage === 'recent') {
-                values.frontPage = '';
-            } else if (values.frontPage === 'page') {
-                values.frontPage = this.state.options.frontPagePage;
+        if (values.frontPageType === 'recent') {
+            values.frontPage = '';
+        } else if (values.frontPageType === 'page') {
+            values.frontPage = this.state.options.frontPage || '';
         }
+        delete values.frontPageType;
+        Object.assign(window.SysConfig.options, this.state.options, values);
         this.props.readingStore.submit(values);
     }
 
     renderPageList() {
         const { pageList } = this.props.sharedStore;
-        if (!this.state.options.frontPagePage) {
-            this.state.options.frontPagePage = pageList.length > 0 ? (pageList[0] as any).pathname : '';
+        if (!this.state.options.frontPage && pageList.length > 0) {
+            this.state.options.frontPage = (pageList[0] as any).pathname;
         }
         return (
             <span onClick={e => e.preventDefault()}>
                 <Select
                     placeholder="请选择页面"
-                    value={this.state.options.frontPagePage}
+                    value={this.state.options.frontPage}
                     defaultActiveFirstOption={true}
                     style={{ width: 200 }}
                     onChange={(selectedValue: string) => {
-                        const options = this.state.options;
-                        options.frontPagePage = selectedValue;
-                        this.setState({options});
+                        this.setState({options: {...this.state.options, frontPage: selectedValue}});
                     }}
                 >
                     {pageList.map((page: any, key: number) => {
@@ -110,7 +105,7 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             {...formItemLayout}
                             label="自定义站点首页"
                             className="frontPage"
-                            name="frontPage"
+                            name="frontPageType"
                         >
                             <RadioGroup
                             >

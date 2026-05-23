@@ -22,8 +22,7 @@ interface Window {
             twitter_url: string;
             miitbeian: string;
             mpsbeian: string;
-            frontPagePage: string;
-            frontPage: 'recent' | 'page';
+            frontPage: string;
             postTocManual: '0' | '1';
             auditFreshCreateTime: '0' | '1';
             postsListSize: number;
