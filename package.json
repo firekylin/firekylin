@@ -33,7 +33,6 @@
     "highlight.js": "^11.11.1",
     "jszip": "^3.7.0",
     "ldapjs": "^1.0.2",
-    "markdown-toc": "^1.2.0",
     "marked": "^18.0.3",
     "marked-alert": "^2.1.2",
     "marked-footnote": "^1.4.0",

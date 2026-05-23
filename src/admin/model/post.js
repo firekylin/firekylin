@@ -2,8 +2,9 @@ const { Marked } = require('marked');
 const { markedHighlight } = require('marked-highlight');
 const markedFootnote = require('marked-footnote');
 const markedAlert = require('marked-alert');
-const toc = require('markdown-toc');
 const hljs = require('highlight.js');
+const markedMathjaxExtension = require('../../common/service/marked-mathjax-extension');
+const markedTocExtension = require('../../common/service/marked-toc-extension');
 const Base = require('./base');
 
 module.exports = class extends Base {
@@ -204,26 +205,15 @@ module.exports = class extends Base {
    * @return {string}
    */
   async markdownToHtml(content, option = { toc: true, highlight: true }) {
-    // 构建 marked 扩展
     const extensions = [];
-
-    /**
-     * 增加 footnote 支持
-     */
+    // 增加 footnote 支持
     extensions.push(markedFootnote());
-
-    /**
-     * 增加 alert 支持
-     */
+    // 增加 alert 支持
     extensions.push(markedAlert());
-
-    /**
-     * 增加 highlight
-     */
+    // 增加 highlight 支持
     if (option.highlight) {
       let detectedLang = null;
-
-      // 先加自定义钩子（后执行）：将检测到的语言写入 token
+      // 自定义钩子：将检测到的语言写入 token（walker 链中最后执行）
       extensions.push({
         walkTokens(token) {
           if (token.type === 'code' && !token.lang && detectedLang) {
@@ -232,8 +222,7 @@ module.exports = class extends Base {
           detectedLang = null;
         }
       });
-
-      // 再加 marked-highlight（先执行）：高亮并存储检测到的语言
+      // marked-highlight：高亮并存储检测到的语言（walker 链中第二个执行）
       extensions.push(markedHighlight({
         emptyLangClass: 'hljs',
         langPrefix: 'hljs lang-',
@@ -244,24 +233,25 @@ module.exports = class extends Base {
         }
       }));
     }
-
-    // 使用包含 MathJax 解析的 Markdown 引擎解析 MD 文本
-    const markedWithMathJax = think.service('marked-with-mathjax');
-    let markedContent = await markedWithMathJax.render(content, extensions);
-
-    /**
-     * 增加 TOC 目录
-     */
-    const marked = new Marked(...extensions);
+    // MathJax extension（walker 链中最先执行）
+    extensions.push(markedMathjaxExtension());
+    // TOC + heading anchor extension（仅定义 renderer，不参与 walker 链）
+    const tocEntries = [];
     if (option.toc) {
-      const tocContent = marked.parse(toc(content).content).replace(/<a\s+href="#([^"]+)">(.+)?<\/a>/g, (a, b, c) => {
-        return `<a href="#${this.generateTocName(c)}">${c}</a>`;
-      });
+      extensions.push(markedTocExtension({
+        generateTocName: this.generateTocName.bind(this),
+        tocEntries
+      }));
+    }
 
-      markedContent = markedContent.replace(/<h(\d)[^<>]*>(.*?)<\/h\1>/g, (a, b, c) => {
-        return `<h${b}><a id="${this.generateTocName(c)}" class="anchor" href="#${this.generateTocName(c)}"></a>${c}</h${b}>`;
-      });
-      markedContent = `<div class="toc">${tocContent}</div>${markedContent}`;
+    // markdown渲染
+    const marked = new Marked(...extensions);
+    let markedContent = await marked.parse(content);
+
+    // TOC后处理，把TOC加到渲染后的HTML开头
+    if (option.toc && tocEntries.length > 0) {
+      const tocHtml = this.buildTocHtml(tocEntries);
+      markedContent = `<div class="toc">${tocHtml}</div>${markedContent}`;
     }
 
     return markedContent;
@@ -298,5 +288,34 @@ module.exports = class extends Base {
       return name;
     }
     return `toc-${think.md5(name).slice(0, 3)}`;
+  }
+
+  /**
+   * 从 tocEntries 生成嵌套 ul>li 目录 HTML
+   * @param  {Array} entries [{id, content, level}]
+   * @return {string}
+   */
+  buildTocHtml(entries) {
+    if (!entries.length) return '';
+    const minLevel = Math.min(...entries.map(e => e.level));
+    let html = '<ul>';
+    let currentLevel = minLevel;
+    for (const entry of entries) {
+      while (currentLevel < entry.level) {
+        html += '<ul>';
+        currentLevel++;
+      }
+      while (currentLevel > entry.level) {
+        html += '</ul>';
+        currentLevel--;
+      }
+      html += `<li><a href="#${entry.id}">${entry.content}</a></li>`;
+    }
+    while (currentLevel > minLevel) {
+      html += '</ul>';
+      currentLevel--;
+    }
+    html += '</ul>';
+    return html;
   }
 };
