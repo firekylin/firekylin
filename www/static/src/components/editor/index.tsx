@@ -161,7 +161,15 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       } else {
         this._handleTab();
       }
-      return e.preventDefault();
+      e.preventDefault();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      if (this._handleEnter()) {
+        e.preventDefault();
+      }
+      return;
     }
 
     let ctrlShortcuts = {
@@ -183,13 +191,13 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       '8': this._listUlText
     };
 
-    if (!e.metaKey && !e.ctrlKey) { return true; }
+    if (!e.metaKey && !e.ctrlKey) { return; }
 
     let key = this._getKeyCode(e);
     let handler = e.shiftKey ? ctrlShiftShortcuts[key] : ctrlShortcuts[key];
     if (handler) {
       handler.bind(this)();
-      return e.preventDefault();
+      e.preventDefault();
     }
   }
 
@@ -647,6 +655,57 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       const newStart = selStart + delta;
       setTimeout(() => textarea.setSelectionRange(newStart, newStart), 20);
     }
+  }
+
+  _handleEnter (): boolean {
+    const textarea = this.textControl as HTMLTextAreaElement;
+    const content = this.props.content;
+    const selStart = textarea.selectionStart;
+    const selEnd = textarea.selectionEnd;
+
+    // 找到选区起始行和结束行的位置
+    const lineStart = content.lastIndexOf('\n', selStart - 1) + 1;
+    let lineEnd = content.indexOf('\n', selEnd);
+    if (lineEnd === -1) lineEnd = content.length;
+    const fullLine = content.slice(lineStart, lineEnd);
+
+    // 匹配行首列表标记
+    const ulMatch = fullLine.match(/^(\s*)([*+-]) /);
+    const olMatch = fullLine.match(/^(\s*)(\d+)\. /);
+    const match = ulMatch || olMatch;
+
+    if (!match) return false;
+
+    const fullMatch = match[0];   // e.g. "  * " or "  1. "
+    const indent = match[1];      // 前导空格
+    const contentAfterMarker = fullLine.slice(fullMatch.length);
+
+    // 标记后整行无内容（仅有标记和可选空格）→ 删除整行（含前导空格），不换行
+    if (contentAfterMarker.trim() === '') {
+      textarea.focus();
+      textarea.setSelectionRange(lineStart, selStart);
+      document.execCommand('insertText', false, '');
+      return true;
+    }
+
+    // 标记后有内容 → 续行：插入换行 + 新标记
+    const isOl = !!olMatch;
+    let newMarker: string;
+    if (isOl) {
+      newMarker = indent + (parseInt(match[2]) + 1) + '. ';
+    } else {
+      newMarker = indent + match[2] + ' ';
+    }
+
+    // 在光标/选区处插入换行和新列表标记
+    textarea.focus();
+    textarea.setSelectionRange(selStart, selEnd);
+    document.execCommand('insertText', false, '\n' + newMarker);
+
+    // 光标定位到新行标记之后
+    const newPos = selStart + 1 + newMarker.length;
+    setTimeout(() => textarea.setSelectionRange(newPos, newPos), 20);
+    return true;
   }
 
   _listUlText () {
