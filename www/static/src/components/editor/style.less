@@ -86,6 +86,13 @@
       fill: #d2d2d2;
     }
 }
+.editor-toolbar.toggle-active {
+    background-color: #e8f4fd;
+    border-color: #e8f4fd;
+    .editor-icon svg {
+      fill: #0081ff;
+    }
+}
 .md-panel.disabled .tb-btn a,
 .md-panel.disabled textarea {
 	cursor: default;
@@ -177,6 +184,9 @@
 	height: 100%;
 	width: 100%;
 	padding: 47px 15px 15px;
+}
+.md-editor.monospace textarea {
+	font-family: ui-monospace, 'Cascadia Mono', 'Menlo', 'Ubuntu Mono', 'Roboto Mono', 'Consolas', 'Liberation Mono', 'Courier New', system-ui, sans-serif;
 }
 .md-preview {
 	position: absolute;

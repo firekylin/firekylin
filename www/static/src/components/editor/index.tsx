@@ -49,6 +49,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       panelClass: 'md-panel',
       mode: 'split',
       isFullScreen: false,
+      isMonospace: true,
       result: marked(this.props.content),
       linkUrl: '',
       linkText: '',
@@ -319,7 +320,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   render () {
     const panelClass = classnames([ 'md-panel', { 'fullscreen': this.state.isFullScreen } ]);
-    const editorClass = classnames([ 'md-editor', { 'expand': this.state.mode === 'edit' } ]);
+    const editorClass = classnames([ 'md-editor', { 'expand': this.state.mode === 'edit', 'monospace': this.state.isMonospace } ]);
     const previewClass = classnames([ 'md-preview', 'markdown', { 'expand': this.state.mode === 'preview', 'shrink': this.state.mode === 'edit' } ]);
 
     return (
@@ -440,6 +441,13 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
             className={classnames('editor-toolbar')}
           >{this._svgIcon(this.state.isFullScreen ? icons.unzen : icons.zen)}</a>
         </li>
+        {/* monospace */}
+        <li className="tb-btn pull-right">
+          <a title="等宽字符模式"
+            onClick={() => this._toggleMonospace()}
+            className={classnames('editor-toolbar', { 'toggle-active': this.state.isMonospace })}
+          >{this._svgIcon(icons.monospace)}</a>
+        </li>
       </ul>
     );
   }
@@ -465,6 +473,10 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   _toggleFullScreen () {
     this.setState({ isFullScreen: !this.state.isFullScreen }, () => this.props.onFullScreen(this.state.isFullScreen));
+  }
+
+  _toggleMonospace () {
+    this.setState({ isMonospace: !this.state.isMonospace });
   }
 
   _getCursorPos() {
