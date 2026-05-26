@@ -153,10 +153,10 @@ module.exports = class extends Base {
     const auto_summary = parseInt(options.auto_summary);
 
     let showToc;
-    if (!postTocManual) {
-      showToc = data.type / 1 === 0;
-    } else {
+    if (postTocManual) {
       showToc = /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
+    } else {
+      showToc = data.type / 1 === 0 || /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
     }
     data.content = await this.markdownToHtml(data.markdown_content, { toc: showToc, highlight: true });
     data.summary = await this.getSummary(data.markdown_content, auto_summary);
