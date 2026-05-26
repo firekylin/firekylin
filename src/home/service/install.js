@@ -197,6 +197,7 @@ module.exports = class extends think.Service {
     await optionsModel.updateOptions('navigation', JSON.stringify([
       {'label': '首页', 'url': '/', 'option': 'home'},
       {'label': '归档', 'url': '/archives/', 'option': 'archive'},
+      {'label': '分类', 'url': '/categories', 'option': 'category'},
       {'label': '标签', 'url': '/tags', 'option': 'tags'},
       {'label': '关于', 'url': '/about', 'option': 'user'},
       {'label': '友链', 'url': '/links', 'option': 'link'}

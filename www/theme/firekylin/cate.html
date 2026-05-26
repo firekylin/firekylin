@@ -1,0 +1,27 @@
+{% extends './layout.html' %}
+
+{% block title -%}
+分类 - {{options.title}}
+{%- endblock %}
+
+{% block headers -%}
+<link rel="canonical" href="{{site_url}}/categories" />
+{%- endblock %}
+
+{% block content %}
+<article class="post categories">
+  <h1 class="title">分类</h1>
+  <div class="entry-content">
+    <section>
+      {% for cate in categories %}
+      <a href="/cate/{{cate.pathname}}" data-cate="{{cate.name}}">{{cate.name}}({{cate.count}})</a>
+      {% if cate.children %}
+        {% for child in cate.children %}
+        <a href="/cate/{{child.pathname}}" data-cate="{{child.name}}" class="child">{{child.name}}({{child.count}})</a>
+        {% endfor %}
+      {% endif %}
+      {% endfor %}
+    </section>
+  </div>
+</article>
+{% endblock %}

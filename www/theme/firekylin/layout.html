@@ -57,7 +57,7 @@
         {% for nav in navigation %}
         <li>
           <a class="" href="{{nav.url}}" title="{{nav.label}}">
-            <i class="iconfont icon-{{nav.option}}"></i>
+            <svg class="icon"><use href="/theme/{{options.theme}}/res/icon/icons.svg#icon-{{nav.option}}"></use></svg>
             <span>{{nav.label}}</span>
           </a>
         </li>
@@ -67,26 +67,26 @@
         <li>
           {% if options.github_url %}
           <a class="inline" rel="nofollow" target="_blank" href="{{options.github_url}}">
-            <i class="iconfont icon-github-v" title="GitHub"></i>
+            <svg class="icon" title="GitHub"><use href="/theme/{{options.theme}}/res/icon/icons.svg#icon-github-v"></use></svg>
           </a>
           {% endif %}
           {% if options.twitter_url %}
           {% if options.twitter_url.indexOf('twitter.com') > -1 %}
           <a class="inline" rel="nofollow" target="_blank" href="{{options.twitter_url}}">
-            <i class="iconfont icon-twitter-v" title="Twitter"></i>
+            <svg class="icon" title="Twitter"><use href="/theme/{{options.theme}}/res/icon/icons.svg#icon-twitter-v"></use></svg>
           </a>
           {% endif %}
           {% if options.twitter_url.indexOf('weibo.com') > -1 %}
           <a class="inline" rel="nofollow" target="_blank" href="{{options.twitter_url}}">
-            <i class="iconfont icon-weibo" title="weibo"></i>
+            <svg class="icon" title="weibo"><use href="/theme/{{options.theme}}/res/icon/icons.svg#icon-weibo"></use></svg>
           </a>
           {% endif %}
           {% endif %}
           <a class="inline" href="/rss.html">
-            <i class="iconfont icon-rss-v" title="RSS"></i>
+            <svg class="icon" title="RSS"><use href="/theme/{{options.theme}}/res/icon/icons.svg#icon-rss-v"></use></svg>
           </a>
           <a class="inline" href="/search.html">
-            <i class="iconfont icon-search" title="Search"></i>
+            <svg class="icon" title="Search"><use href="/theme/{{options.theme}}/res/icon/icons.svg#icon-search"></use></svg>
           </a>
         </li>
       </ul>

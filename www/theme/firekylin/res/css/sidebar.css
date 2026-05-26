@@ -56,18 +56,15 @@
   transition: color .2s cubic-bezier(.4,.01,.165,.99);
   text-decoration: none;
 }
-#sidebar .buttons li a i,
-#sidebar .buttons li a span {
-  display: inline-block;
-  vertical-align: middle;
+#sidebar .buttons li a {
+  display: flex;
+  align-items: center;
 }
-#sidebar .buttons li a i {
-  font-size: 20px;
-  width: 25px;
-  height: 45px;
-  line-height: 45px;
-  text-align: center;
-  margin-right: 20px;
+#sidebar .buttons li a .icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-right: 30px;
 }
 #sidebar .buttons li a:hover {
   color: rgba(153,153,153,.8);

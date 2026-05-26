@@ -246,8 +246,6 @@ article .entry-content dl {
 
 
 /*** page-tag ***/
-
-
 article.tags section a {
   display: inline-block;
   font-size: 14px;
@@ -266,6 +264,26 @@ article.tags section a:hover {
   color: #2479CC;
   border-color: #2479CC;
 }
+
+/*** page-cate ***/
+article.categories section a {
+  display: block;
+  font-size: 16px;
+  padding: 8px 0;
+  color: rgba(36,121,204,.8);
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+  transition: color .2s cubic-bezier(.4,.01,.165,.99);
+}
+article.categories section a:hover {
+  color: #2479CC;
+}
+article.categories section a.child {
+  padding-left: 2em;
+  font-size: 14px;
+}
+
+
 a.anchor {
   display: block;
   position: relative;

@@ -203,6 +203,10 @@ module.exports = class extends Base {
   async tagAction() {
     return this.displayView('tag');
   }
+
+  async cateAction() {
+    return this.displayView('cate');
+  }
   /**
    * search action
    * @return {[type]} [description]

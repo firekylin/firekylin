@@ -67,8 +67,9 @@
   #sidebar .buttons li a.inline {
     width: 100%;
   }
-  #sidebar .buttons li a i {
-    font-size: 18px;
+  #sidebar .buttons li a .icon {
+    width: 18px;
+    height: 18px;
     display: block;
     margin: 0 auto;
   }
