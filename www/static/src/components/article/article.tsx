@@ -2,8 +2,13 @@ import React from 'react';
 import { Row, Col, DatePicker, message } from 'antd';
 import { inject, observer } from 'mobx-react';
 import dayjs from 'dayjs';
+import weekday from 'dayjs/plugin/weekday';
+import localeData from 'dayjs/plugin/localeData';
 import { zip } from 'rxjs';
 import pinyin from 'tiny-pinyin';
+
+dayjs.extend(weekday);
+dayjs.extend(localeData);
 
 import ArticleHeader from './article-header/article-header';
 import ArticleEditor from './article-editor/article-editor';
