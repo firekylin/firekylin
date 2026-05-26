@@ -9,7 +9,7 @@
 {%- endblock %}
 
 {% block content %}
-<article class="post page">
+<div id="page-post"><article class="post page">
   {% if page.title %}
   <h1 class="title">{{page.title}}</h1>
   <div class="entry-content">
@@ -25,5 +25,5 @@
     <p>如果是管理员，请到后台添加地址为 <code>{{pathname}}</code> 的页面，点击<a href="/admin/page/create?pathname={{pathname}}">这里</a>添加。</p>
   </div>
   {% endif %}
-</article>
+</article></div>
 {% endblock %}
