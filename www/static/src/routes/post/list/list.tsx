@@ -71,6 +71,9 @@ class PostListForm extends React.Component<PostListProps, {}> {
                         <TabPane tab="全部" key="">
                             <PostListTable {...this.props} />
                         </TabPane>
+                        <TabPane tab="草稿" key="0">
+                            <PostListTable {...this.props} />
+                        </TabPane>
                         <TabPane tab="已发布" key="3">
                             <PostListTable {...this.props} />
                         </TabPane>

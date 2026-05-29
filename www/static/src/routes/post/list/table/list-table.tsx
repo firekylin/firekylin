@@ -37,7 +37,7 @@ class PostListTable extends React.Component<PostListProps, {}> {
 
     renderActions(post: any) {
         const status = (this.props.postStore.plReqParams.status as string);
-        if (status === '') {
+        if (status === '' || status === '0') {
             return <Space size="small">
                 <Button onClick={() => this.props.history.push(`/post/edit/${post.id}`)} type="primary" icon={<EditOutlined />} size="small">编辑</Button>
                 <Button onClick={() => this.delete(post.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
