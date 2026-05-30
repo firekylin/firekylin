@@ -5,6 +5,7 @@ const markedAlert = require('marked-alert');
 const hljs = require('highlight.js');
 const markedMathjaxExtension = require('../../common/service/marked-mathjax-extension');
 const markedTocExtension = require('../../common/service/marked-toc-extension');
+const markedImgonlyExtension = require('../../common/service/marked-imgonly-extension');
 const Base = require('./base');
 
 module.exports = class extends Base {
@@ -243,6 +244,8 @@ module.exports = class extends Base {
         tocEntries
       }));
     }
+    // 纯图片段落标记：在渲染阶段为仅含图片的段落添加class
+    extensions.push(markedImgonlyExtension());
 
     // markdown渲染
     const marked = new Marked(...extensions);
