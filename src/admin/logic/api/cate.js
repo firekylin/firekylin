@@ -6,8 +6,7 @@ module.exports = class extends think.Logic {
     if (this.post('pathname')) { return true }
 
     const name = this.post('name');
-    const pathname = encodeURIComponent(name);
-    this.post('pathname', pathname);
+    this.post('pathname', name);
   }
 
   postAction() {
