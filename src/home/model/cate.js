@@ -83,8 +83,10 @@ module.exports = class extends think.Model {
       .filter(id => !cates[id].pid)
       .map(id => {
         const cate = cates[id];
+        cate.pathname = encodeURIComponent(cate.pathname);
         if (cate.children) {
           cate.children = Object.values(cate.children).sort((a, b) => a.count > b.count ? -1 : 1);
+          cate.children.forEach(c => c.pathname = encodeURIComponent(c.pathname));
         }
         return cate;
       })

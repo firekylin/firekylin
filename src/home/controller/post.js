@@ -125,6 +125,12 @@ module.exports = class extends Base {
       return this.redirect('/');
     }
     detail.pathname = encodeURIComponent(detail.pathname);
+    if (!think.isEmpty(detail.tag)) {
+      detail.tag.forEach(t => t.pathname = encodeURIComponent(t.pathname));
+    }
+    if (!think.isEmpty(detail.cate)) {
+      detail.cate.forEach(c => c.pathname = encodeURIComponent(c.pathname));
+    }
     try {
       detail.options = JSON.parse(detail.options) || {};
       detail.featuredImage = detail.options.featuredImage;
