@@ -11,6 +11,7 @@ module.exports = options => {
 
   const packageRoot = __dirname;
   process.env.FK_PACKAGE_ROOT = packageRoot;
+  // Avoid ThinkJS interpreting `firekylin server ...` args as CLI action route.
   process.argv = process.argv.slice(0, 2);
 
   const instance = new Application({

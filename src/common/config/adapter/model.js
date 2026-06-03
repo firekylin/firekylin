@@ -17,12 +17,12 @@ let msc = {
 let type = process.env.FK_DB_MODE || 'mysql';
 
 const getConfig = () => {
-  const configs = [
+  const configPaths = [
     path.join(process.cwd(), 'firekylin.config.js'),
     path.join(__dirname, '../db')
   ];
 
-  for (const filepath of configs) {
+  for (const filepath of configPaths) {
     try {
       let config = require(filepath); // eslint-disable-line import/extensions
       config = config.default || config;
