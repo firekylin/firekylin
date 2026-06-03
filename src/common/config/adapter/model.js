@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const mysql = require('think-model-mysql');
 const pgsql = require('think-model-postgresql');
 const sqlite = require('think-model-sqlite');
@@ -23,6 +24,9 @@ const getConfig = () => {
   ];
 
   for (const filepath of configPaths) {
+    if (!fs.existsSync(filepath) && !fs.existsSync(`${filepath}.js`)) {
+      continue;
+    }
     try {
       let config = require(filepath); // eslint-disable-line import/extensions
       config = config.default || config;
@@ -31,7 +35,9 @@ const getConfig = () => {
       }
       return config;
     } catch (e) {
-      // ignore invalid config
+      if (e.code !== 'MODULE_NOT_FOUND' && think.logger) {
+        think.logger.error(e);
+      }
     }
   }
 };
