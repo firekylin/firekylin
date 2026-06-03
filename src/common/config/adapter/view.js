@@ -5,6 +5,7 @@ const nunjucks = require('think-view-nunjucks');
 
 const buildQuery = obj => '?' +
 Object.keys(obj).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(obj[k])).join('&');
+const packageRoot = process.env.FK_PACKAGE_ROOT || think.ROOT_PATH;
 
 /**
  * view adapter config
@@ -13,7 +14,7 @@ Object.keys(obj).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(obj[k
 module.exports = {
   type: 'nunjucks',
   common: {
-    viewPath: path.join(think.ROOT_PATH, 'view'),
+    viewPath: path.join(packageRoot, 'view'),
     sep: '_',
     extname: '.html',
     content_type: 'text/html'
@@ -26,7 +27,7 @@ module.exports = {
       env.addGlobal('eval', eval);
 
       // 读取 Vite manifest，注入资源路径映射
-      const manifestPath = path.join(think.ROOT_PATH, 'www/static/dist/.vite/manifest.json');
+      const manifestPath = path.join(packageRoot, 'www/static/dist/.vite/manifest.json');
       try {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
         env.addGlobal('vite', manifest);

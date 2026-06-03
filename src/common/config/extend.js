@@ -6,6 +6,7 @@ const cache = require('think-cache');
 const session = require('think-session');
 
 const ROOT_PATH = think.env === 'vercel' ? os.tmpdir() : think.ROOT_PATH;
+const isCli = think.env === 'cli';
 module.exports = [
   view, // make application support view
   model(think.app),
@@ -15,8 +16,10 @@ module.exports = [
     think: {
       TMPDIR_PATH: path.join(ROOT_PATH, 'runtime', 'tmp'),
       RUNTIME_PATH: path.join(ROOT_PATH, 'runtime'),
-      RESOURCE_PATH: path.join(think.ROOT_PATH, 'www'),
-      UPLOAD_PATH: path.join(think.ROOT_PATH, 'www', 'static/upload'),
+      RESOURCE_PATH: isCli ? think.ROOT_PATH : path.join(think.ROOT_PATH, 'www'),
+      UPLOAD_PATH: isCli
+        ? path.join(think.ROOT_PATH, 'static/upload')
+        : path.join(think.ROOT_PATH, 'www', 'static/upload'),
       UPLOAD_BASE_URL: ''
     }
   }

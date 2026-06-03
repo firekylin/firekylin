@@ -3,8 +3,12 @@ const path = require('path');
 const routerREST = require('think-router-rest');
 
 const isDev = think.env === 'development';
+const isCli = think.env === 'cli';
+const packageRoot = process.env.FK_PACKAGE_ROOT || think.ROOT_PATH;
+const resourceRoot = isCli ? think.ROOT_PATH : path.join(think.ROOT_PATH, 'www');
+const packageResourceRoot = path.join(packageRoot, 'www');
 
-module.exports = [
+const middlewares = [
   {
     handle: 'meta',
     options: {
@@ -16,7 +20,7 @@ module.exports = [
     handle: 'resource',
     // enable: isDev,
     options: {
-      root: path.join(think.ROOT_PATH, 'www'),
+      root: resourceRoot,
       publicPath: /^\/(static\/|theme\/|[^/]+\.(?!js|html|xml)\w+$)/
     }
   },
@@ -76,3 +80,15 @@ module.exports = [
     }
   }
 ];
+
+if (isCli) {
+  middlewares.splice(1, 0, {
+    handle: 'resource',
+    options: {
+      root: packageResourceRoot,
+      publicPath: /^\/static\/dist\//
+    }
+  });
+}
+
+module.exports = middlewares;

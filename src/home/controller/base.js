@@ -2,7 +2,6 @@
 const path = require('path');
 const pack = require('../../../package.json');
 
-const isPkg = think.env === 'pkg';
 module.exports = class extends think.Controller {
   constructor(...args) {
     super(...args);
@@ -54,7 +53,7 @@ module.exports = class extends think.Controller {
     this.assign('VERSION', pack.version);
     // set theme view root path
     const theme = options.theme || 'firekylin';
-    this.THEME_VIEW_PATH = path.join(isPkg ? process.cwd() : think.ROOT_PATH, 'www', 'theme', theme);
+    this.THEME_VIEW_PATH = path.join(think.RESOURCE_PATH, 'theme', theme);
 
     // 网站地址
     let siteUrl = this.options.site_url;
