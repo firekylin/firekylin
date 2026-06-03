@@ -19,7 +19,8 @@
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
     "cron:comment": "npm start -- \"crontab/sync_comment\"",
-    "build:pkg": "pkg . --out-path=dist/"
+    "build:pkg": "pkg . --out-path=dist/",
+    "server": "firekylin server"
   },
   "pre-commit": [
     "lint"
@@ -27,6 +28,7 @@
   "dependencies": {
     "ali-oss": "^6.2.1",
     "aws-sdk": "^2.814.0",
+    "commander": "^15.0.0",
     "cos-nodejs-sdk-v5": "^2.5.6",
     "dayjs": "^1.11.0",
     "feedparser": "^2.2.9",

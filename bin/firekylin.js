@@ -1,31 +1,46 @@
 #!/usr/bin/env node
-
+// const os = require('node:os');
 const fs = require('fs');
 const path = require('path');
-const packageRoot = path.join(__dirname, '..');
-const packageJson = require(path.join(packageRoot, 'package.json'));
+// const Application = require('thinkjs');
+const { program } = require('commander');
 
-if (process.env.FK_RUN_SERVER === '1') {
-  require(path.join(packageRoot, 'cli'))({});
-  return;
-}
+const pkgRoot = path.join(__dirname, '..');
+const pkg = require(path.join(pkgRoot, 'package.json'));
+const FirekylinServer = require(path.join(pkgRoot, 'vercel.js'));
 
-const argv = process.argv.slice(2);
-const command = argv[0];
+program
+  .name('firekylin')
+  .version(pkg.version)
+  .description('A simple and efficient blogging platform')
+  .usage('<command> [options]');
 
-const printHelp = () => {
-  console.log(`Firekylin v${packageJson.version}
 
-Usage:
-  firekylin init [project-dir]
-  firekylin server [--host <host>] [--port <port>]
-`);
-};
+program
+  .command('init [project-dir]')
+  .description('Initialize a new Firekylin project')
+  .action(projectDir => {
+    const targetDir = path.resolve(process.cwd(), projectDir || '.');
+    if (fs.existsSync(targetDir) && fs.readdirSync(targetDir).length > 0) {
+      console.error(`Directory is not empty: ${targetDir}`);
+      process.exit(1);
+    }
+    initProject(projectDir);
+  });
 
-const fail = message => {
-  console.error(message);
-  process.exit(1);
-};
+program
+  .command('server')
+  .description('Start the Firekylin server')
+  .option('--host <host>', 'Host to listen on', '127.0.0.1')
+  .option('--port <port>', 'Port to listen on', '3000')
+  .action(options => {
+    require('http').createServer(FirekylinServer).listen(options.port, options.host, () => {
+      console.log(`Firekylin server running at http://${options.host}:${options.port}`);
+    });
+  });
+
+
+program.parse();
 
 const ensureDir = dir => {
   fs.mkdirSync(dir, {recursive: true});
@@ -49,7 +64,7 @@ const initProject = projectDir => {
       server: 'firekylin server'
     },
     dependencies: {
-      firekylin: `^${packageJson.version}`
+      firekylin: `^${pkg.version}`
     }
   }, null, 2) + '\n');
 
@@ -89,46 +104,3 @@ module.exports = {
 
   console.log(`Firekylin project initialized at ${targetDir}`);
 };
-
-const parseServerOptions = args => {
-  const options = {};
-  for (let i = 0; i < args.length; i++) {
-    const item = args[i];
-    if (item === '--host') {
-      options.host = args[i + 1];
-      i++;
-      continue;
-    }
-    if (item === '--port') {
-      options.port = args[i + 1];
-      i++;
-      continue;
-    }
-    fail(`Unknown option: ${item}`);
-  }
-
-  if (options.port && !/^\d+$/.test(options.port)) {
-    fail(`Invalid port: ${options.port}`);
-  }
-  return options;
-};
-
-const startServer = options => require(path.join(packageRoot, 'cli'))(options);
-
-if (!command || command === '-h' || command === '--help') {
-  printHelp();
-  process.exit(0);
-}
-
-if (command === 'init') {
-  initProject(argv[1]);
-  process.exit(0);
-}
-
-if (command === 'server') {
-  const options = parseServerOptions(argv.slice(1));
-  process.env.FK_RUN_SERVER = '1';
-  startServer(options);
-} else {
-  fail(`Unknown command: ${command}`);
-}
