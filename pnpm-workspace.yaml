@@ -6,3 +6,7 @@ allowBuilds:
   snyk: true
   spawn-sync: true
   sqlite3: true
+  better-sqlite3: true
+  
+# disable minimum release age to allow immediate releases
+minimumReleaseAge: 0
