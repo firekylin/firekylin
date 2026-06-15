@@ -1,6 +1,8 @@
 {
   "name": "firekylin",
-  "bin": "pkg.js",
+  "bin": {
+    "firekylin": "bin/firekylin.js"
+  },
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
   "version": "1.7.3",
   "author": "lizheming <i@imnerd.org>",
@@ -11,20 +13,22 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "preview": "vite preview",
-    "lint": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache --ext .js,.jsx || true",
-    "lint-fix": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx --fix || true",
-    "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/static/src/*.ts ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx",
+    "lint": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache --no-error-on-unmatched-pattern --ext .js,.jsx || true",
+    "lint-fix": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --no-error-on-unmatched-pattern --ext .js,.jsx --fix || true",
+    "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --no-error-on-unmatched-pattern --ext .js,.jsx",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
     "cron:comment": "npm start -- \"crontab/sync_comment\"",
-    "build:pkg": "pkg . --out-path=dist/"
+    "build:pkg": "pkg . --out-path=dist/",
+    "server": "firekylin server"
   },
   "pre-commit": [
-    "lint-break-on-errors"
+    "lint"
   ],
   "dependencies": {
     "ali-oss": "^6.2.1",
     "aws-sdk": "^2.814.0",
+    "commander": "^15.0.0",
     "cos-nodejs-sdk-v5": "^2.5.6",
     "dayjs": "^1.11.0",
     "feedparser": "^2.2.9",

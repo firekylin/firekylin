@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const mysql = require('think-model-mysql');
 const pgsql = require('think-model-postgresql');
 const sqlite = require('think-model-sqlite');
@@ -14,10 +16,35 @@ let msc = {
   path: process.env.FK_DB_PATH
 };
 let type = process.env.FK_DB_MODE || 'mysql';
+
+const getConfig = () => {
+  const configPaths = [
+    path.join(process.cwd(), 'firekylin.config.js'),
+    path.join(__dirname, '../db')
+  ];
+
+  for (const filepath of configPaths) {
+    if (!fs.existsSync(filepath) && !fs.existsSync(`${filepath}.js`)) {
+      continue;
+    }
+    try {
+      let config = require(filepath); // eslint-disable-line import/extensions
+      config = config.default || config;
+      if (!config.type) {
+        continue;
+      }
+      return config;
+    } catch (e) {
+      if (e.code !== 'MODULE_NOT_FOUND' && think.logger) {
+        think.logger.error(e);
+      }
+    }
+  }
+};
+
 try {
-  let dbConfig = require('../db'); // eslint-disable-line import/extensions
-  dbConfig = dbConfig.default || dbConfig;
-  if (!dbConfig.type) {
+  const dbConfig = getConfig();
+  if (!dbConfig || !dbConfig.type) {
     throw new Error();
   }
 

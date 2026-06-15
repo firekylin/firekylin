@@ -35,7 +35,43 @@
 
 ## 安装
 
-普通用户安装参见 [普通安装](https://github.com/firekylin/firekylin/wiki/安装)，推荐使用[腾讯云实验室](https://www.qcloud.com/developer/labs/lab/10094)体验详细的安装流程。如需对 Firekylin 进行开发，可参考 [仓库版安装](https://github.com/firekylin/firekylin/wiki/仓库版安装)
+推荐使用 CLI 方式安装与升级：
+
+```bash
+npm install -g firekylin
+```
+
+## CLI 使用
+
+### 初始化博客项目
+
+```bash
+firekylin init my-blog
+cd my-blog
+```
+
+初始化后目录包含：
+
+- `package.json`：项目依赖与版本管理（后续升级只需升级其中 `firekylin` 版本）
+- `firekylin.config.js`：数据库配置
+- `theme/`：主题目录
+- `static/`：上传图片等静态资源目录
+
+### 启动服务
+
+```bash
+firekylin server
+```
+
+可选参数：
+
+```bash
+firekylin server --host 0.0.0.0 --port 8360
+```
+
+数据库配置示例见仓库根目录 `firekylin.config.js.example`。
+
+> 兼容性说明：仓库版运行方式仍可继续使用，便于平滑迁移到 CLI 模式。
 
 ## 如何使用
 

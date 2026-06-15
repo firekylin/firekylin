@@ -1,0 +1,29 @@
+'use strict';
+
+module.exports = {
+  type: 'sqlite',
+  adapter: {
+    sqlite: {
+      path: './runtime',
+      database: 'firekylin',
+      prefix: 'fk_'
+    },
+    mysql: {
+      host: '127.0.0.1',
+      port: '3306',
+      database: 'firekylin',
+      user: 'root',
+      password: '',
+      prefix: 'fk_',
+      encoding: 'utf8mb4'
+    },
+    postgresql: {
+      host: '127.0.0.1',
+      port: '5432',
+      database: 'firekylin',
+      user: 'postgres',
+      password: '',
+      prefix: 'fk_'
+    }
+  }
+};

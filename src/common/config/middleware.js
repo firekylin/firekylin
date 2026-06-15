@@ -4,7 +4,7 @@ const routerREST = require('think-router-rest');
 
 const isDev = think.env === 'development';
 
-module.exports = [
+const middlewares = [
   {
     handle: 'meta',
     options: {
@@ -16,8 +16,16 @@ module.exports = [
     handle: 'resource',
     // enable: isDev,
     options: {
-      root: path.join(think.ROOT_PATH, 'www'),
+      root: path.join(think.APP_PATH, '../www'),
       publicPath: /^\/(static\/|theme\/|[^/]+\.(?!js|html|xml)\w+$)/
+    }
+  },
+  {
+    handle: 'resource',
+    // enable: isDev,
+    options: {
+      root: path.join(think.ROOT_PATH, 'static'),
+      publicPath: /^\/(static\/upload\/)/,
     }
   },
   {
@@ -76,3 +84,5 @@ module.exports = [
     }
   }
 ];
+
+module.exports = middlewares;
