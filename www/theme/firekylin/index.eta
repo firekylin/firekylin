@@ -1,34 +1,35 @@
 <% layout('./layout') %>
-<% block('title', () => { %><% if (firekylin.tag) { %>标签 <%= firekylin.tag %> - <% } else if (firekylin.cate) { %>分类 <%= firekylin.cate %> - <% } %><%= firekylin.options.title %><% }) %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'index'}); const site = await firekylin.widget('Widget_Options'); %>
+<% block('title', () => { %><% if (archive.is('tag')) { %>标签 <%= archive.archiveTitle %> - <% } else if (archive.is('cate')) { %>分类 <%= archive.archiveTitle %> - <% } %><%= site.title() %><% }) %>
 <% block('headers', () => { %>
-<link rel="canonical" href="<%= firekylin.site_url %>/<% if (firekylin.tag) { %>tag/<%= firekylin.pathname %><% } else if (firekylin.cate) { %>cate/<%= firekylin.pathname %><% } %><% if (firekylin.pagination.currentPage > 1) { %>?page=<%= firekylin.pagination.currentPage %><% } %>" />
+<link rel="canonical" href="<%= site.siteUrl %>/<% if (archive.is('tag')) { %>tag/<%= archive.archiveSlug %><% } else if (archive.is('cate')) { %>cate/<%= archive.archiveSlug %><% } %><% if (archive.pagination.currentPage > 1) { %>?page=<%= archive.pagination.currentPage %><% } %>" />
 <% }) %>
 <% block('content', () => { %>
 <section id="page-index">
-  <% if (firekylin.tag) { %>
-  <h1 class="intro">标签<a href="<%= firekylin.site_url + firekylin.ctx.url %>"><%= firekylin.tag %></a>下的文章</h1>
-  <% } else if (firekylin.cate) { %>
-  <h1 class="intro">分类<a href="<%= firekylin.site_url + firekylin.ctx.url %>"><%= firekylin.cate %></a>下的文章</h1>
+  <% if (archive.is('tag')) { %>
+  <h1 class="intro">标签<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= archive.archiveTitle %></a>下的文章</h1>
+  <% } else if (archive.is('cate')) { %>
+  <h1 class="intro">分类<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= archive.archiveTitle %></a>下的文章</h1>
   <% } %>
-  <% firekylin.posts.forEach(post => { %>
+  <% while (archive.next()) { %>
   <article class="post">
     <div class="meta">
       <div>
-        <% if (post.user) { %>
-        <span class="author"><%= post.user.display_name || post.user.name %></span>
+        <% if (archive.row.user) { %>
+        <span class="author"><%= archive.author() %></span>
         <span>发布于</span>
         <% } %>
-        <span class="date"><%= firekylin.think.datetime(post.create_time, 'MM月DD, YYYY') %></span>
+        <span class="date"><%= archive.date('MM月DD, YYYY') %></span>
       </div>
-      <div class="comment"><a href="/post/<%= post.pathname %>.html#comments"><%= post.comment_num %> comments</a></div>
+      <div class="comment"><a href="<%= archive.permalink %>#comments"><%= archive.commentsNum('%d comments') %></a></div>
     </div>
-    <h1 class="title"><a href="/post/<%= post.pathname %>.html"><%= post.title %></a></h1>
+    <h1 class="title"><a href="<%= archive.permalink %>"><%= archive.title() %></a></h1>
     <div class="entry-content">
-      <%~ post.summary %>
-      <p class="more"><a href="/post/<%= post.pathname %>.html">阅读全文 »</a></p>
+      <%~ archive.row.summary %>
+      <p class="more"><a href="<%= archive.permalink %>">阅读全文 »</a></p>
     </div>
   </article>
-  <% }) %>
-  <%~ include('./inc/pagination') %>
+  <% } %>
+  <%~ include('./inc/pagination', {pagination: archive.pagination}) %>
 </section>
 <% }) %>

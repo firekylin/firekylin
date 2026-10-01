@@ -65,7 +65,7 @@ module.exports = class extends think.Model {
    */
   async getPostList(page, options = {}) {
     page = page | 0 || 1;
-    const postsListSize = await this.getPostsListSize();
+    const postsListSize = Number(options.pageSize) || await this.getPostsListSize();
 
     let field = options.field || 'id,title,pathname,create_time,summary,comment_num,options';
     if ((await this.model('user').count()) > 0) { field += ',user_id' }

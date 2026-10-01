@@ -67,6 +67,41 @@
 - [主题开发](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
 - [贡献代码](https://github.com/firekylin/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
 
+### 主题 Widget
+
+Eta 主题可以按需加载数据。由于 Widget 查询是异步的，在布局中应使用 `blockAsync`：
+
+```eta
+<% await blockAsync('content', async () => { %>
+<% const posts = await firekylin.widget('Widget_Contents_Post_Recent', {pageSize: 5}); %>
+<% while (posts.next()) { %>
+  <a href="<%= posts.permalink %>"><%= posts.title() %></a>
+<% } %>
+<% }) %>
+```
+
+`title()` 返回格式化后的标题，`title.val()` 返回数据库中的原始标题。内容 Widget 还提供
+`date()`、`excerpt()`、`commentsNum()`、`permalink` 和 `url`；标签 Widget 提供 Typecho
+兼容的 `split()` 分档方法。
+
+内置 Widget 包括负责首页、文章、页面、归档和搜索的 `Widget_Archive`，以及
+`Widget_Contents_Post_Recent`、`Widget_Metas_Tag_Cloud` 和 `Widget_Metas_Category_List`。
+应用或插件也可以继承 `firekylin.Widget`，并通过
+`firekylin.registerWidget(name, WidgetClass)` 注册自定义 Widget。应用内置 Widget 统一由
+`src/home/widget/index.js` 的 Widget map 导出，并在 Worker 启动时自动注册。实现文件按照
+Widget 名称逐段存放，例如 `Widget_Contents_Post_Recent` 对应 `contents/post/recent.js`。
+
+Widget 使用与 Typecho 一致的请求级对象池：同一次请求中，相同完整名称只执行一次，后续调用会
+复用第一次调用创建的实例和参数。如需同一 Widget 使用另一组参数，请指定别名：
+
+```eta
+<% const latest = await firekylin.widget('Widget_Contents_Post_Recent', {pageSize: 5}); %>
+<% const sidebar = await firekylin.widget('Widget_Contents_Post_Recent@sidebar', {pageSize: 10}); %>
+```
+
+`firekylin.widget.destroy(name)` 可以移除指定名称（包括别名）的缓存，省略 `name` 则清空本次
+请求的全部 Widget 缓存。下一次调用被移除的名称时会重新执行 `init()` 和 `execute()`。
+
 ## 捐赠支持
 
 你的每一份帮助都将使 Firekylin 做的更好，走的更远！我们一直在坚持不懈地努力，并坚持让 Firekylin 完全开源免费，你的帮助将使我们更有动力和信心！

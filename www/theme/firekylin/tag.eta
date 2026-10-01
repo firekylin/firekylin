@@ -1,11 +1,13 @@
 <% layout('./layout') %>
-<% block('title', () => { %>标签 - <%= firekylin.options.title %><% }) %>
-<% block('headers', () => { %><link rel="canonical" href="<%= firekylin.site_url %>/tags" /><% }) %>
-<% block('content', () => { %>
+<% const site = await firekylin.widget('Widget_Options'); %>
+<% block('title', () => { %>标签 - <%= site.title() %><% }) %>
+<% block('headers', () => { %><link rel="canonical" href="<%= site.siteUrl %>/tags" /><% }) %>
+<% await blockAsync('content', async () => { %>
+<% const tags = await firekylin.widget('Widget_Metas_Tag_Cloud'); %>
 <article class="post tags">
   <h1 class="title">标签</h1>
   <div class="entry-content"><section>
-    <% firekylin.tags.forEach(tag => { %><a href="/tag/<%= tag.pathname %>" data-tag="<%= tag.name %>"><%= tag.name %>(<%= tag.count %>)</a><% }) %>
+    <% while (tags.next()) { %><a href="/tag/<%= tags.pathname %>" data-tag="<%= tags.name %>"><%= tags.name %>(<%= tags.count %>)</a><% } %>
   </section></div>
 </article>
 <% }) %>

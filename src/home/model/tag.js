@@ -46,6 +46,7 @@ module.exports = class extends think.Model {
         result[tag.pathname].count += 1;
       } else {
         result[tag.pathname] = {
+          id: tag.id,
           name: tag.name,
           pathname: encodeURIComponent(tag.pathname),
           update_time: tag.update_time,
