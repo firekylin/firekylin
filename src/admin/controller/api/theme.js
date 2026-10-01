@@ -163,7 +163,7 @@ module.exports = class extends Base {
       return this.success(templates);
     }
     templates = await readdirAsync(templatePath);
-    templates = templates.filter(t => /\.html$/.test(t));
+    templates = templates.filter(t => /\.eta$/.test(t));
     return this.success(templates);
   }
 };

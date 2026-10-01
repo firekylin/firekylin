@@ -80,7 +80,7 @@ module.exports = class extends Base {
 
     let template = 'index';
     if (where.tag) {
-      const tagView = await stats(path.join(this.THEME_VIEW_PATH, 'tag_index.html'))
+      const tagView = await stats(path.join(this.THEME_VIEW_PATH, 'tag_index.eta'))
         .then(() => true)
         .catch(() => false);
       if (tagView) {
@@ -88,7 +88,7 @@ module.exports = class extends Base {
       }
     }
     if (where.cate) {
-      const cateView = await stats(path.join(this.THEME_VIEW_PATH, 'cate_index.html'))
+      const cateView = await stats(path.join(this.THEME_VIEW_PATH, 'cate_index.eta'))
         .then(() => true)
         .catch(() => false);
       if (cateView) {
@@ -184,8 +184,9 @@ module.exports = class extends Base {
     if (detail.options) {
       try {
         if (detail.options.template) {
-          /* let stat = */await stats(path.join(this.THEME_VIEW_PATH, 'template', detail.options.template));
-          template = path.join('template', detail.options.template.slice(0, -5));
+          const templateName = detail.options.template.replace(/\.html$/, '.eta');
+          /* let stat = */await stats(path.join(this.THEME_VIEW_PATH, 'template', templateName));
+          template = path.join('template', templateName.replace(/\.eta$/, ''));
         }
       } catch (e) {
         console.log(e); // eslint-disable-line no-console

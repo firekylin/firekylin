@@ -52,6 +52,7 @@ module.exports = class extends think.Controller {
     this.assign('navigation', navigation);
     this.assign('themeConfig', themeConfig);
     this.assign('VERSION', pack.version);
+    this.assign('think', think);
     // set theme view root path
     const theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = path.join(isPkg ? process.cwd() : think.ROOT_PATH, 'www', 'theme', theme);
@@ -99,6 +100,6 @@ module.exports = class extends think.Controller {
       return true;
     }
 
-    return this.display(path.join(this.THEME_VIEW_PATH, name + '.html'));
+    return this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'));
   }
 };

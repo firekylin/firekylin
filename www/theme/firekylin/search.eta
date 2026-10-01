@@ -1,0 +1,33 @@
+<% layout('./layout') %>
+<% block('title', () => { %>站内搜索 - <%= firekylin.options.title %><% }) %>
+<% block('headers', () => { %>
+<link rel="canonical" href="<%= firekylin.site_url %>/search.html<% if (firekylin.keyword) { %>?keyword=<%= firekylin.keyword %><% } %><% if (firekylin.pagination && firekylin.pagination.currentPage > 1) { %>&amp;page=<%= firekylin.pagination.currentPage %><% } %>" />
+<% }) %>
+<% block('content', () => { %>
+<article class="post detail">
+  <h1 class="title">站内搜索</h1>
+  <div class="entry-content">
+    <div id="search"><form action="/search.html">
+      <div class="wrapper"><input maxlength="80" placeholder="请输入关键字..." id="keyword" name="keyword" value="<%= firekylin.keyword || '' %>" type="search" required></div>
+      <input class="submit" type="submit" value="搜索">
+    </form></div>
+    <% if (firekylin.keyword) { %>
+    <div id="searchResult">
+      <% if (firekylin.searchData.count) { %><div class="info">本次搜索找到结果 <%= firekylin.searchData.count %> 条</div><% } else { %>
+      <div class="no-result">没有找到任何结果，请更换查询词试试~</div>
+      <div class="item"><div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q=<%= encodeURIComponent('site:' + firekylin.ctx.hostname + ' ' + firekylin.keyword) %>">site:<%= firekylin.ctx.hostname %> <%= firekylin.keyword %></a></div></div>
+      <% } %>
+      <% firekylin.searchData.data.forEach(item => { %><div class="item">
+        <div class="title"><a href="/post/<%= item.pathname %>.html"><%~ item.title %></a></div>
+        <div class="desc"><%~ item.summary %></div>
+      </div><% }) %>
+    </div>
+    <% } else { %>
+    <div id="searchResult"><div class="hot-words">热搜词：
+      <% firekylin.hotTags.forEach(tag => { %><a href="?keyword=<%= tag.name %>"><%= tag.name %></a><% }) %>
+    </div></div>
+    <% } %>
+  </div>
+</article>
+<% if (firekylin.pagination) { %><%~ include('./inc/pagination') %><% } %>
+<% }) %>

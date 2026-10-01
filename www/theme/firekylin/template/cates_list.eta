@@ -1,0 +1,10 @@
+<% layout('../layout') %>
+<% block('title', () => { %><%= firekylin.page.title %> - <%= firekylin.options.title %><% }) %>
+<% block('content', () => { %>
+<article class="post tags">
+  <h1 class="title">分类</h1>
+  <div class="entry-content"><section>
+    <% firekylin.categories.forEach(cate => { %><a href="/cate/<%= cate.pathname %>" data-cate="<%= cate.name %>"><%= cate.name %>(<%= cate.count %>)</a><% }) %>
+  </section></div>
+</article>
+<% }) %>

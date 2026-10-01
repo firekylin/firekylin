@@ -1,0 +1,34 @@
+<% layout('./layout') %>
+<% block('title', () => { %><% if (firekylin.tag) { %>标签 <%= firekylin.tag %> - <% } else if (firekylin.cate) { %>分类 <%= firekylin.cate %> - <% } %><%= firekylin.options.title %><% }) %>
+<% block('headers', () => { %>
+<link rel="canonical" href="<%= firekylin.site_url %>/<% if (firekylin.tag) { %>tag/<%= firekylin.pathname %><% } else if (firekylin.cate) { %>cate/<%= firekylin.pathname %><% } %><% if (firekylin.pagination.currentPage > 1) { %>?page=<%= firekylin.pagination.currentPage %><% } %>" />
+<% }) %>
+<% block('content', () => { %>
+<section id="page-index">
+  <% if (firekylin.tag) { %>
+  <h1 class="intro">标签<a href="<%= firekylin.site_url + firekylin.ctx.url %>"><%= firekylin.tag %></a>下的文章</h1>
+  <% } else if (firekylin.cate) { %>
+  <h1 class="intro">分类<a href="<%= firekylin.site_url + firekylin.ctx.url %>"><%= firekylin.cate %></a>下的文章</h1>
+  <% } %>
+  <% firekylin.posts.forEach(post => { %>
+  <article class="post">
+    <div class="meta">
+      <div>
+        <% if (post.user) { %>
+        <span class="author"><%= post.user.display_name || post.user.name %></span>
+        <span>发布于</span>
+        <% } %>
+        <span class="date"><%= firekylin.think.datetime(post.create_time, 'MM月DD, YYYY') %></span>
+      </div>
+      <div class="comment"><a href="/post/<%= post.pathname %>.html#comments"><%= post.comment_num %> comments</a></div>
+    </div>
+    <h1 class="title"><a href="/post/<%= post.pathname %>.html"><%= post.title %></a></h1>
+    <div class="entry-content">
+      <%~ post.summary %>
+      <p class="more"><a href="/post/<%= post.pathname %>.html">阅读全文 »</a></p>
+    </div>
+  </article>
+  <% }) %>
+  <%~ include('./inc/pagination') %>
+</section>
+<% }) %>

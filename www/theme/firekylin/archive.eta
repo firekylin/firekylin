@@ -1,0 +1,16 @@
+<% layout('./layout') %>
+<% block('title', () => { %>归档 - <%= firekylin.options.title %><% }) %>
+<% block('headers', () => { %><link rel="canonical" href="<%= firekylin.site_url %>/archives" /><% }) %>
+<% block('content', () => { %>
+<article class="post archive">
+  <h1 class="title">归档</h1>
+  <% Object.entries(firekylin.list).forEach(([yearMonth, data]) => { %>
+  <div class="entry-content">
+    <h3><%= yearMonth %> (<%= data.length %>)</h3>
+    <ul>
+      <% data.forEach(item => { %><li><a href="/post/<%= item.pathname %>.html" title="<%= item.title %>"><%= item.title %></a>&nbsp; <span class="date"><%= firekylin.think.datetime(item.create_time, 'YYYY-MM-DD') %></span></li><% }) %>
+    </ul>
+  </div>
+  <% }) %>
+</article>
+<% }) %>

@@ -1,0 +1,18 @@
+<% layout('./layout') %>
+<% block('title', () => { %><%= firekylin.page.title %> - <%= firekylin.options.title %><% }) %>
+<% block('headers', () => { %><link rel="canonical" href="<%= firekylin.site_url %>/page/<%= firekylin.page.pathname %>.html" /><% }) %>
+<% block('content', () => { %>
+<div id="page-post"><article class="post page">
+  <% if (firekylin.page.title) { %>
+  <h1 class="title"><%= firekylin.page.title %></h1>
+  <div class="entry-content"><%~ firekylin.page.content.replace(/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') %></div>
+  <% if (firekylin.page.allow_comment) { %><%~ include('./inc/comment') %><% } %>
+  <% } else { %>
+  <h1 class="title">提示</h1>
+  <div class="entry-content">
+    <p>未找到相关页面。</p>
+    <p>如果是管理员，请到后台添加地址为 <code><%= firekylin.pathname %></code> 的页面，点击<a href="/admin/page/create?pathname=<%= firekylin.pathname %>">这里</a>添加。</p>
+  </div>
+  <% } %>
+</article></div>
+<% }) %>

@@ -1,0 +1,11 @@
+<% layout('./layout') %>
+<% block('title', () => { %>标签 - <%= firekylin.options.title %><% }) %>
+<% block('headers', () => { %><link rel="canonical" href="<%= firekylin.site_url %>/tags" /><% }) %>
+<% block('content', () => { %>
+<article class="post tags">
+  <h1 class="title">标签</h1>
+  <div class="entry-content"><section>
+    <% firekylin.tags.forEach(tag => { %><a href="/tag/<%= tag.pathname %>" data-tag="<%= tag.name %>"><%= tag.name %>(<%= tag.count %>)</a><% }) %>
+  </section></div>
+</article>
+<% }) %>
