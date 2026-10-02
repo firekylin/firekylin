@@ -38,12 +38,12 @@ function controller(rows = []) {
   };
 }
 
-test('project extensions receive the public Widget API and can query models', async(t) => {
+test('project extensions receive domain Widget bases and can reuse content helpers', async(t) => {
   const root = temporaryDirectory(t);
   const widgetName = name('Project');
   write(path.join(root, 'widgets.js'), `
-    module.exports = ({Widget}) => ({
-      ${widgetName}: class extends Widget {
+    module.exports = ({ContentsWidget}) => ({
+      ${widgetName}: class extends ContentsWidget {
         async execute() {
           const rows = await this.model('post').select();
           this.pushAll(rows.map(row => ({...row, limit: this.parameter.limit})));
@@ -56,9 +56,19 @@ test('project extensions receive the public Widget API and can query models', as
     projectPath: root,
     config: {widgets: ['./widgets.js']}
   }), [widgetName]);
-  const widget = await new WidgetFactory(controller([{title: 'Extension'}]))
+  const widget = await new WidgetFactory(controller([{
+    title: 'Extension',
+    pathname: 'custom post',
+    summary: '<p>Reusable summary</p>',
+    comment_num: 2
+  }]))
     .widget(widgetName, {limit: 3});
-  assert.deepEqual(widget.stack, [{title: 'Extension', limit: 3}]);
+  widget.next();
+  assert.equal(widget.permalink, '/post/custom%20post.html');
+  assert.equal(widget.title(), 'Extension');
+  assert.equal(widget.excerpt(), 'Reusable summary');
+  assert.equal(widget.commentsNum('none', 'one', '%d comments'), '2 comments');
+  assert.equal(widget.limit, 3);
 });
 
 test('project overrides must be explicitly declared', async(t) => {

@@ -1,10 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const Widget = require('./base');
+const ContentsWidget = require('../../home/widget/base/contents');
+const MetasWidget = require('../../home/widget/base/metas');
 
 const layers = {core: new Map(), project: new Map()};
 const themeLayers = new Map();
 const themeRequestLayers = new Map();
+const extensionApi = Object.freeze({Widget, ContentsWidget, MetasWidget});
 
 function splitName(name) {
   if (typeof name !== 'string' || !name.trim()) {
@@ -104,7 +107,7 @@ function initializeExtension(entryPath, label) {
   }
   let widgetMap;
   try {
-    widgetMap = initialize({Widget});
+    widgetMap = initialize(extensionApi);
   } catch (error) {
     throw new Error(`Unable to initialize ${label} Widget extension ${entryPath}: ${error.message}`, {cause: error});
   }

@@ -97,19 +97,15 @@ module.exports = {
 };
 ```
 
-入口导出一个同步初始化函数。函数收到稳定的 `Widget` 基类，并返回“名称 → Widget 类”的映射：
+入口导出一个同步初始化函数。函数会收到稳定的 `Widget`、`ContentsWidget` 和 `MetasWidget` 基类，并返回“名称 → Widget 类”的映射。内容类 Widget 推荐继承 `ContentsWidget`，以复用 permalink、摘要、分类标签、作者和权限等处理：
 
 ```js
-module.exports = ({Widget}) => ({
-  Widget_Custom_Posts: class extends Widget {
+module.exports = ({ContentsWidget}) => ({
+  Widget_Custom_Posts: class extends ContentsWidget {
     async execute() {
       const limit = Number(this.parameter.limit) || 5;
       const rows = await this.model('post').limit(limit).select();
       this.pushAll(rows);
-    }
-
-    get permalink() {
-      return `/post/${encodeURIComponent(this.row.pathname)}.html`;
     }
   }
 });
