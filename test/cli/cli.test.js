@@ -6,13 +6,22 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const packageInfo = require('../../package.json');
+const {PasswordHash} = require('phpass');
 const {detectPackageManager, parseArgs, scaffold, validateNewOptions} = require('../../lib/cli');
+const {hashAdminPassword} = require('../../lib/installer');
 
 function options() {
   return {
-    dbType: 'sqlite', dbPath: 'data/firekylin.sqlite', dbPrefix: 'fk_',
-    siteTitle: 'Test', siteUrl: 'http://localhost:8360', adminUser: 'admin',
-    adminPassword: 'secret', adminEmail: 'admin@example.com', packageManager: 'npm', skipInstall: true
+    dbType: 'sqlite',
+    dbPath: 'data/firekylin.sqlite',
+    dbPrefix: 'fk_',
+    siteTitle: 'Test',
+    siteUrl: 'http://localhost:8360',
+    adminUser: 'admin',
+    adminPassword: 'secret',
+    adminEmail: 'admin@example.com',
+    packageManager: 'npm',
+    skipInstall: true
   };
 }
 
@@ -35,6 +44,16 @@ test('detects the invoking package manager', () => {
 test('validates required database and administrator fields', () => {
   assert.doesNotThrow(() => validateNewOptions(options()));
   assert.throws(() => validateNewOptions({...options(), adminPassword: ''}), /adminPassword/);
+});
+
+test('hashes administrator passwords in the same format as the browser login', () => {
+  const salt = 'site-salt';
+  const stored = hashAdminPassword(salt, 'secret-password');
+  const browserPassword = require('node:crypto').createHash('md5')
+    .update(`${salt}secret-password`)
+    .digest('hex');
+  assert.equal(new PasswordHash().checkPassword(browserPassword, stored), true);
+  assert.equal(new PasswordHash().checkPassword('secret-password', stored), false);
 });
 
 test('scaffolds an isolated project and only resumes marked directories', t => {
