@@ -126,7 +126,7 @@ module.exports = ({Widget}) => ({
 
 ```eta
 <% const posts = await firekylin.widget('Widget_Custom_Posts', {limit: 8}); %>
-<% while (posts.next()) { %><a href="<%= posts.permalink %>"><%= posts.title %></a><% } %>
+<% while (posts.next()) { %><a href="/post/<%= encodeURIComponent(posts.pathname) %>.html"><%= posts.title %></a><% } %>
 ```
 
 Widget 重名默认会阻止启动或渲染，并同时报告两个来源。需要替换已有 Widget 时，必须在项目配置或主题的 `firekylin` 配置中通过 `widgetOverrides` 显式列出名称。主题不能覆盖用于确定当前主题的 `Widget_Options`。扩展代码运行在 Firekylin 服务端进程中，应只安装可信扩展；修改后需重启 worker。

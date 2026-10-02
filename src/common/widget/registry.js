@@ -4,6 +4,7 @@ const Widget = require('./base');
 
 const layers = {core: new Map(), project: new Map()};
 const themeLayers = new Map();
+const themeRequestLayers = new Map();
 
 function splitName(name) {
   if (typeof name !== 'string' || !name.trim()) {
@@ -39,6 +40,10 @@ function registrationFor(name, themeLayer) {
   return (themeLayer && themeLayer.get(name)) || layers.project.get(name) || layers.core.get(name);
 }
 
+function normalizeOverrides(overrides) {
+  return new Set(overrides.map(name => splitName(name).className));
+}
+
 function registerWidget(name, WidgetClass, options = {}) {
   const {className} = splitName(name);
   assertWidgetClass(className, WidgetClass);
@@ -58,9 +63,10 @@ function registerWidgetMap(widgetMap, options = {}) {
   if (!widgetMap || typeof widgetMap !== 'object' || Array.isArray(widgetMap)) {
     throw new TypeError('Widget map must be an object');
   }
-  const overrides = new Set(options.overrides || []);
+  const overrides = normalizeOverrides(options.overrides || []);
   return Object.entries(widgetMap).map(([name, WidgetClass]) => {
-    registerWidget(name, WidgetClass, {...options, override: options.override || overrides.has(name)});
+    const {className} = splitName(name);
+    registerWidget(name, WidgetClass, {...options, override: options.override || overrides.has(className)});
     return name;
   });
 }
@@ -153,6 +159,7 @@ function loadThemeWidgets(themesPath, theme) {
   if (relative.startsWith('..' + path.sep) || relative === '..' || path.isAbsolute(relative)) {
     throw new Error(`Theme path escapes the themes root: ${themeRoot}`);
   }
+  if (themeRequestLayers.has(themeRoot)) return themeRequestLayers.get(themeRoot);
   if (!fs.existsSync(themeRoot) || !fs.statSync(themeRoot).isDirectory()) {
     throw new Error(`Theme directory does not exist: ${themeRoot}`);
   }
@@ -162,7 +169,11 @@ function loadThemeWidgets(themesPath, theme) {
   if (realRelative.startsWith('..' + path.sep) || realRelative === '..' || path.isAbsolute(realRelative)) {
     throw new Error(`Theme path escapes the themes root through a symbolic link: ${themeRoot}`);
   }
-  if (themeLayers.has(realThemeRoot)) return themeLayers.get(realThemeRoot);
+  if (themeLayers.has(realThemeRoot)) {
+    const cached = themeLayers.get(realThemeRoot);
+    themeRequestLayers.set(themeRoot, cached);
+    return cached;
+  }
 
   const packagePath = path.join(realThemeRoot, 'package.json');
   let manifest;
@@ -174,6 +185,7 @@ function loadThemeWidgets(themesPath, theme) {
   const config = manifest.firekylin || {};
   if (!config.widgets) {
     themeLayers.set(realThemeRoot, null);
+    themeRequestLayers.set(themeRoot, null);
     return null;
   }
   const overrides = config.widgetOverrides || [];
@@ -182,8 +194,9 @@ function loadThemeWidgets(themesPath, theme) {
   }
   const entryPath = resolveEntry(realThemeRoot, config.widgets, 'Theme');
   const widgetMap = initializeExtension(entryPath, 'Theme');
-  const layer = createThemeLayer(widgetMap, entryPath, new Set(overrides));
+  const layer = createThemeLayer(widgetMap, entryPath, normalizeOverrides(overrides));
   themeLayers.set(realThemeRoot, layer);
+  themeRequestLayers.set(themeRoot, layer);
   return layer;
 }
 

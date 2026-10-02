@@ -67,7 +67,7 @@ test('project overrides must be explicitly declared', async(t) => {
   class CoreWidget extends Widget {}
   registerWidget(widgetName, CoreWidget, {source: 'test core'});
   write(path.join(root, 'widgets.js'), `
-    module.exports = ({Widget}) => ({${widgetName}: class extends Widget {
+    module.exports = ({Widget}) => ({'${widgetName}@replacement': class extends Widget {
       async execute() { this.push({source: 'project'}); }
     }});
   `);
@@ -115,6 +115,10 @@ test('only the selected theme is loaded and its registrations are request scoped
   assert.equal(global.__firekylinFirstThemeLoaded, true);
   assert.equal(global.__firekylinSecondThemeLoaded, undefined);
   assert.equal((await firstFactory.widget(widgetName)).row.theme, 'first');
+  fs.renameSync(first, path.join(root, 'first-moved'));
+  const cachedFactory = new WidgetFactory(controller());
+  cachedFactory.useTheme(root, 'first');
+  assert.equal((await cachedFactory.widget(widgetName)).row.theme, 'first');
 
   const secondFactory = new WidgetFactory(controller());
   secondFactory.useTheme(root, 'second');
