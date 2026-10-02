@@ -28,6 +28,7 @@ global.firekylin = {
 };
 
 widget.registerWidgetMap(widgets);
+widget.loadProjectWidgets(getContext());
 
 /**
  * is installed
