@@ -1,8 +1,9 @@
 const os = require('os');
 const path = require('path');
 const fileSession = require('think-session-file');
+const {getContext} = require('../../../../lib/project-context');
 
-let ROOT_PATH = think.ROOT_PATH;
+let ROOT_PATH = getContext().runtimePath;
 if (think.env === 'vercel') {
   ROOT_PATH = os.tmpdir();
 } else if (think.env === 'pkg') {
@@ -27,6 +28,6 @@ module.exports = {
   },
   file: {
     handle: fileSession,
-    sessionPath: path.join(ROOT_PATH, 'runtime/session')
+    sessionPath: path.join(ROOT_PATH, 'session')
   }
 };

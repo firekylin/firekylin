@@ -20,6 +20,13 @@ module.exports = [
       publicPath: /^\/(static\/|theme\/|[^/]+\.(?!js|html|xml)\w+$)/
     }
   },
+  ...(process.env.FIREKYLIN_PROJECT_PATH ? [{
+    handle: 'resource',
+    options: {
+      root: process.env.FIREKYLIN_PROJECT_PATH,
+      publicPath: /^\/(uploads\/|themes\/)/
+    }
+  }] : []),
   {
     handle: 'trace',
     enable: !think.isCli,
@@ -43,7 +50,7 @@ module.exports = [
         const optionsModel = new think.model('options');
         const { theme } = await optionsModel.getOptions();
 
-        const themeErrorFilePath = path.join(think.RESOURCE_PATH, 'theme', theme, 'error');
+        const themeErrorFilePath = path.join(think.THEMES_PATH, theme, 'error');
         try {
           fs.statSync(themeErrorFilePath);
         } catch (e) {

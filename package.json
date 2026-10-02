@@ -1,6 +1,8 @@
 {
   "name": "firekylin",
-  "bin": "pkg.js",
+  "bin": {
+    "firekylin": "bin/firekylin.js"
+  },
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
   "version": "1.7.5",
   "author": "lizheming <i@imnerd.org>",
@@ -12,13 +14,14 @@
     "watch": "vite build --watch",
     "preview": "vite preview",
     "test:widget": "node --test test/widget/*.test.js",
+    "test:cli": "node --test test/cli/*.test.js",
     "lint": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache --ext .js,.jsx || true",
     "lint-fix": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx --fix || true",
     "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/static/src/*.ts ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
     "cron:comment": "npm start -- \"crontab/sync_comment\"",
-    "build:pkg": "pkg . --out-path=dist/"
+    "build:pkg": "pkg pkg.js --out-path=dist/"
   },
   "pre-commit": [
     "lint-break-on-errors"

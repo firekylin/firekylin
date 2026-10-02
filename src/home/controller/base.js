@@ -2,8 +2,8 @@
 const path = require('path');
 const pack = require('../../../package.json');
 const {WidgetFactory} = require('../../common/widget/registry');
+const {getContext} = require('../../../lib/project-context');
 
-const isPkg = think.env === 'pkg';
 module.exports = class extends think.Controller {
   constructor(...args) {
     super(...args);
@@ -32,7 +32,7 @@ module.exports = class extends think.Controller {
     this.assign('think', think);
     // set theme view root path
     const theme = options.theme || 'firekylin';
-    this.THEME_VIEW_PATH = path.join(isPkg ? process.cwd() : think.ROOT_PATH, 'www', 'theme', theme);
+    this.THEME_VIEW_PATH = path.join(getContext().themesPath, theme);
 
     this.assign('currentYear', (new Date()).getFullYear());
   }

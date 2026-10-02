@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const widget = require('../widget/registry');
 const widgets = require('../../home/widget');
+const {getContext} = require('../../../lib/project-context');
 
 global.firekylin = {
   POST_PUBLIC: 1,
@@ -34,7 +35,7 @@ widget.registerWidgetMap(widgets);
  */
 firekylin.isInstalled = false;
 try {
-  const installedFile = path.join(think.ROOT_PATH, '.installed');
+  const installedFile = getContext().installedPath;
   if (fs.accessSync && fs.accessSync(installedFile, fs.F_OK)) {
     firekylin.isInstalled = true;
   }
@@ -51,7 +52,8 @@ try {
  */
 firekylin.setInstalled = () => {
   firekylin.isInstalled = true;
-  const installedFile = path.join(think.ROOT_PATH, '.installed');
+  const installedFile = getContext().installedPath;
+  fs.mkdirSync(path.dirname(installedFile), {recursive: true});
   fs.writeFileSync(installedFile, 'firekylin');
 };
 

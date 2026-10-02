@@ -20,6 +20,7 @@ module.exports = class extends Base {
       // 上传文件路径
       const filepath = path.join(destPath, basename);
       await fs.move(file, filepath, { overwrite: true });
+      if (think.UPLOAD_BASE_URL) return url.resolve(think.UPLOAD_BASE_URL, `${destDir}/${basename}`);
       return url.resolve(think.UPLOAD_BASE_URL, filepath.replace(think.RESOURCE_PATH, ''));
     } catch (e) {
       console.error(e);
