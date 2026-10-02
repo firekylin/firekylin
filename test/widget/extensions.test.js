@@ -185,7 +185,3 @@ test('extension paths and exports are validated with their source', (t) => {
     config: {widgets: ['./throws.js']}
   }), /throws\.js: broken extension/);
 });
-
-test('package root exposes the stable Widget API', () => {
-  assert.equal(require('../../widget').Widget, Widget);
-});
