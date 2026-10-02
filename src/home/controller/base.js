@@ -33,6 +33,7 @@ module.exports = class extends think.Controller {
     // set theme view root path
     const theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = path.join(getContext().themesPath, theme);
+    this.widgetFactory.useTheme(getContext().themesPath, theme);
 
     this.assign('currentYear', (new Date()).getFullYear());
   }

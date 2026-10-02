@@ -86,6 +86,51 @@ MySQL/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-user`
 - [主题开发](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
 - [贡献代码](https://github.com/firekylin/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
 
+### 扩展 Widget
+
+项目可以在 `firekylin.config.js` 中声明 Widget 入口。入口相对项目根目录解析，并在 worker 启动时加载：
+
+```js
+module.exports = {
+  database: {/* ... */},
+  widgets: ['./widgets/index.js']
+};
+```
+
+入口导出一个同步初始化函数。函数收到稳定的 `Widget` 基类，并返回“名称 → Widget 类”的映射：
+
+```js
+module.exports = ({Widget}) => ({
+  Widget_Custom_Posts: class extends Widget {
+    async execute() {
+      const limit = Number(this.parameter.limit) || 5;
+      const rows = await this.model('post').limit(limit).select();
+      this.pushAll(rows);
+    }
+  }
+});
+```
+
+主题也可以在自身的 `package.json` 中声明入口。只有当前启用主题的服务端代码会被加载：
+
+```json
+{
+  "firekylin": {
+    "widgets": "./widgets/index.js",
+    "widgetOverrides": ["Widget_Contents_Post_Recent"]
+  }
+}
+```
+
+模板调用方式与内置 Widget 相同：
+
+```eta
+<% const posts = await firekylin.widget('Widget_Custom_Posts', {limit: 8}); %>
+<% while (posts.next()) { %><a href="<%= posts.permalink %>"><%= posts.title %></a><% } %>
+```
+
+Widget 重名默认会阻止启动或渲染，并同时报告两个来源。需要替换已有 Widget 时，必须在项目配置或主题的 `firekylin` 配置中通过 `widgetOverrides` 显式列出名称。主题不能覆盖用于确定当前主题的 `Widget_Options`。扩展代码运行在 Firekylin 服务端进程中，应只安装可信扩展；修改后需重启 worker。
+
 
 ## 捐赠支持
 
