@@ -37,6 +37,30 @@ test('migrated theme templates compile with async blocks', () => {
   });
 });
 
+test('migrated application views compile as Eta templates', () => {
+  const eta = new Eta({varName: 'firekylin'});
+  const root = path.join(__dirname, '../../view');
+  [
+    'admin/index_index.eta',
+    'home/index_install.eta',
+    'home/index_contributor.eta',
+    'home/rss.xml',
+    'home/sitemap.xml'
+  ].forEach(file => {
+    assert.doesNotThrow(() => eta.compile(fs.readFileSync(path.join(root, file), 'utf8'), {async: true}));
+  });
+});
+
+test('think-trace can discover status-named theme error templates', () => {
+  const errorRoot = path.join(__dirname, '../../www/theme/firekylin/error');
+  const notFound = fs.readFileSync(path.join(errorRoot, '404.html'), 'utf8');
+  const serverError = fs.readFileSync(path.join(errorRoot, '500.html'), 'utf8');
+
+  assert.match(notFound, /\{\{errMsg\}\}/);
+  assert.match(serverError, /\{\{errMsg\}\}/);
+  assert.match(serverError, /\{\{error\}\}/);
+});
+
 test('view adapter resolves layouts from the theme directory', async() => {
   const root = path.join(__dirname, '../../www/theme/firekylin');
   const tags = new Widget({ctx: {}, model() {}}, {});
