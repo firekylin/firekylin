@@ -21,7 +21,7 @@
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
     "cron:comment": "npm start -- \"crontab/sync_comment\"",
-    "build:pkg": "pkg . --out-path=dist/"
+    "build:pkg": "pkg pkg.js --out-path=dist/"
   },
   "pre-commit": [
     "lint-break-on-errors"

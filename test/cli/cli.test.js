@@ -7,8 +7,14 @@ const path = require('node:path');
 const test = require('node:test');
 const packageInfo = require('../../package.json');
 const {PasswordHash} = require('phpass');
-const {detectPackageManager, parseArgs, scaffold, validateNewOptions} = require('../../lib/cli');
-const {hashAdminPassword} = require('../../lib/installer');
+const {
+  detectPackageManager,
+  mergeResumeOptions,
+  parseArgs,
+  scaffold,
+  validateNewOptions
+} = require('../../lib/cli');
+const {hashAdminPassword, quoteIdentifier} = require('../../lib/installer');
 
 function options() {
   return {
@@ -39,6 +45,25 @@ test('detects the invoking package manager', () => {
   assert.equal(detectPackageManager({npm_config_user_agent: 'pnpm/10 node/v22'}), 'pnpm');
   assert.equal(detectPackageManager({npm_config_user_agent: 'yarn/1.22 node/v22'}), 'yarn');
   assert.equal(detectPackageManager({}), 'npm');
+});
+
+test('explicit retry arguments override persisted initialization values', () => {
+  const config = {database: {type: 'mysql', host: 'bad-host', user: 'old-user', password: 'old-password'}};
+  const state = {site: {title: 'Saved', username: 'admin'}};
+  const merged = mergeResumeOptions({dbHost: 'fixed-host', dbPassword: 'fixed-password'}, config, state);
+  assert.equal(merged.dbHost, 'fixed-host');
+  assert.equal(merged.dbUser, 'old-user');
+  assert.equal(merged.dbPassword, 'fixed-password');
+});
+
+test('quotes option column names for each SQL dialect', () => {
+  assert.equal(quoteIdentifier('mysql', 'key'), '`key`');
+  assert.equal(quoteIdentifier('postgresql', 'key'), '"key"');
+  assert.equal(quoteIdentifier('sqlite', 'value'), '"value"');
+});
+
+test('binary packaging preserves the legacy pkg entry point', () => {
+  assert.match(packageInfo.scripts['build:pkg'], /pkg pkg\.js/);
 });
 
 test('validates required database and administrator fields', () => {
