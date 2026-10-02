@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>服务器错误</title>
+  <style>
+    body { margin: 0; color: #444; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { box-sizing: border-box; max-width: 680px; margin: 15vh auto 0; padding: 0 24px; text-align: center; }
+    h1 { margin: 0; color: #222; font-size: 72px; line-height: 1; }
+    p { margin: 24px 0; }
+    a { color: #2479cc; }
+    .detail { color: #888; font-size: 14px; overflow-wrap: anywhere; }
+    .trace { display: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>500</h1>
+    <p>抱歉，服务器暂时无法完成这次请求。</p>
+    <p class="detail">{{errMsg}}</p>
+    <p><a href="/">返回首页</a></p>
+  </main>
+  <script class="trace" type="application/json">{{error}}</script>
+</body>
+</html>
