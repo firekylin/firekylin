@@ -4,7 +4,7 @@
     "firekylin": "bin/firekylin.js"
   },
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "lizheming <i@imnerd.org>",
   "scripts": {
     "start": "node development.js",
