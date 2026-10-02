@@ -5,6 +5,8 @@
  */
 const fs = require('fs');
 const path = require('path');
+const widget = require('../widget/registry');
+const widgets = require('../../home/widget');
 
 global.firekylin = {
   POST_PUBLIC: 1,
@@ -19,8 +21,12 @@ global.firekylin = {
   USER_EDITOR: 2,
   USER_CONTRIBUTOR: 3,
   USER_AVAILABLE: 1,
-  USER_DISABLED: 2
+  USER_DISABLED: 2,
+  Widget: widget.Widget,
+  registerWidget: widget.registerWidget
 };
+
+widget.registerWidgetMap(widgets);
 
 /**
  * is installed

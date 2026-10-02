@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 module.exports = class extends think.Controller {
   async __before() {
     const { controller, action } = this.ctx;
@@ -48,7 +51,14 @@ module.exports = class extends think.Controller {
     }
 
     this.assign('options', options);
-    // this.assign('JSON', JSON);
+    this.assign('think', think);
+
+    const manifestPath = path.join(think.ROOT_PATH, 'www/static/dist/.vite/manifest.json');
+    try {
+      this.assign('vite', JSON.parse(fs.readFileSync(manifestPath, 'utf8')));
+    } catch (e) {
+      this.assign('vite', {});
+    }
     return this.display('admin/index_index');
   }
 };

@@ -1,0 +1,12 @@
+<% layout('../layout') %>
+<% const page = await firekylin.widget('Widget_Archive', {type: 'page'}); const site = await firekylin.widget('Widget_Options'); page.next(); %>
+<% block('title', () => { %><%= page.title() %> - <%= site.title() %><% }) %>
+<% await blockAsync('content', async () => { %>
+<% const categories = await firekylin.widget('Widget_Metas_Category_List'); %>
+<article class="post tags">
+  <h1 class="title">分类</h1>
+  <div class="entry-content"><section>
+    <% while (categories.next()) { %><a href="/cate/<%= categories.pathname %>" data-cate="<%= categories.name %>"><%= categories.name %>(<%= categories.count %>)</a><% } %>
+  </section></div>
+</article>
+<% }) %>

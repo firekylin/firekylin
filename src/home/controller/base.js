@@ -1,6 +1,7 @@
 
 const path = require('path');
 const pack = require('../../../package.json');
+const {WidgetFactory} = require('../../common/widget/registry');
 
 const isPkg = think.env === 'pkg';
 module.exports = class extends think.Controller {
@@ -20,64 +21,24 @@ module.exports = class extends think.Controller {
       return this.redirect('/index/install');
     }
 
-    const model = this.model('options');
-    const options = await model.getOptions();
+    this.widgetFactory = new WidgetFactory(this);
+    const widget = this.widgetFactory.widget.bind(this.widgetFactory);
+    widget.destroy = this.widgetFactory.destroy.bind(this.widgetFactory);
+    this.assign('widget', widget);
+    const optionsWidget = await this.getWidget('Widget_Options');
+    const options = optionsWidget.row;
     this.options = options;
-    let {
-      navigation,
-      themeConfig
-    } = options;
-    try {
-      navigation = JSON.parse(navigation);
-    } catch (e) {
-      navigation = [];
-    }
-    try {
-      themeConfig = JSON.parse(themeConfig);
-    } catch (e) {
-      themeConfig = {};
-    }
-
-    // remove github pwd
-    let commentConfigName = {};
-    try {
-      commentConfigName = JSON.parse(options.comment.name);
-      delete commentConfigName.githubPassWord;
-      options.comment.name = JSON.stringify(commentConfigName);
-    } catch (e) {
-      commentConfigName = {};
-    }
-
-    this.assign('options', options);
-    this.assign('navigation', navigation);
-    this.assign('themeConfig', themeConfig);
     this.assign('VERSION', pack.version);
+    this.assign('think', think);
     // set theme view root path
     const theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = path.join(isPkg ? process.cwd() : think.ROOT_PATH, 'www', 'theme', theme);
 
-    // 网站地址
-    let siteUrl = this.options.site_url;
-    if (!siteUrl) {
-      siteUrl = 'http://' + this.ctx.host;
-    }
-    this.assign('site_url', siteUrl);
-
-    // 所有的分类
-    const categories = await this.model('cate').getCateArchive();
-    this.assign('categories', categories);
-
-    // 所有标签
-    const tagModel = this.model('tag');
-    const tagList = await tagModel.getTagArchive();
-    this.assign('tags', tagList);
-
-    // 最近10条文章
-    const postModel = this.model('post');
-    const lastPostList = await postModel.getLastPostList();
-    this.assign('lastPostList', lastPostList);
-
     this.assign('currentYear', (new Date()).getFullYear());
+  }
+
+  getWidget(name, params = {}) {
+    return this.widgetFactory.widget(name, params);
   }
   /**
    * display view page
@@ -89,7 +50,7 @@ module.exports = class extends think.Controller {
       const jsonOutput = {};
       const assignObj = this.assign();
       Object.keys(assignObj).forEach((key) => {
-        if (['controller', 'http', 'config', '_', 'options'].indexOf(key) === -1) {
+        if (['controller', 'http', 'config', '_', 'options', 'widget'].indexOf(key) === -1) {
           jsonOutput[key] = assignObj[key];
         }
       });
@@ -99,6 +60,8 @@ module.exports = class extends think.Controller {
       return true;
     }
 
-    return this.display(path.join(this.THEME_VIEW_PATH, name + '.html'));
+    return this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'), {
+      viewPath: this.THEME_VIEW_PATH
+    });
   }
 };

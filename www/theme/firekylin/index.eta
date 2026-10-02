@@ -1,0 +1,35 @@
+<% layout('./layout') %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'index'}); const site = await firekylin.widget('Widget_Options'); %>
+<% block('title', () => { %><% if (archive.is('tag')) { %>标签 <%= archive.archiveTitle %> - <% } else if (archive.is('cate')) { %>分类 <%= archive.archiveTitle %> - <% } %><%= site.title() %><% }) %>
+<% block('headers', () => { %>
+<link rel="canonical" href="<%= site.siteUrl %>/<% if (archive.is('tag')) { %>tag/<%= archive.archiveSlug %><% } else if (archive.is('cate')) { %>cate/<%= archive.archiveSlug %><% } %><% if (archive.pagination.currentPage > 1) { %>?page=<%= archive.pagination.currentPage %><% } %>" />
+<% }) %>
+<% block('content', () => { %>
+<section id="page-index">
+  <% if (archive.is('tag')) { %>
+  <h1 class="intro">标签<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= archive.archiveTitle %></a>下的文章</h1>
+  <% } else if (archive.is('cate')) { %>
+  <h1 class="intro">分类<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= archive.archiveTitle %></a>下的文章</h1>
+  <% } %>
+  <% while (archive.next()) { %>
+  <article class="post">
+    <div class="meta">
+      <div>
+        <% if (archive.row.user) { %>
+        <span class="author"><%= archive.author() %></span>
+        <span>发布于</span>
+        <% } %>
+        <span class="date"><%= archive.date('MM月DD, YYYY') %></span>
+      </div>
+      <div class="comment"><a href="<%= archive.permalink %>#comments"><%= archive.commentsNum('%d comments') %></a></div>
+    </div>
+    <h1 class="title"><a href="<%= archive.permalink %>"><%= archive.title() %></a></h1>
+    <div class="entry-content">
+      <%~ archive.row.summary %>
+      <p class="more"><a href="<%= archive.permalink %>">阅读全文 »</a></p>
+    </div>
+  </article>
+  <% } %>
+  <%~ include('./inc/pagination', {pagination: archive.pagination}) %>
+</section>
+<% }) %>

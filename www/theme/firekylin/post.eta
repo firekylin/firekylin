@@ -1,0 +1,38 @@
+<% layout('./layout') %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'post'}); const site = await firekylin.widget('Widget_Options'); archive.next(); const post = archive.row; %>
+<% block('title', () => { %><%= archive.title() %> - <%= site.title() %><% }) %>
+<% block('headers', () => { %><link rel="canonical" href="<%= site.siteUrl + archive.permalink %>" /><% }) %>
+<% block('content', () => { %>
+<div id="page-post">
+  <article class="post detail">
+    <div class="meta">
+      <div class="date"><%= archive.date('MM月DD, YYYY') %></div>
+      <div class="comment"><a href="#comments"><%= archive.commentsNum('%d comments') %></a></div>
+    </div>
+    <h1 class="title"><%= archive.title() %></h1>
+    <div class="entry-content"><%~ archive.content().replace(/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') %></div>
+    <p>本文链接：<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= site.siteUrl + firekylin.ctx.url %></a></p>
+    <p>-- <acronym title="End of File">EOF</acronym> --</p>
+    <div class="post-info"><p>
+      作者 <a href="/author/<%= post.user.name %>" data-user="<%= post.user.display_name %>"><code class="notebook"><%= archive.author() %></code></a>
+      发表于 <i><%= archive.date() %></i>
+      <% if (post.cate.length) { %>，添加在分类
+        <% post.cate.forEach(cate => { %><a href="/cate/<%= cate.pathname %>" data-cate="<%= cate.name %>"><code class="notebook"><%= cate.name %></code></a><% }) %> 下
+      <% } %>
+      <% if (post.tag.length) { %>，并被添加「
+        <% post.tag.forEach(tag => { %><a href="/tag/<%= tag.pathname %>" data-tag="<%= tag.name %>"><code class="notebook"><%= tag.name %></code></a><% }) %> 」标签
+      <% } %>
+      ，最后修改于 <i><%= firekylin.think.datetime(post.update_time) %></i>
+    </p>
+    <% if (site.themeConfig.cc) { %><p><%~ site.themeConfig.cc %></p><% } %>
+    </div>
+  </article>
+  <% if ((post.prev && post.prev.title) || (post.next && post.next.title)) { %>
+  <nav class="pagination">
+    <% if (post.prev && post.prev.title) { %><a href="/post/<%= post.prev.pathname %>.html" class="prev">&laquo; <%= post.prev.title %></a><% } %>
+    <% if (post.next && post.next.title) { %><a href="/post/<%= post.next.pathname %>.html" class="next"><%= post.next.title %> &raquo;</a><% } %>
+  </nav>
+  <% } %>
+  <% if (archive.allow('comment')) { %><%~ include('./inc/comment', {siteOptions: site}) %><% } %>
+</div>
+<% }) %>

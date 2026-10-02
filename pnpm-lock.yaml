@@ -10,7 +10,7 @@ importers:
     dependencies:
       ali-oss:
         specifier: ^6.2.1
-        version: 6.2.1(co@4.6.0)
+        version: 6.2.1(co@4.6.0)(supports-color@7.2.0)
       aws-sdk:
         specifier: ^2.814.0
         version: 2.1693.0
@@ -67,7 +67,7 @@ importers:
         version: 0.2.3
       qiniu:
         specifier: ^7.3.0
-        version: 7.15.2
+        version: 7.15.2(supports-color@7.2.0)
       request:
         specifier: ^2.87.0
         version: 2.88.2
@@ -88,43 +88,43 @@ importers:
         version: 1.1.2
       think-logger3:
         specifier: ^1.0.0
-        version: 1.4.0
+        version: 1.4.0(supports-color@7.2.0)
       think-model:
         specifier: ^1.5.4
-        version: 1.5.4
+        version: 1.5.4(supports-color@7.2.0)
       think-model-mysql:
         specifier: ^1.0.0
-        version: 1.1.7
+        version: 1.1.7(supports-color@7.2.0)
       think-model-postgresql:
         specifier: ^1.1.6
-        version: 1.1.8
+        version: 1.1.8(supports-color@7.2.0)
       think-model-sqlite:
         specifier: ^2.0.1
-        version: 2.0.1
+        version: 2.0.1(supports-color@7.2.0)
       think-router-rest:
         specifier: ^1.0.4
-        version: 1.0.5
+        version: 1.0.5(supports-color@7.2.0)
       think-session:
         specifier: ^1.1.3
         version: 1.1.6
       think-session-file:
         specifier: ^1.0.5
-        version: 1.1.4
+        version: 1.1.4(supports-color@7.2.0)
       think-view:
         specifier: ^1.0.0
-        version: 1.0.13
-      think-view-nunjucks:
-        specifier: ^1.0.1
-        version: 1.0.11
+        version: 1.0.13(supports-color@7.2.0)
+      think-view-eta:
+        specifier: ^1.0.0
+        version: 1.0.0
       thinkjs:
         specifier: ^3.2.11
-        version: 3.2.11
+        version: 3.2.11(supports-color@7.2.0)
       turndown:
         specifier: ^7.2.4
         version: 7.2.4
       upyun:
         specifier: ^3.3.4
-        version: 3.4.6
+        version: 3.4.6(debug@4.4.3(supports-color@7.2.0))
       wxr:
         specifier: ^0.1.2
         version: 0.1.2
@@ -173,7 +173,7 @@ importers:
         version: 4.24.16(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       axios:
         specifier: ^0.21.2
-        version: 0.21.2
+        version: 0.21.2(debug@4.4.3(supports-color@7.2.0))
       classnames:
         specifier: ^2.2.6
         version: 2.5.1
@@ -182,16 +182,16 @@ importers:
         version: 5.65.21
       eslint:
         specifier: ^8.0.0
-        version: 8.0.0
+        version: 8.0.0(supports-color@7.2.0)
       eslint-config-think:
         specifier: ^1.1.0
-        version: 1.1.0(eslint@8.0.0)
+        version: 1.1.0(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-import:
         specifier: ^2.11.0
-        version: 2.32.0(eslint@8.0.0)
+        version: 2.32.0(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0)
       eslint-plugin-react:
         specifier: ^6.10.3
-        version: 6.10.3(eslint@8.0.0)
+        version: 6.10.3(eslint@8.0.0(supports-color@7.2.0))
       history:
         specifier: ^4.7.2
         version: 4.10.1
@@ -260,10 +260,10 @@ importers:
         version: 0.4.3
       superagent:
         specifier: ^10.3.0
-        version: 10.3.0
+        version: 10.3.0(supports-color@7.2.0)
       think-watcher:
         specifier: ^3.0.0
-        version: 3.0.4
+        version: 3.0.4(supports-color@7.2.0)
       tiny-pinyin:
         specifier: ^1.3.0
         version: 1.3.2
@@ -580,9 +580,6 @@ packages:
         optional: true
       babel-plugin-react-compiler:
         optional: true
-
-  a-sync-waterfall@1.0.1:
-    resolution: {integrity: sha512-RYTOHHdWipFUliRFMCS4X2Yn2X8M87V/OpSqWzKKOGhzqyUxzyVmhHDH9sAvG+ZuQf/TAOFsLCpMw09I1ufUnA==}
 
   accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
@@ -913,10 +910,6 @@ packages:
 
   commander@2.12.1:
     resolution: {integrity: sha512-PCNLExLlI5HiPdaJs4pMXwOTHkSCpNQ1QJH9ykZLKtKEyKu3p9HgmH5l97vM8c0IUz6d54l+xEu2GG9yuYrFzA==}
-
-  commander@5.1.0:
-    resolution: {integrity: sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==}
-    engines: {node: '>= 6'}
 
   component-classes@1.2.6:
     resolution: {integrity: sha512-hPFGULxdwugu1QWW3SvVOCUHLzO34+a2J6Wqy0c5ASQkfi9/8nZcBB0ZohaEbXOQlCflMAEMmEWk7u7BVs4koA==}
@@ -1401,6 +1394,10 @@ packages:
   esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
+
+  eta@4.6.0:
+    resolution: {integrity: sha512-lW6is4T1NFOYnmqGZIfvixqj7A7sSvScF+DN8EK6K58xI5MZ5UvYe0GjopxOXQtZvUn4eDdVuZ8XSoYWTMEKwA==}
+    engines: {node: '>=20'}
 
   events@1.1.1:
     resolution: {integrity: sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==}
@@ -2438,16 +2435,6 @@ packages:
   nodemailer@6.6.1:
     resolution: {integrity: sha512-1xzFN3gqv+/qJ6YRyxBxfTYstLNt0FCtZaFRvf4Sg9wxNGWbwFmGXVpfSi6ThGK6aRxAo+KjHtYSW8NvCsNSAg==}
     engines: {node: '>=6.0.0'}
-
-  nunjucks@3.2.4:
-    resolution: {integrity: sha512-26XRV6BhkgK0VOxfbU5cQI+ICFUtMLixv1noZn1tGU38kQH5A5nmmbk/O45xdyBhD1esk47nKrY0mvQpZIhRjQ==}
-    engines: {node: '>= 6.9.0'}
-    hasBin: true
-    peerDependencies:
-      chokidar: ^3.3.0
-    peerDependenciesMeta:
-      chokidar:
-        optional: true
 
   oauth-sign@0.9.0:
     resolution: {integrity: sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==}
@@ -3637,8 +3624,8 @@ packages:
   think-validator@1.6.7:
     resolution: {integrity: sha512-igc0kNrfjucJ+CCeG33wsAxMHGPW3UdP1R3lFE8WJj5n9MdgqwxNZsT3sqHqp1TuowAV+1hCM+DV+1fXAF6XxA==}
 
-  think-view-nunjucks@1.0.11:
-    resolution: {integrity: sha512-k3GifChMsXfDvDXodozCMwhkRoLfpYjAp2RJxwFeVeerih42chLZ3yy/Va9szmiKYhVDq+N3csMi5G0zEunQhw==}
+  think-view-eta@1.0.0:
+    resolution: {integrity: sha512-+xZhlUST9ncORkEnz5SNoBWMZEiWo9psewjsvt6vGc7Il/S8D8hPReeVNIuIWmqVBkGPbQ5kvX7/PF3vVqHz9g==}
 
   think-view@1.0.13:
     resolution: {integrity: sha512-qBrMIp8cqcWm5EZsYBG53ud3oYAdnfpRO2NwKbcchD3iGKV1NAYRVRMOPTIfgYU/jPqrrvBJ20YjZ7BLhLIyHw==}
@@ -4085,10 +4072,10 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@eslint/eslintrc@1.0.2':
+  '@eslint/eslintrc@1.0.2(supports-color@7.2.0)':
     dependencies:
       ajv: 6.15.0
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       espree: 9.0.0
       globals: 13.9.0
       ignore: 4.0.6
@@ -4099,10 +4086,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@humanwhocodes/config-array@0.6.0':
+  '@humanwhocodes/config-array@0.6.0(supports-color@7.2.0)':
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       minimatch: 3.1.5
     transitivePeerDependencies:
       - supports-color
@@ -4217,13 +4204,13 @@ snapshots:
       '@sentry/utils': 7.36.0
       tslib: 1.14.1
 
-  '@sentry/node@7.36.0':
+  '@sentry/node@7.36.0(supports-color@7.2.0)':
     dependencies:
       '@sentry/core': 7.36.0
       '@sentry/types': 7.36.0
       '@sentry/utils': 7.36.0
       cookie: 0.4.2
-      https-proxy-agent: 5.0.0
+      https-proxy-agent: 5.0.0(supports-color@7.2.0)
       lru_map: 0.3.3
       tslib: 1.14.1
     transitivePeerDependencies:
@@ -4297,8 +4284,6 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.7
       vite: 8.0.11(@types/node@10.5.6)(less@3.8.0)
 
-  a-sync-waterfall@1.0.1: {}
-
   accepts@1.3.8:
     dependencies:
       mime-types: 2.1.35
@@ -4326,9 +4311,9 @@ snapshots:
     dependencies:
       es6-promisify: 5.0.0
 
-  agent-base@6.0.0:
+  agent-base@6.0.0(supports-color@7.2.0):
     dependencies:
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4354,7 +4339,7 @@ snapshots:
       require-from-string: 2.0.2
       uri-js: 4.4.1
 
-  ali-oss@6.2.1(co@4.6.0):
+  ali-oss@6.2.1(co@4.6.0)(supports-color@7.2.0):
     dependencies:
       address: 1.2.2
       agentkeepalive: 3.5.3
@@ -4363,7 +4348,7 @@ snapshots:
       co-defer: 1.0.0(co@4.6.0)
       copy-to: 2.0.1
       dateformat: 2.2.0
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       destroy: 1.2.0
       end-or-error: 1.0.1
       get-ready: 1.0.0
@@ -4375,10 +4360,10 @@ snapshots:
       mz-modules: 2.1.0
       platform: 1.3.6
       sdk-base: 2.0.1
-      snyk: 1.1304.2
+      snyk: 1.1304.2(supports-color@7.2.0)
       stream-http: 2.8.2
       stream-wormhole: 1.1.0
-      urllib: 2.33.1
+      urllib: 2.33.1(supports-color@7.2.0)
       utility: 1.18.0
       xml2js: 0.4.23
     transitivePeerDependencies:
@@ -4562,15 +4547,15 @@ snapshots:
 
   aws4@1.13.2: {}
 
-  axios@0.21.2:
+  axios@0.21.2(debug@4.4.3(supports-color@7.2.0)):
     dependencies:
-      follow-redirects: 1.16.0
+      follow-redirects: 1.16.0(debug@4.4.3(supports-color@7.2.0))
     transitivePeerDependencies:
       - debug
 
-  axios@0.26.1:
+  axios@0.26.1(debug@4.4.3(supports-color@7.2.0)):
     dependencies:
-      follow-redirects: 1.16.0
+      follow-redirects: 1.16.0(debug@4.4.3(supports-color@7.2.0))
     transitivePeerDependencies:
       - debug
 
@@ -4724,8 +4709,6 @@ snapshots:
 
   commander@2.12.1: {}
 
-  commander@5.1.0: {}
-
   component-classes@1.2.6:
     dependencies:
       component-indexof: 0.0.3
@@ -4873,21 +4856,29 @@ snapshots:
     dependencies:
       mimic-fn: 3.1.0
 
-  debug@2.6.9:
+  debug@2.6.9(supports-color@7.2.0):
     dependencies:
       ms: 2.0.0
+    optionalDependencies:
+      supports-color: 7.2.0
 
-  debug@3.1.0:
+  debug@3.1.0(supports-color@7.2.0):
     dependencies:
       ms: 2.0.0
+    optionalDependencies:
+      supports-color: 7.2.0
 
-  debug@3.2.7:
+  debug@3.2.7(supports-color@7.2.0):
     dependencies:
       ms: 2.1.3
+    optionalDependencies:
+      supports-color: 7.2.0
 
-  debug@4.4.3:
+  debug@4.4.3(supports-color@7.2.0):
     dependencies:
       ms: 2.1.3
+    optionalDependencies:
+      supports-color: 7.2.0
 
   decompress-response@6.0.0:
     dependencies:
@@ -5125,12 +5116,12 @@ snapshots:
     optionalDependencies:
       source-map: 0.6.1
 
-  eslint-config-think@1.1.0(eslint@8.0.0):
+  eslint-config-think@1.1.0(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
-      eslint-plugin-import: 2.32.0(eslint@8.0.0)
-      eslint-plugin-node: 5.2.1(eslint@8.0.0)
+      eslint-plugin-import: 2.32.0(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0)
+      eslint-plugin-node: 5.2.1(eslint@8.0.0(supports-color@7.2.0))
       eslint-plugin-promise: 3.5.0
-      eslint-plugin-standard: 3.1.0(eslint@8.0.0)
+      eslint-plugin-standard: 3.1.0(eslint@8.0.0(supports-color@7.2.0))
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
       - eslint
@@ -5138,35 +5129,35 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-import-resolver-node@0.3.10:
+  eslint-import-resolver-node@0.3.10(supports-color@7.2.0):
     dependencies:
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
       is-core-module: 2.16.2
       resolve: 2.0.0-next.6
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.10)(eslint@8.0.0):
+  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.10(supports-color@7.2.0))(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
     optionalDependencies:
-      eslint: 8.0.0
-      eslint-import-resolver-node: 0.3.10
+      eslint: 8.0.0(supports-color@7.2.0)
+      eslint-import-resolver-node: 0.3.10(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint@8.0.0):
+  eslint-plugin-import@2.32.0(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
       array.prototype.findlastindex: 1.2.6
       array.prototype.flat: 1.3.3
       array.prototype.flatmap: 1.3.3
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
       doctrine: 2.1.0
-      eslint: 8.0.0
-      eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.10)(eslint@8.0.0)
+      eslint: 8.0.0(supports-color@7.2.0)
+      eslint-import-resolver-node: 0.3.10(supports-color@7.2.0)
+      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.10(supports-color@7.2.0))(eslint@8.0.0(supports-color@7.2.0))(supports-color@7.2.0)
       hasown: 2.0.3
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -5182,9 +5173,9 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-node@5.2.1(eslint@8.0.0):
+  eslint-plugin-node@5.2.1(eslint@8.0.0(supports-color@7.2.0)):
     dependencies:
-      eslint: 8.0.0
+      eslint: 8.0.0(supports-color@7.2.0)
       ignore: 3.3.10
       minimatch: 3.1.5
       resolve: 1.22.12
@@ -5192,46 +5183,46 @@ snapshots:
 
   eslint-plugin-promise@3.5.0: {}
 
-  eslint-plugin-react@6.10.3(eslint@8.0.0):
+  eslint-plugin-react@6.10.3(eslint@8.0.0(supports-color@7.2.0)):
     dependencies:
       array.prototype.find: 2.2.3
       doctrine: 1.5.0
-      eslint: 8.0.0
+      eslint: 8.0.0(supports-color@7.2.0)
       has: 1.0.4
       jsx-ast-utils: 1.4.1
       object.assign: 4.1.7
 
-  eslint-plugin-standard@3.1.0(eslint@8.0.0):
+  eslint-plugin-standard@3.1.0(eslint@8.0.0(supports-color@7.2.0)):
     dependencies:
-      eslint: 8.0.0
+      eslint: 8.0.0(supports-color@7.2.0)
 
   eslint-scope@6.0.0:
     dependencies:
       esrecurse: 4.3.0
       estraverse: 5.3.0
 
-  eslint-utils@3.0.0(eslint@8.0.0):
+  eslint-utils@3.0.0(eslint@8.0.0(supports-color@7.2.0)):
     dependencies:
-      eslint: 8.0.0
+      eslint: 8.0.0(supports-color@7.2.0)
       eslint-visitor-keys: 2.0.0
 
   eslint-visitor-keys@2.0.0: {}
 
   eslint-visitor-keys@3.0.0: {}
 
-  eslint@8.0.0:
+  eslint@8.0.0(supports-color@7.2.0):
     dependencies:
-      '@eslint/eslintrc': 1.0.2
-      '@humanwhocodes/config-array': 0.6.0
+      '@eslint/eslintrc': 1.0.2(supports-color@7.2.0)
+      '@humanwhocodes/config-array': 0.6.0(supports-color@7.2.0)
       ajv: 6.15.0
       chalk: 4.1.2
       cross-spawn: 7.0.6
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       doctrine: 3.0.0
       enquirer: 2.4.1
       escape-string-regexp: 4.0.0
       eslint-scope: 6.0.0
-      eslint-utils: 3.0.0(eslint@8.0.0)
+      eslint-utils: 3.0.0(eslint@8.0.0(supports-color@7.2.0))
       eslint-visitor-keys: 3.0.0
       espree: 9.0.0
       esquery: 1.7.0
@@ -5285,6 +5276,8 @@ snapshots:
   estraverse@5.3.0: {}
 
   esutils@2.0.3: {}
+
+  eta@4.6.0: {}
 
   events@1.1.1: {}
 
@@ -5359,7 +5352,9 @@ snapshots:
 
   flatted@3.4.2: {}
 
-  follow-redirects@1.16.0: {}
+  follow-redirects@1.16.0(debug@4.4.3(supports-color@7.2.0)):
+    optionalDependencies:
+      debug: 4.4.3(supports-color@7.2.0)
 
   for-each@0.3.5:
     dependencies:
@@ -5476,10 +5471,10 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
 
-  get-uri@2.0.0:
+  get-uri@2.0.0(supports-color@7.2.0):
     dependencies:
       data-uri-to-buffer: 0.0.1
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       extend: 3.0.2
       file-uri-to-path: 0.0.2
       ftp: 0.3.10
@@ -5616,10 +5611,10 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  http-proxy-agent@2.1.0:
+  http-proxy-agent@2.1.0(supports-color@7.2.0):
     dependencies:
       agent-base: 4.2.0
-      debug: 3.1.0
+      debug: 3.1.0(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -5629,17 +5624,17 @@ snapshots:
       jsprim: 1.4.2
       sshpk: 1.18.0
 
-  https-proxy-agent@2.2.1:
+  https-proxy-agent@2.2.1(supports-color@7.2.0):
     dependencies:
       agent-base: 4.2.0
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@5.0.0:
+  https-proxy-agent@5.0.0(supports-color@7.2.0):
     dependencies:
-      agent-base: 6.0.0
-      debug: 4.4.3
+      agent-base: 6.0.0(supports-color@7.2.0)
+      debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -5948,23 +5943,23 @@ snapshots:
       co: 4.6.0
       koa-compose: 4.1.0
 
-  koa-send@3.3.0:
+  koa-send@3.3.0(supports-color@7.2.0):
     dependencies:
       co: 4.6.0
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       mz: 2.7.0
       resolve-path: 1.4.0
     transitivePeerDependencies:
       - supports-color
 
-  koa@2.16.4:
+  koa@2.16.4(supports-color@7.2.0):
     dependencies:
       accepts: 1.3.8
       cache-content-type: 1.0.1
       content-disposition: 0.5.2
       content-type: 1.0.5
       cookies: 0.9.1
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       delegates: 1.0.0
       depd: 2.0.0
       destroy: 1.2.0
@@ -6131,13 +6126,13 @@ snapshots:
 
   lodash@4.18.1: {}
 
-  log4js@6.9.1:
+  log4js@6.9.1(supports-color@7.2.0):
     dependencies:
       date-format: 4.0.14
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       flatted: 3.4.2
       rfdc: 1.4.1
-      streamroller: 3.1.5
+      streamroller: 3.1.5(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -6345,12 +6340,6 @@ snapshots:
 
   nodemailer@6.6.1: {}
 
-  nunjucks@3.2.4:
-    dependencies:
-      a-sync-waterfall: 1.0.1
-      asap: 2.0.6
-      commander: 5.1.0
-
   oauth-sign@0.9.0: {}
 
   object-assign@3.0.0: {}
@@ -6456,13 +6445,13 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  pac-proxy-agent@2.0.1:
+  pac-proxy-agent@2.0.1(supports-color@7.2.0):
     dependencies:
       agent-base: 4.2.0
-      debug: 3.2.7
-      get-uri: 2.0.0
-      http-proxy-agent: 2.1.0
-      https-proxy-agent: 2.2.1
+      debug: 3.2.7(supports-color@7.2.0)
+      get-uri: 2.0.0(supports-color@7.2.0)
+      http-proxy-agent: 2.1.0(supports-color@7.2.0)
+      https-proxy-agent: 2.2.1(supports-color@7.2.0)
       pac-resolver: 3.0.0
       raw-body: 2.5.3
       socks-proxy-agent: 4.0.0
@@ -6609,14 +6598,14 @@ snapshots:
       object-assign: 4.1.1
       react-is: 16.13.1
 
-  proxy-agent@2.3.1:
+  proxy-agent@2.3.1(supports-color@7.2.0):
     dependencies:
       agent-base: 4.2.0
-      debug: 3.2.7
-      http-proxy-agent: 2.1.0
-      https-proxy-agent: 2.2.1
+      debug: 3.2.7(supports-color@7.2.0)
+      http-proxy-agent: 2.1.0(supports-color@7.2.0)
+      https-proxy-agent: 2.2.1(supports-color@7.2.0)
       lru-cache: 4.1.2
-      pac-proxy-agent: 2.0.1
+      pac-proxy-agent: 2.0.1(supports-color@7.2.0)
       proxy-from-env: 1.0.0
       socks-proxy-agent: 3.0.0
     transitivePeerDependencies:
@@ -6649,7 +6638,7 @@ snapshots:
       phpass: 0.1.1
       request: 2.88.2
 
-  qiniu@7.15.2:
+  qiniu@7.15.2(supports-color@7.2.0):
     dependencies:
       agentkeepalive: 4.6.0
       before: 0.0.1
@@ -6663,7 +6652,7 @@ snapshots:
       mockdate: 3.0.5
       tunnel-agent: 0.6.0
       typescript: 4.9.4
-      urllib: 2.41.0
+      urllib: 2.41.0(supports-color@7.2.0)
     transitivePeerDependencies:
       - proxy-agent
       - supports-color
@@ -7543,9 +7532,9 @@ snapshots:
 
   smart-buffer@4.2.0: {}
 
-  snyk@1.1304.2:
+  snyk@1.1304.2(supports-color@7.2.0):
     dependencies:
-      '@sentry/node': 7.36.0
+      '@sentry/node': 7.36.0(supports-color@7.2.0)
       global-agent: 3.0.0
     transitivePeerDependencies:
       - supports-color
@@ -7635,10 +7624,10 @@ snapshots:
 
   stream-wormhole@1.1.0: {}
 
-  streamroller@3.1.5:
+  streamroller@3.1.5(supports-color@7.2.0):
     dependencies:
       date-format: 4.0.14
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       fs-extra: 8.1.0
     transitivePeerDependencies:
       - supports-color
@@ -7692,11 +7681,11 @@ snapshots:
 
   strnum@1.0.5: {}
 
-  superagent@10.3.0:
+  superagent@10.3.0(supports-color@7.2.0):
     dependencies:
       component-emitter: 1.3.1
       cookiejar: 2.1.4
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       fast-safe-stringify: 2.1.1
       form-data: 4.0.5
       formidable: 3.5.4
@@ -7755,9 +7744,9 @@ snapshots:
       think-debounce: 1.0.4
       think-helper: 1.1.4
 
-  think-cluster@1.5.8:
+  think-cluster@1.5.8(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       string-hash: 1.1.3
       think-helper: 1.1.5
     transitivePeerDependencies:
@@ -7771,13 +7760,13 @@ snapshots:
     dependencies:
       think-helper: 1.1.5
 
-  think-crontab@1.0.4:
+  think-crontab@1.0.4(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       node-schedule: 1.3.3
-      think-cluster: 1.5.8
+      think-cluster: 1.5.8(supports-color@7.2.0)
       think-helper: 1.1.5
-      think-mock-http: 1.0.6
+      think-mock-http: 1.0.6(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -7806,18 +7795,18 @@ snapshots:
     dependencies:
       think-helper: 1.1.5
 
-  think-loader@1.2.3:
+  think-loader@1.2.3(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       path-to-regexp: 1.7.0
       think-helper: 1.1.5
-      thinkjs: 4.0.0
+      thinkjs: 4.0.0(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  think-logger3@1.4.0:
+  think-logger3@1.4.0(supports-color@7.2.0):
     dependencies:
-      log4js: 6.9.1
+      log4js: 6.9.1(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -7829,57 +7818,57 @@ snapshots:
     dependencies:
       think-helper: 1.1.5
 
-  think-mock-http@1.0.6:
+  think-mock-http@1.0.6(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       think-helper: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  think-model-abstract@1.6.5:
+  think-model-abstract@1.6.5(supports-color@7.2.0):
     dependencies:
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
       think-helper: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  think-model-mysql@1.1.7:
+  think-model-mysql@1.1.7(supports-color@7.2.0):
     dependencies:
       think-debounce: 1.0.4
       think-helper: 1.1.4
-      think-model-abstract: 1.6.5
-      think-mysql: 1.4.4
+      think-model-abstract: 1.6.5(supports-color@7.2.0)
+      think-mysql: 1.4.4(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  think-model-postgresql@1.1.8:
+  think-model-postgresql@1.1.8(supports-color@7.2.0):
     dependencies:
       pg: 8.20.0
       think-debounce: 1.0.4
       think-helper: 1.1.4
       think-instance: 1.0.2
-      think-model-abstract: 1.6.5
+      think-model-abstract: 1.6.5(supports-color@7.2.0)
     transitivePeerDependencies:
       - pg-native
       - supports-color
 
-  think-model-sqlite@2.0.1:
+  think-model-sqlite@2.0.1(supports-color@7.2.0):
     dependencies:
       better-sqlite3: 11.10.0
       generic-pool: 3.9.0
       think-debounce: 1.0.4
       think-helper: 1.1.5
       think-instance: 1.0.2
-      think-model-abstract: 1.6.5
+      think-model-abstract: 1.6.5(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  think-model@1.5.4:
+  think-model@1.5.4(supports-color@7.2.0):
     dependencies:
       think-cache: 1.1.2
       think-debounce: 1.0.4
       think-helper: 1.1.4
-      think-model-abstract: 1.6.5
+      think-model-abstract: 1.6.5(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -7887,9 +7876,9 @@ snapshots:
     dependencies:
       ms: 1.0.0
 
-  think-mysql@1.4.4:
+  think-mysql@1.4.4(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       mysql: 2.18.1
       think-debounce: 1.0.4
       think-helper: 1.1.5
@@ -7908,31 +7897,31 @@ snapshots:
 
   think-pm2@1.0.0: {}
 
-  think-resource@1.0.3:
+  think-resource@1.0.3(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
-      koa-send: 3.3.0
+      debug: 2.6.9(supports-color@7.2.0)
+      koa-send: 3.3.0(supports-color@7.2.0)
       think-helper: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  think-router-rest@1.0.5:
+  think-router-rest@1.0.5(supports-color@7.2.0):
     dependencies:
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
-  think-router@1.3.5:
+  think-router@1.3.5(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       path-to-regexp: 1.7.0
       think-helper: 1.1.5
     transitivePeerDependencies:
       - supports-color
 
-  think-session-file@1.1.4:
+  think-session-file@1.1.4(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       think-debounce: 1.0.4
       think-gc: 1.0.3
       think-helper: 1.1.4
@@ -7961,75 +7950,73 @@ snapshots:
       think-helper: 1.1.5
       validator: 9.0.0
 
-  think-view-nunjucks@1.0.11:
+  think-view-eta@1.0.0:
     dependencies:
-      nunjucks: 3.2.4
-      think-helper: 1.1.4
-    transitivePeerDependencies:
-      - chokidar
+      eta: 4.6.0
+      think-helper: 1.1.5
 
-  think-view@1.0.13:
+  think-view@1.0.13(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       methods: 1.1.2
       think-helper: 1.1.4
     transitivePeerDependencies:
       - supports-color
 
-  think-watcher@3.0.4:
+  think-watcher@3.0.4(supports-color@7.2.0):
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       think-helper: 1.1.4
     transitivePeerDependencies:
       - supports-color
 
-  thinkjs@3.2.11:
+  thinkjs@3.2.11(supports-color@7.2.0):
     dependencies:
       cookies: 0.7.3
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
       destroy: 1.2.0
-      koa: 2.16.4
+      koa: 2.16.4(supports-color@7.2.0)
       on-finished: 2.4.1
-      think-cluster: 1.5.8
+      think-cluster: 1.5.8(supports-color@7.2.0)
       think-config: 1.1.3
       think-controller: 1.0.5
-      think-crontab: 1.0.4
+      think-crontab: 1.0.4(supports-color@7.2.0)
       think-helper: 1.1.4
-      think-loader: 1.2.3
-      think-logger3: 1.4.0
+      think-loader: 1.2.3(supports-color@7.2.0)
+      think-logger3: 1.4.0(supports-color@7.2.0)
       think-logic: 1.2.2
       think-meta: 1.0.6
-      think-mock-http: 1.0.6
+      think-mock-http: 1.0.6(supports-color@7.2.0)
       think-payload: 1.4.1
       think-pm2: 1.0.0
-      think-resource: 1.0.3
-      think-router: 1.3.5
+      think-resource: 1.0.3(supports-color@7.2.0)
+      think-router: 1.3.5(supports-color@7.2.0)
       think-trace: 1.0.18
       think-validator: 1.6.7
     transitivePeerDependencies:
       - supports-color
 
-  thinkjs@4.0.0:
+  thinkjs@4.0.0(supports-color@7.2.0):
     dependencies:
       cookies: 0.8.0
-      debug: 3.2.7
+      debug: 3.2.7(supports-color@7.2.0)
       destroy: 1.2.0
       koa: 3.2.0
       on-finished: 2.4.1
-      think-cluster: 1.5.8
+      think-cluster: 1.5.8(supports-color@7.2.0)
       think-config: 1.1.3
       think-controller: 1.0.5
-      think-crontab: 1.0.4
+      think-crontab: 1.0.4(supports-color@7.2.0)
       think-helper: 1.1.5
-      think-loader: 1.2.3
-      think-logger3: 1.4.0
+      think-loader: 1.2.3(supports-color@7.2.0)
+      think-logger3: 1.4.0(supports-color@7.2.0)
       think-logic: 1.2.2
       think-meta: 1.0.6
-      think-mock-http: 1.0.6
+      think-mock-http: 1.0.6(supports-color@7.2.0)
       think-payload: 1.4.1
       think-pm2: 1.0.0
-      think-resource: 1.0.3
-      think-router: 1.3.5
+      think-resource: 1.0.3(supports-color@7.2.0)
+      think-router: 1.3.5(supports-color@7.2.0)
       think-trace: 1.0.18
       think-validator: 1.6.7
     transitivePeerDependencies:
@@ -8199,9 +8186,9 @@ snapshots:
 
   unpipe@1.0.0: {}
 
-  upyun@3.4.6:
+  upyun@3.4.6(debug@4.4.3(supports-color@7.2.0)):
     dependencies:
-      axios: 0.26.1
+      axios: 0.26.1(debug@4.4.3(supports-color@7.2.0))
       base-64: 1.0.0
       form-data: 4.0.5
       hmacsha1: 1.0.0
@@ -8220,18 +8207,18 @@ snapshots:
       punycode: 1.3.2
       querystring: 0.2.0
 
-  urllib@2.33.1:
+  urllib@2.33.1(supports-color@7.2.0):
     dependencies:
       any-promise: 1.3.0
       content-type: 1.0.5
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       default-user-agent: 1.0.0
       digest-header: 0.0.1
       ee-first: 1.1.1
       humanize-ms: 1.2.1
       iconv-lite: 0.4.15
       ip: 1.1.9
-      proxy-agent: 2.3.1
+      proxy-agent: 2.3.1(supports-color@7.2.0)
       pump: 3.0.4
       qs: 6.15.1
       statuses: 1.5.0
@@ -8239,11 +8226,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  urllib@2.41.0:
+  urllib@2.41.0(supports-color@7.2.0):
     dependencies:
       any-promise: 1.3.0
       content-type: 1.0.5
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@7.2.0)
       default-user-agent: 1.0.0
       digest-header: 1.1.0
       ee-first: 1.1.1

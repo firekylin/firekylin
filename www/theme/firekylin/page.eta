@@ -1,0 +1,19 @@
+<% layout('./layout') %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'page'}); const site = await firekylin.widget('Widget_Options'); archive.next(); %>
+<% block('title', () => { %><%= archive.have() ? archive.title() : '页面未找到' %> - <%= site.title() %><% }) %>
+<% block('headers', () => { %><% if (archive.have()) { %><link rel="canonical" href="<%= site.siteUrl + archive.permalink %>" /><% } %><% }) %>
+<% block('content', () => { %>
+<div id="page-post"><article class="post page">
+  <% if (archive.have()) { %>
+  <h1 class="title"><%= archive.title() %></h1>
+  <div class="entry-content"><%~ archive.content().replace(/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') %></div>
+  <% if (archive.allow('comment')) { %><%~ include('./inc/comment', {siteOptions: site}) %><% } %>
+  <% } else { %>
+  <h1 class="title">提示</h1>
+  <div class="entry-content">
+    <p>未找到相关页面。</p>
+    <p>如果是管理员，请到后台添加地址为 <code><%= firekylin.ctx.param('pathname') %></code> 的页面，点击<a href="/admin/page/create?pathname=<%= firekylin.ctx.param('pathname') %>">这里</a>添加。</p>
+  </div>
+  <% } %>
+</article></div>
+<% }) %>

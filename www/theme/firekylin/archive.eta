@@ -1,0 +1,17 @@
+<% layout('./layout') %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'archive'}); const site = await firekylin.widget('Widget_Options'); %>
+<% block('title', () => { %>归档 - <%= site.title() %><% }) %>
+<% block('headers', () => { %><link rel="canonical" href="<%= site.siteUrl %>/archives" /><% }) %>
+<% block('content', () => { %>
+<article class="post archive">
+  <h1 class="title">归档</h1>
+  <% Object.entries(archive.grouped).forEach(([yearMonth, data]) => { %>
+  <div class="entry-content">
+    <h3><%= yearMonth %> (<%= data.length %>)</h3>
+    <ul>
+      <% data.forEach(item => { %><li><a href="/post/<%= item.pathname %>.html" title="<%= item.title %>"><%= item.title %></a>&nbsp; <span class="date"><%= firekylin.think.datetime(item.create_time, 'YYYY-MM-DD') %></span></li><% }) %>
+    </ul>
+  </div>
+  <% }) %>
+</article>
+<% }) %>

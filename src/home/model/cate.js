@@ -13,7 +13,9 @@ module.exports = class extends think.Model {
     }
 
     const catesId = catesData.map(({ id }) => id);
-    catesData.forEach(cate => cates[cate.id] = cate);
+    catesData.forEach(cate => {
+      cates[cate.id] = cate;
+    });
 
     // 获取所有的文章 ID 并对其进行分类
     const postsId = await this.model('post_cate').join({
@@ -52,7 +54,9 @@ module.exports = class extends think.Model {
           id: ['IN', postIds]
         }
       });
-      postsArr.forEach(post => posts[post.id] = post);
+      postsArr.forEach(post => {
+        posts[post.id] = post;
+      });
     }
 
     // 根据分类归类文章
@@ -86,10 +90,60 @@ module.exports = class extends think.Model {
         cate.pathname = encodeURIComponent(cate.pathname);
         if (cate.children) {
           cate.children = Object.values(cate.children).sort((a, b) => a.count > b.count ? -1 : 1);
-          cate.children.forEach(c => c.pathname = encodeURIComponent(c.pathname));
+          cate.children.forEach(c => {
+            c.pathname = encodeURIComponent(c.pathname);
+          });
         }
         return cate;
       })
       .sort((a, b) => a.count > b.count ? -1 : 1);
+  }
+
+  async getCateList() {
+    const catesData = await this.select();
+    if (think.isEmpty(catesData)) {
+      return [];
+    }
+
+    const cates = {};
+    catesData.forEach(cate => {
+      cate.count = 0;
+      cates[cate.id] = cate;
+    });
+
+    const counts = await this.model('post_cate').join({
+      table: 'post',
+      on: ['post_id', 'id']
+    }).where({
+      type: 0,
+      status: 3,
+      is_public: 1,
+      cate_id: ['IN', catesData.map(cate => cate.id)]
+    })
+      .field('cate_id,post_id')
+      .select();
+
+    const postIds = {};
+    counts.forEach(({cate_id, post_id}) => {
+      if (!postIds[cate_id]) postIds[cate_id] = new Set();
+      postIds[cate_id].add(post_id);
+    });
+    Object.keys(postIds).forEach(id => {
+      cates[id].count = postIds[id].size;
+    });
+
+    catesData.forEach(cate => {
+      cate.pathname = encodeURIComponent(cate.pathname);
+      if (cate.pid && cates[cate.pid]) {
+        if (!cates[cate.pid].children) cates[cate.pid].children = [];
+        cates[cate.pid].children.push(cate);
+      }
+    });
+
+    const byCount = (left, right) => right.count - left.count;
+    catesData.forEach(cate => {
+      if (cate.children) cate.children.sort(byCount);
+    });
+    return catesData.filter(cate => !cate.pid).sort(byCount);
   }
 };

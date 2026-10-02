@@ -1,0 +1,34 @@
+<% layout('./layout') %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'search'}); const site = await firekylin.widget('Widget_Options'); %>
+<% block('title', () => { %>站内搜索 - <%= site.title() %><% }) %>
+<% block('headers', () => { %>
+<link rel="canonical" href="<%= site.siteUrl %>/search.html<% if (archive.keyword) { %>?keyword=<%= archive.keyword %><% } %><% if (archive.pagination && archive.pagination.currentPage > 1) { %>&amp;page=<%= archive.pagination.currentPage %><% } %>" />
+<% }) %>
+<% await blockAsync('content', async () => { %>
+<article class="post detail">
+  <h1 class="title">站内搜索</h1>
+  <div class="entry-content">
+    <div id="search"><form action="/search.html">
+      <div class="wrapper"><input maxlength="80" placeholder="请输入关键字..." id="keyword" name="keyword" value="<%= archive.keyword %>" type="search" required></div>
+      <input class="submit" type="submit" value="搜索">
+    </form></div>
+    <% if (archive.keyword) { %>
+    <div id="searchResult">
+      <% if (archive.pagination.count) { %><div class="info">本次搜索找到结果 <%= archive.pagination.count %> 条</div><% } else { %>
+      <div class="no-result">没有找到任何结果，请更换查询词试试~</div>
+      <div class="item"><div class="title">或者试试 Google 站内搜索： <a target="_blank" href="https://www.google.com/#q=<%= encodeURIComponent('site:' + firekylin.ctx.hostname + ' ' + archive.keyword) %>">site:<%= firekylin.ctx.hostname %> <%= archive.keyword %></a></div></div>
+      <% } %>
+      <% while (archive.next()) { %><div class="item">
+        <div class="title"><a href="<%= archive.permalink %>"><%= archive.title() %></a></div>
+        <div class="desc"><%~ archive.row.summary %></div>
+      </div><% } %>
+    </div>
+    <% } else { %>
+    <div id="searchResult"><div class="hot-words">热搜词：
+      <% const hotTags = await firekylin.widget('Widget_Metas_Tag_Cloud', {limit: 5}); while (hotTags.next()) { %><a href="?keyword=<%= hotTags.title.val() %>"><%= hotTags.title() %></a><% } %>
+    </div></div>
+    <% } %>
+  </div>
+</article>
+<% if (archive.pagination) { %><%~ include('./inc/pagination', {pagination: archive.pagination}) %><% } %>
+<% }) %>

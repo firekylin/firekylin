@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<% const viteEntry = firekylin.vite['index.html'] || {css: [], file: ''}; %>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title><%= firekylin.options.title %></title>
+  <link rel="icon" href="<%= firekylin.options.favicon_url || '/static/img/firekylin.jpg' %>">
+  <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/admin.css">
+  <link rel="stylesheet" href="/static/css/icon.css">
+  <% (viteEntry.css || []).forEach(css => { %>
+  <link rel="stylesheet" href="/static/dist/<%= css %>">
+  <% }) %>
+</head>
+<body>
+<script>
+window.SysConfig = {
+  userInfo: <%~ JSON.stringify(firekylin.userInfo) %>,
+  options: <%~ JSON.stringify({
+    title: firekylin.options.title,
+    two_factor_auth: firekylin.options.two_factor_auth,
+    ldap_on: firekylin.options.ldap_on,
+    intranet: firekylin.options.intranet,
+    password_salt: firekylin.options.password_salt
+  }) %>,
+  config: {
+    disallow_file_edit: <%= firekylin.think.config('DISALLOW_FILE_EDIT') ? 'true' : 'false' %>
+  }
+};
+</script>
+<div id="app"></div>
+<script type="module" src="/static/dist/<%= viteEntry.file %>"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<% const site = await firekylin.widget('Widget_Options'); const themeConfig = site.themeConfig; %>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+  <title><%~ block('title') %></title>
+  <link rel="icon" href="<%= site.row.favicon_url || '/static/img/firekylin.jpg' %>">
+  <% if (site.row.favicon) { %><link rel="shortcut icon" href="<%= site.row.favicon %>" type="image/x-icon"><% } %>
+  <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.html">
+  <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="<%= site.title() %>">
+  <% if (site.keywords()) { %><meta name="keywords" content="<%= site.keywords() %>"><% } %>
+  <% if (site.description()) { %><meta name="description" content="<%= site.description() %>"><% } %>
+  <%~ block('headers') %>
+  <link rel="stylesheet" href="<%= site.themeUrl('res/css/all.css') %>" type="text/css" data-ls="css_firekylin">
+  <% if (themeConfig.sidebarBackground || themeConfig.sidebarBackgroundColor || themeConfig.customCSS || themeConfig.sidebarColor) { %>
+  <style>
+    <% if (themeConfig.sidebarBackground || themeConfig.sidebarBackgroundColor) { %>
+    #sidebar {
+      <% if (themeConfig.sidebarBackground) { %>background-image: url('<%= themeConfig.sidebarBackground %>');
+      background-size: cover;<% } %>
+      <% if (themeConfig.sidebarBackgroundColor) { %>background-color: <%= themeConfig.sidebarBackgroundColor %>;<% } %>
+    }
+    <% } %>
+    <% if (themeConfig.sidebarColor) { %>
+    #sidebar .profile span,
+    #sidebar .buttons li a,
+    #sidebar .buttons li a:hover { color: <%= themeConfig.sidebarColor %>; }
+    <% } %>
+    <% if (themeConfig.customCSS) { %><%~ themeConfig.customCSS %><% } %>
+  </style>
+  <% } %>
+</head>
+<body>
+  <nav id="sidebar" class="behavior_1">
+    <div class="wrap">
+      <div class="profile">
+        <a href="/"><img src="<%= site.row.logo_url || '/static/img/firekylin.jpg' %>" alt="<%= site.title() %>"></a>
+        <span><%= site.title() %></span>
+      </div>
+      <ul class="buttons">
+        <% site.navigation.forEach(nav => { %>
+        <li><a class="" href="<%= nav.url %>" title="<%= nav.label %>">
+          <svg class="icon"><use href="<%= site.themeUrl('res/icon/icons.svg') %>#icon-<%= nav.option %>"></use></svg>
+          <span><%= nav.label %></span>
+        </a></li>
+        <% }) %>
+      </ul>
+      <ul class="buttons"><li>
+        <% if (site.row.github_url) { %><a class="inline" rel="nofollow" target="_blank" href="<%= site.row.github_url %>"><svg class="icon" title="GitHub"><use href="<%= site.themeUrl('res/icon/icons.svg') %>#icon-github-v"></use></svg></a><% } %>
+        <% if (site.row.twitter_url && site.row.twitter_url.includes('twitter.com')) { %><a class="inline" rel="nofollow" target="_blank" href="<%= site.row.twitter_url %>"><svg class="icon" title="Twitter"><use href="<%= site.themeUrl('res/icon/icons.svg') %>#icon-twitter-v"></use></svg></a><% } %>
+        <% if (site.row.twitter_url && site.row.twitter_url.includes('weibo.com')) { %><a class="inline" rel="nofollow" target="_blank" href="<%= site.row.twitter_url %>"><svg class="icon" title="weibo"><use href="<%= site.themeUrl('res/icon/icons.svg') %>#icon-weibo"></use></svg></a><% } %>
+        <a class="inline" href="/rss.html"><svg class="icon" title="RSS"><use href="<%= site.themeUrl('res/icon/icons.svg') %>#icon-rss-v"></use></svg></a>
+        <a class="inline" href="/search.html"><svg class="icon" title="Search"><use href="<%= site.themeUrl('res/icon/icons.svg') %>#icon-search"></use></svg></a>
+      </li></ul>
+    </div>
+  </nav>
+  <div id="header">
+    <div class="btn-bar"><i></i></div>
+    <h1><a href="/"><%= site.title() %></a></h1>
+    <a class="me" href="/about/"><img src="<%= site.row.logo_url || '/static/img/firekylin.jpg' %>" alt="<%= site.title() %>"></a>
+  </div>
+  <div id="sidebar-mask"></div>
+  <div id="main">
+    <%~ block('content') %>
+    <footer id="footer" class="inner">
+      &copy; <%= firekylin.currentYear %>&nbsp;-&nbsp; <%= site.title() %>
+      <% if (site.row.miitbeian || site.row.mpsbeian) { %>
+        <% if (site.row.miitbeian) { %>&nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://beian.miit.gov.cn"><%= site.row.miitbeian %></a><% } %>
+        <% if (site.row.mpsbeian) { %>&nbsp;-&nbsp;<a target="_blank" rel="nofollow" class="external beian" href="http://www.beian.gov.cn/"><%= site.row.mpsbeian %></a><% } %>
+      <% } else { %>&nbsp;-&nbsp;<a href="/"><%= firekylin.ctx.hostname %></a><% } %>
+      <br>
+      Powered by&nbsp;<a target="_blank" href="https://thinkjs.org">ThinkJS</a>&nbsp;&amp;&nbsp;<a target="_blank" rel="nofollow" class="external" href="https://firekylin.lithub.cc">FireKylin <%= firekylin.VERSION %></a>
+    </footer>
+  </div>
+  <script src="<%= site.themeUrl('res/js/firekylin.js') %>" data-ls="js_firekylin"></script>
+  <% if (site.row.analyze_code) { %><%~ site.row.analyze_code %><% } %>
+  <% if (themeConfig.customJS) { %><script><%~ themeConfig.customJS %></script><% } %>
+</body>
+</html>
