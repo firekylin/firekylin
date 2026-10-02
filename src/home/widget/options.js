@@ -47,6 +47,7 @@ module.exports = class extends Widget {
   }
 
   themeUrl(pathname = '') {
-    return `/theme/${this.row.theme}/${String(pathname).replace(/^\//, '')}`;
+    const base = process.env.FIREKYLIN_PROJECT_PATH ? 'themes' : 'theme';
+    return `/${base}/${this.row.theme}/${String(pathname).replace(/^\//, '')}`;
   }
 };

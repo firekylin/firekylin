@@ -4,8 +4,10 @@ const view = require('think-view');
 const model = require('think-model');
 const cache = require('think-cache');
 const session = require('think-session');
+const {getContext} = require('../../../lib/project-context');
 
-const ROOT_PATH = think.env === 'vercel' ? os.tmpdir() : think.ROOT_PATH;
+const context = getContext();
+const ROOT_PATH = think.env === 'vercel' ? os.tmpdir() : context.runtimePath;
 module.exports = [
   view, // make application support view
   model(think.app),
@@ -13,11 +15,13 @@ module.exports = [
   session,
   {
     think: {
-      TMPDIR_PATH: path.join(ROOT_PATH, 'runtime', 'tmp'),
-      RUNTIME_PATH: path.join(ROOT_PATH, 'runtime'),
+      TMPDIR_PATH: path.join(ROOT_PATH, 'tmp'),
+      RUNTIME_PATH: ROOT_PATH,
       RESOURCE_PATH: path.join(think.ROOT_PATH, 'www'),
-      UPLOAD_PATH: path.join(think.ROOT_PATH, 'www', 'static/upload'),
-      UPLOAD_BASE_URL: ''
+      PACKAGE_RESOURCE_PATH: path.join(think.ROOT_PATH, 'www'),
+      THEMES_PATH: context.themesPath,
+      UPLOAD_PATH: context.uploadPath,
+      UPLOAD_BASE_URL: context.legacy ? '' : '/uploads/'
     }
   }
 ];

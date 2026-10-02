@@ -1,6 +1,7 @@
 const mysql = require('think-model-mysql');
 const pgsql = require('think-model-postgresql');
 const sqlite = require('think-model-sqlite');
+const {getContext} = require('../../../../lib/project-context');
 
 const isDev = think.env === 'development';
 let msc = {
@@ -15,14 +16,17 @@ let msc = {
 };
 let type = process.env.FK_DB_MODE || 'mysql';
 try {
-  let dbConfig = require('../db'); // eslint-disable-line import/extensions
-  dbConfig = dbConfig.default || dbConfig;
-  if (!dbConfig.type) {
-    throw new Error();
+  const context = getContext();
+  if (!context.legacy) {
+    type = context.config.database.type;
+    msc = context.config.database;
+  } else {
+    let dbConfig = require('../db'); // eslint-disable-line import/extensions
+    dbConfig = dbConfig.default || dbConfig;
+    if (!dbConfig.type) throw new Error();
+    type = dbConfig.type;
+    msc = dbConfig.adapter[type];
   }
-
-  type = dbConfig.type;
-  msc = dbConfig.adapter[type];
 } catch (e) {
   //eslint-disable-line
 }
@@ -57,8 +61,12 @@ module.exports = {
   },
   sqlite: {
     handle: sqlite,
-    path: msc.path,
-    database: msc.database,
+    path: process.env.FIREKYLIN_PROJECT_PATH && msc.path
+      ? require('path').dirname(require('path').resolve(process.env.FIREKYLIN_PROJECT_PATH, msc.path))
+      : msc.path,
+    database: process.env.FIREKYLIN_PROJECT_PATH && msc.path
+      ? require('path').basename(msc.path, '.sqlite')
+      : msc.database,
     prefix: msc.prefix
   }
 };

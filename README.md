@@ -35,7 +35,33 @@
 
 ## 安装
 
-普通用户安装参见 [普通安装](https://github.com/firekylin/firekylin/wiki/安装)，推荐使用[腾讯云实验室](https://www.qcloud.com/developer/labs/lab/10094)体验详细的安装流程。如需对 Firekylin 进行开发，可参考 [仓库版安装](https://github.com/firekylin/firekylin/wiki/仓库版安装)
+推荐通过 CLI 创建独立的 Firekylin 项目。核心程序安装在 `node_modules`，项目目录只保存配置、主题、上传文件和数据，升级时不会覆盖用户文件：
+
+```sh
+npx firekylin new my-blog
+cd my-blog
+npm start
+```
+
+初始化命令会交互式选择 SQLite、MySQL 或 PostgreSQL，建立数据表并创建管理员账号。默认主题会复制到 `themes/firekylin`，后续升级不会覆盖这份主题。
+
+开发模式使用 `npm run dev`（等价于 `firekylin -D`）。升级核心程序时在项目中更新 `firekylin` 依赖即可。
+
+### 非交互安装
+
+CI 或容器中可通过参数完成初始化：
+
+```sh
+npx firekylin new my-blog --non-interactive --skip-install \
+  --db-type sqlite --db-path data/firekylin.sqlite --db-prefix fk_ \
+  --site-title "My Blog" --site-url "https://example.com" \
+  --admin-user admin --admin-password 'change-me' --admin-email admin@example.com \
+  --package-manager npm
+```
+
+MySQL/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-user` 和 `--db-password`。命令行密码可能进入 shell history；交互安装更适合人工部署。使用 `--skip-install` 时需在初始化后自行执行包管理器的安装命令。
+
+旧版“源码目录即站点目录”的 `production.js`、`development.js` 和网页安装流程仍保留，供已有部署继续使用。
 
 ## 如何使用
 

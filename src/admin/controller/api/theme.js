@@ -7,7 +7,7 @@ const statsAsync = think.promisify(fs.stat);
 const readdirAsync = think.promisify(fs.readdir);
 const readFileAsync = think.promisify(fs.readFile);
 const writeFileAsync = think.promisify(fs.writeFile);
-const THEME_DIR = path.join(think.RESOURCE_PATH, 'theme');
+const THEME_DIR = think.THEMES_PATH;
 
 module.exports = class extends Base {
   /**
