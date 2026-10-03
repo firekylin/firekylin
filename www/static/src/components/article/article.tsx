@@ -1,14 +1,12 @@
 import React from 'react';
-import { Row, Col, DatePicker, message } from 'antd';
+import { Row, Col, message } from 'antd';
+import generatePicker from 'antd/es/date-picker/generatePicker';
 import { inject, observer } from 'mobx-react';
 import dayjs from 'dayjs';
-import weekday from 'dayjs/plugin/weekday';
-import localeData from 'dayjs/plugin/localeData';
+import dayjsGenerateConfig from 'rc-picker/lib/generate/dayjs';
+import type { Dayjs } from 'dayjs';
 import { zip } from 'rxjs';
 import pinyin from 'tiny-pinyin';
-
-dayjs.extend(weekday);
-dayjs.extend(localeData);
 
 import ArticleHeader from './article-header/article-header';
 import ArticleEditor from './article-editor/article-editor';
@@ -27,6 +25,8 @@ import './article.less';
 import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleControlTemplate from './control-template/control-template';
 import { ArticleEnum } from './article.enum';
+
+const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 
 @inject('sharedStore', 'userStore', 'articleStore')
 @observer
@@ -103,8 +103,12 @@ class Article extends React.Component<ArticleProps, {}> {
         }
     }
     // 发布日期
-    onDateChange(date: dayjs.Dayjs) {
-        this.props.articleStore.setArticleInfo({ create_time: date });
+    onDateChange(date: Dayjs | null) {
+        if (date) {
+            this.props.articleStore.setArticleInfo({
+                create_time: date.format('YYYY-MM-DD HH:mm:ss'),
+            });
+        }
     }
     // Tag
     handleTagChange(tags: string[]) {
