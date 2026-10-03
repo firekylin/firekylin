@@ -152,7 +152,7 @@ class DashBoard extends React.Component<DashBoardProps, any> {
                                 <li><label>服务器系统：</label>{versions.platform}</li>
                                 <li><label>Node.js版本：</label>{versions.nodeVersion}</li>
                                 <li><label>V8引擎版本：</label>{versions.v8Version}</li>
-                                <li><label>MySQL版本：</label>{versions.mysqlVersion}</li>
+                                <li><label>数据库版本：</label>{versions.mysqlVersion}</li>
                                 <li><label>ThinkJS版本：</label>{versions.thinkjsVersion}</li>
                                 <li><label>FireKylin版本：</label>{versions.firekylinVersion}</li>
                             </ul>
@@ -177,15 +177,12 @@ class DashBoard extends React.Component<DashBoardProps, any> {
                                     <a href="https://github.com/firekylin/firekylin/issues">https://github.com/firekylin/firekylin/issues</a>
                                 </li>
                                 <li>
-                                    <label>团队博客：</label>
-                                    <a href="https://75.team">https://75.team</a>
-                                </li>
-                                <li>
                                     <label>开发成员：</label>
                                     <a href="https://github.com/welefen">welefen</a>、
                                     <a href="https://github.com/lizheming">lizheming</a>、
-                                    <a href="https://github.com/colordove">colordove</a>、
-                                    <a href="https://github.com/wei">wei</a>
+                                    <a href="https://github.com/jeffreys-cat">Jeffrey</a>、
+                                    <a href="https://github.com/wei">wei</a>、
+                                    <a href="https://github.com/zheng-fan">Maple</a>
                                 </li>
                             </ul>
                         </div>
