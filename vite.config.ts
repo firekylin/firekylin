@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { createHash } from 'crypto';
+import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 // https://vitejs.dev/config/
@@ -7,7 +9,21 @@ export default defineConfig(({ mode }) => ({
     root: path.resolve(__dirname, 'www/static/src'),
     base: '/static/dist/',
 
-    plugins: [react()],
+    plugins: [
+        react(),
+        {
+            name: 'admin-asset-version',
+            enforce: 'post',
+            closeBundle() {
+                const assetsPath = path.resolve(__dirname, 'www/static/dist/assets');
+                const hash = createHash('sha256');
+                for (const fileName of ['assets/admin.js', 'assets/admin.css']) {
+                    hash.update(readFileSync(path.resolve(__dirname, 'www/static/dist', fileName)));
+                }
+                writeFileSync(path.join(assetsPath, 'admin.version'), hash.digest('hex').slice(0, 16));
+            },
+        },
+    ],
 
     resolve: {},
 

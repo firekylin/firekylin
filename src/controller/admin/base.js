@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const {version} = require('../../../package.json');
@@ -8,11 +7,8 @@ let adminAssetVersion;
 function getAdminAssetVersion() {
   if (adminAssetVersion) return adminAssetVersion;
   try {
-    const assetsPath = path.join(think.ROOT_PATH, 'www/static/dist/assets');
-    const hash = crypto.createHash('sha256');
-    hash.update(fs.readFileSync(path.join(assetsPath, 'admin.js')));
-    hash.update(fs.readFileSync(path.join(assetsPath, 'admin.css')));
-    adminAssetVersion = hash.digest('hex').slice(0, 16);
+    const versionPath = path.join(think.ROOT_PATH, 'www/static/dist/assets/admin.version');
+    adminAssetVersion = fs.readFileSync(versionPath, 'utf8').trim();
     return adminAssetVersion;
   } catch (e) {
     // Keep development usable before the first frontend build. A release always
