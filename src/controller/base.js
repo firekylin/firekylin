@@ -7,8 +7,7 @@ const {getContext} = require('../../lib/project-context');
 module.exports = class extends think.Controller {
   constructor(...args) {
     super(...args);
-    // home view path
-    this.HOME_VIEW_PATH = path.join(think.ROOT_PATH, 'view', 'home');
+    this.APP_VIEW_PATH = path.join(think.ROOT_PATH, 'view');
   }
   /**
    * some base method in here

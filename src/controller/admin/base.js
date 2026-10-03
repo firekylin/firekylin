@@ -59,6 +59,6 @@ module.exports = class extends think.Controller {
     } catch (e) {
       this.assign('vite', {});
     }
-    return this.display('admin/index_index');
+    return this.display('admin_index_index');
   }
 };

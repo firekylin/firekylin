@@ -42,7 +42,7 @@ module.exports = class extends Base {
     this.assign('currentTime', (new Date()).toString());
 
     this.ctx.type = 'text/xml';
-    return super.display(path.join(this.HOME_VIEW_PATH, 'rss.xml'));
+    return super.display(path.join(this.APP_VIEW_PATH, 'rss.xml'));
   }
 
   /**
@@ -55,7 +55,7 @@ module.exports = class extends Base {
     this.assign('postList', postList);
 
     this.ctx.type = 'text/xml';
-    return super.display(path.join(this.HOME_VIEW_PATH, 'sitemap.xml'));
+    return super.display(path.join(this.APP_VIEW_PATH, 'sitemap.xml'));
   }
   /**
    * install
@@ -105,7 +105,7 @@ module.exports = class extends Base {
       }
 
       this.assign({message});
-      return this.display('home/index_install');
+      return this.display('index_install');
     }
 
     if (firekylin.isInstalled) {
@@ -115,7 +115,7 @@ module.exports = class extends Base {
     const errors = this.assign('errors');
     if (!think.isEmpty(errors)) {
       this.assign('message', errors[Object.keys(errors)[0]]);
-      return this.display('home/index_install');
+      return this.display('index_install');
     }
 
     const data = this.post();
@@ -165,7 +165,7 @@ module.exports = class extends Base {
 
     this.assign('message', message);
     this.assign('data', data);
-    return this.display('home/index_install');
+    return this.display('index_install');
   }
   /**
    * 申请成为投稿者
@@ -176,7 +176,7 @@ module.exports = class extends Base {
       return this.fail('PUSH_CLOSED');
     }
     if (this.isGet) {
-      return this.display('home/index_contributor');
+      return this.display('index_contributor');
     }
 
     const user = this.post();
@@ -189,6 +189,6 @@ module.exports = class extends Base {
 
     await this.model('user').where({name: user.name, email: user.email, _logic: 'OR'}).thenAdd(user);
     this.assign('message', 'success');
-    return this.display('home/index_contributor');
+    return this.display('index_contributor');
   }
 };
