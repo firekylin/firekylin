@@ -9,7 +9,7 @@ class SideBar extends React.Component<any, any> {
     }
 
     initState() {
-        const themePages = InitiateThemePages;
+        const themePages = [...InitiateThemePages];
         if (!window.SysConfig.config.disallow_file_edit) {
             themePages.push({url: '/appearance/edit', title: '编辑主题'});
         }

@@ -25,16 +25,22 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
     constructor(props: CommentProps) {
         super(props);
         let comment = window.SysConfig.options.comment;
-        if (typeof comment === 'string') {
-            comment = JSON.parse(comment);
+        try {
+            if (typeof comment === 'string') {
+                comment = JSON.parse(comment);
+            }
+        } catch (e) {
+            comment = {};
         }
-        if (comment.name === 'undefined') {
-            comment.name = '';
-        }
-        comment.name = unescape(comment.name);
+        comment = comment && typeof comment === 'object' ? comment : {};
+        const name = typeof comment.name === 'string' && comment.name !== 'undefined'
+            ? unescape(comment.name) : '';
         this.state = {
             submitting: false,
-            comment: comment
+            comment: {
+                type: comment.type || 'disqus',
+                name
+            }
         };
     }
 
@@ -58,7 +64,13 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
     }
 
     handleChange(e: RadioChangeEvent) {
-        this.setState({comment: Object.assign({}, this.state.comment, {type: e.target.value})});
+        const type = e.target.value;
+        this.setState({comment: {...this.state.comment, type}}, () => {
+            const field = this.isCommentTypeSite() ? 'site' : 'code';
+            if (this.formRef.current?.getFieldValue(field) == null) {
+                this.formRef.current?.setFieldsValue({[field]: ''});
+            }
+        });
     }
 
     handleSubmit = (values: any) => {

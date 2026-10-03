@@ -1,4 +1,8 @@
 module.exports = class extends think.Model {
+  get pk() {
+    return 'key';
+  }
+
   /**
    * get options
    * @return {} []
@@ -53,7 +57,7 @@ module.exports = class extends think.Model {
       const value = data[key];
       const exist = await this.where({key: key}).count('key');
       let p;
-      if (exist) {
+      if (Number(exist) > 0) {
         p = this.where({key: key}).update({value: value});
       } else {
         p = this.add({key, value});

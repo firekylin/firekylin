@@ -33,6 +33,7 @@ const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 class Article extends React.Component<ArticleProps, {}> {
     static defaultProps: ArticleProps;
     type: ArticleTypeEnum;
+    articleId = 0;
     articleInfo = this.props.articleStore.articleInfo;
 
     state = {
@@ -87,6 +88,7 @@ class Article extends React.Component<ArticleProps, {}> {
         this.type = this.props.type;
         this.init();
         const id = +this.props.match.params.id;
+        this.articleId = id || 0;
         if (id) {
             this.props.articleStore.getArticleInfoById(id, this.type);
         } else {
@@ -94,12 +96,15 @@ class Article extends React.Component<ArticleProps, {}> {
         }
     }
     componentWillReceiveProps(nextProps: any) {
-        if (
-            nextProps.match.params.id !== this.props.match.params.id ||
-            !this.props.match.params.id
-        ) {
+        const currentId = +this.props.match.params.id || 0;
+        const nextId = +nextProps.match.params.id || 0;
+        if (nextId !== currentId) {
+            this.articleId = nextId;
             this.props.articleStore.resetArticleInfo();
             this.init();
+            if (nextId) {
+                this.props.articleStore.getArticleInfoById(nextId, this.type);
+            }
         }
     }
     // 发布日期
@@ -163,8 +168,8 @@ class Article extends React.Component<ArticleProps, {}> {
         }
 
         const params: any = {};
-        if (this.props.match.params.id) {
-            params.id = this.props.match.params.id;
+        if (this.articleId) {
+            params.id = this.articleId;
         }
 
         this.props.articleStore.setArticleInfo({ status });
@@ -202,8 +207,11 @@ class Article extends React.Component<ArticleProps, {}> {
         const type = this.isPage() ? 'page' : 'post';
         this.props.articleStore.articleSubmit(params, this.type).subscribe(res => {
             if (res.errno === 0) {
-                if (!params.id && res.data.id) {
-                    params.id = res.data.id;
+                const createdId = !params.id && Number(res.data.id);
+                if (createdId) {
+                    params.id = createdId;
+                    this.articleId = createdId;
+                    this.props.history.replace(`/${type}/edit/${createdId}`);
                 }
 
                 if (status === ArticleEnum.SAVE && articleInfo.is_public) {

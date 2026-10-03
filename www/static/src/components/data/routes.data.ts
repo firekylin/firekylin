@@ -60,7 +60,7 @@ export const InitiateRoutes = (themePages) => [{
     },
     {
         url: '/tag',
-        icon: 'report',
+        icon: 'favor',
         title: '标签管理',
         type: 1,
         children: [{
