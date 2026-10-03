@@ -219,6 +219,9 @@ importers:
       qrcode.react:
         specifier: ^0.8.0
         version: 0.8.0(react@17.0.2)
+      rc-picker:
+        specifier: ^2.7.6
+        version: 2.7.6(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       rc-select:
         specifier: ^5.10.0
         version: 5.10.4(react-dom@17.0.2(react@17.0.2))(react@17.0.2)

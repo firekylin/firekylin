@@ -65,14 +65,13 @@ class ArticleStore {
       .subscribe(
         res => {
             if (res.errno === 0) {
-                if (res.data.create_time === '0000-00-00 00:00:00') {
-                    res.data.create_time = '';
-                }
-                const re = /-/g;
-                res.data.create_time = res.data.create_time.replace(re, '/');
-                res.data.create_time = res.data.create_time 
-                    ? dayjs(res.data.create_time) 
-                    : new Date();
+                const rawCreateTime = res.data.create_time;
+                const createTime = rawCreateTime && rawCreateTime !== '0000-00-00 00:00:00'
+                    ? dayjs(rawCreateTime)
+                    : null;
+                res.data.create_time = createTime && createTime.isValid()
+                    ? createTime.format('YYYY-MM-DD HH:mm:ss')
+                    : dayjs().format('YYYY-MM-DD HH:mm:ss');
                 if (type === ArticleTypeEnum.POST) {
                   res.data.tag = res.data.tag.map(tag => tag.name);
                   res.data.cate.forEach(cat => cat.id);
