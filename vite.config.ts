@@ -29,12 +29,19 @@ export default defineConfig(({ mode }) => ({
     build: {
         outDir: path.resolve(__dirname, 'www/static/dist'),
         emptyOutDir: true,
-        manifest: true,
+        cssCodeSplit: false,
         rollupOptions: {
             input: {
                 admin: path.resolve(__dirname, 'www/static/src/index.html'),
             },
             output: {
+                entryFileNames: 'assets/[name].js',
+                chunkFileNames: 'assets/[name]-[hash].js',
+                assetFileNames(assetInfo) {
+                    return assetInfo.names.some(name => name.endsWith('.css'))
+                        ? 'assets/admin.css'
+                        : 'assets/[name]-[hash][extname]';
+                },
                 manualChunks(id) {
                     return /node_modules\/(react|react-dom|mobx|mobx-react)\//.test(id) ? 'vendor' : undefined;
                 },

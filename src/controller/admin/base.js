@@ -1,5 +1,4 @@
-const fs = require('fs');
-const path = require('path');
+const {version} = require('../../../package.json');
 
 module.exports = class extends think.Controller {
   async __before() {
@@ -52,13 +51,8 @@ module.exports = class extends think.Controller {
 
     this.assign('options', options);
     this.assign('think', think);
+    this.assign('adminAssetVersion', version);
 
-    const manifestPath = path.join(think.ROOT_PATH, 'www/static/dist/.vite/manifest.json');
-    try {
-      this.assign('vite', JSON.parse(fs.readFileSync(manifestPath, 'utf8')));
-    } catch (e) {
-      this.assign('vite', {});
-    }
     return this.display('admin');
   }
 };
