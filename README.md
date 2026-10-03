@@ -131,6 +131,32 @@ module.exports = ({ContentsWidget}) => ({
 
 Widget 重名默认会阻止启动或渲染，并同时报告两个来源。需要替换已有 Widget 时，必须在项目配置或主题的 `firekylin` 配置中通过 `widgetOverrides` 显式列出名称。主题不能覆盖用于确定当前主题的 `Widget_Options`。扩展代码运行在 Firekylin 服务端进程中，应只安装可信扩展；修改后需重启 worker。
 
+通过 `firekylin new` 创建的项目会在根目录包含 `firekylin.d.ts`。支持 TypeScript 类型服务的编辑器或 Eta 插件可据此补全内置 Widget 名称、参数、数据字段和实例方法；声明只提供编辑期提示，不会改变 Widget 的注册和运行行为。类型主体由 `firekylin` 依赖提供，因此升级依赖即可同步最新定义。已有项目也可以手动添加：
+
+```ts
+/// <reference types="firekylin" />
+```
+
+自定义 Widget 可以在项目中的任意 `.d.ts` 文件里扩展注册表：
+
+```ts
+declare namespace Firekylin {
+  interface CustomPostsParameters {
+    limit?: number;
+  }
+
+  class CustomPostsWidget extends ContentsWidget<ContentRow, CustomPostsParameters> {
+    featured(): boolean;
+  }
+
+  interface WidgetRegistry {
+    Widget_Custom_Posts: WidgetDefinition<CustomPostsParameters, CustomPostsWidget>;
+  }
+}
+```
+
+之后调用 `firekylin.widget('Widget_Custom_Posts', {limit: 8})` 时，参数和返回实例都会按扩展声明进行推导。带缓存标识的名称（如 `Widget_Custom_Posts@sidebar`）也会使用同一份 Widget 类型。
+
 
 ## 捐赠支持
 

@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2017",
+    "types": ["../../types"]
+  },
+  "files": ["widgets.test-d.ts"]
+}
