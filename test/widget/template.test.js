@@ -41,9 +41,9 @@ test('migrated application views compile as Eta templates', () => {
   const eta = new Eta({varName: 'firekylin'});
   const root = path.join(__dirname, '../../view');
   [
-    'admin_index_index.eta',
-    'index_install.eta',
-    'index_contributor.eta',
+    'admin.eta',
+    'install.eta',
+    'contributor.eta',
     'rss.xml',
     'sitemap.xml'
   ].forEach(file => {

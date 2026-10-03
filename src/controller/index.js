@@ -105,7 +105,7 @@ module.exports = class extends Base {
       }
 
       this.assign({message});
-      return this.display('index_install');
+      return this.display('install');
     }
 
     if (firekylin.isInstalled) {
@@ -115,7 +115,7 @@ module.exports = class extends Base {
     const errors = this.assign('errors');
     if (!think.isEmpty(errors)) {
       this.assign('message', errors[Object.keys(errors)[0]]);
-      return this.display('index_install');
+      return this.display('install');
     }
 
     const data = this.post();
@@ -165,7 +165,7 @@ module.exports = class extends Base {
 
     this.assign('message', message);
     this.assign('data', data);
-    return this.display('index_install');
+    return this.display('install');
   }
   /**
    * 申请成为投稿者
@@ -176,7 +176,7 @@ module.exports = class extends Base {
       return this.fail('PUSH_CLOSED');
     }
     if (this.isGet) {
-      return this.display('index_contributor');
+      return this.display('contributor');
     }
 
     const user = this.post();
@@ -189,6 +189,6 @@ module.exports = class extends Base {
 
     await this.model('user').where({name: user.name, email: user.email, _logic: 'OR'}).thenAdd(user);
     this.assign('message', 'success');
-    return this.display('index_contributor');
+    return this.display('contributor');
   }
 };
