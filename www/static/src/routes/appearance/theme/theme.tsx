@@ -26,20 +26,31 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
     }
     componentDidMount() {
         this.props.themeStore.getThemeList();
-        this.state.themeConfig = {};
-        let themeConfig = window.SysConfig.options.themeConfig;
+        this.props.themeStore.getOptions().subscribe(res => {
+            if (res.errno !== 0) return;
+            window.SysConfig.options = res.data as any;
+            this.initializeOptions(res.data);
+        });
+    }
+
+    initializeOptions(options: any) {
+        let themeConfig = options.themeConfig;
         try {
-            if (!themeConfig) {
-                return;
-            }
             if (typeof(themeConfig) === 'string') {
                 themeConfig = JSON.parse(themeConfig);
             }
-            this.state.themeConfig = themeConfig;
         } catch (e) {
-            /* JSON Parse Error */
+            themeConfig = {};
         }
-        this.props.themeStore.setData({theme: window.SysConfig.options.theme});
+        this.setState({themeConfig: themeConfig || {}});
+        this.props.themeStore.setData({theme: options.theme || 'firekylin'});
+        this.formRef.current?.setFieldsValue({theme: options.theme || 'firekylin'});
+    }
+
+    updateThemeConfig(name: string, value: any) {
+        this.setState(({themeConfig}: any) => ({
+            themeConfig: {...themeConfig, [name]: value}
+        }));
     }
 
     // 显示主题配置
@@ -87,10 +98,9 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
                     key={i}
                     label={element.label}
                 >
-                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e => {
-                      this.state.themeConfig[element.name] = e.target.value;
-                      this.forceUpdate();
-                    }} />
+                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e =>
+                      this.updateThemeConfig(element.name, e.target.value)
+                    } />
                     <p style={{width: 600}}>{element.help}</p>
                 </Form.Item>
             );
@@ -103,7 +113,12 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
                     key={i}
                     label={element.label}
                 >
-                    <RadioGroup {...element} key={i}>
+                    <RadioGroup
+                        {...element}
+                        key={i}
+                        value={this.state.themeConfig[element.name]}
+                        onChange={e => this.updateThemeConfig(element.name, e.target.value)}
+                    >
                         {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
                     </RadioGroup>
                     <p style={{width: 600}}>{element.help}</p>
@@ -129,17 +144,11 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
                           onChange={e => {
                             let checked = e.target.checked;
                             let val = opt.value ? opt.value : opt;
-                            if (Array.isArray(this.state.themeConfig[element.name])) {
-                              if (checked) {
-                                this.state.themeConfig[element.name].push(val);
-                              } else {
-                                this.state.themeConfig[element.name] =
-                                  this.state.themeConfig[element.name].filter(v => v !== val);
-                              }
-                            } else {
-                              this.state.themeConfig[element.name] = [val];
-                            }
-                            return this.forceUpdate();
+                            const values = Array.isArray(this.state.themeConfig[element.name])
+                              ? this.state.themeConfig[element.name] : [];
+                            this.updateThemeConfig(element.name, checked
+                              ? [...values, val]
+                              : values.filter(v => v !== val));
                           }}
                       />
                       {opt.label ? opt.label : opt}
@@ -161,8 +170,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
                       className="form-control"
                       value={this.state.themeConfig[element.name]}
                       onChange={e => {
-                        this.state.themeConfig[element.name] = e.target.value;
-                        this.forceUpdate();
+                        this.updateThemeConfig(element.name, e.target.value);
                       }}
                   >
                     {element.options.map((opt, j) =>
@@ -190,8 +198,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
                       color={{r, g, b, a: a||1}}
                       onChangeComplete={color => {
                         const {r, g, b, a} = color.rgb;
-                        this.state.themeConfig[element.name] = `rgba(${r},${g},${b},${a||1})`;
-                        this.forceUpdate();
+                        this.updateThemeConfig(element.name, `rgba(${r},${g},${b},${a||1})`);
                       }}
                     />
                   </div> : null}
@@ -214,8 +221,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
                         }}
                         value={this.state.themeConfig[element.name]}
                         onBeforeChange={(editor, data, value) => {
-                            this.state.themeConfig[element.name] = value;
-                            this.forceUpdate();
+                            this.updateThemeConfig(element.name, value);
                         }}
                     />
                   <div className="help-block">{element.help ? element.help : ''}</div>
@@ -228,13 +234,13 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
     }
 
     saveThemeConfig() {
-        window.SysConfig.options.themeConfig = this.state.themeConfig;
         this.props.themeStore.themeConfigSave({themeConfig: JSON.stringify(this.state.themeConfig)});
     }
     handleSubmit(values: any) {
         this.props.themeStore.themeSelect(values);
     }
     handleThemeChanged(theme: string) {
+        this.props.themeStore.setData({theme});
         this.formRef.current?.setFieldsValue({theme});
     }
     render() {

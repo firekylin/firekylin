@@ -34,11 +34,19 @@ class ThemeStore {
         );
     }
 
+    getOptions() {
+        return http.get('/admin/api/options');
+    }
+
     themeSelect(params: {theme: string}) {
         http.post('/admin/api/options?method=put', params)
         .subscribe(
             res => {
-                message.success('设置成功');
+                if (res.errno === 0) {
+                    window.SysConfig.options.theme = params.theme;
+                    this.setData({theme: params.theme});
+                    message.success('设置成功');
+                }
             }
         );
     }
@@ -47,7 +55,10 @@ class ThemeStore {
         http.post('/admin/api/options?method=put', params)
         .subscribe(
             res => {
-                message.success('设置成功');
+                if (res.errno === 0) {
+                    window.SysConfig.options.themeConfig = params.themeConfig;
+                    message.success('设置成功');
+                }
             }
         );
     } 

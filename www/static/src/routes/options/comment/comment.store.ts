@@ -10,10 +10,7 @@ class CommentStore {
             res => {
                 if (res.errno === 0) {
                     message.success('评论设置更新成功');
-                    const comment = JSON.parse(window.SysConfig.options.comment);
-                    window.SysConfig.options.comment = JSON.stringify({
-                        'comment': comment
-                    });
+                    window.SysConfig.options.comment = JSON.stringify(data);
                 }
             }
         );

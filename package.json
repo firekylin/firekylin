@@ -29,8 +29,20 @@
     "lint-break-on-errors"
   ],
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/search": "^6.7.2",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@uiw/codemirror-theme-monokai": "^4.25.12",
     "ali-oss": "^6.2.1",
     "aws-sdk": "^2.814.0",
+    "codemirror-lang-eta": "^1.0.2",
     "cos-nodejs-sdk-v5": "^2.5.6",
     "dayjs": "^1.11.0",
     "feedparser": "^2.2.9",
@@ -65,7 +77,7 @@
     "think-session-file": "^1.0.5",
     "think-view": "^1.0.0",
     "think-view-eta": "^1.0.0",
-    "thinkjs": "^3.2.11",
+    "thinkjs": "^4.0.0",
     "turndown": "^7.2.4",
     "upyun": "^3.3.4",
     "wxr": "^0.1.2",
@@ -134,7 +146,7 @@
   "thinkjs": {
     "metadata": {
       "name": "firekylin",
-      "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
+      "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 4.x & ReactJS & ES2015+",
       "author": "lizheming <i@imnerd.org>",
       "babel": false
     },

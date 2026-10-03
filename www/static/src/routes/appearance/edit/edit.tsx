@@ -1,14 +1,9 @@
 import  React from 'react';
 import { observer, inject } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Controlled as CodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/monokai.css';
-import 'codemirror/mode/css/css';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/htmlmixed/htmlmixed';
 import { Tree, Modal, Button, message } from 'antd';
 import { ThemeEditProps } from './edit.modal';
+import CodeEditor from './code-editor';
 const info = Modal.info;
 
 @inject('editStore', 'sharedStore')
@@ -19,18 +14,6 @@ const info = Modal.info;
         currentFile: '',
 
     };
-    getEditorMode(ext: any) {
-        switch (ext.toLowerCase()) {
-            case 'json':
-            case 'js':
-                return 'javascript';
-            case 'css':
-                return 'css';
-            case 'html':
-                default:
-                return 'htmlmixed';
-        }
-    }
     componentDidMount() {
         const { editStore } = this.props;
         this.checkTheme();
@@ -96,14 +79,10 @@ const info = Modal.info;
                     <h3 style={{marginBottom: '20px'}}>编辑当前主题({theme})</h3>
                     <div className="row">
                         <div className="col-xs-9 theme-editor">
-                            <CodeMirror
-                                options={{
-                                    theme: 'monokai',
-                                    lineNumbers: true,
-                                    mode: this.getEditorMode(path.split('.').pop())
-                                }}
+                            <CodeEditor
+                                path={path}
                                 value={themeContent}
-                                onBeforeChange={(editor, data, content) => {
+                                onChange={content => {
                                     editStore.setData({themeContent: content});
                                 }}
                             />
