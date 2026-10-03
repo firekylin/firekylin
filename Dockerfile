@@ -17,8 +17,7 @@ COPY . /app
 
 RUN pnpm run build \
     && pnpm run copy-package \
-    && rm -rf src/common/runtime \
-    && rm -f src/common/config/db.js \
+    && rm -f src/config/db.js \
     && rm -rf output/www/static/dist/*.map \
     && rm -rf output/www/static/src
 

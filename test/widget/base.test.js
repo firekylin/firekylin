@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const Widget = require('../../src/common/widget/base');
+const Widget = require('../../src/widget/base');
 
 test('Widget exposes and resets its data stack', () => {
   const widget = new Widget({ctx: {}, model() {}}, {});

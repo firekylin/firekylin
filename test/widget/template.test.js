@@ -3,9 +3,9 @@ const fs = require('node:fs');
 const {createRequire} = require('node:module');
 const path = require('node:path');
 const test = require('node:test');
-const Widget = require('../../src/common/widget/base');
+const Widget = require('../../src/widget/base');
 const ThinkViewEta = require('think-view-eta');
-const Options = require('../../src/home/widget/options');
+const Options = require('../../src/widget/options');
 
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
 

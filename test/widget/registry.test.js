@@ -5,7 +5,7 @@ const {
   WidgetFactory,
   registerWidget,
   registerWidgetMap
-} = require('../../src/common/widget/registry');
+} = require('../../src/widget/registry');
 
 let id = 0;
 function uniqueName() {

@@ -9,7 +9,7 @@ const {
   loadProjectWidgets,
   loadThemeWidgets,
   registerWidget
-} = require('../../src/common/widget/registry');
+} = require('../../src/widget/registry');
 
 let sequence = 0;
 function name(label) {

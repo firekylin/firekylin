@@ -21,7 +21,7 @@ fi
 
 touch $VOLUME_PATH/db.js
 
-ln -s $VOLUME_PATH/db.js $APP_PATH/src/common/config/db.js
+ln -s $VOLUME_PATH/db.js $APP_PATH/src/config/db.js
 ln -s $VOLUME_PATH/upload $APP_PATH/www/static/upload
 ln -s $APP_PATH/logs /var/log/firekylin
 

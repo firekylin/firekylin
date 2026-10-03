@@ -1,9 +1,9 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const RecentPosts = require('../../src/home/widget/contents/post/recent');
-const TagCloud = require('../../src/home/widget/metas/tag/cloud');
-const CategoryList = require('../../src/home/widget/metas/category/list');
-const Options = require('../../src/home/widget/options');
+const RecentPosts = require('../../src/widget/contents/post/recent');
+const TagCloud = require('../../src/widget/metas/tag/cloud');
+const CategoryList = require('../../src/widget/metas/category/list');
+const Options = require('../../src/widget/options');
 
 function controller(models) {
   return {
