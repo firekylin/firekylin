@@ -90,9 +90,12 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.equal(manifest.dependencies.firekylin, packageInfo.version);
   assert.equal(manifest.scripts.start, 'firekylin');
   assert.ok(fs.existsSync(path.join(target, 'themes', 'firekylin', 'index.eta')));
+  const typesPath = path.join(target, 'firekylin.d.ts');
+  assert.equal(fs.readFileSync(typesPath, 'utf8'), '/// <reference types="firekylin" />\n');
   assert.equal(fs.statSync(path.join(target, 'firekylin.config.js')).mode & 0o777, 0o600);
   assert.ok(fs.existsSync(result.statePath));
   assert.equal(scaffold(target, options()).resuming, true);
+  assert.equal(fs.readFileSync(typesPath, 'utf8'), '/// <reference types="firekylin" />\n');
 
   const unrelated = path.join(root, 'unrelated');
   fs.mkdirSync(unrelated);
