@@ -1,0 +1,40 @@
+# Development-only files
+.github/
+.claude/
+.idea/
+.tmp/
+.vscode/
+coverage/
+test/
+www/static/src/
+
+# Local and generated state
+*.log
+*.pid
+*.seed
+.DS_Store
+.eslintcache
+.installed
+.version
+build/
+db/
+lib-cov/
+logs/
+output/
+output.theme/
+pids/
+release/
+runtime/
+stats.json
+www/static/images/upload/
+www/static/upload/
+
+# Build tooling that is not needed by the installed package
+75team.sh
+package-lock.json
+tsconfig.json
+tslint.json
+vite.config.ts
+
+# Local database configuration
+src/config/db.js

@@ -1,5 +1,21 @@
 const fs = require('fs');
 const path = require('path');
+const {version} = require('../../../package.json');
+
+let adminAssetVersion;
+
+function getAdminAssetVersion() {
+  if (adminAssetVersion) return adminAssetVersion;
+  try {
+    const versionPath = path.join(think.ROOT_PATH, 'www/static/dist/assets/admin.version');
+    adminAssetVersion = fs.readFileSync(versionPath, 'utf8').trim();
+    return adminAssetVersion;
+  } catch (e) {
+    // Keep development usable before the first frontend build. A release always
+    // contains admin.js, enforced by the packaging workflow.
+    return version;
+  }
+}
 
 module.exports = class extends think.Controller {
   async __before() {
@@ -52,13 +68,8 @@ module.exports = class extends think.Controller {
 
     this.assign('options', options);
     this.assign('think', think);
+    this.assign('adminAssetVersion', getAdminAssetVersion());
 
-    const manifestPath = path.join(think.ROOT_PATH, 'www/static/dist/.vite/manifest.json');
-    try {
-      this.assign('vite', JSON.parse(fs.readFileSync(manifestPath, 'utf8')));
-    } catch (e) {
-      this.assign('vite', {});
-    }
     return this.display('admin');
   }
 };

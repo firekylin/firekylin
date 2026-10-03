@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<% const viteEntry = firekylin.vite['index.html'] || {css: [], file: ''}; %>
 <html>
 <head>
   <meta charset="utf-8">
@@ -9,9 +8,7 @@
   <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/css/admin.css">
   <link rel="stylesheet" href="/static/css/icon.css">
-  <% (viteEntry.css || []).forEach(css => { %>
-  <link rel="stylesheet" href="/static/dist/<%= css %>">
-  <% }) %>
+  <link rel="stylesheet" href="/static/dist/assets/admin.css?v=<%= firekylin.adminAssetVersion %>">
 </head>
 <body>
 <script>
@@ -30,6 +27,6 @@ window.SysConfig = {
 };
 </script>
 <div id="app"></div>
-<script type="module" src="/static/dist/<%= viteEntry.file %>"></script>
+<script type="module" src="/static/dist/assets/admin.js?v=<%= firekylin.adminAssetVersion %>"></script>
 </body>
 </html>
