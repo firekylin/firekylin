@@ -3,9 +3,9 @@ const fs = require('node:fs');
 const {createRequire} = require('node:module');
 const path = require('node:path');
 const test = require('node:test');
-const Widget = require('../../src/common/widget/base');
+const Widget = require('../../src/widget/base');
 const ThinkViewEta = require('think-view-eta');
-const Options = require('../../src/home/widget/options');
+const Options = require('../../src/widget/options');
 
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
 
@@ -41,11 +41,11 @@ test('migrated application views compile as Eta templates', () => {
   const eta = new Eta({varName: 'firekylin'});
   const root = path.join(__dirname, '../../view');
   [
-    'admin/index_index.eta',
-    'home/index_install.eta',
-    'home/index_contributor.eta',
-    'home/rss.xml',
-    'home/sitemap.xml'
+    'admin.eta',
+    'install.eta',
+    'contributor.eta',
+    'rss.xml',
+    'sitemap.xml'
   ].forEach(file => {
     assert.doesNotThrow(() => eta.compile(fs.readFileSync(path.join(root, file), 'utf8'), {async: true}));
   });

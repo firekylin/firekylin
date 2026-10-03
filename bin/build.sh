@@ -39,7 +39,6 @@ tar -cf - -C www/static --exclude=src --exclude=upload . | tar -xf - -C output/w
 npm run copy-package;
 
 cp -r src output;
-rm -rf output/src/common/runtime;
 
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
@@ -59,8 +58,8 @@ cp -r bin/ssl/auto_build.sh output/;
 cp -r bin/ssl/https.js output/;
 cp -r bin/ssl/https.sh output/;
 
-if [ -f output/src/common/config/db.js ]; then
-  rm -r output/src/common/config/db.js;
+if [ -f output/src/config/db.js ]; then
+  rm -r output/src/config/db.js;
 fi
 rm -rf output/www/static/dist/*.map;
 mv output firekylin;

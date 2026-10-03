@@ -10,7 +10,7 @@ global.think = {
   }
 };
 
-const Archive = require('../../src/home/widget/archive');
+const Archive = require('../../src/widget/archive');
 
 function createController({params = {}, models = {}, query = {}} = {}) {
   return {

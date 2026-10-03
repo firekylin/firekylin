@@ -135,14 +135,13 @@
       "name": "firekylin",
       "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
       "author": "lizheming <i@imnerd.org>",
-      "babel": false,
-      "defaultModule": "home"
+      "babel": false
     },
     "projectName": "firekylin",
     "templateName": "/usr/local/lib/node_modules/think-cli/default_template",
     "cacheTemplatePath": "/Users/lizheming/.think-templates/-usr-local-lib-node_modules-think-cli-default_template",
     "clone": false,
-    "isMultiModule": true
+    "isMultiModule": false
   },
   "pkg": {
     "assets": [

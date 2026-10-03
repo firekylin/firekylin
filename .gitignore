@@ -34,7 +34,7 @@ node_modules
 www/static/images/upload/*
 
 # Database Config
-src/common/config/db.js
+src/config/db.js
 
 # Compiled Release
 release/

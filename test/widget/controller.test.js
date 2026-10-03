@@ -32,9 +32,9 @@ global.think = {
 };
 global.firekylin = {isInstalled: true};
 
-const {registerWidgetMap} = require('../../src/common/widget/registry');
-const widgets = require('../../src/home/widget');
-const BaseController = require('../../src/home/controller/base');
+const {registerWidgetMap} = require('../../src/widget/registry');
+const widgets = require('../../src/widget');
+const BaseController = require('../../src/controller/base');
 
 registerWidgetMap(widgets);
 
