@@ -1,8 +1,6 @@
 const Base = require('./base');
-const PublicModel = require('./public/tag');
-const mergeModel = require('./merge');
 
-class TagModel extends Base {
+module.exports = class extends Base {
   get relation() {
     return {
       post_tag: {
@@ -36,6 +34,54 @@ class TagModel extends Base {
     this.model('post_tag').where({tag_id}).delete();
     return this.where({id: tag_id}).delete();
   }
-}
 
-module.exports = mergeModel(TagModel, PublicModel);
+  /**
+   * get hot tags
+   * @return {} []
+   */
+  async getHotTags() {
+    const data = await this.getTagArchive();
+    return data.slice(0, 5);
+  }
+
+  /**
+   * 获取标签数据
+   *
+   * @return {Promise}
+   */
+  async getTagArchive() {
+    const data = await this.model('post_tag')
+      .join({
+        table: 'post',
+        on: ['post_id', 'id']
+      })
+      .join({
+        table: 'tag',
+        on: ['tag_id', 'id']
+      })
+      .where({
+        type: 0,
+        status: 3,
+        is_public: 1
+      })
+      .order('update_time DESC')
+      .select();
+
+    const result = {};
+    for (const tag of data) {
+      if (result[tag.pathname]) {
+        result[tag.pathname].count += 1;
+      } else {
+        result[tag.pathname] = {
+          id: tag.id,
+          name: tag.name,
+          pathname: encodeURIComponent(tag.pathname),
+          update_time: tag.update_time,
+          count: 1
+        };
+      }
+    }
+
+    return Object.values(result).sort((a, b) => a.count > b.count ? -1 : 1);
+  }
+};
