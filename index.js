@@ -1,6 +1,11 @@
 const path = require('path');
 const Application = require('thinkjs');
 const Loader = require('thinkjs/lib/loader');
+const {findProjectPath} = require('./lib/project-context');
+
+const projectPath = findProjectPath();
+if (!projectPath) throw new Error('当前目录及其父目录中未找到 firekylin.config.js');
+process.env.FIREKYLIN_PROJECT_PATH = projectPath;
 
 const app = new Application({
   ROOT_PATH: __dirname,
@@ -19,6 +24,7 @@ const app = new Application({
 
 const loader = new Loader(app.options);
 loader.loadAll('worker');
+
 module.exports = function(req, res) {
   return think.beforeStartServer().catch(err => {
     think.logger.error(err);
