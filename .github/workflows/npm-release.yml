@@ -11,7 +11,35 @@ permissions:
   contents: read
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.version.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check package version
+        id: version
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          previous_version=$(git show "$BEFORE_SHA:package.json" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version")
+          current_version=$(node -p "require('./package.json').version")
+
+          if [ "$previous_version" = "$current_version" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "package.json version is unchanged ($current_version); skipping publish."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "package.json version changed: $previous_version -> $current_version"
+          fi
+
   publish:
+    needs: check-version
+    if: needs.check-version.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
