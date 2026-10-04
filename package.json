@@ -69,7 +69,7 @@
     "think-cache-file": "^1.0.8",
     "think-logger3": "^1.0.0",
     "think-model": "^1.5.4",
-    "think-model-mysql": "^1.0.0",
+    "think-model-mysql2": "^2.0.0",
     "think-model-postgresql": "^1.1.6",
     "think-model-sqlite": "^2.0.1",
     "think-router-rest": "^1.0.4",
