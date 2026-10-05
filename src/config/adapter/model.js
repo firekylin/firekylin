@@ -49,6 +49,21 @@ module.exports = {
     prefix: msc.prefix,
     encoding: msc.encoding
   },
+  tidb: {
+    handle: mysql,
+    dateStrings: true,
+    host: msc.host,
+    port: msc.port,
+    database: msc.database,
+    user: msc.user,
+    password: msc.password,
+    prefix: msc.prefix,
+    encoding: msc.encoding,
+    ssl: {
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: true
+    }
+  },
   postgresql: {
     handle: pgsql,
     user: msc.user,

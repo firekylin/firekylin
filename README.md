@@ -43,7 +43,7 @@ cd my-blog
 npm start
 ```
 
-初始化命令会交互式选择 SQLite、MySQL 或 PostgreSQL，建立数据表并创建管理员账号。默认主题会复制到 `themes/firekylin`，后续升级不会覆盖这份主题。
+初始化命令会交互式选择 SQLite、MySQL、TiDB 或 PostgreSQL，建立数据表并创建管理员账号。TiDB 复用 MySQL 协议，并自动启用 TLS 1.2 及证书校验。默认主题会复制到 `themes/firekylin`，后续升级不会覆盖这份主题。
 
 开发模式使用 `npm run dev`（等价于 `firekylin -D`）。升级核心程序时在项目中更新 `firekylin` 依赖即可。
 

@@ -141,6 +141,8 @@ module.exports = class extends think.Service {
       const sql = {
         mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
         this.dbConfig.database + '\'',
+        tidb: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+        this.dbConfig.database + '\'',
         postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${this.dbConfig.database}';`
       };
       const dbExist = await model.query(sql[this.type]);
@@ -150,6 +152,7 @@ module.exports = class extends think.Service {
 
       const fileName = {
         mysql: 'firekylin.sql',
+        tidb: 'firekylin.sql',
         postgresql: 'firekylin.pgsql'
       };
       const dbFile = path.join(think.ROOT_PATH, fileName[this.type]);
@@ -274,6 +277,12 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
       this.type = type;
     }
     this.dbConfig = dbConfig;
+    if (this.type === 'tidb') {
+      this.dbConfig.ssl = {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+      };
+    }
     await this.checkDbInfo();
     this.updateConfig();
   }
@@ -302,6 +311,8 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     try {
       const sql = {
         mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
+        database + '\'',
+        tidb: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
         database + '\'',
         postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`,
         sqlite: 'SELECT name FROM sqlite_master WHERE type=\'table\''

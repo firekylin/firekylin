@@ -12,6 +12,7 @@ const {
   mergeResumeOptions,
   parseArgs,
   scaffold,
+  projectConfig,
   validateNewOptions
 } = require('../../lib/cli');
 const {hashAdminPassword, quoteIdentifier} = require('../../lib/installer');
@@ -58,8 +59,27 @@ test('explicit retry arguments override persisted initialization values', () => 
 
 test('quotes option column names for each SQL dialect', () => {
   assert.equal(quoteIdentifier('mysql', 'key'), '`key`');
+  assert.equal(quoteIdentifier('tidb', 'key'), '`key`');
   assert.equal(quoteIdentifier('postgresql', 'key'), '"key"');
   assert.equal(quoteIdentifier('sqlite', 'value'), '"value"');
+});
+
+test('configures TiDB with the MySQL-compatible TLS settings', () => {
+  const tidbOptions = {
+    ...options(),
+    dbType: 'tidb',
+    dbHost: 'gateway.example.com',
+    dbPort: '4000',
+    dbName: 'firekylin',
+    dbUser: 'root',
+    dbPassword: 'secret'
+  };
+  const config = projectConfig(tidbOptions);
+  assert.deepEqual(config.database.ssl, {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true
+  });
+  assert.doesNotThrow(() => validateNewOptions(tidbOptions));
 });
 
 test('binary packaging preserves the legacy pkg entry point', () => {
