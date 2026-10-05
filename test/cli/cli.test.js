@@ -130,9 +130,20 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.equal(manifest.dependencies.firekylin, packageInfo.version);
   assert.equal(manifest.scripts.start, 'firekylin');
   assert.ok(fs.existsSync(path.join(target, 'themes', 'firekylin', 'index.eta')));
+  assert.ok(fs.existsSync(path.join(target, 'data', '.gitkeep')));
+  assert.ok(fs.existsSync(path.join(target, 'uploads', '.gitkeep')));
   const typesPath = path.join(target, 'firekylin.d.ts');
   assert.equal(fs.readFileSync(typesPath, 'utf8'), '/// <reference types="firekylin" />\n');
   assert.equal(fs.statSync(path.join(target, 'firekylin.config.js')).mode & 0o777, 0o600);
+  const gitignore = fs.readFileSync(path.join(target, '.gitignore'), 'utf8');
+  assert.doesNotMatch(gitignore, /^data\/\.installed$/m);
+  const vercel = JSON.parse(fs.readFileSync(path.join(target, 'vercel.json'), 'utf8'));
+  assert.deepEqual(vercel.builds[0].config.includeFiles, [
+    'firekylin.config.js',
+    'data/**',
+    'themes/**',
+    'uploads/**'
+  ]);
   assert.ok(fs.existsSync(result.statePath));
   assert.equal(scaffold(target, options()).resuming, true);
   assert.equal(fs.readFileSync(typesPath, 'utf8'), '/// <reference types="firekylin" />\n');
