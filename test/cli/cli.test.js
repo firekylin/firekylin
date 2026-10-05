@@ -130,6 +130,7 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.equal(manifest.dependencies.firekylin, packageInfo.version);
   assert.equal(manifest.scripts.start, 'firekylin');
   assert.ok(fs.existsSync(path.join(target, 'themes', 'firekylin', 'index.eta')));
+  assert.ok(fs.existsSync(path.join(target, 'static', 'css', 'admin.css')));
   assert.ok(fs.existsSync(path.join(target, 'data', '.gitkeep')));
   assert.ok(fs.existsSync(path.join(target, 'uploads', '.gitkeep')));
   const typesPath = path.join(target, 'firekylin.d.ts');
@@ -139,6 +140,12 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.doesNotMatch(gitignore, /^data\/\.installed$/m);
   const vercel = JSON.parse(fs.readFileSync(path.join(target, 'vercel.json'), 'utf8'));
   assert.deepEqual(vercel.env, {NODE_OPTIONS: '--experimental-require-module'});
+  assert.deepEqual(vercel.builds.slice(1), [
+    {src: 'static/**', use: '@vercel/static'},
+    {src: 'themes/**/res/**', use: '@vercel/static'},
+    {src: 'uploads/**', use: '@vercel/static'}
+  ]);
+  assert.deepEqual(vercel.routes[0], {handle: 'filesystem'});
   assert.deepEqual(vercel.builds[0].config.includeFiles, [
     'firekylin.config.js',
     'data/**',

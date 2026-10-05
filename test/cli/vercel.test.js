@@ -76,3 +76,29 @@ test('initializes the Vercel application before handling requests', async() => {
   assert.equal(readyEvents, 1);
   assert.equal(requests, 2);
 });
+
+test('uses JSON errors without loading theme configuration on Vercel', () => {
+  const originalThink = global.think;
+  const middlewarePath = path.join(__dirname, '..', '..', 'src', 'config', 'middleware.js');
+
+  global.think = {
+    env: 'vercel',
+    isCli: false,
+    isPrevent: () => false,
+    ROOT_PATH: '/tmp/firekylin-package'
+  };
+
+  let middleware;
+  try {
+    delete require.cache[middlewarePath];
+    middleware = require(middlewarePath);
+  } finally {
+    delete require.cache[middlewarePath];
+    if (originalThink === undefined) delete global.think;
+    else global.think = originalThink;
+  }
+
+  const trace = middleware.find(item => item.handle === 'trace');
+  assert.equal(trace.options.templates, undefined);
+  assert.equal(trace.options.contentType({}), 'json');
+});
