@@ -6,12 +6,15 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 
-test('uses the writable temporary directory for Vercel runtime files', () => {
+test('initializes the Vercel application before handling requests', async() => {
   const originalLoad = Module._load;
   const originalProjectPath = process.env.FIREKYLIN_PROJECT_PATH;
+  const originalThink = global.think;
   let applicationOptions;
   let loaderOptions;
   let loaderType;
+  let readyEvents = 0;
+  let requests = 0;
 
   class Application {
     constructor(options) {
@@ -39,18 +42,37 @@ test('uses the writable temporary directory for Vercel runtime files', () => {
     return originalLoad.call(this, request, parent, isMain);
   };
 
+  global.think = {
+    beforeStartServer: () => Promise.resolve(),
+    logger: {error: () => {}},
+    app: {
+      callback: () => () => {
+        requests += 1;
+        return Promise.resolve();
+      },
+      emit: event => {
+        if (event === 'appReady') readyEvents += 1;
+      }
+    }
+  };
+
   const entry = path.join(__dirname, '..', '..', 'index.js');
   try {
     delete require.cache[entry];
-    require(entry);
+    const handler = require(entry);
+    await Promise.all([handler({}, {}), handler({}, {})]);
   } finally {
     Module._load = originalLoad;
     delete require.cache[entry];
     if (originalProjectPath === undefined) delete process.env.FIREKYLIN_PROJECT_PATH;
     else process.env.FIREKYLIN_PROJECT_PATH = originalProjectPath;
+    if (originalThink === undefined) delete global.think;
+    else global.think = originalThink;
   }
 
   assert.equal(applicationOptions.RUNTIME_PATH, os.tmpdir());
   assert.equal(loaderOptions, applicationOptions);
   assert.equal(loaderType, 'worker');
+  assert.equal(readyEvents, 1);
+  assert.equal(requests, 2);
 });

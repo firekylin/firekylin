@@ -27,14 +27,15 @@ const app = new Application({
 const loader = new Loader(app.options);
 loader.loadAll('worker');
 
+const ready = think.beforeStartServer().catch(err => {
+  think.logger.error(err);
+}).then(() => {
+  think.app.emit('appReady');
+});
+
 module.exports = function(req, res) {
-  return think.beforeStartServer().catch(err => {
-    think.logger.error(err);
-  }).then(() => {
+  return ready.then(() => {
     const callback = think.app.callback();
     return callback(req, res);
-  })
-    .then(() => {
-      think.app.emit('appReady');
-    });
+  });
 };
