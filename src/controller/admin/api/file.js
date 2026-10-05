@@ -39,7 +39,7 @@ const ALLOW_EXTS = [
   /\.(mp3|wmv|mp4|avi|flv)$/i,
   /** 常用档案文件 */
   /\.(txt|xml|json|docx?|xlsx?|pptx?)$/i,
-  /\.(zip|rar|pdf|gz)$/i
+  /\.(zip|rar|pdf|gz|tgz)$/i
 ];
 
 module.exports = class extends Base {

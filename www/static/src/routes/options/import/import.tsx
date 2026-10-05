@@ -25,6 +25,7 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
         [ImportBlogsEnum.WordPress]: <p style={{marginBottom: 0}}>请上传 WordPress 中导出的 .xml 文件</p>,
         [ImportBlogsEnum.Ghost]: <p>请上传 Ghost 中导出的 .json 文件，Jekyll用户请上传使用 <a href="https://github.com/redwallhp/Jekyll-to-Ghost">Jekyll to Ghost 插件</a>导出后的 .json 文件</p>,
         [ImportBlogsEnum.Hexo]: <p>请上传使用 <a href="https://github.com/lizheming/hexo-generator-hexo2firekylin">Hexo2Firekylin 插件</a> 导出后的 .json 文件</p>,
+        [ImportBlogsEnum.Hugo]: <p>请将 Hugo 站点的 content 目录打包成 .zip、.tar.gz 或 .tgz 文件上传</p>,
         [ImportBlogsEnum.MarkDown]: <p>请将所有 Markdown 文件直接打包成 tar.gz 文件上传</p>
     };
 
@@ -77,6 +78,8 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
                 return ImportUploadAcceptEnum.Ghost;
             case ImportBlogsEnum.Hexo:
                 return ImportUploadAcceptEnum.Hexo;
+            case ImportBlogsEnum.Hugo:
+                return ImportUploadAcceptEnum.Hugo;
             case ImportBlogsEnum.MarkDown:
                 return ImportUploadAcceptEnum.MarkDown;
             default:
@@ -107,6 +110,7 @@ class OptionsImportForm extends React.Component<OptionsImportProps, OptionsImpor
                                     <Radio value={ImportBlogsEnum.WordPress}>WordPress</Radio>
                                     <Radio value={ImportBlogsEnum.Ghost}>Ghost / Jekyll</Radio>
                                     <Radio value={ImportBlogsEnum.Hexo}>Hexo</Radio>
+                                    <Radio value={ImportBlogsEnum.Hugo}>Hugo</Radio>
                                     <Radio value={ImportBlogsEnum.MarkDown}>Markdown文件</Radio>
                                 </RadioGroup>
                             </Form.Item>

@@ -71,6 +71,9 @@ importers:
       jszip:
         specifier: ^3.7.0
         version: 3.10.1
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
       ldapjs:
         specifier: ^1.0.2
         version: 1.0.2
@@ -234,9 +237,6 @@ importers:
       immutability-helper:
         specifier: ^2.8.1
         version: 2.9.1
-      js-yaml:
-        specifier: ^4.1.1
-        version: 4.1.1
       less:
         specifier: ^3.8.0
         version: 3.8.0
