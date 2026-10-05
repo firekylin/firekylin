@@ -6,6 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const packageInfo = require('../../package.json');
+const {build: buildVercelStatic} = require('../../lib/vercel-static');
 const {PasswordHash} = require('phpass');
 const {
   createProject,
@@ -129,8 +130,9 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   const manifest = JSON.parse(fs.readFileSync(path.join(target, 'package.json'), 'utf8'));
   assert.equal(manifest.dependencies.firekylin, packageInfo.version);
   assert.equal(manifest.scripts.start, 'firekylin');
+  assert.equal(manifest.scripts.build, 'node build-static.js');
   assert.ok(fs.existsSync(path.join(target, 'themes', 'firekylin', 'index.eta')));
-  assert.ok(fs.existsSync(path.join(target, 'static', 'css', 'admin.css')));
+  assert.match(fs.readFileSync(path.join(target, 'build-static.js'), 'utf8'), /vercel-static/);
   assert.ok(fs.existsSync(path.join(target, 'data', '.gitkeep')));
   assert.ok(fs.existsSync(path.join(target, 'uploads', '.gitkeep')));
   const typesPath = path.join(target, 'firekylin.d.ts');
@@ -140,13 +142,13 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.doesNotMatch(gitignore, /^data\/\.installed$/m);
   const vercel = JSON.parse(fs.readFileSync(path.join(target, 'vercel.json'), 'utf8'));
   assert.deepEqual(vercel.env, {NODE_OPTIONS: '--experimental-require-module'});
-  assert.deepEqual(vercel.builds.slice(1), [
-    {src: 'static/**', use: '@vercel/static'},
-    {src: 'themes/**/res/**', use: '@vercel/static'},
-    {src: 'uploads/**', use: '@vercel/static'}
-  ]);
+  assert.deepEqual(vercel.builds[0], {
+    src: 'package.json',
+    use: '@vercel/static-build',
+    config: {distDir: '.vercel-static'}
+  });
   assert.deepEqual(vercel.routes[0], {handle: 'filesystem'});
-  assert.deepEqual(vercel.builds[0].config.includeFiles, [
+  assert.deepEqual(vercel.builds[1].config.includeFiles, [
     'firekylin.config.js',
     'data/**',
     'themes/**',
@@ -156,6 +158,14 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.ok(fs.existsSync(result.statePath));
   assert.equal(scaffold(target, options()).resuming, true);
   assert.equal(fs.readFileSync(typesPath, 'utf8'), '/// <reference types="firekylin" />\n');
+
+  fs.writeFileSync(path.join(target, 'themes', 'firekylin', 'ignored.eta'), 'private');
+  fs.writeFileSync(path.join(target, 'uploads', 'avatar.png'), 'image');
+  const staticOutput = buildVercelStatic(target, path.join(__dirname, '..', '..'));
+  assert.ok(fs.existsSync(path.join(staticOutput, 'static', 'css', 'admin.css')));
+  assert.ok(fs.existsSync(path.join(staticOutput, 'themes', 'firekylin', 'res', 'css', 'base.css')));
+  assert.equal(fs.existsSync(path.join(staticOutput, 'themes', 'firekylin', 'ignored.eta')), false);
+  assert.ok(fs.existsSync(path.join(staticOutput, 'uploads', 'avatar.png')));
 
   const unrelated = path.join(root, 'unrelated');
   fs.mkdirSync(unrelated);
