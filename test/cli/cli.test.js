@@ -147,6 +147,13 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
     use: '@vercel/static-build',
     config: {distDir: '.vercel-static'}
   });
+  assert.deepEqual(vercel.builds.slice(2), [
+    {
+      src: 'themes/**/*.{css,eot,gif,ico,jpeg,jpg,js,png,svg,ttf,webp,woff,woff2}',
+      use: '@vercel/static'
+    },
+    {src: 'uploads/**', use: '@vercel/static'}
+  ]);
   assert.deepEqual(vercel.routes[0], {handle: 'filesystem'});
   assert.deepEqual(vercel.builds[1].config.includeFiles, [
     'firekylin.config.js',
@@ -159,13 +166,10 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   assert.equal(scaffold(target, options()).resuming, true);
   assert.equal(fs.readFileSync(typesPath, 'utf8'), '/// <reference types="firekylin" />\n');
 
-  fs.writeFileSync(path.join(target, 'themes', 'firekylin', 'ignored.eta'), 'private');
-  fs.writeFileSync(path.join(target, 'uploads', 'avatar.png'), 'image');
   const staticOutput = buildVercelStatic(target, path.join(__dirname, '..', '..'));
   assert.ok(fs.existsSync(path.join(staticOutput, 'static', 'css', 'admin.css')));
-  assert.ok(fs.existsSync(path.join(staticOutput, 'themes', 'firekylin', 'res', 'css', 'base.css')));
-  assert.equal(fs.existsSync(path.join(staticOutput, 'themes', 'firekylin', 'ignored.eta')), false);
-  assert.ok(fs.existsSync(path.join(staticOutput, 'uploads', 'avatar.png')));
+  assert.equal(fs.existsSync(path.join(staticOutput, 'themes')), false);
+  assert.equal(fs.existsSync(path.join(staticOutput, 'uploads')), false);
 
   const unrelated = path.join(root, 'unrelated');
   fs.mkdirSync(unrelated);
