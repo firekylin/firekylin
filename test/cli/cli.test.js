@@ -142,7 +142,8 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
     'firekylin.config.js',
     'data/**',
     'themes/**',
-    'uploads/**'
+    'uploads/**',
+    'node_modules/mathjax/**'
   ]);
   assert.ok(fs.existsSync(result.statePath));
   assert.equal(scaffold(target, options()).resuming, true);
