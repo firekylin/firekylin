@@ -138,6 +138,7 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   const gitignore = fs.readFileSync(path.join(target, '.gitignore'), 'utf8');
   assert.doesNotMatch(gitignore, /^data\/\.installed$/m);
   const vercel = JSON.parse(fs.readFileSync(path.join(target, 'vercel.json'), 'utf8'));
+  assert.deepEqual(vercel.env, {NODE_OPTIONS: '--experimental-require-module'});
   assert.deepEqual(vercel.builds[0].config.includeFiles, [
     'firekylin.config.js',
     'data/**',
