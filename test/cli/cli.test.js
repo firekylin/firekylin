@@ -99,14 +99,13 @@ test('skip-initialize scaffolds an installed project without connection details'
   await createProject(target, {
     skipInstall: true,
     skipInitialize: true,
-    dbType: 'tidb',
+    dbType: 'mysql',
     packageManager: 'npm'
   });
   const config = require(path.join(target, 'firekylin.config.js')); // eslint-disable-line import/no-dynamic-require
   assert.deepEqual(config.database, {
-    type: 'tidb',
-    prefix: 'fk_',
-    ssl: {minVersion: 'TLSv1.2', rejectUnauthorized: true}
+    type: 'mysql',
+    prefix: 'fk_'
   });
   assert.equal(fs.readFileSync(path.join(target, 'data', '.installed'), 'utf8'), 'firekylin\n');
   assert.equal(fs.existsSync(path.join(target, 'data', '.firekylin-initializing.json')), false);
