@@ -30,6 +30,7 @@
         <label>数据库</label>
         <select name="db_type" id="db_type" required class="form-control" onchange="onDbTypeChange(this.value)">
           <option value="mysql"<%= data.db_type === 'mysql' ? ' selected' : '' %>>MySQL</option>
+          <option value="tidb"<%= data.db_type === 'tidb' ? ' selected' : '' %>>TiDB</option>
           <option value="postgresql"<%= data.db_type === 'postgresql' ? ' selected' : '' %>>PostgreSQL</option>
           <option value="sqlite"<%= data.db_type === 'sqlite' ? ' selected' : '' %>>SQLite</option>
         </select>
