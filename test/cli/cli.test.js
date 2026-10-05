@@ -8,6 +8,7 @@ const test = require('node:test');
 const packageInfo = require('../../package.json');
 const {PasswordHash} = require('phpass');
 const {
+  createProject,
   detectPackageManager,
   mergeResumeOptions,
   parseArgs,
@@ -89,6 +90,26 @@ test('binary packaging preserves the legacy pkg entry point', () => {
 test('validates required database and administrator fields', () => {
   assert.doesNotThrow(() => validateNewOptions(options()));
   assert.throws(() => validateNewOptions({...options(), adminPassword: ''}), /adminPassword/);
+});
+
+test('skip-initialize scaffolds an installed project without connection details', async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-skip-initialize-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  const target = path.join(root, 'blog');
+  await createProject(target, {
+    skipInstall: true,
+    skipInitialize: true,
+    dbType: 'tidb',
+    packageManager: 'npm'
+  });
+  const config = require(path.join(target, 'firekylin.config.js')); // eslint-disable-line import/no-dynamic-require
+  assert.deepEqual(config.database, {
+    type: 'tidb',
+    prefix: 'fk_',
+    ssl: {minVersion: 'TLSv1.2', rejectUnauthorized: true}
+  });
+  assert.equal(fs.readFileSync(path.join(target, 'data', '.installed'), 'utf8'), 'firekylin\n');
+  assert.equal(fs.existsSync(path.join(target, 'data', '.firekylin-initializing.json')), false);
 });
 
 test('hashes administrator passwords in the same format as the browser login', () => {
