@@ -59,7 +59,9 @@ npx firekylin new my-blog --non-interactive --skip-install \
   --package-manager npm
 ```
 
-MySQL/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-user` 和 `--db-password`。命令行密码可能进入 shell history；交互安装更适合人工部署。使用 `--skip-install` 时需在初始化后自行执行包管理器的安装命令。
+MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-user` 和 `--db-password`。命令行密码可能进入 shell history；交互安装更适合人工部署。使用 `--skip-install` 时需在初始化后自行执行包管理器的安装命令。
+
+如果数据库和表已经存在，或准备稍后手工填写 `firekylin.config.js`，可以使用 `--skip-initialize`。该选项只创建项目骨架并标记为已安装，不会进入交互配置，也不会连接数据库、建库、建表或创建管理员。可通过 `--db-type` 指定配置骨架的数据库类型，未指定时默认为 SQLite。
 
 旧版“源码目录即站点目录”的 `production.js`、`development.js` 和网页安装流程仍保留，供已有部署继续使用。
 
