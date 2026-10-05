@@ -1,5 +1,5 @@
 const mysql = require('think-model-mysql2');
-const pgsql = require('think-model-postgresql');
+const pgsql = require('./postgresql');
 const sqlite = require('think-model-sqlite');
 const {getContext} = require('../../../lib/project-context');
 

@@ -134,7 +134,8 @@ module.exports = class extends Base {
   async serviceImport(service, file) {
     let ret = { post: 0, page: 0, category: 0, tag: 0 };
     try {
-      const importor = think.service(`import/${service}`, this);
+      const servicePath = service === 'hugo' ? 'import/hugo/index' : `import/${service}`;
+      const importor = think.service(servicePath, this);
       ret = await importor.run(file);
     } catch (e) {
       return this.fail(e);
