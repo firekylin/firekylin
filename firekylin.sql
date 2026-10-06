@@ -14,7 +14,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
@@ -32,7 +32,7 @@ CREATE TABLE `fk_cate` (
   `pathname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -47,7 +47,7 @@ CREATE TABLE `fk_options` (
   `desc` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`key`),
   UNIQUE KEY `key` (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `fk_options` WRITE;
 /*!40000 ALTER TABLE `fk_options` DISABLE KEYS */;
@@ -95,7 +95,7 @@ CREATE TABLE `fk_post` (
   `pathname` varchar(255) NOT NULL DEFAULT '' COMMENT 'URL 的 pathname',
   `summary` longtext NOT NULL COMMENT '摘要',
   `markdown_content` longtext NOT NULL,
-  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `allow_comment` tinyint(11) NOT NULL DEFAULT '1' COMMENT '1 为允许， 0 为不允许',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE `fk_post` (
   `options` text COMMENT '一些选项，JSON 结构',
   PRIMARY KEY (`id`),
   KEY `create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -119,7 +119,7 @@ CREATE TABLE `fk_post_cate` (
   `cate_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `post_cate` (`post_id`,`cate_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -134,7 +134,7 @@ CREATE TABLE `fk_post_history` (
   `markdown_content` text,
   `update_user_id` int(11) DEFAULT NULL COMMENT '更新用户的 ID',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -149,7 +149,7 @@ CREATE TABLE `fk_post_tag` (
   `tag_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `post_tag` (`post_id`,`tag_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -164,7 +164,7 @@ CREATE TABLE `fk_tag` (
   `pathname` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -190,7 +190,7 @@ CREATE TABLE `fk_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 

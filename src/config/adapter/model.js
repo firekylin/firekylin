@@ -30,6 +30,7 @@ try {
 } catch (e) {
   //eslint-disable-line
 }
+const mysqlEncoding = msc.encoding || 'utf8mb4';
 
 module.exports = {
   type,
@@ -47,7 +48,7 @@ module.exports = {
     user: msc.user,
     password: msc.password,
     prefix: msc.prefix,
-    encoding: msc.encoding
+    encoding: mysqlEncoding
   },
   tidb: {
     handle: mysql,
@@ -58,7 +59,7 @@ module.exports = {
     user: msc.user,
     password: msc.password,
     prefix: msc.prefix,
-    encoding: msc.encoding,
+    encoding: mysqlEncoding,
     ssl: {
       minVersion: 'TLSv1.2',
       rejectUnauthorized: true

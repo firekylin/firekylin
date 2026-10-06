@@ -77,6 +77,7 @@ test('configures TiDB with the MySQL-compatible TLS settings', () => {
     dbPassword: 'secret'
   };
   const config = projectConfig(tidbOptions);
+  assert.equal(config.database.encoding, 'utf8mb4');
   assert.deepEqual(config.database.ssl, {
     minVersion: 'TLSv1.2',
     rejectUnauthorized: true
@@ -106,7 +107,8 @@ test('skip-initialize scaffolds a project without claiming it is installed', asy
   const config = require(path.join(target, 'firekylin.config.js')); // eslint-disable-line import/no-dynamic-require
   assert.deepEqual(config.database, {
     type: 'mysql',
-    prefix: 'fk_'
+    prefix: 'fk_',
+    encoding: 'utf8mb4'
   });
   assert.equal(fs.existsSync(path.join(target, 'data', '.installed')), false);
   assert.equal(fs.existsSync(path.join(target, 'data', '.firekylin-initializing.json')), false);
