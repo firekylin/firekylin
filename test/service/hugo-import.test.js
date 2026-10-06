@@ -15,6 +15,8 @@ draft: true
 categories: [Tech]
 tags: [Node.js, Hugo]
 comments: false
+cover:
+  image: /images/hello.jpg
 ---
 Content`);
 
@@ -23,6 +25,7 @@ Content`);
   assert.equal(item.markdown_content, 'Content');
   assert.equal(item.draft, true);
   assert.equal(item.allow_comment, 0);
+  assert.equal(item.featured_image, '/images/hello.jpg');
   assert.deepEqual(item.categories, ['Tech']);
   assert.deepEqual(item.tags, ['Node.js', 'Hugo']);
 });
@@ -58,6 +61,21 @@ test('classifies posts directory entries as posts and root entries as pages', ()
   assert.equal(page.page, true);
 });
 
+test('supports nested Hugo params and taxonomies', () => {
+  const item = normalizeEntry('content/posts/nested.md', `---
+title: Nested
+params:
+  featured_image: /images/nested.jpg
+taxonomies:
+  categories: [Guides]
+  tags: [Hugo]
+---`);
+
+  assert.equal(item.featured_image, '/images/nested.jpg');
+  assert.deepEqual(item.categories, ['Guides']);
+  assert.deepEqual(item.tags, ['Hugo']);
+});
+
 test('reads a zipped Hugo content directory and ignores section indexes', async() => {
   global.think = {Service: class {}};
   const HugoImport = require('../../src/service/import/hugo');
@@ -77,4 +95,46 @@ test('reads a zipped Hugo content directory and ignores section indexes', async(
   } finally {
     fs.rmSync(directory, {recursive: true});
   }
+});
+
+test('maps featured image, categories and tags when importing a post', async() => {
+  global.think = {Service: class {}};
+  const HugoImport = require('../../src/service/import/hugo');
+  const service = Object.create(HugoImport.prototype);
+  const relations = [];
+  let savedPost;
+  const termModel = id => ({
+    setRelation() { return this },
+    where() { return this },
+    async select() { return [{id}] }
+  });
+
+  service.controller = {session: async() => ({id: 7})};
+  service.cateModelInstance = termModel(11);
+  service.tagModelInstance = termModel(12);
+  service.postModelInstance = {
+    async getContentAndSummary(post) { return post },
+    async addPost(post) {
+      savedPost = post;
+      return {id: 42, type: 'add'};
+    }
+  };
+  service.model = modelName => ({
+    async thenAdd(data) { relations.push({modelName, data}) }
+  });
+
+  const item = normalizeEntry('content/posts/mapped.md', `---
+title: Mapped
+cover: /images/cover.jpg
+categories: [Guides]
+tags: [Hugo]
+---
+Body`);
+  await service.post([item]);
+
+  assert.deepEqual(JSON.parse(savedPost.options), {featuredImage: '/images/cover.jpg'});
+  assert.deepEqual(relations, [
+    {modelName: 'post_cate', data: {post_id: 42, cate_id: 11}},
+    {modelName: 'post_tag', data: {post_id: 42, tag_id: 12}}
+  ]);
 });
