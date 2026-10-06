@@ -67,6 +67,7 @@ module.exports = class extends Base {
       comment_num: 0,
       allow_comment: item.allow_comment,
       is_public: item.is_public,
+      options: JSON.stringify({featuredImage: item.featured_image}),
       type
     };
     post = await this.postModelInstance.getContentAndSummary(post);
@@ -77,11 +78,21 @@ module.exports = class extends Base {
     const posts = items.filter(item => !item.page);
     for (const item of posts) {
       const post = await this.buildPost(item, 0);
-      post.cate = await this.termIds(this.cateModelInstance, item.categories);
-      post.tag = await this.termIds(this.tagModelInstance, item.tags);
-      await this.postModelInstance.addPost(post);
+      const cateIds = await this.termIds(this.cateModelInstance, item.categories);
+      const tagIds = await this.termIds(this.tagModelInstance, item.tags);
+      const result = await this.postModelInstance.addPost(post);
+      await this.addRelations(result.id, 'post_cate', 'cate_id', cateIds);
+      await this.addRelations(result.id, 'post_tag', 'tag_id', tagIds);
     }
     return posts.length;
+  }
+
+  async addRelations(postId, modelName, relationKey, ids) {
+    const model = this.model(modelName);
+    for (const id of ids) {
+      const data = {post_id: postId, [relationKey]: id};
+      await model.thenAdd(data, data);
+    }
   }
 
   async page(items) {

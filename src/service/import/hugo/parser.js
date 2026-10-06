@@ -71,6 +71,14 @@ function arrayValue(value) {
   return [String(value)];
 }
 
+function imageValue(value) {
+  if (Array.isArray(value)) return imageValue(value[0]);
+  if (value && typeof value === 'object') {
+    return imageValue(value.image || value.src || value.url);
+  }
+  return typeof value === 'string' ? value : '';
+}
+
 function fileSlug(filename) {
   const normalized = filename.replace(/\\/g, '/');
   const basename = path.posix.basename(normalized, path.posix.extname(normalized));
@@ -88,10 +96,17 @@ function isPost(filename) {
 
 function normalizeEntry(filename, source, modifiedAt = new Date()) {
   const {attributes, body} = parseFrontMatter(source);
+  const params = attributes.params || {};
+  const taxonomies = attributes.taxonomies || {};
   const title = attributes.title || fileSlug(filename);
   const slug = attributes.slug || attributes.url || fileSlug(filename);
   const date = attributes.date || attributes.publishDate || modifiedAt;
   const updated = attributes.lastmod || attributes.lastMod || attributes.updated || date;
+  const featuredImage = attributes.featuredImage || attributes.featured_image || attributes.cover ||
+    attributes.image || attributes.images || params.featuredImage || params.featured_image || params.cover ||
+    params.image || params.images;
+  const categories = attributes.categories || attributes.category || taxonomies.categories || taxonomies.category;
+  const tags = attributes.tags || attributes.tag || taxonomies.tags || taxonomies.tag;
 
   return {
     title: String(title),
@@ -102,8 +117,9 @@ function normalizeEntry(filename, source, modifiedAt = new Date()) {
     draft: attributes.draft === true,
     allow_comment: attributes.comments === false ? 0 : 1,
     is_public: attributes.private === true ? 0 : 1,
-    categories: arrayValue(attributes.categories || attributes.category),
-    tags: arrayValue(attributes.tags || attributes.tag),
+    featured_image: imageValue(featuredImage),
+    categories: arrayValue(categories),
+    tags: arrayValue(tags),
     page: attributes.type === 'page' || attributes.layout === 'page' || !isPost(filename)
   };
 }
