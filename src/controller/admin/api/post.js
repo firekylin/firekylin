@@ -39,6 +39,10 @@ module.exports = class extends Base {
       }
 
       const {status, keyword, cate: cateText} = this.get();
+      const requestedPageSize = Number(this.get('pageSize'));
+      const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
+        ? Math.min(requestedPageSize, 100)
+        : 15;
       if (status) {
         where.status = status;
       } else {
@@ -82,7 +86,7 @@ module.exports = class extends Base {
       data = await this.modelInstance.where(where)
         .field(field)
         .order('create_time DESC')
-        .page(this.get('page'), 15)
+        .page(this.get('page'), pageSize)
         .countSelect();
     }
     return this.success(data);

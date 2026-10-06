@@ -65,7 +65,8 @@ class PostListTable extends React.Component<PostListProps, {}> {
                 pagination={pagination}
                 onChange={e => {
                     this.props.postStore.setPlReqParams({
-                        page: e.current
+                        page: e.current,
+                        pageSize: e.pageSize
                     });
                 }}
             >
