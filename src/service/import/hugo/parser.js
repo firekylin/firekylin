@@ -79,6 +79,13 @@ function fileSlug(filename) {
     : basename;
 }
 
+function isPost(filename) {
+  const normalized = filename.replace(/\\/g, '/');
+  const contentPath = normalized.match(/(?:^|\/)content\/(.*)$/i);
+  const relative = contentPath ? contentPath[1] : normalized;
+  return /^(posts?)\//i.test(relative.replace(/^\/+/, ''));
+}
+
 function normalizeEntry(filename, source, modifiedAt = new Date()) {
   const {attributes, body} = parseFrontMatter(source);
   const title = attributes.title || fileSlug(filename);
@@ -97,7 +104,7 @@ function normalizeEntry(filename, source, modifiedAt = new Date()) {
     is_public: attributes.private === true ? 0 : 1,
     categories: arrayValue(attributes.categories || attributes.category),
     tags: arrayValue(attributes.tags || attributes.tag),
-    page: attributes.type === 'page' || attributes.layout === 'page'
+    page: attributes.type === 'page' || attributes.layout === 'page' || !isPost(filename)
   };
 }
 

@@ -47,13 +47,23 @@ test('uses bundle directory as the slug for index files', () => {
   const item = normalizeEntry('content/post/my-bundle/index.md', '# Bundle');
   assert.equal(item.title, 'my-bundle');
   assert.equal(item.pathname, 'my-bundle');
+  assert.equal(item.page, false);
 });
 
-test('reads a zipped Hugo content directory and ignores section indexes', async () => {
+test('classifies posts directory entries as posts and root entries as pages', () => {
+  const post = normalizeEntry('site/content/posts/hello.md', '# Post');
+  const page = normalizeEntry('site/content/about.md', '# About');
+
+  assert.equal(post.page, false);
+  assert.equal(page.page, true);
+});
+
+test('reads a zipped Hugo content directory and ignores section indexes', async() => {
   global.think = {Service: class {}};
   const HugoImport = require('../../src/service/import/hugo');
   const zip = new JSZip();
   zip.file('posts/hello.md', '---\ntitle: Hello\n---\nHello');
+  zip.file('about.md', '---\ntitle: About\n---\nAbout');
   zip.file('posts/_index.md', '---\ntitle: Posts\n---');
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-hugo-'));
   const filename = path.join(directory, 'content.zip');
@@ -61,8 +71,9 @@ test('reads a zipped Hugo content directory and ignores section indexes', async 
 
   try {
     const items = await HugoImport.prototype.parseZip({path: filename});
-    assert.equal(items.length, 1);
-    assert.equal(items[0].title, 'Hello');
+    assert.equal(items.length, 2);
+    assert.equal(items.find(item => item.title === 'Hello').page, false);
+    assert.equal(items.find(item => item.title === 'About').page, true);
   } finally {
     fs.rmSync(directory, {recursive: true});
   }
