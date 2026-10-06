@@ -44,7 +44,8 @@ module.exports = [
     handle: 'meta',
     options: {
       logRequest: isDev,
-      sendResponseTime: isDev
+      sendResponseTime: isDev,
+      requestTimeoutCallback: isVercel ? false : () => {},
     }
   },
   {
