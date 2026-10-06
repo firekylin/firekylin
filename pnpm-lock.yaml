@@ -71,6 +71,9 @@ importers:
       jszip:
         specifier: ^3.7.0
         version: 3.10.1
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
       ldapjs:
         specifier: ^1.0.2
         version: 1.0.2
@@ -132,8 +135,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0(@types/node@10.5.6)(supports-color@7.2.0)
       think-model-postgresql:
-        specifier: ^1.1.6
-        version: 1.1.8(supports-color@7.2.0)
+        specifier: ^1.1.10
+        version: 1.1.10(supports-color@7.2.0)
       think-model-sqlite:
         specifier: ^2.0.1
         version: 2.0.1(supports-color@7.2.0)
@@ -234,9 +237,6 @@ importers:
       immutability-helper:
         specifier: ^2.8.1
         version: 2.9.1
-      js-yaml:
-        specifier: ^4.1.1
-        version: 4.1.1
       less:
         specifier: ^3.8.0
         version: 3.8.0
@@ -3684,8 +3684,8 @@ packages:
   think-model-mysql2@2.0.0:
     resolution: {integrity: sha512-JqK5mDH+z/rMzxxRc2PxYVrtUSXS+1Ov++IRrLzOX0VZ2wkpWzGgijSVK4dpjCZ9mV2DAkszGW0NIjpmEJPZYw==}
 
-  think-model-postgresql@1.1.8:
-    resolution: {integrity: sha512-grP7N7kqcyHzxntvFI5uAJKpuDuCoEBdtzMWugCIjq3mkpIiu2+oiTxbAtGiimqvKDqxZI+zzoY/xP2ht9TxFA==}
+  think-model-postgresql@1.1.10:
+    resolution: {integrity: sha512-mzdNREn3JBRaqbmCa9qsRAF2/oUiBBIlGJiw5fiAdVtVHqbY34bvPdMTyFyE6jfMR3ha1hOsP92HP5Ff9X36cA==}
 
   think-model-sqlite@2.0.1:
     resolution: {integrity: sha512-F/6c/7sjpC6sLem4+VqJfrCMwveh051dzCVG5NUWUcuWdc9VRm92ATpxjqNWrliatIGeOhUTotbuMwPPUICZAA==}
@@ -8061,7 +8061,7 @@ snapshots:
       - '@types/node'
       - supports-color
 
-  think-model-postgresql@1.1.8(supports-color@7.2.0):
+  think-model-postgresql@1.1.10(supports-color@7.2.0):
     dependencies:
       pg: 8.20.0
       think-debounce: 1.0.4
