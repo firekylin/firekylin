@@ -38,7 +38,7 @@ const BaseController = require('../../src/controller/base');
 
 registerWidgetMap(widgets);
 
-test('base controller does not eagerly query widget data', async() => {
+test('base controller reuses options widget data for the installation check', async() => {
   const queriedModels = [];
   const controller = new BaseController();
   controller.model = name => {
@@ -49,6 +49,7 @@ test('base controller does not eagerly query widget data', async() => {
         return {
           comment: {name: '{}'},
           navigation: '[]',
+          site_url: 'https://example.com',
           theme: 'firekylin',
           themeConfig: '{}'
         };

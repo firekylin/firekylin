@@ -13,6 +13,19 @@ module.exports = class extends think.Controller {
    * some base method in here
    */
   async __before() {
+    this.widgetFactory = new WidgetFactory(this);
+    const widget = this.widgetFactory.widget.bind(this.widgetFactory);
+    widget.destroy = this.widgetFactory.destroy.bind(this.widgetFactory);
+    this.assign('widget', widget);
+
+    let options;
+    try {
+      const optionsWidget = await this.getWidget('Widget_Options');
+      options = optionsWidget.row;
+      firekylin.isInstalled = Boolean(options.site_url);
+    } catch (e) {
+      firekylin.isInstalled = false;
+    }
     if (this.ctx.action === 'install') {
       return;
     }
@@ -20,12 +33,6 @@ module.exports = class extends think.Controller {
       return this.redirect('/index/install');
     }
 
-    this.widgetFactory = new WidgetFactory(this);
-    const widget = this.widgetFactory.widget.bind(this.widgetFactory);
-    widget.destroy = this.widgetFactory.destroy.bind(this.widgetFactory);
-    this.assign('widget', widget);
-    const optionsWidget = await this.getWidget('Widget_Options');
-    const options = optionsWidget.row;
     this.options = options;
     this.assign('VERSION', pack.version);
     this.assign('think', think);

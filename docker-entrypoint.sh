@@ -9,8 +9,6 @@ checkVolume(){
         echo 'upload dir not found in docker volume /var/lib/firekylin, creating...'
         mkdir -p $VOLUME_PATH/upload
     fi
-
-    echo 'firekylin' > $APP_PATH/.installed
 }
 
 if [[ -z $INSTALLED ]] || [[ $(echo $INSTALLED | tr [A-Z] [a-z]) != true ]]; then

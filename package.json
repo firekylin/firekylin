@@ -161,8 +161,7 @@
     "assets": [
       "src/**/*",
       "view/**/*",
-      "www/**/*",
-      ".installed"
+      "www/**/*"
     ],
     "targets": [
       "node10-linux-x64",
