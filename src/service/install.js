@@ -300,7 +300,8 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
 
   async checkInstalled() {
     try {
-      const installed = await this.getModel('options').hasSiteUrl();
+      const {site_url: siteUrl} = await this.getModel('options').getOptions();
+      const installed = Boolean(siteUrl);
       if (installed) {
         firekylin.setInstalled();
       }

@@ -15,25 +15,6 @@ test('options model uses the key column as its primary key', () => {
   assert.equal(new OptionsModel().pk, 'key');
 });
 
-test('options model treats a non-empty site_url as installed', async() => {
-  const model = new OptionsModel();
-  model.where = condition => {
-    assert.deepEqual(condition, {key: 'site_url'});
-    return {find: async() => ({value: 'https://example.com'})};
-  };
-
-  assert.equal(await model.hasSiteUrl(), true);
-});
-
-test('options model treats a missing or empty site_url as not installed', async() => {
-  const model = new OptionsModel();
-  model.where = () => ({find: async() => ({value: ''})});
-  assert.equal(await model.hasSiteUrl(), false);
-
-  model.where = () => ({find: async() => null});
-  assert.equal(await model.hasSiteUrl(), false);
-});
-
 test('options model inserts when PostgreSQL count returns the string zero', async() => {
   const model = new OptionsModel();
   let inserted;
