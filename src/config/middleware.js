@@ -41,14 +41,6 @@ if (!isVercel) {
 
 module.exports = [
   {
-    handle: 'meta',
-    options: {
-      logRequest: isDev,
-      sendResponseTime: isDev,
-      requestTimeoutCallback: isVercel ? false : () => {},
-    }
-  },
-  {
     handle: 'resource',
     // enable: isDev,
     options: {
