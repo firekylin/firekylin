@@ -34,6 +34,8 @@ module.exports = class extends think.Service {
         return this.syncFromNetease(comment);
       } else if (comment.type === 'gitalk') {
         return this.syncFromGitalk(comment);
+      } else if (comment.type === 'waline') {
+        return this.syncFromWaline(comment);
       }
     }
   }
@@ -372,6 +374,64 @@ module.exports = class extends think.Service {
 
     await Promise.all(promises);
     if (promises.length) {
+      await this.clearPostCache();
+    }
+  }
+
+  /**
+   * sync from waline
+   * @param {Object} comment comment config
+   */
+  async syncFromWaline(comment) {
+    const postData = await this.getPostData();
+    if (think.isEmpty(postData)) {
+      return;
+    }
+
+    const walineConfig = JSON.parse(comment.name);
+    if (!walineConfig.serverURL) {
+      return;
+    }
+
+    const posts = Object.keys(postData).map(key => postData[key]);
+    let index = 0;
+    let updated = false;
+    while (index < posts.length) {
+      const batch = posts.slice(index, index + 50);
+      index += 50;
+      const paths = batch.map(post => {
+        if (walineConfig.path) {
+          return walineConfig.path.replace(/\$\{pathname\}/g, post.pathname);
+        }
+        return '/' + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
+      });
+      const response = await _.get({
+        url: walineConfig.serverURL.replace(/\/+$/, '') + '/api/comment',
+        qs: {
+          type: 'count',
+          url: paths.join(',')
+        }
+      });
+      const body = JSON.parse(response.body);
+      const counts = Array.isArray(body) ? body : body.data;
+      if (!Array.isArray(counts)) {
+        continue;
+      }
+
+      const promises = batch.map((post, batchIndex) => {
+        const count = counts[batchIndex];
+        if (typeof count !== 'number' || count === post.comment_num) {
+          return;
+        }
+        updated = true;
+        return this.model('post').where({id: post.id}).update({
+          comment_num: count
+        });
+      }).filter(Boolean);
+      await Promise.all(promises);
+    }
+
+    if (updated) {
       await this.clearPostCache();
     }
   }
