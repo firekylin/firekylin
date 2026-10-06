@@ -9,6 +9,7 @@ export interface PostProps extends RouteComponentProps<ArticleMatchParams> {
 // Post列表
 export interface PostListRequestParams {
     page?: number;
+    pageSize?: number;
     status?: number | string;
     keyword?: string;
     cate?: string;
