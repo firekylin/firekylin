@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 
-const tables = ['cate', 'post', 'post_cate', 'post_tag', 'tag', 'user'];
 const startPost = `
 这是程序自动发布的文章。如果您看到这篇文章，表示您的 Blog 已经安装成功！
 
@@ -300,30 +299,8 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
   }
 
   async checkInstalled() {
-    const dbConfig = think.config('model');
-    let database = dbConfig.database;
-    let prefix = dbConfig.prefix;
-    if (!database && think.isObject(dbConfig[dbConfig.type])) {
-      database = dbConfig[dbConfig.type].database;
-      prefix = dbConfig[dbConfig.type].prefix;
-    }
-
     try {
-      const sql = {
-        mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
-        database + '\'',
-        tidb: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
-        database + '\'',
-        postgresql: `SELECT * FROM information_schema.tables WHERE table_schema = '${database}';`,
-        sqlite: 'SELECT name FROM sqlite_master WHERE type=\'table\''
-      };
-      const rows = await think.model('user', dbConfig).query(sql[this.type]);
-      if (think.isEmpty(rows)) {
-        return false;
-      }
-      const existTables = rows.map(table => table.TABLE_NAME || table.name);
-
-      const installed = tables.every(table => existTables.indexOf(prefix + table) > -1);
+      const installed = await this.getModel('options').hasSiteUrl();
       if (installed) {
         firekylin.setInstalled();
       }

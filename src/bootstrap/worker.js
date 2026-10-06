@@ -3,7 +3,6 @@
  * this file will be loaded before server started
  * you can define global functions used in controllers, models, templates
  */
-const fs = require('fs');
 const path = require('path');
 const widget = require('../widget/registry');
 const widgets = require('../widget');
@@ -34,18 +33,7 @@ widget.loadProjectWidgets(getContext());
  * is installed
  * @type {Boolean}
  */
-firekylin.isInstalled = false;
-try {
-  const installedFile = getContext().installedPath;
-  if (fs.accessSync && fs.accessSync(installedFile, fs.F_OK)) {
-    firekylin.isInstalled = true;
-  }
-  if (fs.existsSync(installedFile)) {
-    firekylin.isInstalled = true;
-  }
-} catch (e) {
-  // fs.accessSync failed
-}
+firekylin.isInstalled = undefined;
 
 /**
  * set app is installed
@@ -53,9 +41,6 @@ try {
  */
 firekylin.setInstalled = () => {
   firekylin.isInstalled = true;
-  const installedFile = getContext().installedPath;
-  fs.mkdirSync(path.dirname(installedFile), {recursive: true});
-  fs.writeFileSync(installedFile, 'firekylin');
 };
 
 firekylin.require = name => {

@@ -17,7 +17,7 @@ const {
   projectConfig,
   validateNewOptions
 } = require('../../lib/cli');
-const {hashAdminPassword, quoteIdentifier} = require('../../lib/installer');
+const {hashAdminPassword, initialize, isInstalled, quoteIdentifier} = require('../../lib/installer');
 
 function options() {
   return {
@@ -93,7 +93,7 @@ test('validates required database and administrator fields', () => {
   assert.throws(() => validateNewOptions({...options(), adminPassword: ''}), /adminPassword/);
 });
 
-test('skip-initialize scaffolds an installed project without connection details', async t => {
+test('skip-initialize scaffolds a project without claiming it is installed', async t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-skip-initialize-'));
   t.after(() => fs.rmSync(root, {recursive: true, force: true}));
   const target = path.join(root, 'blog');
@@ -108,8 +108,24 @@ test('skip-initialize scaffolds an installed project without connection details'
     type: 'mysql',
     prefix: 'fk_'
   });
-  assert.equal(fs.readFileSync(path.join(target, 'data', '.installed'), 'utf8'), 'firekylin\n');
+  assert.equal(fs.existsSync(path.join(target, 'data', '.installed')), false);
   assert.equal(fs.existsSync(path.join(target, 'data', '.firekylin-initializing.json')), false);
+});
+
+test('detects installation from the site_url option', async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-installed-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  const config = projectConfig(options());
+
+  assert.equal(await isInstalled(root, config), false);
+  await initialize(root, config, {
+    title: 'Test',
+    siteUrl: 'http://localhost:8360',
+    username: 'admin',
+    password: 'secret',
+    email: 'admin@example.com'
+  });
+  assert.equal(await isInstalled(root, config), true);
 });
 
 test('hashes administrator passwords in the same format as the browser login', () => {

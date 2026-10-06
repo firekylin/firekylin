@@ -13,6 +13,13 @@ module.exports = class extends think.Controller {
    * some base method in here
    */
   async __before() {
+    if (typeof firekylin.isInstalled === 'undefined') {
+      try {
+        firekylin.isInstalled = await this.model('options').hasSiteUrl();
+      } catch (e) {
+        firekylin.isInstalled = false;
+      }
+    }
     if (this.ctx.action === 'install') {
       return;
     }

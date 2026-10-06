@@ -3,6 +3,11 @@ module.exports = class extends think.Model {
     return 'key';
   }
 
+  async hasSiteUrl() {
+    const option = await this.where({key: 'site_url'}).find();
+    return Boolean(option && option.value);
+  }
+
   /**
    * get options
    * @return {} []
