@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const PostgreSQLAdapter = require('../../src/config/adapter/postgresql');
+const PostgreSQLAdapter = require('think-model-postgresql');
 
 test('escapes backslashes before quotes in PostgreSQL strings', () => {
   const parser = new PostgreSQLAdapter.Parser();
