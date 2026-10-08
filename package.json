@@ -5,7 +5,7 @@
   },
   "main": "index.js",
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "types": "types/index.d.ts",
   "author": "lizheming <i@imnerd.org>",
   "scripts": {
