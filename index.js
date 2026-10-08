@@ -4,7 +4,9 @@ const Application = require('thinkjs');
 const Loader = require('thinkjs/lib/loader');
 const {findProjectPath} = require('./lib/project-context');
 
-module.exports = function main() {
+const handlerKey = Symbol.for('firekylin.vercel.handler');
+
+function createHandler() {
   const projectPath = findProjectPath();
   if (!projectPath) throw new Error('当前目录及其父目录中未找到 firekylin.config.js');
   process.env.FIREKYLIN_PROJECT_PATH = projectPath;
@@ -28,18 +30,18 @@ module.exports = function main() {
   const loader = new Loader(app.options);
   loader.loadAll('worker');
 
-  return function (req, res) {
-    return think
-      .beforeStartServer()
-      .catch((err) => {
-        think.logger.error(err);
-      })
-      .then(() => {
-        const callback = think.app.callback();
-        return callback(req, res);
-      })
-      .then(() => {
-        think.app.emit('appReady');
-      });
+  const ready = think.beforeStartServer().catch(err => {
+    think.logger.error(err);
+  }).then(() => {
+    think.app.emit('appReady');
+  });
+
+  return function handler(req, res) {
+    return ready.then(() => {
+      const callback = think.app.callback();
+      return callback(req, res);
+    });
   };
-};
+}
+
+module.exports = global[handlerKey] || (global[handlerKey] = createHandler());
