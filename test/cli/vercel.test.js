@@ -6,18 +6,22 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 
-test('initializes the Vercel application before handling requests', async() => {
+test('initializes the Vercel application once across entry reloads', async() => {
   const originalLoad = Module._load;
   const originalProjectPath = process.env.FIREKYLIN_PROJECT_PATH;
   const originalThink = global.think;
+  const handlerKey = Symbol.for('firekylin.vercel.handler');
   let applicationOptions;
+  let applications = 0;
   let loaderOptions;
   let loaderType;
+  let loaders = 0;
   let readyEvents = 0;
   let requests = 0;
 
   class Application {
     constructor(options) {
+      applications += 1;
       applicationOptions = options;
       this.options = options;
     }
@@ -25,6 +29,7 @@ test('initializes the Vercel application before handling requests', async() => {
 
   class Loader {
     constructor(options) {
+      loaders += 1;
       loaderOptions = options;
     }
 
@@ -58,12 +63,18 @@ test('initializes the Vercel application before handling requests', async() => {
 
   const entry = path.join(__dirname, '..', '..', 'index.js');
   try {
+    delete global[handlerKey];
     delete require.cache[entry];
-    const handler = require(entry);
-    await Promise.all([handler({}, {}), handler({}, {})]);
+    const firstHandler = require(entry);
+    delete require.cache[entry];
+    const secondHandler = require(entry);
+    await Promise.all([firstHandler({}, {}), secondHandler({}, {})]);
+
+    assert.equal(firstHandler, secondHandler);
   } finally {
     Module._load = originalLoad;
     delete require.cache[entry];
+    delete global[handlerKey];
     if (originalProjectPath === undefined) delete process.env.FIREKYLIN_PROJECT_PATH;
     else process.env.FIREKYLIN_PROJECT_PATH = originalProjectPath;
     if (originalThink === undefined) delete global.think;
@@ -71,7 +82,9 @@ test('initializes the Vercel application before handling requests', async() => {
   }
 
   assert.equal(applicationOptions.RUNTIME_PATH, os.tmpdir());
+  assert.equal(applications, 1);
   assert.equal(loaderOptions, applicationOptions);
+  assert.equal(loaders, 1);
   assert.equal(loaderType, 'worker');
   assert.equal(readyEvents, 1);
   assert.equal(requests, 2);
