@@ -2,7 +2,8 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-RUN npm i -g pnpm@9.15.9
+RUN apk add --no-cache python3 make g++ \
+    && npm i -g pnpm@9.15.9
 
 COPY package.json /app
 COPY pnpm-lock.yaml /app
