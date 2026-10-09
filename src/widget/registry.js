@@ -7,6 +7,7 @@ const MetasWidget = require('./base/metas');
 const layers = {core: new Map(), project: new Map()};
 const themeLayers = new Map();
 const themeRequestLayers = new Map();
+const projectSources = new Map();
 const extensionApi = Object.freeze({Widget, ContentsWidget, MetasWidget});
 
 function splitName(name) {
@@ -74,6 +75,30 @@ function registerWidgetMap(widgetMap, options = {}) {
   });
 }
 
+function ensureWidgetMap(widgetMap, options = {}) {
+  if (!widgetMap || typeof widgetMap !== 'object' || Array.isArray(widgetMap)) {
+    throw new TypeError('Widget map must be an object');
+  }
+  const layerName = options.layer || 'core';
+  if (!Object.prototype.hasOwnProperty.call(layers, layerName)) {
+    throw new Error(`Unsupported Widget registration layer "${layerName}"`);
+  }
+  const source = options.source || layerName;
+  const layer = layers[layerName];
+  const overrides = normalizeOverrides(options.overrides || []);
+  return Object.entries(widgetMap).map(([name, WidgetClass]) => {
+    const {className} = splitName(name);
+    assertWidgetClass(className, WidgetClass);
+    const existing = layer.get(className);
+    if (existing && existing.source === source) return name;
+    registerWidget(name, WidgetClass, {
+      ...options,
+      override: options.override || overrides.has(className)
+    });
+    return name;
+  });
+}
+
 function resolveEntry(root, entry, label) {
   if (typeof entry !== 'string' || !entry.trim()) {
     throw new TypeError(`${label} Widget entry must be a non-empty string`);
@@ -129,10 +154,16 @@ function loadProjectWidgets(context) {
   const loaded = [];
   entries.forEach((entry) => {
     const entryPath = resolveEntry(context.projectPath, entry, 'Project');
+    if (projectSources.has(entryPath)) {
+      loaded.push(...projectSources.get(entryPath));
+      return;
+    }
     const widgetMap = initializeExtension(entryPath, 'Project');
-    loaded.push(...registerWidgetMap(widgetMap, {
+    const names = ensureWidgetMap(widgetMap, {
       layer: 'project', source: entryPath, overrides
-    }));
+    });
+    projectSources.set(entryPath, names);
+    loaded.push(...names);
   });
   return loaded;
 }
@@ -260,6 +291,7 @@ class WidgetFactory {
 module.exports = {
   Widget,
   WidgetFactory,
+  ensureWidgetMap,
   loadProjectWidgets,
   loadThemeWidgets,
   registerWidget,

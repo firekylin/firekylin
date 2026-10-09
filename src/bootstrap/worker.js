@@ -26,7 +26,7 @@ global.firekylin = {
   registerWidget: widget.registerWidget
 };
 
-widget.registerWidgetMap(widgets);
+widget.ensureWidgetMap(widgets);
 widget.loadProjectWidgets(getContext());
 
 /**
