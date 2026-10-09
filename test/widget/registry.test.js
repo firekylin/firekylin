@@ -3,6 +3,7 @@ const test = require('node:test');
 const {
   Widget,
   WidgetFactory,
+  ensureWidgetMap,
   registerWidget,
   registerWidgetMap
 } = require('../../src/widget/registry');
@@ -31,6 +32,19 @@ test('registry automatically registers an explicit widget map', async() => {
   const factory = new WidgetFactory({ctx: {}, model() {}});
   const widget = await factory.widget('Test_Auto_Widget');
   assert.equal(widget.constructor, AutoWidget);
+});
+
+test('registry idempotently ensures widgets from the same source', () => {
+  const name = uniqueName();
+  class Example extends Widget {}
+  class ReloadedExample extends Widget {}
+
+  assert.deepEqual(ensureWidgetMap({[name]: Example}, {source: 'bootstrap'}), [name]);
+  assert.deepEqual(ensureWidgetMap({[name]: ReloadedExample}, {source: 'bootstrap'}), [name]);
+  assert.throws(
+    () => ensureWidgetMap({[name]: ReloadedExample}, {source: 'another-bootstrap'}),
+    /already registered by bootstrap/
+  );
 });
 
 test('factory awaits lifecycle and caches by request and complete widget name', async() => {
