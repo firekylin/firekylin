@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ RUN cp -r www output/ \
 
 ### 准备工作结束
 
-FROM keymetrics/pm2:20-alpine
+FROM node:24-alpine
 
 ENV APP_PATH=/opt/firekylin
 ENV VOLUME_PATH=/var/lib/firekylin
@@ -45,4 +45,4 @@ VOLUME $VOLUME_PATH
 EXPOSE 8360
 
 ENTRYPOINT ["/opt/firekylin/docker-entrypoint.sh"]
-CMD ["pm2-runtime", "start", "/opt/firekylin/production.js"]
+CMD ["node", "/opt/firekylin/production.js"]

@@ -2,25 +2,26 @@
 
 set -e
 
-checkVolume(){
-    uploadDir="$VOLUME_PATH/upload"
+ensure_link() {
+    source_path="$1"
+    link_path="$2"
 
-    if [ ! -d $uploadDir ]; then
-        echo 'upload dir not found in docker volume /var/lib/firekylin, creating...'
-        mkdir -p $VOLUME_PATH/upload
+    if [ -e "$link_path" ] && [ ! -L "$link_path" ]; then
+        echo "Cannot create link: $link_path already exists and is not a symbolic link" >&2
+        exit 1
     fi
+
+    rm -f "$link_path"
+    ln -s "$source_path" "$link_path"
 }
 
-if [[ -z $INSTALLED ]] || [[ $(echo $INSTALLED | tr [A-Z] [a-z]) != true ]]; then
-    mkdir -p $VOLUME_PATH/upload
-else
-    checkVolume
-fi
+LOG_LINK_PATH="${LOG_LINK_PATH:-/var/log/firekylin}"
 
-touch $VOLUME_PATH/db.js
+mkdir -p "$VOLUME_PATH/upload" "$APP_PATH/logs"
+touch "$VOLUME_PATH/db.js"
 
-ln -s $VOLUME_PATH/db.js $APP_PATH/src/config/db.js
-ln -s $VOLUME_PATH/upload $APP_PATH/www/static/upload
-ln -s $APP_PATH/logs /var/log/firekylin
+ensure_link "$VOLUME_PATH/db.js" "$APP_PATH/src/config/db.js"
+ensure_link "$VOLUME_PATH/upload" "$APP_PATH/www/static/upload"
+ensure_link "$APP_PATH/logs" "$LOG_LINK_PATH"
 
 exec "$@"
