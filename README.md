@@ -35,6 +35,8 @@
 
 ## 安装
 
+使用 Docker 或 Docker Compose 部署，请参阅 [Docker 部署教程](docs/docker-deployment.md)。
+
 推荐通过 CLI 创建独立的 Firekylin 项目。核心程序安装在 `node_modules`，项目目录只保存配置、主题、上传文件和数据，升级时不会覆盖用户文件：
 
 ```sh
