@@ -19,7 +19,9 @@ class RouteRegistry {
 
   register(route, pluginId = 'core') {
     if (!route || typeof route !== 'object') throw new TypeError('Plugin route must be an object');
-    if (typeof route.path !== 'string' || !route.path.startsWith('/')) throw new TypeError('Plugin route path must start with /');
+    if (typeof route.path !== 'string' || !route.path.startsWith('/')) {
+      throw new TypeError('Plugin route path must start with /');
+    }
     if (typeof route.handler !== 'function') throw new TypeError('Plugin route handler must be a function');
     const methods = Array.isArray(route.method) ? route.method : [route.method || 'GET'];
     const normalized = methods.map(method => String(method).toUpperCase());

@@ -17,7 +17,9 @@ module.exports = function pluginRoutes() {
     const match = route.regexp.exec(ctx.path);
     const params = {};
     route.names.forEach((name, index) => { params[name] = decodeURIComponent(match[index + 1]) });
-    const result = await route.handler({ctx, params, query: ctx.query, body: ctx.request.body || ctx.body, plugin: route.pluginId});
+    const result = await route.handler({
+      ctx, params, query: ctx.query, body: ctx.request.body || ctx.body, plugin: route.pluginId
+    });
     if (typeof result !== 'undefined') ctx.body = result;
   };
 };
