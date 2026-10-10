@@ -1,4 +1,6 @@
-packages: []
+packages:
+  - packages/firekylin
+  - packages/admin
 allowBuilds:
   aws-sdk: true
   dtrace-provider: true
@@ -7,6 +9,7 @@ allowBuilds:
   spawn-sync: true
   sqlite3: true
   better-sqlite3: true
-  
+  core-js: set this to true or false
+
 # disable minimum release age to allow immediate releases
 minimumReleaseAge: 0

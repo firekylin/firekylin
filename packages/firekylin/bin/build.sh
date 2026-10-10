@@ -10,11 +10,6 @@ if [ ! -d "./build" ]; then
   mkdir ./build;
 fi
 
-echo 'vite start ...';
-npm run build;
-echo 'vite end';
-
-
 mkdir -p output/www/theme;
 cp -r www/theme/firekylin output/www/theme;
 # rm stc plugin in theme file temporary

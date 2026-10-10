@@ -6,6 +6,8 @@ RUN apk add --no-cache python3 make g++ \
     && npm i -g pnpm@9.15.9
 
 COPY package.json /app
+COPY packages/firekylin/package.json /app/packages/firekylin/package.json
+COPY packages/admin/package.json /app/packages/admin/package.json
 COPY pnpm-lock.yaml /app
 COPY pnpm-workspace.yaml /app
 
@@ -16,20 +18,19 @@ RUN pnpm i -P --force \
 
 COPY . /app
 
-RUN pnpm run build \
-    && pnpm run copy-package \
-    && rm -f src/config/db.js \
-    && rm -rf output/www/static/dist/*.map \
-    && rm -rf output/www/static/src
+RUN pnpm run build:package \
+    && rm -f packages/firekylin/src/config/db.js \
+    && rm -rf packages/firekylin/www/static/dist/*.map \
+    && rm -rf packages/admin/src
 
-RUN cp -r www output/ \
-    && cp -r src output/ \
-    && cp -r view output/ \
-    && cp production.js output/ \
-    && cp firekylin.sql output/ \
-    && cp firekylin.pgsql output/ \
-    && cp firekylin.sqlite.sql output/ \
-    && cp docker-entrypoint.sh output/
+RUN cp -r packages/firekylin/www output/ \
+    && cp -r packages/firekylin/src output/ \
+    && cp -r packages/firekylin/view output/ \
+    && cp packages/firekylin/production.js output/ \
+    && cp packages/firekylin/firekylin.sql output/ \
+    && cp packages/firekylin/firekylin.pgsql output/ \
+    && cp packages/firekylin/firekylin.sqlite.sql output/ \
+    && cp packages/firekylin/docker-entrypoint.sh output/
 
 ### 准备工作结束
 
