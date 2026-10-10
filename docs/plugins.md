@@ -52,6 +52,29 @@ Administrator routes require the logged-in administrator session. Mutating
 routes require the current `X-CSRF-Token` session token unless `csrf: false`
 is explicitly set.
 
+Plugins can register Widgets and template extensions:
+
+```js
+register(ctx) {
+  class Related extends ctx.widgets.Widget {
+    async execute() { this.push({title: 'Related'}) }
+  }
+  ctx.widgets.register('Widget_Plugin_Related', Related);
+  ctx.templates.registerFunction('example.badge', async ({text}) => `<b>${text}</b>`);
+  ctx.templates.registerFilter('example.upper', value => String(value).toUpperCase());
+  ctx.templates.registerSlot('post.after', ({controller}) => '<aside>Example</aside>');
+}
+```
+
+Theme templates receive `plugin`, `filters`, and `slots` through the normal
+Eta data object:
+
+```eta
+<%= await plugin.example.badge({text: post.title}) %>
+<%= await filters['example.upper'](post.title) %>
+<%~ await slots.render('post.after') %>
+```
+
 The entry module must export `register(ctx)`. `activate(ctx)` and
 `deactivate(ctx)` are optional lifecycle hooks.
 

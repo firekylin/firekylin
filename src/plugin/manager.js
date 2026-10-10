@@ -5,6 +5,8 @@ const path = require('path');
 const semver = require('semver');
 const EventBus = require('./events');
 const RouteRegistry = require('./routes');
+const TemplateRegistry = require('./templates');
+const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
 
@@ -48,6 +50,7 @@ class PluginManager {
     this.version = version;
     this.events = eventBus || new EventBus({onError: (error, listener) => this.logError(error, listener)});
     this.routes = new RouteRegistry();
+    this.templates = new TemplateRegistry();
     this.plugins = new Map();
     this.states = new Map();
   }
@@ -110,9 +113,34 @@ class PluginManager {
       routes: Object.freeze({
         register: route => this.routes.register(route, pluginId)
       }),
+      templates: this.templates.api(pluginId),
+      widgets: Object.freeze({
+        Widget,
+        ContentsWidget,
+        MetasWidget,
+        register: (name, WidgetClass, options = {}) => registerWidget(name, WidgetClass, {
+          ...options, layer: 'project', source: pluginId
+        })
+      }),
       logger: this.logger,
       config: Object.freeze((this.config.pluginConfig && this.config.pluginConfig[pluginId]) || {})
     });
+  }
+
+  templateContext(controller) {
+    const plugin = {};
+    for (const [name] of this.templates.functions) {
+      const [pluginId, functionName] = name.split('.', 2);
+      plugin[pluginId] = plugin[pluginId] || {};
+      plugin[pluginId][functionName] = args => this.templates.callFunction(name, args, {controller});
+    }
+    return {
+      plugin,
+      filters: Object.fromEntries([...this.templates.filters].map(([name]) => [
+        name, value => this.templates.applyFilter(name, value, {controller})
+      ])),
+      slots: {render: name => this.templates.renderSlot(name, {controller})}
+    };
   }
 
   async activate(record) {
@@ -138,6 +166,8 @@ class PluginManager {
     } finally {
       this.events.removePlugin(id);
       this.routes.removePlugin(id);
+      this.templates.removePlugin(id);
+      removeWidgetsBySource(id);
       record.status = 'inactive';
       await this.events.emit('plugin.deactivated', {pluginId: id});
     }

@@ -18,6 +18,7 @@ module.exports = class extends think.Controller {
     const widget = this.widgetFactory.widget.bind(this.widgetFactory);
     widget.destroy = this.widgetFactory.destroy.bind(this.widgetFactory);
     this.assign('widget', widget);
+    if (firekylin.plugins) this.assign(firekylin.plugins.templateContext(this));
 
     let options;
     try {

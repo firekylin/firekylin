@@ -63,3 +63,25 @@ test('manager rejects incompatible engine versions', async() => {
   assert.equal(manager.plugins.size, 0);
   assert.match(errors[0], /requires Firekylin/);
 });
+
+test('plugin context registers widgets and Eta-facing extensions', async() => {
+  const root = project();
+  writePlugin(root, 'template', `module.exports = {
+    register(ctx) {
+      ctx.templates.registerFunction('template.badge', ({text}) => '<b>' + text + '</b>');
+      ctx.templates.registerFilter('template.upper', value => String(value).toUpperCase());
+      ctx.templates.registerSlot('post.after', () => '<aside>after</aside>');
+      class Example extends ctx.widgets.Widget {}
+      ctx.widgets.register('Widget_Plugin_Template', Example);
+    }
+  };`);
+  const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
+  await manager.load();
+  const view = manager.templateContext({});
+  assert.equal(await view.plugin.template.badge({text: 'ok'}), '<b>ok</b>');
+  assert.equal(await view.filters['template.upper']('ok'), 'OK');
+  assert.equal(await view.slots.render('post.after'), '<aside>after</aside>');
+  assert.equal(manager.plugins.get('template').status, 'active');
+  await manager.deactivate('template');
+  assert.equal(manager.templates.functions.size, 0);
+});
