@@ -3,6 +3,7 @@ const path = require('path');
 const pack = require('../../package.json');
 const {WidgetFactory} = require('../widget/registry');
 const {getContext} = require('../../lib/project-context');
+const {emit} = require('../plugin/runtime');
 
 module.exports = class extends think.Controller {
   constructor(...args) {
@@ -17,6 +18,7 @@ module.exports = class extends think.Controller {
     const widget = this.widgetFactory.widget.bind(this.widgetFactory);
     widget.destroy = this.widgetFactory.destroy.bind(this.widgetFactory);
     this.assign('widget', widget);
+    if (firekylin.plugins) this.assign(firekylin.plugins.templateContext(this));
 
     let options;
     try {
@@ -53,6 +55,8 @@ module.exports = class extends think.Controller {
    * @return {}      []
    */
   async displayView(name) {
+    const viewContext = {controller: this, name, theme: this.options && this.options.theme};
+    await emit('theme.beforeRender', viewContext);
     if (this.ctx.url.match(/\.json(?:\?|$)/)) {
       const jsonOutput = {};
       const assignObj = this.assign();
@@ -64,11 +68,14 @@ module.exports = class extends think.Controller {
 
       this.ctx.type = 'application/json';
       this.ctx.body = jsonOutput;
+      await emit('theme.afterRender', {...viewContext, response: this.ctx.body});
       return true;
     }
 
-    return this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'), {
+    const result = await this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'), {
       viewPath: this.THEME_VIEW_PATH
     });
+    await emit('theme.afterRender', {...viewContext, response: this.ctx.body});
+    return result;
   }
 };
