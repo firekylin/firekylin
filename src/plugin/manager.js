@@ -8,19 +8,27 @@ const EventBus = require('./events');
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
 
 function readManifest(pluginRoot) {
-  const manifestPath = path.join(pluginRoot, 'manifest.json');
+  const manifestPath = path.join(pluginRoot, 'package.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const metadata = manifest.firekylin || {};
+  const normalized = {
+    ...manifest,
+    ...metadata,
+    id: metadata.id || manifest.name,
+    entry: metadata.entry || manifest.main,
+    engine: metadata.engine || (manifest.engines && manifest.engines.firekylin)
+  };
   for (const field of REQUIRED_MANIFEST_FIELDS) {
-    if (typeof manifest[field] !== 'string' || !manifest[field].trim()) {
-      throw new Error(`Plugin manifest ${manifestPath} requires ${field}`);
+    if (typeof normalized[field] !== 'string' || !normalized[field].trim()) {
+      throw new Error(`Plugin package ${manifestPath} requires ${field} or firekylin.${field}`);
     }
   }
-  if (!/^[a-z0-9][a-z0-9._-]*$/i.test(manifest.id)) throw new Error(`Invalid plugin id: ${manifest.id}`);
-  if (!semver.valid(manifest.version)) throw new Error(`Invalid plugin version for ${manifest.id}`);
-  if (manifest.dependencies && !Array.isArray(manifest.dependencies)) {
-    throw new Error(`Plugin ${manifest.id} dependencies must be an array`);
+  if (!/^[a-z0-9][a-z0-9._-]*$/i.test(normalized.id)) throw new Error(`Invalid plugin id: ${normalized.id}`);
+  if (!semver.valid(normalized.version)) throw new Error(`Invalid plugin version for ${normalized.id}`);
+  if (metadata.dependencies && !Array.isArray(metadata.dependencies)) {
+    throw new Error(`Plugin ${normalized.id} firekylin.dependencies must be an array`);
   }
-  return manifest;
+  return normalized;
 }
 
 function resolveInside(root, entry, label) {

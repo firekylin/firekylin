@@ -14,8 +14,11 @@ function project() {
 function writePlugin(root, id, source, manifest = {}) {
   const dir = path.join(root, 'plugins', id);
   fs.mkdirSync(dir, {recursive: true});
-  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({
-    id, name: id, version: '1.0.0', entry: 'plugin.js', ...manifest
+  fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
+    name: `firekylin-plugin-${id}`,
+    version: '1.0.0',
+    main: 'plugin.js',
+    firekylin: {id, ...manifest}
   }));
   fs.writeFileSync(path.join(dir, 'plugin.js'), source);
 }

@@ -7,20 +7,28 @@ entry module declared by `entry`.
 ```text
 plugins/
   example/
-    manifest.json
+    package.json
     plugin.js
 ```
 
 ```json
 {
-  "id": "example",
   "name": "Example plugin",
   "version": "1.0.0",
-  "engine": ">=2.5.5",
-  "entry": "plugin.js",
-  "permissions": []
+  "main": "plugin.js",
+  "engines": { "firekylin": ">=2.5.5" },
+  "firekylin": {
+    "type": "plugin",
+    "id": "example",
+    "permissions": []
+  }
 }
 ```
+
+Plugin metadata is read from `package.json`. `firekylin.id` is the stable
+runtime identifier; `firekylin.entry` overrides `main` when needed. The
+Firekylin engine constraint can be declared as `firekylin.engine` or
+`engines.firekylin`.
 
 The entry module must export `register(ctx)`. `activate(ctx)` and
 `deactivate(ctx)` are optional lifecycle hooks.
