@@ -6,7 +6,7 @@ module.exports = class extends Post {
     this.modelName = 'post';
   }
 
-  addPost(data) {
+  async addPost(data) {
     const create_time = think.datetime();
     data = Object.assign({
       type: 1,
@@ -16,7 +16,10 @@ module.exports = class extends Post {
       is_public: 1
     }, data);
 
-    return this.where({pathname: data.pathname}).thenAdd(data);
+    const result = await this.where({pathname: data.pathname}).thenAdd(data);
+    const {emit} = require('../plugin/runtime');
+    await emit('content.created', {post: result || data});
+    return result;
   }
 
   async savePost(data) {
@@ -26,6 +29,9 @@ module.exports = class extends Post {
     }
 
     data.update_time = think.datetime();
-    return this.where({id: data.id}).update(data);
+    const result = await this.where({id: data.id}).update(data);
+    const {emit} = require('../plugin/runtime');
+    await emit('content.updated', {post: data, result});
+    return result;
   }
 };

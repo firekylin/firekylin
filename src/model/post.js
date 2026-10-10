@@ -8,6 +8,7 @@ const markedTocExtension = require('../service/marked-toc-extension');
 const markedImgonlyExtension = require('../service/marked-imgonly-extension');
 const markedMermaidExtension = require('../service/marked-mermaid-extension');
 const Base = require('./base');
+const {emit, filter} = require('../plugin/runtime');
 
 module.exports = class extends Base {
   get relation() {
@@ -28,7 +29,7 @@ module.exports = class extends Base {
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
-  addPost(data) {
+  async addPost(data) {
     const create_time = think.datetime();
     data = Object.assign({
       type: 0,
@@ -38,7 +39,9 @@ module.exports = class extends Base {
       is_public: 1
     }, data);
 
-    return this.where({ pathname: data.pathname }).thenAdd(data);
+    const result = await this.where({ pathname: data.pathname }).thenAdd(data);
+    await emit('content.created', {post: result || data});
+    return result;
   }
 
   async savePost(data) {
@@ -59,7 +62,9 @@ module.exports = class extends Base {
     }
 
     data.update_time = think.datetime();
-    return this.where({ id: data.id }).update(data);
+    const result = await this.where({ id: data.id }).update(data);
+    await emit('content.updated', {post: data, result});
+    return result;
   }
 
   async deletePost(post_id) {
@@ -163,6 +168,8 @@ module.exports = class extends Base {
     data.content = await this.markdownToHtml(data.markdown_content, { toc: showToc, highlight: true });
     data.summary = await this.getSummary(data.markdown_content, auto_summary);
 
+    data.content = await filter('content.render', data.content, {post: data, type: 'content'});
+    data.summary = await filter('content.render', data.summary, {post: data, type: 'summary'});
     return data;
   }
 

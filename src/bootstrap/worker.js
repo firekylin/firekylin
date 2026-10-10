@@ -39,7 +39,9 @@ const pluginManager = new PluginManager({
   logger: console
 });
 global.firekylin.plugins = pluginManager;
-pluginManager.load().catch(error => console.error(`[plugin] bootstrap failed: ${error.stack || error.message}`));
+pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
+  console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
+});
 
 /**
  * is installed
