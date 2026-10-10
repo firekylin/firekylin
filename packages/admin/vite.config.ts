@@ -6,7 +6,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-    root: path.resolve(__dirname, 'www/static/src'),
+    root: path.resolve(__dirname, 'src'),
     base: '/static/dist/',
 
     plugins: [
@@ -15,10 +15,10 @@ export default defineConfig(({ mode }) => ({
             name: 'admin-asset-version',
             enforce: 'post',
             closeBundle() {
-                const assetsPath = path.resolve(__dirname, 'www/static/dist/assets');
+                const assetsPath = path.resolve(__dirname, '../firekylin/www/static/dist/assets');
                 const hash = createHash('sha256');
                 for (const fileName of ['assets/admin.js', 'assets/admin.css']) {
-                    hash.update(readFileSync(path.resolve(__dirname, 'www/static/dist', fileName)));
+                    hash.update(readFileSync(path.resolve(__dirname, '../firekylin/www/static/dist', fileName)));
                 }
                 writeFileSync(path.join(assetsPath, 'admin.version'), hash.digest('hex').slice(0, 16));
             },
@@ -43,12 +43,12 @@ export default defineConfig(({ mode }) => ({
     },
 
     build: {
-        outDir: path.resolve(__dirname, 'www/static/dist'),
+        outDir: path.resolve(__dirname, '../firekylin/www/static/dist'),
         emptyOutDir: true,
         cssCodeSplit: false,
         rollupOptions: {
             input: {
-                admin: path.resolve(__dirname, 'www/static/src/index.html'),
+                admin: path.resolve(__dirname, 'src/index.html'),
             },
             output: {
                 entryFileNames: 'assets/[name].js',
