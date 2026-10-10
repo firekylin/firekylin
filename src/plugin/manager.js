@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 const EventBus = require('./events');
+const RouteRegistry = require('./routes');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
 
@@ -46,6 +47,7 @@ class PluginManager {
     this.logger = logger || console;
     this.version = version;
     this.events = eventBus || new EventBus({onError: (error, listener) => this.logError(error, listener)});
+    this.routes = new RouteRegistry();
     this.plugins = new Map();
     this.states = new Map();
   }
@@ -105,6 +107,9 @@ class PluginManager {
       events: Object.freeze({
         on: (event, handler, options = {}) => this.events.on(event, handler, {...options, pluginId})
       }),
+      routes: Object.freeze({
+        register: route => this.routes.register(route, pluginId)
+      }),
       logger: this.logger,
       config: Object.freeze((this.config.pluginConfig && this.config.pluginConfig[pluginId]) || {})
     });
@@ -132,6 +137,7 @@ class PluginManager {
       if (typeof record.plugin.deactivate === 'function') await record.plugin.deactivate(this.context(record));
     } finally {
       this.events.removePlugin(id);
+      this.routes.removePlugin(id);
       record.status = 'inactive';
       await this.events.emit('plugin.deactivated', {pluginId: id});
     }

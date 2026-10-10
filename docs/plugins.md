@@ -30,6 +30,28 @@ runtime identifier; `firekylin.entry` overrides `main` when needed. The
 Firekylin engine constraint can be declared as `firekylin.engine` or
 `engines.firekylin`.
 
+Plugins can register namespaced HTTP routes. A route is available below
+`/api/plugins/<plugin-id>/` and is removed when the plugin is deactivated:
+
+```js
+register(ctx) {
+  ctx.routes.register({
+    method: 'POST',
+    path: '/refresh/:id',
+    auth: 'admin',
+    csrf: true,
+    async handler({params, body}) {
+      return {id: params.id, accepted: Boolean(body)};
+    }
+  });
+}
+```
+
+Supported route methods are `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`.
+Administrator routes require the logged-in administrator session. Mutating
+routes require the current `X-CSRF-Token` session token unless `csrf: false`
+is explicitly set.
+
 The entry module must export `register(ctx)`. `activate(ctx)` and
 `deactivate(ctx)` are optional lifecycle hooks.
 
