@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Base = require('./base');
+const {emit} = require('../plugin/runtime');
 
 const stats = think.promisify(fs.stat);
 
@@ -17,7 +18,9 @@ module.exports = class extends Base {
    * @return {Promise} []
    */
   async listAction() {
+    await emit('archive.beforeQuery', {controller: this, type: 'index'});
     await this.getWidget('Widget_Archive', {type: 'index'});
+    await emit('archive.index', {controller: this});
 
     let template = 'index';
     if (this.get('tag')) {
@@ -43,6 +46,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async detailAction() {
+    await emit('archive.beforeQuery', {controller: this, type: 'single'});
     this.ctx.url = decodeURIComponent(this.ctx.url);
     // 列表页
     if (this.get('pathname') === 'list') {
@@ -58,6 +62,7 @@ module.exports = class extends Base {
   }
 
   async pageAction() {
+    await emit('archive.beforeQuery', {controller: this, type: 'page'});
     const archive = await this.getWidget('Widget_Archive', {type: 'page'});
 
     let template = 'page';
@@ -96,6 +101,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async searchAction() {
+    await emit('archive.search', {controller: this, keyword: this.get('keyword') || this.get('s')});
     return this.displayView('search');
   }
 };

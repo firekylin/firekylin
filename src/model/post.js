@@ -39,8 +39,11 @@ module.exports = class extends Base {
       is_public: 1
     }, data);
 
-    const result = await this.where({ pathname: data.pathname }).thenAdd(data);
-    await emit('content.created', {post: result || data});
+    const prepared = await filter('content.beforeCreate', data, {type: 'post'});
+    const result = await this.where({ pathname: prepared.pathname }).thenAdd(prepared);
+    const post = result || prepared;
+    await emit('post.created', {post});
+    await emit('content.created', {post});
     return result;
   }
 
@@ -62,15 +65,20 @@ module.exports = class extends Base {
     }
 
     data.update_time = think.datetime();
-    const result = await this.where({ id: data.id }).update(data);
-    await emit('content.updated', {post: data, result});
+    const prepared = await filter('content.beforeUpdate', data, {type: 'post'});
+    const result = await this.where({ id: data.id }).update(prepared);
+    await emit('post.updated', {post: prepared, result});
+    await emit('content.updated', {post: prepared, result});
     return result;
   }
 
   async deletePost(post_id) {
     // await this.model('post_cate').delete({post_id});
     // await this.model('post_tag').delete({post_id});
-    return this.where({ id: post_id }).delete();
+    await emit('post.beforeDelete', {id: post_id});
+    const result = await this.where({ id: post_id }).delete();
+    await emit('post.deleted', {id: post_id, result});
+    return result;
   }
 
   /**
@@ -165,10 +173,13 @@ module.exports = class extends Base {
     } else {
       showToc = data.type / 1 === 0 || /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
     }
-    data.content = await this.markdownToHtml(data.markdown_content, { toc: showToc, highlight: true });
-    data.summary = await this.getSummary(data.markdown_content, auto_summary);
+    const markdown = await filter('content.markdown', data.markdown_content, {post: data});
+    data.content = await this.markdownToHtml(markdown, { toc: showToc, highlight: true });
+    data.summary = await this.getSummary(markdown, auto_summary);
 
+    data.content = await filter('content.html', data.content, {post: data});
     data.content = await filter('content.render', data.content, {post: data, type: 'content'});
+    data.summary = await filter('content.excerpt', data.summary, {post: data});
     data.summary = await filter('content.render', data.summary, {post: data, type: 'summary'});
     return data;
   }

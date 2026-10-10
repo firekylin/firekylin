@@ -1,4 +1,5 @@
 const Post = require('./post');
+const {emit, filter} = require('../plugin/runtime');
 
 module.exports = class extends Post {
   constructor(...args) {
@@ -16,9 +17,11 @@ module.exports = class extends Post {
       is_public: 1
     }, data);
 
-    const result = await this.where({pathname: data.pathname}).thenAdd(data);
-    const {emit} = require('../plugin/runtime');
-    await emit('content.created', {post: result || data});
+    const prepared = await filter('content.beforeCreate', data, {type: 'page'});
+    const result = await this.where({pathname: prepared.pathname}).thenAdd(prepared);
+    const page = result || prepared;
+    await emit('page.created', {page});
+    await emit('content.created', {post: page, type: 'page'});
     return result;
   }
 
@@ -29,9 +32,10 @@ module.exports = class extends Post {
     }
 
     data.update_time = think.datetime();
-    const result = await this.where({id: data.id}).update(data);
-    const {emit} = require('../plugin/runtime');
-    await emit('content.updated', {post: data, result});
+    const prepared = await filter('content.beforeUpdate', data, {type: 'page'});
+    const result = await this.where({id: data.id}).update(prepared);
+    await emit('page.updated', {page: prepared, result});
+    await emit('content.updated', {post: prepared, type: 'page', result});
     return result;
   }
 };

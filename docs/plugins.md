@@ -57,8 +57,14 @@ the Widget, Eta template, route, admin and permission APIs on top of the same
 Currently emitted application events include:
 
 - `app.ready` after enabled plugins have loaded;
-- `content.created` and `content.updated` after posts or pages change;
-- `content.render` as a filter for rendered content and summaries;
+- `user.beforeCreate` and `user.created` around user creation;
+- `content.beforeCreate` and `content.beforeUpdate` as content filters;
+- `post.created`, `post.updated`, `post.beforeDelete`, and `post.deleted`;
+- `page.created` and `page.updated`;
+- `content.created` and `content.updated` compatibility events after posts or pages change;
+- `content.render` as a compatibility filter for rendered content and summaries;
+- `content.beforeCreate` and `content.beforeUpdate` as content data filters;
+- `archive.beforeQuery`, `archive.index`, and `archive.search` during public archive flows;
 - `theme.beforeRender` and `theme.afterRender` around theme output.
 
 Firekylin does not provide a built-in comment persistence layer. Comments are
