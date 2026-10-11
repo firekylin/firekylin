@@ -90,6 +90,14 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 
 ### 扩展 Widget
 
+在 Firekylin 项目目录中可以用 CLI 快速创建并登记一个 Widget 插件：
+
+```sh
+firekylin plugin recent-posts
+```
+
+命令会生成 `plugins/recent-posts/`（包含实现、类型声明和使用说明），并把入口写入 `firekylin.config.js` 的 `widgets` 数组。插件名使用字母、数字和连字符；生成后重启 worker 即可加载。
+
 项目可以在 `firekylin.config.js` 中声明 Widget 入口。入口相对项目根目录解析，并在 worker 启动时加载：
 
 ```js

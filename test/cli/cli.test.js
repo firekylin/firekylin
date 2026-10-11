@@ -14,6 +14,7 @@ const {
   mergeResumeOptions,
   parseArgs,
   scaffold,
+  scaffoldPlugin,
   projectConfig,
   validateNewOptions
 } = require('../../lib/cli');
@@ -193,4 +194,30 @@ test('scaffolds an isolated project and only resumes marked directories', t => {
   fs.mkdirSync(unrelated);
   fs.writeFileSync(path.join(unrelated, 'file.txt'), 'keep');
   assert.throws(() => scaffold(unrelated, options()), /非空/);
+});
+
+test('scaffolds and registers a project Widget plugin', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-plugin-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  fs.writeFileSync(path.join(root, 'firekylin.config.js'), `'use strict';
+module.exports = {
+  database: {type: 'sqlite'},
+  custom() { return true; }
+};
+`, {mode: 0o600});
+
+  const result = scaffoldPlugin('recent-posts', root);
+  assert.equal(result.widgetName, 'Widget_Recent_Posts');
+  assert.equal(result.entry, './plugins/recent-posts/index.js');
+  assert.ok(fs.existsSync(path.join(result.pluginPath, 'index.js')));
+  assert.ok(fs.existsSync(path.join(result.pluginPath, 'index.d.ts')));
+  assert.ok(fs.existsSync(path.join(result.pluginPath, 'README.md')));
+  const config = require(path.join(root, 'firekylin.config.js')); // eslint-disable-line import/no-dynamic-require
+  assert.deepEqual(config.widgets, ['./plugins/recent-posts/index.js']);
+  assert.equal(config.custom(), true);
+  assert.match(fs.readFileSync(path.join(root, 'firekylin.config.js'), 'utf8'), /custom\(\)/);
+  assert.equal(fs.statSync(path.join(root, 'firekylin.config.js')).mode & 0o777, 0o600);
+  assert.match(fs.readFileSync(path.join(result.pluginPath, 'index.d.ts'), 'utf8'), /Widget_Recent_Posts/);
+  assert.throws(() => scaffoldPlugin('recent-posts', root), /已存在且非空/);
+  assert.throws(() => scaffoldPlugin('../bad', root), /只能包含/);
 });
