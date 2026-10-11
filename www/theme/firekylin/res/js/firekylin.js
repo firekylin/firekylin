@@ -104,6 +104,7 @@
       walineConfig = JSON.parse(walineConfig);
     }
     walineConfig.el = '#waline-container';
+    walineConfig.path = location.pathname;
 
     var link = doc.createElement('link');
     link.rel = 'stylesheet';
