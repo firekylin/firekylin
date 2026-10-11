@@ -34,6 +34,18 @@ function findPackageRoot(entry, packageName) {
   }
 }
 
+function findPackageRootFromSearchPaths(projectRequire, packageName) {
+  const searchPaths = projectRequire.resolve.paths(packageName) || [];
+  for (const searchPath of searchPaths) {
+    const packageRoot = path.resolve(searchPath, packageName);
+    const relative = path.relative(path.resolve(searchPath), packageRoot);
+    if (relative.startsWith('..' + path.sep) || relative === '..' || path.isAbsolute(relative)) continue;
+    const manifestPath = path.join(packageRoot, 'package.json');
+    if (fs.existsSync(manifestPath) && fs.statSync(manifestPath).isFile()) return packageRoot;
+  }
+  return null;
+}
+
 function readManifest(pluginRoot) {
   const manifestPath = path.join(pluginRoot, 'package.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -105,13 +117,16 @@ class PluginManager {
         manifestPath = projectRequire.resolve(`${packageName}/package.json`);
         packageRoot = path.dirname(manifestPath);
       } catch (manifestError) {
-        try {
-          packageRoot = findPackageRoot(projectRequire.resolve(packageName), packageName);
-          if (!packageRoot) return [];
-          manifestPath = path.join(packageRoot, 'package.json');
-        } catch (entryError) {
-          return [];
+        packageRoot = findPackageRootFromSearchPaths(projectRequire, packageName);
+        if (!packageRoot) {
+          try {
+            packageRoot = findPackageRoot(projectRequire.resolve(packageName), packageName);
+          } catch (entryError) {
+            return [];
+          }
         }
+        if (!packageRoot) return [];
+        manifestPath = path.join(packageRoot, 'package.json');
       }
       try {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));

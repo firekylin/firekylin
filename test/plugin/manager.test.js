@@ -23,13 +23,14 @@ function writePlugin(root, id, source, manifest = {}) {
   fs.writeFileSync(path.join(dir, 'plugin.js'), source);
 }
 
-function writePackage(root, packageName, source, firekylin = {type: 'plugin'}) {
+function writePackage(root, packageName, source, firekylin = {type: 'plugin'}, manifest = {}) {
   const dir = path.join(root, 'node_modules', ...packageName.split('/'));
   fs.mkdirSync(dir, {recursive: true});
   fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
     name: packageName,
     version: '1.0.0',
     main: 'plugin.js',
+    ...manifest,
     firekylin
   }));
   fs.writeFileSync(path.join(dir, 'plugin.js'), source);
@@ -101,6 +102,22 @@ test('manager also discovers plugin packages from optional dependencies', async(
   const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
   await manager.load();
   assert.equal(manager.plugins.get('optional').status, 'active');
+});
+
+test('manager discovers plugins whose exports hide the package root and manifest', async() => {
+  const root = project();
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+    dependencies: {'firekylin-plugin-private-entry': '1.0.0'}
+  }));
+  writePackage(root, 'firekylin-plugin-private-entry', 'module.exports = {register() {}};', {
+    type: 'plugin', id: 'private-entry', entry: 'plugin.js'
+  }, {
+    exports: {'./public': './public.js'}
+  });
+
+  const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
+  await manager.load();
+  assert.equal(manager.plugins.get('private-entry').status, 'active');
 });
 
 test('manager rejects incompatible engine versions', async() => {
