@@ -1,5 +1,6 @@
 const { PasswordHash } = require('phpass');
 const Base = require('./base');
+const {emit, filter} = require('../plugin/runtime');
 
 module.exports = class extends Base {
   /**
@@ -54,21 +55,25 @@ module.exports = class extends Base {
    * @param {[type]} data [description]
    * @param {[type]} ip   [description]
    */
-  addUser(data, ip) {
+  async addUser(data, ip) {
     const create_time = think.datetime();
     const encryptPassword = this.getEncryptPassword(data.password);
-    return this.where({ name: data.username, email: data.email, _logic: 'OR' }).thenAdd({
-      name: data.username,
-      email: data.email,
-      display_name: data.display_name,
+    const prepared = await filter('user.beforeCreate', {...data, ip}, {ip});
+    const user = {
+      name: prepared.username,
+      email: prepared.email,
+      display_name: prepared.display_name,
       password: encryptPassword,
       create_time: create_time,
       last_login_time: create_time,
       create_ip: ip,
       last_login_ip: ip,
-      type: data.type,
-      status: data.status
-    });
+      type: prepared.type,
+      status: prepared.status
+    };
+    const result = await this.where({ name: prepared.username, email: prepared.email, _logic: 'OR' }).thenAdd(user);
+    await emit('user.created', {user: result || user});
+    return result;
   }
   /**
    * 保存用户信息

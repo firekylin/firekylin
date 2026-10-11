@@ -16,6 +16,7 @@
     "watch": "vite build --watch",
     "preview": "vite preview",
     "test:widget": "node --test test/widget/*.test.js",
+    "test:plugin": "node --test test/plugin/*.test.js",
     "test:cli": "node --test test/cli/*.test.js",
     "test:types": "tsc -p test/types/tsconfig.json --noEmit",
     "lint": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache --ext .js,.jsx || true",

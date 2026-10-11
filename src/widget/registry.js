@@ -75,6 +75,12 @@ function registerWidgetMap(widgetMap, options = {}) {
   });
 }
 
+function removeWidgetsBySource(source) {
+  for (const [name, registration] of layers.project) {
+    if (registration.source === source) layers.project.delete(name);
+  }
+}
+
 function ensureWidgetMap(widgetMap, options = {}) {
   if (!widgetMap || typeof widgetMap !== 'object' || Array.isArray(widgetMap)) {
     throw new TypeError('Widget map must be an object');
@@ -295,5 +301,6 @@ module.exports = {
   loadProjectWidgets,
   loadThemeWidgets,
   registerWidget,
-  registerWidgetMap
+  registerWidgetMap,
+  removeWidgetsBySource
 };
