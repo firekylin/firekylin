@@ -9,6 +9,7 @@ module.exports = class extends Base {
     const resource = this.get('resource');
     const id = this.get('id');
     if (resource === 'ui' && id === 'login') return this.loginPage();
+    if (resource === 'ui' && id === 'profile') return this.redirect('/admin');
     if (!this.isGet) {
       const origin = this.ctx.get('origin');
       if (origin) {
