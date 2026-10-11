@@ -56,7 +56,6 @@ export default class Comment extends React.Component<any, any> {
                 const status = COMMENT_STATUS[value] || {color: 'default', text: '未知'};
                 return <Tag color={status.color}>{status.text}</Tag>;
             }},
-            {title: '时间', dataIndex: 'inserted_at', width: 190, render: (value: string) => firekylin.formatTime(value)},
             {title: '操作', width: 270, render: (_: any, row: any) => <Space wrap>
                 {row.status !== 'approved' && <Button size="small" onClick={() => this.operate(row.id, 'approved')}>通过</Button>}
                 {row.status !== 'spam' && <Button size="small" danger onClick={() => this.operate(row.id, 'spam')}>垃圾</Button>}
@@ -66,14 +65,13 @@ export default class Comment extends React.Component<any, any> {
         ];
         return <>
             <BreadCrumb className="breadcrumb" {...this.props} />
-            <div className="page-list"><h3 className="page-title">评论管理</h3>
-                <div className="comment-search">
+            <div className="page-list comment-list">
+                <Tabs className="tabs" type="card" activeKey={this.state.status || 'all'} tabBarExtraContent={<div className="comment-search">
                     <Input placeholder="评论关键字" value={this.state.keyword} onChange={event => this.setState({keyword: event.target.value})} onPressEnter={this.search} allowClear />
                     <Input placeholder="作者昵称、邮箱或 IP" value={this.state.author} onChange={event => this.setState({author: event.target.value})} onPressEnter={this.search} allowClear />
                     <Button type="primary" onClick={this.search}>查询</Button>
                     <Button onClick={this.resetSearch}>重置</Button>
-                </div>
-                <Tabs activeKey={this.state.status || 'all'} onChange={key => { const status = key === 'all' ? '' : key; this.setState({page: 1, status}); this.load(1, status); }} items={[
+                </div>} onChange={key => { const status = key === 'all' ? '' : key; this.setState({page: 1, status}); this.load(1, status); }} items={[
                     {key: 'all', label: '全部'}, {key: 'waiting', label: '待审核'}, {key: 'spam', label: '垃圾评论'}
                 ]} />
                 <Table rowKey="id" columns={columns} dataSource={this.state.data} loading={this.state.loading} pagination={{current: this.state.page, pageSize: 20, total: this.state.total, onChange: page => {this.setState({page}); this.load(page);}}} />
