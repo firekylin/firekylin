@@ -15,7 +15,26 @@ module.exports = class extends Base {
     const page = Math.max(Number(this.get('page')) || 1, 1);
     const pageSize = Math.min(Math.max(Number(this.get('pageSize')) || 20, 1), 100);
     const status = this.get('status');
+    const keyword = String(this.get('keyword') || '').trim();
+    const author = String(this.get('author') || '').trim();
     const where = status ? {status} : {};
+    if (keyword) where.comment = ['LIKE', `%${keyword}%`];
+    if (author) {
+      const pattern = `%${author}%`;
+      const matchedUsers = await this.model('user').where({
+        name: ['LIKE', pattern],
+        display_name: ['LIKE', pattern],
+        email: ['LIKE', pattern],
+        _logic: 'OR'
+      }).field('id').select();
+      where._complex = {
+        nick: ['LIKE', pattern],
+        mail: ['LIKE', pattern],
+        ip: ['LIKE', pattern],
+        ...(matchedUsers.length ? {user_id: ['IN', matchedUsers.map(user => String(user.id))]} : {}),
+        _logic: 'OR'
+      };
+    }
     const model = this.model('comment');
     const [total, data] = await Promise.all([
       model.where(where).count(),
@@ -46,7 +65,7 @@ module.exports = class extends Base {
         post_url: item.url
       };
     });
-    return this.success({page, pageSize, total: Number(total), data: rows});
+    return this.success({page, pageSize, total: Number(total), keyword, author, data: rows});
   }
 
   async postAction() {

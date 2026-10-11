@@ -12,15 +12,22 @@ const COMMENT_STATUS: Record<string, {color: string, text: string}> = {
 };
 
 export default class Comment extends React.Component<any, any> {
-    state = {loading: false, data: [], total: 0, page: 1, status: '', editing: null, content: ''};
+    state = {loading: false, data: [], total: 0, page: 1, status: '', keyword: '', author: '', editing: null, content: ''};
 
     componentDidMount() { this.load(); }
     load(page = this.state.page, status = this.state.status) {
         this.setState({loading: true});
-        http.get<any>('/admin/api/comment', {page, pageSize: 20, status}).subscribe(res => {
+        const {keyword, author} = this.state;
+        http.get<any>('/admin/api/comment', {page, pageSize: 20, status, keyword, author}).subscribe(res => {
             if (res.errno === 0) this.setState({...(res.data as any), status, loading: false});
             else this.setState({loading: false});
         });
+    }
+    search = () => {
+        this.setState({page: 1}, () => this.load(1));
+    }
+    resetSearch = () => {
+        this.setState({page: 1, keyword: '', author: ''}, () => this.load(1));
     }
     operate(id: number, operation: string, comment?: string) {
         http.post('/admin/api/comment', {id, operation, comment}).subscribe(res => {
@@ -60,6 +67,12 @@ export default class Comment extends React.Component<any, any> {
         return <>
             <BreadCrumb className="breadcrumb" {...this.props} />
             <div className="page-list"><h3 className="page-title">评论管理</h3>
+                <div className="comment-search">
+                    <Input placeholder="评论关键字" value={this.state.keyword} onChange={event => this.setState({keyword: event.target.value})} onPressEnter={this.search} allowClear />
+                    <Input placeholder="作者昵称、邮箱或 IP" value={this.state.author} onChange={event => this.setState({author: event.target.value})} onPressEnter={this.search} allowClear />
+                    <Button type="primary" onClick={this.search}>查询</Button>
+                    <Button onClick={this.resetSearch}>重置</Button>
+                </div>
                 <Tabs activeKey={this.state.status || 'all'} onChange={key => { const status = key === 'all' ? '' : key; this.setState({page: 1, status}); this.load(1, status); }} items={[
                     {key: 'all', label: '全部'}, {key: 'waiting', label: '待审核'}, {key: 'spam', label: '垃圾评论'}
                 ]} />
