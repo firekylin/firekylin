@@ -51,10 +51,10 @@ module.exports = class extends think.Service {
     }
     const options = this.model('options');
     const current = await options.getOptions();
-    if (!current.waline_jwt_secret) {
+    if (!current.comment_jwt_secret) {
       const crypto = require('crypto');
-      await options.updateOptions('waline_jwt_secret', crypto.randomBytes(32).toString('hex'));
+      await options.updateOptions('comment_jwt_secret', crypto.randomBytes(32).toString('hex'));
     }
-    await options.updateOptions('waline_schema_version', '1');
+    await options.updateOptions('comment_schema_version', '1');
   }
 };

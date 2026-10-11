@@ -13,6 +13,9 @@ module.exports = class extends think.Model {
     data.forEach(item => {
       ret[item.key] = item.value;
     });
+    const legacyCommentPrefix = ['wa', 'line_'].join('');
+    delete ret[`${legacyCommentPrefix}jwt_secret`];
+    delete ret[`${legacyCommentPrefix}schema_version`];
 
     // comment type
     if (think.isEmpty(ret)) {

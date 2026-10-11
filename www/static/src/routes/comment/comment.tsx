@@ -9,13 +9,13 @@ export default class Comment extends React.Component<any, any> {
     componentDidMount() { this.load(); }
     load(page = this.state.page, status = this.state.status) {
         this.setState({loading: true});
-        http.get<any>('/admin/api/waline_comment', {page, pageSize: 20, status}).subscribe(res => {
+        http.get<any>('/admin/api/comment', {page, pageSize: 20, status}).subscribe(res => {
             if (res.errno === 0) this.setState({...(res.data as any), status, loading: false});
             else this.setState({loading: false});
         });
     }
     operate(id: number, operation: string, comment?: string) {
-        http.post('/admin/api/waline_comment', {id, operation, comment}).subscribe(res => {
+        http.post('/admin/api/comment', {id, operation, comment}).subscribe(res => {
             if (res.errno === 0) { message.success('操作成功'); this.setState({editing: null}); this.load(); }
         });
     }

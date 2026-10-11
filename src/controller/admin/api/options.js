@@ -11,8 +11,8 @@ module.exports = class extends Base {
     const type = this.get('type');
     const model = this.model('options');
     const options = await model.getOptions();
-    delete options.waline_jwt_secret;
-    delete options.waline_schema_version;
+    delete options.comment_jwt_secret;
+    delete options.comment_schema_version;
 
     if (type === '2fa') {
       if (options.two_factor_auth.length === 32) {

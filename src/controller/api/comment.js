@@ -18,7 +18,7 @@ module.exports = class extends Base {
         if (!allowed) this.ctx.throw(403, 'Cross-origin request is not allowed');
       }
     }
-    const service = this.service('waline');
+    const service = this.service('comment');
     try {
       const {core, users, tokenService, avatarService} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
@@ -71,7 +71,7 @@ module.exports = class extends Base {
     } catch (error) {
       const status = Number(error.status || error.statusCode) || 500;
       this.ctx.status = status;
-      this.ctx.body = {errno: error.code || error.name || 'WALINE_ERROR', errmsg: error.message, data: error.data};
+      this.ctx.body = {errno: error.code || error.name || 'COMMENT_ERROR', errmsg: error.message, data: error.data};
       if (status >= 500) think.logger.error(error);
     }
   }
@@ -82,7 +82,7 @@ module.exports = class extends Base {
       const callback = encodeURIComponent(this.ctx.url);
       return this.redirect(`/admin/login?redirect=${callback}`);
     }
-    const service = this.service('waline');
+    const service = this.service('comment');
     const {core, users, tokenService, avatarService} = await service.create(this);
     const ctx = await service.context(this, users, core, tokenService, avatarService);
     const user = ctx.state.userInfo;

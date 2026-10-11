@@ -77,7 +77,7 @@
     if (!comments) {
       return;
     }
-    var load = loadWalineComment;
+    var load = loadCommentClient;
 
     if (location.hash.indexOf('#comments') > -1) {
       load();
@@ -93,24 +93,24 @@
       }, 300);
     }
   };
-  var loadWalineComment = function() {
-    var waline_thread = getById('waline-container');
-    if (!waline_thread || waline_thread.getAttribute('data-loaded')) {
+  var loadCommentClient = function() {
+    var commentThread = getById('comment-container');
+    if (!commentThread || commentThread.getAttribute('data-loaded')) {
       return;
     }
-    waline_thread.setAttribute('data-loaded', '1');
-    var walineConfig = waline_thread.getAttribute('data-name');
-    if (walineConfig) {
-      walineConfig = JSON.parse(walineConfig);
+    commentThread.setAttribute('data-loaded', '1');
+    var commentConfig = commentThread.getAttribute('data-name');
+    if (commentConfig) {
+      commentConfig = JSON.parse(commentConfig);
     }
-    walineConfig.el = '#waline-container';
-    walineConfig.path = location.pathname;
+    commentConfig.el = '#comment-container';
+    commentConfig.path = location.pathname;
 
     var link = doc.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.css';
     (doc.head || doc.body).appendChild(link);
-    var session = fetch(walineConfig.serverURL + '/api/token', {credentials: 'same-origin'})
+    var session = fetch(commentConfig.serverURL + '/api/token', {credentials: 'same-origin'})
       .then(function(response) { return response.json(); })
       .then(function(result) { return result.errno === 0 ? result.data : null; })
       .catch(function() { return null; });
@@ -123,10 +123,10 @@
       } else {
         localStorage.removeItem('WALINE_USER');
       }
-      waline_thread.textContent = '';
-      module.init(walineConfig);
+      commentThread.textContent = '';
+      module.init(commentConfig);
     }).catch(function() {
-      waline_thread.textContent = '评论组件加载失败，请稍后重试。';
+      commentThread.textContent = '评论组件加载失败，请稍后重试。';
     });
   };
 

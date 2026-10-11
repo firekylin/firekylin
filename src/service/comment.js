@@ -3,8 +3,8 @@
 
 const crypto = require('crypto');
 const {marked} = require('marked');
-const {createWalineCore, WalineError} = require('../vendor/waline-core.cjs');
-const {ModelAdapter, UserAdapter} = require('./waline-adapter');
+const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
+const {ModelAdapter, UserAdapter} = require('./comment-adapter');
 
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
@@ -12,10 +12,10 @@ function signature(secret, value) {
 
 module.exports = class extends think.Service {
   async create(controller) {
-    await controller.service('waline-schema').ensure();
+    await controller.service('comment-schema').ensure();
     const options = await controller.model('options').getOptions();
     const config = options.comment || {};
-    const secret = options.waline_jwt_secret;
+    const secret = options.comment_jwt_secret;
     const users = new UserAdapter(controller.model('user'));
     const tokenService = {
       sign(id) { const value = `${id}.${Date.now()}`; return `${value}.${signature(secret, value)}` },
@@ -31,7 +31,7 @@ module.exports = class extends think.Service {
     const avatarService = {
       stringify: value => value.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(value.mail || value.email || '').toLowerCase())}?d=mp`
     };
-    const core = createWalineCore({
+    const core = createCommentCore({
       models: {
         Comment: new ModelAdapter(controller.model('comment')),
         Counter: new ModelAdapter(controller.model('counter')),
@@ -67,12 +67,12 @@ module.exports = class extends think.Service {
       origin: controller.ctx.get('origin'),
       referrer: controller.ctx.referrer(),
       requestUrl: controller.ctx.url,
-      serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/waline`
+      serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/comment`
     };
     if (token) {
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
-    // A Firekylin administrator session is also a Waline administrator session.
+    // A Firekylin administrator session is also a comment administrator session.
     const sessionUser = await controller.session('userInfo') || {};
     if (Number(sessionUser.type) === 1) {
       const found = await users.select({objectId: String(sessionUser.id)});
@@ -89,11 +89,11 @@ module.exports = class extends think.Service {
 
   async validateCommentTarget(controller, url) {
     const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
-    if (!match) throw new WalineError('INVALID_PATH', 400, 'Comment target does not exist');
+    if (!match) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
     const type = match[1] === 'page' ? 1 : 0;
     const pathname = match[2].replace(/\.html$/, '');
     const post = await controller.model('post').where({pathname, type, status: 3, is_public: 1, allow_comment: 1}).find();
-    if (think.isEmpty(post)) throw new WalineError('COMMENT_DISABLED', 403, 'Comment is disabled');
+    if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
 

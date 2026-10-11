@@ -5,7 +5,7 @@ const Base = require('./base');
 
 module.exports = class extends Base {
   async getAction() {
-    await this.service('waline-schema').ensure();
+    await this.service('comment-schema').ensure();
     const page = Math.max(Number(this.get('page')) || 1, 1);
     const pageSize = Math.min(Math.max(Number(this.get('pageSize')) || 20, 1), 100);
     const status = this.get('status');
@@ -30,7 +30,7 @@ module.exports = class extends Base {
     else if (['approved', 'waiting', 'spam'].includes(action)) await model.where({id}).update({status: action, updated_at: think.datetime()});
     else if (action === 'edit') await model.where({id}).update({comment: String(this.post('comment') || ''), updated_at: think.datetime()});
     else return this.fail('INVALID_OPERATION');
-    await this.service('waline').syncCount(this, comment.url);
+    await this.service('comment').syncCount(this, comment.url);
     return this.success();
   }
 };

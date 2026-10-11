@@ -2,7 +2,7 @@
 
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const {createWalineCore} = require('../../src/vendor/waline-core.cjs');
+const {createCommentCore} = require('../../src/vendor/comment-core.cjs');
 
 class MemoryModel {
   constructor() { this.rows = []; this.nextId = 1 }
@@ -45,9 +45,9 @@ class MemoryModel {
   async delete(where) { this.rows = this.rows.filter(row => !this.matches(row, where)) }
 }
 
-test('vendored Waline Core creates, lists and counts comments', async() => {
+test('vendored comment core creates, lists and counts comments', async() => {
   const Comment = new MemoryModel();
-  const core = createWalineCore({
+  const core = createCommentCore({
     models: {Comment, Counter: new MemoryModel(), Users: new MemoryModel()},
     services: {markdown: {render: value => `<p>${value}</p>`}}
   });
@@ -60,9 +60,9 @@ test('vendored Waline Core creates, lists and counts comments', async() => {
   assert.deepEqual(await core.comment.count({url: '/post/hello.html'}, ctx), [1]);
 });
 
-test('vendored Waline Core keeps waiting comments private', async() => {
+test('vendored comment core keeps waiting comments private', async() => {
   const Comment = new MemoryModel();
-  const core = createWalineCore({models: {Comment, Counter: new MemoryModel(), Users: new MemoryModel()}, config: {audit: true}});
+  const core = createCommentCore({models: {Comment, Counter: new MemoryModel(), Users: new MemoryModel()}, config: {audit: true}});
   const ctx = {headers: {}, state: {}, ip: '127.0.0.1'};
   await core.comment.create({url: '/post/a.html', comment: 'Review me'}, ctx);
   assert.equal((await core.comment.list({path: '/post/a.html'}, ctx)).count, 0);
