@@ -79,18 +79,39 @@ module.exports = class extends think.Service {
   }
 
   async validateCommentTarget(controller, url) {
-    const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+    const pathname = await this.getCommentPath(controller, url);
+    const match = pathname.match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
     if (!match) throw new WalineError('INVALID_PATH', 400, 'Comment target does not exist');
     const type = match[1] === 'page' ? 1 : 0;
-    const pathname = match[2].replace(/\.html$/, '');
-    const post = await controller.model('post').where({pathname, type, status: 3, is_public: 1, allow_comment: 1}).find();
+    const slug = match[2].replace(/\.html$/, '');
+    const post = await controller.model('post').where({pathname: slug, type, status: 3, is_public: 1, allow_comment: 1}).find();
     if (think.isEmpty(post)) throw new WalineError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
 
+  async getCommentPath(controller, url) {
+    const value = String(url || '');
+    if (value.startsWith('/')) return value.split(/[?#]/, 1)[0];
+    try {
+      const target = new URL(value);
+      const options = await controller.model('options').getOptions();
+      const site = new URL(options.site_url);
+      if (target.origin !== site.origin) throw new Error('origin mismatch');
+      return target.pathname;
+    } catch (err) {
+      throw new WalineError('INVALID_PATH', 400, 'Comment target does not exist');
+    }
+  }
+
   async syncCount(controller, url) {
     if (!url) return;
-    const match = String(url).match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+    let path;
+    try {
+      path = await this.getCommentPath(controller, url);
+    } catch (err) {
+      return;
+    }
+    const match = path.match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
     if (!match) return;
     const count = await controller.model('comment').where({url, status: ['NOT IN', ['waiting', 'spam']]}).count();
     const pathname = match[2].replace(/\.html$/, '');

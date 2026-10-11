@@ -1,4 +1,4 @@
 <div id="comments">
   <h1 class="title">Comments</h1>
-  <div id="waline-container" data-name="<%= JSON.stringify({serverURL: '/api/waline', pageSize: firekylin.siteOptions.row.comment.pageSize || 10, lang: firekylin.siteOptions.row.comment.locale || 'zh-CN'}) %>">评论加载中...</div>
+  <div id="waline-container" data-name="<%= JSON.stringify({serverURL: '/api/waline', path: firekylin.siteOptions.siteUrl + firekylin.ctx.url, pageSize: firekylin.siteOptions.row.comment.pageSize || 10, lang: firekylin.siteOptions.row.comment.locale || 'zh-CN'}) %>">评论加载中...</div>
 </div>

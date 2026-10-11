@@ -37,6 +37,14 @@ test('migrated theme templates compile with async blocks', () => {
   });
 });
 
+test('native comments use an absolute page URL', () => {
+  const comment = fs.readFileSync(path.join(__dirname, '../../www/theme/firekylin/inc/comment.eta'), 'utf8');
+  const client = fs.readFileSync(path.join(__dirname, '../../www/theme/firekylin/res/js/firekylin.js'), 'utf8');
+
+  assert.match(comment, /path: firekylin\.siteOptions\.siteUrl \+ firekylin\.ctx\.url/);
+  assert.doesNotMatch(client, /walineConfig\.path = location\.pathname/);
+});
+
 test('migrated application views compile as Eta templates', () => {
   const eta = new Eta({varName: 'firekylin'});
   const root = path.join(__dirname, '../../view');
