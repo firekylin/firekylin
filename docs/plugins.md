@@ -212,8 +212,41 @@ ctx.routes.register({
 /api/plugins/<plugin-id>/refresh/123
 ```
 
-支持 `GET`、`POST`、`PUT`、`PATCH`、`DELETE`。路由选项：
+默认的 `scope: 'plugin'` 会保留上述命名空间。如果插件需要提供站点级页面或与站点 URL
+结构集成，可以显式使用 `scope: 'site'`：
 
+```js
+ctx.routes.register({
+  method: ['GET', 'HEAD'],
+  path: '/post/:pathname.md',
+  scope: 'site',
+  async handler({ctx: requestContext, params}) {
+    const post = await think.model('post')
+      .where({
+        pathname: params.pathname,
+        type: 0,
+        status: 3,
+        is_public: 1,
+        create_time: {'<=': think.datetime()}
+      })
+      .field('markdown_content')
+      .setRelation(false)
+      .find();
+    if (think.isEmpty(post)) return requestContext.throw(404);
+    requestContext.type = 'text/markdown; charset=utf-8';
+    return requestContext.method === 'HEAD' ? '' : post.markdown_content;
+  }
+});
+```
+
+这个路由可以通过 `/post/example.md` 直接访问。站点级路由在 Firekylin 内置路由之前
+匹配，因此插件应选择明确、唯一的路径，避免覆盖后台、API、静态资源或已有页面。
+插件停用时，站点级路由也会自动移除。
+
+支持 `GET`、`HEAD`、`POST`、`PUT`、`PATCH`、`DELETE` 和 `OPTIONS`。路由选项：
+
+- `scope: 'plugin'`：默认值，路由位于 `/api/plugins/<plugin-id>` 命名空间；
+- `scope: 'site'`：注册站点级绝对路径，不添加插件命名空间；
 - `auth: 'public'`：默认公开访问；
 - `auth: 'admin'`：要求当前登录用户为管理员；
 - `csrf: true`：修改类请求默认校验 `X-CSRF-Token`；

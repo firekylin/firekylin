@@ -21,3 +21,30 @@ test('route registry rejects collisions and removes all plugin routes', () => {
   routes.removePlugin('example');
   assert.equal(routes.routes.length, 0);
 });
+
+test('route registry exposes site routes and supports params with suffixes', () => {
+  const routes = new RouteRegistry();
+  routes.register({
+    path: '/post/:pathname.md',
+    method: ['GET', 'HEAD'],
+    scope: 'site',
+    handler() {}
+  }, 'markdown');
+  const route = routes.match('GET', '/post/hello-world.md');
+  const match = route.regexp.exec('/post/hello-world.md');
+  assert.equal(route.path, '/post/:pathname.md');
+  assert.equal(route.scope, 'site');
+  assert.deepEqual(route.names, ['pathname']);
+  assert.equal(match[1], 'hello-world');
+  assert.equal(routes.match('HEAD', '/post/hello-world.md'), route);
+  assert.equal(routes.match('GET', '/api/plugins/markdown/post/hello-world.md'), undefined);
+});
+
+test('route registry rejects unsupported scopes', () => {
+  const routes = new RouteRegistry();
+  assert.throws(() => routes.register({
+    path: '/ping',
+    scope: 'global',
+    handler() {}
+  }, 'example'), /Unsupported plugin route scope/);
+});

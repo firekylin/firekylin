@@ -3,11 +3,17 @@
 function compilePath(pattern) {
   const names = [];
   const source = pattern.split('/').map(part => {
-    if (part.startsWith(':')) {
-      names.push(part.slice(1));
-      return '([^/]+)';
+    let cursor = 0;
+    let compiled = '';
+    const parameter = /:([a-z_][a-z0-9_]*)/ig;
+    let match;
+    while ((match = parameter.exec(part))) {
+      compiled += part.slice(cursor, match.index).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      names.push(match[1]);
+      compiled += '([^/]+)';
+      cursor = match.index + match[0].length;
     }
-    return part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return compiled + part.slice(cursor).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }).join('/');
   return {regexp: new RegExp(`^${source}/?$`), names};
 }
@@ -23,14 +29,17 @@ class RouteRegistry {
       throw new TypeError('Plugin route path must start with /');
     }
     if (typeof route.handler !== 'function') throw new TypeError('Plugin route handler must be a function');
+    const scope = route.scope || 'plugin';
+    if (!['plugin', 'site'].includes(scope)) throw new TypeError(`Unsupported plugin route scope: ${scope}`);
     const methods = Array.isArray(route.method) ? route.method : [route.method || 'GET'];
     const normalized = methods.map(method => String(method).toUpperCase());
-    if (normalized.some(method => !['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(method))) {
+    if (normalized.some(method => !['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(method))) {
       throw new TypeError(`Unsupported plugin route method: ${normalized.join(', ')}`);
     }
     const prefix = `/api/plugins/${pluginId}`;
-    const path = route.path.startsWith(prefix + '/') || route.path === prefix
-      ? route.path : `${prefix}${route.path}`;
+    const path = scope === 'site' || route.path.startsWith(prefix + '/') || route.path === prefix
+      ? route.path
+      : `${prefix}${route.path}`;
     const collision = this.routes.some(item => item.path === path &&
       item.methods.some(method => normalized.includes(method)));
     if (collision) {
@@ -38,6 +47,7 @@ class RouteRegistry {
     }
     const registration = {
       pluginId,
+      scope,
       path,
       methods: normalized,
       handler: route.handler,
