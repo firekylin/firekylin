@@ -23,6 +23,20 @@ function writePlugin(root, id, source, manifest = {}) {
   fs.writeFileSync(path.join(dir, 'plugin.js'), source);
 }
 
+function writePackage(root, packageName, source, firekylin = {type: 'plugin'}, manifest = {}) {
+  const dir = path.join(root, 'node_modules', ...packageName.split('/'));
+  fs.mkdirSync(dir, {recursive: true});
+  fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
+    name: packageName,
+    version: '1.0.0',
+    main: 'plugin.js',
+    ...manifest,
+    firekylin
+  }));
+  fs.writeFileSync(path.join(dir, 'plugin.js'), source);
+  return dir;
+}
+
 test('manager discovers and activates a plugin with an isolated context', async() => {
   const root = project();
   writePlugin(root, 'example', `module.exports = {
@@ -48,6 +62,62 @@ test('manager isolates invalid plugins and continues loading', async() => {
   assert.equal(manager.plugins.has('invalid'), false);
   assert.equal(manager.plugins.get('valid').status, 'active');
   assert.equal(errors.length, 1);
+});
+
+test('manager discovers plugin packages from project npm dependencies', async() => {
+  const root = project();
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+    dependencies: {
+      'firekylin-plugin-npm-example': '1.0.0',
+      '@example/firekylin-plugin-scoped': '1.0.0',
+      'regular-package': '1.0.0'
+    }
+  }));
+  writePackage(root, 'firekylin-plugin-npm-example',
+    'module.exports = {register() { global.__firekylinNpmPlugin = true; }};',
+    {type: 'plugin', id: 'npm-example'});
+  writePackage(root, '@example/firekylin-plugin-scoped',
+    'module.exports = {register() { global.__firekylinScopedPlugin = true; }};',
+    {type: 'plugin', id: 'scoped'});
+  writePackage(root, 'regular-package', 'module.exports = {};', {});
+
+  const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
+  await manager.load();
+
+  assert.deepEqual([...manager.plugins.keys()], ['npm-example', 'scoped']);
+  assert.equal(global.__firekylinNpmPlugin, true);
+  assert.equal(global.__firekylinScopedPlugin, true);
+  delete global.__firekylinNpmPlugin;
+  delete global.__firekylinScopedPlugin;
+});
+
+test('manager also discovers plugin packages from optional dependencies', async() => {
+  const root = project();
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+    optionalDependencies: {'firekylin-plugin-optional': '1.0.0'}
+  }));
+  writePackage(root, 'firekylin-plugin-optional', 'module.exports = {register() {}};', {
+    type: 'plugin', id: 'optional'
+  });
+  const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
+  await manager.load();
+  assert.equal(manager.plugins.get('optional').status, 'active');
+});
+
+test('manager discovers plugins whose exports hide the package root and manifest', async() => {
+  const root = project();
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+    dependencies: {'firekylin-plugin-private-entry': '1.0.0'}
+  }));
+  writePackage(root, 'firekylin-plugin-private-entry', 'module.exports = {register() {}};', {
+    type: 'plugin', id: 'private-entry', entry: 'plugin.js'
+  }, {
+    exports: {'./public': './public.js'}
+  });
+
+  const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
+  await manager.load();
+  assert.equal(manager.plugins.get('private-entry').status, 'active');
 });
 
 test('manager rejects incompatible engine versions', async() => {

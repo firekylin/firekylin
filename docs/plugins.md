@@ -44,6 +44,17 @@ Firekylin 启动时扫描插件目录并加载插件。插件元数据直接使�
 }
 ```
 
+插件也可以作为 npm 包分发。使用 npm、pnpm 或 Yarn 将插件安装为项目的直接依赖即可，无需再复制到 `plugins` 目录：
+
+```sh
+npm install firekylin-plugin-reading-stats
+```
+
+Firekylin 会检查项目 `package.json` 中的 `dependencies` 和 `optionalDependencies`，加载其中声明了
+`firekylin.type: "plugin"` 的包；普通依赖不会被执行。作用域包（例如
+`@example/firekylin-plugin-reading-stats`）同样支持。插件开发者应保留上例中的 `firekylin.type`，并确保
+`main` 或 `firekylin.entry` 指向随 npm 包发布的 CommonJS 入口文件。
+
 `main` 是默认入口，`firekylin.entry` 可以覆盖它。`firekylin.id` 是稳定的插件 ID，用于路由和日志，建议不要随显示名称改变。Firekylin 版本约束可以写在 `engines.firekylin` 或 `firekylin.engine`。
 
 入口模块必须导出 `register(ctx)`，`activate(ctx)` 和 `deactivate(ctx)` 可选：
