@@ -22,7 +22,17 @@ class LoginStore {
         res => {
           if (res.errno === 0) {
             message.success('登录成功');
-            setTimeout(() => { location.reload(); }, 1000);
+            setTimeout(() => {
+              const redirect = new URLSearchParams(location.search).get('redirect');
+              if (redirect) {
+                const target = new URL(redirect, location.origin);
+                if (target.origin === location.origin) {
+                  location.href = target.href;
+                  return;
+                }
+              }
+              location.reload();
+            }, 1000);
           } else {
             this.setLoading(false);
           }

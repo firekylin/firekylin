@@ -110,7 +110,19 @@
     link.rel = 'stylesheet';
     link.href = 'https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.css';
     (doc.head || doc.body).appendChild(link);
-    import('https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.js').then(function(module) {
+    var session = fetch(walineConfig.serverURL + '/api/token', {credentials: 'same-origin'})
+      .then(function(response) { return response.json(); })
+      .then(function(result) { return result.errno === 0 ? result.data : null; })
+      .catch(function() { return null; });
+    Promise.all([import('https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.js'), session]).then(function(result) {
+      var module = result[0];
+      var user = result[1];
+      if (user && user.objectId) {
+        user.remember = true;
+        localStorage.setItem('WALINE_USER', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('WALINE_USER');
+      }
       waline_thread.textContent = '';
       module.init(walineConfig);
     }).catch(function() {

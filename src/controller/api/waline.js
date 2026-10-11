@@ -45,7 +45,13 @@ module.exports = class extends Base {
           await service.syncCount(this, old.url);
         }
       } else if (resource === 'token') {
-        if (this.isGet) result = await core.auth.resolveSession({token: ctx.state.token}, ctx);
+        if (this.isGet) {
+          if (ctx.state.userInfo) {
+            const userInfo = {...ctx.state.userInfo};
+            delete userInfo.password;
+            result = userInfo;
+          } else result = await core.auth.resolveSession({token: ctx.state.token}, ctx);
+        }
         else if (this.isDelete) result = {};
         else result = await core.auth.login(input, ctx);
       } else if (resource === 'user') {
@@ -60,7 +66,7 @@ module.exports = class extends Base {
       } else {
         this.ctx.throw(404);
       }
-      return this.success(typeof result === 'undefined' ? {} : result);
+      this.ctx.success(typeof result === 'undefined' ? {} : result);
     } catch (error) {
       const status = Number(error.status || error.statusCode) || 500;
       this.ctx.status = status;
@@ -69,8 +75,20 @@ module.exports = class extends Base {
     }
   }
 
-  loginPage() {
+  async loginPage() {
+    const sessionUser = await this.session('userInfo') || {};
+    if (think.isEmpty(sessionUser)) {
+      const callback = encodeURIComponent(this.ctx.url);
+      return this.redirect(`/admin/login?redirect=${callback}`);
+    }
+    const {UserAdapter} = require('../../service/waline-adapter');
+    const users = new UserAdapter(this.model('user'));
+    const [user] = await users.select({objectId: String(sessionUser.id)});
+    if (!user) return this.redirect('/admin/login');
+    const userInfo = {...user};
+    delete userInfo.password;
+    const data = JSON.stringify({...userInfo, remember: true}).replace(/</g, '\\u003c');
     this.ctx.type = 'text/html';
-    this.ctx.body = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>评论登录</title><style>body{font:16px system-ui;max-width:420px;margin:10vh auto;padding:24px}input,button{box-sizing:border-box;width:100%;padding:10px;margin:6px 0}button{cursor:pointer}.error{color:#c00}</style></head><body><h1>评论账号</h1><form id="form"><input name="display_name" placeholder="昵称（注册时填写）"><input name="email" type="email" required placeholder="邮箱"><input name="password" type="password" required placeholder="密码"><button name="mode" value="login">登录</button><button name="mode" value="register" type="button" id="register">注册</button></form><p class="error" id="error"></p><script>const form=document.querySelector(\'#form\'),error=document.querySelector(\'#error\');async function submit(mode){error.textContent=\'\';const body=Object.fromEntries(new FormData(form));const path=mode===\'register\'?\'user\':\'token\';const response=await fetch(\'/api/waline/api/\'+path,{method:\'POST\',headers:{\'content-type\':\'application/json\'},body:JSON.stringify(body)});const result=await response.json();if(result.errno){error.textContent=result.errmsg||\'操作失败\';return}if(mode===\'register\'){error.style.color=\'green\';error.textContent=\'注册成功，请登录\';return}const data={...result.data,remember:true};if(window.opener){window.opener.postMessage({type:\'userInfo\',data},location.origin);window.close()}else{const redirect=new URLSearchParams(location.search).get(\'redirect\');localStorage.setItem(\'WALINE_USER\',JSON.stringify(data));location.href=redirect||\'/\'}}form.addEventListener(\'submit\',event=>{event.preventDefault();submit(\'login\').catch(err=>error.textContent=err.message)});document.querySelector(\'#register\').onclick=()=>submit(\'register\').catch(err=>error.textContent=err.message);</script></body></html>';
+    this.ctx.body = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>评论登录成功</title></head><body><p>登录成功，正在返回评论页面…</p><script>const data=${data};localStorage.setItem('WALINE_USER',JSON.stringify(data));if(window.opener){window.opener.postMessage({type:'userInfo',data},location.origin);window.close()}else{location.href='/'}</script></body></html>`;
   }
 };

@@ -12,7 +12,7 @@ function signature(secret, value) {
 
 module.exports = class extends think.Service {
   async create(controller) {
-    await this.service('waline-schema').ensure();
+    await controller.service('waline-schema').ensure();
     const options = await controller.model('options').getOptions();
     const config = options.comment || {};
     const secret = options.waline_jwt_secret;

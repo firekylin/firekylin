@@ -20,7 +20,7 @@ function dbWhere(where = {}) {
   for (const [key, value] of Object.entries(where)) {
     if (key === '_complex') output._complex = dbWhere(value);
     else if (key === '_logic') output._logic = value;
-    else output[dbField(key)] = value;
+    else output[dbField(key)] = typeof value === 'undefined' ? null : value;
   }
   return output;
 }
