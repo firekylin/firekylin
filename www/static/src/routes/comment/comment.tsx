@@ -3,6 +3,7 @@ import { Button, Input, Modal, Space, Table, Tabs, Tag, message } from 'antd';
 import BreadCrumb from '../../components/breadcrumb';
 import { http } from '../../utils/http';
 import firekylin from '../../utils/firekylin';
+import './comment.less';
 
 const COMMENT_STATUS: Record<string, {color: string, text: string}> = {
     approved: {color: 'green', text: '已通过'},
@@ -28,8 +29,22 @@ export default class Comment extends React.Component<any, any> {
     }
     render() {
         const columns: any[] = [
-            {title: '作者', dataIndex: 'nick', width: 140, render: (value: string) => value || '匿名'},
-            {title: '评论', dataIndex: 'comment', render: (value: string) => <div style={{whiteSpace: 'pre-wrap'}}>{value}</div>},
+            {title: '作者', key: 'author', width: 250, render: (_: any, row: any) => {
+                const avatar = <img className="comment-author-avatar" src={row.author_avatar} alt={row.author_name} />;
+                const name = <span className="comment-author-name">{row.author_name}</span>;
+                return <div className="comment-author">
+                    {row.author_link ? <a href={row.author_link} target="_blank" rel="noopener noreferrer">{avatar}</a> : avatar}
+                    <div className="comment-author-info">
+                        {row.author_link ? <a href={row.author_link} target="_blank" rel="noopener noreferrer">{name}</a> : name}
+                        <span>{row.author_email || '-'}</span>
+                        <span>{row.ip || '-'}</span>
+                    </div>
+                </div>;
+            }},
+            {title: '内容', dataIndex: 'comment', render: (value: string, row: any) => <div className="comment-content">
+                <div className="comment-meta">{firekylin.formatTime(row.inserted_at)} 于 <a href={row.post_url} target="_blank" rel="noopener noreferrer">{row.post_title}</a></div>
+                <div className="comment-body">{value}</div>
+            </div>},
             {title: '状态', dataIndex: 'status', width: 100, render: (value: string) => {
                 const status = COMMENT_STATUS[value] || {color: 'default', text: '未知'};
                 return <Tag color={status.color}>{status.text}</Tag>;

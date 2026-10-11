@@ -3,6 +3,12 @@
 
 const Base = require('./base');
 
+function getTarget(url) {
+  const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+  if (!match) return null;
+  return {type: match[1] === 'page' ? 1 : 0, pathname: match[2].replace(/\.html$/, '')};
+}
+
 module.exports = class extends Base {
   async getAction() {
     await this.service('comment-schema').ensure();
@@ -16,7 +22,31 @@ module.exports = class extends Base {
       model.where(where).order('inserted_at DESC').page(page, pageSize)
         .select()
     ]);
-    return this.success({page, pageSize, total: Number(total), data});
+    const userIds = [...new Set(data.map(item => item.user_id).filter(Boolean))];
+    const targets = data.map(item => getTarget(item.url)).filter(Boolean);
+    const pathnames = [...new Set(targets.map(item => item.pathname))];
+    const [users, posts] = await Promise.all([
+      userIds.length ? this.model('user').where({id: ['IN', userIds]}).field('id,name,display_name,email,url,avatar').select() : [],
+      pathnames.length ? this.model('post').where({pathname: ['IN', pathnames]}).field('title,pathname,type').select() : []
+    ]);
+    const userMap = new Map(users.map(user => [String(user.id), user]));
+    const postMap = new Map(posts.map(post => [`${post.type}:${post.pathname}`, post]));
+    const rows = data.map(item => {
+      const user = userMap.get(String(item.user_id)) || {};
+      const email = user.email || item.mail || '';
+      const target = getTarget(item.url);
+      const post = target ? postMap.get(`${target.type}:${target.pathname}`) : null;
+      return {
+        ...item,
+        author_name: user.display_name || user.name || item.nick || '匿名',
+        author_email: email,
+        author_link: user.url || item.link || '',
+        author_avatar: user.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(email).toLowerCase())}?d=mp`,
+        post_title: post ? post.title : item.url,
+        post_url: item.url
+      };
+    });
+    return this.success({page, pageSize, total: Number(total), data: rows});
   }
 
   async postAction() {
