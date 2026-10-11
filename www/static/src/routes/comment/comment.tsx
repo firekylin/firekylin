@@ -2,6 +2,13 @@ import * as React from 'react';
 import { Button, Input, Modal, Space, Table, Tabs, Tag, message } from 'antd';
 import BreadCrumb from '../../components/breadcrumb';
 import { http } from '../../utils/http';
+import firekylin from '../../utils/firekylin';
+
+const COMMENT_STATUS: Record<string, {color: string, text: string}> = {
+    approved: {color: 'green', text: '已通过'},
+    waiting: {color: 'orange', text: '待审核'},
+    spam: {color: 'red', text: '垃圾评论'},
+};
 
 export default class Comment extends React.Component<any, any> {
     state = {loading: false, data: [], total: 0, page: 1, status: '', editing: null, content: ''};
@@ -21,10 +28,13 @@ export default class Comment extends React.Component<any, any> {
     }
     render() {
         const columns: any[] = [
-            {title: '作者', key: 'author', width: 180, render: (_: any, row: any) => <><div>{row.nick || '匿名'}</div><small>{row.mail}</small></>},
-            {title: '评论', dataIndex: 'comment', render: (value: string, row: any) => <><div style={{whiteSpace: 'pre-wrap'}}>{value}</div><small>{row.url}</small></>},
-            {title: '状态', dataIndex: 'status', width: 90, render: (value: string) => <Tag color={value === 'approved' ? 'green' : value === 'spam' ? 'red' : 'orange'}>{value}</Tag>},
-            {title: '时间', dataIndex: 'inserted_at', width: 170},
+            {title: '作者', dataIndex: 'nick', width: 140, render: (value: string) => value || '匿名'},
+            {title: '评论', dataIndex: 'comment', render: (value: string) => <div style={{whiteSpace: 'pre-wrap'}}>{value}</div>},
+            {title: '状态', dataIndex: 'status', width: 100, render: (value: string) => {
+                const status = COMMENT_STATUS[value] || {color: 'default', text: '未知'};
+                return <Tag color={status.color}>{status.text}</Tag>;
+            }},
+            {title: '时间', dataIndex: 'inserted_at', width: 190, render: (value: string) => firekylin.formatTime(value)},
             {title: '操作', width: 270, render: (_: any, row: any) => <Space wrap>
                 {row.status !== 'approved' && <Button size="small" onClick={() => this.operate(row.id, 'approved')}>通过</Button>}
                 {row.status !== 'spam' && <Button size="small" danger onClick={() => this.operate(row.id, 'spam')}>垃圾</Button>}
