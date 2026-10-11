@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const {createRequire} = require('module');
 const semver = require('semver');
 const EventBus = require('./events');
 const RouteRegistry = require('./routes');
@@ -9,6 +10,29 @@ const TemplateRegistry = require('./templates');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
+
+function packageDependencies(manifest) {
+  return [manifest.dependencies, manifest.optionalDependencies]
+    .filter(dependencies => dependencies && typeof dependencies === 'object' && !Array.isArray(dependencies))
+    .flatMap(dependencies => Object.keys(dependencies));
+}
+
+function findPackageRoot(entry, packageName) {
+  let directory = path.dirname(entry);
+  while (true) {
+    const manifestPath = path.join(directory, 'package.json');
+    if (fs.existsSync(manifestPath)) {
+      try {
+        if (JSON.parse(fs.readFileSync(manifestPath, 'utf8')).name === packageName) return directory;
+      } catch (error) {
+        // readManifest reports malformed plugin manifests after discovery.
+      }
+    }
+    const parent = path.dirname(directory);
+    if (parent === directory) return null;
+    directory = parent;
+  }
+}
 
 function readManifest(pluginRoot) {
   const manifestPath = path.join(pluginRoot, 'package.json');
@@ -64,12 +88,47 @@ class PluginManager {
     return path.resolve(this.projectPath, this.config.pluginsPath || 'plugins');
   }
 
+  discoverPackages() {
+    const projectManifestPath = path.join(this.projectPath, 'package.json');
+    if (!fs.existsSync(projectManifestPath)) return [];
+    let projectManifest;
+    try {
+      projectManifest = JSON.parse(fs.readFileSync(projectManifestPath, 'utf8'));
+    } catch (error) {
+      throw new Error(`Unable to read project manifest ${projectManifestPath}: ${error.message}`, {cause: error});
+    }
+    const projectRequire = createRequire(projectManifestPath);
+    return [...new Set(packageDependencies(projectManifest))].flatMap(packageName => {
+      let manifestPath;
+      let packageRoot;
+      try {
+        manifestPath = projectRequire.resolve(`${packageName}/package.json`);
+        packageRoot = path.dirname(manifestPath);
+      } catch (manifestError) {
+        try {
+          packageRoot = findPackageRoot(projectRequire.resolve(packageName), packageName);
+          if (!packageRoot) return [];
+          manifestPath = path.join(packageRoot, 'package.json');
+        } catch (entryError) {
+          return [];
+        }
+      }
+      try {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        return manifest.firekylin && manifest.firekylin.type === 'plugin' ? [packageRoot] : [];
+      } catch (error) {
+        this.logger.error?.(`[plugin] Unable to inspect npm package ${packageName}: ${error.message}`);
+        return [];
+      }
+    });
+  }
+
   discover() {
     const root = this.pluginRoot();
-    if (!fs.existsSync(root)) return [];
-    return fs.readdirSync(root, {withFileTypes: true})
+    const directories = fs.existsSync(root) ? fs.readdirSync(root, {withFileTypes: true})
       .filter(entry => entry.isDirectory())
-      .map(entry => path.join(root, entry.name));
+      .map(entry => path.join(root, entry.name)) : [];
+    return [...new Set([...directories, ...this.discoverPackages()].map(directory => fs.realpathSync(directory)))];
   }
 
   loadManifest(pluginRoot) {
