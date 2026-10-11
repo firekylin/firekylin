@@ -47,6 +47,8 @@ module.exports = class extends Base {
     const where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
     const config = await this.getConfig();
     delete config.password_salt;
+    delete config.waline_jwt_secret;
+    delete config.waline_schema_version;
 
     return this.success({
       versions: data,

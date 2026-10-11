@@ -1,0 +1,69 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const test = require('node:test');
+const {createWalineCore} = require('../../src/vendor/waline-core.cjs');
+
+class MemoryModel {
+  constructor() { this.rows = []; this.nextId = 1 }
+  matches(row, where = {}) {
+    return Object.entries(where).every(([key, value]) => {
+      if (key === '_complex') return this.matches(row, value);
+      if (key === '_logic') return true;
+      if (!Array.isArray(value)) return row[key] === value;
+      const [operator, operand] = value;
+      if (operator === 'IN') return operand.includes(row[key]);
+      if (operator === 'NOT IN') return !operand.includes(row[key]);
+      if (operator === '!=') return row[key] !== operand;
+      if (operator === '>') return row[key] > operand;
+      return true;
+    });
+  }
+  async select(where = {}, options = {}) {
+    let rows = this.rows.filter(row => this.matches(row, where));
+    if (options.order) {
+      const order = options.order;
+      rows = rows.sort((a, b) => {
+        for (const item of order) {
+          if (a[item.field] === b[item.field]) continue;
+          const result = a[item.field] > b[item.field] ? 1 : -1;
+          return item.direction === 'desc' ? -result : result;
+        }
+        return 0;
+      });
+    }
+    return rows.slice(options.offset || 0, options.limit ? (options.offset || 0) + options.limit : undefined).map(row => ({...row}));
+  }
+  async count(where = {}) { return this.rows.filter(row => this.matches(row, where)).length }
+  async add(data) { const row = {...data, objectId: String(this.nextId++)}; this.rows.push(row); return {...row} }
+  async update(data, where) {
+    return this.rows.filter(row => this.matches(row, where)).map(row => {
+      Object.assign(row, typeof data === 'function' ? data(row) : data);
+      return {...row};
+    });
+  }
+  async delete(where) { this.rows = this.rows.filter(row => !this.matches(row, where)) }
+}
+
+test('vendored Waline Core creates, lists and counts comments', async() => {
+  const Comment = new MemoryModel();
+  const core = createWalineCore({
+    models: {Comment, Counter: new MemoryModel(), Users: new MemoryModel()},
+    services: {markdown: {render: value => `<p>${value}</p>`}}
+  });
+  const ctx = {headers: {}, state: {}, ip: '127.0.0.1'};
+  const created = await core.comment.create({url: '/post/hello.html', comment: 'Hello', nick: 'Tester'}, ctx);
+  assert.equal(created.comment, '<p>Hello</p>');
+  const list = await core.comment.list({path: '/post/hello.html'}, ctx);
+  assert.equal(list.count, 1);
+  assert.equal(list.data[0].nick, 'Tester');
+  assert.deepEqual(await core.comment.count({url: '/post/hello.html'}, ctx), [1]);
+});
+
+test('vendored Waline Core keeps waiting comments private', async() => {
+  const Comment = new MemoryModel();
+  const core = createWalineCore({models: {Comment, Counter: new MemoryModel(), Users: new MemoryModel()}, config: {audit: true}});
+  const ctx = {headers: {}, state: {}, ip: '127.0.0.1'};
+  await core.comment.create({url: '/post/a.html', comment: 'Review me'}, ctx);
+  assert.equal((await core.comment.list({path: '/post/a.html'}, ctx)).count, 0);
+});

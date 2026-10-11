@@ -187,9 +187,33 @@ CREATE TABLE `fk_user` (
   `last_login_ip` varchar(20) NOT NULL DEFAULT '',
   `app_key` varchar(255) DEFAULT NULL,
   `app_secret` varchar(255) DEFAULT NULL,
+  `url` varchar(512) DEFAULT NULL,
+  `avatar` varchar(512) DEFAULT NULL,
+  `comment_label` varchar(255) DEFAULT NULL,
+  `comment_2fa` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `fk_comment` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `comment` text NOT NULL,
+  `url` varchar(191) NOT NULL,
+  `mail` varchar(255), `nick` varchar(255), `link` varchar(512),
+  `pid` varchar(64), `rid` varchar(64), `ua` text, `ip` varchar(64), `user_id` varchar(64),
+  `status` varchar(32) NOT NULL DEFAULT 'approved', `sticky` tinyint NOT NULL DEFAULT 0,
+  `like` int NOT NULL DEFAULT 0, `inserted_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`), KEY `fk_comment_url_idx` (`url`), KEY `fk_comment_status_idx` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `fk_counter` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT, `url` varchar(191) NOT NULL,
+  `time` int NOT NULL DEFAULT 0, `reaction0` int NOT NULL DEFAULT 0, `reaction1` int NOT NULL DEFAULT 0,
+  `reaction2` int NOT NULL DEFAULT 0, `reaction3` int NOT NULL DEFAULT 0, `reaction4` int NOT NULL DEFAULT 0,
+  `reaction5` int NOT NULL DEFAULT 0, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`), UNIQUE KEY `fk_counter_url_idx` (`url`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

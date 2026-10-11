@@ -11,6 +11,8 @@ function parse(value, fallback) {
 module.exports = class extends Widget {
   async execute() {
     const options = await this.model('options').getOptions();
+    delete options.waline_jwt_secret;
+    delete options.waline_schema_version;
     options.navigation = parse(options.navigation, []);
     options.themeConfig = parse(options.themeConfig, {});
     if (options.comment && options.comment.name) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, FormInstance } from 'antd';
-import { Input, Button, Radio, Modal } from 'antd';
+import { Input, Button, Radio, Modal, Switch, InputNumber, Select } from 'antd';
 import { inject, observer } from 'mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import './comment.less';
@@ -19,6 +19,11 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
         comment: {
            type: '',
            name: '',
+           audit: false,
+           forceLogin: false,
+           pageSize: 10,
+           locale: 'zh-CN',
+           ipQps: 60,
         },
         submitting: false,
     };
@@ -39,7 +44,12 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
             submitting: false,
             comment: {
                 type: comment.type || 'disqus',
-                name
+                name,
+                audit: Boolean(comment.audit),
+                forceLogin: Boolean(comment.forceLogin),
+                pageSize: Number(comment.pageSize) || 10,
+                locale: comment.locale || 'zh-CN',
+                ipQps: Number(comment.ipQps) || 60
             }
         };
     }
@@ -76,7 +86,11 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
     handleSubmit = (values: any) => {
         const params = {
             name: this.isCommentTypeSite() ? values.site : values.code,
-            type: values.type
+            type: values.type,
+            ...(values.type === 'waline-native' ? {
+                name: '', audit: Boolean(values.audit), forceLogin: Boolean(values.forceLogin),
+                pageSize: values.pageSize, locale: values.locale, ipQps: values.ipQps
+            } : {})
         };
         this.props.commentStore.commentSave(params);
     }
@@ -104,6 +118,7 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
                                     onChange={e => this.handleChange(e)}
                                 >
                                     <Radio value="waline">Waline（<a href="https://waline.js.org" target="_blank">官网</a>）</Radio>
+                                    <Radio value="waline-native">内置 Waline</Radio>
                                     <Radio value="valine">Valine</Radio>
                                     <Radio value="disqus">Disqus</Radio>
                                     <Radio value="hypercomments">HyperComments</Radio>
@@ -112,7 +127,15 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
                                     <Radio value="custom">自定义</Radio>
                                 </RadioGroup>
                             </Form.Item>
-                            {
+                            { comment.type === 'waline-native' ?
+                                <div className="comment-content">
+                                    <Form.Item label="评论需要审核" name="audit" valuePropName="checked" initialValue={comment.audit}><Switch /></Form.Item>
+                                    <Form.Item label="必须登录后评论" name="forceLogin" valuePropName="checked" initialValue={comment.forceLogin}><Switch /></Form.Item>
+                                    <Form.Item label="每页评论数" name="pageSize" initialValue={comment.pageSize} rules={[{required: true}]}><InputNumber min={1} max={100} /></Form.Item>
+                                    <Form.Item label="界面语言" name="locale" initialValue={comment.locale}><Select options={[{value: 'zh-CN', label: '简体中文'}, {value: 'en-US', label: 'English'}]} /></Form.Item>
+                                    <Form.Item label="同 IP 评论间隔（秒）" name="ipQps" initialValue={comment.ipQps}><InputNumber min={1} max={3600} /></Form.Item>
+                                </div>
+                            :
                                 this.isCommentTypeSite() ?
                                     <div className="comment-content">
                                         <label>网站名称（<a onClick={() => this.openDialog()}>有疑问</a>）</label>

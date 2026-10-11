@@ -119,5 +119,25 @@ CREATE TABLE fk_user (
   last_login_time DATETIME NOT NULL,
   last_login_ip TEXT NOT NULL DEFAULT '',
   app_key TEXT DEFAULT NULL,
-  app_secret TEXT DEFAULT NULL
+  app_secret TEXT DEFAULT NULL,
+  url TEXT DEFAULT NULL,
+  avatar TEXT DEFAULT NULL,
+  comment_label TEXT DEFAULT NULL,
+  comment_2fa TEXT DEFAULT NULL
+);
+
+CREATE TABLE fk_comment (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, comment TEXT NOT NULL, url TEXT NOT NULL,
+  mail TEXT, nick TEXT, link TEXT, pid TEXT, rid TEXT, ua TEXT, ip TEXT, user_id TEXT,
+  status TEXT NOT NULL DEFAULT 'approved', sticky INTEGER NOT NULL DEFAULT 0, "like" INTEGER NOT NULL DEFAULT 0,
+  inserted_at DATETIME NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL
+);
+CREATE INDEX fk_comment_url_idx ON fk_comment(url);
+CREATE INDEX fk_comment_status_idx ON fk_comment(status);
+
+CREATE TABLE fk_counter (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL UNIQUE, time INTEGER NOT NULL DEFAULT 0,
+  reaction0 INTEGER NOT NULL DEFAULT 0, reaction1 INTEGER NOT NULL DEFAULT 0, reaction2 INTEGER NOT NULL DEFAULT 0,
+  reaction3 INTEGER NOT NULL DEFAULT 0, reaction4 INTEGER NOT NULL DEFAULT 0, reaction5 INTEGER NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL
 );

@@ -50,6 +50,8 @@ module.exports = class extends think.Controller {
       options.navigation = JSON.parse(options.navigation);
     } catch (e) { options.navigation = [] }
     delete options.push_sites; // 不显示推送的配置，会有安全问题
+    delete options.waline_jwt_secret;
+    delete options.waline_schema_version;
 
     if (firekylin.require('auth')) {
       options.intranet = true;

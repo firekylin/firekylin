@@ -26,6 +26,7 @@ global.firekylin = {
   USER_ADMIN: 1,
   USER_EDITOR: 2,
   USER_CONTRIBUTOR: 3,
+  USER_COMMENTER: 4,
   USER_AVAILABLE: 1,
   USER_DISABLED: 2,
   Widget: widget.Widget,

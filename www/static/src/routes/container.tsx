@@ -16,6 +16,7 @@ const Tag = lazy(() => import('./tag/tag'));
 const Push = lazy(() => import('./push/push'));
 const Appearance = lazy(() => import('./appearance/appearance'));
 const Options = lazy(() => import('./options/options'));
+const Comment = lazy(() => import('./comment/comment'));
 
 const routerOptions = {
     basename: '/admin',
@@ -56,6 +57,7 @@ class Container extends React.Component<any, {}> {
                                 <Route path={`/push`} component={Push} />
                                 <Route path="/appearance" component={Appearance} />
                                 <Route path="/options" component={Options} />
+                                <Route path="/comment" component={Comment} />
                                 <Redirect to="/dashboard" />
                             </Switch>
                         </Suspense>

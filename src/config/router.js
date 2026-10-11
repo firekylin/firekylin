@@ -1,4 +1,5 @@
 module.exports = [
+  [/^api\/waline\/(?:api\/)?([^/]+)(?:\/([^/]+))?\/?$/i, 'api/waline/index?resource=:1&id=:2'],
   // [/^admin/, 'admin'],
 
   [/^cate\/(.+)(?:\.html|\.json)$/i, 'post/list?cate=:1'],

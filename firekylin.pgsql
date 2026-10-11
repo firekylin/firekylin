@@ -137,9 +137,30 @@ CREATE TABLE fk_user (
     last_login_time timestamp without time zone,
     last_login_ip character varying(20),
     app_key character varying(255),
-    app_secret character varying(255)
+    app_secret character varying(255),
+    url character varying(512),
+    avatar character varying(512),
+    comment_label character varying(255),
+    comment_2fa character varying(64)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS fk_user_pkey ON fk_user(id int4_ops);
 CREATE UNIQUE INDEX IF NOT EXISTS fk_user_name_key ON fk_user(name text_ops);
 CREATE UNIQUE INDEX IF NOT EXISTS fk_user_email_key ON fk_user(email text_ops);
+
+CREATE TABLE fk_comment (
+    id SERIAL PRIMARY KEY, comment text NOT NULL, url character varying(512) NOT NULL,
+    mail character varying(255), nick character varying(255), link character varying(512),
+    pid character varying(64), rid character varying(64), ua text, ip character varying(64), user_id character varying(64),
+    status character varying(32) NOT NULL DEFAULT 'approved', sticky integer NOT NULL DEFAULT 0,
+    "like" integer NOT NULL DEFAULT 0, inserted_at timestamp NOT NULL, created_at timestamp NOT NULL, updated_at timestamp NOT NULL
+);
+CREATE INDEX fk_comment_url_idx ON fk_comment(url);
+CREATE INDEX fk_comment_status_idx ON fk_comment(status);
+
+CREATE TABLE fk_counter (
+    id SERIAL PRIMARY KEY, url character varying(512) NOT NULL UNIQUE, time integer NOT NULL DEFAULT 0,
+    reaction0 integer NOT NULL DEFAULT 0, reaction1 integer NOT NULL DEFAULT 0, reaction2 integer NOT NULL DEFAULT 0,
+    reaction3 integer NOT NULL DEFAULT 0, reaction4 integer NOT NULL DEFAULT 0, reaction5 integer NOT NULL DEFAULT 0,
+    created_at timestamp NOT NULL, updated_at timestamp NOT NULL
+);

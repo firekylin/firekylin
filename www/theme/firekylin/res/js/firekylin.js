@@ -79,7 +79,9 @@
     }
     var load = function() {
       var dataType = comments.getAttribute('data-type');
-      if (dataType === 'disqus') {
+      if (dataType === 'waline-native') {
+        loadWalineComment();
+      } else if (dataType === 'disqus') {
         loadDisqusComment();
       } else if (dataType === 'hypercomments') {
         loadHyperComments();
@@ -210,6 +212,10 @@
 
   var loadWalineComment = function() {
     var waline_thread = getById('waline-container');
+    if (!waline_thread || waline_thread.getAttribute('data-loaded')) {
+      return;
+    }
+    waline_thread.setAttribute('data-loaded', '1');
     var walineConfig = waline_thread.getAttribute('data-name');
     if (walineConfig) {
       walineConfig = JSON.parse(walineConfig);
@@ -217,12 +223,16 @@
     walineConfig.el = '#waline-container';
     walineConfig.path = location.pathname;
 
-    var s = document.createElement('script');
-    s.src = '//cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js';
-    s.onload = function() {
-      Waline(walineConfig);
-    };
-    (doc.head || doc.body).appendChild(s);
+    var link = doc.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.css';
+    (doc.head || doc.body).appendChild(link);
+    import('https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.js').then(function(module) {
+      waline_thread.textContent = '';
+      module.init(walineConfig);
+    }).catch(function() {
+      waline_thread.textContent = '评论组件加载失败，请稍后重试。';
+    });
   };
 
   var loadValineComment = function() {
