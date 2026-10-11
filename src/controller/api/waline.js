@@ -19,8 +19,8 @@ module.exports = class extends Base {
     }
     const service = this.service('waline');
     try {
-      const {core, users} = await service.create(this);
-      const ctx = await service.context(this, users);
+      const {core, users, tokenService, avatarService} = await service.create(this);
+      const ctx = await service.context(this, users, core, tokenService, avatarService);
       const input = this.isGet ? this.get() : this.post();
       let result;
       if (resource === 'comment') {
@@ -81,9 +81,10 @@ module.exports = class extends Base {
       const callback = encodeURIComponent(this.ctx.url);
       return this.redirect(`/admin/login?redirect=${callback}`);
     }
-    const {UserAdapter} = require('../../service/waline-adapter');
-    const users = new UserAdapter(this.model('user'));
-    const [user] = await users.select({objectId: String(sessionUser.id)});
+    const service = this.service('waline');
+    const {core, users, tokenService, avatarService} = await service.create(this);
+    const ctx = await service.context(this, users, core, tokenService, avatarService);
+    const user = ctx.state.userInfo;
     if (!user) return this.redirect('/admin/login');
     const userInfo = {...user};
     delete userInfo.password;

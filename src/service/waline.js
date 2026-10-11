@@ -17,6 +17,20 @@ module.exports = class extends think.Service {
     const config = options.comment || {};
     const secret = options.waline_jwt_secret;
     const users = new UserAdapter(controller.model('user'));
+    const tokenService = {
+      sign(id) { const value = `${id}.${Date.now()}`; return `${value}.${signature(secret, value)}` },
+      verify(token) {
+        const parts = String(token || '').split('.');
+        if (parts.length !== 3) throw new Error('invalid token');
+        const value = `${parts[0]}.${parts[1]}`;
+        const expected = signature(secret, value);
+        if (parts[2].length !== expected.length || !crypto.timingSafeEqual(Buffer.from(parts[2]), Buffer.from(expected))) throw new Error('invalid token');
+        return parts[0];
+      }
+    };
+    const avatarService = {
+      stringify: value => value.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(value.mail || value.email || '').toLowerCase())}?d=mp`
+    };
     const core = createWalineCore({
       models: {
         Comment: new ModelAdapter(controller.model('comment')),
@@ -31,29 +45,19 @@ module.exports = class extends think.Service {
       },
       logger: think.logger,
       services: {
-        token: {
-          sign(id) { const value = `${id}.${Date.now()}`; return `${value}.${signature(secret, value)}` },
-          verify(token) {
-            const parts = String(token || '').split('.');
-            if (parts.length !== 3) throw new Error('invalid token');
-            const value = `${parts[0]}.${parts[1]}`;
-            const expected = signature(secret, value);
-            if (parts[2].length !== expected.length || !crypto.timingSafeEqual(Buffer.from(parts[2]), Buffer.from(expected))) throw new Error('invalid token');
-            return parts[0];
-          }
-        },
+        token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
           verify: async(value, hash) => controller.model('user').checkPassword({password: hash}, think.md5(options.password_salt + value))
         },
         markdown: {render: value => marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'))},
-        avatar: {stringify: value => value.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(value.mail || value.email || '').toLowerCase())}?d=mp`}
+        avatar: avatarService
       }
     });
-    return {core, users, options, config};
+    return {core, users, options, config, tokenService, avatarService};
   }
 
-  async context(controller, users) {
+  async context(controller, users, core, tokenService, avatarService) {
     const authorization = controller.ctx.get('authorization') || '';
     const token = authorization.replace(/^Bearer\s+/i, '') || controller.get('token');
     const ctx = {
@@ -66,14 +70,19 @@ module.exports = class extends think.Service {
       serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/waline`
     };
     if (token) {
-      const {core} = await this.create(controller);
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
     // A Firekylin administrator session is also a Waline administrator session.
     const sessionUser = await controller.session('userInfo') || {};
     if (Number(sessionUser.type) === 1) {
       const found = await users.select({objectId: String(sessionUser.id)});
-      if (found[0]) ctx.state.userInfo = found[0];
+      if (found[0]) {
+        ctx.state.userInfo = {
+          ...found[0],
+          avatar: await avatarService.stringify(found[0]),
+          token: await tokenService.sign(found[0].objectId)
+        };
+      }
     }
     return ctx;
   }
