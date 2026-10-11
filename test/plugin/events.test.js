@@ -13,6 +13,15 @@ test('event bus orders async listeners and filters values', async() => {
   assert.deepEqual(calls, ['early', 'late']);
 });
 
+test('event bus preserves zero as a listener priority', async() => {
+  const events = new EventBus();
+  const calls = [];
+  events.on('ready', () => { calls.push('default') });
+  events.on('ready', () => { calls.push('first') }, {priority: 0});
+  await events.emit('ready', {});
+  assert.deepEqual(calls, ['first', 'default']);
+});
+
 test('listener errors are isolated unless failFast is requested', async() => {
   const errors = [];
   const events = new EventBus({onError: error => errors.push(error)});

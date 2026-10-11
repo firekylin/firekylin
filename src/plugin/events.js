@@ -9,7 +9,13 @@ class EventBus {
   on(event, handler, options = {}) {
     if (typeof event !== 'string' || !event.trim()) throw new TypeError('Event name must be a non-empty string');
     if (typeof handler !== 'function') throw new TypeError(`Listener for "${event}" must be a function`);
-    const listener = {event, handler, priority: Number(options.priority) || 100, pluginId: options.pluginId || 'core'};
+    const priority = Number(options.priority);
+    const listener = {
+      event,
+      handler,
+      priority: Number.isFinite(priority) ? priority : 100,
+      pluginId: options.pluginId || 'core'
+    };
     const entries = this.listeners.get(event) || [];
     entries.push(listener);
     entries.sort((a, b) => a.priority - b.priority);

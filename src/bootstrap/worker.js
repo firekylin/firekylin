@@ -10,6 +10,10 @@ const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
 const pack = require('../../package.json');
 
+const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
+  ? global.firekylin.plugins
+  : null;
+
 global.firekylin = {
   POST_PUBLIC: 1,
   POST_ALLOW_COMMENT: 1,
@@ -32,16 +36,18 @@ widget.ensureWidgetMap(widgets);
 widget.loadProjectWidgets(getContext());
 
 const projectContext = getContext();
-const pluginManager = new PluginManager({
+const pluginManager = existingPluginManager || new PluginManager({
   projectPath: projectContext.projectPath,
   config: projectContext.config || {},
   version: pack.version,
   logger: console
 });
 global.firekylin.plugins = pluginManager;
-pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
-  console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
-});
+if (!existingPluginManager) {
+  pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
+    console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
+  });
+}
 
 /**
  * is installed
