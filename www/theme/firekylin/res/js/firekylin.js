@@ -77,24 +77,7 @@
     if (!comments) {
       return;
     }
-    var load = function() {
-      var dataType = comments.getAttribute('data-type');
-      if (dataType === 'waline-native') {
-        loadWalineComment();
-      } else if (dataType === 'disqus') {
-        loadDisqusComment();
-      } else if (dataType === 'hypercomments') {
-        loadHyperComments();
-      } else if (dataType === 'changyan') {
-        loadChangyanComment();
-      } else if (dataType === 'gitalk') {
-        loadGitalkComment();
-      } else if (dataType === 'waline') {
-        loadWalineComment();
-      } else if (dataType === 'valine') {
-        loadValineComment();
-      }
-    };
+    var load = loadWalineComment;
 
     if (location.hash.indexOf('#comments') > -1) {
       load();
@@ -110,106 +93,6 @@
       }, 300);
     }
   };
-  /**
-   * load disqus comment
-   * @return {[type]} [description]
-   */
-  var loadDisqusComment = function() {
-    var disqus_thread = getById('disqus_thread');
-    if (!disqus_thread) {
-      return;
-    }
-    win.disqus_config = function() {
-      this.page.url = disqus_thread.getAttribute('data-url');
-      this.page.identifier = disqus_thread.getAttribute('data-identifier');
-    };
-    var s = doc.createElement('script');
-    s.src = '//' + disqus_thread.getAttribute('data-name') + '.disqus.com/embed.js';
-    s.setAttribute('data-timestamp', +new Date());
-    (doc.head || doc.body).appendChild(s);
-  };
-
-  var loadHyperComments = function() {
-    var hyperComments = getById('hypercomments_widget');
-    var appid = hyperComments.getAttribute('data-name');
-
-    win._hcwp = win._hcwp || [];
-    win._hcwp.push({
-      widget: 'Stream',
-      widget_id: appid
-    });
-
-    (function() {
-      if ('HC_LOAD_INIT' in win) {
-        return;
-      }
-
-      var lang = (
-        navigator.language ||
-        navigator.systemLanguage ||
-        navigator.userLanguage ||
-        'en'
-      ).substr(0, 2).toLowerCase();
-      var hcc = document.createElement('script');
-      hcc.type = 'text/javascript';
-      hcc.async = true;
-      hcc.src = (document.location.protocol === 'https:' ? 'https' : 'http') + '://w.hypercomments.com/widget/hc/' + appid + '/' + lang + '/widget.js';
-
-      var s = document.getElementsByTagName('script')[0];
-      s.parentNode.insertBefore(hcc, s.nextSibling);
-    })();
-  };
-
-  var loadChangyanComment = function() {
-    var disqus_thread = getById('SOHUCS');
-    if (!disqus_thread) {
-      return;
-    }
-    var appid = disqus_thread.getAttribute('data-name');
-    var conf = disqus_thread.getAttribute('sid');
-    var width = win.innerWidth || doc.documentElement.clientWidth;
-    var s = doc.createElement('script');
-    if (width < 960) {
-      s.id = 'changyan_mobile_js';
-      s.src = '//changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf;
-    } else {
-      s.src = '//changyan.sohu.com/upload/changyan.js';
-      s.onload = function() {
-        win.changyan.api.config({
-          appid: appid,
-          conf: conf
-        });
-      };
-    }
-    (doc.head || doc.body).appendChild(s);
-  };
-
-  var loadGitalkComment = function() {
-    var gitalk_thread = getById('gitalk-container');
-    if (!gitalk_thread) {
-      return;
-    }
-    var gitalkConfig = gitalk_thread.getAttribute('data-name');
-    var dataIdentifier = gitalk_thread.getAttribute('data-identifier');
-    if (gitalkConfig) {
-      gitalkConfig = JSON.parse(gitalkConfig);
-    }
-    gitalkConfig.id = dataIdentifier;
-    var link = doc.createElement('link');
-    link.setAttribute('rel', 'stylesheet');
-    link.setAttribute('type', 'text/css');
-    link.setAttribute('href', '//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css');
-    (doc.head || doc.body).appendChild(link);
-
-    var s = doc.createElement('script');
-    s.src = '//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js';
-    s.onload = function() {
-      var gitalk = new Gitalk(gitalkConfig);
-      gitalk.render('gitalk-container');
-    };
-    (doc.head || doc.body).appendChild(s);
-  };
-
   var loadWalineComment = function() {
     var waline_thread = getById('waline-container');
     if (!waline_thread || waline_thread.getAttribute('data-loaded')) {
@@ -233,23 +116,6 @@
     }).catch(function() {
       waline_thread.textContent = '评论组件加载失败，请稍后重试。';
     });
-  };
-
-  var loadValineComment = function() {
-    var valine_thread = getById('valine-container');
-    var valineConfig = valine_thread.getAttribute('data-name');
-    if (valineConfig) {
-      valineConfig = JSON.parse(valineConfig);
-    }
-    valineConfig.el = '#valine-container';
-    valineConfig.path = location.pathname;
-
-    var s = document.createElement('script');
-    s.src = '//cdn.jsdelivr.net/npm/valine/dist/Valine.min.js';
-    s.onload = function() {
-      Valine(valineConfig);
-    };
-    (doc.head || doc.body).appendChild(s);
   };
 
   win.addEventListener('load', function() {

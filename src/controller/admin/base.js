@@ -45,7 +45,6 @@ module.exports = class extends think.Controller {
     // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);
-    options.comment.name = escape(options.comment.name);
     try {
       options.navigation = JSON.parse(options.navigation);
     } catch (e) { options.navigation = [] }

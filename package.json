@@ -24,7 +24,6 @@
     "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/static/src/*.ts ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
-    "cron:comment": "npm start -- \"crontab/sync_comment\"",
     "build:pkg": "pkg pkg.js --out-path=dist/"
   },
   "pre-commit": [

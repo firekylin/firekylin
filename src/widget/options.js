@@ -15,11 +15,6 @@ module.exports = class extends Widget {
     delete options.waline_schema_version;
     options.navigation = parse(options.navigation, []);
     options.themeConfig = parse(options.themeConfig, {});
-    if (options.comment && options.comment.name) {
-      const comment = parse(options.comment.name, {});
-      delete comment.githubPassWord;
-      options.comment.name = JSON.stringify(comment);
-    }
     options.siteUrl = options.site_url || `http://${this.ctx.host}`;
     this.push(options);
   }

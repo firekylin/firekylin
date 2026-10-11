@@ -67,7 +67,7 @@ test('view adapter resolves layouts from the theme directory', async() => {
   tags.push({name: 'Eta', pathname: 'eta', count: 1});
   const siteOptions = new Options({ctx: {host: 'example.com'}, model() {}}, {});
   siteOptions.push({
-    comment: {name: '', type: 'disqus'},
+    comment: {pageSize: 10, locale: 'zh-CN'},
     navigation: [],
     theme: 'firekylin',
     themeConfig: {},

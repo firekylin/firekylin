@@ -22,9 +22,17 @@ module.exports = class extends think.Model {
     if (ret.comment && think.isString(ret.comment)) {
       ret.comment = JSON.parse(ret.comment);
     }
-    if (!ret.comment) {
-      ret.comment = {type: 'disqus'};
-    }
+    const comment = {...(ret.comment || {})};
+    Reflect.deleteProperty(comment, 'name');
+    Reflect.deleteProperty(comment, 'type');
+    ret.comment = {
+      audit: false,
+      forceLogin: false,
+      pageSize: 10,
+      locale: 'zh-CN',
+      ipQps: 60,
+      ...comment
+    };
     // upload settings
     if (ret.upload && think.isString(ret.upload)) {
       ret.upload = JSON.parse(ret.upload);

@@ -36,9 +36,7 @@ module.exports = class extends think.Controller {
     }
 
     this.options = options;
-    if (options.comment && options.comment.type === 'waline-native') {
-      await this.service('waline-schema').ensure();
-    }
+    if (typeof this.service === 'function') await this.service('waline-schema').ensure();
     this.assign('VERSION', pack.version);
     this.assign('think', think);
     // set theme view root path

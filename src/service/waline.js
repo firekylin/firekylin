@@ -14,7 +14,7 @@ module.exports = class extends think.Service {
   async create(controller) {
     await this.service('waline-schema').ensure();
     const options = await controller.model('options').getOptions();
-    const config = options.comment && options.comment.type === 'waline-native' ? options.comment : {};
+    const config = options.comment || {};
     const secret = options.waline_jwt_secret;
     const users = new UserAdapter(controller.model('user'));
     const core = createWalineCore({

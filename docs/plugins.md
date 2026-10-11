@@ -11,7 +11,7 @@ Firekylin 插件用于在不修改核心代码和主题文件的情况下，为�
 - 增加公开 API、Webhook 和管理员 API；
 - 集成对象存储、搜索、通知、SEO 和统计服务。
 
-Firekylin 当前没有内置评论持久化模块，评论由 Disqus、Gitalk、Waline 等第三方服务提供，因此评论 Hook、Feed、XML-RPC 和后台管理扩展暂未纳入当前插件 API。
+Firekylin 内置评论持久化和后台管理能力。评论 Hook、Feed、XML-RPC 等扩展点暂未纳入当前插件 API。
 
 ## 创建和使用插件
 

@@ -78,11 +78,11 @@ test('category list delegates to the lightweight category query', async() => {
   assert.equal(widget.permalink, '/cate/category');
 });
 
-test('options widget parses theme data and removes comment credentials', async() => {
+test('options widget parses theme data and exposes native comment settings', async() => {
   const options = {
     async getOptions() {
       return {
-        comment: {name: '{"githubPassWord":"secret","repo":"comments"}'},
+        comment: {pageSize: 20},
         navigation: '[{"label":"Home","url":"/"}]',
         theme: 'firekylin',
         themeConfig: '{"customCSS":"body{}"}',
@@ -101,6 +101,6 @@ test('options widget parses theme data and removes comment credentials', async()
   assert.equal(widget.siteUrl, 'http://example.com');
   assert.deepEqual(widget.navigation, [{label: 'Home', url: '/'}]);
   assert.equal(widget.themeConfig.customCSS, 'body{}');
-  assert.deepEqual(JSON.parse(widget.row.comment.name), {repo: 'comments'});
+  assert.deepEqual(widget.row.comment, {pageSize: 20});
   assert.equal(widget.themeUrl('/res/app.css'), '/theme/firekylin/res/app.css');
 });

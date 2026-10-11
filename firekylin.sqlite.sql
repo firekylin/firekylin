@@ -20,7 +20,7 @@ INSERT INTO fk_options (key, value, desc)
 VALUES
   ('analyze_code','','统计代码，可以添加百度统计、Google 统计等'),
   ('auto_summary', '0', '自动摘要。0 为禁用，具体的数字为摘要截取的字符数'),
-  ('comment','{"type":"duoshuo","name":"welefen2013"}','评论类型'),
+  ('comment','{"audit":false,"forceLogin":false,"pageSize":10,"locale":"zh-CN","ipQps":60}','评论设置'),
   ('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
   ('favicon_url','','favicon'),
   ('github_blog','welefen/blog','GitHub blog 地址，如果填了则同步到 GitHub 上'),
