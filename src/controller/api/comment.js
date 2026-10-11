@@ -5,12 +5,13 @@ const Base = require('../base');
 
 module.exports = class extends Base {
   async indexAction() {
-    if (!this.isGet && !this.isPost && !this.isPut && !this.isDelete) this.ctx.throw(405);
+    const method = this.ctx.method.toUpperCase();
+    if (!['GET', 'POST', 'PUT', 'DELETE'].includes(method)) this.ctx.throw(405);
     const resource = this.get('resource');
     const id = this.get('id');
     if (resource === 'ui' && id === 'login') return this.loginPage();
     if (resource === 'ui' && id === 'profile') return this.redirect('/admin');
-    if (!this.isGet) {
+    if (method !== 'GET') {
       const origin = this.ctx.get('origin');
       if (origin) {
         let allowed = false;
@@ -22,21 +23,21 @@ module.exports = class extends Base {
     try {
       const {core, users, tokenService, avatarService} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
-      const input = this.isGet ? this.get() : this.post();
+      const input = method === 'GET' ? this.get() : this.post();
       let result;
       if (resource === 'comment') {
-        if (this.isGet) {
+        if (method === 'GET') {
           if (input.type === 'count') {
             const url = typeof input.url === 'string' && input.url.includes(',') ? input.url.split(',') : input.url;
             result = await core.comment.count({url}, ctx);
           }
           else if (input.type === 'recent') result = await core.comment.listRecent(input, ctx);
           else result = await core.comment.list(input, ctx);
-        } else if (this.isPost) {
+        } else if (method === 'POST') {
           await service.validateCommentTarget(this, input.url);
           result = await core.comment.create(input, ctx);
           await service.syncCount(this, input.url);
-        } else if (this.isPut) {
+        } else if (method === 'PUT') {
           const old = (await this.model('comment').where({id}).find());
           result = await core.comment.update({objectId: id, data: input}, ctx);
           await service.syncCount(this, old.url);
@@ -46,22 +47,22 @@ module.exports = class extends Base {
           await service.syncCount(this, old.url);
         }
       } else if (resource === 'token') {
-        if (this.isGet) {
+        if (method === 'GET') {
           if (ctx.state.userInfo) {
             const userInfo = {...ctx.state.userInfo};
             delete userInfo.password;
             result = userInfo;
           } else result = await core.auth.resolveSession({token: ctx.state.token}, ctx);
         }
-        else if (this.isDelete) result = {};
+        else if (method === 'DELETE') result = {};
         else result = await core.auth.login(input, ctx);
       } else if (resource === 'user') {
-        if (this.isGet) result = id ? await core.user.get({email: input.email}, ctx) : await core.user.list(input, ctx);
-        else if (this.isPost) result = await core.user.register(input, ctx);
-        else if (this.isPut) result = await core.user.update({objectId: id, data: input}, ctx);
+        if (method === 'GET') result = id ? await core.user.get({email: input.email}, ctx) : await core.user.list(input, ctx);
+        else if (method === 'POST') result = await core.user.register(input, ctx);
+        else if (method === 'PUT') result = await core.user.update({objectId: id, data: input}, ctx);
         else result = await core.user.remove({objectId: id}, ctx);
       } else if (resource === 'article') {
-        result = this.isGet ? await core.counter.get(input, ctx) : await core.counter.update(input, ctx);
+        result = method === 'GET' ? await core.counter.get(input, ctx) : await core.counter.update(input, ctx);
       } else if (resource === 'verification') {
         result = await core.verification.verifyEmail(input, ctx);
       } else {

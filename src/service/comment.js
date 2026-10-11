@@ -33,7 +33,7 @@ module.exports = class extends think.Service {
     };
     const core = createCommentCore({
       models: {
-        Comment: new ModelAdapter(controller.model('comment')),
+        Comment: new ModelAdapter(controller.model('comment'), {hasInsertedAt: true}),
         Counter: new ModelAdapter(controller.model('counter')),
         Users: users
       },

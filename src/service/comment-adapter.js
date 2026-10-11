@@ -33,7 +33,10 @@ function dbData(data) {
 }
 
 class ModelAdapter {
-  constructor(model) { this.model = model }
+  constructor(model, options = {}) {
+    this.model = model;
+    this.hasInsertedAt = Boolean(options.hasInsertedAt);
+  }
   async select(where = {}, options = {}) {
     let query = this.model.where(dbWhere(where));
     if (options.field) query = query.field(options.field.map(dbField).join(','));
@@ -51,7 +54,12 @@ class ModelAdapter {
   }
   async add(data) {
     const now = think.datetime();
-    const saved = dbData({createdAt: now, updatedAt: now, ...data});
+    const saved = dbData({
+      ...data,
+      createdAt: data.createdAt || now,
+      updatedAt: data.updatedAt || now,
+      ...(this.hasInsertedAt || typeof data.comment !== 'undefined' ? {insertedAt: data.insertedAt ? think.datetime(data.insertedAt) : now} : {})
+    });
     const id = await this.model.add(saved);
     return apiRow({...saved, id});
   }
