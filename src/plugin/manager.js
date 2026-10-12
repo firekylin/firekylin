@@ -7,6 +7,7 @@ const semver = require('semver');
 const EventBus = require('./events');
 const RouteRegistry = require('./routes');
 const TemplateRegistry = require('./templates');
+const ToolRegistry = require('./tools');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
@@ -87,6 +88,7 @@ class PluginManager {
     this.events = eventBus || new EventBus({onError: (error, listener) => this.logError(error, listener)});
     this.routes = new RouteRegistry();
     this.templates = new TemplateRegistry();
+    this.tools = new ToolRegistry();
     this.plugins = new Map();
     this.states = new Map();
   }
@@ -188,6 +190,9 @@ class PluginManager {
         register: route => this.routes.register(route, pluginId)
       }),
       templates: this.templates.api(pluginId),
+      tools: Object.freeze({
+        register: definition => this.tools.register(definition, pluginId)
+      }),
       widgets: Object.freeze({
         Widget,
         ContentsWidget,
@@ -228,6 +233,10 @@ class PluginManager {
     } catch (error) {
       record.status = 'error';
       this.events.removePlugin(record.manifest.id);
+      this.routes.removePlugin(record.manifest.id);
+      this.templates.removePlugin(record.manifest.id);
+      this.tools.removePlugin(record.manifest.id);
+      removeWidgetsBySource(record.manifest.id);
       this.logger.error?.(`[plugin:${record.manifest.id}] activation failed: ${error.stack || error.message}`);
     }
   }
@@ -241,6 +250,7 @@ class PluginManager {
       this.events.removePlugin(id);
       this.routes.removePlugin(id);
       this.templates.removePlugin(id);
+      this.tools.removePlugin(id);
       removeWidgetsBySource(id);
       record.status = 'inactive';
       await this.events.emit('plugin.deactivated', {pluginId: id});
