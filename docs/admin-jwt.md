@@ -1,7 +1,9 @@
 # Stateless administrator authentication
 
 Firekylin signs the administrator's login identity into an HS256 JSON Web Token.
-The token is stored in the `fk_admin_token` HttpOnly, SameSite=Lax cookie.
+The token is stored in the existing `thinkjs` HttpOnly, SameSite=Lax cookie.
+The cookie name and baseline options are shared with the legacy session adapter
+via `src/config/auth-cookie.js`.
 There is no per-login file session or shared in-memory session store. Workers
 and Serverless instances can verify the same token independently.
 
@@ -26,7 +28,9 @@ options or admin system settings.
 Existing File Session cookies do not migrate to JWT. Users must log in once
 after deploying the change. The administrator's JWT expires after seven days.
 When "remember me" is selected, the cookie is persistent for seven days;
-otherwise it is a browser-session cookie with the same server-side JWT expiry.
+otherwise it expires after 24 hours, matching the prior session default.
+The old session's 365-day remember-me lifetime is intentionally capped at
+seven days to avoid outliving the JWT, which expires after seven days.
 
 Logout clears the browser cookie but does not revoke copies of the JWT already
 issued. Password changes, account disablement and role changes likewise do not
