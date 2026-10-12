@@ -91,10 +91,13 @@ class HttpClient {
                 map(response => response.data),
                 map(res => handleBusinessError(res)),
                 catchError((error: AxiosResponse | undefined) => {
-                    if (error === undefined) return of({} as any);
-                    this.error$ = of(error);
-                    this.handleError();
-                    return this.error$;
+                    if (error === undefined) {
+                        message.error('请求出错');
+                    } else {
+                        this.error$ = of(error);
+                        this.handleError();
+                    }
+                    throw error;
                 })
             );
     }
