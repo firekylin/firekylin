@@ -217,7 +217,7 @@ declare namespace Firekylin {
   interface TemplateContext {
     [key: string]: any;
     widget: WidgetFunction;
-    comment(options?: {className?: string; title?: string; loadingText?: string}): string;
+    comment(options?: {className?: string; title?: string; loadingText?: string; resourceURL?: string}): string;
   }
 }
 

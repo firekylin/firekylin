@@ -36,7 +36,7 @@ async function checkWidgetTypes(dynamicName: string) {
   const dynamic = await firekylin.widget(dynamicName, {anything: true});
   dynamic.have();
   firekylin.widget.destroy('Widget_Archive');
-  firekylin.comment({className: 'article-comments', title: '评论'});
+  firekylin.comment({className: 'article-comments', title: '评论', resourceURL: '/assets/waline'});
 
   // @ts-expect-error invalid archive type
   await firekylin.widget('Widget_Archive', {type: 'invalid'});

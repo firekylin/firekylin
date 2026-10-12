@@ -27,15 +27,29 @@ function controller(overrides = {}) {
 test('comment helper renders a self-contained forced-login comment block', () => {
   const service = new CommentRender();
   const current = controller();
-  const output = service.render(current, {className: 'article-comments invalid<script', title: '<评论>'});
+  const output = service.render(current, {
+    className: 'article-comments invalid<script',
+    title: '<评论>',
+    resourceURL: 'https://cdn.example.com/waline/3.17.0/dist/'
+  });
 
   assert.match(output, /id="comments" class="fk-comments article-comments"/);
   assert.match(output, /&lt;评论&gt;/);
   assert.match(output, /&quot;serverURL&quot;:&quot;https:\/\/example\.com\/api\/comment&quot;/);
   assert.match(output, /&quot;login&quot;:&quot;force&quot;/);
-  assert.match(output, /@waline\/client@3\.16\.0/);
+  assert.match(output, /https:\/\/cdn\.example\.com\/waline\/3\.17\.0\/dist\/waline\.js/);
+  assert.match(output, /https:\/\/cdn\.example\.com\/waline\/3\.17\.0\/dist\/waline\.css/);
   assert.match(output, /IntersectionObserver/);
   assert.equal(service.render(current), '');
+});
+
+test('comment helper uses a pinned client by default and rejects unsafe resource URLs', () => {
+  const service = new CommentRender();
+  assert.match(service.render(controller()), /@waline\/client@3\.16\.0\/dist\/waline\.js/);
+  assert.throws(
+    () => service.render(controller(), {resourceURL: 'javascript:alert(1)'}),
+    /resourceURL must be an HTTP\(S\) or root-relative URL/
+  );
 });
 
 test('comment helper renders nothing when comments are unavailable', () => {
