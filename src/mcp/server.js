@@ -1,7 +1,7 @@
 'use strict';
 
 const {Readable} = require('node:stream');
-const {createTokenVerifier, isAllowedOrigin} = require('./auth');
+const {isAllowedOrigin} = require('./oauth-auth');
 
 const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
 const ALLOWED_METHODS = new Set(['POST', 'GET', 'DELETE']);
@@ -61,9 +61,10 @@ function createServerFactory({tools, auth, sdk, logger}) {
   };
 }
 
-async function createMcpEndpoint({tools, config = {}, getUser, logger = console, sdk: sdkOverride, verifier, resourceMetadataUrl}) {
+async function createMcpEndpoint({tools, config = {}, logger = console, sdk: sdkOverride, verifier, resourceMetadataUrl}) {
+  if (typeof verifier !== 'function') throw new TypeError('OAuth token verifier is required');
   const sdk = sdkOverride || await import('@modelcontextprotocol/server');
-  const verify = verifier || createTokenVerifier(config, getUser);
+  const verify = verifier;
   return async function handle(ctx) {
     if (!ALLOWED_METHODS.has(ctx.method)) {
       ctx.set('Allow', 'POST, GET, DELETE');
