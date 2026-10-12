@@ -25,6 +25,9 @@ module.exports = class extends think.Controller {
       return;
     }
 
+    const authOptions = await this.model('options').getOptions(true);
+    this.authOptions = authOptions;
+    this.ctx.state.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
     const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       if (this.isAjax()) {
@@ -41,8 +44,10 @@ module.exports = class extends think.Controller {
     if (this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
-    const model = this.model('options');
-    let options = await model.getOptions();
+    let options = {...this.authOptions};
+    delete options.jwt_secret;
+    delete options.comment_jwt_secret;
+    delete options.comment_schema_version;
     // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);

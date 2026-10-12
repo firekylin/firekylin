@@ -10,7 +10,12 @@ function parse(value, fallback) {
 
 module.exports = class extends Widget {
   async execute() {
-    const options = await this.model('options').getOptions();
+    const options = await this.model('options').getOptions(true);
+    this.ctx.state = this.ctx.state || {};
+    this.ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
+    delete options.jwt_secret;
+    delete options.comment_jwt_secret;
+    delete options.comment_schema_version;
     options.navigation = parse(options.navigation, []);
     options.themeConfig = parse(options.themeConfig, {});
     options.siteUrl = options.site_url || `http://${this.ctx.host}`;
