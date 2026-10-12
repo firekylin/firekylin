@@ -1,3 +1,4 @@
+const adminAuth = require('../../service/admin-auth');
 'use strict';
 /* eslint-disable max-len */
 
@@ -78,7 +79,7 @@ module.exports = class extends Base {
   }
 
   async loginPage() {
-    const sessionUser = await this.session('userInfo') || {};
+    const sessionUser = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(sessionUser)) {
       const callback = encodeURIComponent(this.ctx.url);
       return this.redirect(`/admin/login?redirect=${callback}`);
