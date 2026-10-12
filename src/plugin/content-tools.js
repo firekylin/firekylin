@@ -1,5 +1,7 @@
 'use strict';
 
+const PostQueryService = require('../service/post-query');
+
 /**
  * Public, read-only content tools for AI clients.
  * No route or MCP endpoint is opened by registering these tools.
@@ -8,12 +10,7 @@ function registerContentTools(registry, {getModel, now}) {
   if (!registry || typeof registry.register !== 'function') throw new TypeError('Tool registry required');
   if (typeof getModel !== 'function' || typeof now !== 'function') throw new TypeError('Model and clock required');
 
-  const publicWhere = () => ({
-    type: 0,
-    status: 3,
-    is_public: 1,
-    create_time: {'<=': now()}
-  });
+  const queries = new PostQueryService({getModel, now});
   const positiveInteger = (value, defaultValue, max) => {
     if (value === undefined && defaultValue !== undefined) return defaultValue;
     if (!Number.isSafeInteger(value) || value < 1 || value > max) throw new TypeError('Invalid positive integer');
@@ -46,9 +43,7 @@ function registerContentTools(registry, {getModel, now}) {
       input = checkInput(input);
       const page = positiveInteger(input.page, 1, 10000);
       const limit = positiveInteger(input.limit, 10, 50);
-      const rows = await getModel().where(publicWhere())
-        .field('id,title,pathname,summary,create_time,update_time')
-        .setRelation(false).order('create_time DESC').page(page, limit).select();
+      const rows = await queries.listPublic({page, limit});
       return rows.map(summary);
     }
   }, 'core-content');
@@ -64,9 +59,7 @@ function registerContentTools(registry, {getModel, now}) {
     async execute(input = {}) {
       input = checkInput(input);
       const id = positiveInteger(input.id, undefined, Number.MAX_SAFE_INTEGER);
-      const post = await getModel().where({...publicWhere(), id})
-        .field('id,title,pathname,summary,markdown_content,create_time,update_time')
-        .setRelation(false).find();
+      const post = await queries.getPublic(id);
       if (!post || !post.id) return null;
       return {...summary(post), markdown_content: post.markdown_content};
     }
@@ -87,11 +80,7 @@ function registerContentTools(registry, {getModel, now}) {
         throw new TypeError('Invalid query');
       }
       const limit = positiveInteger(input.limit, 10, 50);
-      const rows = await getModel().where({
-        ...publicWhere(),
-        'title|content': ['LIKE', '%' + input.query.trim() + '%']
-      }).field('id,title,pathname,summary,create_time,update_time')
-        .setRelation(false).order('create_time DESC').limit(limit).select();
+      const rows = await queries.searchPublic({query: input.query.trim(), limit});
       return rows.map(summary);
     }
   }, 'core-content');
