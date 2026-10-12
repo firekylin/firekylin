@@ -12,7 +12,7 @@ class OAuthStore {
     const id = 'fk_' + random();
     await this.model('mcp_oauth_client').add({
       client_id: id, name, redirect_uris: JSON.stringify(redirectUris),
-      created_at: new Date()
+      created_at: Date.now()
     });
     return {client_id: id, client_name: name, redirect_uris: redirectUris,
       token_endpoint_auth_method: 'none', grant_types: ['authorization_code', 'refresh_token'],
