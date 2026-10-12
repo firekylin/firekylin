@@ -38,7 +38,7 @@ test('administrator JWT round trip across stateless verifier calls', () => {
 });
 
 test('rejects tampering, expired tokens, and cross-site signature mismatch', () => {
-  process.env.FIREKYLIN_JWT_SECRET = SECRET;
+  auth.setSecret(SECRET);
   const token = auth.sign({id: 1, type: 1, name: 'admin'});
   const segments = token.split('.');
   const tampered = Buffer.from(JSON.stringify({...JSON.parse(Buffer.from(segments[1], 'base64url')), type: 2})).toString('base64url');
@@ -55,7 +55,7 @@ test('requires a persistent sufficiently strong secret', () => {
 });
 
 test('issues HttpOnly cookies and clears them on logout', () => {
-  process.env.FIREKYLIN_JWT_SECRET = SECRET;
+  auth.setSecret(SECRET);
   const ctx = context();
   auth.login(ctx, USER, true);
   assert.deepEqual(auth.currentUser(ctx), USER);
