@@ -148,6 +148,15 @@ test('OAuth login consent, code exchange, refresh and replay protection', async(
     redirect_uri: parameters.redirect_uri, resource: parameters.resource,
     code, code_verifier: verifier
   };
+  const incorrectVerifier = ctx({path: '/oauth/token', method: 'POST', session,
+    body: {...tokenBody, code_verifier: 'x'.repeat(64)}});
+  await handler(incorrectVerifier);
+  assert.equal(incorrectVerifier.body.error, 'invalid_grant');
+  const incorrectRedirect = ctx({path: '/oauth/token', method: 'POST', session,
+    body: {...tokenBody, redirect_uri: 'http://127.0.0.1:9999/callback'}});
+  await handler(incorrectRedirect);
+  assert.equal(incorrectRedirect.body.error, 'invalid_grant');
+
   const first = ctx({path: '/oauth/token', method: 'POST', session, body: tokenBody});
   await handler(first);
   assert.equal(first.status, 200);
