@@ -65,6 +65,10 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 
 旧版“源码目录即站点目录”的 `production.js`、`development.js` 和网页安装流程仍保留，供已有部署继续使用。
 
+### 多实例 / Serverless 后台登录
+
+后台认证使用无状态 JWT Cookie。部署前务必设置 **`FIREKYLIN_JWT_SECRET`**（至少 32 字节的固定随机密钥），并在所有实例共享同一密钥。首次升级需要重新登录。详细说明参见 [JWT 认证和迁移文档](docs/admin-jwt.md)。
+
 ## 如何使用
 
 - [添加和管理文章](https://github.com/firekylin/firekylin/wiki/%E6%96%87%E7%AB%A0)
