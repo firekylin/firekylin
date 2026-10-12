@@ -13,6 +13,7 @@
 <body>
 <script>
 window.SysConfig = {
+  csrfToken: <%~ JSON.stringify(firekylin.csrfToken || '') %>,
   userInfo: <%~ JSON.stringify(firekylin.userInfo) %>,
   options: <%~ JSON.stringify({
     title: firekylin.options.title,
