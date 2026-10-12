@@ -10,8 +10,8 @@ import { Input, Divider, Button, message } from 'antd';
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import classNames from 'classnames';
-import 'antd/lib/table/style/index';
 import BreadCrumb from '../../../components/breadcrumb';
+import './navigation.less';
 @inject('sharedStore', 'navigationStore', 'optionsImportStore')
 @observer
 class Navigation extends React.Component<any, any> {
@@ -335,7 +335,7 @@ class Navigation extends React.Component<any, any> {
         return (
             <div>
                 <BreadCrumb {...this.props} />
-                <div className="options-import-rss-page page-list">
+                <div className="navigation-page page-list">
                     <table className="ant-table ant-table-bordered" style={{width: '100%'}}>
                         <thead className="ant-table-thead">
                             <tr>
