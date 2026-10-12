@@ -1,4 +1,4 @@
-const push2Firekylin = require('push-to-firekylin');
+const PushToFirekylin = require('../../../service/push-to-firekylin');
 const dayjs = require('dayjs');
 const Base = require('./base');
 
@@ -213,7 +213,9 @@ module.exports = class extends Base {
     let push_sites_keys = postOpt.push_sites;
 
     if (post.markdown_content.slice(0, 5) !== '> 原文：') {
-      const site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
+      const site_url = Object.prototype.hasOwnProperty.call(options, 'site_url')
+        ? options.site_url
+        : `http://${this.ctx.host}`;
       post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
 
 ${post.markdown_content}`;
@@ -229,7 +231,7 @@ ${post.markdown_content}`;
     if (!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys] }
     const pushes = push_sites_keys.map(key => {
       const {appKey, appSecret, url} = push_sites[key];
-      const p2fk = new push2Firekylin(url, appKey, appSecret);
+      const p2fk = new PushToFirekylin(url, appKey, appSecret);
       return p2fk.push(post);
     });
     const result = await Promise.all(pushes);
