@@ -52,7 +52,7 @@ class PostQueryService {
     const model = this.getModel();
     const where = {type: 0};
     if (userInfo.type !== 1) where.user_id = userInfo.id;
-    if (status) where.status = status;
+    if (status !== undefined && status !== null && status !== '') where.status = status;
     else where.status = ['!=', 4];
 
     if (keyword) {
