@@ -11,9 +11,11 @@ const FORMATS = {
 };
 
 function matchesSignature(buffer, format) {
-  if (format === 'png') return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'));
+  if (format === 'png') return buffer.length >= 24 &&
+    buffer.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex')) &&
+    buffer.readUInt32BE(8) === 13 && buffer.subarray(12, 16).toString() === 'IHDR';
   if (format === 'jpeg') return buffer.length >= 3 && buffer.subarray(0, 3).equals(Buffer.from('ffd8ff', 'hex'));
-  if (format === 'gif') return buffer.length >= 6 && ['GIF87a', 'GIF89a'].includes(buffer.subarray(0, 6).toString());
+  if (format === 'gif') return buffer.length >= 13 && ['GIF87a', 'GIF89a'].includes(buffer.subarray(0, 6).toString());
   return false;
 }
 
