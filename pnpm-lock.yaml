@@ -77,9 +77,9 @@ importers:
       jszip:
         specifier: ^3.10.2
         version: 3.10.2
-      ldapjs:
-        specifier: ^3.0.7
-        version: 3.0.7
+      ldapts:
+        specifier: ^9.2.0
+        version: 9.2.0
       marked:
         specifier: ^18.1.0
         version: 18.1.0
@@ -464,42 +464,6 @@ packages:
     resolution: {integrity: sha512-QPcGmICAPbGLGb6F/yNf/KzKqvFx8z5qx3D1yFqVAjoFmXK35EgyW+cJ57Te3CNsmzblwtzakLGFqHPqrfb4Tw==}
     peerDependencies:
       react: '*'
-
-  '@ldapjs/asn1@1.2.0':
-    resolution: {integrity: sha512-KX/qQJ2xxzvO2/WOvr1UdQ+8P5dVvuOLk/C9b1bIkXxZss8BaR28njXdPgFCpj5aHaf1t8PmuVnea+N9YG9YMw==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/asn1@2.0.0':
-    resolution: {integrity: sha512-G9+DkEOirNgdPmD0I8nu57ygQJKOOgFEMKknEuQvIHbGLwP3ny1mY+OTUYLCbCaGJP4sox5eYgBJRuSUpnAddA==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/attribute@1.0.0':
-    resolution: {integrity: sha512-ptMl2d/5xJ0q+RgmnqOi3Zgwk/TMJYG7dYMC0Keko+yZU6n+oFM59MjQOUht5pxJeS4FWrImhu/LebX24vJNRQ==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/change@1.0.0':
-    resolution: {integrity: sha512-EOQNFH1RIku3M1s0OAJOzGfAohuFYXFY4s73wOhRm4KFGhmQQ7MChOh2YtYu9Kwgvuq1B0xKciXVzHCGkB5V+Q==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/controls@2.1.0':
-    resolution: {integrity: sha512-2pFdD1yRC9V9hXfAWvCCO2RRWK9OdIEcJIos/9cCVP9O4k72BY1bLDQQ4KpUoJnl4y/JoD4iFgM+YWT3IfITWw==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/dn@1.1.0':
-    resolution: {integrity: sha512-R72zH5ZeBj/Fujf/yBu78YzpJjJXG46YHFo5E4W1EqfNpo1UsVPqdLrRMXeKIsJT3x9dJVIfR6OpzgINlKpi0A==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/filter@2.1.1':
-    resolution: {integrity: sha512-TwPK5eEgNdUO1ABPBUQabcZ+h9heDORE4V9WNZqCtYLKc06+6+UAJ3IAbr0L0bYTnkkWC/JEQD2F+zAFsuikNw==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/messages@1.3.0':
-    resolution: {integrity: sha512-K7xZpXJ21bj92jS35wtRbdcNrwmxAtPwy4myeh9duy/eR3xQKvikVycbdWVzkYEAVE5Ce520VXNOwCHjomjCZw==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
-
-  '@ldapjs/protocol@1.2.1':
-    resolution: {integrity: sha512-O89xFDLW2gBoZWNXuXpBSM32/KealKCTb3JGtJdtUQc7RjAk8XzrRgyz02cPAwGKwKPxy0ivuC7UP9bmN87egQ==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
 
   '@lezer/common@1.5.3':
     resolution: {integrity: sha512-H0iErY4e43LpXbYDyBci5W4v/RwTgGV3YzYOlJPiGZ8RY8w51kVE+xLn1tg3Z6UmSfyETvtsUK3r7YsgDQEI7Q==}
@@ -1029,9 +993,6 @@ packages:
       oxc-transform-react:
         optional: true
 
-  abstract-logging@2.0.1:
-    resolution: {integrity: sha512-2BjRTZxTPvheOvGbBslFSYOUkr+SjPtOnrLP33f+VIWLzezQpZcqVg7ja3L4dBXmzzgwT+a029jRx5PCi3JuiA==}
-
   accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
     engines: {node: '>= 0.6'}
@@ -1163,10 +1124,6 @@ packages:
 
   axios@1.20.0:
     resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
-
-  backoff@2.5.0:
-    resolution: {integrity: sha512-wC5ihrnUXmR2douXmXLCe5O3zg3GKIyvRi/hi58a/XyRxVI+3/yM0PYueQOZXPXQ9pxBislYkw+sF9b7C/RuMA==}
-    engines: {node: '>= 0.6'}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1663,10 +1620,6 @@ packages:
 
   extsprintf@1.3.0:
     resolution: {integrity: sha512-11Ndz7Nv+mvAC1j0ktTa7fAb0vLyGGX+rMHNBYQviQDGU0Hw7lhctJANqbPhu9nV9/izT/IntTgZ7Im/9LJs9g==}
-    engines: {'0': node >=0.6.0}
-
-  extsprintf@1.4.1:
-    resolution: {integrity: sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==}
     engines: {'0': node >=0.6.0}
 
   fast-deep-equal@3.1.3:
@@ -2199,9 +2152,9 @@ packages:
     resolution: {integrity: sha512-e7IpWJrnanNUroVK2taAgMxoEZvHLXdQiNjeExSu/DEIWm83jaKGBgb7tLmu2rMYpA027qFB3iLR/k3AVpFRnA==}
     engines: {node: '>= 18'}
 
-  ldapjs@3.0.7:
-    resolution: {integrity: sha512-1ky+WrN+4CFMuoekUOv7Y1037XWdjKpu0xAPwSP+9KdvmV9PG+qOKlssDV6a+U32apwxdD3is/BZcWOYzN30cg==}
-    deprecated: This package has been decomissioned. See https://github.com/ldapjs/node-ldapjs/blob/8ffd0bc9c149088a10ec4c1ec6a18450f76ad05d/README.md
+  ldapts@9.2.0:
+    resolution: {integrity: sha512-5mDg3OT5fDP9DUXga9dCLW8cMW24OTOKT4pv/Qj+f2zCV3qxb+gkZLCzMAqzVTOANoycidKkYpPvkclUQU2aXw==}
+    engines: {node: '>=22'}
 
   less@4.9.1:
     resolution: {integrity: sha512-orp15PfJvvNDIqJdVWzMI9Sjpjp3VTiw3sfvbB+67LlISTEn8uVT2EdYSuyl02BLvaftv6sdk9Umnxmm5rckmg==}
@@ -2724,10 +2677,6 @@ packages:
     deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
     hasBin: true
 
-  precond@0.2.3:
-    resolution: {integrity: sha512-QCYG84SgGyGzqJ/vlMsxeXd/pgL/I94ixdNFyh1PusWmTCyVfPJjZ1K1jvHtsbfnXQs2TSkEP2fR7QiMZAnKFQ==}
-    engines: {node: '>= 0.6'}
-
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
@@ -2737,9 +2686,6 @@ packages:
 
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
-
-  process-warning@2.3.2:
-    resolution: {integrity: sha512-n9wh8tvBe5sFmsqlg+XQhaQLumwpqoAUruLwjCopgTmUBjJ/fjtBsJzKleCaIGBOMXYEhp1YfKl4d7rJ5ZKJGA==}
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
@@ -3124,6 +3070,9 @@ packages:
     resolution: {integrity: sha512-KFxaM7XT+irxvdqSP1LGLgNWbYN7ay5owZ3r/8t77p+EtSUAfUgtl7be3xtqtOmGUl9K9YPO2ca8133RlTjvKw==}
     engines: {node: '>=8.0'}
 
+  strict-event-emitter-types@2.0.0:
+    resolution: {integrity: sha512-Nk/brWYpD85WlOgzw5h173aci0Teyv8YdIAEtV+N88nDB0dLlazZyJMIsN6eo1/AR61l+p6CJTG1JIyFaoNEEA==}
+
   string-convert@0.2.1:
     resolution: {integrity: sha512-u/1tdPl4yQnPBjnVrmdLo9gtuLvELKsAoRapekWggdiQNvvvum+jYF329d84NAa660KQw7pB2n36KrIKVoXa3A==}
 
@@ -3492,17 +3441,9 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vasync@2.2.1:
-    resolution: {integrity: sha512-Hq72JaTpcTFdWiNA4Y22Amej2GH3BFmBaKPPlDZ4/oC8HNn2ISHLkFrJU4Ds8R3jcUi7oo5Y9jcMHKjES+N9wQ==}
-    engines: {'0': node >=0.6.0}
-
   verror@1.10.0:
     resolution: {integrity: sha512-ZZKSmDAEFOijERBLkmYfJ+vmk3w+7hOLYDNkRCuRuMJGEmqYNCNLyBBFwWKVMhfwaEF3WOd0Zlw86U/WC/+nYw==}
     engines: {'0': node >=0.6.0}
-
-  verror@1.10.1:
-    resolution: {integrity: sha512-veufcmxri4e3XSrT0xwfUR7kguIkaxBeosDg00yDWhk49wdwkSUrvvsm7nc75e1PUyvIeZj6nS8VQRYz2/S4Xg==}
-    engines: {node: '>=0.6.0'}
 
   vite@8.3.4:
     resolution: {integrity: sha512-IftLE8phJhdNRIGNEV4JCCvfNScoZQVfcXaN8TQropWGJtOHcu+iAB9pHcuGvmEb/kddw0LBe/jS8ztdC6xdiQ==}
@@ -3963,50 +3904,6 @@ snapshots:
   '@icons/material@0.2.4(react@19.3.0)':
     dependencies:
       react: 19.3.0
-
-  '@ldapjs/asn1@1.2.0': {}
-
-  '@ldapjs/asn1@2.0.0': {}
-
-  '@ldapjs/attribute@1.0.0':
-    dependencies:
-      '@ldapjs/asn1': 2.0.0
-      '@ldapjs/protocol': 1.2.1
-      process-warning: 2.3.2
-
-  '@ldapjs/change@1.0.0':
-    dependencies:
-      '@ldapjs/asn1': 2.0.0
-      '@ldapjs/attribute': 1.0.0
-
-  '@ldapjs/controls@2.1.0':
-    dependencies:
-      '@ldapjs/asn1': 1.2.0
-      '@ldapjs/protocol': 1.2.1
-
-  '@ldapjs/dn@1.1.0':
-    dependencies:
-      '@ldapjs/asn1': 2.0.0
-      process-warning: 2.3.2
-
-  '@ldapjs/filter@2.1.1':
-    dependencies:
-      '@ldapjs/asn1': 2.0.0
-      '@ldapjs/protocol': 1.2.1
-      process-warning: 2.3.2
-
-  '@ldapjs/messages@1.3.0':
-    dependencies:
-      '@ldapjs/asn1': 2.0.0
-      '@ldapjs/attribute': 1.0.0
-      '@ldapjs/change': 1.0.0
-      '@ldapjs/controls': 2.1.0
-      '@ldapjs/dn': 1.1.0
-      '@ldapjs/filter': 2.1.1
-      '@ldapjs/protocol': 1.2.1
-      process-warning: 2.3.2
-
-  '@ldapjs/protocol@1.2.1': {}
 
   '@lezer/common@1.5.3': {}
 
@@ -4564,8 +4461,6 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.4(@types/node@26.6.5)(less@4.9.1)
 
-  abstract-logging@2.0.1: {}
-
   accepts@1.3.8:
     dependencies:
       mime-types: 2.1.35
@@ -4806,10 +4701,6 @@ snapshots:
     transitivePeerDependencies:
       - debug
       - supports-color
-
-  backoff@2.5.0:
-    dependencies:
-      precond: 0.2.3
 
   balanced-match@1.0.2: {}
 
@@ -5421,8 +5312,6 @@ snapshots:
 
   extsprintf@1.3.0: {}
 
-  extsprintf@1.4.1: {}
-
   fast-deep-equal@3.1.3: {}
 
   fast-json-stable-stringify@2.1.0: {}
@@ -6003,22 +5892,9 @@ snapshots:
       type-is: 2.1.0
       vary: 1.1.2
 
-  ldapjs@3.0.7:
+  ldapts@9.2.0:
     dependencies:
-      '@ldapjs/asn1': 2.0.0
-      '@ldapjs/attribute': 1.0.0
-      '@ldapjs/change': 1.0.0
-      '@ldapjs/controls': 2.1.0
-      '@ldapjs/dn': 1.1.0
-      '@ldapjs/filter': 2.1.1
-      '@ldapjs/messages': 1.3.0
-      '@ldapjs/protocol': 1.2.1
-      abstract-logging: 2.0.1
-      assert-plus: 1.0.0
-      backoff: 2.5.0
-      once: 1.4.0
-      vasync: 2.2.1
-      verror: 1.10.1
+      strict-event-emitter-types: 2.0.0
 
   less@4.9.1:
     dependencies:
@@ -6496,8 +6372,6 @@ snapshots:
       tar-fs: 2.1.5
       tunnel-agent: 0.6.0
 
-  precond@0.2.3: {}
-
   prelude-ls@1.2.1: {}
 
   probe-image-size@7.4.0:
@@ -6510,8 +6384,6 @@ snapshots:
     optional: true
 
   process-nextick-args@2.0.1: {}
-
-  process-warning@2.3.2: {}
 
   prop-types@15.8.1:
     dependencies:
@@ -6970,6 +6842,8 @@ snapshots:
       fs-extra: 8.1.0
     transitivePeerDependencies:
       - supports-color
+
+  strict-event-emitter-types@2.0.0: {}
 
   string-convert@0.2.1: {}
 
@@ -7516,21 +7390,11 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vasync@2.2.1:
-    dependencies:
-      verror: 1.10.0
-
   verror@1.10.0:
     dependencies:
       assert-plus: 1.0.0
       core-util-is: 1.0.2
       extsprintf: 1.3.0
-
-  verror@1.10.1:
-    dependencies:
-      assert-plus: 1.0.0
-      core-util-is: 1.0.2
-      extsprintf: 1.4.1
 
   vite@8.3.4(@types/node@26.6.5)(less@4.9.1):
     dependencies:
