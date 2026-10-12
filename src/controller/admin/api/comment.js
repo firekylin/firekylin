@@ -2,6 +2,7 @@
 /* eslint-disable max-len */
 
 const Base = require('./base');
+const CommentModerationService = require('../../../service/comment-moderation');
 
 module.exports = class extends Base {
   async getAction() {
@@ -65,16 +66,20 @@ module.exports = class extends Base {
 
   async postAction() {
     const id = Number(this.post('id'));
-    const action = this.post('operation');
-    if (!id) return this.fail('PARAMS_ERROR');
-    const model = this.model('comment');
-    const comment = await model.where({id}).find();
-    if (think.isEmpty(comment)) return this.fail('COMMENT_NOT_FOUND');
-    if (action === 'delete') await model.where({id}).delete();
-    else if (['approved', 'waiting', 'spam'].includes(action)) await model.where({id}).update({status: action, updated_at: think.datetime()});
-    else if (action === 'edit') await model.where({id}).update({comment: String(this.post('comment') || ''), updated_at: think.datetime()});
-    else return this.fail('INVALID_OPERATION');
-    await this.service('comment').syncCount(this, comment.post_id);
+    if (!Number.isSafeInteger(id) || id <= 0) return this.fail('PARAMS_ERROR');
+    const service = new CommentModerationService({
+      getModel: name => this.model(name),
+      now: () => think.datetime(),
+      syncCount: postId => this.service('comment').syncCount(this, postId)
+    });
+    try {
+      await service.moderate({
+        id, operation: this.post('operation'), comment: this.post('comment')
+      }, this.userInfo);
+    } catch (error) {
+      if (['COMMENT_NOT_FOUND', 'INVALID_OPERATION'].includes(error.message)) return this.fail(error.message);
+      throw error;
+    }
     return this.success();
   }
 };
