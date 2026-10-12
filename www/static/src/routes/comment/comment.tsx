@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Input, Modal, Space, Table, Tabs, Tag, message } from 'antd';
+import { Button, Input, Modal, Select, Space, Table, Tabs, Tag, message } from 'antd';
 import BreadCrumb from '../../components/breadcrumb';
 import { http } from '../../utils/http';
 import firekylin from '../../utils/firekylin';
@@ -12,22 +12,21 @@ const COMMENT_STATUS: Record<string, {color: string, text: string}> = {
 };
 
 export default class Comment extends React.Component<any, any> {
-    state = {loading: false, data: [], total: 0, page: 1, status: '', keyword: '', author: '', editing: null, content: ''};
+    state = {loading: false, data: [], total: 0, page: 1, status: '', searchType: 'keyword', searchValue: '', editing: null, content: ''};
 
     componentDidMount() { this.load(); }
     load(page = this.state.page, status = this.state.status) {
         this.setState({loading: true});
-        const {keyword, author} = this.state;
+        const {searchType, searchValue} = this.state;
+        const keyword = searchType === 'keyword' ? searchValue : '';
+        const author = searchType === 'author' ? searchValue : '';
         http.get<any>('/admin/api/comment', {page, pageSize: 20, status, keyword, author}).subscribe(res => {
             if (res.errno === 0) this.setState({...(res.data as any), status, loading: false});
             else this.setState({loading: false});
         });
     }
-    search = () => {
-        this.setState({page: 1}, () => this.load(1));
-    }
-    resetSearch = () => {
-        this.setState({page: 1, keyword: '', author: ''}, () => this.load(1));
+    search = (searchValue = this.state.searchValue) => {
+        this.setState({page: 1, searchValue}, () => this.load(1));
     }
     operate(id: number, operation: string, comment?: string) {
         http.post('/admin/api/comment', {id, operation, comment}).subscribe(res => {
@@ -63,18 +62,21 @@ export default class Comment extends React.Component<any, any> {
                 <Button size="small" danger onClick={() => Modal.confirm({title: '确定删除这条评论？', onOk: () => this.operate(row.id, 'delete')})}>删除</Button>
             </Space>}
         ];
+        const table = () => <Table rowKey="id" columns={columns} dataSource={this.state.data} loading={this.state.loading} pagination={{current: this.state.page, pageSize: 20, total: this.state.total, onChange: page => {this.setState({page}); this.load(page);}}} />;
         return <>
             <BreadCrumb className="breadcrumb" {...this.props} />
             <div className="page-list comment-list">
                 <Tabs className="tabs" type="card" activeKey={this.state.status || 'all'} tabBarExtraContent={<div className="comment-search">
-                    <Input placeholder="评论关键字" value={this.state.keyword} onChange={event => this.setState({keyword: event.target.value})} onPressEnter={this.search} allowClear />
-                    <Input placeholder="作者昵称、邮箱或 IP" value={this.state.author} onChange={event => this.setState({author: event.target.value})} onPressEnter={this.search} allowClear />
-                    <Button type="primary" onClick={this.search}>查询</Button>
-                    <Button onClick={this.resetSearch}>重置</Button>
+                    <Select value={this.state.searchType} onChange={searchType => this.setState({searchType})}>
+                        <Select.Option value="keyword">内容</Select.Option>
+                        <Select.Option value="author">作者</Select.Option>
+                    </Select>
+                    <Input.Search placeholder="请输入关键字" value={this.state.searchValue} onChange={event => this.setState({searchValue: event.target.value})} onSearch={this.search} enterButton={true} allowClear />
                 </div>} onChange={key => { const status = key === 'all' ? '' : key; this.setState({page: 1, status}); this.load(1, status); }} items={[
-                    {key: 'all', label: '全部'}, {key: 'waiting', label: '待审核'}, {key: 'spam', label: '垃圾评论'}
+                    {key: 'all', label: '全部', children: table()},
+                    {key: 'waiting', label: '待审核', children: table()},
+                    {key: 'spam', label: '垃圾评论', children: table()}
                 ]} />
-                <Table rowKey="id" columns={columns} dataSource={this.state.data} loading={this.state.loading} pagination={{current: this.state.page, pageSize: 20, total: this.state.total, onChange: page => {this.setState({page}); this.load(page);}}} />
             </div>
             <Modal title="编辑评论" visible={Boolean(this.state.editing)} onCancel={() => this.setState({editing: null})} onOk={() => this.operate(this.state.editing.id, 'edit', this.state.content)}>
                 <Input.TextArea rows={8} value={this.state.content} onChange={event => this.setState({content: event.target.value})} />
