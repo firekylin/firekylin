@@ -13,6 +13,17 @@ module.exports = class extends Base {
     if (this.id) {
       where.id = this.id;
       const user = await modelInstance.where(where).find();
+      user.social_accounts = await this.service('social-auth').list(user.id);
+      try {
+        user.social_services = await this.service('social-auth').services();
+      } catch {
+        user.social_services = [];
+      }
+      for (const account of user.social_accounts) {
+        if (!user.social_services.some(service => service.name === account.provider)) {
+          user.social_services.push({name: account.provider, title: account.provider});
+        }
+      }
       return this.success(user);
     }
 
@@ -34,7 +45,11 @@ module.exports = class extends Base {
     users.forEach(user => {
       user.post_num = postsNum.get(user.id) || 0;
       user.comment_num = commentsNum.get(user.id) || 0;
+      user.social_accounts = [];
     });
+    const socialAccounts = await this.service('social-auth').list(users.map(user => user.id));
+    const usersById = new Map(users.map(user => [Number(user.id), user]));
+    socialAccounts.forEach(account => usersById.get(Number(account.user_id))?.social_accounts.push(account));
 
     return this.success(users);
   }
@@ -58,6 +73,7 @@ module.exports = class extends Base {
     }
 
     const pk = await this.modelInstance.pk;
+    await this.model('user_social').where({user_id: Number(id)}).delete();
     const rows = await this.modelInstance.where({
       [pk]: id
     }).delete();

@@ -131,6 +131,16 @@ export default class UserStore {
             });
     }
 
+    unlinkSocial(provider: string) {
+        http.delete<any>(`/api/comment/social/${encodeURIComponent(provider)}`)
+            .toPromise()
+            .then(() => {
+                message.success('解绑成功');
+                this.getUserInfo(String(this.userInfo.id));
+            })
+            .catch(() => message.error('解绑失败，请稍后重试'));
+    }
+
     savePwd(data: any) {
         http.post<any>(`/admin/user/password`, data)
             .toPromise()

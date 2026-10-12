@@ -114,6 +114,7 @@ class BreadCrumb extends React.Component<any, BreadCrumbState> {
               {window.SysConfig.userInfo.name} <b className="caret" />
             </a>
             <ul className="dropdown-menu">
+              <li><Link to={`/user/edit/${window.SysConfig.userInfo.id}`}>账号设置</Link></li>
               <li><Link to="/user/edit_pwd">修改密码</Link></li>
               <li><a href="/admin/user/logout">退出</a></li>
             </ul>

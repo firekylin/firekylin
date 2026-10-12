@@ -3,7 +3,7 @@ import { observer, inject } from '@admin/utils/mobx-react';
 // import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
-import { message, Input, Select } from 'antd';
+import { message, Input, Select, Button, Space, Tag } from 'antd';
 import md5 from 'md5';
 import UserStore from '../user.store';
 import { RouteComponentProps } from '@admin/utils/router';
@@ -101,6 +101,11 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
         if (this.id) {
             this.userStore.generateKey(this.id);
         }
+    }
+
+    bindSocial(provider: string) {
+        const redirect = `${window.location.origin}/admin/user/edit/${this.id}`;
+        window.location.href = `/api/comment/oauth?type=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}`;
     }
 
     /**
@@ -288,6 +293,26 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                     <Input type="text" className="form-control" disabled={true}
                                            value={this.userStore.userInfo.app_secret} />
                                 </div>
+                                {String(window.SysConfig.userInfo.id) === String(this.id) ? (
+                                    <div className="form-group">
+                                        <legend>社交账号</legend>
+                                        <Space direction="vertical" align="start">
+                                            {(userInfo.social_services || []).map(service => {
+                                                const account = (userInfo.social_accounts || []).find(item => item.provider === service.name);
+                                                return (
+                                                    <Space key={service.name}>
+                                                        <Tag color={account ? 'green' : 'default'}>{service.title || service.name}</Tag>
+                                                        {account ? (
+                                                            <Button size="small" danger onClick={() => this.userStore.unlinkSocial(service.name)}>解绑</Button>
+                                                        ) : (
+                                                            <Button size="small" onClick={() => this.bindSocial(service.name)}>绑定</Button>
+                                                        )}
+                                                    </Space>
+                                                );
+                                            })}
+                                        </Space>
+                                    </div>
+                                ) : null}
                             {/*</filedset>*/}
                         </div>
                     </Form>

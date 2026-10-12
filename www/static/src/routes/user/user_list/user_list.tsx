@@ -91,7 +91,7 @@ export default class extends React.Component<UserProps, any> {
         if (this.userStore.loading) {
             return (
                 <tr>
-                    <td className="center" colSpan="10">
+                    <td className="center" colSpan="11">
                         加载中……
                     </td>
                 </tr>
@@ -100,7 +100,7 @@ export default class extends React.Component<UserProps, any> {
         if (!this.userStore.userList.length) {
             return (
                 <tr>
-                    <td className="center" colSpan="10">
+                    <td className="center" colSpan="11">
                         无相关用户
                     </td>
                 </tr>
@@ -112,6 +112,13 @@ export default class extends React.Component<UserProps, any> {
                     <td scope="row">{item.id}</td>
                     <td>{item.display_name || item.name}</td>
                     <td>{item.email}</td>
+                    <td>
+                        {(item.social_accounts || []).length ? item.social_accounts.map(account => (
+                            <span key={account.provider} className="label label-info" style={{marginRight: 4}}>
+                                {account.provider}
+                            </span>
+                        )) : <span className="gray">未绑定</span>}
+                    </td>
                     <td>{this.getUserType(item)}</td>
                     <td>
                         {item.status === 1 ? (
@@ -191,6 +198,7 @@ export default class extends React.Component<UserProps, any> {
                                 <th>ID</th>
                                 <th>用户名</th>
                                 <th>邮箱</th>
+                                <th>社交账号</th>
                                 <th>用户组</th>
                                 <th>有效</th>
                                 <th>文章数</th>

@@ -85,6 +85,20 @@ class HttpClient {
                 );
     }
 
+    delete<T, U = string>(url: string, config: AxiosRequestConfig = {}): Observable<IResult<T, U>> {
+        return from(axios.delete(url, config))
+            .pipe(
+                map(response => response.data),
+                map(res => handleBusinessError(res)),
+                catchError((error: AxiosResponse | undefined) => {
+                    if (error === undefined) return of({} as any);
+                    this.error$ = of(error);
+                    this.handleError();
+                    return this.error$;
+                })
+            );
+    }
+
     upload(data: any, url: string = '/admin/api/file'): Promise<any> {
         return new Promise(function(resolve: Function, reject: Function) {
             var xhr = new XMLHttpRequest();

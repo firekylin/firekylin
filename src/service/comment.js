@@ -1,10 +1,10 @@
-const adminAuth = require('./admin-auth');
 'use strict';
 /* eslint-disable max-len */
 
 const crypto = require('crypto');
 const {marked, Renderer} = require('marked');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
+const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
 
 function signature(secret, value) {
@@ -146,13 +146,14 @@ module.exports = class extends think.Service {
       requestUrl: controller.ctx.url,
       serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/comment`
     };
+    ctx.state.oauthServices = [];
     if (token) {
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
     // A Firekylin administrator JWT also authenticates the comment administrator.
     const sessionUser = adminAuth.currentUser(controller.ctx) || {};
-    if (Number(sessionUser.type) === 1) {
-      const found = await users.select({objectId: String(sessionUser.id)});
+    if (!think.isEmpty(sessionUser)) {
+      const found = await users.select({objectId: String(sessionUser.id), type: ['!=', 'banned']});
       if (found[0]) {
         ctx.state.userInfo = {
           ...found[0],

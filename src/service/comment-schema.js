@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable max-len */
 
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 function statements(type) {
   const auto = type === 'postgresql' ? 'SERIAL PRIMARY KEY' : type === 'sqlite' ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY';
@@ -30,6 +30,7 @@ module.exports = class extends think.Service {
     const version = Number(current.comment_schema_version) || 0;
     if (version < 1) await this.migrateV1();
     if (version < 2) await this.migrateV2();
+    if (version < 3) await this.migrateV3();
     // Keep existing comment login tokens valid during the key rename.
     const crypto = require('crypto');
     const secret = current.jwt_secret || current.comment_jwt_secret ||
@@ -104,6 +105,27 @@ module.exports = class extends think.Service {
       try { pathname = decodeURIComponent(match[2].replace(/\.html$/, '')) } catch (e) { continue }
       const postId = postMap.get(`${match[1] === 'page' ? 1 : 0}:${pathname}`);
       if (postId) await comment.where({id: item.id}).update({post_id: postId});
+    }
+  }
+
+  async migrateV3() {
+    const cfg = think.config('model');
+    const type = cfg.type;
+    const configuredPrefix = cfg[type] && cfg[type].prefix;
+    const prefix = typeof configuredPrefix === 'string' ? configuredPrefix : 'fk_';
+    const auto = type === 'postgresql' ? 'SERIAL PRIMARY KEY' : type === 'sqlite' ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY';
+    const datetime = type === 'postgresql' ? 'TIMESTAMP' : 'DATETIME';
+    const model = this.model('comment');
+    const table = `${prefix}user_social`;
+    const migrations = [
+      `CREATE TABLE IF NOT EXISTS ${table} (id ${auto}, user_id INTEGER NOT NULL, provider VARCHAR(64) NOT NULL, account_id VARCHAR(255) NOT NULL, created_at ${datetime} NOT NULL)`,
+      `CREATE UNIQUE INDEX ${prefix}user_social_account_idx ON ${table} (provider, account_id)`,
+      `CREATE UNIQUE INDEX ${prefix}user_social_user_idx ON ${table} (user_id, provider)`
+    ];
+    for (const sql of migrations) {
+      try { await model.query(sql) } catch (error) {
+        if (!/already exists|duplicate key name/i.test(error.message)) throw error;
+      }
     }
   }
 };
