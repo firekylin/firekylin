@@ -8,6 +8,19 @@ import { UserProps } from './user.model';
 export default class extends React.Component<UserProps, any> {
     render() {
         const { match } = this.props;
+        const userInfo = window.SysConfig.userInfo;
+
+        if (userInfo.type === 4) {
+            const editPath = `${match.path}/edit/${userInfo.id}`;
+            return (
+                <Switch>
+                    <Route exact path={editPath} component={UserCreate}/>
+                    <Route exact path={`${match.path}/edit_pwd`} component={UserEditPwd}/>
+                    <Redirect to={editPath}/>
+                </Switch>
+            );
+        }
+
         return (
             <Switch>
                 <Route path={`${match.path}/list`} component={UserList}/>

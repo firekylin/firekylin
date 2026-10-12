@@ -33,7 +33,9 @@ function signature(value) {
 }
 
 function sign(user, seconds = TTL) {
-  if (!user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0 || ![1, 2, 4].includes(Number(user.type))) throw new Error('Invalid backend identity');
+  const invalidUser = !user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0 ||
+    ![1, 2, 4].includes(Number(user.type));
+  if (invalidUser) throw new Error('Invalid backend identity');
   const now = Math.floor(Date.now() / 1000);
   const header = base64({alg: 'HS256', typ: 'JWT'});
   const payload = base64({

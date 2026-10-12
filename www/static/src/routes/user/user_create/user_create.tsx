@@ -199,15 +199,15 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                 name="username"
                                 rules={[{
                                         min: 4,
-                                        max: 20,
-                                        message: '长度为4到20个字符'
+                                        max: 30,
+                                        message: '长度为4到30个字符'
                                     },
                                     {
                                         required: true,
                                         message: '请输入用户名!'
                                     }]}
                             >
-                                <Input {...this.isDisabled('name')} placeholder="4-20个字符"/>
+                                <Input {...this.isDisabled('name')} placeholder="4-30个字符"/>
                             </Form.Item>
                             <p className="help-block">登录时所用的名称，不能重复。</p>
                             <Form.Item label="邮箱"

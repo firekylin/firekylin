@@ -47,7 +47,8 @@ test('rejects tampering, expired tokens, and cross-site signature mismatch', () 
   auth.setSecret(SECRET);
   const token = auth.sign({id: 1, type: 1, name: 'admin'});
   const segments = token.split('.');
-  const tampered = Buffer.from(JSON.stringify({...JSON.parse(Buffer.from(segments[1], 'base64url')), type: 2})).toString('base64url');
+  const payload = {...JSON.parse(Buffer.from(segments[1], 'base64url')), type: 2};
+  const tampered = Buffer.from(JSON.stringify(payload)).toString('base64url');
   assert.equal(auth.verify([segments[0], tampered, segments[2]].join('.')), null);
   assert.equal(auth.verify(auth.sign(USER, -1)), null);
   assert.equal(auth.verify('invalid.jwt'), null);
