@@ -36,10 +36,10 @@ test('comment schema migrates once and records its version', async() => {
 
   assert.equal(await service.migrate({skipIfUninstalled: true}), true);
   assert.equal(state.comment_schema_version, '2');
-  assert.match(state.comment_jwt_secret, /^[a-f0-9]{64}$/);
+  assert.match(state.jwt_secret, /^[a-f0-9]{64}$/);
   assert.ok(queries.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS comment ')));
   assert.ok(queries.some(sql => sql.includes('comment_post_idx')));
-  assert.ok(updates.some(([key]) => key === 'comment_jwt_secret'));
+  assert.ok(updates.some(([key]) => key === 'jwt_secret'));
 
   const queryCount = queries.length;
   assert.equal(await service.migrate({skipIfUninstalled: true}), false);
@@ -57,7 +57,7 @@ test('comment schema backfills post ids from legacy pathnames', async() => {
   };
   const postModel = {field() { return this }, async select() { return [{id: 9, type: 0, pathname: 'hello'}] }};
   const options = {
-    async getOptions() { return {site_url: 'https://example.com', comment_schema_version: '1', comment_jwt_secret: 'secret'} },
+    async getOptions() { return {site_url: 'https://example.com', comment_schema_version: '1', comment_jwt_secret: 'legacy-secret-with-minimum-32-bytes-long'} },
     async updateOptions() {}
   };
   const service = new CommentSchema();
