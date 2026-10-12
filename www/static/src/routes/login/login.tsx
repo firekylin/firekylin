@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import { LockOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Checkbox } from 'antd';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import { LoginProps } from './login.model';
 
 @inject('loginStore')

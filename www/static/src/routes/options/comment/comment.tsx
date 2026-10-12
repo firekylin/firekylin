@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Divider, Form, FormInstance, Input, InputNumber, Select, Switch } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import './comment.less';
 import { CommentProps, CommentState } from './comment.model';
