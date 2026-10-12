@@ -2,8 +2,8 @@
 
 Firekylin signs the administrator's login identity into an HS256 JSON Web Token.
 The token is stored in the existing `thinkjs` HttpOnly, SameSite=Lax cookie.
-The cookie name and baseline options are shared with the legacy session adapter
-via `src/config/auth-cookie.js`.
+The cookie options are defined directly in `src/service/admin-auth.js`;
+the legacy session adapter and its dependencies have been removed.
 There is no per-login file session or shared in-memory session store. Workers
 and Serverless instances can verify the same token independently.
 
