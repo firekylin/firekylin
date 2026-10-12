@@ -112,7 +112,10 @@ test('maps featured image, categories and tags when importing a post', async() =
   const adminAuth = require('../../src/service/admin-auth');
   const originalCurrentUser = adminAuth.currentUser;
   adminAuth.currentUser = () => ({id: 7});
-  service.controller = {ctx: {}};
+  service.controller = {
+    ctx: {},
+    model: () => ({async getOptions() { return {jwt_secret: 'test-secret-with-at-least-thirty-two-bytes'} }})
+  };
   service.cateModelInstance = termModel(11);
   service.tagModelInstance = termModel(12);
   service.postModelInstance = {

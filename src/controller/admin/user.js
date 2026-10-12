@@ -12,7 +12,8 @@ module.exports = class extends Base {
     const { username, remember } = this.post();
     let userInfo = {};
     const model = this.model('options');
-    const options = await model.getOptions();
+    const options = await model.getOptions(true);
+    const jwtSecret = options.jwt_secret || options.comment_jwt_secret;
 
     // 二步验证
     if (options.two_factor_auth) {
@@ -60,7 +61,7 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
-    adminAuth.login(this.ctx, userInfo, remember);
+    adminAuth.login(this.ctx, userInfo, remember, jwtSecret);
     return this.success();
   }
   /**
@@ -98,14 +99,15 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
-    adminAuth.login(this.ctx, userInfo, remember);
+    const options = await this.model('options').getOptions(true);
+    adminAuth.login(this.ctx, userInfo, remember, options.jwt_secret || options.comment_jwt_secret);
     return this.redirect('/admin');
   }
   /**
    * update user password
    */
   async passwordAction() {
-    const userInfo = adminAuth.currentUser(this.ctx) || {};
+    const userInfo = adminAuth.currentUser(this.ctx, this.jwtSecret) || {};
     if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
@@ -119,7 +121,7 @@ module.exports = class extends Base {
   }
 
   async forgotAction() {
-    const userInfo = adminAuth.currentUser(this.ctx) || {};
+    const userInfo = adminAuth.currentUser(this.ctx, this.jwtSecret) || {};
     if (!think.isEmpty(userInfo)) {
       return this.success();
     }
@@ -164,7 +166,7 @@ module.exports = class extends Base {
   }
 
   async resetAction() {
-    const userInfo = adminAuth.currentUser(this.ctx) || {};
+    const userInfo = adminAuth.currentUser(this.ctx, this.jwtSecret) || {};
     if (!think.isEmpty(userInfo)) {
       return this.success();
     }

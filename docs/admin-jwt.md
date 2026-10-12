@@ -15,11 +15,12 @@ a new random 32-byte secret for fresh installations. For upgrades, it **copies**
 the existing `comment_jwt_secret` into `jwt_secret` so previously issued
 comment login tokens keep working. No environment variable is required.
 
-Each worker loads this secret once during the startup migration hook and keeps
-it in memory for synchronous token verification. Requests do not query the
-database for the key or for a session. Restart all workers after deliberately
-rotating the database secret; all existing administrator and comment tokens will
-then be invalidated.
+Authentication reads the secret from the private options for each request. When
+the request has already loaded options for another purpose, the same object is
+reused so authentication does not add another query. The authentication module
+does not retain process-global secret state, which keeps cold starts and reused
+Serverless instances consistent. Rotating the database secret invalidates all
+existing administrator and comment tokens immediately.
 
 The old `comment_jwt_secret` row is retained only for backward compatibility
 with prior versions of Firekylin. Neither signing key is returned by public

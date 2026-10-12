@@ -23,8 +23,8 @@ module.exports = class extends Base {
     }
     const service = this.service('comment');
     try {
-      const {core, users, config, tokenService, avatarService} = await service.create(this);
-      const ctx = await service.context(this, users, core, tokenService, avatarService);
+      const {core, users, options, config, tokenService, avatarService} = await service.create(this);
+      const ctx = await service.context(this, users, core, tokenService, avatarService, options);
       const input = method === 'GET' ? this.get() : this.post();
       let result;
       if (resource === 'comment') {
@@ -89,14 +89,15 @@ module.exports = class extends Base {
   async loginPage() {
     const token = this.get('token');
     if (token) return this.completeLogin(token);
-    const sessionUser = adminAuth.currentUser(this.ctx) || {};
+    const service = this.service('comment');
+    const {core, users, options, tokenService, avatarService} = await service.create(this);
+    const secret = options.jwt_secret || options.comment_jwt_secret;
+    const sessionUser = adminAuth.currentUser(this.ctx, secret) || {};
     if (think.isEmpty(sessionUser)) {
       const adminCallback = encodeURIComponent(this.ctx.url);
       return this.redirect(`/admin/login?redirect=${adminCallback}`);
     }
-    const service = this.service('comment');
-    const {core, users, tokenService, avatarService} = await service.create(this);
-    const ctx = await service.context(this, users, core, tokenService, avatarService);
+    const ctx = await service.context(this, users, core, tokenService, avatarService, options);
     const user = ctx.state.userInfo;
     if (!user) return this.redirect('/admin/login');
     return this.completeLogin(user.token);
@@ -104,8 +105,8 @@ module.exports = class extends Base {
 
   async completeLogin(token) {
     const service = this.service('comment');
-    const {core, users, tokenService, avatarService} = await service.create(this);
-    const ctx = await service.context(this, users, core, tokenService, avatarService);
+    const {core, users, options, tokenService, avatarService} = await service.create(this);
+    const ctx = await service.context(this, users, core, tokenService, avatarService, options);
     const user = ctx.state.userInfo || await core.auth.resolveSession({token}, ctx);
     if (!user) return this.redirect('/api/comment/ui/login');
     const userInfo = {...user, token};
@@ -125,13 +126,14 @@ module.exports = class extends Base {
       if (input.redirect) callback.searchParams.set('redirect', input.redirect);
       const target = new URL(`${social.oauthUrl()}/${input.type}`);
       target.searchParams.set('redirect', callback.toString());
-      const sessionUser = adminAuth.currentUser(this.ctx);
+      const options = await this.model('options').getOptions(true);
+      const sessionUser = adminAuth.currentUser(this.ctx, options.jwt_secret || options.comment_jwt_secret);
       target.searchParams.set('state', await social.createState(sessionUser && sessionUser.id));
       return this.redirect(target.toString());
     }
     const service = this.service('comment');
-    const {core, users, tokenService, avatarService} = await service.create(this);
-    const ctx = await service.context(this, users, core, tokenService, avatarService);
+    const {core, users, options, tokenService, avatarService} = await service.create(this);
+    const ctx = await service.context(this, users, core, tokenService, avatarService, options);
     const oauthState = await social.verifyState(input.state);
     if (!oauthState) this.ctx.throw(400, 'Invalid or expired OAuth state');
     if (oauthState.userId) {
@@ -148,7 +150,7 @@ module.exports = class extends Base {
     if (target.pathname === '/admin' || target.pathname.startsWith('/admin/')) {
       const backendUser = await this.model('user').where({id: Number(result.user.objectId)}).find();
       if (!think.isEmpty(backendUser) && Number(backendUser.status) === 1 && [1, 2, 4].includes(Number(backendUser.type))) {
-        adminAuth.login(this.ctx, backendUser, true);
+        adminAuth.login(this.ctx, backendUser, true, options.jwt_secret || options.comment_jwt_secret);
         return this.redirect(target.toString());
       }
       target = new URL('/api/comment/ui/login', `${this.ctx.protocol}://${this.ctx.host}`);

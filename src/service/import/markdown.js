@@ -39,11 +39,11 @@ module.exports = class extends Base {
       return 0;
     }
 
+    const options = await this._think.model('options').getOptions(true);
+    const secret = options.jwt_secret || options.comment_jwt_secret;
+    const user = adminAuth.currentUser(this._think.ctx, secret);
     const postsPromise = posts.map(async item => {
       try {
-        // 获取用户
-        const user = adminAuth.currentUser(this._think.ctx);
-
         let post = {
           title: item.title,
           pathname: item.pathname,

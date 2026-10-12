@@ -10,7 +10,10 @@ module.exports = class extends BaseRest {
   }
 
   async __before() {
-    const userInfo = adminAuth.currentUser(this.ctx) || {};
+    const authOptions = await this.model('options').getOptions(true);
+    this.authOptions = authOptions;
+    this.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
+    const userInfo = adminAuth.currentUser(this.ctx, this.jwtSecret) || {};
     if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
@@ -18,7 +21,7 @@ module.exports = class extends BaseRest {
     const action = this.ctx.action;
     if (action !== 'get') {
       const referrer = this.ctx.referrer();
-      const {site_url} = await this.model('options').getOptions();
+      const {site_url} = this.authOptions;
 
       if (!referrer) {
         return this.fail('REFERRER_ERROR');

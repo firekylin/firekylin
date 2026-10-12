@@ -38,7 +38,6 @@ module.exports = class extends think.Service {
     if (!current.jwt_secret) {
       await options.updateOptions('jwt_secret', secret);
     }
-    require('./admin-auth').setSecret(secret);
     if (version < CURRENT_VERSION) {
       await options.updateOptions('comment_schema_version', String(CURRENT_VERSION));
     }

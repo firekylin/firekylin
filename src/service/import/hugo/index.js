@@ -55,8 +55,12 @@ module.exports = class extends Base {
     return terms.map(item => item.id);
   }
 
-  async buildPost(item, type) {
-    const user = adminAuth.currentUser(this.controller.ctx);
+  async currentUser() {
+    const options = await this.controller.model('options').getOptions(true);
+    return adminAuth.currentUser(this.controller.ctx, options.jwt_secret || options.comment_jwt_secret);
+  }
+
+  async buildPost(item, type, user) {
     let post = {
       title: item.title,
       pathname: item.pathname,
@@ -77,8 +81,9 @@ module.exports = class extends Base {
 
   async post(items) {
     const posts = items.filter(item => !item.page);
+    const user = await this.currentUser();
     for (const item of posts) {
-      const post = await this.buildPost(item, 0);
+      const post = await this.buildPost(item, 0, user);
       const cateIds = await this.termIds(this.cateModelInstance, item.categories);
       const tagIds = await this.termIds(this.tagModelInstance, item.tags);
       const result = await this.postModelInstance.addPost(post);
@@ -98,8 +103,9 @@ module.exports = class extends Base {
 
   async page(items) {
     const pages = items.filter(item => item.page);
+    const user = await this.currentUser();
     for (const item of pages) {
-      await this.pageModelInstance.addPost(await this.buildPost(item, 1));
+      await this.pageModelInstance.addPost(await this.buildPost(item, 1, user));
     }
     return pages.length;
   }
