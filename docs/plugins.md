@@ -260,7 +260,7 @@ ctx.routes.register({
 - `scope: 'site'`：注册站点级绝对路径，不添加插件命名空间；
 - `auth: 'public'`：默认公开访问；
 - `auth: 'admin'`：要求当前登录用户为管理员；
-- `csrf: true`：修改类请求默认校验 `X-CSRF-Token`；
+- `csrf: true`：修改类请求默认校验 `X-CSRF-Token`；登录后台页面可从 `window.SysConfig.csrfToken` 获取令牌（详见 [JWT 认证文档](admin-jwt.md)）；
 - `csrf: false`：插件必须自行完成 Webhook 签名等安全校验。
 
 Action handler 接收 `{ctx, params, query, body, plugin}`，返回值自动作为 HTTP 响应体。路由冲突会在注册时拒绝，插件停用时自动移除路由。
