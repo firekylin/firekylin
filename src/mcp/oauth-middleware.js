@@ -1,11 +1,13 @@
 'use strict';
 
 const {OAuthStore} = require('./oauth-store');
+const {getContext} = require('../../lib/project-context');
 const {scopeList, publicOrigin} = require('./oauth-utils');
 const {createOAuthHandler} = require('./oauth');
 
 function oauthMiddleware() {
   let handlerPromise;
+  const config = (getContext().config || {}).mcp || {};
   async function handler() {
     if (!handlerPromise) {
       handlerPromise = (async() => {
@@ -23,6 +25,7 @@ function oauthMiddleware() {
   }
 
   return async function oauth(ctx, next) {
+    if (config.enabled === false) return next();
     if (!ctx.path.startsWith('/oauth/') &&
         !ctx.path.startsWith('/.well-known/oauth-')) return next();
     const handle = await handler();
