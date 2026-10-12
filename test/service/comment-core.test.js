@@ -67,3 +67,16 @@ test('vendored comment core keeps waiting comments private', async() => {
   await core.comment.create({url: '/post/a.html', comment: 'Review me'}, ctx);
   assert.equal((await core.comment.list({path: '/post/a.html'}, ctx)).count, 0);
 });
+
+test('vendored comment core rejects anonymous comments when login is required', async() => {
+  const core = createCommentCore({
+    models: {Comment: new MemoryModel(), Counter: new MemoryModel(), Users: new MemoryModel()},
+    config: {forceLogin: true}
+  });
+  const ctx = {headers: {}, state: {}, ip: '127.0.0.1'};
+
+  await assert.rejects(
+    core.comment.create({url: '/post/a.html', comment: 'Anonymous'}, ctx),
+    error => error.code === 'UNAUTHORIZED' && error.status === 401
+  );
+});
