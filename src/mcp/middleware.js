@@ -2,6 +2,7 @@
 
 const {getContext} = require('../../lib/project-context');
 const {createMcpEndpoint} = require('./server');
+const {oauthVerifier} = require('./oauth-middleware');
 
 module.exports = function builtinMcp() {
   const project = getContext();
@@ -21,6 +22,8 @@ module.exports = function builtinMcp() {
           execute: (name, input, context) => global.firekylin.plugins.tools.execute(name, input, context)
         },
         config,
+        verifier: oauthVerifier(),
+        resourceMetadataUrl: '/.well-known/oauth-protected-resource/mcp',
         getUser: async id => think.model('user').where({id})
           .field('id,type,status').setRelation(false).find(),
         logger: think.logger
