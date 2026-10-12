@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 // https://vitejs.dev/config/
@@ -13,14 +12,16 @@ export default defineConfig(({ mode }) => ({
         react(),
         {
             name: 'admin-asset-version',
-            enforce: 'post',
-            closeBundle() {
-                const assetsPath = path.resolve(__dirname, 'www/static/dist/assets');
+            generateBundle(_, bundle) {
                 const hash = createHash('sha256');
-                for (const fileName of ['assets/admin.js', 'assets/admin.css']) {
-                    hash.update(readFileSync(path.resolve(__dirname, 'www/static/dist', fileName)));
+                for (const output of Object.values(bundle)) {
+                    hash.update(output.type === 'asset' ? output.source : output.code);
                 }
-                writeFileSync(path.join(assetsPath, 'admin.version'), hash.digest('hex').slice(0, 16));
+                this.emitFile({
+                    type: 'asset',
+                    fileName: 'assets/admin.version',
+                    source: hash.digest('hex').slice(0, 16),
+                });
             },
         },
     ],
@@ -38,8 +39,6 @@ export default defineConfig(({ mode }) => ({
     define: {
         'process.env.basename': JSON.stringify('/admin'),
         'process.env.environment': JSON.stringify(mode === 'production' ? 'production' : 'dev'),
-        // Polyfill Node.js `global` for browser ESM (used by react-codemirror2)
-        global: 'globalThis',
     },
 
     build: {

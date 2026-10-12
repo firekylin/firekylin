@@ -2,7 +2,7 @@ import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Modal, Alert, message } from 'antd';
 import { inject, observer } from 'mobx-react';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG as QRCode } from 'qrcode.react';
 const confirm = Modal.confirm;
 import BreadCrumb from '../../../components/breadcrumb';
 import { TwoFactorAuthProps } from './two-factor-auth.model';

@@ -7,12 +7,7 @@ import { Select, Button, Input, Radio } from 'antd';
 const RadioGroup = Radio.Group;
 import { SketchPicker } from 'react-color';
 import './theme.less';
-import { Controlled as CodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/monokai.css';
-import 'codemirror/mode/css/css';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/mode/htmlmixed/htmlmixed';
+import CodeEditor from '../edit/code-editor';
 
 @inject('themeStore', 'sharedStore')
 @observer class ThemeForm extends React.Component<ThemeProps, {}> {
@@ -213,16 +208,10 @@ import 'codemirror/mode/htmlmixed/htmlmixed';
               <div className="form-group" key={i}>
                 <label style={{color: 'rgba(0, 0, 0, 0.85)'}}>{element.label}</label>
                 <div>
-                    <CodeMirror
-                        options={{
-                            theme: 'monokai',
-                            lineNumbers: true,
-                            mode: element.type
-                        }}
+                    <CodeEditor
+                        path={`theme.${element.type === 'htmlmixed' ? 'html' : element.type === 'javascript' ? 'js' : element.type}`}
                         value={this.state.themeConfig[element.name]}
-                        onBeforeChange={(editor, data, value) => {
-                            this.updateThemeConfig(element.name, value);
-                        }}
+                        onChange={value => this.updateThemeConfig(element.name, value)}
                     />
                   <div className="help-block">{element.help ? element.help : ''}</div>
                 </div>
