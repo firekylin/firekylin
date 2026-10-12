@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, message } from 'antd';
 import generatePicker from 'antd/es/date-picker/generatePicker';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import dayjs from 'dayjs';
 import dayjsGenerateConfig from 'rc-picker/lib/generate/dayjs';
 import type { Dayjs } from 'dayjs';

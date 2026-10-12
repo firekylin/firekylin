@@ -1,18 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 const {exec} = require('child_process');
+const {Readable} = require('stream');
+const {pipeline} = require('stream/promises');
 const semver = require('semver');
-const request = require('request');
 const pack = require('../../../../package.json');
 const Base = require('./base');
 
-const reqIns = request.defaults({
-  timeout: 1000,
-  strictSSL: false,
-  rejectUnauthorized: false
-});
-
-const reqInsAsync = think.promisify(reqIns.get);
+async function fetchWithTimeout(url) {
+  const response = await fetch(url, {signal: AbortSignal.timeout(1000)});
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+  return response;
+}
 
 module.exports = class extends Base {
   constructor(...args) {
@@ -23,8 +24,8 @@ module.exports = class extends Base {
   async getAction() {
     let needUpdate = false;
     try {
-      const res = await reqInsAsync('http://firekylin.lithub.cc/release/v1/.latest');
-      const onlineVersion = res.body.trim();
+      const response = await fetchWithTimeout('http://firekylin.lithub.cc/release/v1/.latest');
+      const onlineVersion = (await response.text()).trim();
       if (semver.gt(onlineVersion, pack.version)) {
         needUpdate = onlineVersion;
       }
@@ -72,15 +73,19 @@ module.exports = class extends Base {
       /** 下载文件 */
       case '1':
       default:
-        return new Promise((resolve, reject) => {
-          reqIns({uri: 'http://firekylin.lithub.cc/release/v1/latest.tar.gz'})
-            .pipe(fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz')))
-            .on('close', resolve)
-            .on('error', reject);
-        }).then(
-          () => this.success(),
-          ({message}) => this.fail(message)
-        );
+        return fetchWithTimeout('http://firekylin.lithub.cc/release/v1/latest.tar.gz')
+          .then(response => {
+            if (!response.body) {
+              throw new Error('Release response has no body');
+            }
+            return pipeline(
+              Readable.fromWeb(response.body),
+              fs.createWriteStream(path.join(think.RESOURCE_PATH, 'latest.tar.gz'))
+            );
+          }).then(
+            () => this.success(),
+            ({message}) => this.fail(message)
+          );
 
       /** 解压覆盖，删除更新文件 */
       case '2':
@@ -127,7 +132,9 @@ module.exports = class extends Base {
     const items = await this.modelInstance.select();
     const siteConfig = {};
 
-    items.forEach(item => siteConfig[item.key] = item.value);
+    items.forEach(item => {
+      siteConfig[item.key] = item.value;
+    });
 
     return siteConfig;
   }

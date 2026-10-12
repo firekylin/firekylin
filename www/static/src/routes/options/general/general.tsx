@@ -3,7 +3,7 @@ import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Upload, message } from 'antd';
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import { GeneralProps } from './general.model';
 import type { UploadChangeParam } from 'antd/es/upload/interface';
 import './general.less';

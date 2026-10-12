@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 // import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';

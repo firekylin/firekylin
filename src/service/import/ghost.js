@@ -90,14 +90,14 @@ module.exports = class extends Base {
           pathname: item.slug,
           content: item.html,
           summary: item.html,
-          markdown_content: item.hasOwnProperty('markdown') ? item.markdown : this.toMarkdown(item.html),
+          markdown_content: Object.hasOwn(item, 'markdown') ? item.markdown : this.toMarkdown(item.html),
           create_time: this.formatDate(new Date(item.created_at)),
           update_time: this.formatDate(new Date(item.updated_at)),
           status: GHOST_POST_STATUS[item.status] || 0,
           user_id: user.id,
           comment_num: 0,
-          allow_comment: item.hasOwnProperty('allow_comment') ? item.allow_comment : 1,
-          is_public: item.hasOwnProperty('visibility') ? Number(item.visibility === 'public') : 1,
+          allow_comment: Object.hasOwn(item, 'allow_comment') ? item.allow_comment : 1,
+          is_public: Object.hasOwn(item, 'visibility') ? Number(item.visibility === 'public') : 1,
           tag,
           cate
         };
@@ -132,14 +132,14 @@ module.exports = class extends Base {
         pathname: item.slug,
         content: item.html,
         summary: item.html,
-        markdown_content: item.hasOwnProperty('markdown') ? item.markdown : this.toMarkdown(item.html),
+        markdown_content: Object.hasOwn(item, 'markdown') ? item.markdown : this.toMarkdown(item.html),
         create_time: this.formatDate(new Date(item.created_at)),
         update_time: this.formatDate(new Date(item.updated_at)),
         status: GHOST_POST_STATUS[item.status] || 0,
         user_id: user.id,
         comment_num: 0,
-        allow_comment: item.hasOwnProperty('allow_comment') ? item.allow_comment : 1,
-        is_public: item.hasOwnProperty('visibility') ? Number(item.visibility === 'public') : 1
+        allow_comment: Object.hasOwn(item, 'allow_comment') ? item.allow_comment : 1,
+        is_public: Object.hasOwn(item, 'visibility') ? Number(item.visibility === 'public') : 1
       };
       await this.pageModelInstance.addPost(page);
     });

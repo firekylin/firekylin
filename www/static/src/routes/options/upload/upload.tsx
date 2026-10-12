@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Button, Radio } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import { OptionsUploadProps } from './upload.model';
 import { UploadEnum } from './upload.enum';
 import BreadCrumb from '../../../components/breadcrumb';
