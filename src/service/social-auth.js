@@ -140,7 +140,7 @@ module.exports = class extends think.Service {
 
     let email = String(profile.email || '').trim();
     const userModel = this.model('user');
-    if (!email || await userModel.where({email}).count()) {
+    if (!email || Number(await userModel.where({email}).count()) > 0) {
       const digest = crypto.createHash('sha256')
         .update(`${input.type}:${profile.id}`)
         .digest('hex')
