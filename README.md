@@ -87,6 +87,10 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/firekylin/firekylin/issues/34 提交网址。
 
 
+## 内置 MCP Server
+
+Firekylin 自带 MCP HTTP 服务，无需安装额外插件。默认地址为 `/mcp`，未配置访问令牌时返回 401，不会开放博客管理能力。支持用受限访问令牌让 Codex、Claude Code 等 MCP 客户端读取公开文章、管理草稿等（高风险发布、删除操作仍需要独立审批支持）。配置与安全说明见 [MCP Server 文档](docs/mcp.md)。
+
 ## 开发者文档
 
 - [主题开发](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
