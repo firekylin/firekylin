@@ -3,6 +3,7 @@ const path = require('path');
 const routerREST = require('think-router-rest');
 const pluginRoutes = require('../plugin/middleware');
 const builtinMcp = require('../mcp/middleware');
+const {oauthMiddleware} = require('../mcp/oauth-middleware');
 
 const isDev = think.env === 'development';
 const isVercel = think.env === 'vercel';
@@ -44,6 +45,9 @@ if (!isVercel) {
 module.exports = [
   {
     handle: builtinMcp
+  },
+  {
+    handle: oauthMiddleware
   },
   {
     handle: pluginRoutes
