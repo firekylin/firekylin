@@ -61,8 +61,8 @@ function createServerFactory({tools, auth, sdk, logger}) {
   };
 }
 
-async function createMcpEndpoint({tools, config = {}, getUser, logger = console}) {
-  const sdk = await import('@modelcontextprotocol/server');
+async function createMcpEndpoint({tools, config = {}, getUser, logger = console, sdk: sdkOverride}) {
+  const sdk = sdkOverride || await import('@modelcontextprotocol/server');
   const verify = createTokenVerifier(config, getUser);
   return async function handle(ctx) {
     if (!ALLOWED_METHODS.has(ctx.method)) {
