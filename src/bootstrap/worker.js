@@ -8,6 +8,7 @@ const widget = require('../widget/registry');
 const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
+const {registerContentTools} = require('../plugin/content-tools');
 const pack = require('../../package.json');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
@@ -44,6 +45,12 @@ const pluginManager = existingPluginManager || new PluginManager({
   logger: console
 });
 global.firekylin.plugins = pluginManager;
+if (!pluginManager.tools.list().some(tool => tool.name === 'posts.get')) {
+  registerContentTools(pluginManager.tools, {
+    getModel: () => think.model('post'),
+    now: () => think.datetime()
+  });
+}
 if (!existingPluginManager) {
   pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
     console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
