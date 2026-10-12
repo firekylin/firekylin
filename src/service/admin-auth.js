@@ -1,8 +1,9 @@
 'use strict';
 
 const crypto = require('crypto');
+const cookieConfig = require('../config/auth-cookie');
 
-const COOKIE_NAME = 'fk_admin_token';
+const COOKIE_NAME = cookieConfig.name;
 const ISSUER = 'firekylin';
 const AUDIENCE = 'firekylin-admin';
 const DAY = 24 * 60 * 60;
@@ -75,11 +76,11 @@ function verify(token) {
 
 function cookieOptions(ctx, remember) {
   return {
-    httpOnly: true,
+    httpOnly: cookieConfig.httpOnly,
     secure: ctx.secure || ctx.protocol === 'https',
     sameSite: 'lax',
-    path: '/',
-    maxAge: remember ? 7 * DAY * 1000 : undefined
+    path: cookieConfig.path,
+    maxAge: remember ? TTL * 1000 : DAY * 1000
   };
 }
 
