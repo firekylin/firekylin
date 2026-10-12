@@ -192,7 +192,7 @@ function buildOAuthHandler({origin, store, getUser}) {
       if (request.decision === 'deny') dest.searchParams.set('error', 'access_denied');
       else if (request.decision === 'allow') {
         const code = await store.createGrant('code', {
-          userId: Number(user.id), clientId, scopes, resource, challenge
+          userId: Number(user.id), clientId, scopes, resource, challenge, parent: digest(redirectUri)
         });
         dest.searchParams.set('code', code);
       } else return oauthError(ctx, 'invalid_request');
@@ -213,7 +213,7 @@ function buildOAuthHandler({origin, store, getUser}) {
         }
         const row = await store.lookup('code', data.code);
         if (!row || row.client_id !== clientId || row.resource !== resource ||
-            row.challenge !== base64url(data.code_verifier)) return oauthError(ctx, 'invalid_grant');
+            (row.challenge !== base64url(data.code_verifier) || row.parent_hash !== digest(data.redirect_uri))) return oauthError(ctx, 'invalid_grant');
         const used = await store.consume('code', data.code);
         if (!used) return oauthError(ctx, 'invalid_grant');
         const user = await getUser(Number(row.user_id));
