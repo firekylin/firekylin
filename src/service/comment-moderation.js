@@ -14,7 +14,7 @@ class CommentModerationService {
     this.syncCount = syncCount;
   }
 
-  async moderate({id, operation, comment}, principal) {
+  async moderate({id, operation, comment, onlyWaiting = false}, principal) {
     if (!principal || Number(principal.type) !== 1) throw new Error('Administrator required');
     if (!Number.isSafeInteger(id) || id <= 0) throw new TypeError('Invalid comment ID');
     if (!['delete', 'approved', 'waiting', 'spam', 'edit'].includes(operation)) {
@@ -22,6 +22,7 @@ class CommentModerationService {
     }
     const existing = await this.getModel('comment').where({id}).setRelation(false).find();
     if (!existing || !existing.id) throw new Error('COMMENT_NOT_FOUND');
+    if (onlyWaiting && existing.status !== 'waiting') throw new Error('Only waiting comments can be approved');
     const model = this.getModel('comment').where({id});
     if (operation === 'delete') {
       await model.delete();
