@@ -30,10 +30,14 @@ module.exports = class extends think.Service {
     const version = Number(current.comment_schema_version) || 0;
     if (version < 1) await this.migrateV1();
     if (version < 2) await this.migrateV2();
-    if (!current.comment_jwt_secret) {
-      const crypto = require('crypto');
-      await options.updateOptions('comment_jwt_secret', crypto.randomBytes(32).toString('hex'));
+    // Keep existing comment login tokens valid during the key rename.
+    const crypto = require('crypto');
+    const secret = current.jwt_secret || current.comment_jwt_secret ||
+      crypto.randomBytes(32).toString('hex');
+    if (!current.jwt_secret) {
+      await options.updateOptions('jwt_secret', secret);
     }
+    require('./admin-auth').setSecret(secret);
     if (version < CURRENT_VERSION) {
       await options.updateOptions('comment_schema_version', String(CURRENT_VERSION));
     }

@@ -14,6 +14,7 @@ module.exports = class extends think.Model {
       ret[item.key] = item.value;
     });
     if (!includePrivate) {
+      delete ret.jwt_secret;
       delete ret.comment_jwt_secret;
       delete ret.comment_schema_version;
     }

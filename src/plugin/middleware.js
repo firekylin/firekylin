@@ -1,3 +1,4 @@
+const adminAuth = require('../service/admin-auth');
 'use strict';
 
 module.exports = function pluginRoutes() {
@@ -6,12 +7,12 @@ module.exports = function pluginRoutes() {
     const route = manager && manager.routes.match(ctx.method, ctx.path);
     if (!route) return next();
     if (route.auth === 'admin') {
-      const user = await ctx.session('userInfo') || {};
+      const user = adminAuth.currentUser(ctx) || {};
       if ((user.type | 0) !== 1) return ctx.throw(403, 'Administrator permission required');
     }
     if (route.csrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(ctx.method)) {
       const token = ctx.get('X-CSRF-Token');
-      const sessionToken = await ctx.session('csrfToken');
+      const sessionToken = adminAuth.csrfToken(ctx);
       if (!token || token !== sessionToken) return ctx.throw(403, 'CSRF validation failed');
     }
     const match = route.regexp.exec(ctx.path);

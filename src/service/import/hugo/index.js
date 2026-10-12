@@ -1,3 +1,4 @@
+const adminAuth = require('../../admin-auth');
 const fs = require('fs');
 const path = require('path');
 const {execFileSync} = require('child_process');
@@ -55,7 +56,7 @@ module.exports = class extends Base {
   }
 
   async buildPost(item, type) {
-    const user = await this.controller.session('userInfo');
+    const user = adminAuth.currentUser(this.controller.ctx);
     let post = {
       title: item.title,
       pathname: item.pathname,
