@@ -293,7 +293,7 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     firekylin.setInstalled();
 
     const optionsModel = this.getModel('options');
-    await optionsModel.getOptions(true);
+    await optionsModel.getOptions();
     // optionsModel.close();
   }
 

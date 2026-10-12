@@ -20,7 +20,7 @@ module.exports = class extends think.Service {
     const options = this.model('options');
     let current;
     try {
-      current = await options.getOptions();
+      current = await options.getOptions(true);
     } catch (error) {
       if (skipIfUninstalled && this.isMissingOptionsTable(error)) return false;
       throw error;

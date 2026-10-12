@@ -7,15 +7,16 @@ module.exports = class extends think.Model {
    * get options
    * @return {} []
    */
-  async getOptions(flag) {
+  async getOptions(includePrivate = false) {
     const data = await this.select();
     const ret = {};
     data.forEach(item => {
       ret[item.key] = item.value;
     });
-    const legacyCommentPrefix = ['wa', 'line_'].join('');
-    delete ret[`${legacyCommentPrefix}jwt_secret`];
-    delete ret[`${legacyCommentPrefix}schema_version`];
+    if (!includePrivate) {
+      delete ret.comment_jwt_secret;
+      delete ret.comment_schema_version;
+    }
 
     // comment type
     if (think.isEmpty(ret)) {
@@ -76,7 +77,7 @@ module.exports = class extends think.Model {
       promises.push(p);
     }
     await Promise.all(promises);
-    await this.getOptions(true);
+    await this.getOptions();
 
     // if `auto_summary` is changed, then rebuild all summaries of posts
     if (typeof data.auto_summary !== 'undefined') {
