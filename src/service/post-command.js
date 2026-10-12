@@ -76,7 +76,8 @@ class PostCommandService {
     const model = this.getModel();
     if (Object.prototype.hasOwnProperty.call(data, 'markdown_content') && data.markdown_content) {
       if (Number(data.status) === 3 && this.actor(principal).type !== 1) data.status = 1;
-      Object.assign(data, model.getPostTime(data));
+      // Preserve the original publication date on updates.
+      data.update_time = this.now();
       const prepared = await model.getContentAndSummary({...post, ...data});
       data.content = prepared.content;
       data.summary = prepared.summary;
