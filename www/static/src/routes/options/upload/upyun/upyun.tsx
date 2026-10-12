@@ -25,8 +25,8 @@ class OptionsUploadUpYunFormItems extends React.Component<OptionsUploadItemsProp
                 </Form.Item>
                 {/* 操作员密码 */}
                 <Form.Item
-                    label="SecretKey"
-                    name="操作员密码"
+                    label="操作员密码"
+                    name="password"
                     rules={[
                         {required: true, message: '请填写又拍云的操作员密码'}
                     ]}

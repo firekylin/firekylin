@@ -77,7 +77,7 @@ module.exports = class extends Base {
     // 处理其它上传
     if (!type) { return this.fail() }
     if (type === 'local') {
-      config = { name: this.post('name') };
+      config = {type, name: this.post('name')};
     }
 
     config.file = file;
@@ -108,7 +108,9 @@ module.exports = class extends Base {
    */
   async serviceUpload(service, file, config) {
     try {
-      const uploader = think.service(`upload/${service}`);
+      const sdkServices = ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel'];
+      const serviceName = sdkServices.includes(service) ? 'files-sdk' : service;
+      const uploader = think.service(`upload/${serviceName}`);
       const result = await uploader.run(file, config);
       return this.success(result);
     } catch (e) {
