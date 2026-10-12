@@ -19,7 +19,7 @@ module.exports = class extends Base {
       const user = await modelInstance.where(where).find();
       user.social_accounts = await this.service('social-auth').list(user.id);
       try {
-        user.social_services = await this.service('social-auth').services();
+        user.social_services = [...await this.service('social-auth').services()];
       } catch {
         user.social_services = [];
       }
