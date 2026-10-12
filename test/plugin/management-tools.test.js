@@ -11,6 +11,10 @@ function fixture() {
   let activeWhere;
   const post = {
     where(where) {activeWhere = where; calls.push(['post.where', where]); return this;},
+    field() {return this;},
+    order() {return this;},
+    page() {return this;},
+    async countSelect() {return {count: 0, data: []};},
     setRelation() {return this;},
     async find() {
       if (!existing) return {};
@@ -55,6 +59,7 @@ function fixture() {
 test('registers all management tools', () => {
   const {registry} = fixture();
   assert.deepEqual(registry.list().map(item => item.name), [
+    'posts.listManaged', 'posts.getManaged', 'posts.update',
     'posts.createDraft', 'posts.updateDraft', 'posts.publish', 'posts.delete',
     'categories.list', 'tags.list', 'comments.list', 'comments.approve'
   ]);
@@ -119,4 +124,21 @@ test('tools reject unsupported arguments and unauthenticated calls', async() => 
   await assert.rejects(run('posts.createDraft', {title: 'T', pathname: 't', markdown_content: '# hi', status: 3}), /Unsupported property/);
   await assert.rejects(run('posts.publish', {id: '7'}), /Invalid ID/);
   await assert.rejects(registry.execute('posts.createDraft', {}, {authorize: () => true}), /Authenticated principal/);
+});
+
+test('managed article tools reuse admin queries and require authenticated principal', async() => {
+  const {run, setExisting, calls, editor} = fixture();
+  setExisting({id: 8, user_id: 2, status: 0, title: 'Draft', markdown_content: '# draft'});
+  const result = await run('posts.getManaged', {id: 8}, editor);
+  assert.equal(result.markdown_content, '# draft');
+  assert.ok(calls.some(([kind, where]) => kind === 'post.where' && where.user_id === 2));
+  await assert.rejects(run('posts.getManaged', {id: 8}, {type: 4}), /Authenticated author/);
+});
+
+test('updating published article through tool requires approval', async() => {
+  const {run, setExisting, calls, editor} = fixture();
+  setExisting({id: 8, user_id: 2, status: 3, pathname: 'post'});
+  await assert.rejects(run('posts.update', {id: 8, title: 'New'}, editor, () => false), /Explicit approval/);
+  await run('posts.update', {id: 8, title: 'New'}, editor);
+  assert.ok(calls.some(([kind, data]) => kind === 'save' && data.status === 1));
 });
