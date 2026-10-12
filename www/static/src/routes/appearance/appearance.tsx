@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from '@admin/utils/router';
 import Theme from './theme/theme';
 import { AppearanceProps } from './appearance.model';
 import Navigation from './navigation/navigation';

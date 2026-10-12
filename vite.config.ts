@@ -7,14 +7,16 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
     root: path.resolve(__dirname, 'www/static/src'),
-    base: '/static/dist/',
+    // Production assets are served by ThinkJS under /static/dist. In dev the
+    // admin router itself owns /admin, so Vite must serve from the origin root.
+    base: mode === 'production' ? '/static/dist/' : '/',
 
     plugins: [
         react(),
         {
             name: 'admin-asset-version',
             enforce: 'post',
-            closeBundle() {
+            writeBundle() {
                 const assetsPath = path.resolve(__dirname, 'www/static/dist/assets');
                 const hash = createHash('sha256');
                 for (const fileName of ['assets/admin.js', 'assets/admin.css']) {
@@ -25,7 +27,11 @@ export default defineConfig(({ mode }) => ({
         },
     ],
 
-    resolve: {},
+    resolve: {
+        alias: {
+            '@admin': path.resolve(__dirname, 'www/static/src'),
+        },
+    },
 
     css: {
         preprocessorOptions: {

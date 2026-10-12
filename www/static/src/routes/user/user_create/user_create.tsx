@@ -6,7 +6,7 @@ import { Form, FormInstance } from 'antd';
 import { message, Input, Select } from 'antd';
 import md5 from 'md5';
 import UserStore from '../user.store';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 
 interface UserCreateProps extends RouteComponentProps<any> {
     userStore: UserStore;

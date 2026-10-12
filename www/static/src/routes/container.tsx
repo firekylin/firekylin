@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import { Route, Redirect, Switch, useRouteComponentProps } from '../utils/router';
 import Loading from './loading';
 import './container.less';
 import Sidebar from '../components/sidebar';
@@ -17,11 +17,6 @@ const Push = lazy(() => import('./push/push'));
 const Appearance = lazy(() => import('./appearance/appearance'));
 const Options = lazy(() => import('./options/options'));
 const Comment = lazy(() => import('./comment/comment'));
-
-const routerOptions = {
-    basename: '/admin',
-    forceRefresh: false,
-};
 
 class Container extends React.Component<any, {}> {
     constructor(props: any) {
@@ -41,8 +36,7 @@ class Container extends React.Component<any, {}> {
     }
     render() {
         return (
-            <Router {...routerOptions}>
-                <>
+            <>
                     <Sidebar {...this.props} />
                     <div className="content">
                         <Suspense fallback={<Loading />}>
@@ -62,10 +56,11 @@ class Container extends React.Component<any, {}> {
                             </Switch>
                         </Suspense>
                     </div>
-                </>
-            </Router>
+            </>
         );
     }
 }
 
-export default Container;
+export default function ContainerWithRouter() {
+    return <Container {...useRouteComponentProps()} />;
+}

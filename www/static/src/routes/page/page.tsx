@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from '@admin/utils/router';
 import PageList from './page-list/page-list';
 import PageCreate from './page-create/page-create';
 

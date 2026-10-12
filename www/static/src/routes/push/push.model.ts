@@ -1,5 +1,5 @@
 import PushStore from  './push.store';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 
 export interface PushProps extends RouteComponentProps<PushMatchParams> {
     pushStore: PushStore;

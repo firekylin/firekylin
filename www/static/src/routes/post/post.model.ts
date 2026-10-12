@@ -1,5 +1,5 @@
 import PostStore from './post.store';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 import { ArticleMatchParams } from '../../models/article.model';
 
 export interface PostProps extends RouteComponentProps<ArticleMatchParams> {

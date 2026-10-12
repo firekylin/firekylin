@@ -8,7 +8,8 @@ import * as React from 'react';
 // import Search from './search';
 import './style.less';
 import * as icons from './icons';
-import { Modal, message, FormInstance, UploadChangeParam, Dropdown } from 'antd';
+import { Modal, message, FormInstance, Dropdown } from 'antd';
+import type { UploadChangeParam } from 'antd/es/upload/interface';
 import EditorLinkModal from './link-modal/link-modal';
 import EditorImageModal from './image-modal/image-modal';
 import { http } from '../../utils/http';
@@ -344,7 +345,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         </div>
         <a ref={a => this.resizebar = a} href="###" className="editor__resize">调整高度</a>
         <EditorLinkModal
-          visible={this.state.visible.link}
+          open={this.state.visible.link}
           onCancel={() => {this.setState({visible: Object.assign({}, this.state.visible, {link: false})}); this.linkFormRef.current?.resetFields(); }}
           onCreate={() => this.handleLinkCreate()}
           onFormReady={ref => { this.linkFormRef = ref; }}
@@ -352,7 +353,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           fetchData={this.props.fetchData}
         />
         <EditorImageModal
-          visible={this.state.visible.image}
+          open={this.state.visible.image}
           onCancel={() => this.imageModalClose()}
           onOk={() => this.handleImageOk()}
           fileDone={(fileInfo: UploadChangeParam) => this.handleFile(fileInfo)}

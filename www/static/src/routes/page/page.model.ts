@@ -1,4 +1,4 @@
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 import PageStore from './page.store';
 import { ArticleMatchParams } from '../../models/article.model';
 import SharedStore from '../../shared.store';

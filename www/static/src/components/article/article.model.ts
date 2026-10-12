@@ -1,5 +1,5 @@
 
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 import UserStore from '../../routes/user/user.store';
 import SharedStore from '../../shared.store';
 import { ArticleMatchParams } from '../../models/article.model';

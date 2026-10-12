@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { NavLink, match, matchPath } from 'react-router-dom';
+import { NavLink } from '../utils/router';
 import { InitiateRoutes, InitiateThemePages } from './data/routes.data';
 class SideBar extends React.Component<any, any> {
     state = this.initState();

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import PushList from './push_list/push_list';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from '@admin/utils/router';
 import PushCreate from './push_create/push_create';
 import { PushProps } from './push.model';
 

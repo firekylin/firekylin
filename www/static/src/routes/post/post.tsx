@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from '@admin/utils/router';
 import PostList from './list/list';
 import PostCreate from './create/create';
 import { PostProps } from './post.model';
