@@ -25,6 +25,7 @@ function signature(value) {
 }
 
 function sign(user, seconds = TTL) {
+  if (!user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0 || ![1, 2].includes(Number(user.type))) throw new Error('Invalid administrator identity');
   const now = Math.floor(Date.now() / 1000);
   const header = base64({alg: 'HS256', typ: 'JWT'});
   const payload = base64({
@@ -56,7 +57,7 @@ function verify(token) {
     if (claims.iss !== ISSUER || claims.aud !== AUDIENCE ||
         !/^[1-9]\d*$/.test(String(claims.sub)) ||
         !Number.isInteger(claims.iat) || !Number.isInteger(claims.exp) ||
-        claims.iat > now || claims.exp <= now || claims.exp - claims.iat > 365 * DAY ||
+        claims.iat > now || claims.exp <= now || claims.exp - claims.iat > TTL ||
         ![1, 2].includes(claims.type)) return null;
     return {id: Number(claims.sub), name: claims.name, type: claims.type};
   } catch (e) {
@@ -75,7 +76,7 @@ function cookieOptions(ctx, remember) {
 }
 
 function login(ctx, user, remember) {
-  const token = sign(user, remember ? TTL : DAY);
+  const token = sign(user);
   ctx.cookie(COOKIE_NAME, token, cookieOptions(ctx, remember));
 }
 
