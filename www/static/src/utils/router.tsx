@@ -74,8 +74,8 @@ export function Route(_props: LegacyRouteProps) {
     return null;
 }
 
-export function Redirect(_props: RedirectProps) {
-    return null;
+export function Redirect({ to }: RedirectProps) {
+    return <Navigate to={to} replace />;
 }
 
 export function Switch({ children }: React.PropsWithChildren<{}>) {
