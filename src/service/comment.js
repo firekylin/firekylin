@@ -4,7 +4,7 @@
 const crypto = require('crypto');
 const {marked, Renderer} = require('marked');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
-const {ModelAdapter, UserAdapter} = require('./comment-adapter');
+const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
 
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
@@ -75,6 +75,16 @@ module.exports = class extends think.Service {
     const config = options.comment || {};
     const secret = options.comment_jwt_secret;
     const users = new UserAdapter(controller.model('user'));
+    const postIds = new Map();
+    const resolvePostId = async url => {
+      if (postIds.has(url)) return postIds.get(url);
+      const target = pathnameFromUrl(url);
+      const post = target ? await controller.model('post').where(target).field('id')
+        .find() : {};
+      const id = post && post.id ? Number(post.id) : null;
+      postIds.set(url, id);
+      return id;
+    };
     const tokenService = {
       sign(id) { const value = `${id}.${Date.now()}`; return `${value}.${signature(secret, value)}` },
       verify(token) {
@@ -91,7 +101,7 @@ module.exports = class extends think.Service {
     };
     const core = createCommentCore({
       models: {
-        Comment: new ModelAdapter(controller.model('comment'), {hasInsertedAt: true}),
+        Comment: new CommentAdapter(controller.model('comment'), resolvePostId),
         Counter: new ModelAdapter(controller.model('counter')),
         Users: users
       },
@@ -178,12 +188,18 @@ module.exports = class extends think.Service {
     }
   }
 
-  async syncCount(controller, url) {
-    if (!url) return;
-    const target = pathnameFromUrl(url);
+  async syncCount(controller, target) {
     if (!target) return;
-    const count = await controller.model('comment').where({url, status: ['NOT IN', ['waiting', 'spam']]}).count();
-    await controller.model('post').where(target).update({comment_num: Number(count)});
+    let postId = Number(target.post_id || target.id || target);
+    if (!postId && typeof target === 'string') {
+      const path = pathnameFromUrl(target);
+      const post = path ? await controller.model('post').where(path).field('id')
+        .find() : {};
+      postId = Number(post.id);
+    }
+    if (!postId) return;
+    const count = await controller.model('comment').where({post_id: postId, status: ['NOT IN', ['waiting', 'spam']]}).count();
+    await controller.model('post').where({id: postId}).update({comment_num: Number(count)});
     await think.cache('post_1', null);
   }
 };

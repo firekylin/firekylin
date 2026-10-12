@@ -33,19 +33,19 @@ module.exports = class extends Base {
           } else if (input.type === 'recent') result = await core.comment.listRecent(input, ctx);
           else result = await core.comment.list(input, ctx);
         } else if (method === 'POST') {
-          await service.validateCommentTarget(this, input.url);
+          const post = await service.validateCommentTarget(this, input.url);
           service.validateCommentInput(input, ctx, config);
           result = await core.comment.create(input, ctx);
-          await service.syncCount(this, input.url);
+          await service.syncCount(this, post.id);
         } else if (method === 'PUT') {
           const old = (await this.model('comment').where({id}).find());
           service.validateCommentInput(input, ctx, config, false);
           result = await core.comment.update({objectId: id, data: input}, ctx);
-          await service.syncCount(this, old.url);
+          await service.syncCount(this, old.post_id);
         } else {
           const old = (await this.model('comment').where({id}).find());
           result = await core.comment.remove({objectId: id}, ctx);
-          await service.syncCount(this, old.url);
+          await service.syncCount(this, old.post_id);
         }
       } else if (resource === 'token') {
         if (method === 'GET') {

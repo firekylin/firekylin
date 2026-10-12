@@ -77,6 +77,56 @@ class ModelAdapter {
   async delete(where) { await this.model.where(dbWhere(where)).delete() }
 }
 
+class CommentAdapter extends ModelAdapter {
+  constructor(model, resolvePostId) {
+    super(model, {hasInsertedAt: true});
+    this.resolvePostId = resolvePostId;
+  }
+  async postIds(urls) {
+    const values = Array.isArray(urls) ? urls : [urls];
+    return Promise.all(values.map(url => this.resolvePostId(url)));
+  }
+  async whereByPost(where = {}) {
+    const output = {...where};
+    if (Object.prototype.hasOwnProperty.call(output, 'url')) {
+      const condition = output.url;
+      if (Array.isArray(condition) && String(condition[0]).toUpperCase() === 'IN') {
+        const ids = (await this.postIds(condition[1])).filter(Boolean);
+        output.post_id = ['IN', ids.length ? ids : [-1]];
+      } else {
+        output.post_id = await this.resolvePostId(condition) || -1;
+      }
+      delete output.url;
+    }
+    if (output._complex) output._complex = await this.whereByPost(output._complex);
+    return output;
+  }
+  async select(where = {}, options = {}) {
+    return super.select(await this.whereByPost(where), options);
+  }
+  async count(where = {}, options = {}) {
+    if (options.group && options.group.includes('url') && Object.prototype.hasOwnProperty.call(where, 'url')) {
+      const condition = where.url;
+      const urls = Array.isArray(condition) && String(condition[0]).toUpperCase() === 'IN' ? condition[1] : [condition];
+      const base = {...where};
+      delete base.url;
+      const rows = [];
+      for (const url of urls) {
+        const postId = await this.resolvePostId(url);
+        const count = postId ? await super.count({...base, post_id: postId}) : 0;
+        rows.push({url, count});
+      }
+      return rows;
+    }
+    return super.count(await this.whereByPost(where), options);
+  }
+  async add(data) {
+    const postId = await this.resolvePostId(data.url);
+    if (!postId) throw new Error('Comment post does not exist');
+    return super.add({...data, post_id: postId});
+  }
+}
+
 class UserAdapter extends ModelAdapter {
   toApi(row, {includePassword = false} = {}) {
     if (!row) return row;
@@ -154,4 +204,4 @@ class UserAdapter extends ModelAdapter {
   async delete(where) { const users = await this.select(where); if (users.length) await this.model.where({id: ['IN', users.map(user => user.objectId)]}).delete(); }
 }
 
-module.exports = {ModelAdapter, UserAdapter, apiRow, dbWhere};
+module.exports = {ModelAdapter, CommentAdapter, UserAdapter, apiRow, dbWhere};

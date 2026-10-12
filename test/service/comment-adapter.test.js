@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const {ModelAdapter, UserAdapter, dbWhere} = require('../../src/service/comment-adapter');
+const {ModelAdapter, CommentAdapter, UserAdapter, dbWhere} = require('../../src/service/comment-adapter');
 
 test('comment adapter maps undefined query values to NULL database fields', () => {
   assert.deepEqual(dbWhere({rid: undefined, objectId: '1'}), {rid: null, id: '1'});
@@ -23,6 +23,32 @@ test('comment adapter supplies all required timestamps when inserting', async() 
     assert.equal(inserted.created_at, '2026-10-12 04:22:35');
     assert.equal(inserted.updated_at, '2026-10-12 04:22:35');
     assert.equal(result.insertedAt, '2026-10-12 04:22:35');
+  } finally {
+    global.think = originalThink;
+  }
+});
+
+test('comment adapter stores and queries comments by post id', async() => {
+  const originalThink = global.think;
+  global.think = {datetime: () => '2026-10-12 04:22:35'};
+  let inserted;
+  let selectedWhere;
+  const query = {
+    order() { return this },
+    limit() { return this },
+    async select() { return [] }
+  };
+  const model = {
+    async add(data) { inserted = data; return 1 },
+    where(value) { selectedWhere = value; return query }
+  };
+  const adapter = new CommentAdapter(model, async url => url.includes('hello') ? 42 : null);
+  try {
+    await adapter.add({comment: 'Hi', url: '/post/hello.html'});
+    assert.equal(inserted.post_id, 42);
+    assert.equal(inserted.url, '/post/hello.html');
+    await adapter.select({url: '/post/hello.html'});
+    assert.deepEqual(selectedWhere, {post_id: 42});
   } finally {
     global.think = originalThink;
   }

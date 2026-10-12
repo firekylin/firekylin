@@ -3,16 +3,6 @@
 
 const Base = require('./base');
 
-function getTarget(url) {
-  const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
-  if (!match) return null;
-  try {
-    return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
-  } catch (e) {
-    return null;
-  }
-}
-
 module.exports = class extends Base {
   async getAction() {
     const page = Math.max(Number(this.get('page')) || 1, 1);
@@ -29,7 +19,8 @@ module.exports = class extends Base {
         display_name: ['LIKE', pattern],
         email: ['LIKE', pattern],
         _logic: 'OR'
-      }).field('id').select();
+      }).field('id')
+        .select();
       where._complex = {
         nick: ['LIKE', pattern],
         mail: ['LIKE', pattern],
@@ -45,19 +36,20 @@ module.exports = class extends Base {
         .select()
     ]);
     const userIds = [...new Set(data.map(item => item.user_id).filter(Boolean))];
-    const targets = data.map(item => getTarget(item.url)).filter(Boolean);
-    const pathnames = [...new Set(targets.map(item => item.pathname))];
+    const postIds = [...new Set(data.map(item => Number(item.post_id)).filter(Boolean))];
     const [users, posts] = await Promise.all([
-      userIds.length ? this.model('user').where({id: ['IN', userIds]}).field('id,name,display_name,email,url,avatar').select() : [],
-      pathnames.length ? this.model('post').where({pathname: ['IN', pathnames]}).field('title,pathname,type').select() : []
+      userIds.length ? this.model('user').where({id: ['IN', userIds]}).field('id,name,display_name,email,url,avatar')
+        .select() : [],
+      postIds.length ? this.model('post').where({id: ['IN', postIds]}).field('id,title,pathname,type')
+        .select() : []
     ]);
     const userMap = new Map(users.map(user => [String(user.id), user]));
-    const postMap = new Map(posts.map(post => [`${post.type}:${post.pathname}`, post]));
+    const postMap = new Map(posts.map(post => [Number(post.id), post]));
     const rows = data.map(item => {
       const user = userMap.get(String(item.user_id)) || {};
       const email = user.email || item.mail || '';
-      const target = getTarget(item.url);
-      const post = target ? postMap.get(`${target.type}:${target.pathname}`) : null;
+      const post = postMap.get(Number(item.post_id));
+      const postUrl = post ? `/${Number(post.type) === 1 ? 'page' : 'post'}/${post.pathname}.html` : item.url;
       return {
         ...item,
         author_name: user.display_name || user.name || item.nick || '匿名',
@@ -65,7 +57,7 @@ module.exports = class extends Base {
         author_link: user.url || item.link || '',
         author_avatar: user.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(email).toLowerCase())}?d=mp`,
         post_title: post ? post.title : item.url,
-        post_url: item.url
+        post_url: postUrl
       };
     });
     return this.success({page, pageSize, total: Number(total), keyword, author, data: rows});
@@ -82,7 +74,7 @@ module.exports = class extends Base {
     else if (['approved', 'waiting', 'spam'].includes(action)) await model.where({id}).update({status: action, updated_at: think.datetime()});
     else if (action === 'edit') await model.where({id}).update({comment: String(this.post('comment') || ''), updated_at: think.datetime()});
     else return this.fail('INVALID_OPERATION');
-    await this.service('comment').syncCount(this, comment.url);
+    await this.service('comment').syncCount(this, comment.post_id);
     return this.success();
   }
 };

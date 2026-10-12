@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable max-len */
 
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 function statements(type) {
   const auto = type === 'postgresql' ? 'SERIAL PRIMARY KEY' : type === 'sqlite' ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY';
@@ -29,6 +29,7 @@ module.exports = class extends think.Service {
 
     const version = Number(current.comment_schema_version) || 0;
     if (version < 1) await this.migrateV1();
+    if (version < 2) await this.migrateV2();
     if (!current.comment_jwt_secret) {
       const crypto = require('crypto');
       await options.updateOptions('comment_jwt_secret', crypto.randomBytes(32).toString('hex'));
@@ -70,6 +71,35 @@ module.exports = class extends think.Service {
       try { await model.query(`ALTER TABLE ${prefix}user ${clause}`) } catch (error) {
         if (!/duplicate column|already exists/i.test(error.message)) throw error;
       }
+    }
+  }
+
+  async migrateV2() {
+    const cfg = think.config('model');
+    const type = cfg.type;
+    const configuredPrefix = cfg[type] && cfg[type].prefix;
+    const prefix = typeof configuredPrefix === 'string' ? configuredPrefix : 'fk_';
+    const comment = this.model('comment');
+    const clause = type === 'postgresql' ? 'ADD COLUMN IF NOT EXISTS post_id INTEGER' : 'ADD COLUMN post_id INTEGER';
+    try { await comment.query(`ALTER TABLE ${prefix}comment ${clause}`) } catch (error) {
+      if (!/duplicate column|already exists/i.test(error.message)) throw error;
+    }
+    try { await comment.query(`CREATE INDEX ${prefix}comment_post_idx ON ${prefix}comment (post_id)`) } catch (error) {
+      if (!/already exists|duplicate key name/i.test(error.message)) throw error;
+    }
+
+    const [comments, posts] = await Promise.all([
+      comment.where({post_id: null}).field('id,url').select(),
+      this.model('post').field('id,type,pathname').select()
+    ]);
+    const postMap = new Map(posts.map(post => [`${Number(post.type)}:${post.pathname}`, post.id]));
+    for (const item of comments) {
+      const match = String(item.url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+      if (!match) continue;
+      let pathname;
+      try { pathname = decodeURIComponent(match[2].replace(/\.html$/, '')) } catch (e) { continue }
+      const postId = postMap.get(`${match[1] === 'page' ? 1 : 0}:${pathname}`);
+      if (postId) await comment.where({id: item.id}).update({post_id: postId});
     }
   }
 };
