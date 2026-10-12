@@ -164,7 +164,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
         now,
         syncCount: postId => getCommentService().syncCount({model: getModel}, postId)
       });
-      const result = await service.moderate({id: commentId, operation: 'approved'}, principal);
+      const result = await service.moderate({id: commentId, operation: 'approved', onlyWaiting: true}, principal);
       return {id: result.id, status: result.status};
 
     }
