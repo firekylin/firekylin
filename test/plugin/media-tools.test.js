@@ -38,7 +38,7 @@ test('media.upload delegates validated bytes to configured uploader and removes 
       }
     })
   });
-  const png = Buffer.from('89504e470d0a1a0a00000000', 'hex').toString('base64');
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
   const result = await registry.execute('media.upload', {
     name: 'image', format: 'png', base64: png
   }, {principal: {id: 1, type: 1}, authorize: () => true});
