@@ -27,6 +27,13 @@ function normalizeResourceURL(value) {
   return url;
 }
 
+function stringList(value, limit) {
+  const list = Array.isArray(value)
+    ? value.filter(item => typeof item === 'string' && item.trim()).map(item => item.trim())
+    : [];
+  return typeof limit === 'number' ? list.slice(0, limit) : list;
+}
+
 module.exports = class extends think.Service {
   render(controller, options = {}) {
     const archive = controller.archive;
@@ -44,6 +51,21 @@ module.exports = class extends think.Service {
       pageSize: Number(settings.pageSize) || 10,
       lang: settings.locale || 'zh-CN',
       login: settings.forceLogin ? 'force' : 'enable',
+      commentSorting: ['latest', 'oldest', 'hottest'].includes(settings.commentSorting)
+        ? settings.commentSorting : 'latest',
+      dark: settings.dark === 'auto' || (typeof settings.dark === 'string' && settings.dark.trim())
+        ? settings.dark : false,
+      meta: stringList(settings.meta).filter(item => ['nick', 'mail', 'link'].includes(item)),
+      requiredMeta: stringList(settings.requiredMeta).filter(item => ['nick', 'mail', 'link'].includes(item)),
+      wordLimit: settings.wordLimit || 0,
+      emoji: Array.isArray(settings.emoji) ? stringList(settings.emoji) : settings.emoji !== false,
+      reaction: Array.isArray(settings.reaction) ? stringList(settings.reaction, 6) : Boolean(settings.reaction),
+      imageUploader: settings.imageUploader !== false,
+      highlighter: settings.highlighter !== false,
+      texRenderer: settings.texRenderer !== false,
+      search: settings.search !== false,
+      noCopyright: Boolean(settings.noCopyright),
+      noRss: Boolean(settings.noRss),
       resources: {
         script: `${resourceURL}/waline.js`,
         style: `${resourceURL}/waline.css`

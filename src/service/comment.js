@@ -54,6 +54,21 @@ function pathnameFromUrl(url) {
   }
 }
 
+function stringList(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (typeof value !== 'string') return [];
+  return value.split(/[\n,]/).map(item => item.trim()).filter(Boolean);
+}
+
+function wordLimit(value) {
+  if (Array.isArray(value)) return [Math.max(0, Number(value[0]) || 0), Math.max(0, Number(value[1]) || 0)];
+  return [0, Math.max(0, Number(value) || 0)];
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 module.exports = class extends think.Service {
   async create(controller) {
     const options = await controller.model('options').getOptions(true);
@@ -84,6 +99,14 @@ module.exports = class extends think.Service {
         audit: Boolean(config.audit),
         forceLogin: Boolean(config.forceLogin),
         ipQps: Number(config.ipQps) || 60,
+        forbiddenWords: stringList(config.forbiddenWords).map(escapeRegExp),
+        disallowIPList: stringList(config.disallowIPList),
+        likeIncMax: Math.max(1, Math.min(100, Number(config.likeIncMax) || 1)),
+        levels: stringList(config.levels)
+          .map(Number)
+          .filter(Number.isFinite)
+          .sort((a, b) => a - b),
+        avatarProxy: typeof config.avatarProxy === 'string' ? config.avatarProxy.trim() : '',
         normalUserType: 'guest'
       },
       logger: think.logger,
@@ -136,6 +159,23 @@ module.exports = class extends think.Service {
     const post = await controller.model('post').where({...target, status: 3, is_public: 1, allow_comment: 1}).find();
     if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
+  }
+
+  validateCommentInput(input, ctx, config, requireMeta = true) {
+    const data = input && input.data && typeof input.data === 'object' ? input.data : input;
+    if (Object.prototype.hasOwnProperty.call(data, 'comment')) {
+      const content = String(data.comment || '');
+      const length = Array.from(content).length;
+      const [min, max] = wordLimit(config.wordLimit);
+      if ((min && length < min) || (max && length > max)) {
+        throw new CommentError('VALIDATION_ERROR', 400, 'COMMENT_LENGTH', {field: 'comment', min, max});
+      }
+    }
+    if (requireMeta && !ctx.state.userInfo) {
+      const required = stringList(config.requiredMeta).filter(item => ['nick', 'mail', 'link'].includes(item));
+      const missing = required.find(field => !String(data[field] || '').trim());
+      if (missing) throw new CommentError('VALIDATION_ERROR', 400, 'REQUIRED_META', {field: missing});
+    }
   }
 
   async syncCount(controller, url) {

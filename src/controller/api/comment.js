@@ -21,7 +21,7 @@ module.exports = class extends Base {
     }
     const service = this.service('comment');
     try {
-      const {core, users, tokenService, avatarService} = await service.create(this);
+      const {core, users, config, tokenService, avatarService} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
       const input = method === 'GET' ? this.get() : this.post();
       let result;
@@ -30,15 +30,16 @@ module.exports = class extends Base {
           if (input.type === 'count') {
             const url = typeof input.url === 'string' && input.url.includes(',') ? input.url.split(',') : input.url;
             result = await core.comment.count({url}, ctx);
-          }
-          else if (input.type === 'recent') result = await core.comment.listRecent(input, ctx);
+          } else if (input.type === 'recent') result = await core.comment.listRecent(input, ctx);
           else result = await core.comment.list(input, ctx);
         } else if (method === 'POST') {
           await service.validateCommentTarget(this, input.url);
+          service.validateCommentInput(input, ctx, config);
           result = await core.comment.create(input, ctx);
           await service.syncCount(this, input.url);
         } else if (method === 'PUT') {
           const old = (await this.model('comment').where({id}).find());
+          service.validateCommentInput(input, ctx, config, false);
           result = await core.comment.update({objectId: id, data: input}, ctx);
           await service.syncCount(this, old.url);
         } else {
@@ -53,8 +54,7 @@ module.exports = class extends Base {
             delete userInfo.password;
             result = userInfo;
           } else result = await core.auth.resolveSession({token: ctx.state.token}, ctx);
-        }
-        else if (method === 'DELETE') result = {};
+        } else if (method === 'DELETE') result = {};
         else result = await core.auth.login(input, ctx);
       } else if (resource === 'user') {
         if (method === 'GET') result = id ? await core.user.get({email: input.email}, ctx) : await core.user.list(input, ctx);

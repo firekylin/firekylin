@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 global.think = {Service: class {}};
+const CommentService = require('../../src/service/comment');
 const {pathnameFromUrl, renderMarkdown} = require('../../src/service/comment');
 
 test('comment markdown removes unsafe links and image sources', () => {
@@ -31,4 +32,17 @@ test('comment paths decode browser-encoded post pathnames', () => {
   assert.deepEqual(pathnameFromUrl('/post/%E4%B8%AD%E6%96%87.html'), {type: 0, pathname: '中文'});
   assert.deepEqual(pathnameFromUrl('/page/about.html'), {type: 1, pathname: 'about'});
   assert.equal(pathnameFromUrl('/post/%E4.html'), null);
+});
+
+test('comment input enforces configured length and anonymous metadata', () => {
+  const service = new CommentService();
+  const anonymous = {state: {}};
+  const signedIn = {state: {userInfo: {objectId: '1'}}};
+  const config = {wordLimit: [2, 5], requiredMeta: ['nick', 'mail']};
+
+  assert.throws(() => service.validateCommentInput({comment: 'a', nick: 'A', mail: 'a@example.com'}, anonymous, config),
+    error => error.code === 'VALIDATION_ERROR' && error.details.min === 2);
+  assert.throws(() => service.validateCommentInput({comment: 'hello', nick: 'A'}, anonymous, config),
+    error => error.code === 'VALIDATION_ERROR' && error.details.field === 'mail');
+  assert.doesNotThrow(() => service.validateCommentInput({comment: 'hello'}, signedIn, config));
 });

@@ -58,3 +58,29 @@ test('comment helper renders nothing when comments are unavailable', () => {
   assert.equal(service.render(controller({get: name => name === 'preview' ? '1' : undefined})), '');
   assert.equal(service.render(controller({archive: null})), '');
 });
+
+test('comment helper forwards supported client options', () => {
+  const current = controller();
+  current.options.comment = {
+    commentSorting: 'hottest',
+    dark: 'auto',
+    meta: ['nick', 'mail'],
+    requiredMeta: ['nick'],
+    wordLimit: [2, 200],
+    emoji: false,
+    reaction: ['one.svg', 'two.svg'],
+    imageUploader: false,
+    highlighter: false,
+    texRenderer: false,
+    search: false,
+    noCopyright: true,
+    noRss: true
+  };
+  const output = new CommentRender().render(current);
+  assert.match(output, /&quot;commentSorting&quot;:&quot;hottest&quot;/);
+  assert.match(output, /&quot;dark&quot;:&quot;auto&quot;/);
+  assert.match(output, /&quot;wordLimit&quot;:\[2,200\]/);
+  assert.match(output, /&quot;emoji&quot;:false/);
+  assert.match(output, /&quot;imageUploader&quot;:false/);
+  assert.match(output, /&quot;noCopyright&quot;:true/);
+});

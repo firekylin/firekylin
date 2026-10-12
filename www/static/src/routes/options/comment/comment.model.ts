@@ -11,6 +11,7 @@ export interface CommentState {
         pageSize?: number;
         locale?: string;
         ipQps?: number;
+        [key: string]: any;
     };
     submitting: boolean;
 }
