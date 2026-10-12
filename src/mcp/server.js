@@ -61,9 +61,9 @@ function createServerFactory({tools, auth, sdk, logger}) {
   };
 }
 
-async function createMcpEndpoint({tools, config = {}, getUser, logger = console, sdk: sdkOverride}) {
+async function createMcpEndpoint({tools, config = {}, getUser, logger = console, sdk: sdkOverride, verifier, resourceMetadataUrl}) {
   const sdk = sdkOverride || await import('@modelcontextprotocol/server');
-  const verify = createTokenVerifier(config, getUser);
+  const verify = verifier || createTokenVerifier(config, getUser);
   return async function handle(ctx) {
     if (!ALLOWED_METHODS.has(ctx.method)) {
       ctx.set('Allow', 'POST, GET, DELETE');
@@ -78,7 +78,8 @@ async function createMcpEndpoint({tools, config = {}, getUser, logger = console,
     // Never expose the MCP endpoint without a configured bearer token.
     const auth = await verify(ctx.get('authorization'));
     if (!auth) {
-      ctx.set('WWW-Authenticate', 'Bearer realm="firekylin-mcp"');
+      ctx.set('WWW-Authenticate', 'Bearer realm="firekylin-mcp"' +
+        (resourceMetadataUrl ? ', resource_metadata="' + resourceMetadataUrl + '"' : ''));
       ctx.status = 401;
       ctx.body = 'Unauthorized';
       return;
