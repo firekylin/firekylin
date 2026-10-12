@@ -1,3 +1,4 @@
+const adminAuth = require('./admin-auth');
 'use strict';
 /* eslint-disable max-len */
 
@@ -148,8 +149,8 @@ module.exports = class extends think.Service {
     if (token) {
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
-    // A Firekylin administrator session is also a comment administrator session.
-    const sessionUser = await controller.session('userInfo') || {};
+    // A Firekylin administrator JWT also authenticates the comment administrator.
+    const sessionUser = adminAuth.currentUser(controller.ctx) || {};
     if (Number(sessionUser.type) === 1) {
       const found = await users.select({objectId: String(sessionUser.id)});
       if (found[0]) {
