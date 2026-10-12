@@ -1,3 +1,4 @@
+const adminAuth = require('../../../service/admin-auth');
 const {parse} = require('url');
 const BaseRest = require('../rest');
 const {isLocalReferrer} = require('./referrer');
@@ -9,7 +10,7 @@ module.exports = class extends BaseRest {
   }
 
   async __before() {
-    const userInfo = await this.session('userInfo') || {};
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
