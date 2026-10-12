@@ -1,6 +1,15 @@
 # Stateless administrator authentication
 
-Firekylin signs the administrator's login identity into an HS256 JSON Web Token.
+Firekylin signs the backend login identity into an HS256 JSON Web Token.
+`src/service/admin-auth.js` signs and verifies tokens for management identities
+(user types 1 and 2) as well as commenter identities (user type 4). Any other
+user type is rejected when signing and when verifying.
+
+A commenter token gives a restricted backend session. Commenters can only view,
+edit and delete their own comments and change their own profile, password and
+social account bindings. Role, status and other management operations are
+forbidden.
+
 The token is stored in the existing `thinkjs` HttpOnly, SameSite=Lax cookie.
 The cookie options are defined directly in `src/service/admin-auth.js`;
 the legacy session adapter and its dependencies have been removed.
