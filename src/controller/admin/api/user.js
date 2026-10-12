@@ -101,7 +101,7 @@ module.exports = class extends Base {
     const user = await this.modelInstance.where({id: this.id}).find();
     const options = await this.model('options').getOptions();
     const transporter = nodemailer.createTransport();
-    const site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
+    const site_url = Object.hasOwn(options, 'site_url') ? options.site_url : `http://${this.ctx.host}`;
     transporter.sendMail({
       from: 'no-reply@firekylin.lithub.cc',
       to: user.email,

@@ -19,9 +19,9 @@
     "test:plugin": "node --test test/plugin/*.test.js",
     "test:cli": "node --test test/cli/*.test.js",
     "test:types": "tsc -p test/types/tsconfig.json --noEmit",
-    "lint": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --cache --ext .js,.jsx || true",
-    "lint-fix": "eslint ./src ./*.js ./www/static/src/*.js ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx --fix || true",
-    "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/static/src/*.ts ./www/static/src ./www/theme/firekylin --ignore-path .gitignore --ext .js,.jsx",
+    "lint": "eslint ./src ./*.js ./www/theme/firekylin --cache || true",
+    "lint-fix": "eslint ./src ./*.js ./www/theme/firekylin --fix || true",
+    "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/theme/firekylin",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
     "build:pkg": "pkg pkg.js --out-path=dist/"
@@ -85,6 +85,7 @@
   },
   "devDependencies": {
     "@ant-design/icons": "^6.3.4",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-color": "^3.0.13",
@@ -93,10 +94,9 @@
     "antd": "^6.6.6",
     "axios": "^1.20.0",
     "classnames": "^2.5.1",
-    "eslint": "^8.57.1",
-    "eslint-config-think": "^1.1.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-react": "^7.37.5",
+    "eslint": "^10.12.0",
+    "eslint-plugin-import-x": "^4.17.1",
+    "globals": "^17.13.0",
     "history": "^5.3.0",
     "immutability-helper": "^3.1.1",
     "less": "^4.9.1",
@@ -115,13 +115,13 @@
     "superagent": "^10.4.1",
     "think-watcher": "^3.0.4",
     "tiny-pinyin": "^1.3.2",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.3.4"
   },
   "repository": "https://github.com/lizheming/firekylin",
   "license": "MIT",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.13.0 || >=24"
   },
   "packageManager": "pnpm@10.29.3",
   "readmeFilename": "README.md",

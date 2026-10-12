@@ -28,7 +28,7 @@ module.exports = class extends Base {
    */
   async user(channel) {
     /** 无用户无需导入返回导入0个用户 */
-    if (!channel.hasOwnProperty('wp:author')) {
+    if (!Object.hasOwn(channel, 'wp:author')) {
       return 0;
     }
 
@@ -80,7 +80,7 @@ module.exports = class extends Base {
         const user = await this.userModelInstance.where({name: item['dc:creator'][0]}).find();
         // 查询分类 ID
         let cate = [];
-        if (item.hasOwnProperty('category')) {
+        if (Object.hasOwn(item, 'category')) {
           const cates = item.category.filter(item => item.$.domain === 'category').map(item => item._);
           if (Array.isArray(cates) && cates.length > 0) {
             cate = await this.cateModelInstance.setRelation(false)
@@ -93,7 +93,7 @@ module.exports = class extends Base {
 
         // 摘要有可能是空
         let summary;
-        if (item.hasOwnProperty('excerpt:encoded') && item['excerpt:encoded'][0] !== '') {
+        if (Object.hasOwn(item, 'excerpt:encoded') && item['excerpt:encoded'][0] !== '') {
           summary = item['excerpt:encoded'][0];
         } else {
           summary = item['content:encoded'][0];
@@ -111,7 +111,7 @@ module.exports = class extends Base {
           comment_num: 0,
           allow_comment: Number(item['wp:comment_status'][0] === 'open'),
           is_public: Number(item['wp:status'][0] !== 'private'),
-          tag: item.hasOwnProperty('category')
+          tag: Object.hasOwn(item, 'category')
             ? item.category.filter(item => item.$.domain === 'post_tag').map(item => item._) : [],
           cate
         };
