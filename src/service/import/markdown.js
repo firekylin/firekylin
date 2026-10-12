@@ -1,3 +1,4 @@
+const adminAuth = require('../admin-auth');
 const fs = require('fs');
 const path = require('path');
 const {execSync} = require('child_process');
@@ -41,7 +42,7 @@ module.exports = class extends Base {
     const postsPromise = posts.map(async item => {
       try {
         // 获取用户
-        const user = await this._think.session('userInfo');
+        const user = adminAuth.currentUser(this._think.ctx);
 
         let post = {
           title: item.title,
