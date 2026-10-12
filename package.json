@@ -76,8 +76,6 @@
     "think-model-postgresql": "^1.1.10",
     "think-model-sqlite": "^2.0.1",
     "think-router-rest": "^1.0.5",
-    "think-session": "^1.1.6",
-    "think-session-file": "^1.1.4",
     "think-view": "^1.0.13",
     "think-view-eta": "^1.0.0",
     "thinkjs": "^4.0.0",
