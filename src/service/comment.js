@@ -1,442 +1,208 @@
-const request = require('request');
+'use strict';
+/* eslint-disable max-len */
 
-const reqIns = request.defaults({
-  strictSSL: false,
-  rejectUnauthorized: false
-});
+const crypto = require('crypto');
+const {marked, Renderer} = require('marked');
+const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
+const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
 
-const _ = {
-  get: think.promisify(reqIns, reqIns),
-  post: think.promisify(reqIns.post, reqIns)
-};
+function signature(secret, value) {
+  return crypto.createHmac('sha256', secret).update(value).digest('base64url');
+}
+
+function escapeAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function safeMarkdownUrl(value, image = false) {
+  let decoded = String(value || '').replace(/&colon;|&#0*58;|&#x0*3a;/ig, ':');
+  try { decoded = decodeURIComponent(decoded) } catch (e) {} // eslint-disable-line no-empty
+  const normalized = decoded.replace(/[\u0000-\u0020]+/g, '').toLowerCase(); // eslint-disable-line no-control-regex
+  const scheme = normalized.match(/^([a-z][a-z0-9+.-]*):/);
+  if (!scheme) return true;
+  if (image && scheme[1] === 'data') return /^data:image\/(?:gif|png|jpe?g|webp);base64,/i.test(normalized);
+  return image ? ['http', 'https'].includes(scheme[1]) : ['http', 'https', 'mailto'].includes(scheme[1]);
+}
+
+function renderMarkdown(value) {
+  const renderer = new Renderer();
+  renderer.link = function({href, title, tokens}) {
+    const text = this.parser.parseInline(tokens);
+    if (!safeMarkdownUrl(href)) return text;
+    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
+    return `<a href="${escapeAttribute(href)}"${titleAttribute}>${text}</a>`;
+  };
+  renderer.image = ({href, title, text}) => {
+    if (!safeMarkdownUrl(href, true)) return escapeAttribute(text || '');
+    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
+    return `<img src="${escapeAttribute(href)}" alt="${escapeAttribute(text || '')}"${titleAttribute}>`;
+  };
+  return marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'), {renderer});
+}
+
+function pathnameFromUrl(url) {
+  const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+  if (!match) return null;
+  try {
+    return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
+  } catch (e) {
+    return null;
+  }
+}
+
+function stringList(value) {
+  if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
+  if (typeof value !== 'string') return [];
+  return value.split(/[\n,]/).map(item => item.trim()).filter(Boolean);
+}
+
+function wordLimit(value) {
+  if (Array.isArray(value)) return [Math.max(0, Number(value[0]) || 0), Math.max(0, Number(value[1]) || 0)];
+  return [0, Math.max(0, Number(value) || 0)];
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 module.exports = class extends think.Service {
-  /**
-   * sync post comments
-   * @return {[type]} [description]
-   */
-  async sync() {
-    const optionsModel = this.model('options');
-    const options = await optionsModel.getOptions();
-    const comment = options.comment;
-    comment.site_url = options.site_url;
-
-    if (comment.name) {
-      if (comment.type === 'disqus') {
-        return this.syncFromDisqus(comment);
-      } else if (comment.type === 'hypercomments') {
-        return this.syncFromHyperComments(comment);
-      } else if (comment.type === 'duoshuo') {
-        return this.syncFromDuoshuo(comment);
-      } else if (comment.type === 'changyan') {
-        return this.syncFromChangyan(comment);
-      } else if (comment.type === 'netease') {
-        return this.syncFromNetease(comment);
-      } else if (comment.type === 'gitalk') {
-        return this.syncFromGitalk(comment);
-      } else if (comment.type === 'waline') {
-        return this.syncFromWaline(comment);
-      }
-    }
-  }
-
-  /**
-   * get post data
-   * @return {[type]} [description]
-   */
-  async getPostData() {
-    const postModel = this.model('post');
-    const allPost = await postModel.setRelation(false)
-      .order('create_time DESC')
-      .field('id,pathname,comment_num,type')
-      .select();
-    const keys = {};
-    allPost.map(item => {
-      const key = think.md5(item.pathname);
-      keys[key] = item;
-      return key;
-    });
-    return keys;
-  }
-  /**
-   * sync from disqus
-   * @return {[type]} [description]
-   */
-  async syncFromDisqus(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
-    }
-    const threads = Object.keys(postData); // .join('&l=')
-    let index = 0;
-    while (true) { // eslint-disable-line no-constant-condition
-      const ths = threads.slice(index, index + 10);
-      index += 10;
-      if (!ths.length) {
-        return;
-      }
-      const url = `https://${comment.name}.disqus.com/count-data.js?1=${ths.join('&1=')}`;
-      // think.log(`sync comments ${url}`);
-      const response = await _.get(url).catch(() => {});
-      if (!response) {
-        continue;
-      }
-      let data = response.body.match(/DISQUSWIDGETS.displayCount\(([^()]+)\);/);
-      if (!data) {
-        continue;
-      }
-
-      data = JSON.parse(data[1]).counts;
-      const promises = data.map(item => {
-        if (item.comments === postData[item.id].comment_num) {
-          return;
-        }
-        const id = postData[item.id].id;
-        return this.model('post').where({
-          id: id
-        }).update({
-          comment_num: item.comments
-        });
-      });
-      await Promise.all(promises);
-      if (promises.length) {
-        await this.clearPostCache();
-      }
-    }
-  }
-
-  async syncFromHyperComments(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
-    }
-
-    const url = 'https://c1n1.hypercomments.com/api/get_count';
-    let site_url = comment.site_url;
-    if (site_url.slice(-1) !== '/') {
-      site_url = site_url + '/';
-    }
-
-    for (const i in postData) {
-      const post = postData[i];
-      post.url = site_url + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
-    }
-
-    const threads = Object.keys(postData);
-    let index = 0;
-    while (true) { // eslint-disable-line no-constant-condition
-      const ths = threads.slice(index, index + 50);
-      index += 50;
-
-      if (!ths.length) {
-        return;
-      }
-
-      const formData = {
-        data: JSON.stringify({
-          widget_id: comment.name,
-          href: ths.map(th => postData[th].url)
-        }),
-        host: site_url
-      };
-      const resp = await _.post({
-        url,
-        form: formData
-      });
-      const data = JSON.parse(resp.body).data;
-
-      if (!data) {
-        return;
-      }
-
-      const promises = [];
-      for (let i = 0; i < ths.length; i++) {
-        const post = postData[ths[i]];
-        if (data[i].cm === post.comment_num) {
-          continue;
-        }
-
-        const id = post.id;
-        promises.push(
-          this.model('post')
-            .where({
-              id
-            })
-            .update({
-              comment_num: data[i].cm
-            })
-        );
-      }
-
-      await Promise.all(promises);
-      if (promises.length) {
-        await this.clearPostCache();
-      }
-    }
-  }
-  /**
-   * sync from duoshuo
-   * @return {[type]} [description]
-   */
-  async syncFromDuoshuo(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
-    }
-    const threads = Object.keys(postData);
-    let index = 0;
-    while (true) { // eslint-disable-line no-constant-condition
-      const ths = threads.slice(index, index + 10);
-      index += 10;
-      if (!ths.length) {
-        return;
-      }
-      const url = `http://api.duoshuo.com/threads/counts.json?short_name=${comment.name}&threads=${ths.join(',')}`;
-      // think.log(`sync comments ${url}`);
-      const response = await _.get(url);
-      const data = JSON.parse(response.body).response;
-      const promises = [];
-      for (const key in data) {
-        if (data[key].comments === postData[key].comment_num) {
-          continue;
-        }
-        const id = postData[key].id;
-        const promise = this.model('post').where({
-          id: id
-        }).update({
-          comment_num: data[key].comments
-        });
-        promises.push(promise);
-      }
-      await Promise.all(promises);
-      if (promises.length) {
-        await this.clearPostCache();
-      }
-    }
-  }
-  /**
-   * sync from changyan
-   * @return {[type]} [description]
-   */
-  async syncFromChangyan(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
-    }
-    const threads = Object.keys(postData);
-    let index = 0;
-    while (true) { // eslint-disable-line no-constant-condition
-      const ths = threads.slice(index, index + 10);
-      index += 10;
-      if (!ths.length) {
-        return;
-      }
-      const url = `http://changyan.sohu.com/api/2/topic/count?client_id=${comment.name}&topic_id=${ths.join(',')}`;
-      // think.log(`sync comments ${url}`);
-      const response = await _.get(url);
-      const data = JSON.parse(response.body).result;
-      const promises = [];
-      for (const key in data) {
-        if (data[key].comments === postData[key].comment_num) {
-          continue;
-        }
-        const id = postData[key].id;
-        const promise = this.model('post').where({
-          id: id
-        }).update({
-          comment_num: data[key].comments
-        });
-        promises.push(promise);
-      }
-      await Promise.all(promises);
-      if (promises.length) {
-        await this.clearPostCache();
-      }
-    }
-  }
-  /**
-   * sync from duoshuo
-   * @return {[type]} [description]
-   */
-  async syncFromNetease(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
-    }
-
-    let site_url = comment.site_url;
-    if (site_url.slice(-1) !== '/') {
-      site_url = site_url + '/';
-    }
-
-    for (const i in postData) {
-      const post = postData[i];
-      post.url = site_url + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
-    }
-
-    const threads = Object.keys(postData);
-    let index = 0;
-    const url = `https://api.gentie.163.com/products/${comment.name}/threads/joincounts`;
-    while (true) { // eslint-disable-line no-constant-condition
-      const ths = threads.slice(index, index + 50);
-      if (!ths.length) {
-        return;
-      }
-      index += 50;
-      // think.log(`sync comments ${url}`);
-      const formData = {
-        data: JSON.stringify(
-          ths.map(th => ({
-            url: postData[th].url,
-            sourceId: null
-          }))
-        )
-      };
-      const resp = await _.post({
-        url,
-        form: formData
-      });
-      const data = JSON.parse(resp.body).data;
-
-      const promises = [];
-      for (let i = 0; i < ths.length; i++) {
-        const post = postData[ths[i]];
-        if (data[i] === post.comment_num) {
-          continue;
-        }
-
-        const id = post.id;
-        promises.push(this.model('post').where({
-          id
-        }).update({
-          comment_num: data[i]
-        }));
-      }
-
-      await Promise.all(promises);
-      if (promises.length) {
-        await this.clearPostCache();
-      }
-    }
-  }
-
-  /**
-   *
-   * @param {*sync form gitalk in github} comment
-   */
-  async syncFromGitalk(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
-    }
-
-    // get gtalk and github config
-    const gtalkConfig = JSON.parse(comment.name);
-
-    const base64Header = Buffer.from(gtalkConfig.githubUserName + ':' + gtalkConfig.githubPassWord).toString('base64');
-
-    const url = 'https://api.github.com/search/issues?q=author:' + gtalkConfig.owner;
-    const options = {
-      url: url,
-      headers: {
-        'User-Agent': 'request',
-        'Authorization': 'Basic ' + base64Header
+  async create(controller) {
+    const options = await controller.model('options').getOptions(true);
+    const config = options.comment || {};
+    const secret = options.comment_jwt_secret;
+    const users = new UserAdapter(controller.model('user'));
+    const postIds = new Map();
+    const resolvePostId = async url => {
+      if (postIds.has(url)) return postIds.get(url);
+      const target = pathnameFromUrl(url);
+      const post = target ? await controller.model('post').where(target).field('id')
+        .find() : {};
+      const id = post && post.id ? Number(post.id) : null;
+      postIds.set(url, id);
+      return id;
+    };
+    const tokenService = {
+      sign(id) { const value = `${id}.${Date.now()}`; return `${value}.${signature(secret, value)}` },
+      verify(token) {
+        const parts = String(token || '').split('.');
+        if (parts.length !== 3) throw new Error('invalid token');
+        const value = `${parts[0]}.${parts[1]}`;
+        const expected = signature(secret, value);
+        if (parts[2].length !== expected.length || !crypto.timingSafeEqual(Buffer.from(parts[2]), Buffer.from(expected))) throw new Error('invalid token');
+        return parts[0];
       }
     };
-
-    const promises = [];
-
-    for (const i in postData) {
-      const post = postData[i];
-      post.url = '/' + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
-      options.url = url + '+label:' + i;
-
-      let response = await _.get(options);
-
-      response = JSON.parse(response.body);
-      let commentNum = 0;
-      if (response && response.total_count === 1) {
-        commentNum = response.items[0].comments;
-      } else {
-        commentNum = 0;
+    const avatarService = {
+      stringify: value => value.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(value.mail || value.email || '').toLowerCase())}?d=mp`
+    };
+    const core = createCommentCore({
+      models: {
+        Comment: new CommentAdapter(controller.model('comment'), resolvePostId),
+        Counter: new ModelAdapter(controller.model('counter')),
+        Users: users
+      },
+      config: {
+        audit: Boolean(config.audit),
+        forceLogin: Boolean(config.forceLogin),
+        ipQps: Number(config.ipQps) || 60,
+        forbiddenWords: stringList(config.forbiddenWords).map(escapeRegExp),
+        disallowIPList: stringList(config.disallowIPList),
+        likeIncMax: Math.max(1, Math.min(100, Number(config.likeIncMax) || 1)),
+        levels: stringList(config.levels)
+          .map(Number)
+          .filter(Number.isFinite)
+          .sort((a, b) => a - b),
+        avatarProxy: typeof config.avatarProxy === 'string' ? config.avatarProxy.trim() : '',
+        normalUserType: 'guest'
+      },
+      logger: think.logger,
+      services: {
+        token: tokenService,
+        password: {
+          hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
+          verify: async(value, hash) => controller.model('user').checkPassword({password: hash}, think.md5(options.password_salt + value))
+        },
+        markdown: {render: renderMarkdown},
+        avatar: avatarService
       }
+    });
+    return {core, users, options, config, tokenService, avatarService};
+  }
 
-      // update commentNum
-      if (commentNum !== post.comment_num) {
-        const id = post.id;
-        promises.push(this.model('post').where({
-          id
-        }).update({
-          comment_num: commentNum
-        }));
+  async context(controller, users, core, tokenService, avatarService) {
+    const authorization = controller.ctx.get('authorization') || '';
+    const token = authorization.replace(/^Bearer\s+/i, '') || controller.get('token');
+    const ctx = {
+      headers: controller.ctx.headers,
+      state: {token},
+      ip: controller.ctx.ip,
+      origin: controller.ctx.get('origin'),
+      referrer: controller.ctx.referrer(),
+      requestUrl: controller.ctx.url,
+      serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/comment`
+    };
+    if (token) {
+      ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
+    }
+    // A Firekylin administrator session is also a comment administrator session.
+    const sessionUser = await controller.session('userInfo') || {};
+    if (Number(sessionUser.type) === 1) {
+      const found = await users.select({objectId: String(sessionUser.id)});
+      if (found[0]) {
+        ctx.state.userInfo = {
+          ...found[0],
+          avatar: await avatarService.stringify(found[0]),
+          token: await tokenService.sign(found[0].objectId)
+        };
       }
     }
+    return ctx;
+  }
 
-    await Promise.all(promises);
-    if (promises.length) {
-      await this.clearPostCache();
+  async validateCommentTarget(controller, url) {
+    const target = pathnameFromUrl(url);
+    if (!target) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
+    const post = await controller.model('post').where({...target, status: 3, is_public: 1, allow_comment: 1}).find();
+    if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
+    return post;
+  }
+
+  validateCommentInput(input, ctx, config, requireMeta = true) {
+    const data = input && input.data && typeof input.data === 'object' ? input.data : input;
+    if (Object.prototype.hasOwnProperty.call(data, 'comment')) {
+      const content = String(data.comment || '');
+      const length = Array.from(content).length;
+      const [min, max] = wordLimit(config.wordLimit);
+      if ((min && length < min) || (max && length > max)) {
+        throw new CommentError('VALIDATION_ERROR', 400, 'COMMENT_LENGTH', {field: 'comment', min, max});
+      }
+    }
+    if (requireMeta && !ctx.state.userInfo) {
+      const required = stringList(config.requiredMeta).filter(item => ['nick', 'mail', 'link'].includes(item));
+      const missing = required.find(field => !String(data[field] || '').trim());
+      if (missing) throw new CommentError('VALIDATION_ERROR', 400, 'REQUIRED_META', {field: missing});
     }
   }
 
-  /**
-   * sync from waline
-   * @param {Object} comment comment config
-   */
-  async syncFromWaline(comment) {
-    const postData = await this.getPostData();
-    if (think.isEmpty(postData)) {
-      return;
+  async syncCount(controller, target) {
+    if (!target) return;
+    let postId = Number(target.post_id || target.id || target);
+    if (!postId && typeof target === 'string') {
+      const path = pathnameFromUrl(target);
+      const post = path ? await controller.model('post').where(path).field('id')
+        .find() : {};
+      postId = Number(post.id);
     }
-
-    const walineConfig = JSON.parse(comment.name);
-    if (!walineConfig.serverURL) {
-      return;
-    }
-
-    const posts = Object.keys(postData).map(key => postData[key]);
-    let index = 0;
-    let updated = false;
-    while (index < posts.length) {
-      const batch = posts.slice(index, index + 50);
-      index += 50;
-      const paths = batch.map(post => {
-        if (walineConfig.path) {
-          return walineConfig.path.replace(/\$\{pathname\}/g, post.pathname);
-        }
-        return '/' + (post.type ? 'page/' : 'post/') + post.pathname + '.html';
-      });
-      const response = await _.get({
-        url: walineConfig.serverURL.replace(/\/+$/, '') + '/api/comment',
-        qs: {
-          type: 'count',
-          url: paths.join(',')
-        }
-      });
-      const body = JSON.parse(response.body);
-      const counts = Array.isArray(body) ? body : body.data;
-      if (!Array.isArray(counts)) {
-        continue;
-      }
-
-      const promises = batch.map((post, batchIndex) => {
-        const count = counts[batchIndex];
-        if (typeof count !== 'number' || count === post.comment_num) {
-          return;
-        }
-        updated = true;
-        return this.model('post').where({id: post.id}).update({
-          comment_num: count
-        });
-      }).filter(Boolean);
-      await Promise.all(promises);
-    }
-
-    if (updated) {
-      await this.clearPostCache();
-    }
-  }
-
-  clearPostCache() {
-    return think.cache('post_1', null);
+    if (!postId) return;
+    const count = await controller.model('comment').where({post_id: postId, status: ['NOT IN', ['waiting', 'spam']]}).count();
+    await controller.model('post').where({id: postId}).update({comment_num: Number(count)});
+    await think.cache('post_1', null);
   }
 };
+
+module.exports.renderMarkdown = renderMarkdown;
+module.exports.pathnameFromUrl = pathnameFromUrl;

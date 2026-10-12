@@ -74,6 +74,12 @@ export const InitiateRoutes = (themePages) => [{
         ]
     },
     {
+        url: '/comment',
+        icon: 'topic',
+        title: '评论管理',
+        type: 1
+    },
+    {
         url: '/user',
         icon: 'user',
         title: '用户管理',

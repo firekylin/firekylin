@@ -141,6 +141,24 @@ module.exports = ({ContentsWidget}) => ({
 
 Widget 重名默认会阻止启动或渲染，并同时报告两个来源。需要替换已有 Widget 时，必须在项目配置或主题的 `firekylin` 配置中通过 `widgetOverrides` 显式列出名称。主题不能覆盖用于确定当前主题的 `Widget_Options`。扩展代码运行在 Firekylin 服务端进程中，应只安装可信扩展；修改后需重启 worker。
 
+文章或页面模板可以通过一行输出内置评论区：
+
+```eta
+<%~ firekylin.comment() %>
+```
+
+`comment()` 会自动判断当前内容是否允许评论，并读取后台的分页、语言及强制登录设置。主题无需自行引入评论客户端或编写初始化脚本。可选参数包括 `className`、`title`、`loadingText` 和 Waline `dist` 目录地址 `resourceURL`：
+
+```eta
+<%~ firekylin.comment({className: 'article-comments', title: '评论'}) %>
+```
+
+如需升级 Waline 客户端或使用自建 CDN，可以指定资源目录，Firekylin 会在其下加载 `waline.js` 和 `waline.css`：
+
+```eta
+<%~ firekylin.comment({resourceURL: 'https://cdn.jsdelivr.net/npm/@waline/client@3.17.0/dist'}) %>
+```
+
 通过 `firekylin new` 创建的项目会在根目录包含 `firekylin.d.ts`。支持 TypeScript 类型服务的编辑器或 Eta 插件可据此补全内置 Widget 名称、参数、数据字段和实例方法；声明只提供编辑期提示，不会改变 Widget 的注册和运行行为。类型主体由 `firekylin` 依赖提供，因此升级依赖即可同步最新定义。已有项目也可以手动添加：
 
 ```ts

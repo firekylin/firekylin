@@ -7,12 +7,16 @@ module.exports = class extends think.Model {
    * get options
    * @return {} []
    */
-  async getOptions(flag) {
+  async getOptions(includePrivate = false) {
     const data = await this.select();
     const ret = {};
     data.forEach(item => {
       ret[item.key] = item.value;
     });
+    if (!includePrivate) {
+      delete ret.comment_jwt_secret;
+      delete ret.comment_schema_version;
+    }
 
     // comment type
     if (think.isEmpty(ret)) {
@@ -22,9 +26,35 @@ module.exports = class extends think.Model {
     if (ret.comment && think.isString(ret.comment)) {
       ret.comment = JSON.parse(ret.comment);
     }
-    if (!ret.comment) {
-      ret.comment = {type: 'disqus'};
-    }
+    const comment = {...(ret.comment || {})};
+    Reflect.deleteProperty(comment, 'name');
+    Reflect.deleteProperty(comment, 'type');
+    ret.comment = {
+      audit: false,
+      forceLogin: false,
+      pageSize: 10,
+      locale: 'zh-CN',
+      ipQps: 60,
+      commentSorting: 'latest',
+      dark: false,
+      meta: ['nick', 'mail', 'link'],
+      requiredMeta: [],
+      wordLimit: 0,
+      emoji: true,
+      reaction: false,
+      imageUploader: true,
+      highlighter: true,
+      texRenderer: true,
+      search: true,
+      noCopyright: false,
+      noRss: false,
+      forbiddenWords: [],
+      disallowIPList: [],
+      likeIncMax: 1,
+      levels: [],
+      avatarProxy: '',
+      ...comment
+    };
     // upload settings
     if (ret.upload && think.isString(ret.upload)) {
       ret.upload = JSON.parse(ret.upload);
@@ -65,7 +95,7 @@ module.exports = class extends think.Model {
       promises.push(p);
     }
     await Promise.all(promises);
-    await this.getOptions(true);
+    await this.getOptions();
 
     // if `auto_summary` is changed, then rebuild all summaries of posts
     if (typeof data.auto_summary !== 'undefined') {

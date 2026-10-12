@@ -56,7 +56,7 @@ INSERT INTO `fk_options` (`key`, `value`, `desc`)
 VALUES
   ('analyze_code','','统计代码，可以添加百度统计、Google 统计等'),
   ('auto_summary', '0', '自动摘要。0 为禁用，具体的数字为摘要截取的字符数'),
-  ('comment','{\"type\":\"duoshuo\",\"name\":\"welefen2013\"}','评论类型'),
+  ('comment','{\"audit\":false,\"forceLogin\":false,\"pageSize\":10,\"locale\":\"zh-CN\",\"ipQps\":60}','评论设置'),
   ('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
   ('favicon_url','','favicon'),
   ('github_blog','welefen/blog','GitHub blog 地址，如果填了则同步到 GitHub 上'),
@@ -187,9 +187,33 @@ CREATE TABLE `fk_user` (
   `last_login_ip` varchar(20) NOT NULL DEFAULT '',
   `app_key` varchar(255) DEFAULT NULL,
   `app_secret` varchar(255) DEFAULT NULL,
+  `url` varchar(512) DEFAULT NULL,
+  `avatar` varchar(512) DEFAULT NULL,
+  `comment_label` varchar(255) DEFAULT NULL,
+  `comment_2fa` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `fk_comment` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `comment` text NOT NULL,
+  `url` varchar(191) NOT NULL,
+  `mail` varchar(255), `nick` varchar(255), `link` varchar(512),
+  `pid` varchar(64), `rid` varchar(64), `ua` text, `ip` varchar(64), `user_id` varchar(64),
+  `status` varchar(32) NOT NULL DEFAULT 'approved', `sticky` tinyint NOT NULL DEFAULT 0,
+  `like` int NOT NULL DEFAULT 0, `inserted_at` datetime NOT NULL,
+  `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`), KEY `fk_comment_url_idx` (`url`), KEY `fk_comment_status_idx` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `fk_counter` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT, `url` varchar(191) NOT NULL,
+  `time` int NOT NULL DEFAULT 0, `reaction0` int NOT NULL DEFAULT 0, `reaction1` int NOT NULL DEFAULT 0,
+  `reaction2` int NOT NULL DEFAULT 0, `reaction3` int NOT NULL DEFAULT 0, `reaction4` int NOT NULL DEFAULT 0,
+  `reaction5` int NOT NULL DEFAULT 0, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`), UNIQUE KEY `fk_counter_url_idx` (`url`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

@@ -80,6 +80,8 @@ export default class extends React.Component<UserProps, any> {
                 return '编辑';
             case 3:
                 return '投稿者';
+            case 4:
+                return '评论者';
             default:
                 return '';
         }

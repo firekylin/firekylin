@@ -20,7 +20,7 @@ INSERT INTO fk_options (key, value, desc)
 VALUES
   ('analyze_code','','统计代码，可以添加百度统计、Google 统计等'),
   ('auto_summary', '0', '自动摘要。0 为禁用，具体的数字为摘要截取的字符数'),
-  ('comment','{"type":"duoshuo","name":"welefen2013"}','评论类型'),
+  ('comment','{"audit":false,"forceLogin":false,"pageSize":10,"locale":"zh-CN","ipQps":60}','评论设置'),
   ('description','A Simple & Fast Node Bloging Platform Base On ThinkJS 2.0 & ReactJS & ES6/7','网站描述'),
   ('favicon_url','','favicon'),
   ('github_blog','welefen/blog','GitHub blog 地址，如果填了则同步到 GitHub 上'),
@@ -119,5 +119,25 @@ CREATE TABLE fk_user (
   last_login_time DATETIME NOT NULL,
   last_login_ip TEXT NOT NULL DEFAULT '',
   app_key TEXT DEFAULT NULL,
-  app_secret TEXT DEFAULT NULL
+  app_secret TEXT DEFAULT NULL,
+  url TEXT DEFAULT NULL,
+  avatar TEXT DEFAULT NULL,
+  comment_label TEXT DEFAULT NULL,
+  comment_2fa TEXT DEFAULT NULL
+);
+
+CREATE TABLE fk_comment (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, comment TEXT NOT NULL, url TEXT NOT NULL,
+  mail TEXT, nick TEXT, link TEXT, pid TEXT, rid TEXT, ua TEXT, ip TEXT, user_id TEXT,
+  status TEXT NOT NULL DEFAULT 'approved', sticky INTEGER NOT NULL DEFAULT 0, "like" INTEGER NOT NULL DEFAULT 0,
+  inserted_at DATETIME NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL
+);
+CREATE INDEX fk_comment_url_idx ON fk_comment(url);
+CREATE INDEX fk_comment_status_idx ON fk_comment(status);
+
+CREATE TABLE fk_counter (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT NOT NULL UNIQUE, time INTEGER NOT NULL DEFAULT 0,
+  reaction0 INTEGER NOT NULL DEFAULT 0, reaction1 INTEGER NOT NULL DEFAULT 0, reaction2 INTEGER NOT NULL DEFAULT 0,
+  reaction3 INTEGER NOT NULL DEFAULT 0, reaction4 INTEGER NOT NULL DEFAULT 0, reaction5 INTEGER NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL
 );

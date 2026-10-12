@@ -7,8 +7,7 @@ delete data.devDependencies;
 delete data.thinkjs;
 data.scripts = {
   start: 'node production.js',
-  'cron:rss': 'npm start -- "admin/cron/rss"',
-  'cron:comment': 'npm start -- "crontab/sync_comment"'
+  'cron:rss': 'npm start -- "admin/cron/rss"'
 };
 fs.writeFileSync('output/package.json', JSON.stringify(data, undefined, 4));
 fs.writeFileSync('.version', data.version);

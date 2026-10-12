@@ -37,6 +37,17 @@ test('migrated theme templates compile with async blocks', () => {
   });
 });
 
+test('native themes render comments through the template helper', () => {
+  const root = path.join(__dirname, '../../www/theme/firekylin');
+  const post = fs.readFileSync(path.join(root, 'post.eta'), 'utf8');
+  const page = fs.readFileSync(path.join(root, 'page.eta'), 'utf8');
+  const client = fs.readFileSync(path.join(__dirname, '../../www/theme/firekylin/res/js/firekylin.js'), 'utf8');
+
+  assert.match(post, /firekylin\.comment\(\)/);
+  assert.match(page, /firekylin\.comment\(\)/);
+  assert.doesNotMatch(client, /@waline\/client|commentConfig|WALINE_USER/);
+});
+
 test('migrated application views compile as Eta templates', () => {
   const eta = new Eta({varName: 'firekylin'});
   const root = path.join(__dirname, '../../view');
@@ -67,7 +78,7 @@ test('view adapter resolves layouts from the theme directory', async() => {
   tags.push({name: 'Eta', pathname: 'eta', count: 1});
   const siteOptions = new Options({ctx: {host: 'example.com'}, model() {}}, {});
   siteOptions.push({
-    comment: {name: '', type: 'disqus'},
+    comment: {pageSize: 10, locale: 'zh-CN'},
     navigation: [],
     theme: 'firekylin',
     themeConfig: {},

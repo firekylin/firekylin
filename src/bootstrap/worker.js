@@ -26,6 +26,7 @@ global.firekylin = {
   USER_ADMIN: 1,
   USER_EDITOR: 2,
   USER_CONTRIBUTOR: 3,
+  USER_COMMENTER: 4,
   USER_AVAILABLE: 1,
   USER_DISABLED: 2,
   Widget: widget.Widget,
@@ -78,3 +79,12 @@ firekylin.require = name => {
     return false;
   }
 };
+
+const commentMigrationKey = Symbol.for('firekylin.commentSchemaMigration');
+if (!global[commentMigrationKey]) {
+  global[commentMigrationKey] = true;
+  think.beforeStartServer(async() => {
+    const migrated = await think.service('comment-schema').migrate({skipIfUninstalled: true});
+    if (migrated) think.logger.info('[comment] database schema migrated');
+  });
+}

@@ -1,4 +1,5 @@
 module.exports = [
+  [/^api\/comment\/(?:api\/)?([^/]+)(?:\/([^/]+))?\/?$/i, 'api/comment/index?resource=:1&id=:2'],
   // [/^admin/, 'admin'],
 
   [/^cate\/(.+)(?:\.html|\.json)$/i, 'post/list?cate=:1'],

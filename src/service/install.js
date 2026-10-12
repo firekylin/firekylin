@@ -18,9 +18,7 @@ Firekylin 的后台登录入口在 [~/admin](/admin)
 更多的设置，请参考 [官方 WIKI](https://github.com/firekylin/firekylin/wiki/) 的 [系统设置](https://github.com/firekylin/firekylin/wiki/系统设置)
 
 ### 评论设置
-Firekylin 没有内置评论模块。但是，Firekylin 可方便地使用第三方评论系统。在后台的 [系统设置](/admin/options/) 的 [评论设置](/admin/options/comment) 的 \`自定义\` 模式下粘贴第三方评论系统的代码即可。
-
-Firekylin 还对 [Disqus](https://disqus.com/) 、[畅言](https://changyan.kuaizhan.com/) 、[网易云跟帖](https://gentie.163.com/)  提供了特别的支持，只需要填写对应的网站id即可，不需要粘贴具体的代码。
+Firekylin 内置了评论系统，可在后台的 [评论设置](/admin/options/comment) 中配置审核、登录要求和分页等选项，并在 [评论管理](/admin/comment) 中审核和管理评论。
 
 ### 菜单管理
 后台的 [外观设置](admin/appearance/) 可进行 [菜单管理](/admin/appearance/navigation)，包括新增菜单、删除菜单、菜单排序等。  
@@ -288,13 +286,14 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
 
   async saveSiteInfo({title, site_url, username, password, email}) {
     await this.insertData(title, site_url);
+    await think.service('comment-schema').migrate();
     await this.createAccount(username, password, email);
     await this.addStartPost();
 
     firekylin.setInstalled();
 
     const optionsModel = this.getModel('options');
-    await optionsModel.getOptions(true);
+    await optionsModel.getOptions();
     // optionsModel.close();
   }
 

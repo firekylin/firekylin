@@ -54,6 +54,7 @@ module.exports = class extends Base {
     }
 
     const archive = await this.getWidget('Widget_Archive', {type: 'post'});
+    this.archive = archive;
     if (!archive.have()) {
       return this.redirect('/');
     }
@@ -64,6 +65,7 @@ module.exports = class extends Base {
   async pageAction() {
     await emit('archive.beforeQuery', {controller: this, type: 'page'});
     const archive = await this.getWidget('Widget_Archive', {type: 'page'});
+    this.archive = archive;
 
     let template = 'page';
     if (archive.have()) {
