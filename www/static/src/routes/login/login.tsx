@@ -1,6 +1,17 @@
 import * as React from 'react';
 import classnames from 'classnames';
-import { LockOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  FacebookOutlined,
+  GithubOutlined,
+  GlobalOutlined,
+  GoogleOutlined,
+  QqOutlined,
+  SafetyOutlined,
+  TwitterOutlined,
+  UserOutlined,
+  WeiboOutlined,
+  LockOutlined,
+} from '@ant-design/icons';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Checkbox } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
@@ -78,6 +89,40 @@ class LoginForm extends React.Component<LoginProps, any> {
 
   toggleForgot() {
     this.setState({ forgot: !this.state.forgot });
+  }
+
+  getSocialLogin() {
+    const services = window.SysConfig.options.social_services || [];
+    if (!services.length) return null;
+    const icons: Record<string, any> = {
+      facebook: FacebookOutlined,
+      github: GithubOutlined,
+      google: GoogleOutlined,
+      oidc: GlobalOutlined,
+      qq: QqOutlined,
+      twitter: TwitterOutlined,
+      weibo: WeiboOutlined,
+    };
+    const queryRedirect = new URLSearchParams(this.props.location.search).get('redirect');
+    let redirect = `${window.location.origin}/admin`;
+    if (queryRedirect) {
+      const target = new URL(queryRedirect, window.location.origin);
+      if (target.origin === window.location.origin) redirect = target.href;
+    }
+    return (
+      <div style={{display: 'flex', justifyContent: 'center', gap: 16, margin: '-4px 0 20px'}}>
+        {services.map(service => {
+          const Icon = icons[service.name] || GlobalOutlined;
+          const href = `/api/comment/oauth?type=${encodeURIComponent(service.name)}&redirect=${encodeURIComponent(redirect)}`;
+          return (
+            <a key={service.name} href={href} title={service.title || service.name}
+              style={{fontSize: 24, color: 'rgba(0, 0, 0, 0.65)'}}>
+              <Icon />
+            </a>
+          );
+        })}
+      </div>
+    );
   }
 
   renderReset() {
@@ -226,6 +271,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                 </Button>
               </Form.Item>
             </Form>
+            {this.getSocialLogin()}
             <div className="form-footer">
               <div className="left back-site">
                 <a href="/">← 回到{window.SysConfig.options.title}</a>

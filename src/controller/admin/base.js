@@ -50,6 +50,11 @@ module.exports = class extends think.Controller {
       options.navigation = JSON.parse(options.navigation);
     } catch (e) { options.navigation = [] }
     delete options.push_sites; // 不显示推送的配置，会有安全问题
+    try {
+      options.social_services = await this.service('social-auth').services();
+    } catch {
+      options.social_services = [];
+    }
 
     if (firekylin.require('auth')) {
       options.intranet = true;
@@ -62,7 +67,8 @@ module.exports = class extends think.Controller {
         two_factor_auth: options.two_factor_auth,
         password_salt: options.password_salt,
         ldap_on: options.ldap_on,
-        intranet: options.intranet
+        intranet: options.intranet,
+        social_services: options.social_services
       };
     }
 

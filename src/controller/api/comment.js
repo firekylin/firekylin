@@ -91,14 +91,8 @@ module.exports = class extends Base {
     if (token) return this.completeLogin(token);
     const sessionUser = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(sessionUser)) {
-      let services = [];
-      try { services = await this.service('social-auth').services() } catch (e) { think.logger.warn(e.message) }
-      const callback = `${this.ctx.protocol}://${this.ctx.host}/api/comment/ui/login`;
-      const links = services.map(({name, title}) => `<a style="display:inline-block;margin:6px;padding:8px 14px;border:1px solid #ddd;border-radius:4px;text-decoration:none;color:#333" href="/api/comment/oauth?type=${encodeURIComponent(name)}&redirect=${encodeURIComponent(callback)}">${this.escapeHtml(title)}</a>`).join('');
       const adminCallback = encodeURIComponent(this.ctx.url);
-      this.ctx.type = 'text/html';
-      this.ctx.body = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>登录后评论</title></head><body style="font:16px sans-serif;max-width:480px;margin:60px auto;padding:20px;text-align:center"><h2>登录后评论</h2><p>${links || '暂时没有可用的社交登录方式'}</p><p><a href="/admin/login?redirect=${adminCallback}">使用后台账号登录</a></p></body></html>`;
-      return;
+      return this.redirect(`/admin/login?redirect=${adminCallback}`);
     }
     const service = this.service('comment');
     const {core, users, tokenService, avatarService} = await service.create(this);
@@ -150,7 +144,15 @@ module.exports = class extends Base {
     const result = await social.authorize(input, ctx, users, tokenService);
     if (result.linked && ctx.state.userInfo) return this.redirect(`/admin/user/edit/${ctx.state.userInfo.objectId}`);
     const redirect = this.safeRedirect(input.redirect) || '/api/comment/ui/login';
-    const target = new URL(redirect, `${this.ctx.protocol}://${this.ctx.host}`);
+    let target = new URL(redirect, `${this.ctx.protocol}://${this.ctx.host}`);
+    if (target.pathname === '/admin' || target.pathname.startsWith('/admin/')) {
+      const backendUser = await this.model('user').where({id: Number(result.user.objectId)}).find();
+      if (!think.isEmpty(backendUser) && Number(backendUser.status) === 1 && [1, 2].includes(Number(backendUser.type))) {
+        adminAuth.login(this.ctx, backendUser, true);
+        return this.redirect(target.toString());
+      }
+      target = new URL('/api/comment/ui/login', `${this.ctx.protocol}://${this.ctx.host}`);
+    }
     target.searchParams.set('token', result.token);
     return this.redirect(target.toString());
   }
@@ -163,9 +165,4 @@ module.exports = class extends Base {
     } catch (e) { return '' }
   }
 
-  escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, char => (
-      {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;'}[char]
-    ));
-  }
 };
