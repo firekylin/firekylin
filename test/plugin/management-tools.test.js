@@ -8,10 +8,15 @@ const {registerManagementTools} = require('../../src/plugin/management-tools');
 function fixture() {
   const calls = [];
   let existing = null;
+  let activeWhere;
   const post = {
-    where(where) {calls.push(['post.where', where]); return this;},
+    where(where) {activeWhere = where; calls.push(['post.where', where]); return this;},
     setRelation() {return this;},
-    async find() {return existing || {};},
+    async find() {
+      if (!existing) return {};
+      if (activeWhere.user_id !== undefined && Number(activeWhere.user_id) !== Number(existing.user_id)) return {};
+      return existing;
+    },
     async getContentAndSummary(data) {return {...data, summary: 'summary', content: '<p>rendered</p>'};},
     getPostTime(data) {return {...data, create_time: 'now', update_time: 'now'};},
     async addPost(data) {calls.push(['add', data]); return 123;},
