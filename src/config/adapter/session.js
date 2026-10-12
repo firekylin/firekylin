@@ -1,6 +1,7 @@
 const os = require('os');
 const path = require('path');
 const fileSession = require('think-session-file');
+const authCookie = require('../auth-cookie');
 const {getContext} = require('../../../lib/project-context');
 
 let ROOT_PATH = getContext().runtimePath;
@@ -19,11 +20,9 @@ module.exports = {
     secret: '!N71PV5J',
     timeout: 24 * 3600,
     cookie: {
-      name: 'thinkjs',
-      length: 32,
-      httponly: true
-      // keys: ['werwer', 'werwer'],
-      // signed: true
+      ...authCookie,
+      httponly: authCookie.httpOnly,
+      length: 32
     }
   },
   file: {
