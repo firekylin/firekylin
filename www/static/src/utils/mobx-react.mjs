@@ -1,26 +1,28 @@
-const React = require('react');
-const {observer} = require('mobx-react');
+import React from 'react';
+import {observer} from 'mobx-react';
 
-const StoreContext = React.createContext({});
+let applicationStores = {};
+
+function configureStores(stores) {
+  applicationStores = stores;
+}
 
 function Provider({children, ...stores}) {
-  const parentStores = React.useContext(StoreContext);
-  const storesRef = React.useRef({...parentStores, ...stores});
-  return React.createElement(StoreContext.Provider, {value: storesRef.current}, children);
+  configureStores(stores);
+  return React.createElement(React.Fragment, null, children);
 }
 
 function inject(...storeNames) {
   return Component => {
     const Injected = React.forwardRef((props, ref) => {
-      const stores = React.useContext(StoreContext);
       const nextProps = {...props};
 
       for (const name of storeNames) {
         if (name in nextProps) continue;
-        if (!(name in stores)) {
+        if (!(name in applicationStores)) {
           throw new Error(`MobX injector: Store '${name}' is not available`);
         }
-        nextProps[name] = stores[name];
+        nextProps[name] = applicationStores[name];
       }
 
       return React.createElement(Component, {...nextProps, ref});
@@ -31,4 +33,4 @@ function inject(...storeNames) {
   };
 }
 
-module.exports = {inject, observer, Provider};
+export {configureStores, inject, observer, Provider};
