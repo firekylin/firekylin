@@ -1,9 +1,8 @@
 'use strict';
 
 const crypto = require('crypto');
-const cookieConfig = require('../config/auth-cookie');
 
-const COOKIE_NAME = cookieConfig.name;
+const COOKIE_NAME = 'thinkjs';
 const ISSUER = 'firekylin';
 const AUDIENCE = 'firekylin-admin';
 const DAY = 24 * 60 * 60;
@@ -76,10 +75,10 @@ function verify(token) {
 
 function cookieOptions(ctx, remember) {
   return {
-    httpOnly: cookieConfig.httpOnly,
+    httpOnly: true,
     secure: ctx.secure || ctx.protocol === 'https',
     sameSite: 'lax',
-    path: cookieConfig.path,
+    path: '/',
     maxAge: remember ? TTL * 1000 : DAY * 1000
   };
 }
