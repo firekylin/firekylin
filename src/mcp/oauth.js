@@ -28,7 +28,7 @@ function secure(ctx) {
 }
 
 function authorizable(scopes, user) {
-  if (!user || ![1, 2, 3].includes(Number(user.type))) return false;
+  if (!user || ![1, 2].includes(Number(user.type))) return false;
   return scopes.every(scope => allowedScopes.has(scope) &&
     (Number(user.type) === 1 || ![
       'posts:publish', 'posts:delete', 'comments:read', 'comments:moderate'
@@ -72,6 +72,7 @@ function buildOAuthHandler({origin, store, getUser}) {
     grant_types_supported: ['authorization_code', 'refresh_token'],
     token_endpoint_auth_methods_supported: ['none'],
     code_challenge_methods_supported: ['S256'],
+    authorization_response_iss_parameter_supported: true,
     scopes_supported: [...allowedScopes],
     registration_endpoint_auth_methods_supported: ['none']
   };
@@ -217,7 +218,7 @@ function buildOAuthHandler({origin, store, getUser}) {
         const used = await store.consume('code', data.code);
         if (!used) return oauthError(ctx, 'invalid_grant');
         const user = await getUser(Number(row.user_id));
-        if (!user || Number(user.status) !== 1) return oauthError(ctx, 'invalid_grant');
+        if (!user || Number(user.status) !== 1 || !authorizable(scopeList(row.scopes), user)) return oauthError(ctx, 'invalid_grant');
         return issueTokens(ctx, {userId: Number(row.user_id), clientId, scopes: scopeList(row.scopes)});
       }
       if (grant === 'refresh_token') {
