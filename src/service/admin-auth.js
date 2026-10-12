@@ -8,12 +8,20 @@ const AUDIENCE = 'firekylin-admin';
 const DAY = 24 * 60 * 60;
 const TTL = 7 * DAY;
 
-function getSecret() {
-  const secret = process.env.FIREKYLIN_JWT_SECRET || process.env.JWT_SECRET;
-  if (!secret || Buffer.byteLength(secret) < 32) {
-    throw new Error('FIREKYLIN_JWT_SECRET must contain at least 32 bytes');
+let signingSecret;
+
+function setSecret(secret) {
+  if (typeof secret !== 'string' || Buffer.byteLength(secret) < 32) {
+    throw new Error('Invalid jwt_secret: expected at least 32 bytes');
   }
-  return secret;
+  signingSecret = secret;
+}
+
+function getSecret() {
+  if (!signingSecret) {
+    throw new Error('JWT secret has not been initialized');
+  }
+  return signingSecret;
 }
 
 function base64(value) {
@@ -95,4 +103,4 @@ function csrfToken(ctx) {
   return crypto.createHmac('sha256', getSecret()).update('plugin-csrf:' + token).digest('base64url');
 }
 
-module.exports = {COOKIE_NAME, sign, verify, login, logout, currentUser, csrfToken};
+module.exports = {COOKIE_NAME, setSecret, sign, verify, login, logout, currentUser, csrfToken};
