@@ -109,7 +109,10 @@ test('maps featured image, categories and tags when importing a post', async() =
     async select() { return [{id}] }
   });
 
-  service.controller = {session: async() => ({id: 7})};
+  const adminAuth = require('../../src/service/admin-auth');
+  const originalCurrentUser = adminAuth.currentUser;
+  adminAuth.currentUser = () => ({id: 7});
+  service.controller = {ctx: {}};
   service.cateModelInstance = termModel(11);
   service.tagModelInstance = termModel(12);
   service.postModelInstance = {
@@ -130,7 +133,11 @@ categories: [Guides]
 tags: [Hugo]
 ---
 Body`);
-  await service.post([item]);
+  try {
+    await service.post([item]);
+  } finally {
+    adminAuth.currentUser = originalCurrentUser;
+  }
 
   assert.deepEqual(JSON.parse(savedPost.options), {featuredImage: '/images/cover.jpg'});
   assert.deepEqual(relations, [
