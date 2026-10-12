@@ -6,7 +6,7 @@ const auth = require('../../src/service/admin-auth');
 const pluginRoutes = require('../../src/plugin/middleware');
 
 test('plugin admin routes authenticate JWT and reject invalid CSRF tokens', async() => {
-  process.env.FIREKYLIN_JWT_SECRET = 'plugin-jwt-test-secret-with-at-least-32-bytes';
+  auth.setSecret('plugin-jwt-test-secret-with-at-least-32-bytes');
   const cookies = new Map();
   const route = {
     auth: 'admin',
