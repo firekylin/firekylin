@@ -1,10 +1,18 @@
 import * as React from 'react';
 import classnames from 'classnames';
-import { LockOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
+import { GlobalOutlined, LockOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Checkbox } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { LoginProps } from './login.model';
+import facebookIcon from '../../assets/social/facebook.svg';
+import githubIcon from '../../assets/social/github.svg';
+import googleIcon from '../../assets/social/google.svg';
+import huaweiIcon from '../../assets/social/huawei.svg';
+import oidcIcon from '../../assets/social/oidc.svg';
+import qqIcon from '../../assets/social/qq.svg';
+import twitterIcon from '../../assets/social/twitter.svg';
+import weiboIcon from '../../assets/social/weibo.svg';
 
 @inject('loginStore')
 @observer
@@ -78,6 +86,41 @@ class LoginForm extends React.Component<LoginProps, any> {
 
   toggleForgot() {
     this.setState({ forgot: !this.state.forgot });
+  }
+
+  getSocialLogin() {
+    const services = window.SysConfig.options.social_services || [];
+    if (!services.length) return null;
+    const icons: Record<string, string> = {
+      facebook: facebookIcon,
+      github: githubIcon,
+      google: googleIcon,
+      huawei: huaweiIcon,
+      oidc: oidcIcon,
+      qq: qqIcon,
+      twitter: twitterIcon,
+      weibo: weiboIcon,
+    };
+    const queryRedirect = new URLSearchParams(this.props.location.search).get('redirect');
+    let redirect = `${window.location.origin}/admin`;
+    if (queryRedirect) {
+      const target = new URL(queryRedirect, window.location.origin);
+      if (target.origin === window.location.origin) redirect = target.href;
+    }
+    return (
+      <div style={{display: 'flex', justifyContent: 'center', gap: 16, margin: '-4px 0 20px'}}>
+        {services.map(service => {
+          const icon = icons[service.name];
+          const href = `/api/comment/oauth?type=${encodeURIComponent(service.name)}&redirect=${encodeURIComponent(redirect)}`;
+          return (
+            <a key={service.name} href={href} title={service.title || service.name}
+              style={{display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center'}}>
+              {icon ? <img src={icon} alt={service.title || service.name} width="32" height="32" /> : <GlobalOutlined style={{fontSize: 28}} />}
+            </a>
+          );
+        })}
+      </div>
+    );
   }
 
   renderReset() {
@@ -188,7 +231,7 @@ class LoginForm extends React.Component<LoginProps, any> {
             <Form ref={this.formRef} onFinish={values => this.handleSubmit(values)} className="login-form" scrollToFirstError>
               <Form.Item
                 name="username"
-                rules={[{ min: 4, max: 20, message: '长度为4到20个字符' }, {
+                rules={[{ min: 4, max: 30, message: '长度为4到30个字符' }, {
                   required: true,
                   message: '请输入用户名!'
                 }]}
@@ -226,6 +269,7 @@ class LoginForm extends React.Component<LoginProps, any> {
                 </Button>
               </Form.Item>
             </Form>
+            {this.getSocialLogin()}
             <div className="form-footer">
               <div className="left back-site">
                 <a href="/">← 回到{window.SysConfig.options.title}</a>

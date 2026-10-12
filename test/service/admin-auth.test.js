@@ -37,6 +37,12 @@ test('administrator JWT round trip across stateless verifier calls', () => {
   assert.equal(JSON.parse(Buffer.from(payload, 'base64url')).iss, 'firekylin');
 });
 
+test('commenter identities can hold a restricted backend session', () => {
+  auth.setSecret(SECRET);
+  const commenter = {id: 12, name: 'commenter', type: 4};
+  assert.deepEqual(auth.verify(auth.sign(commenter)), commenter);
+});
+
 test('rejects tampering, expired tokens, and cross-site signature mismatch', () => {
   auth.setSecret(SECRET);
   const token = auth.sign({id: 1, type: 1, name: 'admin'});

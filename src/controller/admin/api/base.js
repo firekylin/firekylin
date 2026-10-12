@@ -49,12 +49,20 @@ module.exports = class extends BaseRest {
 
     this.userInfo = userInfo;
     const type = userInfo.type | 0;
+    const name = this.ctx.controller.replace(/^admin\//, '') + '/' + this.ctx.action;
+    if (type === 4) {
+      const commenterAllowList = [
+        'api/comment/get', 'api/comment/post',
+        'api/user/get', 'api/user/put'
+      ];
+      if (commenterAllowList.includes(name)) return;
+      return this.fail('USER_NO_PERMISSION');
+    }
     // not admin
     if (type !== 1) {
       if (action === 'get') {
         return;
       }
-      const name = this.ctx.controller.replace(/^admin\//, '') + '/' + this.ctx.action;
       if (this.allowList.indexOf(name) > -1) {
         return;
       }

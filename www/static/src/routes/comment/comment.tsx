@@ -34,6 +34,7 @@ export default class Comment extends React.Component<any, any> {
         });
     }
     render() {
+        const isCommenter = window.SysConfig.userInfo.type === 4;
         const columns: any[] = [
             {title: '作者', key: 'author', width: 250, render: (_: any, row: any) => {
                 const avatar = <img className="comment-author-avatar" src={row.author_avatar} alt={row.author_name} />;
@@ -56,8 +57,8 @@ export default class Comment extends React.Component<any, any> {
                 return <Tag color={status.color}>{status.text}</Tag>;
             }},
             {title: '操作', width: 270, render: (_: any, row: any) => <Space wrap>
-                {row.status !== 'approved' && <Button size="small" onClick={() => this.operate(row.id, 'approved')}>通过</Button>}
-                {row.status !== 'spam' && <Button size="small" danger onClick={() => this.operate(row.id, 'spam')}>垃圾</Button>}
+                {!isCommenter && row.status !== 'approved' && <Button size="small" onClick={() => this.operate(row.id, 'approved')}>通过</Button>}
+                {!isCommenter && row.status !== 'spam' && <Button size="small" danger onClick={() => this.operate(row.id, 'spam')}>垃圾</Button>}
                 <Button size="small" onClick={() => this.setState({editing: row, content: row.comment})}>编辑</Button>
                 <Button size="small" danger onClick={() => Modal.confirm({title: '确定删除这条评论？', onOk: () => this.operate(row.id, 'delete')})}>删除</Button>
             </Space>}
