@@ -69,6 +69,7 @@ module.exports = class extends think.Controller {
     this.assign('options', options);
     this.assign('think', think);
     this.assign('adminAssetVersion', getAdminAssetVersion());
+    this.assign('csrfToken', adminAuth.csrfToken(this.ctx));
 
     return this.display('admin');
   }
