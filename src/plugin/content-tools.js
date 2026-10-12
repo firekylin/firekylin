@@ -15,9 +15,13 @@ function registerContentTools(registry, {getModel, now}) {
     create_time: {'<=': now()}
   });
   const positiveInteger = (value, defaultValue, max) => {
-    if (value === undefined) return defaultValue;
+    if (value === undefined && defaultValue !== undefined) return defaultValue;
     if (!Number.isSafeInteger(value) || value < 1 || value > max) throw new TypeError('Invalid positive integer');
     return value;
+  };
+  const checkInput = input => {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('Invalid tool input');
+    return input;
   };
   const summary = post => ({
     id: post.id,
@@ -39,6 +43,7 @@ function registerContentTools(registry, {getModel, now}) {
         limit: {type: 'integer', minimum: 1, maximum: 50}}
     },
     async execute(input = {}) {
+      input = checkInput(input);
       const page = positiveInteger(input.page, 1, 10000);
       const limit = positiveInteger(input.limit, 10, 50);
       const rows = await getModel().where(publicWhere())
@@ -57,6 +62,7 @@ function registerContentTools(registry, {getModel, now}) {
       properties: {id: {type: 'integer', minimum: 1}}, required: ['id']
     },
     async execute(input = {}) {
+      input = checkInput(input);
       const id = positiveInteger(input.id, undefined, Number.MAX_SAFE_INTEGER);
       const post = await getModel().where({...publicWhere(), id})
         .field('id,title,pathname,summary,markdown_content,create_time,update_time')
@@ -76,6 +82,7 @@ function registerContentTools(registry, {getModel, now}) {
         limit: {type: 'integer', minimum: 1, maximum: 50}}, required: ['query']
     },
     async execute(input = {}) {
+      input = checkInput(input);
       if (typeof input.query !== 'string' || !input.query.trim() || input.query.length > 120) {
         throw new TypeError('Invalid query');
       }
