@@ -3,7 +3,7 @@
 const {OAuthStore} = require('./oauth-store');
 const {getContext} = require('../../lib/project-context');
 const {scopeList, publicOrigin} = require('./oauth-utils');
-const {createOAuthHandler} = require('./oauth');
+const {createOAuthHandler, authorizable} = require('./oauth');
 
 function oauthMiddleware() {
   let handlerPromise;
@@ -42,7 +42,8 @@ function oauthVerifier() {
     if (!grant) return null;
     const user = await think.model('user').where({id: grant.user_id})
       .field('id,type,status').setRelation(false).find();
-    if (!user || !user.id || Number(user.status) !== 1) return null;
+    if (!user || !user.id || Number(user.status) !== 1 ||
+        !authorizable(scopeList(grant.scopes), user)) return null;
     const options = await think.model('options').getOptions();
     const resource = publicOrigin(options.site_url) + '/mcp';
     if (grant.resource !== resource) return null;
