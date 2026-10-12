@@ -147,7 +147,7 @@ module.exports = class extends Base {
     let target = new URL(redirect, `${this.ctx.protocol}://${this.ctx.host}`);
     if (target.pathname === '/admin' || target.pathname.startsWith('/admin/')) {
       const backendUser = await this.model('user').where({id: Number(result.user.objectId)}).find();
-      if (!think.isEmpty(backendUser) && Number(backendUser.status) === 1 && [1, 2].includes(Number(backendUser.type))) {
+      if (!think.isEmpty(backendUser) && Number(backendUser.status) === 1 && [1, 2, 4].includes(Number(backendUser.type))) {
         adminAuth.login(this.ctx, backendUser, true);
         return this.redirect(target.toString());
       }

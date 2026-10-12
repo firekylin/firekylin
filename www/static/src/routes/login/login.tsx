@@ -231,7 +231,7 @@ class LoginForm extends React.Component<LoginProps, any> {
             <Form ref={this.formRef} onFinish={values => this.handleSubmit(values)} className="login-form" scrollToFirstError>
               <Form.Item
                 name="username"
-                rules={[{ min: 4, max: 20, message: '长度为4到20个字符' }, {
+                rules={[{ min: 4, max: 30, message: '长度为4到30个字符' }, {
                   required: true,
                   message: '请输入用户名!'
                 }]}

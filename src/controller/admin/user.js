@@ -55,7 +55,7 @@ module.exports = class extends Base {
     }
 
     // 帐号是否被禁用，且投稿者不允许登录
-    if ((userInfo.status | 0) !== 1 || userInfo.type === 3 || userInfo.type === 4) {
+    if ((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 
@@ -93,7 +93,7 @@ module.exports = class extends Base {
     }
 
     // 帐号是否被禁用，且投稿者不允许登录
-    if ((userInfo.status | 0) !== 1 || userInfo.type === 3 || userInfo.type === 4) {
+    if ((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 

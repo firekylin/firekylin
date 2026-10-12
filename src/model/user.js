@@ -98,14 +98,14 @@ module.exports = class extends Base {
     if (password) {
       updateData.password = password;
     }
-    if (think.isEmpty(updateData)) {
-      return Promise.reject('DATA_EMPTY');
-    }
     if (data.email) {
       const count = await this.where({ email: data.email }).count('email');
-      if (!count) {
+      if (Number(count) === 0) {
         updateData.email = data.email;
       }
+    }
+    if (think.isEmpty(updateData)) {
+      return Promise.reject('DATA_EMPTY');
     }
     updateData.last_login_time = think.datetime();
     updateData.last_login_ip = ip;

@@ -7,6 +7,10 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async getAction() {
+    const isCommenter = Number(this.userInfo.type) === 4;
+    if (isCommenter && (!this.id || String(this.id) !== String(this.userInfo.id))) {
+      return this.fail('USER_NO_PERMISSION');
+    }
     let where = {};
     const modelInstance = this.modelInstance
       .field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
@@ -148,7 +152,11 @@ module.exports = class extends Base {
       return await this.generateKey(self, 1);
     }
 
-    const data = this.post();
+    let data = this.post();
+    if (Number(this.userInfo.type) === 4) {
+      if (String(this.id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
+      data = {display_name: data.display_name, email: data.email};
+    }
     data.id = this.id;
     const rows = await this.modelInstance.saveUser(data, this.ctx.ip);
     return this.success({affectedRows: rows});

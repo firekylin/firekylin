@@ -33,7 +33,7 @@ function signature(value) {
 }
 
 function sign(user, seconds = TTL) {
-  if (!user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0 || ![1, 2].includes(Number(user.type))) throw new Error('Invalid administrator identity');
+  if (!user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0 || ![1, 2, 4].includes(Number(user.type))) throw new Error('Invalid backend identity');
   const now = Math.floor(Date.now() / 1000);
   const header = base64({alg: 'HS256', typ: 'JWT'});
   const payload = base64({
@@ -66,7 +66,7 @@ function verify(token) {
         !/^[1-9]\d*$/.test(String(claims.sub)) ||
         !Number.isInteger(claims.iat) || !Number.isInteger(claims.exp) ||
         claims.iat > now || claims.exp <= now || claims.exp - claims.iat > TTL ||
-        ![1, 2].includes(claims.type)) return null;
+        ![1, 2, 4].includes(claims.type)) return null;
     return {id: Number(claims.sub), name: claims.name, type: claims.type};
   } catch (e) {
     return null;
