@@ -177,6 +177,7 @@ function buildOAuthHandler({origin, store, getUser}) {
           '<main style="font:16px system-ui;max-width:560px;margin:8vh auto;padding:24px">' +
           '<h1>授权 AI 客户端访问 Firekylin</h1><p>应用：' + escapeHtml(client.name) +
           '</p><p>登录用户：' + escapeHtml(user.name || String(user.id)) +
+          '</p><p>回调地址：' + escapeHtml(redirectUri) +
           '</p><p>请求权限：</p><ul>' + displayed + '</ul>' +
           '<form method="post"><input type="hidden" name="client_id" value="' + escapeHtml(clientId) + '">' +
           '<input type="hidden" name="redirect_uri" value="' + escapeHtml(redirectUri) + '">' +
@@ -237,7 +238,8 @@ function buildOAuthHandler({origin, store, getUser}) {
         const consumed = await store.consume('refresh', data.refresh_token);
         if (!consumed) return oauthError(ctx, 'invalid_grant');
         const user = await getUser(Number(row.user_id));
-        if (!user || Number(user.status) !== 1) return oauthError(ctx, 'invalid_grant');
+        if (!user || Number(user.status) !== 1 ||
+            !authorizable(scopeList(row.scopes), user)) return oauthError(ctx, 'invalid_grant');
         return issueTokens(ctx, {userId: Number(row.user_id), clientId, scopes: scopeList(row.scopes)});
       }
       return oauthError(ctx, 'unsupported_grant_type');
