@@ -1,13 +1,8 @@
+const adminAuth = require('../../service/admin-auth');
 const nodemailer = require('nodemailer');
 const speakeasy = require('speakeasy');
 const Base = require('./base');
 
-const rememberSessionOpt = {
-  maxAge: 365 * 24 * 3600 * 1000
-};
-const normalSessionOpt = {
-  maxAge: 24 * 3600 * 1000
-};
 module.exports = class extends Base {
   /**
    * login
@@ -65,11 +60,7 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
-    await this.session(
-      'userInfo',
-      userInfo,
-      remember ? rememberSessionOpt : normalSessionOpt
-    );
+    adminAuth.login(this.ctx, userInfo, remember);
     return this.success();
   }
   /**
@@ -77,7 +68,7 @@ module.exports = class extends Base {
    * @return {}
    */
   async logoutAction() {
-    await this.session('userInfo', '');
+    adminAuth.logout(this.ctx);
     return this.redirect('/');
   }
 
@@ -107,18 +98,14 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
-    await this.session(
-      'userInfo',
-      userInfo,
-      remember ? rememberSessionOpt : normalSessionOpt
-    );
+    adminAuth.login(this.ctx, userInfo, remember);
     return this.redirect('/admin');
   }
   /**
    * update user password
    */
   async passwordAction() {
-    const userInfo = await this.session('userInfo') || {};
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }
@@ -132,7 +119,7 @@ module.exports = class extends Base {
   }
 
   async forgotAction() {
-    const userInfo = await this.session('userInfo') || {};
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (!think.isEmpty(userInfo)) {
       return this.success();
     }
@@ -177,7 +164,7 @@ module.exports = class extends Base {
   }
 
   async resetAction() {
-    const userInfo = await this.session('userInfo') || {};
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (!think.isEmpty(userInfo)) {
       return this.success();
     }
