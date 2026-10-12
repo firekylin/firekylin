@@ -61,6 +61,8 @@ function registrationAllowed(uris) {
 }
 
 function buildOAuthHandler({origin, store, getUser}) {
+  // Best-effort local abuse limit; deploy behind a shared/proxy rate limiter as well.
+  const registrations = new Map();
   const resource = origin + '/mcp';
   const issuer = origin;
   const metadata = {
@@ -114,6 +116,14 @@ function buildOAuthHandler({origin, store, getUser}) {
 
     if (pathname === '/oauth/register') {
       if (ctx.method !== 'POST') return oauthError(ctx, 'invalid_request', 405);
+      const ip = String(ctx.ip || 'unknown').slice(0, 128);
+      const now = Date.now();
+      if (registrations.size > 10000) registrations.clear();
+      const previous = registrations.get(ip);
+      const window = previous && previous.reset > now ? previous : {count: 0, reset: now + 3600000};
+      if (window.count >= 20) return oauthError(ctx, 'rate_limited', 429);
+      window.count++;
+      registrations.set(ip, window);
       if (!String(ctx.get('content-type')).startsWith('application/json')) return oauthError(ctx, 'invalid_request', 415);
       const input = await readJson(ctx);
       if (!input || !safeClientName(input.client_name) || !registrationAllowed(input.redirect_uris) ||
