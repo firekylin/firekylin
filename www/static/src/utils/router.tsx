@@ -2,13 +2,11 @@ import React from 'react';
 import {
     BrowserRouter,
     Link,
+    matchPath,
     Navigate,
     NavLink as RouterNavLink,
-    Route as RouterRoute,
-    Routes,
     useLocation,
     useNavigate,
-    useParams,
 } from 'react-router-dom';
 
 export { BrowserRouter, Link };
@@ -40,10 +38,9 @@ type LegacyRouteProps = {
 
 type RedirectProps = { to: string };
 
-export function useRouteComponentProps(path = ''): RouteComponentProps<any> {
+export function useRouteComponentProps(path = '', params: Record<string, string | undefined> = {}): RouteComponentProps<any> {
     const location = useLocation();
     const navigate = useNavigate();
-    const params = useParams();
 
     return {
         history: {
@@ -54,7 +51,7 @@ export function useRouteComponentProps(path = ''): RouteComponentProps<any> {
         },
         location,
         match: {
-            params: params as any,
+            params,
             path: path.replace(/\/\*$/, ''),
             url: location.pathname,
             isExact: true,
@@ -62,8 +59,10 @@ export function useRouteComponentProps(path = ''): RouteComponentProps<any> {
     };
 }
 
-function LegacyRouteElement({ component: Component, render, path }: LegacyRouteProps) {
-    const props = useRouteComponentProps(path);
+function LegacyRouteElement({ component: Component, render, path, params = {} }: LegacyRouteProps & {
+    params?: Record<string, string | undefined>;
+}) {
+    const props = useRouteComponentProps(path, params);
     if (render) {
         return <>{render(props)}</>;
     }
@@ -79,32 +78,29 @@ export function Redirect({ to }: RedirectProps) {
 }
 
 export function Switch({ children }: React.PropsWithChildren<{}>) {
-    const routes: React.ReactElement[] = [];
+    const location = useLocation();
+    let selected: React.ReactElement | null = null;
 
     React.Children.forEach(children, child => {
-        if (!React.isValidElement(child)) {
+        if (selected || !React.isValidElement(child)) {
             return;
         }
         if (child.type === Redirect) {
             const { to } = child.props as RedirectProps;
-            routes.push(<RouterRoute key={`redirect-${to}`} path="*" element={<Navigate to={to} replace />} />);
+            selected = <Navigate to={to} replace />;
             return;
         }
 
         const props = child.props as LegacyRouteProps;
-        const path = props.path && !props.exact && props.path !== '*'
-            ? `${props.path.replace(/\/$/, '')}/*`
-            : props.path;
-        routes.push(
-            <RouterRoute
-                key={props.path || routes.length}
-                path={path}
-                element={<LegacyRouteElement {...props} />}
-            />,
-        );
+        const match = props.path
+            ? matchPath({ path: props.path, end: Boolean(props.exact) }, location.pathname)
+            : null;
+        if (match) {
+            selected = <LegacyRouteElement {...props} params={match.params} />;
+        }
     });
 
-    return <Routes>{routes}</Routes>;
+    return selected;
 }
 
 type NavLinkProps = Omit<React.ComponentProps<typeof RouterNavLink>, 'className'> & {
