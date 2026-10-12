@@ -42,7 +42,7 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
         return (
             <Modal
                 title="插入链接"
-                visible={this.props.visible}
+                open={this.props.open}
                 onOk={() => onCreate(this.formRef)}
                 onCancel={onCancel}
             >

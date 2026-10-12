@@ -1,5 +1,6 @@
 import React from 'react';
-import { Input, Modal, Tabs, Upload, message, UploadChangeParam, ModalProps } from 'antd';
+import { Input, Modal, Tabs, Upload, message, ModalProps } from 'antd';
+import type { UploadChangeParam } from 'antd/es/upload/interface';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { ChangeEvent } from 'react';
 import './image-modal.less';
@@ -57,7 +58,7 @@ class EditorImageModalForm extends React.Component<EditorImageModalProps, {loadi
         return (
             <Modal
                 title="插入图片"
-                visible={this.props.visible}
+                open={this.props.open}
                 onOk={this.props.onOk}
                 onCancel={onCancel}
                 className="eidtor-image-modal"

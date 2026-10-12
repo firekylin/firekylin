@@ -1,17 +1,17 @@
 import React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'mobx-react';
 
 import routes from './routes';
 import store from './app.store';
 
 import './app.less';
-import 'antd/dist/antd.css';
+import 'antd/dist/reset.css';
 
 if (Object.freeze) {
     Object.freeze(window.SysConfig.userInfo);
 }
 
-ReactDOM.render(<Provider {...store}>{routes}</Provider>, document.getElementById(
-    'app',
-) as HTMLElement);
+createRoot(document.getElementById('app') as HTMLElement).render(
+    <Provider {...store}>{routes}</Provider>,
+);

@@ -1,4 +1,4 @@
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 import { BaseProps } from '../../models/baseprops.model';
 import AppearanceStore from './appearance.store';
 

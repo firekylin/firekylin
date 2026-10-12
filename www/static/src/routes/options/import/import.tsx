@@ -9,7 +9,7 @@ const TabPane = Tabs.TabPane;
 import './import.less';
 const RadioGroup = Radio.Group;
 import { ImportBlogsEnum, ImportUploadAcceptEnum } from './import.enum';
-import { RcFile } from 'antd';
+import type { RcFile } from 'antd/es/upload/interface';
 import { http } from '../../../utils/http';
 import OptionsImportRss from './import-rss/import-rss';
 @inject('sharedStore')

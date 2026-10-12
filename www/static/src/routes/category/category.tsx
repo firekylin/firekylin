@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from '@admin/utils/router';
 import CategoryList from './list/list';
 import CategoryCreate from './create/create';
 import { CategoryProps } from './category.model';

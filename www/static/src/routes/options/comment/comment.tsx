@@ -113,7 +113,7 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
                         <Form.Item label="每页评论数" name="pageSize" initialValue={comment.pageSize} rules={[{required: true}]}><InputNumber min={1} max={100} /></Form.Item>
                         <Form.Item label="界面语言" name="locale" initialValue={comment.locale}><Select options={[{value: 'zh-CN', label: '简体中文'}, {value: 'zh-TW', label: '繁體中文'}, {value: 'en', label: 'English'}, {value: 'jp', label: '日本語'}, {value: 'pt-BR', label: 'Português'}, {value: 'ru', label: 'Русский'}, {value: 'fr-FR', label: 'Français'}, {value: 'de', label: 'Deutsch'}]} /></Form.Item>
                         <Form.Item label="同 IP 评论间隔（秒）" name="ipQps" initialValue={comment.ipQps}><InputNumber min={1} max={3600} /></Form.Item>
-                        <Divider orientation="left">展示与交互</Divider>
+                        <Divider orientation="start">展示与交互</Divider>
                         <Form.Item label="默认排序" name="commentSorting" initialValue={comment.commentSorting}><Select options={[{value: 'latest', label: '最新'}, {value: 'oldest', label: '最早'}, {value: 'hottest', label: '最热'}]} /></Form.Item>
                         <Form.Item label="深色模式" name="dark" initialValue={comment.dark}><Select options={[{value: false, label: '关闭'}, {value: 'auto', label: '跟随系统'}]} /></Form.Item>
                         <Form.Item label="评论者资料栏" name="meta" initialValue={comment.meta}><Select mode="multiple" options={META_OPTIONS} /></Form.Item>
@@ -132,7 +132,7 @@ class CommentForm extends React.Component<CommentProps, CommentState> {
                         <Form.Item label="GIF 搜索" name="search" valuePropName="checked" initialValue={comment.search}><Switch /></Form.Item>
                         <Form.Item label="隐藏版权提示" name="noCopyright" valuePropName="checked" initialValue={comment.noCopyright}><Switch /></Form.Item>
                         <Form.Item label="隐藏评论 RSS" name="noRss" valuePropName="checked" initialValue={comment.noRss}><Switch /></Form.Item>
-                        <Divider orientation="left">安全与用户</Divider>
+                        <Divider orientation="start">安全与用户</Divider>
                         <Form.Item label="敏感词" name="forbiddenWords" initialValue={comment.forbiddenWords} extra="每行一个词，命中的评论会进入垃圾评论"><TextArea autoSize={{minRows: 3, maxRows: 8}} /></Form.Item>
                         <Form.Item label="IP 黑名单" name="disallowIPList" initialValue={comment.disallowIPList} extra="每行一个完整 IP 地址"><TextArea autoSize={{minRows: 3, maxRows: 8}} /></Form.Item>
                         <Form.Item label="单次点赞随机增量上限" name="likeIncMax" initialValue={comment.likeIncMax}><InputNumber min={1} max={100} /></Form.Item>

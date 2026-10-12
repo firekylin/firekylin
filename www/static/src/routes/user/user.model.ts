@@ -1,5 +1,5 @@
 import UserStore from  './user.store';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 
 export interface UserProps extends RouteComponentProps<UserMatchParams> {
     userStore: UserStore;

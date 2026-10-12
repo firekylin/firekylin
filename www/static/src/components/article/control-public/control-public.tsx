@@ -15,7 +15,8 @@ class ArticleControlPublic extends React.Component<ACPublicProps, any> {
 
     render() {
         const radioStyle = {
-          display: 'block',
+          display: 'flex',
+          alignItems: 'center',
           height: '30px',
           lineHeight: '30px',
         };
