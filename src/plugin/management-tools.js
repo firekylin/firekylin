@@ -1,6 +1,7 @@
 'use strict';
 
 const PostCommandService = require('../service/post-command');
+const CommentModerationService = require('../service/comment-moderation');
 
 function object(input) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('Object input required');
@@ -157,13 +158,15 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       const input = object(raw);
       keys(input, ['id']);
       const commentId = id(input.id);
-      const comment = await getModel('comment').where({id: commentId}).setRelation(false).find();
-      if (!comment || !comment.id) throw new Error('Comment not found');
-      if (comment.status !== 'waiting') throw new Error('Only waiting comments can be approved');
-      await getModel('comment').where({id: commentId}).update({status: 'approved', updated_at: now()});
       if (typeof getCommentService !== 'function') throw new Error('Comment count sync is not configured');
-      await getCommentService().syncCount({model: getModel}, comment.post_id);
-      return {id: commentId, status: 'approved'};
+      const service = new CommentModerationService({
+        getModel,
+        now,
+        syncCount: postId => getCommentService().syncCount({model: getModel}, postId)
+      });
+      const result = await service.moderate({id: commentId, operation: 'approved'}, principal);
+      return {id: result.id, status: result.status};
+
     }
   });
 }
