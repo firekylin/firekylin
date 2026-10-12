@@ -133,7 +133,8 @@ module.exports = class extends Base {
     } catch (e) {
       return this.fail(e);
     }
-    return this.success(`共导入文章 ${ret.post} 篇，页面 ${ret.page} 页，分类 ${ret.category} 个，标签 ${ret.tag} 个`);
+    const comment = ret.comment ? `，评论 ${ret.comment} 条` : '';
+    return this.success(`共导入文章 ${ret.post} 篇，页面 ${ret.page} 页，分类 ${ret.category} 个，标签 ${ret.tag} 个${comment}`);
   }
 
   /**
