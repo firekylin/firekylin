@@ -1,3 +1,4 @@
+const adminAuth = require('./admin-auth');
 'use strict';
 /* eslint-disable max-len */
 
@@ -73,7 +74,7 @@ module.exports = class extends think.Service {
   async create(controller) {
     const options = await controller.model('options').getOptions(true);
     const config = options.comment || {};
-    const secret = options.comment_jwt_secret;
+    const secret = options.jwt_secret || options.comment_jwt_secret;
     const users = new UserAdapter(controller.model('user'));
     const postIds = new Map();
     const resolvePostId = async url => {
@@ -148,8 +149,8 @@ module.exports = class extends think.Service {
     if (token) {
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
-    // A Firekylin administrator session is also a comment administrator session.
-    const sessionUser = await controller.session('userInfo') || {};
+    // A Firekylin administrator JWT also authenticates the comment administrator.
+    const sessionUser = adminAuth.currentUser(controller.ctx) || {};
     if (Number(sessionUser.type) === 1) {
       const found = await users.select({objectId: String(sessionUser.id)});
       if (found[0]) {
