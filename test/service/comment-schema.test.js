@@ -58,7 +58,7 @@ test('comment schema backfills post ids from legacy pathnames', async() => {
   const postModel = {field() { return this }, async select() { return [{id: 9, type: 0, pathname: 'hello'}] }};
   const options = {
     async getOptions() { return {site_url: 'https://example.com', comment_schema_version: '1', comment_jwt_secret: 'legacy-secret-with-minimum-32-bytes-long'} },
-    async updateOptions() {}
+    async updateOptions(key, value) { if (key === 'jwt_secret') assert.equal(value, 'legacy-secret-with-minimum-32-bytes-long') }
   };
   const service = new CommentSchema();
   service.model = name => name === 'options' ? options : name === 'post' ? postModel : commentModel;
