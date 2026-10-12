@@ -1,3 +1,4 @@
+const adminAuth = require('../../service/admin-auth');
 const fs = require('fs');
 const path = require('path');
 const {version} = require('../../../package.json');
@@ -24,7 +25,7 @@ module.exports = class extends think.Controller {
       return;
     }
 
-    const userInfo = await this.session('userInfo') || {};
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       if (this.isAjax()) {
         return this.fail('NOT_LOGIN');
