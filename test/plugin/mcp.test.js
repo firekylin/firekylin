@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const crypto = require('node:crypto');
 const {createTokenVerifier, isAllowedOrigin} = require('../../examples/firekylin-plugin-mcp/auth');
-const {exposedTools, createServerFactory, readBody} = require('../../examples/firekylin-plugin-mcp/server');
+const {exposedTools, createServerFactory, createMcpEndpoint, readBody} = require('../../examples/firekylin-plugin-mcp/server');
 const {Readable} = require('node:stream');
 
 function hash(token) {
@@ -80,4 +80,46 @@ test('body reader enforces request size limits', async() => {
   await assert.rejects(readBody(Readable.from([Buffer.alloc(10)]), 5), /too large/);
   const value = await readBody(Readable.from([Buffer.from('hello')]), 10);
   assert.equal(value.toString(), 'hello');
+});
+
+test('HTTP endpoint checks token and responds using MCP HTTP SDK bridge', async() => {
+  const token = 'a'.repeat(64);
+  const sdk = {
+    McpServer: class {
+      registerTool() {}
+    },
+    fromJsonSchema: schema => schema,
+    createMcpHandler(factory) {
+      factory();
+      return async request => new Response(JSON.stringify({jsonrpc: '2.0', id: 1, result: {ok: true}}), {
+        headers: {'content-type': 'application/json'}
+      });
+    }
+  };
+  const endpoint = await createMcpEndpoint({
+    sdk,
+    config: {requireHttps: false, tokens: [{sha256: hash(token), userId: 1, scopes: ['posts:read']}]},
+    getUser: async id => ({id, status: 1, type: 1}),
+    tools: {list: () => []},
+    logger: {info() {}, error() {}}
+  });
+  function context(auth) {
+    const requestHeaders = {'authorization': auth, 'content-type': 'application/json', accept: 'application/json'};
+    const outputHeaders = {};
+    return {
+      method: 'POST', secure: false, req: Readable.from([Buffer.from('{"jsonrpc":"2.0","id":1,"method":"initialize"}')]),
+      get: name => requestHeaders[name.toLowerCase()] || '',
+      set: (name, value) => {outputHeaders[name] = value;},
+      outputHeaders
+    };
+  }
+  const denied = context('Bearer ' + 'b'.repeat(64));
+  await endpoint(denied);
+  assert.equal(denied.status, 401);
+  const accepted = context('Bearer ' + token);
+  await endpoint(accepted);
+  assert.equal(accepted.status, 200);
+  let payload = '';
+  for await (const chunk of accepted.body) payload += chunk.toString();
+  assert.deepEqual(JSON.parse(payload).result, {ok: true});
 });
