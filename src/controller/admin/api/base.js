@@ -12,8 +12,8 @@ module.exports = class extends BaseRest {
   async __before() {
     const authOptions = await this.model('options').getOptions(true);
     this.authOptions = authOptions;
-    this.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
-    const userInfo = adminAuth.currentUser(this.ctx, this.jwtSecret) || {};
+    this.ctx.state.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
     }

@@ -55,11 +55,6 @@ module.exports = class extends Base {
     return terms.map(item => item.id);
   }
 
-  async currentUser() {
-    const options = await this.controller.model('options').getOptions(true);
-    return adminAuth.currentUser(this.controller.ctx, options.jwt_secret || options.comment_jwt_secret);
-  }
-
   async buildPost(item, type, user) {
     let post = {
       title: item.title,
@@ -81,7 +76,7 @@ module.exports = class extends Base {
 
   async post(items) {
     const posts = items.filter(item => !item.page);
-    const user = await this.currentUser();
+    const user = adminAuth.currentUser(this.controller.ctx);
     for (const item of posts) {
       const post = await this.buildPost(item, 0, user);
       const cateIds = await this.termIds(this.cateModelInstance, item.categories);
@@ -103,7 +98,7 @@ module.exports = class extends Base {
 
   async page(items) {
     const pages = items.filter(item => item.page);
-    const user = await this.currentUser();
+    const user = adminAuth.currentUser(this.controller.ctx);
     for (const item of pages) {
       await this.pageModelInstance.addPost(await this.buildPost(item, 1, user));
     }

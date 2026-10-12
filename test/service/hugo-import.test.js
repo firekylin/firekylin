@@ -113,7 +113,7 @@ test('maps featured image, categories and tags when importing a post', async() =
   const originalCurrentUser = adminAuth.currentUser;
   adminAuth.currentUser = () => ({id: 7});
   service.controller = {
-    ctx: {},
+    ctx: {state: {jwtSecret: 'test-secret-with-at-least-thirty-two-bytes'}},
     model: () => ({async getOptions() { return {jwt_secret: 'test-secret-with-at-least-thirty-two-bytes'} }})
   };
   service.cateModelInstance = termModel(11);

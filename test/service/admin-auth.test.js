@@ -11,6 +11,7 @@ function context() {
   const cookies = new Map();
   const options = new Map();
   return {
+    state: {jwtSecret: SECRET},
     protocol: 'https',
     secure: true,
     cookie(name, value, config) {
@@ -57,19 +58,19 @@ test('requires a persistent sufficiently strong secret', () => {
 
 test('issues HttpOnly cookies and clears them on logout', () => {
   const ctx = context();
-  auth.login(ctx, USER, true, SECRET);
-  assert.deepEqual(auth.currentUser(ctx, SECRET), USER);
+  auth.login(ctx, USER, true);
+  assert.deepEqual(auth.currentUser(ctx), USER);
   const options = ctx.options.get(auth.COOKIE_NAME);
   assert.equal(auth.COOKIE_NAME, 'thinkjs');
   assert.equal(options.httpOnly, true);
   assert.equal(options.secure, true);
   assert.equal(options.sameSite, 'lax');
   assert.equal(options.maxAge, 7 * 24 * 60 * 60 * 1000);
-  assert.equal(typeof auth.csrfToken(ctx, SECRET), 'string');
-  auth.login(ctx, USER, false, SECRET);
+  assert.equal(typeof auth.csrfToken(ctx), 'string');
+  auth.login(ctx, USER, false);
   assert.equal(ctx.options.get(auth.COOKIE_NAME).maxAge, 24 * 60 * 60 * 1000);
   auth.logout(ctx);
-  assert.equal(auth.currentUser(ctx, SECRET), null);
-  assert.equal(auth.csrfToken(ctx, SECRET), null);
+  assert.equal(auth.currentUser(ctx), null);
+  assert.equal(auth.csrfToken(ctx), null);
   assert.equal(ctx.options.get(auth.COOKIE_NAME).maxAge, 0);
 });

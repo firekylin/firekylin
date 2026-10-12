@@ -134,7 +134,7 @@ module.exports = class extends think.Service {
     return {core, users, options, config, tokenService, avatarService};
   }
 
-  async context(controller, users, core, tokenService, avatarService, options) {
+  async context(controller, users, core, tokenService, avatarService) {
     const authorization = controller.ctx.get('authorization') || '';
     const token = authorization.replace(/^Bearer\s+/i, '') || controller.get('token');
     const ctx = {
@@ -151,8 +151,7 @@ module.exports = class extends think.Service {
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
     // A Firekylin administrator JWT also authenticates the comment administrator.
-    const secret = options.jwt_secret || options.comment_jwt_secret;
-    const sessionUser = adminAuth.currentUser(controller.ctx, secret) || {};
+    const sessionUser = adminAuth.currentUser(controller.ctx) || {};
     if (!think.isEmpty(sessionUser)) {
       const found = await users.select({objectId: String(sessionUser.id), type: ['!=', 'banned']});
       if (found[0]) {

@@ -27,8 +27,8 @@ module.exports = class extends think.Controller {
 
     const authOptions = await this.model('options').getOptions(true);
     this.authOptions = authOptions;
-    this.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
-    const userInfo = adminAuth.currentUser(this.ctx, this.jwtSecret) || {};
+    this.ctx.state.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
+    const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       if (this.isAjax()) {
         return this.fail('NOT_LOGIN');
@@ -80,7 +80,7 @@ module.exports = class extends think.Controller {
     this.assign('options', options);
     this.assign('think', think);
     this.assign('adminAssetVersion', getAdminAssetVersion());
-    this.assign('csrfToken', adminAuth.csrfToken(this.ctx, this.jwtSecret));
+    this.assign('csrfToken', adminAuth.csrfToken(this.ctx));
 
     return this.display('admin');
   }

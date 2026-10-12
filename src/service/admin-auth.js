@@ -15,6 +15,10 @@ function validateSecret(secret) {
   return secret;
 }
 
+function contextSecret(ctx) {
+  return validateSecret(ctx && ctx.state && ctx.state.jwtSecret);
+}
+
 function base64(value) {
   return Buffer.from(JSON.stringify(value)).toString('base64url');
 }
@@ -78,8 +82,8 @@ function cookieOptions(ctx, remember) {
   };
 }
 
-function login(ctx, user, remember, secret) {
-  const token = sign(user, secret);
+function login(ctx, user, remember) {
+  const token = sign(user, contextSecret(ctx));
   ctx.cookie(COOKIE_NAME, token, cookieOptions(ctx, remember));
 }
 
@@ -87,15 +91,16 @@ function logout(ctx) {
   ctx.cookie(COOKIE_NAME, null, {...cookieOptions(ctx, false), maxAge: 0});
 }
 
-function currentUser(ctx, secret) {
-  return verify(ctx.cookie(COOKIE_NAME), secret);
+function currentUser(ctx) {
+  return verify(ctx.cookie(COOKIE_NAME), contextSecret(ctx));
 }
 
 // A signed CSRF proof bound to the user's JWT. Used by plugin routes.
-function csrfToken(ctx, secret) {
+function csrfToken(ctx) {
   const token = ctx.cookie(COOKIE_NAME);
+  const secret = contextSecret(ctx);
   if (!verify(token, secret)) return null;
-  return crypto.createHmac('sha256', validateSecret(secret)).update('plugin-csrf:' + token).digest('base64url');
+  return crypto.createHmac('sha256', secret).update('plugin-csrf:' + token).digest('base64url');
 }
 
 module.exports = {COOKIE_NAME, validateSecret, sign, verify, login, logout, currentUser, csrfToken};

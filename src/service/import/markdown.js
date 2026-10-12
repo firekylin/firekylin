@@ -39,9 +39,7 @@ module.exports = class extends Base {
       return 0;
     }
 
-    const options = await this._think.model('options').getOptions(true);
-    const secret = options.jwt_secret || options.comment_jwt_secret;
-    const user = adminAuth.currentUser(this._think.ctx, secret);
+    const user = adminAuth.currentUser(this._think.ctx);
     const postsPromise = posts.map(async item => {
       try {
         let post = {
