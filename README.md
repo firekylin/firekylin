@@ -67,7 +67,7 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 
 ### 多实例 / Serverless 后台登录
 
-后台认证使用无状态 JWT Cookie。部署前务必设置 **`FIREKYLIN_JWT_SECRET`**（至少 32 字节的固定随机密钥），并在所有实例共享同一密钥。首次升级需要重新登录。详细说明参见 [JWT 认证和迁移文档](docs/admin-jwt.md)。
+后台认证使用无状态 JWT Cookie，签名密钥由数据库中的 `jwt_secret` 统一保存，旧版 `comment_jwt_secret` 会自动迁移，无需额外环境变量。首次升级需要重新登录。详细说明参见 [JWT 认证和迁移文档](docs/admin-jwt.md)。
 
 ## 如何使用
 
