@@ -1,21 +1,18 @@
 import * as React from 'react';
 import classnames from 'classnames';
-import {
-  FacebookOutlined,
-  GithubOutlined,
-  GlobalOutlined,
-  GoogleOutlined,
-  QqOutlined,
-  SafetyOutlined,
-  TwitterOutlined,
-  UserOutlined,
-  WeiboOutlined,
-  LockOutlined,
-} from '@ant-design/icons';
+import { GlobalOutlined, LockOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Checkbox } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { LoginProps } from './login.model';
+import facebookIcon from '../../assets/social/facebook.svg';
+import githubIcon from '../../assets/social/github.svg';
+import googleIcon from '../../assets/social/google.svg';
+import huaweiIcon from '../../assets/social/huawei.svg';
+import oidcIcon from '../../assets/social/oidc.svg';
+import qqIcon from '../../assets/social/qq.svg';
+import twitterIcon from '../../assets/social/twitter.svg';
+import weiboIcon from '../../assets/social/weibo.svg';
 
 @inject('loginStore')
 @observer
@@ -94,14 +91,15 @@ class LoginForm extends React.Component<LoginProps, any> {
   getSocialLogin() {
     const services = window.SysConfig.options.social_services || [];
     if (!services.length) return null;
-    const icons: Record<string, any> = {
-      facebook: FacebookOutlined,
-      github: GithubOutlined,
-      google: GoogleOutlined,
-      oidc: GlobalOutlined,
-      qq: QqOutlined,
-      twitter: TwitterOutlined,
-      weibo: WeiboOutlined,
+    const icons: Record<string, string> = {
+      facebook: facebookIcon,
+      github: githubIcon,
+      google: googleIcon,
+      huawei: huaweiIcon,
+      oidc: oidcIcon,
+      qq: qqIcon,
+      twitter: twitterIcon,
+      weibo: weiboIcon,
     };
     const queryRedirect = new URLSearchParams(this.props.location.search).get('redirect');
     let redirect = `${window.location.origin}/admin`;
@@ -112,12 +110,12 @@ class LoginForm extends React.Component<LoginProps, any> {
     return (
       <div style={{display: 'flex', justifyContent: 'center', gap: 16, margin: '-4px 0 20px'}}>
         {services.map(service => {
-          const Icon = icons[service.name] || GlobalOutlined;
+          const icon = icons[service.name];
           const href = `/api/comment/oauth?type=${encodeURIComponent(service.name)}&redirect=${encodeURIComponent(redirect)}`;
           return (
             <a key={service.name} href={href} title={service.title || service.name}
-              style={{fontSize: 24, color: 'rgba(0, 0, 0, 0.65)'}}>
-              <Icon />
+              style={{display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center'}}>
+              {icon ? <img src={icon} alt={service.title || service.name} width="32" height="32" /> : <GlobalOutlined style={{fontSize: 28}} />}
             </a>
           );
         })}
