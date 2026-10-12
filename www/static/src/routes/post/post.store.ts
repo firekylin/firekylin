@@ -76,9 +76,12 @@ class PostStore {
       .pipe(
         map(
           res => {
-            res.data.data.map((post, i) => {
+            if (res.errno !== 0 || !Array.isArray(res.data?.data)) {
+              return res;
+            }
+            res.data.data.forEach(post => {
               post.key = post.id;
-              post.author = post.user.name;
+              post.author = post.user?.name || '';
               post.statusText = tools.getStatusText(post.status, post.create_time);
             });
             return res;
@@ -94,11 +97,11 @@ class PostStore {
                 pageSize: res.data.pageSize,
                 total: res.data.count
               });
-              this.setLoading(false);
           }
+          this.setLoading(false);
         },
         err => {
-          message.error(err);
+          message.error(err instanceof Error ? err.message : String(err));
           this.setLoading(false);
         }
       );

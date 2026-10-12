@@ -78,7 +78,7 @@ export default class Comment extends React.Component<any, any> {
                     {key: 'spam', label: '垃圾评论', children: table()}
                 ]} />
             </div>
-            <Modal title="编辑评论" visible={Boolean(this.state.editing)} onCancel={() => this.setState({editing: null})} onOk={() => this.operate(this.state.editing.id, 'edit', this.state.content)}>
+            <Modal title="编辑评论" open={Boolean(this.state.editing)} onCancel={() => this.setState({editing: null})} onOk={() => this.operate(this.state.editing.id, 'edit', this.state.content)}>
                 <Input.TextArea rows={8} value={this.state.content} onChange={event => this.setState({content: event.target.value})} />
             </Modal>
         </>;

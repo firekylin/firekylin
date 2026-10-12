@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from '@admin/utils/router';
 import { TagList } from './list/list';
 import { TagProps } from './tag.model';
 import TagCreateOrEdit from './create-or-edit/create-or-edit';

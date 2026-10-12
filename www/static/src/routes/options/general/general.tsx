@@ -5,7 +5,7 @@ import { Input, Button, Upload, message } from 'antd';
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import { inject, observer } from 'mobx-react';
 import { GeneralProps } from './general.model';
-import { UploadChangeParam } from 'antd';
+import type { UploadChangeParam } from 'antd/es/upload/interface';
 import './general.less';
 
 @inject('generalStore')

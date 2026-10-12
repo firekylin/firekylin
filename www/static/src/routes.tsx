@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect, Switch } from './utils/router';
 import { auth } from './utils/auth';
 import Login from './routes/login/login';
 import Container from './routes/container';
@@ -11,7 +11,7 @@ const routes = (
                 path="/"
                 render={props =>
                     auth.checkLogin() ? (
-                        <Container {...props} />
+                        <Container />
                     ) : props.history.location.pathname === '/login' ? (
                         <Login {...props} />
                     ) : (

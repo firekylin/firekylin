@@ -2,7 +2,7 @@ import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Modal, Alert, message } from 'antd';
 import { inject, observer } from 'mobx-react';
-import { QRCodeSVG as QRCode } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 const confirm = Modal.confirm;
 import BreadCrumb from '../../../components/breadcrumb';
 import { TwoFactorAuthProps } from './two-factor-auth.model';
@@ -88,7 +88,7 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
         return (
             <div>
                 <p>已经开启两步验证</p>
-                <QRCode value={otpauth_url} size={256} />,
+                <QRCodeSVG value={otpauth_url} size={256} />,
                 <br />
                 <br />
                 <Button type="primary" htmlType="submit" onClick={() => this.close2Fa()}>关闭二步验证</Button>
@@ -137,7 +137,7 @@ class TwoFactorAuthForm extends React.Component<TwoFactorAuthProps, {}> {
         return (
             <div>
                 <p>打开两步验证的应用，扫描下面的二维码</p>
-                <QRCode value={otpauth_url} size={256} />
+                <QRCodeSVG value={otpauth_url} size={256} />
                 <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
                     <Form.Item
                         label="填写 6 位校验码"

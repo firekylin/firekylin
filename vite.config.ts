@@ -1,32 +1,37 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'crypto';
+import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
     root: path.resolve(__dirname, 'www/static/src'),
-    base: '/static/dist/',
+    // Production assets are served by ThinkJS under /static/dist. In dev the
+    // admin router itself owns /admin, so Vite must serve from the origin root.
+    base: mode === 'production' ? '/static/dist/' : '/',
 
     plugins: [
         react(),
         {
             name: 'admin-asset-version',
-            generateBundle(_, bundle) {
+            enforce: 'post',
+            writeBundle() {
+                const assetsPath = path.resolve(__dirname, 'www/static/dist/assets');
                 const hash = createHash('sha256');
-                for (const output of Object.values(bundle)) {
-                    hash.update(output.type === 'asset' ? output.source : output.code);
+                for (const fileName of ['assets/admin.js', 'assets/admin.css']) {
+                    hash.update(readFileSync(path.resolve(__dirname, 'www/static/dist', fileName)));
                 }
-                this.emitFile({
-                    type: 'asset',
-                    fileName: 'assets/admin.version',
-                    source: hash.digest('hex').slice(0, 16),
-                });
+                writeFileSync(path.join(assetsPath, 'admin.version'), hash.digest('hex').slice(0, 16));
             },
         },
     ],
 
-    resolve: {},
+    resolve: {
+        alias: {
+            '@admin': path.resolve(__dirname, 'www/static/src'),
+        },
+    },
 
     css: {
         preprocessorOptions: {
@@ -39,6 +44,8 @@ export default defineConfig(({ mode }) => ({
     define: {
         'process.env.basename': JSON.stringify('/admin'),
         'process.env.environment': JSON.stringify(mode === 'production' ? 'production' : 'dev'),
+        // Polyfill Node.js `global` for browser ESM (used by react-codemirror2)
+        global: 'globalThis',
     },
 
     build: {

@@ -1,6 +1,6 @@
 import DashBoardStore from './dashboard.store';
 import { BaseProps } from '../../models/baseprops.model';
-import { RouterProps } from 'react-router';
+import { RouterProps } from '@admin/utils/router';
 
 export interface DashBoardProps extends BaseProps, RouterProps {
     dashBoardStore: DashBoardStore;

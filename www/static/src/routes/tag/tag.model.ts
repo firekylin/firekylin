@@ -1,4 +1,4 @@
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from '@admin/utils/router';
 
 export interface TagCreateParams {
     name: string;
