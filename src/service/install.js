@@ -286,6 +286,7 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
 
   async saveSiteInfo({title, site_url, username, password, email}) {
     await this.insertData(title, site_url);
+    await think.service('comment-schema').migrate();
     await this.createAccount(username, password, email);
     await this.addStartPost();
 

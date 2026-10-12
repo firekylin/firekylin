@@ -79,3 +79,12 @@ firekylin.require = name => {
     return false;
   }
 };
+
+const commentMigrationKey = Symbol.for('firekylin.commentSchemaMigration');
+if (!global[commentMigrationKey]) {
+  global[commentMigrationKey] = true;
+  think.beforeStartServer(async() => {
+    const migrated = await think.service('comment-schema').migrate({skipIfUninstalled: true});
+    if (migrated) think.logger.info('[comment] database schema migrated');
+  });
+}

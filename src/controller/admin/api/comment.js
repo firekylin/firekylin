@@ -11,7 +11,6 @@ function getTarget(url) {
 
 module.exports = class extends Base {
   async getAction() {
-    await this.service('comment-schema').ensure();
     const page = Math.max(Number(this.get('page')) || 1, 1);
     const pageSize = Math.min(Math.max(Number(this.get('pageSize')) || 20, 1), 100);
     const status = this.get('status');

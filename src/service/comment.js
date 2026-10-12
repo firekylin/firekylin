@@ -12,7 +12,6 @@ function signature(secret, value) {
 
 module.exports = class extends think.Service {
   async create(controller) {
-    await controller.service('comment-schema').ensure();
     const options = await controller.model('options').getOptions();
     const config = options.comment || {};
     const secret = options.comment_jwt_secret;

@@ -36,7 +36,6 @@ module.exports = class extends think.Controller {
     }
 
     this.options = options;
-    if (typeof this.service === 'function') await this.service('comment-schema').ensure();
     this.assign('VERSION', pack.version);
     this.assign('think', think);
     // set theme view root path

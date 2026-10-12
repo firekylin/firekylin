@@ -1,7 +1,7 @@
 'use strict';
 /* eslint-disable max-len */
 
-let ready;
+const CURRENT_VERSION = 1;
 
 function statements(type) {
   const auto = type === 'postgresql' ? 'SERIAL PRIMARY KEY' : type === 'sqlite' ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY';
@@ -16,17 +16,39 @@ function statements(type) {
 }
 
 module.exports = class extends think.Service {
-  ensure() {
-    if (ready) return ready;
-    ready = this.run().catch(error => { ready = null; throw error });
-    return ready;
+  async migrate({skipIfUninstalled = false} = {}) {
+    const options = this.model('options');
+    let current;
+    try {
+      current = await options.getOptions();
+    } catch (error) {
+      if (skipIfUninstalled && this.isMissingOptionsTable(error)) return false;
+      throw error;
+    }
+    if (skipIfUninstalled && !current.site_url) return false;
+
+    const version = Number(current.comment_schema_version) || 0;
+    if (version < 1) await this.migrateV1();
+    if (!current.comment_jwt_secret) {
+      const crypto = require('crypto');
+      await options.updateOptions('comment_jwt_secret', crypto.randomBytes(32).toString('hex'));
+    }
+    if (version < CURRENT_VERSION) {
+      await options.updateOptions('comment_schema_version', String(CURRENT_VERSION));
+    }
+    return version < CURRENT_VERSION;
   }
 
-  async run() {
+  isMissingOptionsTable(error) {
+    return /no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(String(error && error.message));
+  }
+
+  async migrateV1() {
     const model = this.model('comment');
     const cfg = think.config('model');
     const type = cfg.type;
-    const prefix = (cfg[type] && cfg[type].prefix) || 'fk_';
+    const configuredPrefix = cfg[type] && cfg[type].prefix;
+    const prefix = typeof configuredPrefix === 'string' ? configuredPrefix : 'fk_';
     const names = {
       '%COMMENT%': `${prefix}comment`,
       '%COUNTER%': `${prefix}counter`,
@@ -49,12 +71,5 @@ module.exports = class extends think.Service {
         if (!/duplicate column|already exists/i.test(error.message)) throw error;
       }
     }
-    const options = this.model('options');
-    const current = await options.getOptions();
-    if (!current.comment_jwt_secret) {
-      const crypto = require('crypto');
-      await options.updateOptions('comment_jwt_secret', crypto.randomBytes(32).toString('hex'));
-    }
-    await options.updateOptions('comment_schema_version', '1');
   }
 };
