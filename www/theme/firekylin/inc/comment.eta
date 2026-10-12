@@ -1,4 +1,0 @@
-<div id="comments">
-  <h1 class="title">Comments</h1>
-  <div id="comment-container" data-name="<%= JSON.stringify({serverURL: firekylin.siteOptions.siteUrl + '/api/comment', pageSize: firekylin.siteOptions.row.comment.pageSize || 10, lang: firekylin.siteOptions.row.comment.locale || 'zh-CN', login: firekylin.siteOptions.row.comment.forceLogin ? 'force' : 'enable'}) %>">评论加载中...</div>
-</div>

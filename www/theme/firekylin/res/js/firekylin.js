@@ -1,8 +1,4 @@
 (function(win, doc) {
-  var getById = function(el) {
-    return doc.getElementById(el);
-  };
-
   // from qwrap
   var getDocRect = function(doc) {
     doc = doc || document;
@@ -67,72 +63,6 @@
       'right': x + w
     };
   };
-
-  /**
-   * load comment
-   * @return {[type]} [description]
-   */
-  var loadComment = function() {
-    var comments = getById('comments');
-    if (!comments) {
-      return;
-    }
-    var load = loadCommentClient;
-
-    if (location.hash.indexOf('#comments') > -1) {
-      load();
-    } else {
-      var timer = setInterval(function() {
-        var docRect = getDocRect();
-        var currentTop = docRect.scrollY + docRect.height;
-        var elTop = getRect(comments).top;
-        if (Math.abs(elTop - currentTop) < 1000) {
-          load();
-          clearInterval(timer);
-        }
-      }, 300);
-    }
-  };
-  var loadCommentClient = function() {
-    var commentThread = getById('comment-container');
-    if (!commentThread || commentThread.getAttribute('data-loaded')) {
-      return;
-    }
-    commentThread.setAttribute('data-loaded', '1');
-    var commentConfig = commentThread.getAttribute('data-name');
-    if (commentConfig) {
-      commentConfig = JSON.parse(commentConfig);
-    }
-    commentConfig.el = '#comment-container';
-    commentConfig.path = location.pathname;
-
-    var link = doc.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.css';
-    (doc.head || doc.body).appendChild(link);
-    var session = fetch(commentConfig.serverURL + '/api/token', {credentials: 'same-origin'})
-      .then(function(response) { return response.json(); })
-      .then(function(result) { return result.errno === 0 ? result.data : null; })
-      .catch(function() { return null; });
-    Promise.all([import('https://cdn.jsdelivr.net/npm/@waline/client@3.16.0/dist/waline.js'), session]).then(function(result) {
-      var module = result[0];
-      var user = result[1];
-      if (user && user.objectId) {
-        user.remember = true;
-        localStorage.setItem('WALINE_USER', JSON.stringify(user));
-      } else {
-        localStorage.removeItem('WALINE_USER');
-      }
-      commentThread.textContent = '';
-      module.init(commentConfig);
-    }).catch(function() {
-      commentThread.textContent = '评论组件加载失败，请稍后重试。';
-    });
-  };
-
-  win.addEventListener('load', function() {
-    loadComment();
-  });
 
   var utils = {
     isMob: (function() {

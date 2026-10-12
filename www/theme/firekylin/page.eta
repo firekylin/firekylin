@@ -7,7 +7,7 @@
   <% if (archive.have()) { %>
   <h1 class="title"><%= archive.title() %></h1>
   <div class="entry-content"><%~ archive.content().replace(/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') %></div>
-  <% if (archive.allow('comment')) { %><%~ include('./inc/comment', {siteOptions: site}) %><% } %>
+  <%~ firekylin.comment() %>
   <% } else { %>
   <h1 class="title">提示</h1>
   <div class="entry-content">

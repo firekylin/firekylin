@@ -33,6 +33,6 @@
     <% if (post.next && post.next.title) { %><a href="/post/<%= post.next.pathname %>.html" class="next"><%= post.next.title %> &raquo;</a><% } %>
   </nav>
   <% } %>
-  <% if (archive.allow('comment')) { %><%~ include('./inc/comment', {siteOptions: site}) %><% } %>
+  <%~ firekylin.comment() %>
 </div>
 <% }) %>

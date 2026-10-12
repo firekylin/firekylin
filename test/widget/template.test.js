@@ -37,20 +37,15 @@ test('migrated theme templates compile with async blocks', () => {
   });
 });
 
-test('native comments use an absolute server URL and honor forced login', async() => {
-  const eta = new Eta({varName: 'firekylin'});
-  const comment = fs.readFileSync(path.join(__dirname, '../../www/theme/firekylin/inc/comment.eta'), 'utf8');
+test('native themes render comments through the template helper', () => {
+  const root = path.join(__dirname, '../../www/theme/firekylin');
+  const post = fs.readFileSync(path.join(root, 'post.eta'), 'utf8');
+  const page = fs.readFileSync(path.join(root, 'page.eta'), 'utf8');
   const client = fs.readFileSync(path.join(__dirname, '../../www/theme/firekylin/res/js/firekylin.js'), 'utf8');
-  const siteOptions = {
-    siteUrl: 'https://example.com',
-    row: {comment: {pageSize: 20, locale: 'zh-CN', forceLogin: true}}
-  };
-  const output = await eta.renderStringAsync(comment, {siteOptions});
 
-  assert.match(comment, /serverURL: firekylin\.siteOptions\.siteUrl \+ '\/api\/comment'/);
-  assert.match(client, /commentConfig\.path = location\.pathname/);
-  assert.match(output, /&quot;serverURL&quot;:&quot;https:\/\/example\.com\/api\/comment&quot;/);
-  assert.match(output, /&quot;login&quot;:&quot;force&quot;/);
+  assert.match(post, /firekylin\.comment\(\)/);
+  assert.match(page, /firekylin\.comment\(\)/);
+  assert.doesNotMatch(client, /@waline\/client|commentConfig|WALINE_USER/);
 });
 
 test('migrated application views compile as Eta templates', () => {
