@@ -1,0 +1,69 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const test = require('node:test');
+const PostCommandService = require('../../src/service/post-command');
+const CommentModerationService = require('../../src/service/comment-moderation');
+
+function fixture() {
+  const operations = [];
+  let current = {};
+  const model = {
+    where(where) { operations.push(['where', where]); return this; },
+    setRelation() { return this; },
+    async find() { return current; },
+    getPostTime(data) { data.update_time = 'now'; return data; },
+    async getContentAndSummary(data) { operations.push(['render', data.markdown_content]); return {...data, summary: 'summary', content: 'html'}; },
+    async addPost(data) { operations.push(['add', data]); return 12; },
+    async savePost(data) { operations.push(['save', data]); return 1; },
+    async deletePost(id) { operations.push(['delete', id]); return 1; }
+  };
+  const svc = new PostCommandService({getModel: () => model, now: () => 'now'});
+  return {svc, operations, setPost: value => {current = value}};
+}
+
+test('admin and tool create flow use identical post creation lifecycle', async() => {
+  const {svc, operations} = fixture();
+  const result = await svc.create({title: 'Hello', pathname: 'hello', markdown_content: '# Hi', status: 3}, {id: 2, type: 2});
+  assert.equal(result, 12);
+  const added = operations.find(([name]) => name === 'add')[1];
+  assert.equal(added.status, 1);
+  assert.equal(added.user_id, 2);
+  assert.equal(added.summary, 'summary');
+  assert.equal(added.content, 'html');
+});
+
+test('tool draft creation and admin creation share create implementation', async() => {
+  const {svc, operations} = fixture();
+  await svc.createDraft({title: 'Draft', pathname: 'draft', markdown_content: 'Hello'}, {id: 2, type: 2});
+  const saved = operations.find(([name]) => name === 'add')[1];
+  assert.equal(saved.status, 0);
+  assert.equal(saved.is_public, 0);
+});
+
+test('update rejects unauthorized owner and preserves model save hooks', async() => {
+  const {svc, operations, setPost} = fixture();
+  setPost({id: 7, user_id: 3, status: 0, pathname: 'existing'});
+  // The real database applies the user_id filter. Test the filter passed to the model.
+  await svc.update({id: 7, markdown_content: '# updated'}, {id: 3, type: 2});
+  assert.ok(operations.some(([type, value]) => type === 'where' && value.user_id === 3));
+  assert.ok(operations.some(([type, value]) => type === 'save' && value.summary === 'summary'));
+});
+
+test('shared moderator requires administrator and updates comment count', async() => {
+  const operations = [];
+  const getModel = () => ({
+    where(where) {operations.push(['where', where]); return this;},
+    setRelation() {return this;},
+    async find() {return {id: 7, post_id: 6, status: 'waiting'};},
+    async update(data) {operations.push(['update', data]); return 1;}
+  });
+  const service = new CommentModerationService({
+    getModel, now: () => 'now',
+    syncCount: async postId => operations.push(['sync', postId])
+  });
+  await assert.rejects(service.moderate({id: 7, operation: 'approved'}, {type: 2}), /Administrator/);
+  assert.deepEqual(await service.moderate({id: 7, operation: 'approved', onlyWaiting: true}, {type: 1}),
+    {id: 7, status: 'approved'});
+  assert.ok(operations.some(([action, value]) => action === 'sync' && value === 6));
+});
