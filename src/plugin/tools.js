@@ -8,7 +8,7 @@ class ToolRegistry {
   register(definition, owner) {
     if (!owner || typeof owner !== 'string') throw new TypeError('Tool owner required');
     if (!definition || typeof definition !== 'object') throw new TypeError('Tool definition required');
-    const {name, description, execute, requiredPermissions = []} = definition;
+    const {name, description, execute, requiredPermissions = [], requiresApproval = false} = definition;
     if (typeof name !== 'string' || !/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/.test(name)) {
       throw new TypeError('Invalid tool name');
     }
@@ -21,15 +21,15 @@ class ToolRegistry {
     const entry = Object.freeze({
       name, description, inputSchema: definition.inputSchema,
       requiredPermissions: Object.freeze([...new Set(requiredPermissions)]),
-      execute, owner
+      requiresApproval: Boolean(requiresApproval), execute, owner
     });
     this.tools.set(name, entry);
     return entry;
   }
 
   list() {
-    return [...this.tools.values()].map(({name, description, inputSchema, requiredPermissions}) => ({
-      name, description, inputSchema, requiredPermissions: [...requiredPermissions]
+    return [...this.tools.values()].map(({name, description, inputSchema, requiredPermissions, requiresApproval}) => ({
+      name, description, inputSchema, requiredPermissions: [...requiredPermissions], requiresApproval
     }));
   }
 
@@ -40,6 +40,12 @@ class ToolRegistry {
     for (const permission of tool.requiredPermissions) {
       if (await context.authorize(permission, {tool: name, owner: tool.owner}) !== true) {
         throw new Error('Permission denied: ' + permission);
+      }
+    }
+    if (tool.requiresApproval) {
+      if (typeof context.approve !== 'function' ||
+          await context.approve({name, input, principal: context.principal}) !== true) {
+        throw new Error('Explicit approval required: ' + name);
       }
     }
     return tool.execute(input, Object.freeze({principal: context.principal, requestId: context.requestId}));
