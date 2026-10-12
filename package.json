@@ -54,7 +54,7 @@
     "js-yaml": "^5.4.3",
     "jszip": "^3.10.2",
     "ldapts": "^9.2.0",
-    "marked": "^18.1.0",
+    "marked": "^18.1.1",
     "marked-alert": "^2.1.2",
     "marked-footnote": "^1.4.0",
     "marked-highlight": "^2.2.4",
