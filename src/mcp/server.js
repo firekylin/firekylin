@@ -85,7 +85,8 @@ async function createMcpEndpoint({tools, config = {}, logger = console, sdk: sdk
       ctx.body = 'Unauthorized';
       return;
     }
-    if (config.requireHttps !== false && !ctx.secure) {
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(ctx.hostname);
+    if (config.requireHttps !== false && !ctx.secure && !loopback) {
       ctx.status = 403;
       ctx.body = 'HTTPS required';
       return;
