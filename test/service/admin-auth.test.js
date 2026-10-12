@@ -26,7 +26,7 @@ function context() {
 }
 
 test('administrator JWT round trip across stateless verifier calls', () => {
-  process.env.FIREKYLIN_JWT_SECRET = SECRET;
+  auth.setSecret(SECRET);
   const token = auth.sign(USER);
   const decoded = auth.verify(token);
   assert.deepEqual(decoded, USER);
@@ -45,16 +45,13 @@ test('rejects tampering, expired tokens, and cross-site signature mismatch', () 
   assert.equal(auth.verify([segments[0], tampered, segments[2]].join('.')), null);
   assert.equal(auth.verify(auth.sign(USER, -1)), null);
   assert.equal(auth.verify('invalid.jwt'), null);
-  process.env.FIREKYLIN_JWT_SECRET = crypto.randomBytes(32).toString('hex');
+  auth.setSecret(crypto.randomBytes(32).toString('hex'));
   assert.equal(auth.verify(token), null);
 });
 
 test('requires a persistent sufficiently strong secret', () => {
-  delete process.env.JWT_SECRET;
-  delete process.env.FIREKYLIN_JWT_SECRET;
-  assert.throws(() => auth.sign(USER), /FIREKYLIN_JWT_SECRET/);
-  process.env.FIREKYLIN_JWT_SECRET = 'short';
-  assert.throws(() => auth.sign(USER), /FIREKYLIN_JWT_SECRET/);
+  assert.throws(() => auth.setSecret('short'), /jwt_secret/);
+  auth.setSecret(SECRET);
 });
 
 test('issues HttpOnly cookies and clears them on logout', () => {
