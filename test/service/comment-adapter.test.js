@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const {ModelAdapter, dbWhere} = require('../../src/service/comment-adapter');
+const {ModelAdapter, UserAdapter, dbWhere} = require('../../src/service/comment-adapter');
 
 test('comment adapter maps undefined query values to NULL database fields', () => {
   assert.deepEqual(dbWhere({rid: undefined, objectId: '1'}), {rid: null, id: '1'});
@@ -26,4 +26,34 @@ test('comment adapter supplies all required timestamps when inserting', async() 
   } finally {
     global.think = originalThink;
   }
+});
+
+test('user adapter preserves the active-user predicate and password projection', async() => {
+  let selectedWhere;
+  let selectedFields;
+  const query = {
+    field(value) { selectedFields = value; return this },
+    limit() { return this },
+    order() { return this },
+    async select() {
+      return [{
+        id: 7, email: 'user@example.com', name: 'user', display_name: 'User', type: 4, status: 1, password: 'hash'
+      }];
+    }
+  };
+  const adapter = new UserAdapter({
+    where(value) { selectedWhere = value; return query }
+  });
+
+  const sessionUsers = await adapter.select(
+    {objectId: '7', type: ['!=', 'banned']},
+    {field: ['id', 'email', 'display_name', 'type']}
+  );
+  assert.deepEqual(selectedWhere, {id: '7', status: 1});
+  assert.doesNotMatch(selectedFields, /password/);
+  assert.equal(sessionUsers[0].password, undefined);
+
+  const loginUsers = await adapter.select({email: 'user@example.com'}, {field: ['id', 'email', 'type', 'password']});
+  assert.match(selectedFields, /password/);
+  assert.equal(loginUsers[0].password, 'hash');
 });

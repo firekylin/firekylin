@@ -78,7 +78,7 @@ class ModelAdapter {
 }
 
 class UserAdapter extends ModelAdapter {
-  toApi(row) {
+  toApi(row, {includePassword = false} = {}) {
     if (!row) return row;
     return {
       objectId: String(row.id),
@@ -87,7 +87,7 @@ class UserAdapter extends ModelAdapter {
       display_name: row.display_name || row.name,
       url: row.url,
       avatar: row.avatar,
-      password: row.password,
+      ...(includePassword ? {password: row.password} : {}),
       label: row.comment_label,
       '2fa': row.comment_2fa,
       type: Number(row.status) !== 1 ? 'banned' : Number(row.type) === 1 ? 'administrator' : 'guest',
@@ -100,12 +100,32 @@ class UserAdapter extends ModelAdapter {
     if (mapped.objectId) { mapped.id = mapped.objectId; delete mapped.objectId }
     if (mapped.type) {
       if (mapped.type === 'banned') mapped.status = ['!=', 1];
+      else if (Array.isArray(mapped.type) && mapped.type[0] === '!=' && mapped.type[1] === 'banned') mapped.status = 1;
       delete mapped.type;
     }
     let query = this.model.where(dbWhere(mapped));
+    const includePassword = Boolean(options.field && options.field.includes('password'));
+    if (options.field) {
+      const fields = new Set(['id']);
+      const fieldMap = {
+        id: ['id'],
+        email: ['email'],
+        url: ['url'],
+        display_name: ['display_name', 'name'],
+        type: ['type', 'status'],
+        avatar: ['avatar'],
+        password: ['password'],
+        label: ['comment_label'],
+        '2fa': ['comment_2fa'],
+        createdAt: ['create_time'],
+        updatedAt: ['last_login_time']
+      };
+      options.field.forEach(field => (fieldMap[field] || []).forEach(column => fields.add(column)));
+      query = query.field([...fields].join(','));
+    }
     if (options.limit) query = query.limit(options.offset || 0, options.limit);
     if (options.desc) query = query.order(options.desc === 'createdAt' ? 'create_time DESC' : `${dbField(options.desc)} DESC`);
-    return (await query.select()).map(row => this.toApi(row));
+    return (await query.select()).map(row => this.toApi(row, {includePassword}));
   }
   count(where = {}) { return this.model.where(dbWhere(where)).count().then(Number) }
   async add(data) {

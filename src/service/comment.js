@@ -2,12 +2,56 @@
 /* eslint-disable max-len */
 
 const crypto = require('crypto');
-const {marked} = require('marked');
+const {marked, Renderer} = require('marked');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const {ModelAdapter, UserAdapter} = require('./comment-adapter');
 
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
+}
+
+function escapeAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function safeMarkdownUrl(value, image = false) {
+  let decoded = String(value || '').replace(/&colon;|&#0*58;|&#x0*3a;/ig, ':');
+  try { decoded = decodeURIComponent(decoded) } catch (e) {} // eslint-disable-line no-empty
+  const normalized = decoded.replace(/[\u0000-\u0020]+/g, '').toLowerCase(); // eslint-disable-line no-control-regex
+  const scheme = normalized.match(/^([a-z][a-z0-9+.-]*):/);
+  if (!scheme) return true;
+  if (image && scheme[1] === 'data') return /^data:image\/(?:gif|png|jpe?g|webp);base64,/i.test(normalized);
+  return image ? ['http', 'https'].includes(scheme[1]) : ['http', 'https', 'mailto'].includes(scheme[1]);
+}
+
+function renderMarkdown(value) {
+  const renderer = new Renderer();
+  renderer.link = function({href, title, tokens}) {
+    const text = this.parser.parseInline(tokens);
+    if (!safeMarkdownUrl(href)) return text;
+    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
+    return `<a href="${escapeAttribute(href)}"${titleAttribute}>${text}</a>`;
+  };
+  renderer.image = ({href, title, text}) => {
+    if (!safeMarkdownUrl(href, true)) return escapeAttribute(text || '');
+    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
+    return `<img src="${escapeAttribute(href)}" alt="${escapeAttribute(text || '')}"${titleAttribute}>`;
+  };
+  return marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'), {renderer});
+}
+
+function pathnameFromUrl(url) {
+  const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+  if (!match) return null;
+  try {
+    return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
+  } catch (e) {
+    return null;
+  }
 }
 
 module.exports = class extends think.Service {
@@ -49,7 +93,7 @@ module.exports = class extends think.Service {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
           verify: async(value, hash) => controller.model('user').checkPassword({password: hash}, think.md5(options.password_salt + value))
         },
-        markdown: {render: value => marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'))},
+        markdown: {render: renderMarkdown},
         avatar: avatarService
       }
     });
@@ -87,22 +131,22 @@ module.exports = class extends think.Service {
   }
 
   async validateCommentTarget(controller, url) {
-    const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
-    if (!match) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
-    const type = match[1] === 'page' ? 1 : 0;
-    const pathname = match[2].replace(/\.html$/, '');
-    const post = await controller.model('post').where({pathname, type, status: 3, is_public: 1, allow_comment: 1}).find();
+    const target = pathnameFromUrl(url);
+    if (!target) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
+    const post = await controller.model('post').where({...target, status: 3, is_public: 1, allow_comment: 1}).find();
     if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
 
   async syncCount(controller, url) {
     if (!url) return;
-    const match = String(url).match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
-    if (!match) return;
+    const target = pathnameFromUrl(url);
+    if (!target) return;
     const count = await controller.model('comment').where({url, status: ['NOT IN', ['waiting', 'spam']]}).count();
-    const pathname = match[2].replace(/\.html$/, '');
-    await controller.model('post').where({pathname, type: match[1] === 'page' ? 1 : 0}).update({comment_num: Number(count)});
+    await controller.model('post').where(target).update({comment_num: Number(count)});
     await think.cache('post_1', null);
   }
 };
+
+module.exports.renderMarkdown = renderMarkdown;
+module.exports.pathnameFromUrl = pathnameFromUrl;

@@ -80,3 +80,25 @@ test('vendored comment core rejects anonymous comments when login is required', 
     error => error.code === 'UNAUTHORIZED' && error.status === 401
   );
 });
+
+test('vendored comment core explicitly requests the password only during login', async() => {
+  let selectedFields;
+  const Users = {
+    async select(_where, options = {}) {
+      selectedFields = options.field;
+      return [{objectId: '1', email: 'user@example.com', password: 'hash', type: 'guest'}];
+    }
+  };
+  const core = createCommentCore({
+    models: {Comment: new MemoryModel(), Counter: new MemoryModel(), Users},
+    services: {
+      password: {verify: async() => true},
+      token: {sign: async() => 'token'}
+    }
+  });
+
+  const result = await core.auth.login({email: 'user@example.com', password: 'password'}, {state: {}});
+  assert.ok(selectedFields.includes('password'));
+  assert.equal(result.password, undefined);
+  assert.equal(result.token, 'token');
+});

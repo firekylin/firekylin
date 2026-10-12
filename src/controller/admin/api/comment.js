@@ -6,7 +6,11 @@ const Base = require('./base');
 function getTarget(url) {
   const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
   if (!match) return null;
-  return {type: match[1] === 'page' ? 1 : 0, pathname: match[2].replace(/\.html$/, '')};
+  try {
+    return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
+  } catch (e) {
+    return null;
+  }
 }
 
 module.exports = class extends Base {

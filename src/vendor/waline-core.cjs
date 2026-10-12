@@ -132,7 +132,7 @@ var createAuthHandler = (runtime) => {
       requiredString(input.password, "password");
       const passwordService = requiredCapability(services.password, "password");
       const tokenService = requiredCapability(services.token, "token");
-      const [account] = await models.Users.select({ email });
+      const [account] = await models.Users.select({ email }, { field: ["id", "email", "url", "display_name", "type", "avatar", "password", "2fa", "label"] });
       if (!account || account.type.startsWith("verify:") || account.type === "banned" || !account.password || !await passwordService.verify(input.password, account.password)) {
         throw new WalineError("LOGIN_FAILED", 400);
       }
@@ -866,4 +866,3 @@ var createWalineCore = (options) => {
   WalineError,
   createWalineCore
 });
-
