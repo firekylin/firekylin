@@ -66,6 +66,8 @@ class PostCommandService {
       throw new Error('Only drafts can be edited with posts.updateDraft');
     }
     const data = {...input};
+    // Editing a published article as an editor must re-enter the review queue.
+    if (this.actor(principal).type !== 1 && Number(post.status) === 3) data.status = 1;
     if (data.pathname && data.pathname !== post.pathname) {
       const existing = await this.getModel().where({pathname: data.pathname, type: 0})
         .setRelation(false).find();
