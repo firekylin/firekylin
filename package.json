@@ -32,7 +32,8 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1149.0",
-    "@aws-sdk/lib-storage": "^3.1149.0",
+    "@aws-sdk/s3-presigned-post": "^3.1150.0",
+    "@aws-sdk/s3-request-presigner": "^3.1150.0",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-css": "^6.3.1",
@@ -44,12 +45,11 @@
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.14",
     "@uiw/codemirror-theme-monokai": "^4.25.12",
-    "ali-oss": "^6.23.0",
+    "@vercel/blob": "^2.8.1",
     "codemirror-lang-eta": "^1.0.2",
-    "cos-nodejs-sdk-v5": "^3.0.0",
     "dayjs": "^1.11.23",
     "feedparser": "^2.6.0",
-    "form-data": "^4.0.6",
+    "files-sdk": "^3.1.0",
     "fs-extra": "^11.4.1",
     "highlight.js": "^11.12.0",
     "js-yaml": "^5.4.3",
@@ -123,6 +123,11 @@
     "node": "^22.13.0 || >=24"
   },
   "packageManager": "pnpm@10.29.3",
+  "pnpm": {
+    "overrides": {
+      "better-sqlite3": "12.4.1"
+    }
+  },
   "readmeFilename": "README.md",
   "thinkjs": {
     "metadata": {
