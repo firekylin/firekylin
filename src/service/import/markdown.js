@@ -39,11 +39,9 @@ module.exports = class extends Base {
       return 0;
     }
 
+    const user = adminAuth.currentUser(this._think.ctx);
     const postsPromise = posts.map(async item => {
       try {
-        // 获取用户
-        const user = adminAuth.currentUser(this._think.ctx);
-
         let post = {
           title: item.title,
           pathname: item.pathname,

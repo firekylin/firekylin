@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './list.less';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import PostListTable from './table/list-table';
 import { Form } from 'antd';
 import { Tabs, Input, Select } from 'antd';

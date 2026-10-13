@@ -67,3 +67,20 @@ test('shared moderator requires administrator and updates comment count', async(
     {id: 7, status: 'approved'});
   assert.ok(operations.some(([action, value]) => action === 'sync' && value === 6));
 });
+
+
+test('shared moderation preserves commenter own edit/delete without granting approval', async() => {
+  let existing = {id: 7, user_id: '4', post_id: 9};
+  const changes = [];
+  const service = new CommentModerationService({
+    getModel: () => ({where() {return this}, setRelation() {return this},
+      async find() {return existing}, async update(value) {changes.push(value)}, async delete() {changes.push('delete')}}),
+    now: () => 'now', syncCount: async() => {}
+  });
+  await service.moderate({id: 7, operation: 'edit', comment: 'Edited', allowCommenter: true}, {id: 4, type: 4});
+  assert.equal(changes[0].comment, 'Edited');
+  await assert.rejects(service.moderate({id: 7, operation: 'approved', allowCommenter: true}, {id: 4, type: 4}), /USER_NO_PERMISSION/);
+  existing = {...existing, user_id: '5'};
+  await assert.rejects(service.moderate({id: 7, operation: 'delete', allowCommenter: true}, {id: 4, type: 4}), /USER_NO_PERMISSION/);
+  await assert.rejects(service.moderate({id: 7, operation: 'edit'}, {id: 4, type: 4}), /Administrator/);
+});

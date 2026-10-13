@@ -1,20 +1,52 @@
-name: Docker Build and Push
+name: Docker Release
 
 on:
   push:
     branches:
       - master
+    paths:
+      - package.json
+
+permissions:
+  contents: read
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.version.outputs.changed }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check package version
+        id: version
+        shell: bash
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          previous_version=$(git show "$BEFORE_SHA:package.json" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version")
+          current_version=$(node -p "require('./package.json').version")
+          echo "version=$current_version" >> "$GITHUB_OUTPUT"
+
+          if [ "$previous_version" = "$current_version" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "package.json version is unchanged ($current_version); skipping Docker release."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "package.json version changed: $previous_version -> $current_version"
+          fi
+
   build-and-push:
+    needs: check-version
+    if: needs.check-version.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Get version from package.json
-        id: version
-        run: echo "VERSION=$(node -e "console.log(require('./package.json').version)")" >> $GITHUB_OUTPUT
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -35,5 +67,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            firekylin/firekylin:${{ steps.version.outputs.VERSION }}
+            firekylin/firekylin:${{ needs.check-version.outputs.version }}
             firekylin/firekylin:latest

@@ -84,6 +84,7 @@ test('options widget parses theme data and exposes native comment settings', asy
       return {
         comment: {pageSize: 20},
         navigation: '[{"label":"Home","url":"/"}]',
+        jwt_secret: 'widget-test-secret-with-at-least-32-bytes',
         theme: 'firekylin',
         themeConfig: '{"customCSS":"body{}"}',
         title: 'Blog'
@@ -102,5 +103,7 @@ test('options widget parses theme data and exposes native comment settings', asy
   assert.deepEqual(widget.navigation, [{label: 'Home', url: '/'}]);
   assert.equal(widget.themeConfig.customCSS, 'body{}');
   assert.deepEqual(widget.row.comment, {pageSize: 20});
+  assert.equal(widget.ctx.state.jwtSecret, 'widget-test-secret-with-at-least-32-bytes');
+  assert.equal(widget.row.jwt_secret, undefined);
   assert.equal(widget.themeUrl('/res/app.css'), '/theme/firekylin/res/app.css');
 });

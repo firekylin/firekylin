@@ -184,11 +184,11 @@ const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10
 
 | Tool | 权限 | 附加限制 |
 | --- | --- | --- |
-| `posts.listManaged` | `posts:manage:read` | 与后台共用列表查询，按用户限制可见文章 |
-| `posts.getManaged` | `posts:manage:read` | 与后台共用详情查询，包含草稿正文 |
+| `posts.list_managed` | `posts:manage:read` | 与后台共用列表查询，按用户限制可见文章 |
+| `posts.get_managed` | `posts:manage:read` | 与后台共用详情查询，包含草稿正文 |
 | `posts.update` | `posts:write` | 更新已存在文章，需审批；编辑改动已发布文章进入审核 |
-| `posts.createDraft` | `posts:write` | 当前用户创建私密草稿 |
-| `posts.updateDraft` | `posts:write` | 仅本人草稿 / 管理员 |
+| `posts.create_draft` | `posts:write` | 当前用户创建私密草稿 |
+| `posts.update_draft` | `posts:write` | 仅本人草稿 / 管理员 |
 | `posts.publish` | `posts:publish` | 仅管理员 + 显式审批 |
 | `posts.delete` | `posts:delete` | 本人或管理员 + 显式审批；永久删除 |
 | `categories.list` | `taxonomy:read` | 查询分类 |
