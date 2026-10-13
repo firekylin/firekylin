@@ -33,47 +33,85 @@ class PostCommandService {
     return post;
   }
 
-  async createDraft(input, principal) {
-    const actor = this.actor(principal);
-    const {title, pathname, markdown_content} = input;
-    const existing = await this.getModel().where({pathname, type: 0}).setRelation(false)
-.find();
-    if (existing && existing.id) throw new Error('PATHNAME_EXIST');
+  async resolveTags(tags, getTagModel) {
+    if (!tags) return [];
+    if (typeof getTagModel !== 'function') throw new TypeError('Tag model factory required');
+    const names = Array.isArray(tags) ? tags : [tags];
+    return Promise.all(names.map(async name => {
+      const result = await getTagModel().setRelation(false).where({name})
+        .thenAdd({name, pathname: name});
+      return {tag_id: result.id, name};
+    }));
+  }
 
+  async create(input, principal, options = {}) {
+    const actor = this.actor(principal);
     const model = this.getModel();
-    let data = {
-      title, pathname, markdown_content,
-      type: 0, status: 0, is_public: 0,
-      user_id: actor.id,
-      options: '{}'
-    };
+    const existing = await this.getModel().where({pathname: input.pathname, type: 0})
+      .setRelation(false)
+      .find();
+    if (existing && existing.id) throw new Error('PATHNAME_EXIST');
+    let data = {...input, type: 0, user_id: actor.id};
+    if (Number(data.status) === 3 && actor.type !== 1) data.status = 1;
+    if (options.forceDraft) {
+      data.status = 0;
+      data.is_public = 0;
+    }
+    if (options.getTagModel) data.tag = await this.resolveTags(data.tag, options.getTagModel);
     data = await model.getContentAndSummary(data);
     data = model.getPostTime(data);
     return model.addPost(data);
   }
 
-  async updateDraft(input, principal) {
+  async update(input, principal, options = {}) {
     const post = await this.editable(input.id, principal);
-    if (Number(post.status) !== 0) throw new Error('Only drafts can be edited with posts.update_draft');
+    if (options.draftOnly && Number(post.status) !== 0) {
+      throw new Error('Only drafts can be edited with posts.update_draft');
+    }
+    let data = {...input};
+    // Editing a published article as an editor must re-enter the review queue.
+    if (this.actor(principal).type !== 1 && Number(post.status) === 3) data.status = 1;
+    if (data.pathname && data.pathname !== post.pathname) {
+      const existing = await this.getModel().where({pathname: data.pathname, type: 0})
+        .setRelation(false)
+      .find();
+      if (existing && existing.id && Number(existing.id) !== Number(input.id)) {
+        throw new Error('PATHNAME_EXIST');
+      }
+    }
     const model = this.getModel();
-    if (input.pathname && input.pathname !== post.pathname) {
-      const existing = await this.getModel().where({pathname: input.pathname, type: 0}).setRelation(false)
-.find();
-      if (existing && existing.id && Number(existing.id) !== Number(input.id)) throw new Error('PATHNAME_EXIST');
+    if (Object.prototype.hasOwnProperty.call(data, 'markdown_content') && data.markdown_content) {
+      if (Number(data.status) === 3 && this.actor(principal).type !== 1) data.status = 1;
+      // Preserve the original publication date on updates.
+      data.update_time = this.now();
+      const prepared = await model.getContentAndSummary({...post, ...data});
+      data.content = prepared.content;
+      data.summary = prepared.summary;
+      if (options.getTagModel && data.tag) data.tag = await this.resolveTags(data.tag, options.getTagModel);
+    } else if (data.create_time && options.normalizePublishTime) {
+      data = options.normalizePublishTime(data, post);
     }
-    const updates = {id: input.id};
+    const affectedRows = await model.savePost(data);
+    return {id: data.id, affectedRows};
+  }
+
+  async remove(id, principal) {
+    await this.editable(id, principal);
+    return this.getModel().deletePost(id);
+  }
+
+  async createDraft(input, principal) {
+    return this.create({
+      ...input, status: 0, is_public: 0, options: '{}'
+    }, principal, {forceDraft: true});
+  }
+
+  async updateDraft(input, principal) {
+    const data = {id: input.id};
     for (const name of ['title', 'pathname', 'markdown_content']) {
-      if (Object.prototype.hasOwnProperty.call(input, name)) updates[name] = input[name];
+      if (Object.prototype.hasOwnProperty.call(input, name)) data[name] = input[name];
     }
-    if (Object.prototype.hasOwnProperty.call(updates, 'markdown_content')) {
-      const prepared = await model.getContentAndSummary({
-        type: 0, markdown_content: updates.markdown_content
-      });
-      updates.content = prepared.content;
-      updates.summary = prepared.summary;
-    }
-    const affectedRows = await model.savePost(updates);
-    return {id: input.id, affectedRows};
+    return this.update(data, principal, {draftOnly: true});
   }
 
   async publish(id, principal) {
@@ -87,8 +125,7 @@ class PostCommandService {
   }
 
   async delete(id, principal) {
-    await this.editable(id, principal);
-    const result = await this.getModel().deletePost(id);
+    const result = await this.remove(id, principal);
     return {id, result};
   }
 }

@@ -27,16 +27,16 @@ class PostQueryService {
     return this.getModel().where(this.publicWhere())
       .field('id,title,pathname,summary,create_time,update_time')
       .setRelation(false)
-.order('create_time DESC')
-.page(page, limit)
-.select();
+      .order('create_time DESC')
+      .page(page, limit)
+      .select();
   }
 
   async getPublic(id) {
     return this.getModel().where(this.publicWhere({id}))
       .field('id,title,pathname,summary,markdown_content,create_time,update_time')
       .setRelation(false)
-.find();
+      .find();
   }
 
   async searchPublic({query, limit = 10}) {
@@ -44,9 +44,9 @@ class PostQueryService {
       'title|content': ['LIKE', '%' + query + '%']
     })).field('id,title,pathname,summary,create_time,update_time')
       .setRelation(false)
-.order('create_time DESC')
-.limit(limit)
-.select();
+      .order('create_time DESC')
+      .limit(limit)
+      .select();
   }
 
   async getAdmin(id, userInfo) {
@@ -59,7 +59,7 @@ class PostQueryService {
     const model = this.getModel();
     const where = {type: 0};
     if (userInfo.type !== 1) where.user_id = userInfo.id;
-    if (status) where.status = status;
+    if (status !== undefined && status !== null && status !== '') where.status = status;
     else where.status = ['!=', 4];
 
     if (keyword) {
@@ -86,8 +86,8 @@ class PostQueryService {
     ];
     return model.where(where).field(fields)
       .order('create_time DESC')
-.page(page, pageSize)
-.countSelect();
+      .page(page, pageSize)
+      .countSelect();
   }
 }
 

@@ -2,6 +2,7 @@ const PushToFirekylin = require('../../../service/push-to-firekylin');
 const dayjs = require('dayjs');
 const Base = require('./base');
 const PostQueryService = require('../../../service/post-query');
+const PostCommandService = require('../../../service/post-command');
 
 module.exports = class extends Base {
   constructor(...args) {
@@ -43,6 +44,26 @@ module.exports = class extends Base {
     return this.success(data);
   }
 
+  async runCommand(operation) {
+    try { return await operation() } catch (error) {
+      const failures = {
+        PATHNAME_EXIST: 'PATHNAME_EXIST',
+        'Post not found or permission denied': 'USER_NO_PERMISSION',
+        'Authenticated author required': 'USER_NO_PERMISSION',
+        'Invalid post ID': 'PARAMS_ERROR'
+      };
+      if (Object.hasOwn(failures, error.message)) return this.fail(failures[error.message]);
+      throw error;
+    }
+  }
+
+  commandService() {
+    return new PostCommandService({
+      getModel: () => this.model('post'),
+      now: () => think.datetime()
+    });
+  }
+
   getBaseAction(self) {
     return super.getAction(self);
   }
@@ -51,103 +72,49 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async postAction() {
-    let data = this.post();
-    // check pathname
-    const post = await this.modelInstance.where({pathname: data.pathname}).find();
-    if (!think.isEmpty(post)) {
-      return this.fail('PATHNAME_EXIST');
-    }
-
-    /** 如果是编辑发布文章的话默认状态改为审核中 **/
-    if (data.status === 3 && this.userInfo.type !== 1) {
-      data.status = 1;
-    }
-
-    /** 推送文章 **/
-    this.pushPost(data);
-
-    data.tag = await this.getTagIds(data.tag);
-    data = await this.modelInstance.getContentAndSummary(data);
-    data.user_id = this.userInfo.id;
-    data = this.modelInstance.getPostTime(data);
-
-    const insert = await this.modelInstance.addPost(data);
-    return this.success(insert);
+    return this.runCommand(async() => {
+      const data = this.post();
+      const result = await this.commandService().create(data, this.userInfo, {
+        getTagModel: () => this.model('tag')
+      });
+      // Preserve existing push integration, but do not block persistence on a remote service.
+      if (data.options && data.markdown_content) void this.pushPost(data).catch(error => think.logger.error(error));
+      return this.success(result);
+    });
   }
   /**
    * update user info
    * @return {[type]} [description]
    */
   async putAction() {
-    if (!this.id) {
-      return this.fail('PARAMS_ERROR');
-    }
-
-    let data = this.post();
-    data.id = this.id;
-
-    /** 判断接收的参数中是否有 markdown_content 来区别审核通过的状态修改和普通的文章更新 */
-    if (data.markdown_content) {
-      if (this.userInfo.type !== 1) {
-        const post = await this.modelInstance.where({id: this.id}).find();
-        if (post.user_id !== this.userInfo.id) {
-          return this.fail('USER_NO_PERMISSION');
+    return this.runCommand(async() => {
+      if (!this.id) return this.fail('PARAMS_ERROR');
+      const data = {...this.post(), id: Number(this.id)};
+      const result = await this.commandService().update(data, this.userInfo, {
+        getTagModel: () => this.model('tag'),
+        normalizePublishTime: (next, post) => {
+          let options = JSON.parse(post.options || '{}');
+          if (typeof options === 'string') options = JSON.parse(options) || {};
+          if (dayjs(next.create_time).isBefore(dayjs()) && !options.origin_create_time) {
+            next.options = JSON.stringify({...options, origin_create_time: next.create_time});
+            next.create_time = think.datetime();
+          } else {
+            delete next.create_time;
+          }
+          return next;
         }
-      }
-
-      /** 如果是编辑发布文章的话默认状态改为审核中 **/
-      if (data.status === 3 && this.userInfo.type !== 1) {
-        data.status = 1;
-      }
-
-      /** 推送文章 */
-      this.pushPost(data);
-
-      data = this.modelInstance.getPostTime(data);
-      data = await this.modelInstance.getContentAndSummary(data);
-      if (data.tag) {
-        data.tag = await this.getTagIds(data.tag);
-      }
-    } else if (data.create_time) {
-      /** 审核通过的状态修改，有 create_time 即需要更新时间，时间由服务器生成 */
-
-      const post = await this.modelInstance.where({id: data.id}).find();
-      let options = JSON.parse(post.options || '{}');
-      if (typeof options === 'string') {
-        options = JSON.parse(options) || {};
-      }
-
-      if (dayjs(data.create_time).isBefore(dayjs()) && !options.origin_create_time) {
-        data.options = JSON.stringify({
-          ...options,
-          origin_create_time: data.create_time
-        });
-        data.create_time = think.datetime(); // 此处可能出现 create_time 和 update_time 不一致的情况
-      } else {
-        // 此处需删除 create_time，或者对 create_time 的格式进行处理
-        delete data.create_time;
-      }
-    }
-
-    const rows = await this.modelInstance.savePost(data);
-    return this.success({affectedRows: rows});
+      });
+      if (data.markdown_content && data.options) void this.pushPost(data).catch(error => think.logger.error(error));
+      return this.success({affectedRows: result.affectedRows});
+    });
   }
 
   async deleteAction() {
-    if (!this.id) {
-      return this.fail('PARAMS_ERROR');
-    }
-
-    /** 如果不是管理员且不是本文作者则无权限删除文章 **/
-    if (this.userInfo.type !== 1) {
-      const post = await this.modelInstance.where({id: this.id}).find();
-      if (post.user_id !== this.userInfo.id) {
-        return this.fail('USER_NO_PERMISSION');
-      }
-    }
-
-    await this.modelInstance.deletePost(this.id);
-    return this.success();
+    return this.runCommand(async() => {
+      if (!this.id) return this.fail('PARAMS_ERROR');
+      await this.commandService().remove(Number(this.id), this.userInfo);
+      return this.success();
+    });
   }
 
   async pushPost(postData) {
