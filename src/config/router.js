@@ -9,6 +9,7 @@ module.exports = [
   [/^categories(?:\.html|\.json)$/i, 'post/cate'],
   [/^search(?:\.html|\.json)$/i, 'post/search'],
   [/^page\/([^/]+)(?:\.html|\.json)$/i, 'post/page?pathname=:1'],
+  [/^attachment\/([^/]+)(?:\.html|\.json)$/i, 'post/attachment?pathname=:1'],
   [/^post\/([^/]+)(?:\.html|\.json)$/i, 'post/detail?pathname=:1'],
 
   [/^about\/?$/i, 'post/page?pathname=about'],
@@ -23,6 +24,7 @@ module.exports = [
   [/^sitemap(?:\.xml)?\/?$/i, 'index/sitemap'],
   [/^search\/?$/i, 'post/search'],
   [/^page\/([^/]+)\/?$/i, 'post/page?pathname=:1'],
+  [/^attachment\/([^/]+)\/?$/i, 'post/attachment?pathname=:1'],
   [/^post\/sitemap\/?$/i, 'post/sitemap'],
   [/^post\/([^/]+)\/?$/i, 'post/detail?pathname=:1'],
   ['opensearch.xml', 'index/opensearch']

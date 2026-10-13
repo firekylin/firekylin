@@ -84,6 +84,33 @@ test('archive detail formats relations, content and permissions', async() => {
   assert.equal(archive.allow('comment'), true);
 });
 
+test('attachment is an independent content type with its own permalink', async() => {
+  const query = {
+    setRelation(value) {
+      assert.equal(value, 'user');
+      return this;
+    },
+    where(value) {
+      assert.deepEqual(value, {pathname: 'manual', is_public: 1, type: 2, status: 3});
+      return this;
+    },
+    async find() {
+      return {
+        title: 'manual.pdf',
+        pathname: 'manual',
+        type: 2,
+        options: JSON.stringify({attachment: {url: '/uploads/manual.pdf', mime: 'application/pdf'}})
+      };
+    }
+  };
+  const archive = new Archive(createController({params: {pathname: 'manual'}, models: {post: query}}), {type: 'attachment'});
+  await archive.execute();
+  archive.next();
+
+  assert.equal(archive.permalink, '/attachment/manual.html');
+  assert.equal(archive.options.attachment.url, '/uploads/manual.pdf');
+});
+
 test('archive and search modes retain grouped and paginated views', async() => {
   const post = {
     async getPostArchive() {

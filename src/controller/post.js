@@ -83,6 +83,28 @@ module.exports = class extends Base {
 
     return this.displayView(template);
   }
+
+  async attachmentAction() {
+    const archive = await this.getWidget('Widget_Archive', {type: 'attachment'});
+    this.archive = archive;
+    if (!archive.have()) return this.ctx.throw(404);
+
+    const attachment = archive.stack[0].options.attachment || {};
+    this.assign('attachment', attachment);
+    if (/\.json(?:\?|$)/.test(this.ctx.url)) return this.displayView('attachment');
+    const hasTemplate = await stats(path.join(this.THEME_VIEW_PATH, 'attachment.eta'))
+      .then(() => true)
+      .catch(() => false);
+    if (hasTemplate) return this.displayView('attachment');
+
+    const escape = value => String(value || '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '\x22': '&quot;', '\'': '&#39;'
+    })[character]);
+    const title = escape(archive.stack[0].title);
+    const url = escape(attachment.url);
+    this.ctx.type = 'text/html';
+    this.ctx.body = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title></head><body><main><h1>${title}</h1><p><a href="${url}">${escape(attachment.name || archive.stack[0].title)}</a></p></main></body></html>`;
+  }
   /**
    * post archive
    * @return {[type]} [description]

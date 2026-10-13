@@ -17,6 +17,8 @@ module.exports = class extends ContentsWidget {
         return this.executePost();
       case 'page':
         return this.executePage();
+      case 'attachment':
+        return this.executeAttachment();
       case 'archive':
         return this.executeArchive();
       case 'search':
@@ -85,6 +87,19 @@ module.exports = class extends ContentsWidget {
       })
       .find();
     if (!think.isEmpty(detail)) this.push(Object.assign({type: 1}, detail));
+  }
+
+  async executeAttachment() {
+    const detail = await this.model('post')
+      .setRelation('user')
+      .where({
+        pathname: this.controller.get('pathname'),
+        is_public: 1,
+        type: 2,
+        status: 3
+      })
+      .find();
+    if (!think.isEmpty(detail)) this.push(Object.assign({type: 2}, detail));
   }
 
   async getPreview() {

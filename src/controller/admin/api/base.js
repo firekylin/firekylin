@@ -6,7 +6,11 @@ const {isLocalReferrer} = require('./referrer');
 module.exports = class extends BaseRest {
   constructor(...args) {
     super(...args);
-    this.allowList = ['api/post/put', 'api/post/post', 'api/post/delete', 'api/file/post', 'api/file/get'];
+    this.allowList = [
+      'api/post/put', 'api/post/post', 'api/post/delete',
+      'api/file/post', 'api/file/get',
+      'api/attachment/delete'
+    ];
   }
 
   async __before() {

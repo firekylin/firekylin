@@ -44,7 +44,9 @@ module.exports = class ContentsWidget extends Widget {
   }
 
   get permalink() {
-    const type = this.row.type === 1 || this.row.type === 'page' ? 'page' : 'post';
+    const type = this.row.type === 2 || this.row.type === 'attachment'
+      ? 'attachment'
+      : this.row.type === 1 || this.row.type === 'page' ? 'page' : 'post';
     return `/${type}/${this.row.pathname}.html`;
   }
 

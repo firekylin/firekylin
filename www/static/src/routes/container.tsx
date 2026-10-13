@@ -17,6 +17,7 @@ const Push = lazy(() => import('./push/push'));
 const Appearance = lazy(() => import('./appearance/appearance'));
 const Options = lazy(() => import('./options/options'));
 const Comment = lazy(() => import('./comment/comment'));
+const Media = lazy(() => import('./media/media'));
 
 class Container extends React.Component<any, {}> {
     constructor(props: any) {
@@ -56,6 +57,7 @@ class Container extends React.Component<any, {}> {
                                 <Route path="/appearance" component={Appearance} />
                                 <Route path="/options" component={Options} />
                                 <Route path="/comment" component={Comment} />
+                                <Route path="/media" component={Media} />
                                 <Redirect to="/dashboard" />
                             </Switch>
                         </Suspense>
