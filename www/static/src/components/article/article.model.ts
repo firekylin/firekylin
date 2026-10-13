@@ -41,6 +41,7 @@ export interface ArticleInfo {
         template: string;
         featuredImage: string;
         push_sites: any[];
+        fields: Record<string, any>;
     };
     user_id: string;
     status: number;
@@ -51,4 +52,5 @@ export interface ArticleInfoOptions {
     template: string;
     featuredImage: string;
     push_sites: any[];
+    fields: Record<string, any>;
 }

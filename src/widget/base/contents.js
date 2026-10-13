@@ -35,6 +35,9 @@ module.exports = class ContentsWidget extends Widget {
       }
     }
     row.options = row.options || {};
+    row.fields = row.options.fields && typeof row.options.fields === 'object'
+      ? row.options.fields
+      : {};
     row.featuredImage = row.options.featuredImage || '';
     return super.push(row);
   }
