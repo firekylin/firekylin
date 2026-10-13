@@ -14,6 +14,7 @@
 <script>
 window.SysConfig = {
   csrfToken: <%~ JSON.stringify(firekylin.csrfToken || '') %>,
+  pluginAdmin: <%~ JSON.stringify(firekylin.pluginAdmin || []) %>,
   userInfo: <%~ JSON.stringify(firekylin.userInfo) %>,
   options: <%~ JSON.stringify({
     title: firekylin.options.title,

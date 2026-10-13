@@ -1,4 +1,73 @@
 declare namespace Firekylin {
+  type AdminFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password';
+
+  interface AdminPanelDefinition {
+    id: string;
+    title: string;
+    icon?: string;
+    order?: number;
+  }
+
+  interface AdminPageContext {
+    ctx: any;
+    user: {id: number; name: string; type: number};
+    pluginId: string;
+  }
+
+  interface AdminPageContent {
+    notices?: Array<{type?: 'success' | 'info' | 'warning' | 'error'; message: string}>;
+    sections?: Array<
+      {type: 'text'; title?: string; content: string} |
+      {type: 'description'; title?: string; items: Array<{label: string; value: unknown}>} |
+      {type: 'table'; title?: string; rowKey?: string; columns: Array<{key: string; title: string}>; rows: any[]}
+    >;
+  }
+
+  interface AdminPageDefinition {
+    id: string;
+    panel: string;
+    title: string;
+    description?: string;
+    order?: number;
+    load?(context: AdminPageContext): AdminPageContent | Promise<AdminPageContent>;
+  }
+
+  interface AdminFormField {
+    name: string;
+    type?: AdminFieldType;
+    label: string;
+    description?: string;
+    placeholder?: string;
+    required?: boolean;
+    options?: Array<{label: string; value: unknown}>;
+  }
+
+  interface AdminFormDefinition {
+    id: string;
+    page: string;
+    title: string;
+    submitLabel?: string;
+    fields: AdminFormField[];
+    load?(context: AdminPageContext): Record<string, unknown> | Promise<Record<string, unknown>>;
+    submit(values: Record<string, unknown>, context: AdminPageContext): unknown | Promise<unknown>;
+  }
+
+  interface AdminActionDefinition {
+    id: string;
+    page: string;
+    label: string;
+    type?: 'default' | 'primary' | 'danger';
+    confirm?: string;
+    handler(input: Record<string, unknown>, context: AdminPageContext): unknown | Promise<unknown>;
+  }
+
+  interface AdminPluginAPI {
+    registerPanel(definition: AdminPanelDefinition): () => boolean;
+    registerPage(definition: AdminPageDefinition): () => boolean;
+    registerForm(definition: AdminFormDefinition): () => boolean;
+    registerAction(definition: AdminActionDefinition): () => boolean;
+  }
+
   interface WidgetRow {
     [key: string]: any;
   }

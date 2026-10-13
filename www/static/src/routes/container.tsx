@@ -17,6 +17,7 @@ const Push = lazy(() => import('./push/push'));
 const Appearance = lazy(() => import('./appearance/appearance'));
 const Options = lazy(() => import('./options/options'));
 const Comment = lazy(() => import('./comment/comment'));
+const PluginAdmin = lazy(() => import('./plugin/plugin-admin'));
 
 class Container extends React.Component<any, {}> {
     constructor(props: any) {
@@ -56,6 +57,7 @@ class Container extends React.Component<any, {}> {
                                 <Route path="/appearance" component={Appearance} />
                                 <Route path="/options" component={Options} />
                                 <Route path="/comment" component={Comment} />
+                                <Route path="/plugins/:pluginId/:pageId" component={PluginAdmin} />
                                 <Redirect to="/dashboard" />
                             </Switch>
                         </Suspense>

@@ -8,6 +8,7 @@ const EventBus = require('./events');
 const RouteRegistry = require('./routes');
 const TemplateRegistry = require('./templates');
 const ToolRegistry = require('./tools');
+const AdminRegistry = require('./admin');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
@@ -89,6 +90,7 @@ class PluginManager {
     this.routes = new RouteRegistry();
     this.templates = new TemplateRegistry();
     this.tools = new ToolRegistry();
+    this.admin = new AdminRegistry();
     this.plugins = new Map();
     this.states = new Map();
   }
@@ -195,6 +197,12 @@ class PluginManager {
         list: () => this.tools.list(),
         execute: (name, input, context) => this.tools.execute(name, input, context)
       }),
+      admin: Object.freeze({
+        registerPanel: definition => this.admin.registerPanel(definition, pluginId),
+        registerPage: definition => this.admin.registerPage(definition, pluginId),
+        registerForm: definition => this.admin.registerForm(definition, pluginId),
+        registerAction: definition => this.admin.registerAction(definition, pluginId)
+      }),
       widgets: Object.freeze({
         Widget,
         ContentsWidget,
@@ -238,6 +246,7 @@ class PluginManager {
       this.routes.removePlugin(record.manifest.id);
       this.templates.removePlugin(record.manifest.id);
       this.tools.removePlugin(record.manifest.id);
+      this.admin.removePlugin(record.manifest.id);
       removeWidgetsBySource(record.manifest.id);
       this.logger.error?.(`[plugin:${record.manifest.id}] activation failed: ${error.stack || error.message}`);
     }
@@ -253,6 +262,7 @@ class PluginManager {
       this.routes.removePlugin(id);
       this.templates.removePlugin(id);
       this.tools.removePlugin(id);
+      this.admin.removePlugin(id);
       removeWidgetsBySource(id);
       record.status = 'inactive';
       await this.events.emit('plugin.deactivated', {pluginId: id});

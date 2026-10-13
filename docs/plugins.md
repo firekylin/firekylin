@@ -338,6 +338,89 @@ ctx.routes.register({
 
 Action handler 接收 `{ctx, params, query, body, plugin}`，返回值自动作为 HTTP 响应体。路由冲突会在注册时拒绝，插件停用时自动移除路由。
 
+## 后台 UI 扩展
+
+插件可以用声明式 API 增加管理员侧栏面板、页面、表单和动作。后台外观、路由、权限和
+CSRF 由 Firekylin 统一管理；插件不需要绑定 React 或 Ant Design 版本，也不能向后台注入
+任意脚本。此接口仅对管理员可见。
+
+```js
+register(ctx) {
+  ctx.admin.registerPanel({
+    id: 'reading-tools',
+    title: '阅读工具',
+    icon: 'setting',
+    order: 80
+  });
+
+  ctx.admin.registerPage({
+    id: 'overview',
+    panel: 'reading-tools',
+    title: '阅读统计',
+    description: '查看并配置阅读统计插件',
+    async load({user}) {
+      return {
+        notices: [{type: 'info', message: `你好，${user.name}`}],
+        sections: [
+          {type: 'description', title: '状态', items: [
+            {label: '缓存', value: '正常'},
+            {label: '文章数', value: 42}
+          ]},
+          {type: 'table', title: '热门文章', rowKey: 'id',
+            columns: [{key: 'title', title: '标题'}, {key: 'views', title: '阅读数'}],
+            rows: [{id: 1, title: 'Hello', views: 100}]}
+        ]
+      };
+    }
+  });
+
+  ctx.admin.registerForm({
+    id: 'settings',
+    page: 'overview',
+    title: '插件设置',
+    fields: [
+      {name: 'enabled', type: 'switch', label: '启用统计'},
+      {name: 'label', type: 'text', label: '显示名称', required: true},
+      {name: 'style', type: 'select', label: '样式', options: [
+        {label: '简洁', value: 'compact'}, {label: '完整', value: 'full'}
+      ]}
+    ],
+    async load() {
+      return {enabled: true, label: '阅读数', style: 'compact'};
+    },
+    async submit(values, {user}) {
+      // 校验并保存 values；未声明的字段会被宿主丢弃。
+      return {message: `已由 ${user.name} 保存`};
+    }
+  });
+
+  ctx.admin.registerAction({
+    id: 'rebuild',
+    page: 'overview',
+    label: '重建统计',
+    type: 'danger',
+    confirm: '确定要重建全部统计吗？',
+    async handler(input, {user}) {
+      return {message: `重建任务已由 ${user.name} 启动`};
+    }
+  });
+}
+```
+
+一个面板可以包含多个页面，侧栏会自动生成二级导航。注册顺序要求为面板 → 页面 →
+表单/动作；同一插件内的 ID 必须唯一。页面 `load`、表单 `load/submit` 和动作 `handler`
+都会收到 `{ctx, user, pluginId}` 上下文。
+
+页面支持以下安全的内容区块：
+
+- `text`：`{type, title?, content}`；
+- `description`：`{type, title?, items: [{label, value}]}`；
+- `table`：`{type, title?, rowKey?, columns: [{key, title}], rows}`。
+
+表单字段支持 `text`、`textarea`、`number`、`switch`、`select` 和 `password`。字段还可以
+声明 `description`、`placeholder`、`required`；`select` 必须提供 `options`。动作的 `type`
+支持 `default`、`primary` 和 `danger`。所有返回内容都作为数据由宿主渲染和转义。
+
 ## 完整 Demo：阅读统计插件
 
 ### `package.json`

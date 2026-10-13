@@ -81,6 +81,9 @@ module.exports = class extends think.Controller {
     this.assign('think', think);
     this.assign('adminAssetVersion', getAdminAssetVersion());
     this.assign('csrfToken', adminAuth.csrfToken(this.ctx));
+    const pluginManager = global.firekylin && global.firekylin.plugins;
+    this.assign('pluginAdmin', !think.isEmpty(this.userInfo) && (this.userInfo.type | 0) === 1 && pluginManager
+      ? pluginManager.admin.manifest() : []);
 
     return this.display('admin');
   }

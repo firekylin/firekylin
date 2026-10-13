@@ -155,3 +155,23 @@ test('plugin context registers widgets and Eta-facing extensions', async() => {
   await manager.deactivate('template');
   assert.equal(manager.templates.functions.size, 0);
 });
+
+test('plugin context registers and cleans up admin extensions', async() => {
+  const root = project();
+  writePlugin(root, 'admin-example', `module.exports = {
+    register(ctx) {
+      ctx.admin.registerPanel({id: 'main', title: 'Example'});
+      ctx.admin.registerPage({id: 'overview', panel: 'main', title: 'Overview'});
+      ctx.admin.registerForm({
+        id: 'settings', page: 'overview', title: 'Settings',
+        fields: [{name: 'name', label: 'Name'}], submit: async values => values
+      });
+      ctx.admin.registerAction({id: 'refresh', page: 'overview', label: 'Refresh', handler: async() => ({ok: true})});
+    }
+  };`);
+  const manager = new PluginManager({projectPath: root, logger: {error() {}, info() {}}});
+  await manager.load();
+  assert.equal(manager.admin.manifest()[0].pages[0].id, 'overview');
+  await manager.deactivate('admin-example');
+  assert.deepEqual(manager.admin.manifest(), []);
+});

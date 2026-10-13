@@ -14,8 +14,24 @@ class SideBar extends React.Component<any, any> {
             themePages.push({url: '/appearance/edit', title: '编辑主题'});
         }
 
+        const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce((routes, plugin) =>
+            routes.concat(plugin.panels.filter(panel =>
+                plugin.pages.some(page => page.panel === panel.id)
+            ).map(panel => {
+                const pages = plugin.pages.filter(page => page.panel === panel.id);
+                return {
+                    url: `/plugins/${plugin.id}/${pages[0] && pages[0].id}`,
+                    icon: panel.icon || 'plugin',
+                    title: panel.title,
+                    type: 1,
+                    children: pages.length > 1 ? pages.map(page => ({
+                        url: `/plugins/${plugin.id}/${page.id}`,
+                        title: page.title
+                    })) : undefined
+                };
+            })), []);
         return {
-            routes: InitiateRoutes(themePages),
+            routes: [...InitiateRoutes(themePages), ...pluginRoutes],
             isActive: {}
         };
     }
