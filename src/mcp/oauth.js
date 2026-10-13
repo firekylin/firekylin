@@ -1,8 +1,9 @@
 'use strict';
 
 const {OAuthStore, TTL} = require('./oauth-store');
+const adminAuth = require('../service/admin-auth');
 const {
-  random, base64url, digest, validVerifier, validChallenge, validScope,
+  base64url, digest, validVerifier, validChallenge, validScope,
   scopeList, redirectAllowed, escapeHtml, safeClientName
 } = require('./oauth-utils');
 
@@ -23,8 +24,9 @@ function oauthError(ctx, error, status = 400) {
   json(ctx, {error}, status);
 }
 
-function secure(ctx) {
-  return ctx.secure || ctx.hostname === 'localhost' || ctx.hostname === '127.0.0.1';
+function secure(ctx, origin) {
+  const site = new URL(origin);
+  return ctx.secure || (site.protocol === 'http:' && ctx.hostname === site.hostname);
 }
 
 function authorizable(scopes, user) {
@@ -60,7 +62,7 @@ function registrationAllowed(uris) {
     new Set(uris).size === uris.length;
 }
 
-function buildOAuthHandler({origin, store, getUser}) {
+function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => adminAuth.currentUser(ctx)}) {
   // Best-effort local abuse limit; deploy behind a shared/proxy rate limiter as well.
   const registrations = new Map();
   const resource = origin + '/mcp';
@@ -111,7 +113,7 @@ function buildOAuthHandler({origin, store, getUser}) {
     if (!['/oauth/authorize', '/oauth/token', '/oauth/register', '/oauth/revoke'].includes(pathname)) {
       return next();
     }
-    if (!secure(ctx)) return oauthError(ctx, 'invalid_request', 403);
+    if (!secure(ctx, origin)) return oauthError(ctx, 'invalid_request', 403);
     ctx.set('Cache-Control', 'no-store');
 
     if (pathname === '/oauth/register') {
@@ -124,7 +126,9 @@ function buildOAuthHandler({origin, store, getUser}) {
       if (window.count >= 20) return oauthError(ctx, 'rate_limited', 429);
       window.count++;
       registrations.set(ip, window);
-      if (!String(ctx.get('content-type')).startsWith('application/json')) return oauthError(ctx, 'invalid_request', 415);
+      if (!String(ctx.get('content-type')).startsWith('application/json')) {
+        return oauthError(ctx, 'invalid_request', 415);
+      }
       const input = await readJson(ctx);
       if (!input || !safeClientName(input.client_name) || !registrationAllowed(input.redirect_uris) ||
           (input.token_endpoint_auth_method && input.token_endpoint_auth_method !== 'none')) {
@@ -137,7 +141,7 @@ function buildOAuthHandler({origin, store, getUser}) {
     if (pathname === '/oauth/authorize') {
       if (!['GET', 'POST'].includes(ctx.method)) return oauthError(ctx, 'invalid_request', 405);
       let request;
-      try { request = ctx.method === 'POST' ? await readForm(ctx) : ctx.query } catch (error) {
+      try { request = ctx.method === 'POST' ? await readForm(ctx) : ctx.query } catch {
         return oauthError(ctx, 'invalid_request');
       }
       const {
@@ -156,22 +160,26 @@ function buildOAuthHandler({origin, store, getUser}) {
       }
       const scopes = scopeList(scope);
       const requestId = digest([clientId, redirectUri, challenge, scope, state, resource].join('\0'));
-      const session = await ctx.session('userInfo') || {};
-      if (!session.id) {
+      const identity = await getCurrentUser(ctx);
+      if (!identity || !identity.id) {
         const location = '/admin/login?redirect=' + encodeURIComponent(ctx.url);
         ctx.redirect(location);
         return;
       }
-      const user = await getUser(Number(session.id));
+      const user = await getUser(Number(identity.id));
       if (!user || Number(user.status) !== 1 || !authorizable(scopes, user)) {
         return oauthError(ctx, 'access_denied', 403);
       }
       if (ctx.method === 'GET') {
-        const csrf = random();
-        await ctx.session('mcpOAuthConsent', {requestId, csrf, userId: Number(user.id), expiresAt: Date.now() + 600000});
+        const csrf = await store.createGrant('consent', {
+          userId: Number(user.id), clientId, scopes, resource, parent: requestId
+        });
         const displayed = scopes.map(item => '<li>' + escapeHtml(item) + '</li>').join('');
         ctx.type = 'text/html; charset=utf-8';
-        ctx.set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+        ctx.set('Content-Security-Policy',
+          'default-src \'none\'; style-src \'unsafe-inline\'; form-action \'self\'; ' +
+          'base-uri \'none\'; frame-ancestors \'none\''
+        );
         ctx.set('X-Frame-Options', 'DENY');
         ctx.body = '<!doctype html><html lang="zh"><meta charset="utf-8"><title>授权 Firekylin</title>' +
           '<main style="font:16px system-ui;max-width:560px;margin:8vh auto;padding:24px">' +
@@ -192,10 +200,9 @@ function buildOAuthHandler({origin, store, getUser}) {
           '<button name="decision" value="deny">拒绝</button></form></main></html>';
         return;
       }
-      const consent = await ctx.session('mcpOAuthConsent');
-      await ctx.session('mcpOAuthConsent', null);
-      if (!consent || consent.requestId !== requestId || consent.csrf !== request.csrf ||
-          consent.userId !== Number(user.id) || consent.expiresAt < Date.now()) {
+      const consent = await store.consume('consent', request.csrf);
+      if (!consent || consent.parent_hash !== requestId ||
+          Number(consent.user_id) !== Number(user.id)) {
         return oauthError(ctx, 'invalid_request', 403);
       }
       const dest = new URL(redirectUri);
@@ -215,7 +222,7 @@ function buildOAuthHandler({origin, store, getUser}) {
     if (pathname === '/oauth/token') {
       if (ctx.method !== 'POST') return oauthError(ctx, 'invalid_request', 405);
       let data;
-      try { data = await readForm(ctx) } catch (error) { return oauthError(ctx, 'invalid_request') }
+      try { data = await readForm(ctx) } catch { return oauthError(ctx, 'invalid_request') }
       const {grant_type: grant, client_id: clientId, resource: targetResource} = data;
       const client = await store.client(clientId);
       if (!client || targetResource !== resource) return oauthError(ctx, 'invalid_client');
@@ -225,11 +232,15 @@ function buildOAuthHandler({origin, store, getUser}) {
         }
         const row = await store.lookup('code', data.code);
         if (!row || row.client_id !== clientId || row.resource !== resource ||
-            (row.challenge !== base64url(data.code_verifier) || row.parent_hash !== digest(data.redirect_uri))) return oauthError(ctx, 'invalid_grant');
+            row.challenge !== base64url(data.code_verifier) || row.parent_hash !== digest(data.redirect_uri)) {
+          return oauthError(ctx, 'invalid_grant');
+        }
         const used = await store.consume('code', data.code);
         if (!used) return oauthError(ctx, 'invalid_grant');
         const user = await getUser(Number(row.user_id));
-        if (!user || Number(user.status) !== 1 || !authorizable(scopeList(row.scopes), user)) return oauthError(ctx, 'invalid_grant');
+        if (!user || Number(user.status) !== 1 || !authorizable(scopeList(row.scopes), user)) {
+          return oauthError(ctx, 'invalid_grant');
+        }
         return issueTokens(ctx, {userId: Number(row.user_id), clientId, scopes: scopeList(row.scopes)});
       }
       if (grant === 'refresh_token') {
@@ -248,7 +259,7 @@ function buildOAuthHandler({origin, store, getUser}) {
     if (pathname === '/oauth/revoke') {
       if (ctx.method !== 'POST') return oauthError(ctx, 'invalid_request', 405);
       let data;
-      try { data = await readForm(ctx) } catch (error) { return oauthError(ctx, 'invalid_request') }
+      try { data = await readForm(ctx) } catch { return oauthError(ctx, 'invalid_request') }
       // Token revocation requires possession of the secret; it does not grant access.
       if (typeof data.token !== 'string' || data.token.length > 256) return oauthError(ctx, 'invalid_request');
       await store.revoke(data.token);
@@ -265,11 +276,11 @@ async function readJson(ctx) {
     if (total > FORM_LIMIT) return null;
     chunks.push(chunk);
   }
-  try { return JSON.parse(Buffer.concat(chunks).toString('utf8')) } catch (error) { return null }
+  try { return JSON.parse(Buffer.concat(chunks).toString('utf8')) } catch { return null }
 }
 
-async function createOAuthHandler({origin, getModel, getUser}) {
-  return buildOAuthHandler({origin, store: new OAuthStore(getModel), getUser});
+async function createOAuthHandler({origin, getModel, getUser, getCurrentUser}) {
+  return buildOAuthHandler({origin, store: new OAuthStore(getModel), getUser, getCurrentUser});
 }
 
 module.exports = {createOAuthHandler, buildOAuthHandler, authorizable, registrationAllowed};

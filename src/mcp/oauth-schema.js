@@ -12,8 +12,11 @@ function sqlFor(type, prefix) {
 
 async function migrateOAuthModels({model, config}) {
   const type = config.type;
-  if (!['sqlite', 'mysql', 'postgresql'].includes(type)) throw new Error('Unsupported database backend for OAuth');
-  const prefix = ((config[type] || {}).prefix || 'fk_');
+  if (!['sqlite', 'mysql', 'tidb', 'postgresql'].includes(type)) {
+    throw new Error('Unsupported database backend for OAuth');
+  }
+  const configuredPrefix = (config[type] || {}).prefix;
+  const prefix = typeof configuredPrefix === 'string' ? configuredPrefix : 'fk_';
   if (!/^[a-zA-Z0-9_]*$/.test(prefix)) throw new Error('Invalid database table prefix');
   for (const sql of sqlFor(type, prefix)) await model.query(sql);
 }

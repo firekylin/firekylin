@@ -78,3 +78,35 @@ test('all tools fail closed without authorization', async() => {
   await assert.rejects(registry.execute('posts.list', {}), /Authorization callback required/);
   await assert.rejects(registry.execute('posts.list', {}, {authorize: () => false}), /Permission denied/);
 });
+
+
+test('reconciles each partial built-in registration and rejects foreign name collisions', () => {
+  for (const retained of ['posts.list', 'posts.get', 'posts.search']) {
+    const {registry} = harness();
+    for (const name of registry.tools.keys()) if (name !== retained) registry.tools.delete(name);
+    registerContentTools(registry, {getModel: () => ({}), now: () => ''});
+    assert.equal(registry.list().length, 3);
+    registerContentTools(registry, {getModel: () => ({}), now: () => ''});
+    assert.equal(registry.list().length, 3);
+  }
+  const registry = new ToolRegistry();
+  registry.register({name: 'posts.get', description: 'Foreign', execute() {}}, 'other');
+  assert.throws(() => registerContentTools(registry, {getModel: () => ({}), now: () => ''}), /Duplicate tool/);
+});
+
+test('plugin cleanup cannot claim the built-in content owner', () => {
+  const {registry} = harness();
+  registry.removePlugin('core-content');
+  assert.equal(registry.list().length, 3);
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const {readManifest} = require('../../src/plugin/manager');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-owner-'));
+  try {
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+      name: 'plugin', version: '1.0.0', main: 'index.js', firekylin: {id: 'core:content'}
+    }));
+    assert.throws(() => readManifest(root), /Invalid plugin id/);
+  } finally { fs.rmSync(root, {recursive: true, force: true}) }
+});

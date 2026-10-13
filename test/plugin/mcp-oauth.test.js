@@ -9,7 +9,9 @@ const {
   publicOrigin, escapeHtml
 } = require('../../src/mcp/oauth-utils');
 const {buildOAuthHandler, authorizable, registrationAllowed} = require('../../src/mcp/oauth');
-const {sqlFor} = require('../../src/mcp/oauth-schema');
+const {sqlFor, migrateOAuthModels} = require('../../src/mcp/oauth-schema');
+const adminAuth = require('../../src/service/admin-auth');
+const jwtSecret = 'test-secret-for-oauth-jwt-login-32-bytes';
 
 function fakeStore() {
   let nextClient = 1;
@@ -57,10 +59,8 @@ function ctx({path, method = 'GET', query = {}, body = {}, user, session, secure
     req: Readable.from([Buffer.from(raw)]),
     get: name => requestHeaders[name.toLowerCase()] || '',
     set: (name, value) => {responseHeaders[name] = value},
-    async session(name, value) {
-      if (arguments.length === 2) {session[name] = value; return value}
-      return name === 'userInfo' ? user : session[name];
-    },
+    state: {jwtSecret},
+    cookie: () => user ? adminAuth.sign({...user, type: user.type || 1}, jwtSecret) : undefined,
     redirect(value) {this.location = value; this.status = 302},
     responseHeaders
   };
@@ -130,7 +130,7 @@ test('OAuth login consent, code exchange, refresh and replay protection', async(
   const consent = ctx({path: '/oauth/authorize', query: parameters, session, user: principal});
   await handler(consent);
   assert.match(consent.body, /同意授权/);
-  const csrf = session.mcpOAuthConsent.csrf;
+  const csrf = /name="csrf" value="([^"<>]+)"/.exec(consent.body)[1];
 
   const approved = ctx({
     path: '/oauth/authorize', method: 'POST', session, user: principal,
@@ -225,4 +225,50 @@ test('OAuth SQL migration has portable client and credential tables', () => {
   }
   assert.equal(authorizable(['posts:read'], {type: 2}), true);
   assert.equal(authorizable(['comments:moderate'], {type: 2}), false);
+});
+
+
+test('TiDB uses the MySQL dialect and migrations preserve empty prefixes', async() => {
+  for (const type of ['sqlite', 'mysql', 'tidb', 'postgresql']) {
+    const queries = [];
+    await migrateOAuthModels({model: {query: async sql => queries.push(sql)}, config: {type, [type]: {prefix: ''}}});
+    assert.ok(queries.every(sql => /CREATE TABLE IF NOT EXISTS mcp_oauth_/.test(sql)));
+    if (type === 'tidb') assert.deepEqual(queries, sqlFor('mysql', ''));
+  }
+});
+
+test('JWT consent is persistent, bound to user/request, and one-time', async() => {
+  const store = fakeStore();
+  const build = () => buildOAuthHandler({origin: 'https://blog.example', store,
+    getUser: async id => ({id, type: 1, status: 1})});
+  const client = await store.registerClient({name: 'Client', redirectUris: ['https://client.example/cb']});
+  const params = {client_id: client.client_id, redirect_uri: 'https://client.example/cb', response_type: 'code',
+    code_challenge: base64url('v'.repeat(64)), code_challenge_method: 'S256',
+    resource: 'https://blog.example/mcp', scope: 'posts:read', state: 'test'};
+  const page = ctx({path: '/oauth/authorize', query: params, user: {id: 1}});
+  await build()(page);
+  assert.equal(page.session, undefined);
+  const csrf = /name="csrf" value="([^"<>]+)"/.exec(page.body)[1];
+  const wrong = ctx({path: '/oauth/authorize', method: 'POST', user: {id: 2}, body: {...params, csrf, decision: 'allow'}});
+  await build()(wrong);
+  assert.equal(wrong.status, 403);
+  const fresh = ctx({path: '/oauth/authorize', query: params, user: {id: 1}});
+  await build()(fresh);
+  const valid = /name="csrf" value="([^"<>]+)"/.exec(fresh.body)[1];
+  const post = () => ctx({path: '/oauth/authorize', method: 'POST', user: {id: 1}, body: {...params, csrf: valid, decision: 'allow'}});
+  const accepted = post();
+  await build()(accepted);
+  assert.equal(accepted.status, 302);
+  const replay = post();
+  await build()(replay);
+  assert.equal(replay.status, 403);
+});
+
+
+test('spoofed loopback Host cannot bypass HTTPS on a public OAuth issuer', async() => {
+  const handler = buildOAuthHandler({origin: 'https://blog.example', store: fakeStore(), getUser: async() => null});
+  const request = ctx({path: '/oauth/register', method: 'POST', secure: false});
+  request.hostname = 'localhost';
+  await handler(request);
+  assert.equal(request.status, 403);
 });

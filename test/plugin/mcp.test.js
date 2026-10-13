@@ -16,12 +16,12 @@ test('Origin headers are rejected unless explicitly allowed', () => {
 test('MCP only advertises authorized tools and never approval-gated tools', () => {
   const tools = [
     {name: 'posts.list', requiredPermissions: ['posts:read'], requiresApproval: false},
-    {name: 'posts.createDraft', requiredPermissions: ['posts:write'], requiresApproval: false},
+    {name: 'posts.create_draft', requiredPermissions: ['posts:write'], requiresApproval: false},
     {name: 'posts.publish', requiredPermissions: ['posts:publish'], requiresApproval: true}
   ];
   assert.deepEqual(exposedTools(tools, new Set(['posts:read'])).map(tool => tool.name), ['posts.list']);
   assert.deepEqual(exposedTools(tools, new Set(['posts:read', 'posts:write', 'posts:publish']))
-    .map(tool => tool.name), ['posts.list', 'posts.createDraft']);
+    .map(tool => tool.name), ['posts.list', 'posts.create_draft']);
 });
 
 test('registered Tool execution uses scoped OAuth identity', async() => {
@@ -55,9 +55,9 @@ test('OAuth verifier is mandatory and unauthorized MCP requests advertise discov
     fromJsonSchema: schema => schema,
     createMcpHandler(factory) {
       factory();
-      return async request => new Response(JSON.stringify({jsonrpc: '2.0', id: 1, result: {ok: true}}), {
+      return {fetch: async request => new Response(JSON.stringify({jsonrpc: '2.0', id: 1, result: {ok: true}}), {
         headers: {'content-type': 'application/json'}
-      });
+      })};
     }
   };
   const endpoint = await createMcpEndpoint({
@@ -94,4 +94,14 @@ test('OAuth verifier is mandatory and unauthorized MCP requests advertise discov
 test('body reader enforces request size limits', async() => {
   await assert.rejects(readBody(Readable.from([Buffer.alloc(10)]), 5), /too large/);
   assert.equal((await readBody(Readable.from([Buffer.from('hello')]), 10)).toString(), 'hello');
+});
+
+
+test('spoofed loopback Host cannot bypass HTTPS for a public MCP resource', async() => {
+  const endpoint = await createMcpEndpoint({sdk: {}, tools: {},
+    verifier: async() => ({principal: {id: 1}, scopes: new Set()}),
+    resourceMetadataUrl: 'https://blog.example/.well-known/oauth-protected-resource/mcp'});
+  const ctx = {method: 'POST', secure: false, hostname: 'localhost', get: () => '', set() {}};
+  await endpoint(ctx);
+  assert.equal(ctx.status, 403);
 });

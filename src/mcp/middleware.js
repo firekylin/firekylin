@@ -1,13 +1,12 @@
 'use strict';
 
-const {getContext} = require('../../lib/project-context');
+const {getMcpConfig} = require('./config');
 const {createMcpEndpoint} = require('./server');
 const {oauthVerifier} = require('./oauth-middleware');
 const {publicOrigin} = require('./oauth-utils');
 
 module.exports = function builtinMcp() {
-  const project = getContext();
-  const config = (project.config && project.config.mcp) || {};
+  const config = getMcpConfig();
   let endpointPromise;
   return async function mcpMiddleware(ctx, next) {
     if (ctx.path !== '/mcp') return next();
@@ -21,14 +20,14 @@ module.exports = function builtinMcp() {
         const options = await think.model('options').getOptions();
         const origin = publicOrigin(options.site_url);
         return createMcpEndpoint({
-        tools: {
-          list: () => global.firekylin.plugins.tools.list(),
-          execute: (name, input, context) => global.firekylin.plugins.tools.execute(name, input, context)
-        },
-        config,
-        verifier: oauthVerifier(),
-        resourceMetadataUrl: origin + '/.well-known/oauth-protected-resource/mcp',
-        logger: think.logger
+          tools: {
+            list: () => global.firekylin.plugins.tools.list(),
+            execute: (name, input, context) => global.firekylin.plugins.tools.execute(name, input, context)
+          },
+          config,
+          verifier: oauthVerifier(),
+          resourceMetadataUrl: origin + '/.well-known/oauth-protected-resource/mcp',
+          logger: think.logger
         });
       })().catch(error => {
         endpointPromise = null;

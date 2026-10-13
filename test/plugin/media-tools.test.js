@@ -56,3 +56,21 @@ test('media upload requires explicit media:write privilege', async() => {
     name: 'image', format: 'png', base64: 'AAAA'
   }, {principal: {id: 1}, authorize: () => false}), /Permission denied/);
 });
+
+
+test('configured providers use their actual upload service identifiers', async() => {
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
+  for (const type of ['local', 'qiniu', 'upyun', 'aliyun', 'tencent', 's3', 'r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel']) {
+    const registry = new ToolRegistry();
+    registerMediaTools(registry, {
+      getUploadConfig: async() => ({type}),
+      getUploader: actual => {
+        assert.equal(actual, ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel'].includes(type) ? 'files-sdk' : type);
+        return {run: async() => 'uploaded'};
+      }
+    });
+    assert.equal(await registry.execute('media.upload', {name: 'image', format: 'png', base64: png}, {
+      principal: {id: 1, type: 1}, authorize: () => true
+    }), 'uploaded');
+  }
+});

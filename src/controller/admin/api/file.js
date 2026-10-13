@@ -2,7 +2,6 @@ const fs = require('fs');
 const dns = require('dns');
 const path = require('path');
 const { parse } = require('url');
-const request = require('request');
 const onFinish = require('on-finished');
 const Base = require('./base');
 
@@ -22,12 +21,6 @@ function ip2long(ip) {
   return longValue;
 }
 
-const reqIns = request.defaults({
-  strictSSL: false,
-  rejectUnauthorized: false
-});
-
-const getFileContent = think.promisify(reqIns.get, reqIns);
 const writeFileAsync = think.promisify(fs.writeFile, fs);
 const unlinkAsync = think.promisify(fs.unlink, fs);
 const lookupAsync = think.promisify(dns.lookup, dns);
@@ -84,7 +77,7 @@ module.exports = class extends Base {
     // 处理其它上传
     if (!type) { return this.fail() }
     if (type === 'local') {
-      config = { name: this.post('name') };
+      config = {type, name: this.post('name')};
     }
 
     config.file = file;
@@ -115,7 +108,9 @@ module.exports = class extends Base {
    */
   async serviceUpload(service, file, config) {
     try {
-      const uploader = think.service(`upload/${service}`);
+      const sdkServices = ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel'];
+      const serviceName = sdkServices.includes(service) ? 'files-sdk' : service;
+      const uploader = think.service(`upload/${serviceName}`);
       const result = await uploader.run(file, config);
       return this.success(result);
     } catch (e) {
@@ -140,7 +135,8 @@ module.exports = class extends Base {
     } catch (e) {
       return this.fail(e);
     }
-    return this.success(`共导入文章 ${ret.post} 篇，页面 ${ret.page} 页，分类 ${ret.category} 个，标签 ${ret.tag} 个`);
+    const comment = ret.comment ? `，评论 ${ret.comment} 条` : '';
+    return this.success(`共导入文章 ${ret.post} 篇，页面 ${ret.page} 页，分类 ${ret.category} 个，标签 ${ret.tag} 个${comment}`);
   }
 
   /**
@@ -157,6 +153,44 @@ module.exports = class extends Base {
   }
 
   async getUrlFile(url) {
+    const response = await this.fetchUrlFile(url);
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('image')) {
+      throw new Error('UPLOAD_TYPE_ERROR');
+    }
+
+    const body = Buffer.from(await response.arrayBuffer());
+
+    // let uploadDir = this.config('post').file_upload_path;
+    // if(!uploadDir) {
+    const uploadDir = think.TMPDIR_PATH;
+    // }
+    if (!think.isDirectory(uploadDir)) {
+      think.mkdir(uploadDir);
+    }
+
+    const uploadName = think.uuid(20) + path.extname(url);
+    const uploadPath = path.join(uploadDir, uploadName);
+    await writeFileAsync(uploadPath, body);
+
+    // after upload delete file
+    onFinish(this.ctx.res, () =>
+      think.isExist(uploadPath) && unlinkAsync(uploadPath)
+    );
+
+    return {
+      name: path.basename(url),
+      path: uploadPath,
+      size: response.headers.get('content-length') || body.length,
+      type: contentType
+    };
+  }
+
+  async fetchUrlFile(url, redirectCount = 0) {
+    if (redirectCount > 5) {
+      throw new Error('UPLOAD_URL_ERROR');
+    }
+
     let { hostname } = parse(url);
     if (!/^\d+\.\d+\.\d+\.\d+/i.test(hostname)) {
       hostname = await lookupAsync(hostname);
@@ -170,42 +204,24 @@ module.exports = class extends Base {
       }
     }
 
-    const resp = await getFileContent({
-      url,
+    const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) Chrome/47.0.2526.111 Safari/537.36'
       },
-      strictSSL: false,
-      timeout: 1000,
-      encoding: 'binary'
+      redirect: 'manual',
+      signal: AbortSignal.timeout(1000)
     }).catch(() => { throw new Error('UPLOAD_URL_ERROR') });
 
-    if (resp.headers['content-type'].indexOf('image') === -1) {
-      throw new Error('UPLOAD_TYPE_ERROR');
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) {
+        throw new Error('UPLOAD_URL_ERROR');
+      }
+      return this.fetchUrlFile(new URL(location, url).toString(), redirectCount + 1);
     }
-
-    // let uploadDir = this.config('post').file_upload_path;
-    // if(!uploadDir) {
-    const uploadDir = think.TMPDIR_PATH;
-    // }
-    if (!think.isDirectory(uploadDir)) {
-      think.mkdir(uploadDir);
+    if (!response.ok) {
+      throw new Error('UPLOAD_URL_ERROR');
     }
-
-    const uploadName = think.uuid(20) + path.extname(url);
-    const uploadPath = path.join(uploadDir, uploadName);
-    await writeFileAsync(uploadPath, resp.body, 'binary');
-
-    // after upload delete file
-    onFinish(this.ctx.res, () =>
-      think.isExist(uploadPath) && unlinkAsync(uploadPath)
-    );
-
-    return {
-      name: path.basename(url),
-      path: uploadPath,
-      size: resp.headers['content-length'],
-      type: resp.headers['content-type']
-    };
+    return response;
   }
 };

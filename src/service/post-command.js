@@ -7,7 +7,9 @@
  */
 class PostCommandService {
   constructor({getModel, now}) {
-    if (typeof getModel !== 'function' || typeof now !== 'function') throw new TypeError('Model and clock are required');
+    if (typeof getModel !== 'function' || typeof now !== 'function') {
+      throw new TypeError('Model and clock are required');
+    }
     this.getModel = getModel;
     this.now = now;
   }
@@ -46,7 +48,8 @@ class PostCommandService {
     const actor = this.actor(principal);
     const model = this.getModel();
     const existing = await this.getModel().where({pathname: input.pathname, type: 0})
-      .setRelation(false).find();
+      .setRelation(false)
+      .find();
     if (existing && existing.id) throw new Error('PATHNAME_EXIST');
     let data = {...input, type: 0, user_id: actor.id};
     if (Number(data.status) === 3 && actor.type !== 1) data.status = 1;
@@ -63,14 +66,15 @@ class PostCommandService {
   async update(input, principal, options = {}) {
     const post = await this.editable(input.id, principal);
     if (options.draftOnly && Number(post.status) !== 0) {
-      throw new Error('Only drafts can be edited with posts.updateDraft');
+      throw new Error('Only drafts can be edited with posts.update_draft');
     }
-    const data = {...input};
+    let data = {...input};
     // Editing a published article as an editor must re-enter the review queue.
     if (this.actor(principal).type !== 1 && Number(post.status) === 3) data.status = 1;
     if (data.pathname && data.pathname !== post.pathname) {
       const existing = await this.getModel().where({pathname: data.pathname, type: 0})
-        .setRelation(false).find();
+        .setRelation(false)
+      .find();
       if (existing && existing.id && Number(existing.id) !== Number(input.id)) {
         throw new Error('PATHNAME_EXIST');
       }

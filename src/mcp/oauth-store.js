@@ -2,7 +2,7 @@
 
 const {digest, random} = require('./oauth-utils');
 
-const TTL = {code: 600, access: 3600, refresh: 30 * 86400};
+const TTL = {consent: 600, code: 600, access: 3600, refresh: 30 * 86400};
 
 class OAuthStore {
   constructor(model) {

@@ -1,5 +1,5 @@
 'use strict';
-/* eslint-disable max-len */
+
 
 const Base = require('./base');
 const CommentModerationService = require('../../../service/comment-moderation');
@@ -12,6 +12,7 @@ module.exports = class extends Base {
     const keyword = String(this.get('keyword') || '').trim();
     const author = String(this.get('author') || '').trim();
     const where = status ? {status} : {};
+    if (Number(this.userInfo.type) === 4) where.user_id = String(this.userInfo.id);
     if (keyword) where.comment = ['LIKE', `%${keyword}%`];
     if (author) {
       const pattern = `%${author}%`;
@@ -74,10 +75,12 @@ module.exports = class extends Base {
     });
     try {
       await service.moderate({
-        id, operation: this.post('operation'), comment: this.post('comment')
+        id, operation: this.post('operation'), comment: this.post('comment'), allowCommenter: true
       }, this.userInfo);
     } catch (error) {
-      if (['COMMENT_NOT_FOUND', 'INVALID_OPERATION'].includes(error.message)) return this.fail(error.message);
+      if (['COMMENT_NOT_FOUND', 'INVALID_OPERATION', 'USER_NO_PERMISSION'].includes(error.message)) {
+        return this.fail(error.message);
+      }
       throw error;
     }
     return this.success();

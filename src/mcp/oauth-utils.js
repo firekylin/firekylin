@@ -17,14 +17,14 @@ function redirectAllowed(value) {
     if (url.username || url.password || url.hash || value.length > 1024) return false;
     if (url.protocol === 'https:') return true;
     return url.protocol === 'http:' && ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostname);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;'
   }[char]));
 }
 
@@ -34,7 +34,8 @@ function safeClientName(value) {
 
 function publicOrigin(url) {
   const parsed = new URL(url);
-  if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(parsed.hostname))) {
+  const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+  if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) {
     throw new Error('OAuth requires a secure site_url');
   }
   if (parsed.search || parsed.hash || parsed.pathname !== '/') throw new Error('OAuth site_url must be a bare origin');

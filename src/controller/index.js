@@ -172,7 +172,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async contributorAction() {
-    if (!this.options.hasOwnProperty('push') || +this.options.push === 0) {
+    if (!Object.hasOwn(this.options, 'push') || +this.options.push === 0) {
       return this.fail('PUSH_CLOSED');
     }
     if (this.isGet) {

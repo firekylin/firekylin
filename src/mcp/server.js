@@ -61,7 +61,9 @@ function createServerFactory({tools, auth, sdk, logger}) {
   };
 }
 
-async function createMcpEndpoint({tools, config = {}, logger = console, sdk: sdkOverride, verifier, resourceMetadataUrl}) {
+async function createMcpEndpoint({
+  tools, config = {}, logger = console, sdk: sdkOverride, verifier, resourceMetadataUrl
+}) {
   if (typeof verifier !== 'function') throw new TypeError('OAuth token verifier is required');
   const sdk = sdkOverride || await import('@modelcontextprotocol/server');
   const verify = verifier;
@@ -85,7 +87,9 @@ async function createMcpEndpoint({tools, config = {}, logger = console, sdk: sdk
       ctx.body = 'Unauthorized';
       return;
     }
-    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(ctx.hostname);
+    const resource = resourceMetadataUrl && new URL(resourceMetadataUrl);
+    const loopback = resource && resource.protocol === 'http:' &&
+      ['localhost', '127.0.0.1', '[::1]'].includes(resource.hostname) && ctx.hostname === resource.hostname;
     if (config.requireHttps !== false && !ctx.secure && !loopback) {
       ctx.status = 403;
       ctx.body = 'HTTPS required';
@@ -118,7 +122,7 @@ async function createMcpEndpoint({tools, config = {}, logger = console, sdk: sdk
       headers,
       ...(rawBody ? {body: rawBody} : {})
     });
-    const response = await handler(request);
+    const response = await handler.fetch(request);
     ctx.status = response.status;
     for (const name of ['content-type', 'cache-control', 'mcp-protocol-version', 'mcp-session-id', 'allow']) {
       const value = response.headers.get(name);

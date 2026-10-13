@@ -12,7 +12,7 @@ Firekylin 自带 **OAuth 授权服务器**，MCP 客户端连接博客不需要�
 6. Firekylin 签发一次性 Authorization Code，浏览器返回客户端回调地址。
 7. 客户端通过 `/oauth/token` 交换 Access Token 和 Refresh Token，之后就能以当前用户身份调用 MCP Tools。
 
-所有令牌均为随机生成，数据库只存 SHA-256 摘要，且具有过期时间。授权码同时绑定 Client ID、Redirect URI、PKCE Challenge 和 MCP Resource。用户身份来自已认证的 Firekylin Session。
+所有令牌均为随机生成，数据库只存 SHA-256 摘要，且具有过期时间。授权码同时绑定 Client ID、Redirect URI、PKCE Challenge 和 MCP Resource。用户身份来自已认证的 Firekylin JWT Cookie。
 
 ## 标准 OAuth 端点
 
@@ -36,7 +36,7 @@ Firekylin 自带 **OAuth 授权服务器**，MCP 客户端连接博客不需要�
 
 - 无需预先配置客户端 ID、Secret 或用户 ID，授权必须经过真实站点登录和确认。
 - OAuth 使用 Authorization Code + PKCE S256，不支持 Implicit / Password Grant。
-- 授权页核验 Session、CSRF Token、Scope、Redirect URI 和 PKCE Challenge。
+- 授权页核验 JWT 登录、一次性持久化 CSRF Token、Scope、Redirect URI 和 PKCE Challenge。
 - 动态注册仅支持 HTTPS 和 localhost/loopback 回调。公开注册接口应通过反向代理限制注册频率。
 - MCP 执行会继续经过 Tool Registry 的 Scope 判断和共享业务 Service 的角色/资源权限判断。
 - 需要审批的发布、删除等 Tool 目前仍不会暴露给远程 MCP 客户端；授权页面不能替代单次高风险动作审批。
@@ -55,3 +55,8 @@ pnpm lint-break-on-errors
 需要在部署环境用 MCP Inspector / Codex 验证：发现、动态注册、重定向登录、授权码交换、Token 刷新、工具调用、拒绝授权、一次性授权码不可重放、HTTPS 反向代理。
 
 **注意：** 这是待审查的实现分支，仍需要端到端联调与安全审查，不要直接用于公网生产环境。
+
+
+## 旧版源码部署
+
+使用 `node production.js` 或 `node development.js` 的旧版部署通过 ThinkJS `mcp` 配置读取 `enabled`、`allowedOrigins` 等选项，例如在 `src/config/mcp.js` 导出 `{enabled: false}` 可以关闭 MCP/OAuth。独立项目仍优先读取 `firekylin.config.js`。OAuth 使用已有 JWT 登录，不要求启用 session 扩展。

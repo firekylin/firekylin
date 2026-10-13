@@ -2,7 +2,7 @@ import * as React from 'react';
 import './article-editor.less';
 import MarkDownEditor from '../../editor';
 import { ArticleEditorState } from './article-editor.model';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
 @inject('postStore', 'articleStore')
