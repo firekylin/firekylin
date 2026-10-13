@@ -18,7 +18,8 @@ class ArticleStore {
     options: {
       template: '',
       featuredImage: '',
-      push_sites: []
+      push_sites: [],
+      fields: {}
     },
     status: ArticleEnum.SAVE,
     user_id: '',
@@ -46,11 +47,12 @@ class ArticleStore {
       is_public: '1',
       create_time: new Date().toUTCString(),
       allow_comment: true,
-      options: JSON.stringify({
+      options: {
         template: '',
         featuredImage: '',
-        push_sites: []
-      }),
+        push_sites: [],
+        fields: {}
+      },
       status: ArticleEnum.DRAFT,
       user_id: '',
     });
@@ -84,6 +86,8 @@ class ArticleStore {
                 } else {
                     res.data.options.push_sites = res.data.options.push_sites || [];
                 }
+                res.data.options.fields = res.data.options.fields && typeof res.data.options.fields === 'object'
+                    && !Array.isArray(res.data.options.fields) ? res.data.options.fields : {};
                 this.setArticleInfo({ ...res.data });
             }
         }
