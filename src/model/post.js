@@ -500,9 +500,9 @@ module.exports = class extends Base {
     const feedFullText = await this.getFeedFullText();
 
     if (feedFullText === '0') {
-      field += 'summary,content';
+      field += 'summary,content,options';
     } else {
-      field += 'content';
+      field += 'content,options';
     }
 
     const data = await this.field(field)
