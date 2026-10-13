@@ -1,4 +1,6 @@
 packages: []
+overrides:
+  better-sqlite3: 13.0.3
 allowBuilds:
   aws-sdk: true
   dtrace-provider: true
@@ -7,6 +9,7 @@ allowBuilds:
   spawn-sync: true
   sqlite3: true
   better-sqlite3: true
-  
+  unrs-resolver: true
+
 # disable minimum release age to allow immediate releases
 minimumReleaseAge: 0

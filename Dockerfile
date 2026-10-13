@@ -3,7 +3,7 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++ \
-    && npm i -g pnpm@10.29.3
+    && npm i -g pnpm@12.11.2
 
 COPY package.json /app
 COPY pnpm-lock.yaml /app

@@ -20,9 +20,9 @@
     "test:plugin": "node --test test/plugin/*.test.js",
     "test:cli": "node --test test/cli/*.test.js",
     "test:types": "tsc -p test/types/tsconfig.json --noEmit",
-    "lint": "eslint ./src ./*.js ./www/theme/firekylin --cache || true",
-    "lint-fix": "eslint ./src ./*.js ./www/theme/firekylin --fix || true",
-    "lint-break-on-errors": "echo '\n[INFO] Running ESLint...\n[INFO] (Autofix with `npm run lint-fix`)' && eslint ./src ./*.js ./www/theme/firekylin",
+    "lint": "eslint ./src ./*.js ./www/theme/firekylin --cache",
+    "lint-fix": "eslint ./src ./*.js ./www/theme/firekylin --fix",
+    "lint-break-on-errors": "npm run lint",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
     "build:pkg": "pkg pkg.js --out-path=dist/"
@@ -31,7 +31,7 @@
     "lint-break-on-errors"
   ],
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1149.0",
+    "@aws-sdk/client-s3": "^3.1150.0",
     "@aws-sdk/s3-presigned-post": "^3.1150.0",
     "@aws-sdk/s3-request-presigner": "^3.1150.0",
     "@codemirror/autocomplete": "^6.20.3",
@@ -122,12 +122,7 @@
   "engines": {
     "node": "^22.13.0 || >=24"
   },
-  "packageManager": "pnpm@10.29.3",
-  "pnpm": {
-    "overrides": {
-      "better-sqlite3": "12.4.1"
-    }
-  },
+  "packageManager": "pnpm@12.11.2",
   "readmeFilename": "README.md",
   "thinkjs": {
     "metadata": {
