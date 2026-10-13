@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Button, Radio } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { OptionsPushProps } from './push.model';
 const RadioGroup = Radio.Group;

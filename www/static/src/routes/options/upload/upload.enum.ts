@@ -3,7 +3,12 @@ export enum UploadEnum {
     QiNiu = 'qiniu',
     Upyun = 'upyun',
     AliYun = 'aliyun',
-    SMMS = 'smms',
     AWSS3 = 's3',
-    Tencent = 'tencent'
+    Tencent = 'tencent',
+    CloudflareR2 = 'r2',
+    MinIO = 'minio',
+    BackblazeB2 = 'backblaze',
+    Wasabi = 'wasabi',
+    DigitalOcean = 'digitalocean',
+    VercelBlob = 'vercel'
 }

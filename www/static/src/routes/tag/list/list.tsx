@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Table, Modal, message, Space } from 'antd';
-import { Observable, of } from 'rxjs';
-import { tap, startWith, switchMap, catchError } from 'rxjs/operators';
-import { useEventCallback } from 'rxjs-hooks';
+import { tap } from 'rxjs/operators';
 import { Tag } from '../../../models/tag.model';
 import { TagAPI } from '../tag.api';
 import { TagProps } from '../tag.model';
@@ -15,22 +13,28 @@ const Column = Table.Column;
 
 export function TagList(props: TagProps) {
     const [loading, setLoading] = useState(false);
+    const [tagList, setTagList] = useState<Tag[]>([]);
 
-    const [eventCallback, tagList] = useEventCallback((event$: Observable<React.MouseEvent<HTMLButtonElement>>) => {
-        return event$.pipe(
-            startWith([]),
-            switchMap(() => TagAPI.queryTagList()),
-            tap(() => {
+    const loadTags = useCallback(() => {
+        setLoading(true);
+        return TagAPI.queryTagList().subscribe({
+            next: tags => {
+                setTagList(tags);
                 setLoading(false);
-            }),
-            catchError(err => {
+            },
+            error: err => {
                 console.error(err);
-                return of([]);
-            })
-        );
+                setLoading(false);
+            },
+        });
     }, []);
 
-    function tagDelete(e: React.MouseEvent<HTMLButtonElement>, id: number) {
+    useEffect(() => {
+        const subscription = loadTags();
+        return () => subscription.unsubscribe();
+    }, [loadTags]);
+
+    function tagDelete(id: number) {
         confirm({
             title: '提示',
             content: '确定删除吗?',
@@ -40,7 +44,7 @@ export function TagList(props: TagProps) {
                     tap(res => {
                         if (res.errno === 0) {
                             message.success('删除成功');
-                            eventCallback(e);
+                            loadTags();
                         }
                     })
                 ).toPromise();
@@ -85,7 +89,7 @@ export function TagList(props: TagProps) {
                             >
                                 编辑
                             </Button>
-                            <Button onClick={(e) => tagDelete(e, tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+                            <Button onClick={() => tagDelete(tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
                         </Space>
                     )}
                 />

@@ -2,7 +2,7 @@ import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Select } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import { CategoryCreateProps } from './create.model';
 
 const Option = Select.Option;

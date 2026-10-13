@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Table, Button, message, Space } from 'antd';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';

@@ -27,14 +27,16 @@ function actor(context) {
 function registerManagementTools(registry, {getModel, now, getCommentService}) {
   const commands = new PostCommandService({getModel: () => getModel('post'), now});
   const queries = new PostQueryService({getModel: () => getModel('post'), now});
-  const register = definition => registry.register(definition, 'core-management');
+  const register = definition => {
+    if (!registry.has(definition.name, 'core:management')) registry.register(definition, 'core:management');
+  };
   const idSchema = {type: 'integer', minimum: 1};
   const objectSchema = (properties, required) => ({
     type: 'object', additionalProperties: false, properties, required
   });
 
   register({
-    name: 'posts.listManaged', description: 'List posts available to the authenticated author',
+    name: 'posts.list_managed', description: 'List posts available to the authenticated author',
     requiredPermissions: ['posts:manage:read'],
     inputSchema: objectSchema({
       page: idSchema, limit: {type: 'integer', minimum: 1, maximum: 100},
@@ -48,8 +50,12 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       const page = input.page === undefined ? 1 : id(input.page);
       const pageSize = input.limit === undefined ? 15 : id(input.limit);
       if (pageSize > 100) throw new TypeError('Invalid limit');
-      if (input.status !== undefined && (!Number.isInteger(input.status) || input.status < 0 || input.status > 4)) throw new TypeError('Invalid status');
-      if (input.keyword !== undefined && (typeof input.keyword !== 'string' || input.keyword.length > 120)) throw new TypeError('Invalid keyword');
+      if (input.status !== undefined && (!Number.isInteger(input.status) || input.status < 0 || input.status > 4)) {
+        throw new TypeError('Invalid status');
+      }
+      if (input.keyword !== undefined && (typeof input.keyword !== 'string' || input.keyword.length > 120)) {
+        throw new TypeError('Invalid keyword');
+      }
       const result = await queries.listAdmin({
         userInfo: principal, page, pageSize,
         status: input.status === undefined ? undefined : input.status,
@@ -60,7 +66,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
   });
 
   register({
-    name: 'posts.getManaged', description: 'Read an article or draft available to the authenticated author',
+    name: 'posts.get_managed', description: 'Read an article or draft available to the authenticated author',
     requiredPermissions: ['posts:manage:read'],
     inputSchema: objectSchema({id: idSchema}, ['id']),
     async execute(raw, context) {
@@ -69,7 +75,9 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       keys(input, ['id']);
       const post = await queries.getAdmin(id(input.id), principal);
       if (!post || !post.id) throw new Error('Post not found or permission denied');
-      const {id: postId, title, pathname, markdown_content, summary, status, is_public, create_time, update_time} = post;
+      const {
+        id: postId, title, pathname, markdown_content, summary, status, is_public, create_time, update_time
+      } = post;
       return {id: postId, title, pathname, markdown_content, summary, status, is_public, create_time, update_time};
     }
   });
@@ -100,7 +108,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
   });
 
   register({
-    name: 'posts.createDraft', description: 'Create an unpublished private article draft',
+    name: 'posts.create_draft', description: 'Create an unpublished private article draft',
     requiredPermissions: ['posts:write'],
     inputSchema: objectSchema({
       title: {type: 'string', minLength: 1, maxLength: 255},
@@ -120,7 +128,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
   });
 
   register({
-    name: 'posts.updateDraft', description: 'Update an existing article draft owned by the caller',
+    name: 'posts.update_draft', description: 'Update an existing article draft owned by the caller',
     requiredPermissions: ['posts:write'],
     inputSchema: objectSchema({
       id: idSchema, title: {type: 'string', minLength: 1, maxLength: 255},
@@ -208,7 +216,9 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       }
       const where = input.status ? {status: input.status} : {};
       const rows = await getModel('comment').where(where).order('inserted_at DESC')
-        .page(page, limit).setRelation(false).select();
+        .page(page, limit)
+.setRelation(false)
+.select();
       return rows.map(({id, post_id, nick, comment, status, inserted_at}) => ({
         id, post_id, nick, comment, status, inserted_at
       }));

@@ -1,4 +1,4 @@
-const push2Firekylin = require('push-to-firekylin');
+const PushToFirekylin = require('../../../service/push-to-firekylin');
 const dayjs = require('dayjs');
 const Base = require('./base');
 const PostQueryService = require('../../../service/post-query');
@@ -44,6 +44,19 @@ module.exports = class extends Base {
     return this.success(data);
   }
 
+  async runCommand(operation) {
+    try { return await operation() } catch (error) {
+      const failures = {
+        PATHNAME_EXIST: 'PATHNAME_EXIST',
+        'Post not found or permission denied': 'USER_NO_PERMISSION',
+        'Authenticated author required': 'USER_NO_PERMISSION',
+        'Invalid post ID': 'PARAMS_ERROR'
+      };
+      if (Object.hasOwn(failures, error.message)) return this.fail(failures[error.message]);
+      throw error;
+    }
+  }
+
   commandService() {
     return new PostCommandService({
       getModel: () => this.model('post'),
@@ -59,43 +72,49 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async postAction() {
-    const data = this.post();
-    const result = await this.commandService().create(data, this.userInfo, {
-      getTagModel: () => this.model('tag')
+    return this.runCommand(async() => {
+      const data = this.post();
+      const result = await this.commandService().create(data, this.userInfo, {
+        getTagModel: () => this.model('tag')
+      });
+      // Preserve existing push integration, but do not block persistence on a remote service.
+      if (data.options && data.markdown_content) void this.pushPost(data).catch(error => think.logger.error(error));
+      return this.success(result);
     });
-    // Preserve existing push integration, but do not block persistence on a remote service.
-    if (data.options && data.markdown_content) void this.pushPost(data).catch(error => think.logger.error(error));
-    return this.success(result);
   }
   /**
    * update user info
    * @return {[type]} [description]
    */
   async putAction() {
-    if (!this.id) return this.fail('PARAMS_ERROR');
-    const data = {...this.post(), id: Number(this.id)};
-    const result = await this.commandService().update(data, this.userInfo, {
-      getTagModel: () => this.model('tag'),
-      normalizePublishTime: (next, post) => {
-        let options = JSON.parse(post.options || '{}');
-        if (typeof options === 'string') options = JSON.parse(options) || {};
-        if (dayjs(next.create_time).isBefore(dayjs()) && !options.origin_create_time) {
-          next.options = JSON.stringify({...options, origin_create_time: next.create_time});
-          next.create_time = think.datetime();
-        } else {
-          delete next.create_time;
+    return this.runCommand(async() => {
+      if (!this.id) return this.fail('PARAMS_ERROR');
+      const data = {...this.post(), id: Number(this.id)};
+      const result = await this.commandService().update(data, this.userInfo, {
+        getTagModel: () => this.model('tag'),
+        normalizePublishTime: (next, post) => {
+          let options = JSON.parse(post.options || '{}');
+          if (typeof options === 'string') options = JSON.parse(options) || {};
+          if (dayjs(next.create_time).isBefore(dayjs()) && !options.origin_create_time) {
+            next.options = JSON.stringify({...options, origin_create_time: next.create_time});
+            next.create_time = think.datetime();
+          } else {
+            delete next.create_time;
+          }
+          return next;
         }
-        return next;
-      }
+      });
+      if (data.markdown_content && data.options) void this.pushPost(data).catch(error => think.logger.error(error));
+      return this.success({affectedRows: result.affectedRows});
     });
-    if (data.markdown_content && data.options) void this.pushPost(data).catch(error => think.logger.error(error));
-    return this.success({affectedRows: result.affectedRows});
   }
 
   async deleteAction() {
-    if (!this.id) return this.fail('PARAMS_ERROR');
-    await this.commandService().remove(Number(this.id), this.userInfo);
-    return this.success();
+    return this.runCommand(async() => {
+      if (!this.id) return this.fail('PARAMS_ERROR');
+      await this.commandService().remove(Number(this.id), this.userInfo);
+      return this.success();
+    });
   }
 
   async pushPost(postData) {
@@ -112,7 +131,9 @@ module.exports = class extends Base {
     let push_sites_keys = postOpt.push_sites;
 
     if (post.markdown_content.slice(0, 5) !== '> 原文：') {
-      const site_url = options.hasOwnProperty('site_url') ? options.site_url : `http://${this.ctx.host}`;
+      const site_url = Object.prototype.hasOwnProperty.call(options, 'site_url')
+        ? options.site_url
+        : `http://${this.ctx.host}`;
       post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
 
 ${post.markdown_content}`;
@@ -128,7 +149,7 @@ ${post.markdown_content}`;
     if (!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys] }
     const pushes = push_sites_keys.map(key => {
       const {appKey, appSecret, url} = push_sites[key];
-      const p2fk = new push2Firekylin(url, appKey, appSecret);
+      const p2fk = new PushToFirekylin(url, appKey, appSecret);
       return p2fk.push(post);
     });
     const result = await Promise.all(pushes);

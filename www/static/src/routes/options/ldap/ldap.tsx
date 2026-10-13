@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Modal, Alert, message } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import './ldap.less';
 import { LDAPProps } from './ldap.model';

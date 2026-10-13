@@ -1,7 +1,7 @@
 import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Modal, Alert, message } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import { QRCodeSVG } from 'qrcode.react';
 const confirm = Modal.confirm;
 import BreadCrumb from '../../../components/breadcrumb';

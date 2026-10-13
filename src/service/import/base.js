@@ -56,6 +56,13 @@ class Base extends think.Service {
   }
 
   /**
+   * 导入评论
+   */
+  async comment() {
+    return 0;
+  }
+
+  /**
    * 处理上传文件获取导入数据
    */
   async parseFile(file) { // eslint-disable-line no-unused-vars
@@ -68,8 +75,9 @@ class Base extends think.Service {
     const tag = await this.tag(data);
     const post = await this.post(data);
     const page = await this.page(data);
+    const comment = await this.comment(data);
 
-    return {user, post, page, tag, category};
+    return {user, post, page, comment, tag, category};
   }
 }
 
