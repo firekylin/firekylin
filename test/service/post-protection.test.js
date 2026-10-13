@@ -20,27 +20,27 @@ function context() {
   };
 }
 
-test('post passwords are salted and verified without storing plaintext', () => {
+test('post passwords are salted and verified without storing plaintext', async() => {
   const protection = new PostProtection();
-  const first = protection.hash('correct horse');
-  const second = protection.hash('correct horse');
+  const first = await protection.hash('correct horse');
+  const second = await protection.hash('correct horse');
   assert.notEqual(first, second);
   assert.equal(first.includes('correct horse'), false);
-  assert.equal(protection.verify('correct horse', first), true);
-  assert.equal(protection.verify('wrong', first), false);
-  assert.equal(protection.verify('correct horse', 'invalid'), false);
+  assert.equal(await protection.verify('correct horse', first), true);
+  assert.equal(await protection.verify('wrong', first), false);
+  assert.equal(await protection.verify('correct horse', 'invalid'), false);
 });
 
-test('unlock cookie is scoped to the post and invalidated by password changes', () => {
+test('unlock cookie is scoped to the post and invalidated by password changes', async() => {
   const protection = new PostProtection();
   const ctx = context();
-  const post = {id: 42, options: {postPasswordHash: protection.hash('secret')}};
+  const post = {id: 42, options: {postPasswordHash: await protection.hash('secret')}};
   assert.equal(protection.isUnlocked(ctx, post), false);
-  assert.equal(protection.unlock(ctx, post, 'wrong'), false);
-  assert.equal(protection.unlock(ctx, post, 'secret'), true);
+  assert.deepEqual(await protection.unlock(ctx, post, 'wrong'), {unlocked: false, limited: false});
+  assert.deepEqual(await protection.unlock(ctx, post, 'secret'), {unlocked: true, limited: false});
   assert.equal(protection.isUnlocked(ctx, post), true);
 
-  post.options.postPasswordHash = protection.hash('new secret');
+  post.options.postPasswordHash = await protection.hash('new secret');
   assert.equal(protection.isUnlocked(ctx, post), false);
 });
 
@@ -50,4 +50,14 @@ test('password prompt escapes its action URL', () => {
   assert.match(html, /密码错误/);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /name="protectPassword"/);
+});
+
+test('password attempts are rate limited per article and client', async() => {
+  const protection = new PostProtection();
+  const ctx = {...context(), ip: '203.0.113.10'};
+  const post = {id: 77, options: {postPasswordHash: await protection.hash('secret')}};
+  for (let count = 0; count < 5; count++) {
+    assert.deepEqual(await protection.unlock(ctx, post, 'wrong'), {unlocked: false, limited: false});
+  }
+  assert.deepEqual(await protection.unlock(ctx, post, 'secret'), {unlocked: false, limited: true});
 });

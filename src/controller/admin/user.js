@@ -12,7 +12,8 @@ module.exports = class extends Base {
     const { username, remember } = this.post();
     let userInfo = {};
     const model = this.model('options');
-    const options = await model.getOptions();
+    const options = await model.getOptions(true);
+    this.ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
 
     // 二步验证
     if (options.two_factor_auth) {
@@ -98,6 +99,8 @@ module.exports = class extends Base {
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
+    const options = await this.model('options').getOptions(true);
+    this.ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
     adminAuth.login(this.ctx, userInfo, remember);
     return this.redirect('/admin');
   }

@@ -191,7 +191,9 @@ class PluginManager {
       }),
       templates: this.templates.api(pluginId),
       tools: Object.freeze({
-        register: definition => this.tools.register(definition, pluginId)
+        register: definition => this.tools.register(definition, pluginId),
+        list: () => this.tools.list(),
+        execute: (name, input, context) => this.tools.execute(name, input, context)
       }),
       widgets: Object.freeze({
         Widget,

@@ -22,5 +22,26 @@
         .category {
             .control-item();
         }
+        .custom-fields {
+            .custom-field-row {
+                display: flex;
+                gap: 6px;
+                margin-bottom: 8px;
+
+                .ant-input:first-child {
+                    width: 38%;
+                }
+            }
+
+            .custom-field-add {
+                width: 100%;
+            }
+
+            .custom-field-error {
+                color: #ff4d4f;
+                font-size: 12px;
+                margin: -4px 0 8px;
+            }
+        }
     }
 }

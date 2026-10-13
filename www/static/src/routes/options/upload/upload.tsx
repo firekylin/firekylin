@@ -1,17 +1,31 @@
 import React from 'react';
 import { Form, FormInstance } from 'antd';
-import { Button, Radio } from 'antd';
+import { Button, Select } from 'antd';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { OptionsUploadProps } from './upload.model';
 import { UploadEnum } from './upload.enum';
 import BreadCrumb from '../../../components/breadcrumb';
-const RadioGroup = Radio.Group;
 import OptionsUploadQiNiuFormItems from './qiniu/qiniu';
 import './upload.less';
 import OptionsUploadUpYunFormItems from './upyun/upyun';
 import OptionsUploadAliYunFormItems from './aliyun/aliyun';
-import OptionsUploadS3FormItems from './s3/s3';
 import OptionsUploadTencentFormItems from './tencent/tencent';
+import OptionsUploadCloudFormItems from './cloud/cloud';
+
+const uploadProviders = [
+    {value: UploadEnum.Local, label: '本地'},
+    {value: UploadEnum.QiNiu, label: '七牛云'},
+    {value: UploadEnum.Upyun, label: '又拍云'},
+    {value: UploadEnum.AliYun, label: '阿里云 OSS'},
+    {value: UploadEnum.AWSS3, label: 'AWS S3 / S3 兼容存储'},
+    {value: UploadEnum.Tencent, label: '腾讯云 COS'},
+    {value: UploadEnum.CloudflareR2, label: 'Cloudflare R2'},
+    {value: UploadEnum.MinIO, label: 'MinIO'},
+    {value: UploadEnum.BackblazeB2, label: 'Backblaze B2'},
+    {value: UploadEnum.Wasabi, label: 'Wasabi'},
+    {value: UploadEnum.DigitalOcean, label: 'DigitalOcean Spaces'},
+    {value: UploadEnum.VercelBlob, label: 'Vercel Blob'}
+];
 
 @inject('optionsUploadStore')
 @observer
@@ -37,12 +51,16 @@ class OptionsUploadForm extends React.Component<OptionsUploadProps, {}> {
                 return <OptionsUploadUpYunFormItems upload={upload} />;
             case UploadEnum.AliYun:
                 return <OptionsUploadAliYunFormItems upload={upload} />;
-            case UploadEnum.SMMS:
-                return <p>选用此功能图片将上传至第三方图床 : <a href="https://sm.ms/" target="_blank">SM.MS 图床</a></p>;
-            case UploadEnum.AWSS3:
-                return <OptionsUploadS3FormItems upload={upload} />;
             case UploadEnum.Tencent:
                 return <OptionsUploadTencentFormItems upload={upload} />;
+            case UploadEnum.AWSS3:
+            case UploadEnum.CloudflareR2:
+            case UploadEnum.MinIO:
+            case UploadEnum.BackblazeB2:
+            case UploadEnum.Wasabi:
+            case UploadEnum.DigitalOcean:
+            case UploadEnum.VercelBlob:
+                return <OptionsUploadCloudFormItems key={type} upload={upload} />;
             default:
                 return null;
         }
@@ -66,20 +84,14 @@ class OptionsUploadForm extends React.Component<OptionsUploadProps, {}> {
                                 name="type"
                                 initialValue={upload.type || UploadEnum.Local}
                             >
-                                <RadioGroup
-                                    onChange={e => {
+                                <Select
+                                    style={{width: '100%'}}
+                                    options={uploadProviders}
+                                    onChange={value => {
                                         this.formRef.current?.resetFields();
-                                        setUpload({type: e.target.value});
+                                        setUpload({type: value});
                                     }}
-                                >
-                                    <Radio value={UploadEnum.Local}>本地</Radio>
-                                    <Radio value={UploadEnum.QiNiu}>七牛云</Radio>
-                                    <Radio value={UploadEnum.Upyun}>又拍云</Radio>
-                                    <Radio value={UploadEnum.AliYun}>阿里云</Radio>
-                                    <Radio value={UploadEnum.SMMS}>SM.MS 图床</Radio>
-                                    <Radio value={UploadEnum.AWSS3}>AWS S3</Radio>
-                                    <Radio value={UploadEnum.Tencent}>腾讯云</Radio>
-                                </RadioGroup>
+                                />
                             </Form.Item>
                             {
                                 this.renderUploadItems()

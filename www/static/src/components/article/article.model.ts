@@ -42,7 +42,7 @@ export interface ArticleInfo {
         featuredImage: string;
         push_sites: any[];
         passwordProtected: boolean;
-        fields: Record<string, any>;
+        fields: Record<string, string>;
     };
     user_id: string;
     status: number;
@@ -54,5 +54,5 @@ export interface ArticleInfoOptions {
     featuredImage: string;
     push_sites: any[];
     passwordProtected: boolean;
-    fields: Record<string, any>;
+    fields: Record<string, string>;
 }

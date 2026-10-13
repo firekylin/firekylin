@@ -49,6 +49,7 @@ test('base controller reuses options widget data for the installation check', as
         return {
           comment: {name: '{}'},
           navigation: '[]',
+          jwt_secret: 'controller-test-secret-with-at-least-32-bytes',
           site_url: 'https://example.com',
           theme: 'firekylin',
           themeConfig: '{}'
@@ -59,6 +60,7 @@ test('base controller reuses options widget data for the installation check', as
 
   await controller.__before();
   assert.deepEqual(queriedModels, ['options']);
+  assert.equal(controller.ctx.state.jwtSecret, 'controller-test-secret-with-at-least-32-bytes');
   assert.equal(typeof controller.data.widget, 'function');
   assert.equal(typeof controller.data.widget.destroy, 'function');
 

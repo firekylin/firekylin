@@ -70,14 +70,14 @@ module.exports = class extends ContentsWidget {
   }
 
   async executePost() {
-    let detail = await this.getPreview();
-    detail = detail || await this.model('post').getPostDetail(this.controller.get('pathname'));
-    detail = this.protect(detail);
+    const preview = await this.getPreview();
+    let detail = preview || await this.model('post').getPostDetail(this.controller.get('pathname'));
+    detail = await this.protect(detail, Boolean(preview));
     if (!think.isEmpty(detail)) this.push(Object.assign({type: 0}, detail));
   }
 
-  protect(detail) {
-    if (think.isEmpty(detail) || this.controller.get('preview')) return detail;
+  async protect(detail, isPreview = false) {
+    if (think.isEmpty(detail) || isPreview) return detail;
     let options = detail.options || {};
     if (typeof options === 'string') {
       try { options = JSON.parse(options) || {} } catch { options = {} }
@@ -87,19 +87,22 @@ module.exports = class extends ContentsWidget {
     detail.options = options;
     const protection = this.controller.service('post-protection');
     let error = false;
+    let limited = false;
     if (this.ctx.method === 'POST' && this.controller.post('protectPassword')) {
-      if (protection.unlock(this.ctx, detail, this.controller.post('protectPassword'))) {
+      const result = await protection.unlock(this.ctx, detail, this.controller.post('protectPassword'));
+      if (result.unlocked) {
         delete detail.options.postPasswordHash;
         return detail;
       }
       error = true;
+      limited = result.limited;
     } else if (protection.isUnlocked(this.ctx, detail)) {
       delete detail.options.postPasswordHash;
       return detail;
     }
 
     delete detail.options.postPasswordHash;
-    detail.content = protection.form(this.ctx, error);
+    detail.content = protection.form(this.ctx, error, limited);
     detail.summary = '这篇文章受密码保护。';
     detail.allow_comment = 0;
     detail.password_protected = true;

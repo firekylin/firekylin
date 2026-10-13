@@ -8,6 +8,10 @@ const widget = require('../widget/registry');
 const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
+const {registerContentTools} = require('../plugin/content-tools');
+const {registerManagementTools} = require('../plugin/management-tools');
+const {registerMediaTools} = require('../plugin/media-tools');
+const {migrateOAuthModels} = require('../mcp/oauth-schema');
 const pack = require('../../package.json');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
@@ -44,6 +48,19 @@ const pluginManager = existingPluginManager || new PluginManager({
   logger: console
 });
 global.firekylin.plugins = pluginManager;
+registerContentTools(pluginManager.tools, {
+  getModel: () => think.model('post'),
+  now: () => think.datetime()
+});
+registerManagementTools(pluginManager.tools, {
+  getModel: name => think.model(name),
+  now: () => think.datetime(),
+  getCommentService: () => think.service('comment')
+});
+registerMediaTools(pluginManager.tools, {
+  getUploadConfig: async() => (await think.model('options').getOptions()).upload,
+  getUploader: type => think.service('upload/' + type)
+});
 if (!existingPluginManager) {
   pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
     console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
@@ -86,5 +103,23 @@ if (!global[commentMigrationKey]) {
   think.beforeStartServer(async() => {
     const migrated = await think.service('comment-schema').migrate({skipIfUninstalled: true});
     if (migrated) think.logger.info('[comment] database schema migrated');
+  });
+}
+
+const oauthMigrationKey = Symbol.for('firekylin.mcp.oauthMigration');
+if (!global[oauthMigrationKey]) {
+  global[oauthMigrationKey] = true;
+  think.beforeStartServer(async() => {
+    try {
+      // Do not attempt migration before the site has been installed.
+      const options = await think.model('options').getOptions(true);
+      if (!options.site_url) return;
+      await migrateOAuthModels({
+        model: think.model('user'), config: think.config('model')
+      });
+    } catch (error) {
+      if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
+      throw error;
+    }
   });
 }

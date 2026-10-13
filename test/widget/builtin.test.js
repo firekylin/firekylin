@@ -36,6 +36,24 @@ test('recent posts uses configured and explicit page sizes', async() => {
   assert.equal(defaultWidget.permalink, '/post/recent.html');
 });
 
+test('content widgets expose custom fields stored in post options', async() => {
+  const post = {
+    async getPostList() {
+      return {data: [{
+        title: 'Custom fields',
+        pathname: 'custom-fields',
+        options: JSON.stringify({fields: {mood: 'sunny', location: 'Shanghai'}})
+      }]};
+    }
+  };
+  const widget = new RecentPosts(controller({post}), {pageSize: 1});
+  await widget.execute();
+  widget.next();
+
+  assert.deepEqual(widget.fields, {mood: 'sunny', location: 'Shanghai'});
+  assert.deepEqual(widget.row.fields, {mood: 'sunny', location: 'Shanghai'});
+});
+
 test('tag cloud filters, sorts and limits rows', async() => {
   const tag = {
     async getTagArchive() {
@@ -84,6 +102,7 @@ test('options widget parses theme data and exposes native comment settings', asy
       return {
         comment: {pageSize: 20},
         navigation: '[{"label":"Home","url":"/"}]',
+        jwt_secret: 'widget-test-secret-with-at-least-32-bytes',
         theme: 'firekylin',
         themeConfig: '{"customCSS":"body{}"}',
         title: 'Blog'
@@ -102,5 +121,7 @@ test('options widget parses theme data and exposes native comment settings', asy
   assert.deepEqual(widget.navigation, [{label: 'Home', url: '/'}]);
   assert.equal(widget.themeConfig.customCSS, 'body{}');
   assert.deepEqual(widget.row.comment, {pageSize: 20});
+  assert.equal(widget.ctx.state.jwtSecret, 'widget-test-secret-with-at-least-32-bytes');
+  assert.equal(widget.row.jwt_secret, undefined);
   assert.equal(widget.themeUrl('/res/app.css'), '/theme/firekylin/res/app.css');
 });

@@ -1,0 +1,395 @@
+{
+  "package": "firekylin",
+  "manifestVersion": "2.8.0",
+  "scope": "Built-in registry metadata, not a deployed client tools/list response",
+  "tools": [
+    {
+      "name": "posts.list",
+      "description": "List publicly published blog articles, newest first",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          }
+        }
+      },
+      "requiredPermissions": [
+        "posts:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.get",
+      "description": "Read a publicly published blog article by numeric ID",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.search",
+      "description": "Search titles or content of publicly published articles",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.list_managed",
+      "description": "List posts available to the authenticated author",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          },
+          "keyword": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "required": []
+      },
+      "requiredPermissions": [
+        "posts:manage:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.get_managed",
+      "description": "Read an article or draft available to the authenticated author",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:manage:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.update",
+      "description": "Update an existing article, including published posts",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "markdown_content": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:write"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "posts.create_draft",
+      "description": "Create an unpublished private article draft",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "markdown_content": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "title",
+          "pathname",
+          "markdown_content"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.update_draft",
+      "description": "Update an existing article draft owned by the caller",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "markdown_content": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "posts.publish",
+      "description": "Publish a draft or pending post (administrator only)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:publish"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "posts.delete",
+      "description": "Permanently delete a post (irreversible)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "posts:delete"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "categories.list",
+      "description": "List blog categories",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "requiredPermissions": [
+        "taxonomy:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "tags.list",
+      "description": "List blog tags",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "requiredPermissions": [
+        "taxonomy:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "comments.list",
+      "description": "List comments for moderation (administrators only)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "waiting",
+              "spam"
+            ]
+          }
+        },
+        "required": []
+      },
+      "requiredPermissions": [
+        "comments:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "comments.approve",
+      "description": "Approve a waiting comment",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "comments:moderate"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "media.upload",
+      "description": "Upload a PNG, JPEG or GIF image from base64 data; remote URLs are not supported",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "png",
+              "jpeg",
+              "gif"
+            ]
+          },
+          "base64": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "format",
+          "base64"
+        ]
+      },
+      "requiredPermissions": [
+        "media:write"
+      ],
+      "requiresApproval": false
+    }
+  ]
+}
