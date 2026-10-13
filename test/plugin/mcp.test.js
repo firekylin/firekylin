@@ -43,12 +43,12 @@ test('Origin headers are rejected unless explicitly allowed', () => {
 test('MCP only advertises authorized tools and never approval-gated tools', () => {
   const tools = [
     {name: 'posts.list', requiredPermissions: ['posts:read'], requiresApproval: false},
-    {name: 'posts.createDraft', requiredPermissions: ['posts:write'], requiresApproval: false},
+    {name: 'posts.create_draft', requiredPermissions: ['posts:write'], requiresApproval: false},
     {name: 'posts.publish', requiredPermissions: ['posts:publish'], requiresApproval: true}
   ];
   assert.deepEqual(exposedTools(tools, new Set(['posts:read'])).map(tool => tool.name), ['posts.list']);
   assert.deepEqual(exposedTools(tools, new Set(['posts:read', 'posts:write', 'posts:publish']))
-    .map(tool => tool.name), ['posts.list', 'posts.createDraft']);
+    .map(tool => tool.name), ['posts.list', 'posts.create_draft']);
 });
 
 test('tool registration and execution are backed by Tool Registry with safe error output', async() => {
@@ -91,9 +91,9 @@ test('HTTP endpoint checks token and responds using MCP HTTP SDK bridge', async(
     fromJsonSchema: schema => schema,
     createMcpHandler(factory) {
       factory();
-      return async request => new Response(JSON.stringify({jsonrpc: '2.0', id: 1, result: {ok: true}}), {
+      return {fetch: async request => new Response(JSON.stringify({jsonrpc: '2.0', id: 1, result: {ok: true}}), {
         headers: {'content-type': 'application/json'}
-      });
+      })};
     }
   };
   const endpoint = await createMcpEndpoint({

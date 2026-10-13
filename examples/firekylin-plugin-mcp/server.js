@@ -115,7 +115,7 @@ async function createMcpEndpoint({tools, config = {}, getUser, logger = console,
       headers,
       ...(rawBody ? {body: rawBody} : {})
     });
-    const response = await handler(request);
+    const response = await handler.fetch(request);
     ctx.status = response.status;
     for (const name of ['content-type', 'cache-control', 'mcp-protocol-version', 'mcp-session-id', 'allow']) {
       const value = response.headers.get(name);
