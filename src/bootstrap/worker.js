@@ -45,12 +45,10 @@ const pluginManager = existingPluginManager || new PluginManager({
   logger: console
 });
 global.firekylin.plugins = pluginManager;
-if (!pluginManager.tools.list().some(tool => tool.name === 'posts.get')) {
-  registerContentTools(pluginManager.tools, {
-    getModel: () => think.model('post'),
-    now: () => think.datetime()
-  });
-}
+registerContentTools(pluginManager.tools, {
+  getModel: () => think.model('post'),
+  now: () => think.datetime()
+});
 if (!existingPluginManager) {
   pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
     console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);

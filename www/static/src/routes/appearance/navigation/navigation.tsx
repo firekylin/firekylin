@@ -8,7 +8,7 @@ import {
 
 import { Input, Divider, Button, message } from 'antd';
 import React from 'react';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import classNames from 'classnames';
 import BreadCrumb from '../../../components/breadcrumb';
 import './navigation.less';

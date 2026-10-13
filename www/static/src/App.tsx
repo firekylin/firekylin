@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Provider } from 'mobx-react';
+import { configureStores } from '@admin/utils/mobx-react';
 
 import routes from './routes';
 import store from './app.store';
@@ -12,6 +12,5 @@ if (Object.freeze) {
     Object.freeze(window.SysConfig.userInfo);
 }
 
-createRoot(document.getElementById('app') as HTMLElement).render(
-    <Provider {...store}>{routes}</Provider>,
-);
+configureStores(store);
+createRoot(document.getElementById('app') as HTMLElement).render(routes);

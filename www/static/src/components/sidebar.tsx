@@ -29,14 +29,22 @@ class SideBar extends React.Component<any, any> {
     render() {
         let routes = this.state.routes;
         let userType = window.SysConfig.userInfo.type || 0;
-        routes = routes.filter(item => {
-            if (!item.type) {
-                return true;
-            }
-            if (userType <= item.type) {
-                return true;
-            }
-        });
+        if (userType === 4) {
+            routes = [
+                {url: '/comment', icon: 'topic', title: '我的评论'},
+                {url: `/user/edit/${window.SysConfig.userInfo.id}`, icon: 'user', title: '账号设置'},
+                {url: '/user/edit_pwd', icon: 'setting', title: '修改密码'},
+            ];
+        } else {
+            routes = routes.filter(item => {
+                if (!item.type) {
+                    return true;
+                }
+                if (userType <= item.type) {
+                    return true;
+                }
+            });
+        }
         return (
             <div className="fk-side ps-container" id="fk-side">
                 <div className="mod">

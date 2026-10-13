@@ -25,6 +25,9 @@ module.exports = class extends think.Controller {
       return;
     }
 
+    const authOptions = await this.model('options').getOptions(true);
+    this.authOptions = authOptions;
+    this.ctx.state.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
     const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       if (this.isAjax()) {
@@ -41,8 +44,10 @@ module.exports = class extends think.Controller {
     if (this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
-    const model = this.model('options');
-    let options = await model.getOptions();
+    let options = {...this.authOptions};
+    delete options.jwt_secret;
+    delete options.comment_jwt_secret;
+    delete options.comment_schema_version;
     // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);
@@ -50,6 +55,11 @@ module.exports = class extends think.Controller {
       options.navigation = JSON.parse(options.navigation);
     } catch (e) { options.navigation = [] }
     delete options.push_sites; // 不显示推送的配置，会有安全问题
+    try {
+      options.social_services = await this.service('social-auth').services();
+    } catch {
+      options.social_services = [];
+    }
 
     if (firekylin.require('auth')) {
       options.intranet = true;
@@ -62,7 +72,8 @@ module.exports = class extends think.Controller {
         two_factor_auth: options.two_factor_auth,
         password_salt: options.password_salt,
         ldap_on: options.ldap_on,
-        intranet: options.intranet
+        intranet: options.intranet,
+        social_services: options.social_services
       };
     }
 

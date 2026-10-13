@@ -1,5 +1,5 @@
 import  React from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Tree, Modal, Button, message } from 'antd';
 import { ThemeEditProps } from './edit.modal';

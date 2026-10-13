@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 // import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
-import { message, Input, Select } from 'antd';
+import { message, Input, Select, Button, Space, Tag } from 'antd';
 import md5 from 'md5';
 import UserStore from '../user.store';
 import { RouteComponentProps } from '@admin/utils/router';
@@ -75,7 +75,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
      */
     handleValidSubmit = (values: any) => {
         delete values.repassword;
-        if (this.id && values.password === '') {
+        if (this.id && !values.password) {
             delete values.password;
         } else {
             let password = md5(window.SysConfig.options.password_salt + values.password);
@@ -89,7 +89,8 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
         this.userStore.saveUser(values, () => {
             message.success(this.id ? '保存成功' : '添加成功');
             this.userStore.setSubmitting(false);
-            setTimeout(() => this.props.history.push('/user/list'), 1000);
+            const target = window.SysConfig.userInfo.type === 4 ? `/user/edit/${this.id}` : '/user/list';
+            setTimeout(() => this.props.history.push(target), 1000);
         },                      () => {
             message.error('保存失败');
             this.userStore.setSubmitting(false);
@@ -101,6 +102,11 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
         if (this.id) {
             this.userStore.generateKey(this.id);
         }
+    }
+
+    bindSocial(provider: string) {
+        const redirect = `${window.location.origin}/admin/user/edit/${this.id}`;
+        window.location.href = `/api/comment/oauth?type=${encodeURIComponent(provider)}&redirect=${encodeURIComponent(redirect)}`;
     }
 
     /**
@@ -116,7 +122,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
         };
         if (this.id && ['name', 'email'].indexOf(type) > -1) {
             if (type === 'email') {
-                if (this.userStore.userInfo.email) {
+                if (this.userStore.userInfo.email && window.SysConfig.userInfo.type !== 4) {
                     prop.disabled = true;
                 }
             } else {
@@ -149,6 +155,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
      */
     render() {
         const { userInfo } = this.props.userStore;
+        const isCommenter = window.SysConfig.userInfo.type === 4;
         let props = {
             disabled: false,
         };
@@ -219,7 +226,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                             <Form.Item label="密码"
                                 name="password"
                                 rules={[{
-                                    required: true, message: '请输入密码!',
+                                    required: !this.id, message: '请输入密码!',
                                 }, {
                                     min: 8,
                                     max: 30,
@@ -232,7 +239,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                             <Form.Item label="确认密码"
                                 name="repassword"
                                 rules={[{
-                                    required: true, message: '请再次确认密码!',
+                                    required: !this.id, message: '请再次确认密码!',
                                 }, {
                                     validator: this.compareToFirstPassword,
                                 }]}
@@ -249,7 +256,7 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                             >
                                 <Input {...this.isDisabled('display_name')} placeholder="显示名称" />
                             </Form.Item>
-                            <Form.Item label="用户组"
+                            {!isCommenter ? <Form.Item label="用户组"
                                 name="type"
                             >
                                 <Select {...this.isDisabled('type')} className="form-control">
@@ -257,17 +264,17 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                     <Option value="1">管理员</Option>
                                     <Option value="3">投稿者</Option>
                                 </Select>
-                            </Form.Item>
-                            <Form.Item label="状态"
+                            </Form.Item> : null}
+                            {!isCommenter ? <Form.Item label="状态"
                                 name="status"
                             >
                                 <Select {...this.isDisabled('status')} className="form-control">
                                         <Option value="1">有效</Option>
                                         <Option value="2">禁用</Option>
                                     </Select>
-                            </Form.Item>
+                            </Form.Item> : null}
                             {/*<filedset>*/}
-                                <legend>
+                                {!isCommenter ? <><legend>
                                     认证
                                     <button
                                         type="button"
@@ -288,6 +295,27 @@ class UserCreateForm extends React.Component<UserCreateProps, any> {
                                     <Input type="text" className="form-control" disabled={true}
                                            value={this.userStore.userInfo.app_secret} />
                                 </div>
+                                </> : null}
+                                {String(window.SysConfig.userInfo.id) === String(this.id) ? (
+                                    <div className="form-group">
+                                        <legend>社交账号</legend>
+                                        <Space direction="vertical" align="start">
+                                            {(userInfo.social_services || []).map(service => {
+                                                const account = (userInfo.social_accounts || []).find(item => item.provider === service.name);
+                                                return (
+                                                    <Space key={service.name}>
+                                                        <Tag color={account ? 'green' : 'default'}>{service.title || service.name}</Tag>
+                                                        {account ? (
+                                                            <Button size="small" danger onClick={() => this.userStore.unlinkSocial(service.name)}>解绑</Button>
+                                                        ) : (
+                                                            <Button size="small" onClick={() => this.bindSocial(service.name)}>绑定</Button>
+                                                        )}
+                                                    </Space>
+                                                );
+                                            })}
+                                        </Space>
+                                    </div>
+                                ) : null}
                             {/*</filedset>*/}
                         </div>
                     </Form>

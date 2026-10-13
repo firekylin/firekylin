@@ -11,6 +11,7 @@ module.exports = class extends Base {
     const keyword = String(this.get('keyword') || '').trim();
     const author = String(this.get('author') || '').trim();
     const where = status ? {status} : {};
+    if (Number(this.userInfo.type) === 4) where.user_id = String(this.userInfo.id);
     if (keyword) where.comment = ['LIKE', `%${keyword}%`];
     if (author) {
       const pattern = `%${author}%`;
@@ -70,6 +71,9 @@ module.exports = class extends Base {
     const model = this.model('comment');
     const comment = await model.where({id}).find();
     if (think.isEmpty(comment)) return this.fail('COMMENT_NOT_FOUND');
+    const isCommenter = Number(this.userInfo.type) === 4;
+    if (isCommenter && String(comment.user_id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
+    if (isCommenter && !['delete', 'edit'].includes(action)) return this.fail('USER_NO_PERMISSION');
     if (action === 'delete') await model.where({id}).delete();
     else if (['approved', 'waiting', 'spam'].includes(action)) await model.where({id}).update({status: action, updated_at: think.datetime()});
     else if (action === 'edit') await model.where({id}).update({comment: String(this.post('comment') || ''), updated_at: think.datetime()});

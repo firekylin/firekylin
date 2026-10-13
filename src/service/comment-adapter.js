@@ -182,7 +182,7 @@ class UserAdapter extends ModelAdapter {
     const email = data.email;
     const base = String(email).split('@')[0].replace(/[^a-z0-9_-]/ig, '').slice(0, 30) || 'commenter';
     let name = base; let suffix = 0;
-    while (await this.model.where({name}).count()) name = `${base}-${++suffix}`;
+    while (Number(await this.model.where({name}).count()) > 0) name = `${base}-${++suffix}`;
     const now = think.datetime();
     const id = await this.model.add({name, display_name: data.display_name || name, email, password: data.password || '', type: 4, status: 1, create_time: now, last_login_time: now, create_ip: '', last_login_ip: '', url: data.url || null, avatar: data.avatar || null, comment_label: data.label || null, comment_2fa: data['2fa'] || null});
     return this.toApi(await this.model.where({id}).find());

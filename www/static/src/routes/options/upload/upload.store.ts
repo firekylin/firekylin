@@ -18,6 +18,9 @@ class OptionsUploadStore {
         upyunBucket: '',
         upyunOrigin: '',
         upyunPrefix: '',
+        endpoint: '',
+        accountId: '',
+        token: '',
     };
 
     constructor() {
@@ -34,9 +37,7 @@ class OptionsUploadStore {
             res => {
                 if (res.errno === 0) {
                     message.success('上传设置更新成功');
-                    window.SysConfig.options.upload = JSON.stringify({
-                        'upload': JSON.stringify(data)
-                    });
+                    window.SysConfig.options.upload = JSON.stringify(data);
                 }
             }
         );
