@@ -18,7 +18,9 @@ class ArticleStore {
     options: {
       template: '',
       featuredImage: '',
-      push_sites: []
+      push_sites: [],
+      passwordProtected: false,
+      fields: {}
     },
     status: ArticleEnum.SAVE,
     user_id: '',
@@ -49,7 +51,9 @@ class ArticleStore {
       options: JSON.stringify({
         template: '',
         featuredImage: '',
-        push_sites: []
+        push_sites: [],
+        passwordProtected: false,
+        fields: {}
       }),
       status: ArticleEnum.DRAFT,
       user_id: '',
@@ -84,6 +88,7 @@ class ArticleStore {
                 } else {
                     res.data.options.push_sites = res.data.options.push_sites || [];
                 }
+                res.data.options.fields = res.data.options.fields || {};
                 this.setArticleInfo({ ...res.data });
             }
         }

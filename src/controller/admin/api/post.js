@@ -31,6 +31,8 @@ module.exports = class extends Base {
       } else {
         data.options = {};
       }
+      data.options.passwordProtected = Boolean(data.options.postPasswordHash);
+      delete data.options.postPasswordHash;
     } else {
       const where = {};
       // 不是管理员，只显示个人的文章
@@ -101,6 +103,7 @@ module.exports = class extends Base {
    */
   async postAction() {
     let data = this.post();
+    data = await this.prepareProtection(data);
     // check pathname
     const post = await this.modelInstance.where({pathname: data.pathname}).find();
     if (!think.isEmpty(post)) {
@@ -134,6 +137,7 @@ module.exports = class extends Base {
 
     let data = this.post();
     data.id = this.id;
+    data = await this.prepareProtection(data, this.id);
 
     /** 判断接收的参数中是否有 markdown_content 来区别审核通过的状态修改和普通的文章更新 */
     if (data.markdown_content) {
@@ -236,6 +240,29 @@ ${post.markdown_content}`;
     });
     const result = await Promise.all(pushes);
     console.log('push result for debug: ', result); // eslint-disable-line no-console
+  }
+
+  async prepareProtection(data, id) {
+    let current = {};
+    if (id) {
+      const post = await this._modelInstance.where({id}).setRelation(false).field('options')
+        .find();
+      try { current = JSON.parse(post.options || '{}') || {} } catch { current = {} }
+    }
+    let incoming = {};
+    try { incoming = JSON.parse(data.options || '{}') || {} } catch { incoming = {} }
+    delete incoming.passwordProtected;
+    delete incoming.postPasswordHash;
+    const options = Object.assign({}, current, incoming);
+    if (data.clear_post_password === '1' || data.clear_post_password === 1) {
+      delete options.postPasswordHash;
+    } else if (data.post_password) {
+      options.postPasswordHash = this.service('post-protection').hash(data.post_password);
+    }
+    delete data.post_password;
+    delete data.clear_post_password;
+    data.options = JSON.stringify(options);
+    return data;
   }
 
   async lastest() {
