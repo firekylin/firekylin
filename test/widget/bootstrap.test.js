@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const Module = require('node:module');
 const path = require('node:path');
 const test = require('node:test');
+const ToolRegistry = require('../../src/plugin/tools');
 
 test('worker bootstrap can be evaluated again with a retained registry', () => {
   const originalLoad = Module._load;
@@ -20,6 +21,7 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     constructor() {
       managerInstances += 1;
       this.events = {emit() {}};
+      this.tools = new ToolRegistry();
     }
 
     async load() {
@@ -47,6 +49,7 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     assert.equal(managerInstances, 1);
     assert.equal(pluginLoads, 1);
     assert.equal(startHooks.length, 1);
+    assert.deepEqual(firstManager.tools.list().map(tool => tool.name), ['posts.list', 'posts.get', 'posts.search']);
   } finally {
     Module._load = originalLoad;
     delete require.cache[workerPath];

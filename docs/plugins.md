@@ -162,6 +162,22 @@ const result = await pluginManager.tools.execute('posts.lookup', {id: 123}, {
 
 未提供授权回调时执行会被拒绝。高风险操作应由上层额外实施审批、资源级授权及审计。工具的 `inputSchema` 当前仅存储为元数据，**调用方必须负责入参校验**。未来 MCP Adapter 不得把来自模型的参数当作已验证输入。插件停用时会自动注销其所有工具。
 
+### 内置公开文章 Tools
+
+在 worker 启动时，Firekylin 注册三个只读工具：`posts.list`、`posts.get`、`posts.search`。
+三个工具都要求调用方提供 `posts:read` 授权判断，只查询公开、已发布、发布时间不晚于当前时间的文章（`type=0, status=3, is_public=1`）。
+
+```js
+const tools = global.firekylin.plugins.tools;
+const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10}, {
+  // Example only: the real MCP adapter MUST derive permissions from verified credentials.
+  authorize: permission => permission === 'posts:read',
+  principal: {type: 'public'}
+});
+```
+
+工具结果使用有限字段白名单；详情工具额外返回 Markdown 正文。此功能仅提供内部操作层，**不会开放新的 HTTP 路由或 MCP 端点**。后续对外暴露必须实现真实身份认证、请求参数 JSON Schema 校验、限流与审计。首版不提供任何草稿/私密文章读取能力。
+
 ## Widget 扩展
 
 插件可以注册异步 Widget：

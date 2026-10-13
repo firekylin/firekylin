@@ -27,6 +27,11 @@ class ToolRegistry {
     return entry;
   }
 
+  has(name, owner) {
+    const tool = this.tools.get(name);
+    return !!tool && (owner === undefined || tool.owner === owner);
+  }
+
   list() {
     return [...this.tools.values()].map(({name, description, inputSchema, requiredPermissions}) => ({
       name, description, inputSchema, requiredPermissions: [...requiredPermissions]

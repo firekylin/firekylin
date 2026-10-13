@@ -1,6 +1,7 @@
 const PushToFirekylin = require('../../../service/push-to-firekylin');
 const dayjs = require('dayjs');
 const Base = require('./base');
+const PostQueryService = require('../../../service/post-query');
 
 module.exports = class extends Base {
   constructor(...args) {
@@ -17,77 +18,27 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async getAction() {
-    // this.modelInstance.field('id,user_id,type,status,title,pathname,create_time,update_time');
-    if (this.get('type') === 'lastest') {
-      return this.lastest();
-    }
+    if (this.get('type') === 'lastest') return this.lastest();
 
+    const service = new PostQueryService({
+      getModel: () => this.model('post'),
+      now: () => think.datetime()
+    });
     let data;
     if (this.id) {
-      data = await this.modelInstance.where({id: this.id}).find();
-      // 文章选项
-      if (data.options) {
-        data.options = JSON.parse(data.options) || {};
-      } else {
-        data.options = {};
-      }
+      data = await service.getAdmin(this.id, this.userInfo);
+      if (!data || !data.id) return this.fail('USER_NO_PERMISSION');
+      data.options = data.options ? JSON.parse(data.options) || {} : {};
     } else {
-      const where = {};
-      // 不是管理员，只显示个人的文章
-      if (this.userInfo.type !== 1) {
-        where.user_id = this.userInfo.id;
-      }
-
-      const {status, keyword, cate: cateText} = this.get();
+      const {status, keyword, cate} = this.get();
       const requestedPageSize = Number(this.get('pageSize'));
       const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
         ? Math.min(requestedPageSize, 100)
         : 15;
-      if (status) {
-        where.status = status;
-      } else {
-        // 已删除的文章不展示在全部列表里
-        where.status = ['!=', 4];
-      }
-
-      if (keyword) {
-        let keywords = keyword.split(/\s+/g);
-        if (keywords.indexOf(':public') > -1 || keywords.indexOf(':private') > -1) {
-          where.is_public = Number(keywords.indexOf(':public') > -1);
-          keywords = keywords.filter(word => word !== ':public' && word !== ':private');
-        }
-        if (keywords.length > 0) {
-          where.title = ['like', keywords.map(word => `%${word}%`)];
-        }
-      }
-
-      if (cateText) {
-        const cate = parseInt(cateText);
-        if (!isNaN(cate)) {
-          this.modelInstance.join({
-            table: 'post_cate',
-            join: 'left',
-            on: ['id', 'post_id']
-          });
-          where.cate_id = cate;
-        }
-      }
-
-      const field = [
-        `${this.modelInstance.config.prefix}post.id`,
-        'title',
-        'user_id',
-        'create_time',
-        'update_time',
-        'status',
-        'pathname',
-        'is_public'
-      ];
-      data = await this.modelInstance.where(where)
-        .field(field)
-        .order('create_time DESC')
-        .page(this.get('page'), pageSize)
-        .countSelect();
+      data = await service.listAdmin({
+        userInfo: this.userInfo, status, keyword, cate,
+        page: this.get('page'), pageSize
+      });
     }
     return this.success(data);
   }
