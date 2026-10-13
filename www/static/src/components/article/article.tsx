@@ -42,7 +42,8 @@ class Article extends React.Component<ArticleProps, {}> {
             pathname: false,
             title: false,
         },
-        autocompletePathname: !this.props.match.params.id
+        autocompletePathname: !this.props.match.params.id,
+        customFieldsValid: true,
     };
 
     constructor(props: any) {
@@ -166,6 +167,10 @@ class Article extends React.Component<ArticleProps, {}> {
             this.setState({
                 hasError: Object.assign({}, this.state.hasError, { pathname: false }),
             });
+        }
+        if (!this.state.customFieldsValid) {
+            message.error('自定义字段名称不能重复');
+            return;
         }
 
         const params: any = {};
@@ -438,6 +443,9 @@ class Article extends React.Component<ArticleProps, {}> {
                                 fields={articleInfo.options.fields}
                                 onChange={fields =>
                                     articleStore.setArticleInfo({options: {fields}})
+                                }
+                                onValidityChange={customFieldsValid =>
+                                    this.setState({customFieldsValid})
                                 }
                             />
                         </section>
