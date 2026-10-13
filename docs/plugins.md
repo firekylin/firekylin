@@ -128,6 +128,18 @@ ctx.events.on('content.html', async html => {
 
 常见上下文包括：`{post}`、`{page}`、`{user, ip}`、`{controller, type}`、`{controller, name, theme, response}`。插件异常默认记录并隔离，不会阻断其他插件。
 
+文章和页面的自定义字段保存在 `options.fields` 中。插件从模型或事件取得内容后可以按字段名读取：
+
+```js
+ctx.events.on('post.created', async ({post}) => {
+  const options = typeof post.options === 'string' ? JSON.parse(post.options) : post.options;
+  ctx.logger.info(`来源：${options.fields?.source || '未设置'}`);
+});
+```
+
+主题的内容 Widget 会将它们同时暴露为 `fields`，因此文章模板可以直接使用
+`archive.fields.source` 或 `archive.row.fields.source`。没有自定义字段时 `fields` 是空对象。
+
 ## AI / Agent Tool Registry（实验性）
 
 Firekylin 提供插件级 Tool Registry，供未来 MCP Server、后台 AI 助手和 Agent 共用。

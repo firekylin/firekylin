@@ -143,7 +143,8 @@ ${post.markdown_content}`;
     delete post.cate;
     delete post.user_id;
     post.options = JSON.stringify({
-      featuredImage: postOpt.featuredImage
+      featuredImage: postOpt.featuredImage,
+      fields: postOpt.fields || {}
     });
 
     if (!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys] }

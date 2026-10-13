@@ -36,6 +36,24 @@ test('recent posts uses configured and explicit page sizes', async() => {
   assert.equal(defaultWidget.permalink, '/post/recent.html');
 });
 
+test('content widgets expose custom fields stored in post options', async() => {
+  const post = {
+    async getPostList() {
+      return {data: [{
+        title: 'Custom fields',
+        pathname: 'custom-fields',
+        options: JSON.stringify({fields: {mood: 'sunny', location: 'Shanghai'}})
+      }]};
+    }
+  };
+  const widget = new RecentPosts(controller({post}), {pageSize: 1});
+  await widget.execute();
+  widget.next();
+
+  assert.deepEqual(widget.fields, {mood: 'sunny', location: 'Shanghai'});
+  assert.deepEqual(widget.row.fields, {mood: 'sunny', location: 'Shanghai'});
+});
+
 test('tag cloud filters, sorts and limits rows', async() => {
   const tag = {
     async getTagArchive() {

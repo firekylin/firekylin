@@ -16,6 +16,7 @@ import ArticleControlTag from './control-tag/control-tag';
 import ArticleControlPublic from './control-public/control-public';
 import ArticleControlImage from './control-image/control-image';
 import ArticleControlUser from './control-user/control-user';
+import ArticleControlFields from './control-fields/control-fields';
 
 import { Checkbox } from 'antd';
 import { RadioChangeEvent } from 'antd';
@@ -41,7 +42,8 @@ class Article extends React.Component<ArticleProps, {}> {
             pathname: false,
             title: false,
         },
-        autocompletePathname: !this.props.match.params.id
+        autocompletePathname: !this.props.match.params.id,
+        customFieldsValid: true,
     };
 
     constructor(props: any) {
@@ -166,6 +168,10 @@ class Article extends React.Component<ArticleProps, {}> {
                 hasError: Object.assign({}, this.state.hasError, { pathname: false }),
             });
         }
+        if (!this.state.customFieldsValid) {
+            message.error('自定义字段名称不能重复');
+            return;
+        }
 
         const params: any = {};
         if (this.articleId) {
@@ -197,9 +203,11 @@ class Article extends React.Component<ArticleProps, {}> {
 
         params.is_public = articleInfo.is_public;
         params.options = JSON.stringify({
+            ...articleInfo.options,
             template: articleInfo.options.template,
             featuredImage: articleInfo.options.featuredImage,
             push_sites: articleInfo.options.push_sites,
+            fields: articleInfo.options.fields,
         });
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + params.id);
@@ -427,6 +435,18 @@ class Article extends React.Component<ArticleProps, {}> {
                             <ArticleControlImage
                                 imageUrl={articleInfo.options.featuredImage}
                                 handleImageChange={e => this.handleImageChange(e)}
+                            />
+                        </section>
+                        <section className="category custom-fields">
+                            <h5>自定义字段</h5>
+                            <ArticleControlFields
+                                fields={articleInfo.options.fields}
+                                onChange={fields =>
+                                    articleStore.setArticleInfo({options: {fields}})
+                                }
+                                onValidityChange={customFieldsValid =>
+                                    this.setState({customFieldsValid})
+                                }
                             />
                         </section>
                         {this.isPage() || window.SysConfig.userInfo.type !== 1 ? null : (
