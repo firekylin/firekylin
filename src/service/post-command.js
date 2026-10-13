@@ -7,7 +7,9 @@
  */
 class PostCommandService {
   constructor({getModel, now}) {
-    if (typeof getModel !== 'function' || typeof now !== 'function') throw new TypeError('Model and clock are required');
+    if (typeof getModel !== 'function' || typeof now !== 'function') {
+      throw new TypeError('Model and clock are required');
+    }
     this.getModel = getModel;
     this.now = now;
   }
@@ -34,7 +36,8 @@ class PostCommandService {
   async createDraft(input, principal) {
     const actor = this.actor(principal);
     const {title, pathname, markdown_content} = input;
-    const existing = await this.getModel().where({pathname, type: 0}).setRelation(false).find();
+    const existing = await this.getModel().where({pathname, type: 0}).setRelation(false)
+.find();
     if (existing && existing.id) throw new Error('PATHNAME_EXIST');
 
     const model = this.getModel();
@@ -51,10 +54,11 @@ class PostCommandService {
 
   async updateDraft(input, principal) {
     const post = await this.editable(input.id, principal);
-    if (Number(post.status) !== 0) throw new Error('Only drafts can be edited with posts.updateDraft');
+    if (Number(post.status) !== 0) throw new Error('Only drafts can be edited with posts.update_draft');
     const model = this.getModel();
     if (input.pathname && input.pathname !== post.pathname) {
-      const existing = await this.getModel().where({pathname: input.pathname, type: 0}).setRelation(false).find();
+      const existing = await this.getModel().where({pathname: input.pathname, type: 0}).setRelation(false)
+.find();
       if (existing && existing.id && Number(existing.id) !== Number(input.id)) throw new Error('PATHNAME_EXIST');
     }
     const updates = {id: input.id};

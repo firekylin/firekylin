@@ -184,8 +184,8 @@ const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10
 
 | Tool | 权限 | 附加限制 |
 | --- | --- | --- |
-| `posts.createDraft` | `posts:write` | 当前用户创建私密草稿 |
-| `posts.updateDraft` | `posts:write` | 仅本人草稿 / 管理员 |
+| `posts.create_draft` | `posts:write` | 当前用户创建私密草稿 |
+| `posts.update_draft` | `posts:write` | 仅本人草稿 / 管理员 |
 | `posts.publish` | `posts:publish` | 仅管理员 + 显式审批 |
 | `posts.delete` | `posts:delete` | 本人或管理员 + 显式审批；永久删除 |
 | `categories.list` | `taxonomy:read` | 查询分类 |

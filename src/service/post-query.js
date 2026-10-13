@@ -26,20 +26,27 @@ class PostQueryService {
   async listPublic({page = 1, limit = 10} = {}) {
     return this.getModel().where(this.publicWhere())
       .field('id,title,pathname,summary,create_time,update_time')
-      .setRelation(false).order('create_time DESC').page(page, limit).select();
+      .setRelation(false)
+.order('create_time DESC')
+.page(page, limit)
+.select();
   }
 
   async getPublic(id) {
     return this.getModel().where(this.publicWhere({id}))
       .field('id,title,pathname,summary,markdown_content,create_time,update_time')
-      .setRelation(false).find();
+      .setRelation(false)
+.find();
   }
 
   async searchPublic({query, limit = 10}) {
     return this.getModel().where(this.publicWhere({
       'title|content': ['LIKE', '%' + query + '%']
     })).field('id,title,pathname,summary,create_time,update_time')
-      .setRelation(false).order('create_time DESC').limit(limit).select();
+      .setRelation(false)
+.order('create_time DESC')
+.limit(limit)
+.select();
   }
 
   async getAdmin(id, userInfo) {
@@ -78,7 +85,9 @@ class PostQueryService {
       'status', 'pathname', 'is_public'
     ];
     return model.where(where).field(fields)
-      .order('create_time DESC').page(page, pageSize).countSelect();
+      .order('create_time DESC')
+.page(page, pageSize)
+.countSelect();
   }
 }
 

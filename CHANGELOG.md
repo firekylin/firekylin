@@ -1,3 +1,9 @@
+## Unreleased
+- 本地、AWS S3、阿里云 OSS 和腾讯云 COS 上传统一使用 files-sdk 服务
+- 新增 Cloudflare R2、MinIO、Backblaze B2、Wasabi、DigitalOcean Spaces 和 Vercel Blob 上传配置
+- 保留七牛和又拍云上传支持
+- 移除已停止服务的 sm.ms 上传支持
+- 兼容原有的 S3 和腾讯云配置
 ## 1.5.0
 - 增加 PostgreSQL 数据库支持
 ## 1.4.0

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
 import { Form } from 'antd';
 import { Tabs, Button, Radio, Upload, message } from 'antd';

@@ -10,6 +10,9 @@ module.exports = class extends BaseRest {
   }
 
   async __before() {
+    const authOptions = await this.model('options').getOptions(true);
+    this.authOptions = authOptions;
+    this.ctx.state.jwtSecret = authOptions.jwt_secret || authOptions.comment_jwt_secret;
     const userInfo = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(userInfo)) {
       return this.fail('USER_NOT_LOGIN');
@@ -18,7 +21,7 @@ module.exports = class extends BaseRest {
     const action = this.ctx.action;
     if (action !== 'get') {
       const referrer = this.ctx.referrer();
-      const {site_url} = await this.model('options').getOptions();
+      const {site_url} = this.authOptions;
 
       if (!referrer) {
         return this.fail('REFERRER_ERROR');
@@ -49,12 +52,20 @@ module.exports = class extends BaseRest {
 
     this.userInfo = userInfo;
     const type = userInfo.type | 0;
+    const name = this.ctx.controller.replace(/^admin\//, '') + '/' + this.ctx.action;
+    if (type === 4) {
+      const commenterAllowList = [
+        'api/comment/get', 'api/comment/post',
+        'api/user/get', 'api/user/put'
+      ];
+      if (commenterAllowList.includes(name)) return;
+      return this.fail('USER_NO_PERMISSION');
+    }
     // not admin
     if (type !== 1) {
       if (action === 'get') {
         return;
       }
-      const name = this.ctx.controller.replace(/^admin\//, '') + '/' + this.ctx.action;
       if (this.allowList.indexOf(name) > -1) {
         return;
       }

@@ -1,7 +1,7 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Input, Divider, Button, message, Select } from 'antd';
 import React from 'react';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import 'antd/lib/table/style/index';
 import classNames from 'classnames';
 

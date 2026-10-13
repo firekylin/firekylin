@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Modal } from 'antd';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import { PushProps } from '../push.model';
 import BreadCrumb from '../../../components/breadcrumb';
 

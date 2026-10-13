@@ -32,15 +32,19 @@ class Container extends React.Component<any, {}> {
     }
 
     componentWillMount() {
-        this.getOptions();
+        if (window.SysConfig.userInfo.type !== 4) this.getOptions();
     }
     render() {
+        const isCommenter = window.SysConfig.userInfo.type === 4;
         return (
             <>
                     <Sidebar {...this.props} />
                     <div className="content">
                         <Suspense fallback={<Loading />}>
                             <Switch>
+                                {isCommenter ? <Route path="/comment" component={Comment} /> : null}
+                                {isCommenter ? <Route path={`/user`} component={User} /> : null}
+                                {isCommenter ? <Redirect to="/comment" /> : null}
                                 <Route exact={true} path="/dashboard" component={DashBoard}
                                 />
                                 <Route path="/post" component={Post} />

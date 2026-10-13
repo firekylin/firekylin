@@ -24,14 +24,16 @@ function actor(context) {
 
 function registerManagementTools(registry, {getModel, now, getCommentService}) {
   const commands = new PostCommandService({getModel: () => getModel('post'), now});
-  const register = definition => registry.register(definition, 'core-management');
+  const register = definition => {
+    if (!registry.has(definition.name, 'core:management')) registry.register(definition, 'core:management');
+  };
   const idSchema = {type: 'integer', minimum: 1};
   const objectSchema = (properties, required) => ({
     type: 'object', additionalProperties: false, properties, required
   });
 
   register({
-    name: 'posts.createDraft', description: 'Create an unpublished private article draft',
+    name: 'posts.create_draft', description: 'Create an unpublished private article draft',
     requiredPermissions: ['posts:write'],
     inputSchema: objectSchema({
       title: {type: 'string', minLength: 1, maxLength: 255},
@@ -51,7 +53,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
   });
 
   register({
-    name: 'posts.updateDraft', description: 'Update an existing article draft owned by the caller',
+    name: 'posts.update_draft', description: 'Update an existing article draft owned by the caller',
     requiredPermissions: ['posts:write'],
     inputSchema: objectSchema({
       id: idSchema, title: {type: 'string', minLength: 1, maxLength: 255},
@@ -139,7 +141,9 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       }
       const where = input.status ? {status: input.status} : {};
       const rows = await getModel('comment').where(where).order('inserted_at DESC')
-        .page(page, limit).setRelation(false).select();
+        .page(page, limit)
+.setRelation(false)
+.select();
       return rows.map(({id, post_id, nick, comment, status, inserted_at}) => ({
         id, post_id, nick, comment, status, inserted_at
       }));
@@ -157,7 +161,8 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       const input = object(raw);
       keys(input, ['id']);
       const commentId = id(input.id);
-      const comment = await getModel('comment').where({id: commentId}).setRelation(false).find();
+      const comment = await getModel('comment').where({id: commentId}).setRelation(false)
+.find();
       if (!comment || !comment.id) throw new Error('Comment not found');
       if (comment.status !== 'waiting') throw new Error('Only waiting comments can be approved');
       await getModel('comment').where({id: commentId}).update({status: 'approved', updated_at: now()});

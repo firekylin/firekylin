@@ -1,5 +1,5 @@
 const speakeasy = require('speakeasy');
-const push2Firekylin = require('push-to-firekylin');
+const PushToFirekylin = require('../../../service/push-to-firekylin');
 const Base = require('./base');
 
 module.exports = class extends Base {
@@ -101,7 +101,7 @@ module.exports = class extends Base {
     const push_sites = await this.getPushSites();
 
     /** 新添加的 push_sites 要校验唯一性 **/
-    if (!key && push_sites.hasOwnProperty(data.appKey)) {
+    if (!key && Object.prototype.hasOwnProperty.call(push_sites, data.appKey)) {
       return this.fail('KEY_EXIST');
     }
 
@@ -114,7 +114,7 @@ module.exports = class extends Base {
     if (data) {
       /** 需要增加验证 key 正确性的请求 **/
       const {url, appKey, appSecret} = data;
-      const result = await (new push2Firekylin(url, appKey, appSecret)).authorize();
+      const result = await (new PushToFirekylin(url, appKey, appSecret)).authorize();
       if (result.errno) {
         return this.fail('APP_KEY_SECRET_ERROR', result.errmsg);
       }

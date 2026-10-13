@@ -8,32 +8,31 @@ const AUDIENCE = 'firekylin-admin';
 const DAY = 24 * 60 * 60;
 const TTL = 7 * DAY;
 
-let signingSecret;
-
-function setSecret(secret) {
+function validateSecret(secret) {
   if (typeof secret !== 'string' || Buffer.byteLength(secret) < 32) {
     throw new Error('Invalid jwt_secret: expected at least 32 bytes');
   }
-  signingSecret = secret;
+  return secret;
 }
 
-function getSecret() {
-  if (!signingSecret) {
-    throw new Error('JWT secret has not been initialized');
-  }
-  return signingSecret;
+function contextSecret(ctx) {
+  return validateSecret(ctx && ctx.state && ctx.state.jwtSecret);
 }
 
 function base64(value) {
   return Buffer.from(JSON.stringify(value)).toString('base64url');
 }
 
-function signature(value) {
-  return crypto.createHmac('sha256', getSecret()).update(value).digest('base64url');
+function signature(value, secret) {
+  return crypto.createHmac('sha256', validateSecret(secret)).update(value).digest('base64url');
 }
 
-function sign(user, seconds = TTL) {
-  if (!user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0 || ![1, 2].includes(Number(user.type))) throw new Error('Invalid administrator identity');
+function sign(user, secret, seconds = TTL) {
+  const userId = Number(user && user.id);
+  const userType = Number(user && user.type);
+  if (!user || !Number.isSafeInteger(userId) || userId <= 0 || ![1, 2, 4].includes(userType)) {
+    throw new Error('Invalid backend identity');
+  }
   const now = Math.floor(Date.now() / 1000);
   const header = base64({alg: 'HS256', typ: 'JWT'});
   const payload = base64({
@@ -46,17 +45,17 @@ function sign(user, seconds = TTL) {
     exp: now + seconds
   });
   const data = header + '.' + payload;
-  return data + '.' + signature(data);
+  return data + '.' + signature(data, secret);
 }
 
-function verify(token) {
+function verify(token, secret) {
   if (typeof token !== 'string' || token.length > 8192) return null;
   const parts = token.split('.');
   if (parts.length !== 3) return null;
   try {
     const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
     if (header.alg !== 'HS256' || header.typ !== 'JWT') return null;
-    const expected = signature(parts[0] + '.' + parts[1]);
+    const expected = signature(parts[0] + '.' + parts[1], secret);
     const a = Buffer.from(expected);
     const b = Buffer.from(parts[2]);
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
@@ -66,7 +65,7 @@ function verify(token) {
         !/^[1-9]\d*$/.test(String(claims.sub)) ||
         !Number.isInteger(claims.iat) || !Number.isInteger(claims.exp) ||
         claims.iat > now || claims.exp <= now || claims.exp - claims.iat > TTL ||
-        ![1, 2].includes(claims.type)) return null;
+        ![1, 2, 4].includes(claims.type)) return null;
     return {id: Number(claims.sub), name: claims.name, type: claims.type};
   } catch (e) {
     return null;
@@ -84,7 +83,7 @@ function cookieOptions(ctx, remember) {
 }
 
 function login(ctx, user, remember) {
-  const token = sign(user);
+  const token = sign(user, contextSecret(ctx));
   ctx.cookie(COOKIE_NAME, token, cookieOptions(ctx, remember));
 }
 
@@ -93,14 +92,15 @@ function logout(ctx) {
 }
 
 function currentUser(ctx) {
-  return verify(ctx.cookie(COOKIE_NAME));
+  return verify(ctx.cookie(COOKIE_NAME), contextSecret(ctx));
 }
 
 // A signed CSRF proof bound to the user's JWT. Used by plugin routes.
 function csrfToken(ctx) {
   const token = ctx.cookie(COOKIE_NAME);
-  if (!verify(token)) return null;
-  return crypto.createHmac('sha256', getSecret()).update('plugin-csrf:' + token).digest('base64url');
+  const secret = contextSecret(ctx);
+  if (!verify(token, secret)) return null;
+  return crypto.createHmac('sha256', secret).update('plugin-csrf:' + token).digest('base64url');
 }
 
-module.exports = {COOKIE_NAME, setSecret, sign, verify, login, logout, currentUser, csrfToken};
+module.exports = {COOKIE_NAME, validateSecret, sign, verify, login, logout, currentUser, csrfToken};

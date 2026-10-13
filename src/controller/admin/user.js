@@ -12,7 +12,8 @@ module.exports = class extends Base {
     const { username, remember } = this.post();
     let userInfo = {};
     const model = this.model('options');
-    const options = await model.getOptions();
+    const options = await model.getOptions(true);
+    this.ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
 
     // 二步验证
     if (options.two_factor_auth) {
@@ -55,7 +56,7 @@ module.exports = class extends Base {
     }
 
     // 帐号是否被禁用，且投稿者不允许登录
-    if ((userInfo.status | 0) !== 1 || userInfo.type === 3 || userInfo.type === 4) {
+    if ((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 
@@ -93,11 +94,13 @@ module.exports = class extends Base {
     }
 
     // 帐号是否被禁用，且投稿者不允许登录
-    if ((userInfo.status | 0) !== 1 || userInfo.type === 3 || userInfo.type === 4) {
+    if ((userInfo.status | 0) !== 1 || userInfo.type === 3) {
       return this.fail('ACCOUNT_FORBIDDEN');
     }
 
     await this.model('user').updateUserLoginTime(userInfo);
+    const options = await this.model('options').getOptions(true);
+    this.ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
     adminAuth.login(this.ctx, userInfo, remember);
     return this.redirect('/admin');
   }
