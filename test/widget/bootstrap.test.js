@@ -49,7 +49,9 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     assert.equal(managerInstances, 1);
     assert.equal(pluginLoads, 1);
     assert.equal(startHooks.length, 1);
-    assert.deepEqual(firstManager.tools.list().map(tool => tool.name), ['posts.list', 'posts.get', 'posts.search']);
+    assert.equal(firstManager.tools.list().length, 12);
+    assert.ok(firstManager.tools.has('posts.create_draft', 'core:management'));
+    assert.ok(firstManager.tools.has('media.upload', 'core:media'));
   } finally {
     Module._load = originalLoad;
     delete require.cache[workerPath];

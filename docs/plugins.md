@@ -178,6 +178,26 @@ const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10
 
 工具结果使用有限字段白名单；详情工具额外返回 Markdown 正文。此功能仅提供内部操作层，**不会开放新的 HTTP 路由或 MCP 端点**。后续对外暴露必须实现真实身份认证、请求参数 JSON Schema 校验、限流与审计。首版不提供任何草稿/私密文章读取能力。
 
+### 内置管理工具（实验性）
+
+除了只读的文章工具，worker 还注册了以下能力：
+
+| Tool | 权限 | 附加限制 |
+| --- | --- | --- |
+| `posts.create_draft` | `posts:write` | 当前用户创建私密草稿 |
+| `posts.update_draft` | `posts:write` | 仅本人草稿 / 管理员 |
+| `posts.publish` | `posts:publish` | 仅管理员 + 显式审批 |
+| `posts.delete` | `posts:delete` | 本人或管理员 + 显式审批；永久删除 |
+| `categories.list` | `taxonomy:read` | 查询分类 |
+| `tags.list` | `taxonomy:read` | 查询标签 |
+| `comments.list` | `comments:read` | 仅管理员 |
+| `comments.approve` | `comments:moderate` | 仅管理员 + 显式审批，更新评论数 |
+| `media.upload` | `media:write` | Base64 PNG/JPEG/GIF，最大 5 MiB，不支持远程 URL |
+
+写入工具通过原有 Post Model 的 `getContentAndSummary` / `addPost` / `savePost` / `deletePost`，触发正常文章生命周期。当前模型入口与 Admin Controller 的部分编排仍有差异，后续可以在稳定后进一步合并 PostCommandService 与后台写入服务。
+
+**重要：** `ToolRegistry.execute` 的 `authorize` 由受信任的调用方实现；高风险工具还要求额外的 `approve({name, input, principal})` 回调返回 `true`。不要把模型生成的“已批准”字段或请求体中的角色当作授权依据。Registry 不直接暴露 HTTP 接口或 MCP 服务；生产适配层必须补充 Token 认证、参数 Schema 校验、限流、审计与明确的审批交互。外部工具不得默认获得全站管理员权限。
+
 ## Widget 扩展
 
 插件可以注册异步 Widget：

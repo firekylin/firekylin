@@ -9,6 +9,8 @@ const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
 const {registerContentTools} = require('../plugin/content-tools');
+const {registerManagementTools} = require('../plugin/management-tools');
+const {registerMediaTools} = require('../plugin/media-tools');
 const pack = require('../../package.json');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
@@ -48,6 +50,15 @@ global.firekylin.plugins = pluginManager;
 registerContentTools(pluginManager.tools, {
   getModel: () => think.model('post'),
   now: () => think.datetime()
+});
+registerManagementTools(pluginManager.tools, {
+  getModel: name => think.model(name),
+  now: () => think.datetime(),
+  getCommentService: () => think.service('comment')
+});
+registerMediaTools(pluginManager.tools, {
+  getUploadConfig: async() => (await think.model('options').getOptions()).upload,
+  getUploader: type => think.service('upload/' + type)
 });
 if (!existingPluginManager) {
   pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
