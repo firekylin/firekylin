@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './dashboard.less';
-import { observer, inject } from 'mobx-react';
+import { observer, inject } from '@admin/utils/mobx-react';
 import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
 import { NavLink } from 'react-router-dom';

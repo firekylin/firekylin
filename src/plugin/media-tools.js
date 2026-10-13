@@ -20,7 +20,10 @@ function matchesSignature(buffer, format) {
 }
 
 function registerMediaTools(registry, {getUploadConfig, getUploader}) {
-  if (typeof getUploadConfig !== 'function' || typeof getUploader !== 'function') throw new TypeError('Media dependencies required');
+  if (typeof getUploadConfig !== 'function' || typeof getUploader !== 'function') {
+    throw new TypeError('Media dependencies required');
+  }
+  if (registry.has('media.upload', 'core:media')) return;
   registry.register({
     name: 'media.upload',
     description: 'Upload a PNG, JPEG or GIF image from base64 data; remote URLs are not supported',
@@ -57,7 +60,8 @@ function registerMediaTools(registry, {getUploadConfig, getUploader}) {
       }
 
       const config = await getUploadConfig();
-      if (!config || !['local', 'qiniu', 'upyun', 'oss', 'cos', 's3'].includes(config.type)) {
+      const sdkServices = ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel'];
+      if (!config || !['local', 'qiniu', 'upyun', 'aliyun', 'tencent', 's3', ...sdkServices].includes(config.type)) {
         throw new Error('Configured upload provider is not supported');
       }
       const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'firekylin-ai-upload-'));
@@ -67,12 +71,13 @@ function registerMediaTools(registry, {getUploadConfig, getUploader}) {
         const uploadConfig = {...config, name: input.name, file: {
           name: input.name + format.extension, path: filename, size: bytes.length, type: format.mime
         }};
-        return await getUploader(config.type).run(filename, uploadConfig);
+        const service = sdkServices.includes(config.type) ? 'files-sdk' : config.type;
+        return await getUploader(service).run(filename, uploadConfig);
       } finally {
         await fs.rm(temporary, {recursive: true, force: true});
       }
     }
-  }, 'core-management');
+  }, 'core:media');
 }
 
 module.exports = {registerMediaTools};

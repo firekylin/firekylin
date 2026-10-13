@@ -69,6 +69,10 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 
 后台认证使用无状态 JWT Cookie，签名密钥由数据库中的 `jwt_secret` 统一保存，旧版 `comment_jwt_secret` 会自动迁移，无需额外环境变量。首次升级需要重新登录。详细说明参见 [JWT 认证和迁移文档](docs/admin-jwt.md)。
 
+### 评论社交登录
+
+评论登录支持 Waline OAuth 服务提供的 GitHub、微博、QQ、OIDC 等社交账号。默认使用 `https://oauth.lithub.cc`，也可以通过 `OAUTH_URL` 环境变量指向[自行部署的 Waline Auth 服务](https://github.com/walinejs/auth)。首次社交登录会自动创建“评论者”用户；已登录的后台用户可以在自己的用户编辑页绑定或解绑社交账号，管理员可在用户列表查看绑定情况。
+
 ## 如何使用
 
 - [添加和管理文章](https://github.com/firekylin/firekylin/wiki/%E6%96%87%E7%AB%A0)

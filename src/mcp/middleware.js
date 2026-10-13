@@ -1,11 +1,10 @@
 'use strict';
 
-const {getContext} = require('../../lib/project-context');
+const {getMcpConfig} = require('./config');
 const {createMcpEndpoint} = require('./server');
 
 module.exports = function builtinMcp() {
-  const project = getContext();
-  const config = (project.config && project.config.mcp) || {};
+  const config = getMcpConfig();
   let endpointPromise;
   return async function mcpMiddleware(ctx, next) {
     if (ctx.path !== '/mcp') return next();
@@ -22,7 +21,9 @@ module.exports = function builtinMcp() {
         },
         config,
         getUser: async id => think.model('user').where({id})
-          .field('id,type,status').setRelation(false).find(),
+          .field('id,type,status')
+.setRelation(false)
+.find(),
         logger: think.logger
       }).catch(error => {
         endpointPromise = null;

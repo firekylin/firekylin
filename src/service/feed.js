@@ -1,7 +1,6 @@
 const {parse} = require('url');
+const {Readable} = require('stream');
 const FeedParser = require('feedparser');
-const request = require('request');
-const req = require('request-promise-native');
 
 const API_URL = 'https://firekylin.lithub.cc/api/spider';
 module.exports = class extends think.Service {
@@ -16,12 +15,13 @@ module.exports = class extends think.Service {
    * @param {String} url 文章URL
    */
   async contentParser(url) {
-    const resp = await req({
-      uri: API_URL,
-      method: 'GET',
-      qs: {url},
-      json: true
-    });
+    const endpoint = new URL(API_URL);
+    endpoint.searchParams.set('url', url);
+    const response = await fetch(endpoint);
+    if (!response.ok) {
+      throw new Error(`Spider request failed with status ${response.status}`);
+    }
+    const resp = await response.json();
 
     if (resp.errno) {
       return false;
@@ -59,10 +59,9 @@ module.exports = class extends think.Service {
    * @param {Object} feed 解析出来的 feed 数据
    */
   async transformPost({title, link, pubDate, description}) {
-    let {
-      content: markdown_content,
-      firstImageUrl: featuredImage
-    } = await this.contentParser(link);
+    const parsedContent = await this.contentParser(link);
+    let markdown_content = parsedContent.content;
+    const featuredImage = parsedContent.firstImageUrl;
 
     if (!markdown_content) {
       markdown_content = description;
@@ -84,20 +83,22 @@ module.exports = class extends think.Service {
    */
   async feedParser(url, options) {
     const service = this;
-    const req = request(url, options);
     const feedparser = new FeedParser(options);
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Bad status code: ${response.status}`);
+    }
+    if (!response.body) {
+      throw new Error('Feed response has no body');
+    }
+    const responseStream = Readable.fromWeb(response.body);
 
     return new Promise((resolve, reject) => {
       const feeds = [];
-      req.on('error', reject);
+      responseStream.on('error', reject);
       feedparser.on('error', reject);
-
-      req.on('response', function(res) {
-        if (res.statusCode !== 200) {
-          return reject(new Error('Bad status code'));
-        }
-        this.pipe(feedparser);
-      });
+      responseStream.pipe(feedparser);
 
       feedparser.on('readable', function() {
         let item;

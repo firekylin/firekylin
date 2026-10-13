@@ -10,6 +10,10 @@ function registerContentTools(registry, {getModel, now}) {
   if (!registry || typeof registry.register !== 'function') throw new TypeError('Tool registry required');
   if (typeof getModel !== 'function' || typeof now !== 'function') throw new TypeError('Model and clock required');
 
+  const register = definition => {
+    if (registry.has(definition.name, 'core:content')) return;
+    registry.register(definition, 'core:content');
+  };
   const queries = new PostQueryService({getModel, now});
   const positiveInteger = (value, defaultValue, max) => {
     if (value === undefined && defaultValue !== undefined) return defaultValue;
@@ -29,7 +33,7 @@ function registerContentTools(registry, {getModel, now}) {
     update_time: post.update_time
   });
 
-  registry.register({
+  register({
     name: 'posts.list',
     description: 'List publicly published blog articles, newest first',
     requiredPermissions: ['posts:read'],
@@ -46,9 +50,9 @@ function registerContentTools(registry, {getModel, now}) {
       const rows = await queries.listPublic({page, limit});
       return rows.map(summary);
     }
-  }, 'core-content');
+  });
 
-  registry.register({
+  register({
     name: 'posts.get',
     description: 'Read a publicly published blog article by numeric ID',
     requiredPermissions: ['posts:read'],
@@ -63,9 +67,9 @@ function registerContentTools(registry, {getModel, now}) {
       if (!post || !post.id) return null;
       return {...summary(post), markdown_content: post.markdown_content};
     }
-  }, 'core-content');
+  });
 
-  registry.register({
+  register({
     name: 'posts.search',
     description: 'Search titles or content of publicly published articles',
     requiredPermissions: ['posts:read'],
@@ -83,7 +87,7 @@ function registerContentTools(registry, {getModel, now}) {
       const rows = await queries.searchPublic({query: input.query.trim(), limit});
       return rows.map(summary);
     }
-  }, 'core-content');
+  });
 }
 
 module.exports = {registerContentTools};

@@ -83,3 +83,29 @@ test('user adapter preserves the active-user predicate and password projection',
   assert.match(selectedFields, /password/);
   assert.equal(loginUsers[0].password, 'hash');
 });
+
+test('user adapter handles PostgreSQL string counts when choosing a unique name', async() => {
+  const originalThink = global.think;
+  global.think = {datetime: () => '2026-10-12 12:00:00'};
+  const checkedNames = [];
+  let inserted;
+  const model = {
+    where(value) {
+      this.currentWhere = value;
+      if (value.name) checkedNames.push(value.name);
+      return this;
+    },
+    async count() { return this.currentWhere.name === 'social-user' ? '1' : '0' },
+    async add(data) { inserted = data; return 9 },
+    async find() { return {...inserted, id: 9} }
+  };
+  try {
+    const adapter = new UserAdapter(model);
+    const user = await adapter.add({email: 'social-user@example.com', display_name: 'Social User'});
+    assert.deepEqual(checkedNames, ['social-user', 'social-user-1']);
+    assert.equal(inserted.name, 'social-user-1');
+    assert.equal(user.objectId, '9');
+  } finally {
+    global.think = originalThink;
+  }
+});

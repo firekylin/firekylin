@@ -35,10 +35,12 @@ test('comment schema migrates once and records its version', async() => {
   service.model = name => name === 'options' ? options : name === 'post' ? postModel : commentModel;
 
   assert.equal(await service.migrate({skipIfUninstalled: true}), true);
-  assert.equal(state.comment_schema_version, '2');
+  assert.equal(state.comment_schema_version, '3');
   assert.match(state.jwt_secret, /^[a-f0-9]{64}$/);
   assert.ok(queries.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS comment ')));
   assert.ok(queries.some(sql => sql.includes('comment_post_idx')));
+  assert.ok(queries.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS user_social')));
+  assert.ok(queries.some(sql => sql.includes('user_social_account_idx')));
   assert.ok(updates.some(([key]) => key === 'jwt_secret'));
 
   const queryCount = queries.length;

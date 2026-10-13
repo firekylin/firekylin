@@ -72,3 +72,8 @@ pnpm lint-break-on-errors
 ```
 
 生产部署前应验证 ThinkJS 中间件流式处理、实际 MCP 客户端及反向代理行为。目前代码尚待完整端到端测试，不应直接视为生产已验证版本。
+
+
+## 旧版源码部署
+
+使用 `node production.js` 或 `node development.js` 的旧版部署，可通过 ThinkJS 的 `mcp` 配置设置相同选项，例如在 `src/config/mcp.js` 中导出上述 `mcp` 对象。独立项目仍优先使用 `firekylin.config.js`，无需切换部署结构。

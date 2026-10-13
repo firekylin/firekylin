@@ -2,7 +2,7 @@ import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Radio, Select } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import { ReadingProps } from './reading.model';
 import './reading.less';
 

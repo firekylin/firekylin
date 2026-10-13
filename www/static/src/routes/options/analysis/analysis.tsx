@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, FormInstance, Input, Button } from 'antd';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { AnalysisProps } from './analysis.model';
 const TextArea = Input.TextArea;

@@ -20,7 +20,8 @@ window.SysConfig = {
     two_factor_auth: firekylin.options.two_factor_auth,
     ldap_on: firekylin.options.ldap_on,
     intranet: firekylin.options.intranet,
-    password_salt: firekylin.options.password_salt
+    password_salt: firekylin.options.password_salt,
+    social_services: firekylin.options.social_services
   }) %>,
   config: {
     disallow_file_edit: <%= firekylin.think.config('DISALLOW_FILE_EDIT') ? 'true' : 'false' %>

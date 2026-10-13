@@ -59,15 +59,15 @@ function fixture() {
 test('registers all management tools', () => {
   const {registry} = fixture();
   assert.deepEqual(registry.list().map(item => item.name), [
-    'posts.listManaged', 'posts.getManaged', 'posts.update',
-    'posts.createDraft', 'posts.updateDraft', 'posts.publish', 'posts.delete',
+    'posts.list_managed', 'posts.get_managed', 'posts.update',
+    'posts.create_draft', 'posts.update_draft', 'posts.publish', 'posts.delete',
     'categories.list', 'tags.list', 'comments.list', 'comments.approve'
   ]);
 });
 
 test('creates a private draft using existing post model lifecycle', async() => {
   const {run, calls, editor} = fixture();
-  assert.equal(await run('posts.createDraft', {title: 'Test', pathname: 'test', markdown_content: '# hello'}, editor), 123);
+  assert.equal(await run('posts.create_draft', {title: 'Test', pathname: 'test', markdown_content: '# hello'}, editor), 123);
   const created = calls.find(([action]) => action === 'add')[1];
   assert.equal(created.status, 0);
   assert.equal(created.is_public, 0);
@@ -79,7 +79,7 @@ test('creates a private draft using existing post model lifecycle', async() => {
 test('updateDraft refuses modifying another owner or already-published article', async() => {
   const {run, setExisting, editor, calls} = fixture();
   setExisting({id: 5, type: 0, status: 0, user_id: 3, pathname: 'test'});
-  await assert.rejects(run('posts.updateDraft', {id: 5, title: 'New'}, editor), /permission denied|not found/i);
+  await assert.rejects(run('posts.update_draft', {id: 5, title: 'New'}, editor), /permission denied|not found/i);
   // Fake model needs to respect the WHERE owner's condition.
   assert.equal(calls.some(([action, where]) => action === 'post.where' && where.user_id === 2), true);
 });
@@ -121,18 +121,18 @@ test('comment tools require admin and synchronize counts on approval', async() =
 
 test('tools reject unsupported arguments and unauthenticated calls', async() => {
   const {run, registry} = fixture();
-  await assert.rejects(run('posts.createDraft', {title: 'T', pathname: 't', markdown_content: '# hi', status: 3}), /Unsupported property/);
+  await assert.rejects(run('posts.create_draft', {title: 'T', pathname: 't', markdown_content: '# hi', status: 3}), /Unsupported property/);
   await assert.rejects(run('posts.publish', {id: '7'}), /Invalid ID/);
-  await assert.rejects(registry.execute('posts.createDraft', {}, {authorize: () => true}), /Authenticated principal/);
+  await assert.rejects(registry.execute('posts.create_draft', {title: 'T', pathname: 't', markdown_content: '# hi'}, {authorize: () => true}), /Authenticated principal/);
 });
 
 test('managed article tools reuse admin queries and require authenticated principal', async() => {
   const {run, setExisting, calls, editor} = fixture();
   setExisting({id: 8, user_id: 2, status: 0, title: 'Draft', markdown_content: '# draft'});
-  const result = await run('posts.getManaged', {id: 8}, editor);
+  const result = await run('posts.get_managed', {id: 8}, editor);
   assert.equal(result.markdown_content, '# draft');
   assert.ok(calls.some(([kind, where]) => kind === 'post.where' && where.user_id === 2));
-  await assert.rejects(run('posts.getManaged', {id: 8}, {type: 4}), /Authenticated author/);
+  await assert.rejects(run('posts.get_managed', {id: 8}, {type: 4}), /Authenticated author/);
 });
 
 test('updating published article through tool requires approval', async() => {

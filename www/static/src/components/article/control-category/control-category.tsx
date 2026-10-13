@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { inject, observer } from 'mobx-react';
+import { inject, observer } from '@admin/utils/mobx-react';
 import SharedStore from '../../../shared.store';
 import ArticleStore from '../article.store';
 
