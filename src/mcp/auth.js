@@ -8,7 +8,7 @@ function createTokenVerifier(config, getUser) {
     Number.isSafeInteger(Number(item.userId)) && Number(item.userId) > 0 &&
     Array.isArray(item.scopes) && item.scopes.every(scope => typeof scope === 'string'));
   return async function verify(authorization) {
-    const match = /^Bearer\s+([A-Za-z0-9._~+\/-]{32,256})$/i.exec(authorization || '');
+    const match = /^Bearer\s+([A-Za-z0-9._~+/-]{32,256})$/i.exec(authorization || '');
     if (!match) return null;
     const digest = crypto.createHash('sha256').update(match[1]).digest();
     let token;
@@ -23,7 +23,8 @@ function createTokenVerifier(config, getUser) {
     return {
       principal: {id: Number(user.id), type: Number(user.type)},
       scopes: new Set(token.scopes),
-      tokenId: crypto.createHash('sha256').update(token.sha256).digest('hex').slice(0, 12)
+      tokenId: crypto.createHash('sha256').update(token.sha256).digest('hex')
+.slice(0, 12)
     };
   };
 }

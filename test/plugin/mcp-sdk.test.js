@@ -5,7 +5,7 @@ const test = require('node:test');
 const crypto = require('node:crypto');
 const {Readable} = require('node:stream');
 const ToolRegistry = require('../../src/plugin/tools');
-const {createMcpEndpoint} = require('../../examples/firekylin-plugin-mcp/server');
+const {createMcpEndpoint} = require('../../src/mcp/server');
 const sdk = require('@modelcontextprotocol/server');
 
 test('real MCP SDK handles initialization, discovery, calls and schema validation', async() => {

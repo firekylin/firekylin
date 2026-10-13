@@ -3,8 +3,8 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const crypto = require('node:crypto');
-const {createTokenVerifier, isAllowedOrigin} = require('../../examples/firekylin-plugin-mcp/auth');
-const {exposedTools, createServerFactory, createMcpEndpoint, readBody} = require('../../examples/firekylin-plugin-mcp/server');
+const {createTokenVerifier, isAllowedOrigin} = require('../../src/mcp/auth');
+const {exposedTools, createServerFactory, createMcpEndpoint, readBody} = require('../../src/mcp/server');
 const {Readable} = require('node:stream');
 
 function hash(token) {

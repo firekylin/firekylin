@@ -208,6 +208,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.43.14
         version: 6.43.14
+      '@modelcontextprotocol/server':
+        specifier: ^2.3.1
+        version: 2.3.1
       '@uiw/codemirror-theme-monokai':
         specifier: ^4.25.12
         version: 4.25.12(@codemirror/language@6.13.1)(@codemirror/state@6.7.6)(@codemirror/view@6.43.14)
@@ -326,9 +329,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.12.0)
-      '@modelcontextprotocol/server':
-        specifier: ^2.3.1
-        version: 2.3.1
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
