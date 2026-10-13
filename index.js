@@ -30,6 +30,15 @@ function createHandler() {
   const loader = new Loader(app.options);
   loader.loadAll('worker');
 
+  // Vercel can supply requests without a socket, including after an await.
+  // Keep Koa's proxy-header protocol detection working for Cookie authentication.
+  const missingSocket = Object.freeze({encrypted: false});
+  Object.defineProperty(think.app.request, 'socket', {
+    get() {
+      return this.req.socket || missingSocket;
+    }
+  });
+
   const ready = think.beforeStartServer().catch(err => {
     think.logger.error(err);
   }).then(() => {
