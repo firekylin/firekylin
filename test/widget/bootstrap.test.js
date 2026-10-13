@@ -11,6 +11,8 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
   const originalFirekylin = global.firekylin;
   const originalThink = global.think;
   const migrationKey = Symbol.for('firekylin.commentSchemaMigration');
+  const oauthKey = Symbol.for('firekylin.mcp.oauthMigration');
+  const originalOAuthMigration = global[oauthKey];
   const originalMigration = global[migrationKey];
   const workerPath = path.join(__dirname, '..', '..', 'src', 'bootstrap', 'worker.js');
   let managerInstances = 0;
@@ -38,6 +40,7 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
   };
   global.think = {beforeStartServer: hook => startHooks.push(hook)};
   delete global[migrationKey];
+  delete global[oauthKey];
 
   try {
     delete require.cache[workerPath];
@@ -48,11 +51,13 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     assert.equal(global.firekylin.plugins, firstManager);
     assert.equal(managerInstances, 1);
     assert.equal(pluginLoads, 1);
-    assert.equal(startHooks.length, 1);
+    assert.equal(startHooks.length, 2);
     assert.equal(firstManager.tools.list().length, 15);
     assert.ok(firstManager.tools.has('posts.create_draft', 'core:management'));
     assert.ok(firstManager.tools.has('media.upload', 'core:media'));
   } finally {
+    if (originalOAuthMigration === undefined) delete global[oauthKey];
+    else global[oauthKey] = originalOAuthMigration;
     Module._load = originalLoad;
     delete require.cache[workerPath];
     if (originalFirekylin === undefined) delete global.firekylin;

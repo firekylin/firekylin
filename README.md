@@ -93,7 +93,7 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 
 ## 内置 MCP Server
 
-Firekylin 自带 MCP HTTP 服务，无需安装额外插件。默认地址为 `/mcp`，未配置访问令牌时返回 401，不会开放博客管理能力。支持用受限访问令牌让 Codex、Claude Code 等 MCP 客户端读取公开文章、管理草稿等（高风险发布、删除操作仍需要独立审批支持）。配置与安全说明见 [MCP Server 文档](docs/mcp.md)。
+Firekylin 自带 MCP HTTP 服务，无需安装额外插件，也不需要手工创建 Token 或配置用户 ID。默认地址为 `/mcp`，客户端通过 OAuth 2.1 跳转到 Firekylin 登录并确认授权，自动获取与当前用户绑定的访问令牌。可以让 Codex、Claude Code 等 MCP 客户端在授权范围内读取文章、管理草稿（高风险发布、删除操作仍需要单次审批支持）。使用和安全说明见 [MCP Server 文档](docs/mcp.md)。
 
 ## 开发者文档
 

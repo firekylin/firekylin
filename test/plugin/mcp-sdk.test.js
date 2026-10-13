@@ -2,7 +2,6 @@
 
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const crypto = require('node:crypto');
 const {Readable} = require('node:stream');
 const ToolRegistry = require('../../src/plugin/tools');
 const {createMcpEndpoint} = require('../../src/mcp/server');
@@ -19,10 +18,10 @@ test('real MCP SDK handles initialization, discovery, calls and schema validatio
   tools.register({name: 'posts.publish', description: 'Publish', requiredPermissions: ['posts:read'],
     requiresApproval: true, execute() {throw new Error('must not execute')}
   }, 'test');
-  const endpoint = await createMcpEndpoint({sdk, tools, config: {
-    requireHttps: false,
-    tokens: [{sha256: crypto.createHash('sha256').update(token).digest('hex'), userId: 1, scopes: ['posts:read']}]
-  }, getUser: async id => ({id, status: 1, type: 1}), logger: {info() {}, error() {}}});
+  const endpoint = await createMcpEndpoint({sdk, tools, config: {requireHttps: false},
+    verifier: async authorization => authorization === 'Bearer ' + token ? {
+      principal: {id: 1, type: 1}, scopes: new Set(['posts:read']), tokenId: 'test'
+    } : null, logger: {info() {}, error() {}}});
   async function call(method, params, id) {
     const headers = {'content-type': 'application/json', accept: 'application/json, text/event-stream',
       authorization: 'Bearer ' + token, 'mcp-protocol-version': '2025-11-25'};

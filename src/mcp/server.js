@@ -1,7 +1,7 @@
 'use strict';
 
 const {Readable} = require('node:stream');
-const {createTokenVerifier, isAllowedOrigin} = require('./auth');
+const {isAllowedOrigin} = require('./oauth-auth');
 
 const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
 const ALLOWED_METHODS = new Set(['POST', 'GET', 'DELETE']);
@@ -61,9 +61,12 @@ function createServerFactory({tools, auth, sdk, logger}) {
   };
 }
 
-async function createMcpEndpoint({tools, config = {}, getUser, logger = console, sdk: sdkOverride}) {
+async function createMcpEndpoint({
+  tools, config = {}, logger = console, sdk: sdkOverride, verifier, resourceMetadataUrl
+}) {
+  if (typeof verifier !== 'function') throw new TypeError('OAuth token verifier is required');
   const sdk = sdkOverride || await import('@modelcontextprotocol/server');
-  const verify = createTokenVerifier(config, getUser);
+  const verify = verifier;
   return async function handle(ctx) {
     if (!ALLOWED_METHODS.has(ctx.method)) {
       ctx.set('Allow', 'POST, GET, DELETE');
@@ -78,12 +81,16 @@ async function createMcpEndpoint({tools, config = {}, getUser, logger = console,
     // Never expose the MCP endpoint without a configured bearer token.
     const auth = await verify(ctx.get('authorization'));
     if (!auth) {
-      ctx.set('WWW-Authenticate', 'Bearer realm="firekylin-mcp"');
+      ctx.set('WWW-Authenticate', 'Bearer realm="firekylin-mcp"' +
+        (resourceMetadataUrl ? ', resource_metadata="' + resourceMetadataUrl + '"' : ''));
       ctx.status = 401;
       ctx.body = 'Unauthorized';
       return;
     }
-    if (config.requireHttps !== false && !ctx.secure) {
+    const resource = resourceMetadataUrl && new URL(resourceMetadataUrl);
+    const loopback = resource && resource.protocol === 'http:' &&
+      ['localhost', '127.0.0.1', '[::1]'].includes(resource.hostname) && ctx.hostname === resource.hostname;
+    if (config.requireHttps !== false && !ctx.secure && !loopback) {
       ctx.status = 403;
       ctx.body = 'HTTPS required';
       return;
