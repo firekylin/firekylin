@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../../utils/router';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Tabs, Button, Space } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
