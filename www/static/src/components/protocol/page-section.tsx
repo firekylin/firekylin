@@ -1,0 +1,141 @@
+import * as React from 'react';
+import { Alert, Button, Card, Descriptions, Divider, Empty, Form, Image, List, Progress, Space, Statistic, Table, Typography } from 'antd';
+import { FormField, FormFieldSchema } from './form-field';
+import { ProtocolList, ProtocolNode, ProtocolRenderer, ProtocolRendererMap } from './renderer';
+
+export interface PageSection extends ProtocolNode {
+    [key: string]: any;
+}
+
+export interface PageSectionContext {
+    forms: any[];
+    actions: any[];
+    formValues: Record<string, any>;
+    submit: (id: string, values: any) => void;
+    run: (action: any) => void;
+}
+
+function safeUrl(value: unknown): string | undefined {
+    if (typeof value !== 'string') return undefined;
+    if (value.startsWith('/') && !value.startsWith('//')) return value;
+    try {
+        const url = new URL(value);
+        return ['http:', 'https:', 'mailto:'].includes(url.protocol) ? value : undefined;
+    } catch {
+        return undefined;
+    }
+}
+
+function safeImageUrl(value: unknown): string | undefined {
+    const url = safeUrl(value);
+    return url && !url.startsWith('mailto:') ? url : undefined;
+}
+
+function InlineMarkdown({children}: {children: string}) {
+    const tokens = children.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
+    return <>{tokens.map((token, index) => {
+        if (token.startsWith('`') && token.endsWith('`')) return <Typography.Text code key={index}>{token.slice(1, -1)}</Typography.Text>;
+        if (token.startsWith('**') && token.endsWith('**')) return <Typography.Text strong key={index}>{token.slice(2, -2)}</Typography.Text>;
+        const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token);
+        if (link) return safeUrl(link[2]) ? <a key={index} href={safeUrl(link[2])} target="_blank" rel="noreferrer">{link[1]}</a> : link[1];
+        return token;
+    })}</>;
+}
+
+function Markdown({content}: {content: string}) {
+    const lines = String(content || '').split('\n');
+    return <div>{lines.map((line, index) => {
+        const heading = /^(#{1,3})\s+(.+)$/.exec(line);
+        if (heading) return <Typography.Title key={index} level={(heading[1].length + 2) as 3 | 4 | 5}>
+            <InlineMarkdown>{heading[2]}</InlineMarkdown>
+        </Typography.Title>;
+        if (/^[-*]\s+/.test(line)) return <div key={index}>• <InlineMarkdown>{line.replace(/^[-*]\s+/, '')}</InlineMarkdown></div>;
+        return line ? <Typography.Paragraph key={index}><InlineMarkdown>{line}</InlineMarkdown></Typography.Paragraph> : <br key={index} />;
+    })}</div>;
+}
+
+function card(node: PageSection, children: React.ReactNode) {
+    return <Card title={node.title} style={{marginBottom: 16}}>{children}</Card>;
+}
+
+function PluginForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
+    return <Card title={item.title} style={{marginBottom: 16}}>
+        <Form layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
+            onFinish={formValues => submit(item.id, formValues)}>
+            {item.fields.map((field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
+                valuePropName={field.type === 'switch' ? 'checked' : 'value'}
+                extra={field.description} rules={[{required: field.required, message: `请填写${field.label}`}]}>
+                <FormField field={field} />
+            </Form.Item>)}
+            <Button type="primary" htmlType="submit">{item.submitLabel}</Button>
+        </Form>
+    </Card>;
+}
+
+export function ActionGroup({ids, context}: {ids?: string[]; context: PageSectionContext}) {
+    const selected = ids ? context.actions.filter(action => ids.includes(action.id)) : context.actions;
+    return selected.length ? <Space style={{display: 'flex', marginBottom: 16}}>
+        {selected.map(action => <Button key={action.id} type={action.type === 'primary' ? 'primary' : 'default'}
+            danger={action.type === 'danger'} onClick={() => context.run(action)}>{action.label}</Button>)}
+    </Space> : null;
+}
+
+const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext> = {
+    text: ({node}) => card(node, <Typography.Paragraph style={{whiteSpace: 'pre-wrap'}}>{node.content}</Typography.Paragraph>),
+    description: ({node}) => card(node, <Descriptions column={node.columns || 1}
+        items={(node.items || []).map((item, index) => ({
+            key: index, label: item.label, children: String(item.value == null ? '' : item.value)
+        }))} />),
+    table: ({node}) => card(node, <Table pagination={node.pagination ? undefined : false}
+        rowKey={node.rowKey || 'id'} columns={(node.columns || []).map(column => ({
+            title: column.title, dataIndex: column.key, key: column.key
+        }))} dataSource={node.rows || []} />),
+    stat: ({node}) => card(node, <div style={{display: 'grid', gap: 24,
+        gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, node.columns || 3))}, minmax(0, 1fr))`}}>
+        {(node.items || []).map((item, index) => <Statistic key={index} title={item.label} value={item.value}
+            prefix={item.prefix} suffix={item.suffix} precision={item.precision} />)}
+    </div>),
+    list: ({node}) => card(node, <List dataSource={node.items || []} renderItem={(item: any) =>
+        <List.Item><List.Item.Meta title={item.title || String(item)} description={item.description} /></List.Item>} />),
+    markdown: ({node}) => card(node, <Markdown content={node.content} />),
+    image: ({node}) => card(node, safeImageUrl(node.src)
+        ? <Image src={safeImageUrl(node.src)} alt={node.alt || ''} width={node.width} />
+        : <Alert type="warning" message="图片地址无效" showIcon />),
+    progress: ({node}) => card(node, <Progress percent={Math.max(0, Math.min(100, node.percent || 0))}
+        status={node.status} format={node.label ? () => node.label : undefined} />),
+    empty: ({node}) => <Empty style={{marginBottom: 16}} description={node.description} />,
+    divider: ({node}) => <Divider>{node.title}</Divider>,
+    links: ({node}) => card(node, <List dataSource={node.items || []} renderItem={(item: any) =>
+        <List.Item><List.Item.Meta title={safeUrl(item.href)
+            ? <a href={safeUrl(item.href)} target="_blank" rel="noreferrer">{item.label}</a> : item.label}
+            description={item.description} /></List.Item>} />),
+    code: ({node}) => card(node, <Typography.Paragraph><pre style={{overflow: 'auto'}}><code>
+        {String(node.content || '')}
+    </code></pre></Typography.Paragraph>),
+    grid: ({node, context}) => <div style={{display: 'grid', gap: 16,
+        gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, node.columns || 2))}, minmax(0, 1fr))`}}>
+        <ProtocolList nodes={node.items || []} context={context} renderers={pageSectionRenderers} />
+    </div>,
+    form: ({node, context}) => {
+        const item = context.forms.find(form => form.id === node.id);
+        return item ? <PluginForm item={item} values={context.formValues[item.id]} submit={context.submit} /> : null;
+    },
+    actions: ({node, context}) => <ActionGroup ids={node.ids} context={context} />
+};
+
+export function PageSectionRenderer({section, context}: {section: PageSection; context: PageSectionContext}) {
+    return <ProtocolRenderer node={section} context={context} renderers={pageSectionRenderers} />;
+}
+
+export function PageSections({sections, context}: {sections: PageSection[]; context: PageSectionContext}) {
+    return <ProtocolList nodes={sections} context={context} renderers={pageSectionRenderers} />;
+}
+
+export function PageForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
+    return <PluginForm item={item} values={values} submit={submit} />;
+}
+
+export function hasLayoutReferences(sections: PageSection[]): boolean {
+    return (sections || []).some(section => ['form', 'actions'].includes(section.type) ||
+        (section.type === 'grid' && hasLayoutReferences(section.items)));
+}

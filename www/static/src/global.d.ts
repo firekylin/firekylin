@@ -4,6 +4,8 @@ interface Window {
         config: {
             disallow_file_edit: any;
         };
+        csrfToken: string;
+        pluginAdmin: Array<any>;
         options: {
             title: string;
             two_factor_auth: string;

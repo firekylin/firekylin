@@ -350,6 +350,112 @@ ctx.routes.register({
 
 Action handler 接收 `{ctx, params, query, body, plugin}`，返回值自动作为 HTTP 响应体。路由冲突会在注册时拒绝，插件停用时自动移除路由。
 
+## 后台 UI 扩展
+
+插件可以用声明式 API 增加管理员侧栏面板、页面、表单和动作。后台外观、路由、权限和
+CSRF 由 Firekylin 统一管理；插件不需要绑定 React 或 Ant Design 版本，也不能向后台注入
+任意脚本。此接口仅对管理员可见。
+
+```js
+register(ctx) {
+  ctx.admin.registerPanel({
+    id: 'reading-tools',
+    title: '阅读工具',
+    icon: 'setting',
+    order: 80
+  });
+
+  ctx.admin.registerPage({
+    id: 'overview',
+    panel: 'reading-tools',
+    title: '阅读统计',
+    description: '查看并配置阅读统计插件',
+    async load({user}) {
+      return {
+        notices: [{type: 'info', message: `你好，${user.name}`}],
+        sections: [
+          {type: 'description', title: '状态', items: [
+            {label: '缓存', value: '正常'},
+            {label: '文章数', value: 42}
+          ]},
+          {type: 'table', title: '热门文章', rowKey: 'id',
+            columns: [{key: 'title', title: '标题'}, {key: 'views', title: '阅读数'}],
+            rows: [{id: 1, title: 'Hello', views: 100}]},
+          {type: 'grid', columns: 2, items: [
+            {type: 'form', id: 'settings'},
+            {type: 'markdown', title: '使用说明', content: '**保存**后新配置立即生效。'}
+          ]},
+          {type: 'actions', ids: ['rebuild']}
+        ]
+      };
+    }
+  });
+
+  ctx.admin.registerForm({
+    id: 'settings',
+    page: 'overview',
+    title: '插件设置',
+    fields: [
+      {name: 'enabled', type: 'switch', label: '启用统计'},
+      {name: 'label', type: 'text', label: '显示名称', required: true},
+      {name: 'style', type: 'select', label: '样式', options: [
+        {label: '简洁', value: 'compact'}, {label: '完整', value: 'full'}
+      ]}
+    ],
+    async load() {
+      return {enabled: true, label: '阅读数', style: 'compact'};
+    },
+    async submit(values, {user}) {
+      // 校验并保存 values；未声明的字段会被宿主丢弃。
+      return {message: `已由 ${user.name} 保存`};
+    }
+  });
+
+  ctx.admin.registerAction({
+    id: 'rebuild',
+    page: 'overview',
+    label: '重建统计',
+    type: 'danger',
+    confirm: '确定要重建全部统计吗？',
+    async handler(input, {user}) {
+      return {message: `重建任务已由 ${user.name} 启动`};
+    }
+  });
+}
+```
+
+一个面板可以包含多个页面，侧栏会自动生成二级导航。注册顺序要求为面板 → 页面 →
+表单/动作；同一插件内的 ID 必须唯一。页面 `load`、表单 `load/submit` 和动作 `handler`
+都会收到 `{ctx, user, pluginId}` 上下文。
+
+`sections` 同时是页面布局：`form` 可以把已注册表单插入任意位置，`actions` 可以插入指定
+动作按钮，`grid` 可以递归排列其他区块。引用必须属于当前插件的当前页面；未知类型和错误
+引用会被拒绝。如果页面没有使用 `form` 或 `actions` 引用，Firekylin 会保持兼容布局：动作
+显示在顶部，表单显示在内容之后。
+
+页面支持以下安全的内容区块：
+
+- `text`：`{type, title?, content}`；
+- `description`：`{type, title?, items: [{label, value}]}`；
+- `table`：`{type, title?, rowKey?, pagination?, columns: [{key, title}], rows}`；
+- `stat`：统计数字卡片，支持 `prefix`、`suffix` 和 `precision`；
+- `list`：标题及说明组成的列表；
+- `markdown`：安全的 Markdown 子集，支持标题、列表、粗体、行内代码和链接；
+- `image`、`progress`、`empty`、`divider`：图片、进度、空状态和分隔线；
+- `links`：经过协议检查的链接列表；
+- `code`：只读代码或日志；
+- `grid`：`{type, columns?, items}`，以一至四列递归布局其他区块；
+- `form`：`{type: 'form', id}`，引用当前页面的表单；
+- `actions`：`{type: 'actions', ids?}`，引用部分或全部当前页面动作。
+
+Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持的安全协议。插件不能通过页面
+区块注入脚本或任意 React 组件。
+
+表单字段支持 `text`、`textarea`、`number`、`switch`、`select`、`password`、`email`、
+`url`、`radio`、`checkbox`、`color` 和 `code`。字段还可以
+声明 `description`、`placeholder`、`required`；`select` 必须提供 `options`。动作的 `type`
+支持 `default`、`primary` 和 `danger`。所有返回内容都作为数据由宿主渲染和转义。
+
 ## 完整 Demo：阅读统计插件
 
 ### `package.json`

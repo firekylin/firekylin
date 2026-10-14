@@ -42,3 +42,40 @@ test('plugin admin routes authenticate JWT and reject invalid CSRF tokens', asyn
   ctx.headers['X-CSRF-Token'] = auth.csrfToken(ctx);
   await assert.rejects(middleware(ctx, () => {}), {status: 403});
 });
+
+test('declarative admin endpoints require an administrator and CSRF on writes', async() => {
+  const secret = 'plugin-admin-ui-secret-with-at-least-32-bytes';
+  const cookies = new Map();
+  const calls = [];
+  global.firekylin = {plugins: {
+    routes: {match: () => null},
+    admin: {
+      manifest: () => [{id: 'demo'}],
+      async loadPage() { return {content: {}} },
+      async loadForm() { return {} },
+      async submitForm(pluginId, formId, body) { calls.push({pluginId, formId, body}); return {message: 'saved'} },
+      async runAction() { return {} }
+    }
+  }};
+  global.think = {model: () => ({async getOptions() { return {jwt_secret: secret} }})};
+  const ctx = {
+    method: 'GET', path: '/admin/api/plugins', request: {body: {}}, state: {}, headers: {},
+    get(name) { return this.headers[name] || '' },
+    cookie(name) { return cookies.get(name) },
+    throw(status, message) { throw Object.assign(new Error(message), {status}) }
+  };
+  const middleware = pluginRoutes();
+  await assert.rejects(middleware(ctx, () => {}), {status: 403});
+  cookies.set(auth.COOKIE_NAME, auth.sign({id: 1, name: 'admin', type: 1}, secret));
+  await middleware(ctx, () => {});
+  assert.equal(ctx.body.data[0].id, 'demo');
+
+  ctx.method = 'POST';
+  ctx.path = '/admin/api/plugins/demo/forms/settings';
+  ctx.request.body = {enabled: true};
+  await assert.rejects(middleware(ctx, () => {}), {status: 403});
+  ctx.headers['X-CSRF-Token'] = auth.csrfToken(ctx);
+  await middleware(ctx, () => {});
+  assert.deepEqual(calls, [{pluginId: 'demo', formId: 'settings', body: {enabled: true}}]);
+  assert.equal(ctx.body.data.message, 'saved');
+});

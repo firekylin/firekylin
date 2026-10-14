@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Checkbox, Input, Radio, Select } from 'antd';
 import { SketchPicker } from 'react-color';
 import CodeEditor from '../../routes/appearance/edit/code-editor';
+import { FormField, FormFieldSchema } from '../protocol/form-field';
 
 export interface ConfigFieldDefinition {
     name: string;
@@ -23,27 +23,20 @@ export default function ConfigField({field, value, onChange}: Props) {
     const options = Array.isArray(field.options) ? field.options : [];
     const type = field.type === 'html' ? 'htmlmixed' : field.type;
 
+    if (['text', 'url', 'email', 'password', 'textarea', 'select', 'radio', 'checkbox'].includes(type)) {
+        const schema: FormFieldSchema = {
+            name: field.name,
+            type: type as FormFieldSchema['type'],
+            label: field.name,
+            options: options.map(option => ({value: optionValue(option), label: optionLabel(option)}))
+        };
+        const fieldValue = type === 'checkbox' && !Array.isArray(value) ? [] : value == null ? '' : value;
+        return <FormField field={schema} value={fieldValue} onChange={(nextValue: any) =>
+            onChange(nextValue && nextValue.target ? nextValue.target.value : nextValue)
+        } />;
+    }
+
     switch (type) {
-        case 'text':
-        case 'url':
-        case 'email':
-        case 'password':
-            return <Input type={type === 'password' ? 'password' : type === 'url' ? 'url' : type === 'email' ? 'email' : 'text'}
-                value={value == null ? '' : value} onChange={e => onChange(e.target.value)} />;
-        case 'textarea':
-            return <Input.TextArea value={value == null ? '' : value} onChange={e => onChange(e.target.value)} />;
-        case 'select':
-            return <Select style={{width: '100%'}} value={value}
-                options={options.map(option => ({value: optionValue(option), label: optionLabel(option)}))}
-                onChange={onChange} />;
-        case 'radio':
-            return <Radio.Group value={value} onChange={e => onChange(e.target.value)}>
-                {options.map((option, index) => <Radio key={index} value={optionValue(option)}>{optionLabel(option)}</Radio>)}
-            </Radio.Group>;
-        case 'checkbox':
-            return <Checkbox.Group value={Array.isArray(value) ? value : []}
-                options={options.map(option => ({value: optionValue(option), label: optionLabel(option)}))}
-                onChange={onChange} />;
         case 'color': {
             const [, r, g, b, a] = (value || '').match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
             return <div className="react-color-picker">

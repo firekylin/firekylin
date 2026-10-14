@@ -50,9 +50,6 @@ module.exports = [
     handle: oauthMiddleware
   },
   {
-    handle: pluginRoutes
-  },
-  {
     handle: 'resource',
     // enable: isDev,
     options: {
@@ -77,6 +74,9 @@ module.exports = [
     options: {
       uploadDir: think.TMPDIR_PATH
     }
+  },
+  {
+    handle: pluginRoutes
   },
   {
     handle: 'router',

@@ -1,4 +1,91 @@
 declare namespace Firekylin {
+  type AdminFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password' |
+    'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code';
+
+  interface AdminPanelDefinition {
+    id: string;
+    title: string;
+    icon?: string;
+    order?: number;
+  }
+
+  interface AdminPageContext {
+    ctx: any;
+    user: {id: number; name: string; type: number};
+    pluginId: string;
+  }
+
+  interface AdminPageContent {
+    notices?: Array<{type?: 'success' | 'info' | 'warning' | 'error'; message: string}>;
+    sections?: AdminPageSection[];
+  }
+
+  type AdminPageSection =
+    | {type: 'text'; title?: string; content: string}
+    | {type: 'description'; title?: string; columns?: number; items: Array<{label: string; value: unknown}>}
+    | {type: 'table'; title?: string; rowKey?: string; pagination?: boolean;
+      columns: Array<{key: string; title: string}>; rows: any[]}
+    | {type: 'stat'; title?: string; columns?: number;
+      items: Array<{label: string; value: string | number; prefix?: string; suffix?: string; precision?: number}>}
+    | {type: 'list'; title?: string; items: Array<string | {title: string; description?: string}>}
+    | {type: 'markdown'; title?: string; content: string}
+    | {type: 'image'; title?: string; src: string; alt?: string; width?: string | number}
+    | {type: 'progress'; title?: string; percent: number;
+      status?: 'normal' | 'exception' | 'active' | 'success'; label?: string}
+    | {type: 'empty'; description?: string}
+    | {type: 'divider'; title?: string}
+    | {type: 'links'; title?: string;
+      items: Array<{label: string; href: string; description?: string}>}
+    | {type: 'code'; title?: string; content: string; language?: string}
+    | {type: 'grid'; columns?: number; items: AdminPageSection[]}
+    | {type: 'form'; id: string}
+    | {type: 'actions'; ids?: string[]};
+
+  interface AdminPageDefinition {
+    id: string;
+    panel: string;
+    title: string;
+    description?: string;
+    order?: number;
+    load?(context: AdminPageContext): AdminPageContent | Promise<AdminPageContent>;
+  }
+
+  interface AdminFormField {
+    name: string;
+    type?: AdminFieldType;
+    label: string;
+    description?: string;
+    placeholder?: string;
+    required?: boolean;
+    options?: Array<{label: string; value: unknown}>;
+  }
+
+  interface AdminFormDefinition {
+    id: string;
+    page: string;
+    title: string;
+    submitLabel?: string;
+    fields: AdminFormField[];
+    load?(context: AdminPageContext): Record<string, unknown> | Promise<Record<string, unknown>>;
+    submit(values: Record<string, unknown>, context: AdminPageContext): unknown | Promise<unknown>;
+  }
+
+  interface AdminActionDefinition {
+    id: string;
+    page: string;
+    label: string;
+    type?: 'default' | 'primary' | 'danger';
+    confirm?: string;
+    handler(input: Record<string, unknown>, context: AdminPageContext): unknown | Promise<unknown>;
+  }
+
+  interface AdminPluginAPI {
+    registerPanel(definition: AdminPanelDefinition): () => boolean;
+    registerPage(definition: AdminPageDefinition): () => boolean;
+    registerForm(definition: AdminFormDefinition): () => boolean;
+    registerAction(definition: AdminActionDefinition): () => boolean;
+  }
+
   interface WidgetRow {
     [key: string]: any;
   }
