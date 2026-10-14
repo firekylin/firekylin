@@ -1,7 +1,10 @@
 'use strict';
 
 const ID_PATTERN = /^[a-z][a-z0-9._-]*$/i;
-const FIELD_TYPES = new Set(['text', 'textarea', 'number', 'switch', 'select', 'password']);
+const FIELD_TYPES = new Set([
+  'text', 'textarea', 'number', 'switch', 'select', 'password', 'email', 'url', 'radio', 'checkbox',
+  'color', 'code'
+]);
 const ACTION_TYPES = new Set(['default', 'primary', 'danger']);
 const SECTION_TYPES = new Set([
   'text', 'description', 'table', 'stat', 'list', 'markdown', 'image', 'progress', 'empty', 'divider',
@@ -43,8 +46,8 @@ function normalizeFields(fields, formId) {
     names.add(name);
     const type = field.type || 'text';
     if (!FIELD_TYPES.has(type)) throw new TypeError(`Unsupported admin form field type: ${type}`);
-    if (type === 'select' && (!Array.isArray(field.options) || !field.options.length)) {
-      throw new TypeError(`Select field ${formId}.${name} requires options`);
+    if (['select', 'radio', 'checkbox'].includes(type) && (!Array.isArray(field.options) || !field.options.length)) {
+      throw new TypeError(`${type} field ${formId}.${name} requires options`);
     }
     const normalized = {
       name,

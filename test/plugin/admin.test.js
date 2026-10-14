@@ -57,6 +57,10 @@ test('admin registry validates relationships and removes every plugin resource',
   const admin = new AdminRegistry();
   assert.throws(() => admin.registerPage({id: 'page', panel: 'missing', title: 'Page'}, 'example'), /Unknown/);
   registerExample(admin);
+  assert.throws(() => admin.registerForm({
+    id: 'invalid-radio', page: 'settings', title: 'Invalid',
+    fields: [{name: 'choice', type: 'radio', label: 'Choice'}], submit() {}
+  }, 'example'), /requires options/);
   assert.throws(() => admin.registerPanel({id: 'tools', title: 'Again'}, 'example'), /already registered/);
   admin.removePlugin('example');
   assert.deepEqual(admin.manifest(), []);

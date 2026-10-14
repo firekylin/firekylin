@@ -3,11 +3,11 @@ import { observer, inject } from '@admin/utils/mobx-react';
 import { ThemeProps, ConfigElement } from './theme.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
-import { Select, Button, Input, Radio } from 'antd';
-const RadioGroup = Radio.Group;
+import { Select, Button } from 'antd';
 import { SketchPicker } from 'react-color';
 import './theme.less';
 import CodeEditor from '../edit/code-editor';
+import { FormField, FormFieldSchema } from '../../../components/protocol/form-field';
 
 @inject('themeStore', 'sharedStore')
 @observer class ThemeForm extends React.Component<ThemeProps, {}> {
@@ -88,94 +88,26 @@ import CodeEditor from '../edit/code-editor';
           case 'email':
           case 'textarea':
           case 'password':
-            return (
-                <Form.Item
-                    key={i}
-                    label={element.label}
-                >
-                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e =>
-                      this.updateThemeConfig(element.name, e.target.value)
-                    } />
-                    <p style={{width: 600}}>{element.help}</p>
-                </Form.Item>
-            );
-
           case 'radio':
-            if (!Array.isArray(element.options)) { return null; }
-
-            return (
-                <Form.Item
-                    key={i}
-                    label={element.label}
-                >
-                    <RadioGroup
-                        {...element}
-                        key={i}
-                        value={this.state.themeConfig[element.name]}
-                        onChange={e => this.updateThemeConfig(element.name, e.target.value)}
-                    >
-                        {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
-                    </RadioGroup>
-                    <p style={{width: 600}}>{element.help}</p>
-                </Form.Item>
-            );
-
           case 'checkbox':
-            if (!Array.isArray(element.options)) { return null; }
-
-            return (
-              <div className="form-group" key={i}>
-                <label>{element.label}</label>
-                <div>
-                  {element.options.map((opt, j) =>
-                    <label key={j}>
-                      <input
-                          type="checkbox"
-                          className="form-control"
-                          name={'element.name[]'}
-                          value={opt.value ? opt.value : opt}
-                          checked={Array.isArray(this.state.themeConfig[element.name]) &&
-                            this.state.themeConfig[element.name].includes(opt.value || opt)}
-                          onChange={e => {
-                            let checked = e.target.checked;
-                            let val = opt.value ? opt.value : opt;
-                            const values = Array.isArray(this.state.themeConfig[element.name])
-                              ? this.state.themeConfig[element.name] : [];
-                            this.updateThemeConfig(element.name, checked
-                              ? [...values, val]
-                              : values.filter(v => v !== val));
-                          }}
-                      />
-                      {opt.label ? opt.label : opt}
-                    </label>
-                  )}
-                </div>
-              </div>
-            );
-
-          case 'select':
-            if (!Array.isArray(element.options)) { return null; }
-
-            return (
-              <div className="form-group" key={i}>
-                <label>{element.label}</label>
-                <div>
-                  <select
-                      name={element.name}
-                      className="form-control"
-                      value={this.state.themeConfig[element.name]}
-                      onChange={e => {
-                        this.updateThemeConfig(element.name, e.target.value);
-                      }}
-                  >
-                    {element.options.map((opt, j) =>
-                      <option key={j} value={opt.value ? opt.value : opt}>{opt.label ? opt.label : opt}</option>
-                    )}
-                  </select>
-                  <div className="help-block">{element.help ? element.help : ''}</div>
-                </div>
-              </div>
-            );
+          case 'select': {
+            if (['radio', 'checkbox', 'select'].includes(element.type) && !Array.isArray(element.options)) return null;
+            const field: FormFieldSchema = {
+              name: element.name,
+              type: element.type as FormFieldSchema['type'],
+              label: element.label,
+              description: element.help,
+              options: Array.isArray(element.options) ? element.options.map(option => ({
+                label: option.label || String(typeof option.value === 'undefined' ? option : option.value),
+                value: typeof option.value === 'undefined' ? option : option.value
+              })) : undefined
+            };
+            return <Form.Item key={i} label={field.label} extra={field.description} style={{maxWidth: 600}}>
+              <FormField field={field} value={this.state.themeConfig[element.name]} onChange={(value: any) =>
+                this.updateThemeConfig(element.name, value && value.target ? value.target.value : value)
+              } />
+            </Form.Item>;
+          }
 
           case 'color':
             const clr = this.state.themeConfig[element.name];

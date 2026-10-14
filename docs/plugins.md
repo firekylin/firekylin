@@ -439,7 +439,8 @@ register(ctx) {
 Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持的安全协议。插件不能通过页面
 区块注入脚本或任意 React 组件。
 
-表单字段支持 `text`、`textarea`、`number`、`switch`、`select` 和 `password`。字段还可以
+表单字段支持 `text`、`textarea`、`number`、`switch`、`select`、`password`、`email`、
+`url`、`radio`、`checkbox`、`color` 和 `code`。字段还可以
 声明 `description`、`placeholder`、`required`；`select` 必须提供 `options`。动作的 `type`
 支持 `default`、`primary` 和 `danger`。所有返回内容都作为数据由宿主渲染和转义。
 

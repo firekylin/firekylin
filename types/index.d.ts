@@ -1,5 +1,6 @@
 declare namespace Firekylin {
-  type AdminFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password';
+  type AdminFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password' |
+    'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code';
 
   interface AdminPanelDefinition {
     id: string;
