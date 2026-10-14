@@ -81,7 +81,7 @@ export const InitiateRoutes = (themePages) => [{
     },
     {
         url: '/media',
-        icon: 'picture',
+        icon: 'image',
         title: '媒体管理'
     },
     {
