@@ -17,6 +17,8 @@ module.exports = class extends ContentsWidget {
         return this.executePost();
       case 'page':
         return this.executePage();
+      case 'attachment':
+        return this.executeAttachment();
       case 'archive':
         return this.executeArchive();
       case 'search':
@@ -68,9 +70,38 @@ module.exports = class extends ContentsWidget {
   }
 
   async executePost() {
-    let detail = await this.getPreview();
-    detail = detail || await this.model('post').getPostDetail(this.controller.get('pathname'));
+    const preview = await this.getPreview();
+    let detail = preview || await this.model('post').getPostDetail(this.controller.get('pathname'));
+    detail = await this.protect(detail, Boolean(preview));
     if (!think.isEmpty(detail)) this.push(Object.assign({type: 0}, detail));
+  }
+
+  async protect(detail, isPreview = false) {
+    if (think.isEmpty(detail) || isPreview) return detail;
+    let options = detail.options || {};
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options) || {} } catch { options = {} }
+    }
+    if (!options.postPasswordHash) return detail;
+
+    detail.options = options;
+    const protection = this.controller.service('post-protection');
+    let error = false;
+    if (this.ctx.method === 'POST' && this.controller.post('protectPassword')) {
+      if (await protection.unlock(detail, this.controller.post('protectPassword'))) {
+        delete detail.options.postPasswordHash;
+        return detail;
+      }
+      error = true;
+    }
+
+    delete detail.options.postPasswordHash;
+    detail.title = '此内容被密码保护';
+    detail.content = protection.form(this.ctx, error);
+    detail.summary = '这篇文章受密码保护。';
+    detail.allow_comment = 0;
+    detail.password_protected = true;
+    return detail;
   }
 
   async executePage() {
@@ -85,6 +116,19 @@ module.exports = class extends ContentsWidget {
       })
       .find();
     if (!think.isEmpty(detail)) this.push(Object.assign({type: 1}, detail));
+  }
+
+  async executeAttachment() {
+    const detail = await this.model('post')
+      .setRelation('user')
+      .where({
+        pathname: this.controller.get('pathname'),
+        is_public: 1,
+        type: 2,
+        status: 3
+      })
+      .find();
+    if (!think.isEmpty(detail)) this.push(Object.assign({type: 2}, detail));
   }
 
   async getPreview() {

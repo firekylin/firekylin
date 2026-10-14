@@ -69,6 +69,7 @@ class PostCommandService {
       throw new Error('Only drafts can be edited with posts.update_draft');
     }
     let data = {...input};
+    if (options.prepare) data = await options.prepare(data, post);
     // Editing a published article as an editor must re-enter the review queue.
     if (this.actor(principal).type !== 1 && Number(post.status) === 3) data.status = 1;
     if (data.pathname && data.pathname !== post.pathname) {

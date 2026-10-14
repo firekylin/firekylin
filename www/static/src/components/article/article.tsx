@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, message } from 'antd';
+import { Row, Col, Input, message } from 'antd';
 import generatePicker from 'antd/es/date-picker/generatePicker';
 import { inject, observer } from '@admin/utils/mobx-react';
 import dayjs from 'dayjs';
@@ -44,6 +44,8 @@ class Article extends React.Component<ArticleProps, {}> {
             title: false,
         },
         autocompletePathname: !this.props.match.params.id,
+        postPassword: '',
+        clearPostPassword: false,
         customFieldsValid: true,
     };
 
@@ -104,6 +106,7 @@ class Article extends React.Component<ArticleProps, {}> {
         const nextId = +nextProps.match.params.id || 0;
         if (nextId !== currentId) {
             this.articleId = nextId;
+            this.setState({ postPassword: '', clearPostPassword: false });
             this.props.articleStore.resetArticleInfo();
             this.init();
             if (nextId) {
@@ -218,14 +221,24 @@ class Article extends React.Component<ArticleProps, {}> {
             template: articleInfo.options.template,
             featuredImage: articleInfo.options.featuredImage,
             push_sites: articleInfo.options.push_sites,
+            passwordProtected: articleInfo.options.passwordProtected,
             fields: this.fieldsWithThemeDefaults(),
         });
+        if (this.state.postPassword) params.post_password = this.state.postPassword;
+        if (this.state.clearPostPassword) params.clear_post_password = 1;
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + params.id);
         // 保存
         const type = this.isPage() ? 'page' : 'post';
         this.props.articleStore.articleSubmit(params, this.type).subscribe(res => {
             if (res.errno === 0) {
+                const passwordProtected = this.state.clearPostPassword
+                    ? false
+                    : Boolean(this.state.postPassword || articleInfo.options.passwordProtected);
+                this.setState({ postPassword: '', clearPostPassword: false });
+                articleStore.setArticleInfo({
+                    options: { passwordProtected },
+                });
                 const createdId = !params.id && Number(res.data.id);
                 if (createdId) {
                     params.id = createdId;
@@ -448,6 +461,26 @@ class Article extends React.Component<ArticleProps, {}> {
                                 handlePublicChange={e => this.handlePublicChange(e)}
                             />
                         </section>
+                        {this.isPage() ? null : (
+                            <section className="category">
+                                <h5>访问密码</h5>
+                                <Input.Password
+                                    value={this.state.postPassword}
+                                    disabled={this.state.clearPostPassword}
+                                    placeholder={articleInfo.options.passwordProtected ? '留空则保持原密码' : '留空则不启用密码'}
+                                    maxLength={256}
+                                    onChange={e => this.setState({ postPassword: e.target.value, clearPostPassword: false })}
+                                />
+                                {articleInfo.options.passwordProtected ? (
+                                    <Checkbox
+                                        checked={this.state.clearPostPassword}
+                                        onChange={e => this.setState({ clearPostPassword: e.target.checked, postPassword: '' })}
+                                    >
+                                        取消密码保护
+                                    </Checkbox>
+                                ) : null}
+                            </section>
+                        )}
                         <section className="category">
                             <h5>权限控制</h5>
                             <Checkbox

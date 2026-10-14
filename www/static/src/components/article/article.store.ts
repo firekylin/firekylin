@@ -19,6 +19,7 @@ class ArticleStore {
       template: '',
       featuredImage: '',
       push_sites: [],
+      passwordProtected: false,
       fields: {}
     },
     status: ArticleEnum.SAVE,
@@ -51,6 +52,7 @@ class ArticleStore {
         template: '',
         featuredImage: '',
         push_sites: [],
+        passwordProtected: false,
         fields: {}
       },
       status: ArticleEnum.DRAFT,

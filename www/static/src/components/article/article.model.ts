@@ -41,6 +41,7 @@ export interface ArticleInfo {
         template: string;
         featuredImage: string;
         push_sites: any[];
+        passwordProtected: boolean;
         fields: Record<string, any>;
     };
     user_id: string;
@@ -52,5 +53,6 @@ export interface ArticleInfoOptions {
     template: string;
     featuredImage: string;
     push_sites: any[];
+    passwordProtected: boolean;
     fields: Record<string, any>;
 }

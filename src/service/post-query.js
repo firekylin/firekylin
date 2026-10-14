@@ -23,30 +23,47 @@ class PostQueryService {
     };
   }
 
+  sanitizePublic(post) {
+    if (!post || !post.id) return post;
+    post = {...post};
+    let options = {};
+    try { options = JSON.parse(post.options || '{}') || {} } catch { options = {} }
+    delete post.options;
+    if (!options.postPasswordHash) return post;
+    delete post.markdown_content;
+    post.title = '此内容被密码保护';
+    post.summary = '这篇文章受密码保护。';
+    post.password_protected = true;
+    return post;
+  }
+
   async listPublic({page = 1, limit = 10} = {}) {
-    return this.getModel().where(this.publicWhere())
-      .field('id,title,pathname,summary,create_time,update_time')
+    const posts = await this.getModel().where(this.publicWhere())
+      .field('id,title,pathname,summary,create_time,update_time,options')
       .setRelation(false)
       .order('create_time DESC')
       .page(page, limit)
       .select();
+    return posts.map(post => this.sanitizePublic(post));
   }
 
   async getPublic(id) {
-    return this.getModel().where(this.publicWhere({id}))
-      .field('id,title,pathname,summary,markdown_content,create_time,update_time')
+    const post = await this.getModel().where(this.publicWhere({id}))
+      .field('id,title,pathname,summary,markdown_content,create_time,update_time,options')
       .setRelation(false)
       .find();
+    return this.sanitizePublic(post);
   }
 
   async searchPublic({query, limit = 10}) {
-    return this.getModel().where(this.publicWhere({
+    const posts = await this.getModel().where(this.publicWhere({
       'title|content': ['LIKE', '%' + query + '%']
-    })).field('id,title,pathname,summary,create_time,update_time')
+    })).field('id,title,pathname,summary,create_time,update_time,options')
       .setRelation(false)
       .order('create_time DESC')
       .limit(limit)
       .select();
+    return posts.map(post => this.sanitizePublic(post));
   }
 
   async getAdmin(id, userInfo) {
