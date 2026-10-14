@@ -7,16 +7,9 @@ global.think = {Service: class {}};
 const PostProtection = require('../../src/service/post-protection');
 
 function context() {
-  const cookies = new Map();
   return {
     method: 'GET',
-    path: '/post/hello.html',
-    protocol: 'https',
-    secure: true,
-    cookie(name, value) {
-      if (arguments.length > 1) cookies.set(name, value);
-      return cookies.get(name);
-    }
+    path: '/post/hello.html'
   };
 }
 
@@ -31,17 +24,11 @@ test('post passwords are salted and verified without storing plaintext', async()
   assert.equal(await protection.verify('correct horse', 'invalid'), false);
 });
 
-test('unlock cookie is scoped to the post and invalidated by password changes', async() => {
+test('unlock validates only the current request without persisting access state', async() => {
   const protection = new PostProtection();
-  const ctx = context();
   const post = {id: 42, options: {postPasswordHash: await protection.hash('secret')}};
-  assert.equal(protection.isUnlocked(ctx, post), false);
-  assert.deepEqual(await protection.unlock(ctx, post, 'wrong'), {unlocked: false, limited: false});
-  assert.deepEqual(await protection.unlock(ctx, post, 'secret'), {unlocked: true, limited: false});
-  assert.equal(protection.isUnlocked(ctx, post), true);
-
-  post.options.postPasswordHash = await protection.hash('new secret');
-  assert.equal(protection.isUnlocked(ctx, post), false);
+  assert.equal(await protection.unlock(post, 'wrong'), false);
+  assert.equal(await protection.unlock(post, 'secret'), true);
 });
 
 test('password prompt escapes its action URL', () => {
@@ -50,14 +37,4 @@ test('password prompt escapes its action URL', () => {
   assert.match(html, /密码错误/);
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /name="protectPassword"/);
-});
-
-test('password attempts are rate limited per article and client', async() => {
-  const protection = new PostProtection();
-  const ctx = {...context(), ip: '203.0.113.10'};
-  const post = {id: 77, options: {postPasswordHash: await protection.hash('secret')}};
-  for (let count = 0; count < 5; count++) {
-    assert.deepEqual(await protection.unlock(ctx, post, 'wrong'), {unlocked: false, limited: false});
-  }
-  assert.deepEqual(await protection.unlock(ctx, post, 'secret'), {unlocked: false, limited: true});
 });

@@ -12,12 +12,12 @@ global.think = {
 
 const Archive = require('../../src/widget/archive');
 
-function createController({params = {}, models = {}, query = {}, services = {}} = {}) {
+function createController({params = {}, models = {}, query = {}, services = {}, body = {}, method = 'GET'} = {}) {
   return {
-    ctx: {path: '/posts', query, method: 'GET', cookie() {}},
+    ctx: {path: '/posts', query, method},
     get(name) { return params[name] },
     model(name) { return models[name] },
-    post() { return undefined },
+    post(name) { return body[name] },
     service(name) { return services[name] }
   };
 }
@@ -113,6 +113,37 @@ test('preview query without preview payload does not bypass stored post protecti
   assert.equal(archive.content(), '<form>password</form>');
   assert.equal(archive.allow('comment'), false);
   assert.equal(archive.row.options.postPasswordHash, undefined);
+});
+
+test('correct password unlocks only the current POST request', async() => {
+  const post = {
+    async getPostDetail() {
+      return {
+        id: 10,
+        pathname: 'protected',
+        content: '<p>Secret body</p>',
+        options: JSON.stringify({postPasswordHash: 'hash'})
+      };
+    }
+  };
+  const protection = {
+    async unlock(article, password) { return article.id === 10 && password === 'secret' },
+    form() { return '<form>password</form>' }
+  };
+  const unlocked = new Archive(createController({
+    params: {pathname: 'protected'}, models: {post}, services: {'post-protection': protection},
+    body: {protectPassword: 'secret'}, method: 'POST'
+  }), {type: 'post'});
+  await unlocked.execute();
+  unlocked.next();
+  assert.equal(unlocked.content(), '<p>Secret body</p>');
+
+  const nextRequest = new Archive(createController({
+    params: {pathname: 'protected'}, models: {post}, services: {'post-protection': protection}
+  }), {type: 'post'});
+  await nextRequest.execute();
+  nextRequest.next();
+  assert.equal(nextRequest.content(), '<form>password</form>');
 });
 
 test('archive and search modes retain grouped and paginated views', async() => {

@@ -87,22 +87,16 @@ module.exports = class extends ContentsWidget {
     detail.options = options;
     const protection = this.controller.service('post-protection');
     let error = false;
-    let limited = false;
     if (this.ctx.method === 'POST' && this.controller.post('protectPassword')) {
-      const result = await protection.unlock(this.ctx, detail, this.controller.post('protectPassword'));
-      if (result.unlocked) {
+      if (await protection.unlock(detail, this.controller.post('protectPassword'))) {
         delete detail.options.postPasswordHash;
         return detail;
       }
       error = true;
-      limited = result.limited;
-    } else if (protection.isUnlocked(this.ctx, detail)) {
-      delete detail.options.postPasswordHash;
-      return detail;
     }
 
     delete detail.options.postPasswordHash;
-    detail.content = protection.form(this.ctx, error, limited);
+    detail.content = protection.form(this.ctx, error);
     detail.summary = '这篇文章受密码保护。';
     detail.allow_comment = 0;
     detail.password_protected = true;
