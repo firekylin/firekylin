@@ -10,6 +10,23 @@ const markedMermaidExtension = require('../service/marked-mermaid-extension');
 const Base = require('./base');
 const {emit, filter} = require('../plugin/runtime');
 
+function redactProtectedPosts(posts) {
+  return posts.map(post => {
+    let options = post.options || {};
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options) || {} } catch { options = {} }
+    }
+    if (!options.postPasswordHash) return post;
+    delete options.postPasswordHash;
+    return Object.assign({}, post, {
+      title: '此内容被密码保护',
+      summary: '这篇文章受密码保护。',
+      content: '这篇文章受密码保护。',
+      options
+    });
+  });
+}
+
 module.exports = class extends Base {
   get relation() {
     return {
@@ -408,7 +425,7 @@ module.exports = class extends Base {
         return false;
       }
       const where = this.getWhereCondition({[`${name}.${name}_id`]: id});
-      return this
+      const result = await this
         .join({
           table: `post_${name}`,
           as: name,
@@ -418,6 +435,8 @@ module.exports = class extends Base {
         .order('create_time DESC')
         .page(page, postsListSize)
         .countSelect();
+      result.data = redactProtectedPosts(result.data);
+      return result;
     }
 
     const where = this.getWhereCondition(options.where);
@@ -433,12 +452,14 @@ module.exports = class extends Base {
     //   },{timeout:259200});
     // }
 
-    return this.field(field)
+    const result = await this.field(field)
       .page(page, postsListSize)
       .setRelation('user')
       .order('create_time DESC')
       .where(where)
       .countSelect();
+    result.data = redactProtectedPosts(result.data);
+    return result;
   }
 
   /**
@@ -457,7 +478,7 @@ module.exports = class extends Base {
       create_time: ['<', createTime],
       id: ['!=', detail.id]
     });
-    const prevPromise = this.field('title,pathname')
+    const prevPromise = this.field('title,pathname,options')
       .setRelation(false)
       .where(prevWhere)
       .order('create_time DESC')
@@ -466,14 +487,14 @@ module.exports = class extends Base {
       create_time: ['>', createTime],
       id: ['!=', detail.id]
     });
-    const nextPromise = this.field('title,pathname')
+    const nextPromise = this.field('title,pathname,options')
       .setRelation(false)
       .where(nextWhere)
       .order('create_time ASC')
       .find();
     const [prev, next] = await Promise.all([prevPromise, nextPromise]);
-    detail.prev = prev;
-    detail.next = next;
+    detail.prev = redactProtectedPosts([prev]).map(item => ({title: item.title, pathname: item.pathname}))[0];
+    detail.next = redactProtectedPosts([next]).map(item => ({title: item.title, pathname: item.pathname}))[0];
     return detail;
   }
   async getPostRssList() {
@@ -482,9 +503,9 @@ module.exports = class extends Base {
     const feedFullText = await this.getFeedFullText();
 
     if (feedFullText === '0') {
-      field += 'summary,content';
+      field += 'summary,content,options';
     } else {
-      field += 'content';
+      field += 'content,options';
     }
 
     const data = await this.field(field)
@@ -493,7 +514,7 @@ module.exports = class extends Base {
       .setRelation(false)
       .limit(10)
       .select();
-    return data;
+    return redactProtectedPosts(data);
   }
 
   async getPostSitemapList() {
@@ -543,11 +564,13 @@ module.exports = class extends Base {
   async getPostSearch(keyword, page) {
     let where = {'title|content': ['LIKE', `%${keyword}%`]};
     where = this.getWhereCondition(where);
-    return this.where(where)
+    const result = await this.where(where)
       .page(page, await this.getPostsListSize())
       .setRelation(false)
       .field('title,pathname,summary,create_time,options')
       .order('create_time DESC')
       .countSelect(false);
+    result.data = redactProtectedPosts(result.data);
+    return result;
   }
 };

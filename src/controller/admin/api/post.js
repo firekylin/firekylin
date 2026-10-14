@@ -30,6 +30,8 @@ module.exports = class extends Base {
       data = await service.getAdmin(this.id, this.userInfo);
       if (!data || !data.id) return this.fail('USER_NO_PERMISSION');
       data.options = data.options ? JSON.parse(data.options) || {} : {};
+      data.options.passwordProtected = Boolean(data.options.postPasswordHash);
+      delete data.options.postPasswordHash;
     } else {
       const {status, keyword, cate} = this.get();
       const requestedPageSize = Number(this.get('pageSize'));
@@ -73,7 +75,7 @@ module.exports = class extends Base {
    */
   async postAction() {
     return this.runCommand(async() => {
-      const data = this.post();
+      const data = await this.prepareProtection(this.post());
       const result = await this.commandService().create(data, this.userInfo, {
         getTagModel: () => this.model('tag')
       });
@@ -92,6 +94,7 @@ module.exports = class extends Base {
       const data = {...this.post(), id: Number(this.id)};
       const result = await this.commandService().update(data, this.userInfo, {
         getTagModel: () => this.model('tag'),
+        prepare: (next, post) => this.prepareProtection(next, post.options),
         normalizePublishTime: (next, post) => {
           let options = JSON.parse(post.options || '{}');
           if (typeof options === 'string') options = JSON.parse(options) || {};
@@ -143,7 +146,8 @@ ${post.markdown_content}`;
     delete post.cate;
     delete post.user_id;
     post.options = JSON.stringify({
-      featuredImage: postOpt.featuredImage
+      featuredImage: postOpt.featuredImage,
+      fields: postOpt.fields || {}
     });
 
     if (!Array.isArray(push_sites_keys)) { push_sites_keys = [push_sites_keys] }
@@ -154,6 +158,28 @@ ${post.markdown_content}`;
     });
     const result = await Promise.all(pushes);
     console.log('push result for debug: ', result); // eslint-disable-line no-console
+  }
+
+  async prepareProtection(data, existingOptions = '{}') {
+    let current = {};
+    try { current = JSON.parse(existingOptions || '{}') || {} } catch { current = {} }
+    let incoming = {};
+    try { incoming = JSON.parse(data.options || '{}') || {} } catch { incoming = {} }
+    delete incoming.passwordProtected;
+    delete incoming.postPasswordHash;
+    const options = Object.assign({}, current, incoming);
+    if (typeof data.post_password === 'string' && data.post_password.length > 256) {
+      throw new Error('Post password is too long');
+    }
+    if (data.clear_post_password === '1' || data.clear_post_password === 1) {
+      delete options.postPasswordHash;
+    } else if (data.post_password) {
+      options.postPasswordHash = await this.service('post-protection').hash(data.post_password);
+    }
+    delete data.post_password;
+    delete data.clear_post_password;
+    data.options = JSON.stringify(options);
+    return data;
   }
 
   async lastest() {

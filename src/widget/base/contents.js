@@ -35,6 +35,9 @@ module.exports = class ContentsWidget extends Widget {
       }
     }
     row.options = row.options || {};
+    row.fields = row.options.fields && typeof row.options.fields === 'object' && !Array.isArray(row.options.fields)
+      ? row.options.fields
+      : {};
     row.featuredImage = row.options.featuredImage || '';
     return super.push(row);
   }
@@ -44,7 +47,9 @@ module.exports = class ContentsWidget extends Widget {
   }
 
   get permalink() {
-    const type = this.row.type === 1 || this.row.type === 'page' ? 'page' : 'post';
+    const type = this.row.type === 2 || this.row.type === 'attachment'
+      ? 'attachment'
+      : this.row.type === 1 || this.row.type === 'page' ? 'page' : 'post';
     return `/${type}/${this.row.pathname}.html`;
   }
 

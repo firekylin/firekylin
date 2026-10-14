@@ -20,7 +20,7 @@ class SideBar extends React.Component<any, any> {
             ).map(panel => {
                 const pages = plugin.pages.filter(page => page.panel === panel.id);
                 return {
-                    url: `/plugins/${plugin.id}/${pages[0] && pages[0].id}`,
+                    url: pages.length > 1 ? `/plugins/${plugin.id}` : `/plugins/${plugin.id}/${pages[0].id}`,
                     icon: panel.icon || 'plugin',
                     title: panel.title,
                     type: 1,
@@ -36,7 +36,8 @@ class SideBar extends React.Component<any, any> {
         };
     }
     isActive(routeUrl: string): boolean {
-        return `/${location.pathname.split('/')[2]}`.includes(routeUrl);
+        const currentPath = location.pathname.replace(/^\/admin(?=\/|$)/, '');
+        return currentPath === routeUrl || currentPath.startsWith(`${routeUrl}/`);
     }
     open(routeUrl: string) {
         this.props.history.push(routeUrl);

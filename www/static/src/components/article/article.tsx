@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, message } from 'antd';
+import { Row, Col, Input, message } from 'antd';
 import generatePicker from 'antd/es/date-picker/generatePicker';
 import { inject, observer } from '@admin/utils/mobx-react';
 import dayjs from 'dayjs';
@@ -16,6 +16,7 @@ import ArticleControlTag from './control-tag/control-tag';
 import ArticleControlPublic from './control-public/control-public';
 import ArticleControlImage from './control-image/control-image';
 import ArticleControlUser from './control-user/control-user';
+import ArticleControlFields from './control-fields/control-fields';
 
 import { Checkbox } from 'antd';
 import { RadioChangeEvent } from 'antd';
@@ -25,6 +26,7 @@ import './article.less';
 import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleControlTemplate from './control-template/control-template';
 import { ArticleEnum } from './article.enum';
+import ArticleControlThemeFields from './control-theme-fields/control-theme-fields';
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 
@@ -41,7 +43,10 @@ class Article extends React.Component<ArticleProps, {}> {
             pathname: false,
             title: false,
         },
-        autocompletePathname: !this.props.match.params.id
+        autocompletePathname: !this.props.match.params.id,
+        postPassword: '',
+        clearPostPassword: false,
+        customFieldsValid: true,
     };
 
     constructor(props: any) {
@@ -56,6 +61,7 @@ class Article extends React.Component<ArticleProps, {}> {
         if (this.isPage()) {
             sharedStore.getTemplateList(window.SysConfig.options.theme || 'firekylin');
         }
+        sharedStore.getThemeFields(window.SysConfig.options.theme || 'firekylin');
 
         // Get Cats
         sharedStore.set$();
@@ -100,6 +106,7 @@ class Article extends React.Component<ArticleProps, {}> {
         const nextId = +nextProps.match.params.id || 0;
         if (nextId !== currentId) {
             this.articleId = nextId;
+            this.setState({ postPassword: '', clearPostPassword: false });
             this.props.articleStore.resetArticleInfo();
             this.init();
             if (nextId) {
@@ -136,6 +143,15 @@ class Article extends React.Component<ArticleProps, {}> {
         this.props.articleStore.setArticleInfo({ user_id: value });
     }
 
+    fieldsWithThemeDefaults() {
+        const defaults = Object.fromEntries(
+            this.props.sharedStore.themeFields
+                .filter(field => field && field.name && field.default !== undefined)
+                .map(field => [field.name, field.default]),
+        );
+        return {...defaults, ...(this.props.articleStore.articleInfo.options.fields || {})};
+    }
+
     handleSave(): void {
         this.handleSubmit(ArticleEnum.SAVE);
     }
@@ -165,6 +181,10 @@ class Article extends React.Component<ArticleProps, {}> {
             this.setState({
                 hasError: Object.assign({}, this.state.hasError, { pathname: false }),
             });
+        }
+        if (!this.state.customFieldsValid) {
+            message.error('自定义字段名称不能重复');
+            return;
         }
 
         const params: any = {};
@@ -197,16 +217,28 @@ class Article extends React.Component<ArticleProps, {}> {
 
         params.is_public = articleInfo.is_public;
         params.options = JSON.stringify({
+            ...articleInfo.options,
             template: articleInfo.options.template,
             featuredImage: articleInfo.options.featuredImage,
             push_sites: articleInfo.options.push_sites,
+            passwordProtected: articleInfo.options.passwordProtected,
+            fields: this.fieldsWithThemeDefaults(),
         });
+        if (this.state.postPassword) params.post_password = this.state.postPassword;
+        if (this.state.clearPostPassword) params.clear_post_password = 1;
         // 删除缓存
         localStorage.removeItem('unsavetype' + this.type + 'id' + params.id);
         // 保存
         const type = this.isPage() ? 'page' : 'post';
         this.props.articleStore.articleSubmit(params, this.type).subscribe(res => {
             if (res.errno === 0) {
+                const passwordProtected = this.state.clearPostPassword
+                    ? false
+                    : Boolean(this.state.postPassword || articleInfo.options.passwordProtected);
+                this.setState({ postPassword: '', clearPostPassword: false });
+                articleStore.setArticleInfo({
+                    options: { passwordProtected },
+                });
                 const createdId = !params.id && Number(res.data.id);
                 if (createdId) {
                     params.id = createdId;
@@ -287,7 +319,10 @@ class Article extends React.Component<ArticleProps, {}> {
             )[0],
             comment_num: 0,
             allow_comment: 0,
-            options: JSON.stringify(articleInfo.options),
+            options: JSON.stringify({
+                ...articleInfo.options,
+                fields: this.fieldsWithThemeDefaults(),
+            }),
         };
 
         if (this.type === 0) {
@@ -324,7 +359,7 @@ class Article extends React.Component<ArticleProps, {}> {
         const sharedStore = this.props.sharedStore;
         const articleStore = this.props.articleStore;
         const { articleInfo } = articleStore;
-        const { tagList, templateList } = sharedStore;
+        const { tagList, templateList, themeFields } = sharedStore;
         return (
             <div className="post-article">
                 <Row>
@@ -402,6 +437,23 @@ class Article extends React.Component<ArticleProps, {}> {
                                 />
                             </section>
                         ) : null}
+                        {themeFields.length > 0 ? (
+                            <section className="category theme-fields">
+                                <h5>主题字段</h5>
+                                <ArticleControlThemeFields
+                                    fields={themeFields}
+                                    values={articleInfo.options.fields || {}}
+                                    onChange={(name, value) => articleStore.setArticleInfo({
+                                        options: {
+                                            fields: {
+                                                ...(articleInfo.options.fields || {}),
+                                                [name]: value,
+                                            },
+                                        },
+                                    })}
+                                />
+                            </section>
+                        ) : null}
                         <section className="category">
                             <h5>公开度</h5>
                             <ArticleControlPublic
@@ -409,6 +461,26 @@ class Article extends React.Component<ArticleProps, {}> {
                                 handlePublicChange={e => this.handlePublicChange(e)}
                             />
                         </section>
+                        {this.isPage() ? null : (
+                            <section className="category">
+                                <h5>访问密码</h5>
+                                <Input.Password
+                                    value={this.state.postPassword}
+                                    disabled={this.state.clearPostPassword}
+                                    placeholder={articleInfo.options.passwordProtected ? '留空则保持原密码' : '留空则不启用密码'}
+                                    maxLength={256}
+                                    onChange={e => this.setState({ postPassword: e.target.value, clearPostPassword: false })}
+                                />
+                                {articleInfo.options.passwordProtected ? (
+                                    <Checkbox
+                                        checked={this.state.clearPostPassword}
+                                        onChange={e => this.setState({ clearPostPassword: e.target.checked, postPassword: '' })}
+                                    >
+                                        取消密码保护
+                                    </Checkbox>
+                                ) : null}
+                            </section>
+                        )}
                         <section className="category">
                             <h5>权限控制</h5>
                             <Checkbox
@@ -427,6 +499,30 @@ class Article extends React.Component<ArticleProps, {}> {
                             <ArticleControlImage
                                 imageUrl={articleInfo.options.featuredImage}
                                 handleImageChange={e => this.handleImageChange(e)}
+                            />
+                        </section>
+                        <section className="category custom-fields">
+                            <h5>自定义字段</h5>
+                            <ArticleControlFields
+                                fields={Object.fromEntries(
+                                    Object.entries(articleInfo.options.fields || {}).filter(
+                                        ([name]) => !themeFields.some(field => field.name === name),
+                                    ),
+                                )}
+                                onChange={fields => {
+                                    const themeFieldNames = new Set(themeFields.map(field => field.name));
+                                    const themeFieldValues = Object.fromEntries(
+                                        Object.entries(articleInfo.options.fields || {}).filter(
+                                            ([name]) => themeFieldNames.has(name),
+                                        ),
+                                    );
+                                    articleStore.setArticleInfo({options: {
+                                        fields: {...themeFieldValues, ...fields},
+                                    }});
+                                }}
+                                onValidityChange={customFieldsValid =>
+                                    this.setState({customFieldsValid})
+                                }
                             />
                         </section>
                         {this.isPage() || window.SysConfig.userInfo.type !== 1 ? null : (

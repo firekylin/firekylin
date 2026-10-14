@@ -83,6 +83,36 @@ module.exports = class extends Base {
 
     return this.displayView(template);
   }
+
+  async attachmentAction() {
+    const archive = await this.getWidget('Widget_Archive', {type: 'attachment'});
+    this.archive = archive;
+    if (!archive.have()) return this.ctx.throw(404);
+
+    this.assign('attachment', archive.stack[0].options.attachment || {});
+    if (/\.json(?:\?|$)/.test(this.ctx.url)) return this.displayView('attachment');
+
+    // Typecho 同样优先使用附件模板，并依次回退到页面、文章模板。
+    // Firekylin 模板会主动获取 Widget_Archive，因此在回退期间复用当前附件实例，
+    // 避免 page.eta / post.eta 按各自内容类型重新查询。
+    const widget = this.assign('widget');
+    const attachmentWidget = (name, params = {}) => {
+      if (name === 'Widget_Archive' && ['attachment', 'page', 'post'].includes(params.type)) {
+        return Promise.resolve(archive);
+      }
+      return widget(name, params);
+    };
+    attachmentWidget.destroy = widget.destroy;
+    this.assign('widget', attachmentWidget);
+
+    for (const template of ['attachment', 'page', 'post']) {
+      const exists = await stats(path.join(this.THEME_VIEW_PATH, `${template}.eta`))
+        .then(() => true)
+        .catch(() => false);
+      if (exists) return this.displayView(template);
+    }
+    return this.ctx.throw(500, 'THEME_TEMPLATE_NOT_FOUND');
+  }
   /**
    * post archive
    * @return {[type]} [description]

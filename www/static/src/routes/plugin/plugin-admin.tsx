@@ -18,20 +18,26 @@ function PluginAdmin(props: any) {
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, any>>({});
+    const [reloadKey, setReloadKey] = useState(0);
     const writeConfig = {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}};
 
-    const reload = () => {
+    useEffect(() => {
+        setContent(null);
+        setFormValues({});
         setLoading(true);
-        http.get<any>(`/admin/api/plugins/${pluginId}/pages/${pageId}`).subscribe(res => {
+        if (!descriptor || !page) {
+            setLoading(false);
+            return;
+        }
+        const subscriptions = [http.get<any>(`/admin/api/plugins/${pluginId}/pages/${pageId}`).subscribe(res => {
             if (res.errno === 0) setContent((res.data as any).content || {});
             setLoading(false);
-        });
-        forms.forEach(item => http.get<any>(`/admin/api/plugins/${pluginId}/forms/${item.id}`).subscribe(res => {
+        }), ...forms.map(item => http.get<any>(`/admin/api/plugins/${pluginId}/forms/${item.id}`).subscribe(res => {
             if (res.errno === 0) setFormValues(values => ({...values, [item.id]: res.data || {}}));
-        }));
-    };
+        }))];
+        return () => subscriptions.forEach(subscription => subscription.unsubscribe());
+    }, [pluginId, pageId, reloadKey]);
 
-    useEffect(reload, [pluginId, pageId]);
     if (!descriptor || !page) return <Alert type="error" message="插件后台页面不存在或已停用" showIcon />;
 
     const submit = (formId: string, values: any) => http.post<any>(
@@ -40,7 +46,7 @@ function PluginAdmin(props: any) {
         .subscribe(res => {
             if (res.errno === 0) {
                 message.success((res.data as any).message || '保存成功');
-                reload();
+                setReloadKey(key => key + 1);
             }
         });
     const run = (action: any) => {
@@ -50,7 +56,7 @@ function PluginAdmin(props: any) {
             .subscribe(res => {
                 if (res.errno === 0) {
                     message.success((res.data as any).message || '操作成功');
-                    reload();
+                    setReloadKey(key => key + 1);
                 }
             });
         action.confirm ? Modal.confirm({title: action.confirm, onOk: execute}) : execute();

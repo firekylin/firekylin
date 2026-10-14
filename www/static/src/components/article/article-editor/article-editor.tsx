@@ -25,7 +25,8 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
             options: {
                 template: '',
                 featuredImage: '',
-                push_sites: []
+                push_sites: [],
+                fields: {}
             },
             status: 3,
             user_id: '',

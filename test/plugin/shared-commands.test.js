@@ -50,6 +50,22 @@ test('update rejects unauthorized owner and preserves model save hooks', async()
   assert.ok(operations.some(([type, value]) => type === 'save' && value.summary === 'summary'));
 });
 
+test('update checks ownership before preparing protected options', async() => {
+  const {svc, operations, setPost} = fixture();
+  setPost({id: 7, user_id: 3, status: 0, pathname: 'existing', options: '{}'});
+  let prepared = false;
+  await svc.update({id: 7, post_password: 'secret'}, {id: 3, type: 2}, {
+    prepare(data, post) {
+      prepared = true;
+      assert.ok(operations.some(([type, value]) => type === 'where' && value.user_id === 3));
+      assert.equal(post.id, 7);
+      return {...data, options: '{"postPasswordHash":"hash"}'};
+    }
+  });
+  assert.equal(prepared, true);
+  assert.ok(operations.some(([type, value]) => type === 'save' && value.options.includes('postPasswordHash')));
+});
+
 test('shared moderator requires administrator and updates comment count', async() => {
   const operations = [];
   const getModel = () => ({

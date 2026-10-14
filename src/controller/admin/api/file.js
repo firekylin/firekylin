@@ -112,6 +112,7 @@ module.exports = class extends Base {
       const serviceName = sdkServices.includes(service) ? 'files-sdk' : service;
       const uploader = think.service(`upload/${serviceName}`);
       const result = await uploader.run(file, config);
+      await this.createAttachment(result, config.file, service);
       return this.success(result);
     } catch (e) {
       if (think.isPrevent(e)) {
@@ -121,6 +122,38 @@ module.exports = class extends Base {
       console.log(e); // eslint-disable-line no-console
       return this.fail(e.message || 'FILE_UPLOAD_ERROR');
     }
+  }
+
+  /**
+   * 将上传结果登记为可复用的附件内容。保持上传接口原有的 URL 返回值，
+   * 以兼容编辑器、站点图标等现有调用方。
+   */
+  async createAttachment(url, file, storage) {
+    const now = think.datetime();
+    const name = file.name || path.basename(url);
+    const attachment = {
+      name,
+      url,
+      size: Number(file.size) || 0,
+      mime: file.type || 'application/octet-stream',
+      storage
+    };
+    return this.model('post').addPost({
+      user_id: this.userInfo.id,
+      type: 2,
+      status: 3,
+      title: name,
+      pathname: think.uuid(20),
+      summary: '',
+      markdown_content: '',
+      content: '',
+      allow_comment: 0,
+      create_time: now,
+      update_time: now,
+      is_public: 1,
+      comment_num: 0,
+      options: JSON.stringify({attachment})
+    });
   }
 
   /**

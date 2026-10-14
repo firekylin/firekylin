@@ -14,6 +14,15 @@ interface SharedLoading {
   page?: boolean;
 }
 
+export interface ThemeField {
+  name: string;
+  type: 'text' | 'url' | 'email' | 'password' | 'textarea' | 'select' | 'radio' | 'checkbox';
+  label?: string;
+  help?: string;
+  default?: any;
+  options?: any[];
+}
+
 class SharedStore {
   getCategoryList$: Observable<IResult<Category[]>>;
   getDefaultCategory$: Observable<IResult<string>>;
@@ -21,6 +30,8 @@ class SharedStore {
   categoryList: Category[] = [];
   userList: any = [];
   templateList: string[] = [];
+  themeFields: ThemeField[] = [];
+  themeFieldsTheme = '';
   pageList = [];
   tagList: Tag[] = [];
   loading: SharedLoading = {
@@ -53,6 +64,8 @@ class SharedStore {
   }
 
   setTemplateList = data => this.templateList = data
+
+  setThemeFields = (data: ThemeField[]) => this.themeFields = data
 
   setTagList = (data: Tag[]) => this.tagList = data
 
@@ -128,6 +141,20 @@ class SharedStore {
         }
       }
     );
+  }
+
+  // 获取主题声明的通用文章字段
+  getThemeFields(theme: string) {
+    this.themeFieldsTheme = theme;
+    this.setThemeFields([]);
+    http.get<ThemeField[]>('/admin/api/theme?type=themeFields', {theme})
+    .subscribe(res => {
+      if (this.themeFieldsTheme === theme && res.errno === 0) {
+        this.setThemeFields(Array.isArray(res.data) ? res.data : []);
+      }
+    }, () => {
+      if (this.themeFieldsTheme === theme) this.setThemeFields([]);
+    });
   }
 
   // 获取页面
