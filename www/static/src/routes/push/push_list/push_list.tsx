@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../../utils/router';
 import { Modal } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { PushProps } from '../push.model';

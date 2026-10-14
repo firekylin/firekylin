@@ -31,6 +31,10 @@ export default defineConfig(({ mode }) => ({
         alias: {
             '@admin': path.resolve(__dirname, 'www/static/src'),
         },
+        // Router context is identified by object identity. Keep React and
+        // React Router singletons even when pnpm symlinks and lazy chunks
+        // expose more than one resolution path during production builds.
+        dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
     },
 
     css: {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Table, Button, message, Space } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../../utils/router';
 import { Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 import { PageListProps } from '../page.model';

@@ -1,5 +1,5 @@
 import classnames from 'classnames';
-import { Link } from 'react-router-dom';
+import { Link } from '../utils/router';
 import * as React from 'react';
 import { SideBarItem } from './types/routes.model';
 import { InitiateRoutes } from './data/routes.data';

@@ -3,7 +3,7 @@ import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant
 import { Table, Button, Space } from 'antd';
 import './list-table.less';
 import { observer, inject } from '@admin/utils/mobx-react';
-import { Link } from 'react-router-dom';
+import { Link } from '../../../../utils/router';
 import { Modal } from 'antd';
 import { PostListProps } from '../list.model';
 import { TABLE_DELAY } from '../../../../config';

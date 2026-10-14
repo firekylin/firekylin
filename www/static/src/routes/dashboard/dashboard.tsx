@@ -3,7 +3,7 @@ import './dashboard.less';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
 import { Subscription } from 'rxjs';
