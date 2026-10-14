@@ -72,6 +72,7 @@ module.exports = [
   {
     handle: 'payload',
     options: {
+      limit: '20mb',
       uploadDir: think.TMPDIR_PATH
     }
   },

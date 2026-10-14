@@ -62,3 +62,4 @@ stats.json
 package-lock.json
 
 .claude
+plugins
