@@ -379,8 +379,11 @@ register(ctx) {
             {label: '文章数', value: 42}
           ]},
           {type: 'table', title: '热门文章', rowKey: 'id',
-            columns: [{key: 'title', title: '标题'}, {key: 'views', title: '阅读数'}],
-            rows: [{id: 1, title: 'Hello', views: 100}]},
+            columns: [{key: 'title', title: '标题'}, {key: 'views', title: '阅读数'},
+              {key: 'operations', title: '操作', type: 'actions'}],
+            rows: [{id: 1, title: 'Hello', views: 100, operations: [
+              {label: '重建', action: 'rebuild', input: {id: 1}}
+            ]}], toolbar: [{label: '新建', href: '/admin/plugins/example/edit', type: 'primary'}]},
           {type: 'grid', columns: 2, items: [
             {type: 'form', id: 'settings'},
             {type: 'markdown', title: '使用说明', content: '**保存**后新配置立即生效。'}

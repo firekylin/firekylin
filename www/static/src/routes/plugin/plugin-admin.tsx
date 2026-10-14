@@ -10,6 +10,7 @@ function extension(pluginId: string) {
 
 function PluginAdmin(props: any) {
     const {pluginId, pageId} = props.match.params;
+    const search = props.location.search || '';
     const descriptor = extension(pluginId);
     const page = descriptor && descriptor.pages.find(item => item.id === pageId);
     const forms = descriptor ? descriptor.forms.filter(item => item.page === pageId) : [];
@@ -31,11 +32,11 @@ function PluginAdmin(props: any) {
         const subscriptions = [http.get<any>(`/admin/api/plugins/${pluginId}/pages/${pageId}`).subscribe(res => {
             if (res.errno === 0) setContent((res.data as any).content || {});
             setLoading(false);
-        }), ...forms.map(item => http.get<any>(`/admin/api/plugins/${pluginId}/forms/${item.id}`).subscribe(res => {
+        }), ...forms.map(item => http.get<any>(`/admin/api/plugins/${pluginId}/forms/${item.id}${search}`).subscribe(res => {
             if (res.errno === 0) setFormValues(values => ({...values, [item.id]: res.data || {}}));
         }))];
         return () => subscriptions.forEach(subscription => subscription.unsubscribe());
-    }, [pluginId, pageId, reloadKey]);
+    }, [pluginId, pageId, search, reloadKey]);
 
     if (!descriptor || !page) return <Alert type="error" message="插件后台页面不存在或已停用" showIcon />;
 
@@ -48,9 +49,9 @@ function PluginAdmin(props: any) {
                 setReloadKey(key => key + 1);
             }
         });
-    const run = (action: any) => {
+    const run = (action: any, input: Record<string, any> = {}) => {
         const execute = () => http.post<any>(
-            `/admin/api/plugins/${pluginId}/actions/${action.id}`, {}, writeConfig
+            `/admin/api/plugins/${pluginId}/actions/${action.id}`, input, writeConfig
         )
             .subscribe(res => {
                 if (res.errno === 0) {

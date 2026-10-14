@@ -17,11 +17,12 @@ function registerExample(admin) {
   admin.registerForm({
     id: 'preferences', page: 'settings', title: '偏好',
     fields: [
+      {name: 'id', type: 'hidden', label: 'ID'},
       {name: 'enabled', type: 'switch', label: '启用'},
       {name: 'color', type: 'select', label: '颜色', required: true, options: [{label: '蓝色', value: 'blue'}]},
       {name: 'secret', type: 'password', label: '密钥'}
     ],
-    load: async() => ({enabled: true, color: 'blue', secret: 'do-not-return'}),
+    load: async() => ({id: 'record-1', enabled: true, color: 'blue', secret: 'do-not-return'}),
     submit: async values => ({saved: values})
   }, 'example');
   admin.registerAction({
@@ -35,7 +36,8 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
   registerExample(admin);
   const manifest = admin.manifest();
   assert.equal(manifest[0].panels[0].title, '内容工具');
-  assert.equal(manifest[0].forms[0].fields[1].options[0].value, 'blue');
+  assert.equal(manifest[0].forms[0].fields[0].type, 'hidden');
+  assert.equal(manifest[0].forms[0].fields[2].options[0].value, 'blue');
   assert.equal('handler' in manifest[0].actions[0], false);
   assert.deepEqual(await admin.loadPage('example', 'settings', {}), {
     page: {id: 'settings', title: '阅读设置', panel: 'tools', description: undefined, order: 100},
@@ -45,7 +47,7 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
       {type: 'actions', ids: ['rebuild']}
     ]}
   });
-  assert.deepEqual(await admin.loadForm('example', 'preferences', {}), {enabled: true, color: 'blue'});
+  assert.deepEqual(await admin.loadForm('example', 'preferences', {}), {id: 'record-1', enabled: true, color: 'blue'});
   assert.deepEqual(await admin.submitForm('example', 'preferences', {
     enabled: false, color: 'blue', injected: 'discarded'
   }, {}), {saved: {enabled: false, color: 'blue'}});

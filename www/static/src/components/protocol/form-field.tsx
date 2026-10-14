@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Checkbox, Input, InputNumber, Radio, Select, Switch } from 'antd';
 
 export type FormFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password' |
-    'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code';
+    'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code' | 'hidden';
 
 export interface FormFieldSchema {
     name: string;
@@ -21,6 +21,7 @@ const input: FieldRenderer = ({field, ...props}) => <Input {...props} placeholde
     type={field.type === 'password' ? 'password' : field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'} />;
 
 export const defaultFieldRenderers: FieldRendererMap = {
+    hidden: ({field: _field, ...props}) => <input {...props} type="hidden" />,
     text: input,
     password: input,
     email: input,

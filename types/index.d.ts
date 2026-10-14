@@ -1,6 +1,6 @@
 declare namespace Firekylin {
   type AdminFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password' |
-    'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code';
+    'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code' | 'hidden';
 
   interface AdminPanelDefinition {
     id: string;
@@ -20,11 +20,21 @@ declare namespace Firekylin {
     sections?: AdminPageSection[];
   }
 
+  interface AdminTableAction {
+    label: string;
+    href?: string;
+    action?: string;
+    input?: Record<string, unknown>;
+    type?: 'default' | 'primary' | 'danger';
+    disabled?: boolean;
+  }
+
   type AdminPageSection =
     | {type: 'text'; title?: string; content: string}
     | {type: 'description'; title?: string; columns?: number; items: Array<{label: string; value: unknown}>}
     | {type: 'table'; title?: string; rowKey?: string; pagination?: boolean;
-      columns: Array<{key: string; title: string}>; rows: any[]}
+      columns: Array<{key: string; title: string; type?: 'text' | 'actions'}>; rows: any[];
+      toolbar?: AdminTableAction[]}
     | {type: 'stat'; title?: string; columns?: number;
       items: Array<{label: string; value: string | number; prefix?: string; suffix?: string; precision?: number}>}
     | {type: 'list'; title?: string; items: Array<string | {title: string; description?: string}>}
