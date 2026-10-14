@@ -89,21 +89,29 @@ module.exports = class extends Base {
     this.archive = archive;
     if (!archive.have()) return this.ctx.throw(404);
 
-    const attachment = archive.stack[0].options.attachment || {};
-    this.assign('attachment', attachment);
+    this.assign('attachment', archive.stack[0].options.attachment || {});
     if (/\.json(?:\?|$)/.test(this.ctx.url)) return this.displayView('attachment');
-    const hasTemplate = await stats(path.join(this.THEME_VIEW_PATH, 'attachment.eta'))
-      .then(() => true)
-      .catch(() => false);
-    if (hasTemplate) return this.displayView('attachment');
 
-    const escape = value => String(value || '').replace(/[&<>"']/g, character => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '\x22': '&quot;', '\'': '&#39;'
-    })[character]);
-    const title = escape(archive.stack[0].title);
-    const url = escape(attachment.url);
-    this.ctx.type = 'text/html';
-    this.ctx.body = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title></head><body><main><h1>${title}</h1><p><a href="${url}">${escape(attachment.name || archive.stack[0].title)}</a></p></main></body></html>`;
+    // Typecho 同样优先使用附件模板，并依次回退到页面、文章模板。
+    // Firekylin 模板会主动获取 Widget_Archive，因此在回退期间复用当前附件实例，
+    // 避免 page.eta / post.eta 按各自内容类型重新查询。
+    const widget = this.assign('widget');
+    const attachmentWidget = (name, params = {}) => {
+      if (name === 'Widget_Archive' && ['attachment', 'page', 'post'].includes(params.type)) {
+        return Promise.resolve(archive);
+      }
+      return widget(name, params);
+    };
+    attachmentWidget.destroy = widget.destroy;
+    this.assign('widget', attachmentWidget);
+
+    for (const template of ['attachment', 'page', 'post']) {
+      const exists = await stats(path.join(this.THEME_VIEW_PATH, `${template}.eta`))
+        .then(() => true)
+        .catch(() => false);
+      if (exists) return this.displayView(template);
+    }
+    return this.ctx.throw(500, 'THEME_TEMPLATE_NOT_FOUND');
   }
   /**
    * post archive
