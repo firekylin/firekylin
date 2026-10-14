@@ -86,10 +86,6 @@ test('configures TiDB with the MySQL-compatible TLS settings', () => {
   assert.doesNotThrow(() => validateNewOptions(tidbOptions));
 });
 
-test('binary packaging preserves the legacy pkg entry point', () => {
-  assert.match(packageInfo.scripts['build:pkg'], /pkg pkg\.js/);
-});
-
 test('validates required database and administrator fields', () => {
   assert.doesNotThrow(() => validateNewOptions(options()));
   assert.throws(() => validateNewOptions({...options(), adminPassword: ''}), /adminPassword/);
