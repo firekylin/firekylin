@@ -20,7 +20,7 @@ class SideBar extends React.Component<any, any> {
             ).map(panel => {
                 const pages = plugin.pages.filter(page => page.panel === panel.id);
                 return {
-                    url: pages.length > 1 ? `/plugins/${plugin.id}` : `/plugins/${plugin.id}/${pages[0].id}`,
+                    url: `/plugins/${plugin.id}/${pages[0].id}`,
                     icon: panel.icon || 'plugin',
                     title: panel.title,
                     type: 1,
@@ -73,8 +73,9 @@ class SideBar extends React.Component<any, any> {
                     <input type="hidden" id="hide_values" value="0" />
                     {routes.map((route, i) =>
                         <li key={i}>
-                            <NavLink to={route.url} onClick={() => this.open(route.children && route.children[0].url || route.url)}
-                                className={`icon icon-${route.icon}`}
+                            <NavLink to={route.url} onClick={() => this.open(route.url)}
+                                className={`icon icon-${route.icon} ${route.children && route.children.some(child =>
+                                    this.isActive(child.url)) ? 'active' : ''}`}
                                 activeClassName="active"
                             >
                                 <span>{route.title}</span>
@@ -82,7 +83,8 @@ class SideBar extends React.Component<any, any> {
                             {
                                 route.children 
                                 ?
-                                    <ul style={{height: 49 * (this.isActive(route.url) ? route.children.length : 0)}}>
+                                    <ul style={{height: 49 * (route.children.some(child =>
+                                        this.isActive(child.url)) ? route.children.length : 0)}}>
                                         {route.children.map((child, j) =>
                                         <li key={j}>
                                             <NavLink to={child.url} onClick={() => this.open(child.url)}
