@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
-import { ActionGroup, hasLayoutReferences, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
+import { ActionGroup, hasLayoutReferences, PAGE_SECTION_CONTENT_INSET, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
 import { http } from '../../utils/http';
 
 function extension(pluginId: string) {
@@ -66,14 +66,16 @@ function PluginAdmin(props: any) {
     const sectionContext: PageSectionContext = {forms, actions, formValues, submit, run};
 
     return <div className="fk-content-wrap">
-        <Space direction="vertical" size={4} style={{marginBottom: 20}}>
+        <Space direction="vertical" size={4} style={{marginBottom: 20,
+            marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
             <Typography.Title level={3} style={{margin: 0}}>{page.title}</Typography.Title>
             {page.description ? <Typography.Text type="secondary">{page.description}</Typography.Text> : null}
         </Space>
         {!explicitLayout ? <ActionGroup context={sectionContext} /> : null}
         <Spin spinning={loading}>
             {(content && content.notices || []).map((notice, index) =>
-                <Alert key={index} style={{marginBottom: 16}} type={notice.type || 'info'} message={notice.message} showIcon />
+                <Alert key={index} style={{marginBottom: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}
+                    type={notice.type || 'info'} message={notice.message} showIcon />
             )}
             <PageSections sections={sections} context={sectionContext} />
         </Spin>
