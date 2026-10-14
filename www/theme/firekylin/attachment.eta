@@ -1,0 +1,23 @@
+<% layout('./layout') %>
+<% const archive = await firekylin.widget('Widget_Archive', {type: 'attachment'}); const site = await firekylin.widget('Widget_Options'); archive.next(); %>
+<% const media = archive.have() ? (archive.options.attachment || {}) : {}; %>
+<% block('title', () => { %><%= archive.have() ? archive.title() : '附件未找到' %> - <%= site.title() %><% }) %>
+<% block('headers', () => { %><% if (archive.have()) { %><link rel="canonical" href="<%= site.siteUrl + archive.permalink %>" /><% } %><% }) %>
+<% block('content', () => { %>
+<div id="page-post"><article class="post page attachment">
+  <% if (archive.have()) { %>
+  <h1 class="title"><%= archive.title() %></h1>
+  <div class="entry-content">
+    <% if ((media.mime || '').startsWith('image/')) { %>
+      <p><a href="<%= media.url %>"><img src="<%= media.url %>" alt="<%= archive.title() %>"></a></p>
+    <% } else if ((media.mime || '').startsWith('audio/')) { %>
+      <audio controls src="<%= media.url %>"></audio>
+    <% } else if ((media.mime || '').startsWith('video/')) { %>
+      <video controls src="<%= media.url %>" style="max-width:100%"></video>
+    <% } %>
+    <p><a href="<%= media.url %>" download><%= media.name || archive.title() %></a></p>
+    <% if (media.size) { %><p><%= (media.size / 1024).toFixed(1) %> KB · <%= media.mime %></p><% } %>
+  </div>
+  <% } else { %><h1 class="title">附件未找到</h1><% } %>
+</article></div>
+<% }) %>

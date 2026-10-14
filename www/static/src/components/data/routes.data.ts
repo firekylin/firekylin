@@ -80,6 +80,11 @@ export const InitiateRoutes = (themePages) => [{
         type: 1
     },
     {
+        url: '/media',
+        icon: 'picture',
+        title: '媒体管理'
+    },
+    {
         url: '/user',
         icon: 'user',
         title: '用户管理',
