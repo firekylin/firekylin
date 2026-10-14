@@ -102,6 +102,7 @@ Firekylin 自带 MCP HTTP 服务，无需安装额外插件，也不需要手工
 ## 开发者文档
 
 - [主题开发](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
+- [主题文章字段](docs/theme-fields.md)
 - [贡献代码](https://github.com/firekylin/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
 
 ### 扩展 Widget
