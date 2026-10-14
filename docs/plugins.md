@@ -368,7 +368,12 @@ register(ctx) {
           ]},
           {type: 'table', title: '热门文章', rowKey: 'id',
             columns: [{key: 'title', title: '标题'}, {key: 'views', title: '阅读数'}],
-            rows: [{id: 1, title: 'Hello', views: 100}]}
+            rows: [{id: 1, title: 'Hello', views: 100}]},
+          {type: 'grid', columns: 2, items: [
+            {type: 'form', id: 'settings'},
+            {type: 'markdown', title: '使用说明', content: '**保存**后新配置立即生效。'}
+          ]},
+          {type: 'actions', ids: ['rebuild']}
         ]
       };
     }
@@ -411,11 +416,28 @@ register(ctx) {
 表单/动作；同一插件内的 ID 必须唯一。页面 `load`、表单 `load/submit` 和动作 `handler`
 都会收到 `{ctx, user, pluginId}` 上下文。
 
+`sections` 同时是页面布局：`form` 可以把已注册表单插入任意位置，`actions` 可以插入指定
+动作按钮，`grid` 可以递归排列其他区块。引用必须属于当前插件的当前页面；未知类型和错误
+引用会被拒绝。如果页面没有使用 `form` 或 `actions` 引用，Firekylin 会保持兼容布局：动作
+显示在顶部，表单显示在内容之后。
+
 页面支持以下安全的内容区块：
 
 - `text`：`{type, title?, content}`；
 - `description`：`{type, title?, items: [{label, value}]}`；
-- `table`：`{type, title?, rowKey?, columns: [{key, title}], rows}`。
+- `table`：`{type, title?, rowKey?, pagination?, columns: [{key, title}], rows}`；
+- `stat`：统计数字卡片，支持 `prefix`、`suffix` 和 `precision`；
+- `list`：标题及说明组成的列表；
+- `markdown`：安全的 Markdown 子集，支持标题、列表、粗体、行内代码和链接；
+- `image`、`progress`、`empty`、`divider`：图片、进度、空状态和分隔线；
+- `links`：经过协议检查的链接列表；
+- `code`：只读代码或日志；
+- `grid`：`{type, columns?, items}`，以一至四列递归布局其他区块；
+- `form`：`{type: 'form', id}`，引用当前页面的表单；
+- `actions`：`{type: 'actions', ids?}`，引用部分或全部当前页面动作。
+
+Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持的安全协议。插件不能通过页面
+区块注入脚本或任意 React 组件。
 
 表单字段支持 `text`、`textarea`、`number`、`switch`、`select` 和 `password`。字段还可以
 声明 `description`、`placeholder`、`required`；`select` 必须提供 `options`。动作的 `type`

@@ -8,7 +8,11 @@ function registerExample(admin) {
   admin.registerPanel({id: 'tools', title: '内容工具'}, 'example');
   admin.registerPage({
     id: 'settings', panel: 'tools', title: '阅读设置',
-    load: async() => ({sections: [{type: 'text', content: 'ready'}]})
+    load: async() => ({sections: [
+      {type: 'stat', items: [{label: '文章', value: 3}]},
+      {type: 'grid', columns: 2, items: [{type: 'text', content: 'ready'}, {type: 'form', id: 'preferences'}]},
+      {type: 'actions', ids: ['rebuild']}
+    ]})
   }, 'example');
   admin.registerForm({
     id: 'preferences', page: 'settings', title: '偏好',
@@ -35,7 +39,11 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
   assert.equal('handler' in manifest[0].actions[0], false);
   assert.deepEqual(await admin.loadPage('example', 'settings', {}), {
     page: {id: 'settings', title: '阅读设置', panel: 'tools', description: undefined, order: 100},
-    content: {sections: [{type: 'text', content: 'ready'}]}
+    content: {sections: [
+      {type: 'stat', items: [{label: '文章', value: 3}]},
+      {type: 'grid', columns: 2, items: [{type: 'text', content: 'ready'}, {type: 'form', id: 'preferences'}]},
+      {type: 'actions', ids: ['rebuild']}
+    ]}
   });
   assert.deepEqual(await admin.loadForm('example', 'preferences', {}), {enabled: true, color: 'blue'});
   assert.deepEqual(await admin.submitForm('example', 'preferences', {
@@ -52,4 +60,17 @@ test('admin registry validates relationships and removes every plugin resource',
   assert.throws(() => admin.registerPanel({id: 'tools', title: 'Again'}, 'example'), /already registered/);
   admin.removePlugin('example');
   assert.deepEqual(admin.manifest(), []);
+});
+
+test('admin page layouts reject unknown types and cross-page references', async() => {
+  const admin = new AdminRegistry();
+  admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
+  admin.registerPage({id: 'bad-type', panel: 'tools', title: 'Bad', load: () => ({
+    sections: [{type: 'unsafe-html', content: '<script />'}]
+  })}, 'example');
+  admin.registerPage({id: 'bad-reference', panel: 'tools', title: 'Bad ref', load: () => ({
+    sections: [{type: 'form', id: 'other-form'}]
+  })}, 'example');
+  await assert.rejects(admin.loadPage('example', 'bad-type', {}), /unsupported section/);
+  await assert.rejects(admin.loadPage('example', 'bad-reference', {}), /Unknown admin form reference/);
 });

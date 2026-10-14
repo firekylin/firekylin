@@ -16,12 +16,29 @@ declare namespace Firekylin {
 
   interface AdminPageContent {
     notices?: Array<{type?: 'success' | 'info' | 'warning' | 'error'; message: string}>;
-    sections?: Array<
-      {type: 'text'; title?: string; content: string} |
-      {type: 'description'; title?: string; items: Array<{label: string; value: unknown}>} |
-      {type: 'table'; title?: string; rowKey?: string; columns: Array<{key: string; title: string}>; rows: any[]}
-    >;
+    sections?: AdminPageSection[];
   }
+
+  type AdminPageSection =
+    | {type: 'text'; title?: string; content: string}
+    | {type: 'description'; title?: string; columns?: number; items: Array<{label: string; value: unknown}>}
+    | {type: 'table'; title?: string; rowKey?: string; pagination?: boolean;
+      columns: Array<{key: string; title: string}>; rows: any[]}
+    | {type: 'stat'; title?: string; columns?: number;
+      items: Array<{label: string; value: string | number; prefix?: string; suffix?: string; precision?: number}>}
+    | {type: 'list'; title?: string; items: Array<string | {title: string; description?: string}>}
+    | {type: 'markdown'; title?: string; content: string}
+    | {type: 'image'; title?: string; src: string; alt?: string; width?: string | number}
+    | {type: 'progress'; title?: string; percent: number;
+      status?: 'normal' | 'exception' | 'active' | 'success'; label?: string}
+    | {type: 'empty'; description?: string}
+    | {type: 'divider'; title?: string}
+    | {type: 'links'; title?: string;
+      items: Array<{label: string; href: string; description?: string}>}
+    | {type: 'code'; title?: string; content: string; language?: string}
+    | {type: 'grid'; columns?: number; items: AdminPageSection[]}
+    | {type: 'form'; id: string}
+    | {type: 'actions'; ids?: string[]};
 
   interface AdminPageDefinition {
     id: string;

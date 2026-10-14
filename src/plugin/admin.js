@@ -3,6 +3,10 @@
 const ID_PATTERN = /^[a-z][a-z0-9._-]*$/i;
 const FIELD_TYPES = new Set(['text', 'textarea', 'number', 'switch', 'select', 'password']);
 const ACTION_TYPES = new Set(['default', 'primary', 'danger']);
+const SECTION_TYPES = new Set([
+  'text', 'description', 'table', 'stat', 'list', 'markdown', 'image', 'progress', 'empty', 'divider',
+  'links', 'code', 'grid', 'form', 'actions'
+]);
 
 function requiredString(value, label) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string`);
@@ -55,6 +59,32 @@ function normalizeFields(fields, formId) {
       value: option.value
     }));
     return normalized;
+  });
+}
+
+function validateSections(sections, registry, pluginId, pageId, location = 'sections') {
+  if (!Array.isArray(sections)) throw new TypeError(`Admin page ${pageId} ${location} must be an array`);
+  sections.forEach((section, index) => {
+    const label = `${location}[${index}]`;
+    if (!section || typeof section !== 'object' || !SECTION_TYPES.has(section.type)) {
+      throw new TypeError(`Admin page ${pageId} has unsupported section at ${label}`);
+    }
+    if (section.type === 'grid') {
+      validateSections(section.items, registry, pluginId, pageId, `${label}.items`);
+    }
+    if (section.type === 'form') {
+      const formId = identifier(section.id, `Admin page ${pageId} form reference`);
+      const form = registry.forms.get(registry.key(pluginId, formId));
+      if (!form || form.page !== pageId) throw new Error(`Unknown admin form reference: ${formId}`);
+    }
+    if (section.type === 'actions' && typeof section.ids !== 'undefined') {
+      if (!Array.isArray(section.ids)) throw new TypeError(`Admin page ${pageId} ${label}.ids must be an array`);
+      for (const id of section.ids) {
+        const actionId = identifier(id, `Admin page ${pageId} action reference`);
+        const action = registry.actions.get(registry.key(pluginId, actionId));
+        if (!action || action.page !== pageId) throw new Error(`Unknown admin action reference: ${actionId}`);
+      }
+    }
   });
 }
 
@@ -177,8 +207,13 @@ class AdminRegistry {
   async loadPage(pluginId, pageId, context) {
     const page = this.pages.get(this.key(pluginId, pageId));
     if (!page) return null;
-    const content = await page.load(context);
-    return {page: publicPage(page), content: clone(content === null || typeof content === 'undefined' ? {} : content)};
+    const loaded = await page.load(context);
+    const content = clone(loaded === null || typeof loaded === 'undefined' ? {} : loaded);
+    if (!content || typeof content !== 'object' || Array.isArray(content)) {
+      throw new TypeError(`Admin page ${pageId} load() must return an object`);
+    }
+    if (typeof content.sections !== 'undefined') validateSections(content.sections, this, pluginId, pageId);
+    return {page: publicPage(page), content};
   }
 
   async loadForm(pluginId, formId, context) {
