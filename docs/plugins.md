@@ -128,6 +128,18 @@ ctx.events.on('content.html', async html => {
 
 常见上下文包括：`{post}`、`{page}`、`{user, ip}`、`{controller, type}`、`{controller, name, theme, response}`。插件异常默认记录并隔离，不会阻断其他插件。
 
+文章和页面的自定义字段保存在 `options.fields` 中。插件从模型或事件取得内容后可以按字段名读取：
+
+```js
+ctx.events.on('post.created', async ({post}) => {
+  const options = typeof post.options === 'string' ? JSON.parse(post.options) : post.options;
+  ctx.logger.info(`来源：${options.fields?.source || '未设置'}`);
+});
+```
+
+主题的内容 Widget 会将它们同时暴露为 `fields`，因此文章模板可以直接使用
+`archive.fields.source` 或 `archive.row.fields.source`。没有自定义字段时 `fields` 是空对象。
+
 ## AI / Agent Tool Registry（实验性）
 
 Firekylin 提供插件级 Tool Registry，供未来 MCP Server、后台 AI 助手和 Agent 共用。
@@ -161,6 +173,45 @@ const result = await pluginManager.tools.execute('posts.lookup', {id: 123}, {
 ```
 
 未提供授权回调时执行会被拒绝。高风险操作应由上层额外实施审批、资源级授权及审计。工具的 `inputSchema` 当前仅存储为元数据，**调用方必须负责入参校验**。未来 MCP Adapter 不得把来自模型的参数当作已验证输入。插件停用时会自动注销其所有工具。
+
+### 内置公开文章 Tools
+
+在 worker 启动时，Firekylin 注册三个只读工具：`posts.list`、`posts.get`、`posts.search`。
+三个工具都要求调用方提供 `posts:read` 授权判断，只查询公开、已发布、发布时间不晚于当前时间的文章（`type=0, status=3, is_public=1`）。
+
+```js
+const tools = global.firekylin.plugins.tools;
+const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10}, {
+  // Example only: the real MCP adapter MUST derive permissions from verified credentials.
+  authorize: permission => permission === 'posts:read',
+  principal: {type: 'public'}
+});
+```
+
+工具结果使用有限字段白名单；详情工具额外返回 Markdown 正文。此功能仅提供内部操作层，**不会开放新的 HTTP 路由或 MCP 端点**。后续对外暴露必须实现真实身份认证、请求参数 JSON Schema 校验、限流与审计。首版不提供任何草稿/私密文章读取能力。
+
+### 内置管理工具（实验性）
+
+除了只读的文章工具，worker 还注册了以下能力：
+
+| Tool | 权限 | 附加限制 |
+| --- | --- | --- |
+| `posts.list_managed` | `posts:manage:read` | 与后台共用列表查询，按用户限制可见文章 |
+| `posts.get_managed` | `posts:manage:read` | 与后台共用详情查询，包含草稿正文 |
+| `posts.update` | `posts:write` | 更新已存在文章，需审批；编辑改动已发布文章进入审核 |
+| `posts.create_draft` | `posts:write` | 当前用户创建私密草稿 |
+| `posts.update_draft` | `posts:write` | 仅本人草稿 / 管理员 |
+| `posts.publish` | `posts:publish` | 仅管理员 + 显式审批 |
+| `posts.delete` | `posts:delete` | 本人或管理员 + 显式审批；永久删除 |
+| `categories.list` | `taxonomy:read` | 查询分类 |
+| `tags.list` | `taxonomy:read` | 查询标签 |
+| `comments.list` | `comments:read` | 仅管理员 |
+| `comments.approve` | `comments:moderate` | 仅管理员 + 显式审批，更新评论数 |
+| `media.upload` | `media:write` | Base64 PNG/JPEG/GIF，最大 5 MiB，不支持远程 URL |
+
+写入工具通过原有 Post Model 的 `getContentAndSummary` / `addPost` / `savePost` / `deletePost`，触发正常文章生命周期。当前模型入口与 Admin Controller 的部分编排仍有差异，后续可以在稳定后进一步合并 PostCommandService 与后台写入服务。
+
+后台文章创建、更新、删除已经与 Tool 调用统一经过 `PostCommandService`；文章列表和详情经过 `PostQueryService`。评论审核通过 `CommentModerationService`，后台管理 API 和 Tool 都使用该服务，避免重复管理状态更新与评论计数同步。Tool 仍不通过内部 HTTP 调用后台路由：权限基于已认证身份传递给服务层，HTTP Controller 仅负责 Session、CSRF 和返回格式。上传与其他插件扩展的统一仍需单独验证。\n\n**重要：** `ToolRegistry.execute` 的 `authorize` 由受信任的调用方实现；高风险工具还要求额外的 `approve({name, input, principal})` 回调返回 `true`。不要把模型生成的“已批准”字段或请求体中的角色当作授权依据。Registry 不直接暴露 HTTP 接口或 MCP 服务；生产适配层必须补充 Token 认证、参数 Schema 校验、限流、审计与明确的审批交互。外部工具不得默认获得全站管理员权限。
 
 ## Widget 扩展
 

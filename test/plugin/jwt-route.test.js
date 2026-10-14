@@ -6,7 +6,7 @@ const auth = require('../../src/service/admin-auth');
 const pluginRoutes = require('../../src/plugin/middleware');
 
 test('plugin admin routes authenticate JWT and reject invalid CSRF tokens', async() => {
-  auth.setSecret('plugin-jwt-test-secret-with-at-least-32-bytes');
+  const secret = 'plugin-jwt-test-secret-with-at-least-32-bytes';
   const cookies = new Map();
   const route = {
     auth: 'admin',
@@ -17,10 +17,14 @@ test('plugin admin routes authenticate JWT and reject invalid CSRF tokens', asyn
     async handler() { return {ok: true} }
   };
   global.firekylin = {plugins: {routes: {match: () => route}}};
+  global.think = {
+    model: () => ({async getOptions() { return {jwt_secret: secret} }})
+  };
   const ctx = {
     method: 'POST',
     path: '/api/plugins/demo/refresh',
     request: {body: {}},
+    state: {},
     query: {},
     headers: {},
     get(name) { return this.headers[name] || '' },
@@ -29,12 +33,12 @@ test('plugin admin routes authenticate JWT and reject invalid CSRF tokens', asyn
   };
   const middleware = pluginRoutes();
   await assert.rejects(middleware(ctx, () => {}), {status: 403});
-  cookies.set(auth.COOKIE_NAME, auth.sign({id: 1, name: 'admin', type: 1}));
+  cookies.set(auth.COOKIE_NAME, auth.sign({id: 1, name: 'admin', type: 1}, secret));
   await assert.rejects(middleware(ctx, () => {}), {status: 403});
   ctx.headers['X-CSRF-Token'] = auth.csrfToken(ctx);
   await middleware(ctx, () => {});
   assert.deepEqual(ctx.body, {ok: true});
-  cookies.set(auth.COOKIE_NAME, auth.sign({id: 2, name: 'editor', type: 2}));
+  cookies.set(auth.COOKIE_NAME, auth.sign({id: 2, name: 'editor', type: 2}, secret));
   ctx.headers['X-CSRF-Token'] = auth.csrfToken(ctx);
   await assert.rejects(middleware(ctx, () => {}), {status: 403});
 });

@@ -31,6 +31,7 @@ class SharedStore {
   userList: any = [];
   templateList: string[] = [];
   themeFields: ThemeField[] = [];
+  themeFieldsTheme = '';
   pageList = [];
   tagList: Tag[] = [];
   loading: SharedLoading = {
@@ -144,11 +145,15 @@ class SharedStore {
 
   // 获取主题声明的通用文章字段
   getThemeFields(theme: string) {
+    this.themeFieldsTheme = theme;
+    this.setThemeFields([]);
     http.get<ThemeField[]>('/admin/api/theme?type=themeFields', {theme})
     .subscribe(res => {
-      if (res.errno === 0) {
+      if (this.themeFieldsTheme === theme && res.errno === 0) {
         this.setThemeFields(Array.isArray(res.data) ? res.data : []);
       }
+    }, () => {
+      if (this.themeFieldsTheme === theme) this.setThemeFields([]);
     });
   }
 

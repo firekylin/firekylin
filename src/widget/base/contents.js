@@ -35,7 +35,7 @@ module.exports = class ContentsWidget extends Widget {
       }
     }
     row.options = row.options || {};
-    row.fields = row.options.fields && typeof row.options.fields === 'object'
+    row.fields = row.options.fields && typeof row.options.fields === 'object' && !Array.isArray(row.options.fields)
       ? row.options.fields
       : {};
     row.featuredImage = row.options.featuredImage || '';

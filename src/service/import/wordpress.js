@@ -224,7 +224,8 @@ module.exports = class extends Base {
 
     const posts = await this.postModelInstance.setRelation(false).field('id,type,pathname').where({
       pathname: ['IN', [...new Set(source.map(item => item.pathname))]]
-    }).select();
+    })
+      .select();
     const postMap = new Map(posts.map(post => [`${Number(post.type)}:${post.pathname}`, post]));
     const sourceMap = new Map(source.map(item => [item.key, item]));
     const depth = (item, seen = new Set()) => {
