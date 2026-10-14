@@ -39,6 +39,10 @@ class SideBar extends React.Component<any, any> {
         const currentPath = location.pathname.replace(/^\/admin(?=\/|$)/, '');
         return currentPath === routeUrl || currentPath.startsWith(`${routeUrl}/`);
     }
+    isSectionActive(route: any): boolean {
+        return this.isActive(route.url) || Boolean(route.children && route.children.some(child =>
+            this.isActive(child.url)));
+    }
     open(routeUrl: string) {
         this.props.history.push(routeUrl);
     }
@@ -74,8 +78,7 @@ class SideBar extends React.Component<any, any> {
                     {routes.map((route, i) =>
                         <li key={i}>
                             <NavLink to={route.url} onClick={() => this.open(route.url)}
-                                className={`icon icon-${route.icon} ${route.children && route.children.some(child =>
-                                    this.isActive(child.url)) ? 'active' : ''}`}
+                                className={`icon icon-${route.icon} ${route.children && this.isSectionActive(route) ? 'active' : ''}`}
                                 activeClassName="active"
                             >
                                 <span>{route.title}</span>
@@ -83,8 +86,7 @@ class SideBar extends React.Component<any, any> {
                             {
                                 route.children 
                                 ?
-                                    <ul style={{height: 49 * (route.children.some(child =>
-                                        this.isActive(child.url)) ? route.children.length : 0)}}>
+                                    <ul style={{height: 49 * (this.isSectionActive(route) ? route.children.length : 0)}}>
                                         {route.children.map((child, j) =>
                                         <li key={j}>
                                             <NavLink to={child.url} onClick={() => this.open(child.url)}
