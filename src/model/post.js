@@ -546,7 +546,7 @@ module.exports = class extends Base {
       .where(where)
       .select();
     const result = {};
-    data.forEach(item => {
+    redactProtectedPosts(data).forEach(item => {
       const yearMonth = think.datetime(item.create_time, 'YYYY年MM月');
       if (!(yearMonth in result)) {
         result[yearMonth] = [];
