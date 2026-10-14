@@ -12,7 +12,7 @@ export interface PageSectionContext {
     actions: any[];
     formValues: Record<string, any>;
     submit: (id: string, values: any) => void;
-    run: (action: any) => void;
+    run: (action: any, input?: Record<string, any>) => void;
 }
 
 export const PAGE_SECTION_CONTENT_INSET = 24;
@@ -56,8 +56,24 @@ function Markdown({content}: {content: string}) {
     })}</div>;
 }
 
-function card(node: PageSection, children: React.ReactNode) {
-    return <Card title={node.title} style={{marginBottom: 16}}>{children}</Card>;
+function card(node: PageSection, children: React.ReactNode, extra?: React.ReactNode) {
+    return <Card title={node.title} extra={extra} style={{marginBottom: 16}}>{children}</Card>;
+}
+
+function TableAction({item, context}: {item: any; context: PageSectionContext}) {
+    const type = item.type === 'primary' ? 'primary' : 'link';
+    if (item.href) {
+        const href = safeUrl(item.href);
+        return href ? <Button type={type} danger={item.type === 'danger'} disabled={item.disabled}
+            href={href}>{item.label}</Button> : null;
+    }
+    const action = context.actions.find(candidate => candidate.id === item.action);
+    return action ? <Button type={type} danger={item.type === 'danger' || action.type === 'danger'}
+        disabled={item.disabled} onClick={() => context.run(action, item.input || {})}>{item.label || action.label}</Button> : null;
+}
+
+function TableActions({items, context}: {items: any[]; context: PageSectionContext}) {
+    return <Space>{(items || []).map((item, index) => <TableAction key={index} item={item} context={context} />)}</Space>;
 }
 
 function PluginForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
@@ -65,6 +81,7 @@ function PluginForm({item, values, submit}: {item: any; values: any; submit: Pag
         <Form layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
             onFinish={formValues => submit(item.id, formValues)}>
             {item.fields.map((field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
+                hidden={field.type === 'hidden'}
                 valuePropName={field.type === 'switch' ? 'checked' : 'value'}
                 extra={field.description} rules={[{required: field.required, message: `请填写${field.label}`}]}>
                 <FormField field={field} />
@@ -89,10 +106,11 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
         items={(node.items || []).map((item, index) => ({
             key: index, label: item.label, children: String(item.value == null ? '' : item.value)
         }))} />),
-    table: ({node}) => card(node, <Table pagination={node.pagination ? undefined : false}
+    table: ({node, context}) => card(node, <Table pagination={node.pagination ? undefined : false}
         rowKey={node.rowKey || 'id'} columns={(node.columns || []).map(column => ({
-            title: column.title, dataIndex: column.key, key: column.key
-        }))} dataSource={node.rows || []} />),
+            title: column.title, dataIndex: column.key, key: column.key,
+            render: column.type === 'actions' ? (items: any[]) => <TableActions items={items} context={context} /> : undefined
+        }))} dataSource={node.rows || []} />, node.toolbar ? <TableActions items={node.toolbar} context={context} /> : undefined),
     stat: ({node}) => card(node, <div style={{display: 'grid', gap: 24,
         gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, node.columns || 3))}, minmax(0, 1fr))`}}>
         {(node.items || []).map((item, index) => <Statistic key={index} title={item.label} value={item.value}

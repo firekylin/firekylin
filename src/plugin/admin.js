@@ -3,7 +3,7 @@
 const ID_PATTERN = /^[a-z][a-z0-9._-]*$/i;
 const FIELD_TYPES = new Set([
   'text', 'textarea', 'number', 'switch', 'select', 'password', 'email', 'url', 'radio', 'checkbox',
-  'color', 'code'
+  'color', 'code', 'hidden'
 ]);
 const ACTION_TYPES = new Set(['default', 'primary', 'danger']);
 const SECTION_TYPES = new Set([
