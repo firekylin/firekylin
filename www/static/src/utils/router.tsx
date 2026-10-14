@@ -5,6 +5,7 @@ import {
     matchPath,
     Navigate,
     NavLink as RouterNavLink,
+    useInRouterContext,
     useLocation,
     useNavigate,
 } from 'react-router-dom';
@@ -77,7 +78,7 @@ export function Redirect({ to }: RedirectProps) {
     return <Navigate to={to} replace />;
 }
 
-export function Switch({ children }: React.PropsWithChildren<{}>) {
+function SwitchContent({ children }: React.PropsWithChildren<{}>) {
     const location = useLocation();
     let selected: React.ReactElement | null = null;
 
@@ -101,6 +102,20 @@ export function Switch({ children }: React.PropsWithChildren<{}>) {
     });
 
     return selected;
+}
+
+export function Switch(props: React.PropsWithChildren<{}>) {
+    // The admin router compatibility layer is also consumed by lazy chunks and
+    // plugin pages. Recover if one of those trees is mounted without inheriting
+    // the top-level provider instead of letting useLocation/Link crash.
+    if (!useInRouterContext()) {
+        return (
+            <BrowserRouter basename={process.env.basename}>
+                <SwitchContent {...props} />
+            </BrowserRouter>
+        );
+    }
+    return <SwitchContent {...props} />;
 }
 
 type NavLinkProps = Omit<React.ComponentProps<typeof RouterNavLink>, 'className'> & {

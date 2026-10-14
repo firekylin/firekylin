@@ -24,6 +24,13 @@ test('admin components share one React Router entry point', () => {
     'import React Router through utils/router so every Link shares the BrowserRouter context');
 });
 
+test('legacy Switch restores a missing Router provider before using location hooks', () => {
+  const source = fs.readFileSync(routerModule, 'utf8');
+
+  assert.match(source, /if \(!useInRouterContext\(\)\)\s*{[\s\S]*<BrowserRouter/);
+  assert.match(source, /<BrowserRouter basename={process\.env\.basename}>/);
+});
+
 test('Vite deduplicates React and Router context packages', () => {
   const config = fs.readFileSync(path.resolve(__dirname, '../../vite.config.ts'), 'utf8');
   for (const dependency of ['react', 'react-dom', 'react-router', 'react-router-dom']) {
