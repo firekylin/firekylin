@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
 import { ActionGroup, hasLayoutReferences, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
 import { http } from '../../utils/http';
-import { useRouteComponentProps } from '../../utils/router';
 
 function extension(pluginId: string) {
     return (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === pluginId);
@@ -83,6 +82,4 @@ function PluginAdmin(props: any) {
     </div>;
 }
 
-export default function PluginAdminWithRouter() {
-    return <PluginAdmin {...useRouteComponentProps()} />;
-}
+export default PluginAdmin;
