@@ -26,6 +26,7 @@ import './article.less';
 import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleControlTemplate from './control-template/control-template';
 import { ArticleEnum } from './article.enum';
+import ArticleControlThemeFields from './control-theme-fields/control-theme-fields';
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 
@@ -60,6 +61,8 @@ class Article extends React.Component<ArticleProps, {}> {
         if (this.isPage()) {
             sharedStore.getTemplateList(window.SysConfig.options.theme || 'firekylin');
         }
+        sharedStore.getThemeFields(window.SysConfig.options.theme || 'firekylin');
+
         // Get Cats
         sharedStore.set$();
         const merged$ = zip(
@@ -140,6 +143,15 @@ class Article extends React.Component<ArticleProps, {}> {
         this.props.articleStore.setArticleInfo({ user_id: value });
     }
 
+    fieldsWithThemeDefaults() {
+        const defaults = Object.fromEntries(
+            this.props.sharedStore.themeFields
+                .filter(field => field && field.name && field.default !== undefined)
+                .map(field => [field.name, field.default]),
+        );
+        return {...defaults, ...(this.props.articleStore.articleInfo.options.fields || {})};
+    }
+
     handleSave(): void {
         this.handleSubmit(ArticleEnum.SAVE);
     }
@@ -210,7 +222,7 @@ class Article extends React.Component<ArticleProps, {}> {
             featuredImage: articleInfo.options.featuredImage,
             push_sites: articleInfo.options.push_sites,
             passwordProtected: articleInfo.options.passwordProtected,
-            fields: articleInfo.options.fields,
+            fields: this.fieldsWithThemeDefaults(),
         });
         if (this.state.postPassword) params.post_password = this.state.postPassword;
         if (this.state.clearPostPassword) params.clear_post_password = 1;
@@ -307,7 +319,10 @@ class Article extends React.Component<ArticleProps, {}> {
             )[0],
             comment_num: 0,
             allow_comment: 0,
-            options: JSON.stringify(articleInfo.options),
+            options: JSON.stringify({
+                ...articleInfo.options,
+                fields: this.fieldsWithThemeDefaults(),
+            }),
         };
 
         if (this.type === 0) {
@@ -344,7 +359,7 @@ class Article extends React.Component<ArticleProps, {}> {
         const sharedStore = this.props.sharedStore;
         const articleStore = this.props.articleStore;
         const { articleInfo } = articleStore;
-        const { tagList, templateList } = sharedStore;
+        const { tagList, templateList, themeFields } = sharedStore;
         return (
             <div className="post-article">
                 <Row>
@@ -422,6 +437,23 @@ class Article extends React.Component<ArticleProps, {}> {
                                 />
                             </section>
                         ) : null}
+                        {themeFields.length > 0 ? (
+                            <section className="category theme-fields">
+                                <h5>主题字段</h5>
+                                <ArticleControlThemeFields
+                                    fields={themeFields}
+                                    values={articleInfo.options.fields || {}}
+                                    onChange={(name, value) => articleStore.setArticleInfo({
+                                        options: {
+                                            fields: {
+                                                ...(articleInfo.options.fields || {}),
+                                                [name]: value,
+                                            },
+                                        },
+                                    })}
+                                />
+                            </section>
+                        ) : null}
                         <section className="category">
                             <h5>公开度</h5>
                             <ArticleControlPublic
@@ -472,10 +504,22 @@ class Article extends React.Component<ArticleProps, {}> {
                         <section className="category custom-fields">
                             <h5>自定义字段</h5>
                             <ArticleControlFields
-                                fields={articleInfo.options.fields}
-                                onChange={fields =>
-                                    articleStore.setArticleInfo({options: {fields}})
-                                }
+                                fields={Object.fromEntries(
+                                    Object.entries(articleInfo.options.fields || {}).filter(
+                                        ([name]) => !themeFields.some(field => field.name === name),
+                                    ),
+                                )}
+                                onChange={fields => {
+                                    const themeFieldNames = new Set(themeFields.map(field => field.name));
+                                    const themeFieldValues = Object.fromEntries(
+                                        Object.entries(articleInfo.options.fields || {}).filter(
+                                            ([name]) => themeFieldNames.has(name),
+                                        ),
+                                    );
+                                    articleStore.setArticleInfo({options: {
+                                        fields: {...themeFieldValues, ...fields},
+                                    }});
+                                }}
                                 onValidityChange={customFieldsValid =>
                                     this.setState({customFieldsValid})
                                 }

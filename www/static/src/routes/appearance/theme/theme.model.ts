@@ -10,6 +10,7 @@ export interface Theme {
     name: string;
     version: string;
     configElements: ConfigElement[];
+    themeFields?: ConfigElement[];
 }
 
 export interface ConfigElement {
