@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
-import { ThemeProps, ConfigElement } from './theme.model';
+import { ThemeProps } from './theme.model';
+import ConfigField from '../../../components/config-field';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
-import { Select, Button, Input, Radio } from 'antd';
-const RadioGroup = Radio.Group;
-import { SketchPicker } from 'react-color';
+import { Select, Button } from 'antd';
 import './theme.less';
-import CodeEditor from '../edit/code-editor';
 
 @inject('themeStore', 'sharedStore')
 @observer class ThemeForm extends React.Component<ThemeProps, {}> {
@@ -68,158 +66,17 @@ import CodeEditor from '../edit/code-editor';
                 layout="vertical"
                 onFinish={() => this.saveThemeConfig()}
             >
-                {theme.configElements.map(this.renderConfigElement.bind(this))}
+                {theme.configElements.map((element, index) => <Form.Item key={element.name || index} label={element.label}
+                    help={element.help}>
+                    <ConfigField field={element} value={this.state.themeConfig[element.name]}
+                        onChange={value => this.updateThemeConfig(element.name, value)} />
+                </Form.Item>)}
                 <Form.Item>
                     <Button type="primary" htmlType="submit">保存配置</Button>
                 </Form.Item>
             </Form>
           </div>
         );
-    }
-
-    renderConfigElement(element: ConfigElement, i: number) {
-        if (element.type === 'html') {
-          element.type = 'htmlmixed';
-        }
-
-        switch (element.type) {
-          case 'url':
-          case 'text':
-          case 'email':
-          case 'textarea':
-          case 'password':
-            return (
-                <Form.Item
-                    key={i}
-                    label={element.label}
-                >
-                    <Input value={this.state.themeConfig[element.name]} style={{width: 600}} onChange={e =>
-                      this.updateThemeConfig(element.name, e.target.value)
-                    } />
-                    <p style={{width: 600}}>{element.help}</p>
-                </Form.Item>
-            );
-
-          case 'radio':
-            if (!Array.isArray(element.options)) { return null; }
-
-            return (
-                <Form.Item
-                    key={i}
-                    label={element.label}
-                >
-                    <RadioGroup
-                        {...element}
-                        key={i}
-                        value={this.state.themeConfig[element.name]}
-                        onChange={e => this.updateThemeConfig(element.name, e.target.value)}
-                    >
-                        {element.options.map((opt, j) => <Radio {...opt} key={j} />)}
-                    </RadioGroup>
-                    <p style={{width: 600}}>{element.help}</p>
-                </Form.Item>
-            );
-
-          case 'checkbox':
-            if (!Array.isArray(element.options)) { return null; }
-
-            return (
-              <div className="form-group" key={i}>
-                <label>{element.label}</label>
-                <div>
-                  {element.options.map((opt, j) =>
-                    <label key={j}>
-                      <input
-                          type="checkbox"
-                          className="form-control"
-                          name={'element.name[]'}
-                          value={opt.value ? opt.value : opt}
-                          checked={Array.isArray(this.state.themeConfig[element.name]) &&
-                            this.state.themeConfig[element.name].includes(opt.value || opt)}
-                          onChange={e => {
-                            let checked = e.target.checked;
-                            let val = opt.value ? opt.value : opt;
-                            const values = Array.isArray(this.state.themeConfig[element.name])
-                              ? this.state.themeConfig[element.name] : [];
-                            this.updateThemeConfig(element.name, checked
-                              ? [...values, val]
-                              : values.filter(v => v !== val));
-                          }}
-                      />
-                      {opt.label ? opt.label : opt}
-                    </label>
-                  )}
-                </div>
-              </div>
-            );
-
-          case 'select':
-            if (!Array.isArray(element.options)) { return null; }
-
-            return (
-              <div className="form-group" key={i}>
-                <label>{element.label}</label>
-                <div>
-                  <select
-                      name={element.name}
-                      className="form-control"
-                      value={this.state.themeConfig[element.name]}
-                      onChange={e => {
-                        this.updateThemeConfig(element.name, e.target.value);
-                      }}
-                  >
-                    {element.options.map((opt, j) =>
-                      <option key={j} value={opt.value ? opt.value : opt}>{opt.label ? opt.label : opt}</option>
-                    )}
-                  </select>
-                  <div className="help-block">{element.help ? element.help : ''}</div>
-                </div>
-              </div>
-            );
-
-          case 'color':
-            const clr = this.state.themeConfig[element.name];
-            const [_, r, g, b, a] = (clr||'').match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
-            return (
-              <div className="form-group react-color-picker" key={i}>
-                <label style={{color: 'rgba(0, 0, 0, 0.85)'}}>{element.label}</label>
-                <div>
-                   <div className="swatch" onClick={() => this.setState({[`display${element.name}`]: !this.state[`display${element.name}`]})}>
-                    <div className="color" style={{backgroundColor: this.state.themeConfig[element.name]}}/>
-                  </div>
-                  { this.state[`display${element.name}`] ? <div className="popover-color">
-                    <div className="cover" onClick={() => this.setState({[`display${element.name}`]: false})}/>
-                    <SketchPicker
-                      color={{r, g, b, a: a||1}}
-                      onChangeComplete={color => {
-                        const {r, g, b, a} = color.rgb;
-                        this.updateThemeConfig(element.name, `rgba(${r},${g},${b},${a||1})`);
-                      }}
-                    />
-                  </div> : null}
-                </div>
-              </div>
-            );
-
-          case 'css':
-          case 'htmlmixed':
-          case 'javascript':
-            return (
-              <div className="form-group" key={i}>
-                <label style={{color: 'rgba(0, 0, 0, 0.85)'}}>{element.label}</label>
-                <div>
-                    <CodeEditor
-                        path={`theme.${element.type === 'htmlmixed' ? 'html' : element.type === 'javascript' ? 'js' : element.type}`}
-                        value={this.state.themeConfig[element.name]}
-                        onChange={value => this.updateThemeConfig(element.name, value)}
-                    />
-                  <div className="help-block">{element.help ? element.help : ''}</div>
-                </div>
-              </div>
-            );
-        default:
-            return null;
-        }
     }
 
     saveThemeConfig() {

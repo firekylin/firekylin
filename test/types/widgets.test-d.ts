@@ -17,6 +17,7 @@ async function checkWidgetTypes(dynamicName: string) {
   archive.pageUrl(2);
   archive.excerpt(80);
   archive.row.title.toUpperCase();
+  archive.row.fields.customKey.toUpperCase();
 
   const cachedTags = await firekylin.widget('Widget_Metas_Tag_Cloud@sidebar', {
     sort: 'update_time',

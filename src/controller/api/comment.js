@@ -89,13 +89,13 @@ module.exports = class extends Base {
   async loginPage() {
     const token = this.get('token');
     if (token) return this.completeLogin(token);
+    const service = this.service('comment');
+    const {core, users, tokenService, avatarService} = await service.create(this);
     const sessionUser = adminAuth.currentUser(this.ctx) || {};
     if (think.isEmpty(sessionUser)) {
       const adminCallback = encodeURIComponent(this.ctx.url);
       return this.redirect(`/admin/login?redirect=${adminCallback}`);
     }
-    const service = this.service('comment');
-    const {core, users, tokenService, avatarService} = await service.create(this);
     const ctx = await service.context(this, users, core, tokenService, avatarService);
     const user = ctx.state.userInfo;
     if (!user) return this.redirect('/admin/login');

@@ -77,6 +77,8 @@ declare namespace Firekylin {
     update_time?: string | number | Date;
     comment_num?: number;
     options?: WidgetRow;
+    /** Article custom fields, keyed by the name entered in the admin editor. */
+    fields: Record<string, string>;
     featuredImage?: string;
     cate?: MetaRow[];
     tag?: MetaRow[];

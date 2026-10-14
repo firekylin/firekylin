@@ -42,6 +42,9 @@ module.exports = class extends Base {
       case 'templateList':
         return await this.getPageTemplateList();
 
+      case 'themeFields':
+        return await this.getThemeFields();
+
       case 'themeList':
       default:
         return await this.getThemeList();
@@ -165,5 +168,22 @@ module.exports = class extends Base {
     templates = await readdirAsync(templatePath);
     templates = templates.filter(t => /\.eta$/.test(t));
     return this.success(templates);
+  }
+
+  /** 获取主题在 package.json 中声明的通用文章字段。 */
+  async getThemeFields() {
+    const {theme} = this.get();
+    if (!theme || theme !== path.basename(theme)) {
+      return this.success([]);
+    }
+    const infoFile = path.join(THEME_DIR, theme, 'package.json');
+    this.pathCheck(infoFile);
+
+    try {
+      const info = JSON.parse(await readFileAsync(infoFile, {encoding: 'utf-8'}));
+      return this.success(Array.isArray(info.themeFields) ? info.themeFields : []);
+    } catch {
+      return this.success([]);
+    }
   }
 };

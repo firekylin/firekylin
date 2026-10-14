@@ -33,6 +33,10 @@
 </div>
 
 
+## AI 使用指南
+
+[Firekylin Agent Skill](skills/firekylin/SKILL.md) 按系统使用者、主题/插件开发者、系统维护者三类角色说明能力和操作流程，包含 MCP/OAuth 与工具参数参考。复制整个技能目录即可交给支持 Skill 的 AI 客户端；安装和调用方法见 [技能说明](skills/firekylin/README.md)。
+
 ## 安装
 
 推荐通过 CLI 创建独立的 Firekylin 项目。核心程序安装在 `node_modules`，项目目录只保存配置、主题、上传文件和数据，升级时不会覆盖用户文件：
@@ -91,9 +95,14 @@ MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-
 如果你的博客也是用 FireKylin 构建的，请到 https://github.com/firekylin/firekylin/issues/34 提交网址。
 
 
+## 内置 MCP Server
+
+Firekylin 自带 MCP HTTP 服务，无需安装额外插件，也不需要手工创建 Token 或配置用户 ID。默认地址为 `/mcp`，客户端通过 OAuth 2.1 跳转到 Firekylin 登录并确认授权，自动获取与当前用户绑定的访问令牌。可以让 Codex、Claude Code 等 MCP 客户端在授权范围内读取文章、管理草稿（高风险发布、删除操作仍需要单次审批支持）。使用和安全说明见 [MCP Server 文档](docs/mcp.md)。
+
 ## 开发者文档
 
 - [主题开发](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
+- [主题文章字段](docs/theme-fields.md)
 - [贡献代码](https://github.com/firekylin/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
 
 ### 扩展 Widget

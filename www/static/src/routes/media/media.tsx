@@ -20,7 +20,9 @@ export default class Media extends React.Component<any, any> {
     load(page = this.state.page) {
         this.setState({loading: true});
         http.get<any>('/admin/api/attachment', {page, pageSize: 24, keyword: this.state.keyword}).subscribe(res => {
-            if (res.errno === 0) this.setState({...(res.data as any), page, loading: false});
+            if (res.errno === 0) {
+                this.setState({...(res.data as any), total: Number(res.data.count) || 0, page, loading: false});
+            }
             else this.setState({loading: false});
         });
     }
