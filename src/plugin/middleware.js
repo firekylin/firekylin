@@ -6,6 +6,12 @@ function adminResponse(data) {
   return {errno: 0, errmsg: '', data};
 }
 
+function requestBody(ctx) {
+  const body = ctx.request && ctx.request.body;
+  if (body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'post')) return body.post;
+  return body || {};
+}
+
 async function handleAdminExtension(manager, ctx) {
   const prefix = '/admin/api/plugins';
   if (ctx.path !== prefix && !ctx.path.startsWith(prefix + '/')) return false;
@@ -35,10 +41,10 @@ async function handleAdminExtension(manager, ctx) {
     result = await manager.admin.loadForm(pluginId, resourceId, context);
   }
   if (resource === 'forms' && ctx.method === 'POST') {
-    result = await manager.admin.submitForm(pluginId, resourceId, ctx.request.body || {}, context);
+    result = await manager.admin.submitForm(pluginId, resourceId, requestBody(ctx), context);
   }
   if (resource === 'actions' && ctx.method === 'POST') {
-    result = await manager.admin.runAction(pluginId, resourceId, ctx.request.body || {}, context);
+    result = await manager.admin.runAction(pluginId, resourceId, requestBody(ctx), context);
   }
   if (typeof result === 'undefined') return false;
   if (result === null) return ctx.throw(404, 'Plugin admin resource not found');
@@ -69,7 +75,7 @@ module.exports = function pluginRoutes() {
     const params = {};
     route.names.forEach((name, index) => { params[name] = decodeURIComponent(match[index + 1]) });
     const result = await route.handler({
-      ctx, params, query: ctx.query, body: ctx.request.body || ctx.body, plugin: route.pluginId
+      ctx, params, query: ctx.query, body: requestBody(ctx), plugin: route.pluginId
     });
     if (typeof result !== 'undefined') ctx.body = result;
   };

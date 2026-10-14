@@ -15,6 +15,8 @@ export interface PageSectionContext {
     run: (action: any) => void;
 }
 
+export const PAGE_SECTION_CONTENT_INSET = 24;
+
 function safeUrl(value: unknown): string | undefined {
     if (typeof value !== 'string') return undefined;
     if (value.startsWith('/') && !value.startsWith('//')) return value;
@@ -74,7 +76,8 @@ function PluginForm({item, values, submit}: {item: any; values: any; submit: Pag
 
 export function ActionGroup({ids, context}: {ids?: string[]; context: PageSectionContext}) {
     const selected = ids ? context.actions.filter(action => ids.includes(action.id)) : context.actions;
-    return selected.length ? <Space style={{display: 'flex', marginBottom: 16}}>
+    return selected.length ? <Space style={{display: 'flex', marginBottom: 16,
+        marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
         {selected.map(action => <Button key={action.id} type={action.type === 'primary' ? 'primary' : 'default'}
             danger={action.type === 'danger'} onClick={() => context.run(action)}>{action.label}</Button>)}
     </Space> : null;
@@ -103,8 +106,10 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
         : <Alert type="warning" message="图片地址无效" showIcon />),
     progress: ({node}) => card(node, <Progress percent={Math.max(0, Math.min(100, node.percent || 0))}
         status={node.status} format={node.label ? () => node.label : undefined} />),
-    empty: ({node}) => <Empty style={{marginBottom: 16}} description={node.description} />,
-    divider: ({node}) => <Divider>{node.title}</Divider>,
+    empty: ({node}) => <Empty style={{marginBottom: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}
+        description={node.description} />,
+    divider: ({node}) => <Divider style={{width: 'auto', minWidth: 0,
+        marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>{node.title}</Divider>,
     links: ({node}) => card(node, <List dataSource={node.items || []} renderItem={(item: any) =>
         <List.Item><List.Item.Meta title={safeUrl(item.href)
             ? <a href={safeUrl(item.href)} target="_blank" rel="noreferrer">{item.label}</a> : item.label}
