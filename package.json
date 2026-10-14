@@ -24,8 +24,7 @@
     "lint-fix": "eslint ./src ./*.js ./www/theme/firekylin --fix",
     "lint-break-on-errors": "npm run lint",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
-    "cron:rss": "npm start -- \"admin/cron/rss\"",
-    "build:pkg": "pkg pkg.js --out-path=dist/"
+    "cron:rss": "npm start -- \"admin/cron/rss\""
   },
   "pre-commit": [
     "lint-break-on-errors"
@@ -137,17 +136,5 @@
     "cacheTemplatePath": "/Users/lizheming/.think-templates/-usr-local-lib-node_modules-think-cli-default_template",
     "clone": false,
     "isMultiModule": false
-  },
-  "pkg": {
-    "assets": [
-      "src/**/*",
-      "view/**/*",
-      "www/**/*"
-    ],
-    "targets": [
-      "node10-linux-x64",
-      "node10-macos-x64",
-      "node10-win-x64"
-    ]
   }
 }
