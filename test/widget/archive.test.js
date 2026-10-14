@@ -111,6 +111,7 @@ test('preview query without preview payload does not bypass stored post protecti
   archive.next();
 
   assert.equal(archive.content(), '<form>password</form>');
+  assert.equal(archive.title(), '此内容被密码保护');
   assert.equal(archive.allow('comment'), false);
   assert.equal(archive.row.options.postPasswordHash, undefined);
 });

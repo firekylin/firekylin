@@ -17,9 +17,12 @@ function redactProtectedPosts(posts) {
       try { options = JSON.parse(options) || {} } catch { options = {} }
     }
     if (!options.postPasswordHash) return post;
+    delete options.postPasswordHash;
     return Object.assign({}, post, {
+      title: '此内容被密码保护',
       summary: '这篇文章受密码保护。',
-      content: '这篇文章受密码保护。'
+      content: '这篇文章受密码保护。',
+      options
     });
   });
 }
@@ -475,7 +478,7 @@ module.exports = class extends Base {
       create_time: ['<', createTime],
       id: ['!=', detail.id]
     });
-    const prevPromise = this.field('title,pathname')
+    const prevPromise = this.field('title,pathname,options')
       .setRelation(false)
       .where(prevWhere)
       .order('create_time DESC')
@@ -484,14 +487,14 @@ module.exports = class extends Base {
       create_time: ['>', createTime],
       id: ['!=', detail.id]
     });
-    const nextPromise = this.field('title,pathname')
+    const nextPromise = this.field('title,pathname,options')
       .setRelation(false)
       .where(nextWhere)
       .order('create_time ASC')
       .find();
     const [prev, next] = await Promise.all([prevPromise, nextPromise]);
-    detail.prev = prev;
-    detail.next = next;
+    detail.prev = redactProtectedPosts([prev]).map(item => ({title: item.title, pathname: item.pathname}))[0];
+    detail.next = redactProtectedPosts([next]).map(item => ({title: item.title, pathname: item.pathname}))[0];
     return detail;
   }
   async getPostRssList() {

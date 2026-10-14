@@ -31,6 +31,7 @@ class PostQueryService {
     delete post.options;
     if (!options.postPasswordHash) return post;
     delete post.markdown_content;
+    post.title = '此内容被密码保护';
     post.summary = '这篇文章受密码保护。';
     post.password_protected = true;
     return post;
