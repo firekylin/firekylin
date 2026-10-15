@@ -100,6 +100,24 @@ test('admin tables validate search and selected-row actions', async() => {
   await assert.rejects(admin.loadPage('example', 'invalid-table', {}), /search.keys/);
 });
 
+test('admin page tabs validate and nest sections', async() => {
+  const admin = new AdminRegistry();
+  admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
+  admin.registerPage({id: 'settings', panel: 'tools', title: 'Settings', load: () => ({sections: [{
+    type: 'tabs', items: [
+      {key: 'general', label: 'General', sections: [{type: 'text', content: 'General settings'}]},
+      {key: 'publish', label: 'Publish', sections: [{type: 'markdown', content: 'Publishing settings'}]}
+    ]
+  }]})}, 'example');
+  const loaded = await admin.loadPage('example', 'settings', {});
+  assert.equal(loaded.content.sections[0].items[1].key, 'publish');
+
+  admin.registerPage({id: 'invalid-tabs', panel: 'tools', title: 'Invalid', load: () => ({sections: [{
+    type: 'tabs', items: [{key: 'same', label: 'One', sections: []}, {key: 'same', label: 'Two', sections: []}]
+  }]})}, 'example');
+  await assert.rejects(admin.loadPage('example', 'invalid-tabs', {}), /Duplicate admin tab key/);
+});
+
 test('admin pages can be routable without appearing in the panel menu', async() => {
   const admin = new AdminRegistry();
   admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');

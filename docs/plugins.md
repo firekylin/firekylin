@@ -471,6 +471,7 @@ ctx.admin.registerPage({
 - `links`：经过协议检查的链接列表；
 - `code`：只读代码或日志；
 - `grid`：`{type, columns?, items}`，以一至四列递归布局其他区块；
+- `tabs`：`{type, items: [{key, label, sections}]}`，使用标签页组织多组区块或表单；
 - `form`：`{type: 'form', id}`，引用当前页面的表单；
 - `actions`：`{type: 'actions', ids?}`，引用部分或全部当前页面动作。
 

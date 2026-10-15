@@ -58,6 +58,7 @@ declare namespace Firekylin {
       items: Array<{label: string; href: string; description?: string}>}
     | {type: 'code'; title?: string; content: string; language?: string}
     | {type: 'grid'; columns?: number; items: AdminPageSection[]}
+    | {type: 'tabs'; items: Array<{key: string; label: string; sections: AdminPageSection[]}>}
     | {type: 'form'; id: string}
     | {type: 'actions'; ids?: string[]};
 

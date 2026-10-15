@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Card, Descriptions, Divider, Dropdown, Empty, Form, Image, Input, List, Progress, Space, Statistic, Table, Typography } from 'antd';
+import { Alert, Button, Card, Descriptions, Divider, Dropdown, Empty, Form, Image, Input, List, Progress, Space, Statistic, Table, Tabs, Typography } from 'antd';
 import { FormField, FormFieldSchema } from './form-field';
 import { ProtocolList, ProtocolNode, ProtocolRenderer, ProtocolRendererMap } from './renderer';
 
@@ -177,6 +177,11 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
         gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, node.columns || 2))}, minmax(0, 1fr))`}}>
         <ProtocolList nodes={node.items || []} context={context} renderers={pageSectionRenderers} />
     </div>,
+    tabs: ({node, context}) => <Tabs items={(node.items || []).map(tab => ({
+        key: tab.key,
+        label: tab.label,
+        children: <ProtocolList nodes={tab.sections || []} context={context} renderers={pageSectionRenderers} />
+    }))} />,
     form: ({node, context}) => {
         const item = context.forms.find(form => form.id === node.id);
         return item ? <PluginForm item={item} values={context.formValues[item.id]} submit={context.submit} /> : null;
@@ -198,5 +203,6 @@ export function PageForm({item, values, submit}: {item: any; values: any; submit
 
 export function hasLayoutReferences(sections: PageSection[]): boolean {
     return (sections || []).some(section => ['form', 'actions'].includes(section.type) ||
-        (section.type === 'grid' && hasLayoutReferences(section.items)));
+        (section.type === 'grid' && hasLayoutReferences(section.items)) ||
+        (section.type === 'tabs' && (section.items || []).some(tab => hasLayoutReferences(tab.sections))));
 }

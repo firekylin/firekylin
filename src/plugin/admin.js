@@ -8,7 +8,7 @@ const FIELD_TYPES = new Set([
 const ACTION_TYPES = new Set(['default', 'primary', 'danger']);
 const SECTION_TYPES = new Set([
   'text', 'description', 'table', 'stat', 'list', 'markdown', 'image', 'progress', 'empty', 'divider',
-  'links', 'code', 'grid', 'form', 'actions'
+  'links', 'code', 'grid', 'tabs', 'form', 'actions'
 ]);
 
 function requiredString(value, label) {
@@ -75,6 +75,20 @@ function validateSections(sections, registry, pluginId, pageId, location = 'sect
     }
     if (section.type === 'grid') {
       validateSections(section.items, registry, pluginId, pageId, `${label}.items`);
+    }
+    if (section.type === 'tabs') {
+      if (!Array.isArray(section.items) || !section.items.length) {
+        throw new TypeError(`Admin page ${pageId} ${label}.items must be a non-empty array`);
+      }
+      const keys = new Set();
+      section.items.forEach((tab, tabIndex) => {
+        if (!tab || typeof tab !== 'object') throw new TypeError(`Admin page ${pageId} ${label} tab must be an object`);
+        const key = identifier(tab.key, `Admin page ${pageId} ${label} tab key`);
+        if (keys.has(key)) throw new Error(`Duplicate admin tab key: ${key}`);
+        keys.add(key);
+        requiredString(tab.label, `Admin page ${pageId} ${label} tab label`);
+        validateSections(tab.sections, registry, pluginId, pageId, `${label}.items[${tabIndex}].sections`);
+      });
     }
     if (section.type === 'form') {
       const formId = identifier(section.id, `Admin page ${pageId} form reference`);
