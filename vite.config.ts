@@ -1,7 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { createHash } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 // https://vitejs.dev/config/
@@ -11,21 +9,7 @@ export default defineConfig(({ mode }) => ({
     // admin router itself owns /admin, so Vite must serve from the origin root.
     base: mode === 'production' ? '/static/dist/' : '/',
 
-    plugins: [
-        react(),
-        {
-            name: 'admin-asset-version',
-            enforce: 'post',
-            writeBundle() {
-                const assetsPath = path.resolve(__dirname, 'www/static/dist/assets');
-                const hash = createHash('sha256');
-                for (const fileName of ['assets/admin.js', 'assets/admin.css']) {
-                    hash.update(readFileSync(path.resolve(__dirname, 'www/static/dist', fileName)));
-                }
-                writeFileSync(path.join(assetsPath, 'admin.version'), hash.digest('hex').slice(0, 16));
-            },
-        },
-    ],
+    plugins: [react()],
 
     resolve: {
         alias: {
@@ -56,18 +40,15 @@ export default defineConfig(({ mode }) => ({
         outDir: path.resolve(__dirname, 'www/static/dist'),
         emptyOutDir: true,
         cssCodeSplit: false,
+        manifest: true,
         rollupOptions: {
             input: {
                 admin: path.resolve(__dirname, 'www/static/src/index.html'),
             },
             output: {
-                entryFileNames: 'assets/[name].js',
+                entryFileNames: 'assets/[name]-[hash].js',
                 chunkFileNames: 'assets/[name]-[hash].js',
-                assetFileNames(assetInfo) {
-                    return assetInfo.names.some(name => name.endsWith('.css'))
-                        ? 'assets/admin.css'
-                        : 'assets/[name]-[hash][extname]';
-                },
+                assetFileNames: 'assets/[name]-[hash][extname]',
                 manualChunks(id) {
                     return /node_modules\/(react|react-dom|mobx|mobx-react)\//.test(id) ? 'vendor' : undefined;
                 },
