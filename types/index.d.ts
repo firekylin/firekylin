@@ -57,6 +57,12 @@ declare namespace Firekylin {
     title: string;
     description?: string;
     order?: number;
+    iframe?: {
+      /** HTML entry relative to the plugin package. Only files below its directory are served. */
+      entry: string;
+      /** Initial iframe height in pixels, clamped to 320–2400. */
+      height?: number;
+    };
     load?(context: AdminPageContext): AdminPageContent | Promise<AdminPageContent>;
   }
 

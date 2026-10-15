@@ -3,16 +3,13 @@ import { useEffect, useState } from 'react';
 import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
 import { ActionGroup, hasLayoutReferences, PAGE_SECTION_CONTENT_INSET, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
 import { http } from '../../utils/http';
+import PluginIframe from './plugin-iframe';
 
 function extension(pluginId: string) {
     return (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === pluginId);
 }
 
-function PluginAdmin(props: any) {
-    const {pluginId, pageId} = props.match.params;
-    const search = props.location.search || '';
-    const descriptor = extension(pluginId);
-    const page = descriptor && descriptor.pages.find(item => item.id === pageId);
+function DeclarativePluginAdmin({pluginId, pageId, descriptor, page, search}: any) {
     const forms = descriptor ? descriptor.forms.filter(item => item.page === pageId) : [];
     const actions = descriptor ? descriptor.actions.filter(item => item.page === pageId) : [];
     const [content, setContent] = useState<any>(null);
@@ -37,8 +34,6 @@ function PluginAdmin(props: any) {
         }))];
         return () => subscriptions.forEach(subscription => subscription.unsubscribe());
     }, [pluginId, pageId, search, reloadKey]);
-
-    if (!descriptor || !page) return <Alert type="error" message="插件后台页面不存在或已停用" showIcon />;
 
     const submit = (formId: string, values: any) => http.post<any>(
         `/admin/api/plugins/${pluginId}/forms/${formId}`, values, writeConfig
@@ -85,4 +80,12 @@ function PluginAdmin(props: any) {
     </div>;
 }
 
-export default PluginAdmin;
+export default function PluginAdmin(props: any) {
+    const {pluginId, pageId} = props.match.params;
+    const descriptor = extension(pluginId);
+    const page = descriptor && descriptor.pages.find(item => item.id === pageId);
+    if (!descriptor || !page) return <Alert type="error" message="插件后台页面不存在或已停用" showIcon />;
+    if (page.iframe) return <PluginIframe pluginId={pluginId} page={page} route={props} />;
+    return <DeclarativePluginAdmin pluginId={pluginId} pageId={pageId} descriptor={descriptor} page={page}
+        search={props.location.search || ''} />;
+}

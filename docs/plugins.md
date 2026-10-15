@@ -436,6 +436,66 @@ register(ctx) {
 引用会被拒绝。如果页面没有使用 `form` 或 `actions` 引用，Firekylin 会保持兼容布局：动作
 显示在顶部，表单显示在内容之后。
 
+### 自定义 iframe 页面
+
+复杂插件可以注册一个隔离的 iframe 页面。入口必须是插件包内的相对 HTML 路径；Firekylin
+只会提供入口所在目录及其子目录中的文件，并且所有资源请求都要求管理员身份：
+
+```js
+ctx.admin.registerPage({
+  id: 'designer',
+  panel: 'reading-tools',
+  title: '页面设计器',
+  description: '使用完整的自定义界面编辑页面。',
+  iframe: {
+    entry: 'admin/index.html',
+    height: 900
+  }
+});
+```
+
+iframe 页面不能同时注册声明式 `load()`、Form 或 Action。它可以使用任意前端框架，也可以
+使用原生 HTML。React、Vue 等依赖由插件自行构建；iframe 与 Firekylin 后台的 React、CSS
+和路由完全隔离，因此不会产生依赖版本或 Context 冲突。
+
+Firekylin 提供一个无依赖的浏览器 SDK。插件入口可以加载公共样式和 SDK：
+
+```html
+<link rel="stylesheet" href="/static/css/plugin-admin.css">
+<script src="/static/plugin-admin-sdk.js"></script>
+<main class="fk-plugin-page">
+  <section class="fk-plugin-card">
+    <button id="save" class="fk-plugin-button fk-plugin-button-primary">保存</button>
+  </section>
+</main>
+<script src="./app.js"></script>
+```
+
+`admin/app.js`：
+
+```js
+  FirekylinAdmin.context.then(context => console.log(context.pluginId, context.theme));
+  document.querySelector('#save').onclick = async() => {
+    await FirekylinAdmin.request({method: 'POST', path: '/save', body: {enabled: true}});
+    await FirekylinAdmin.notify('保存成功', 'success');
+  };
+```
+
+`request()` 只能访问当前插件的 `/api/plugins/<plugin-id>/*` 路由，写请求的 CSRF Token 由
+宿主添加。SDK 还提供：
+
+- `context`：当前插件、页面、路由参数、查询字符串及主题 Token；
+- `navigate(path)`：跳转到后台内部路径；
+- `notify(message, level)`：显示 `success`、`error`、`warning` 或 `info` 消息；
+- `confirm(message, title)`：显示宿主确认框并返回布尔值；
+- `resize(height)`：调整页面高度，范围为 320–2400 像素。
+
+iframe 固定使用不包含 `allow-same-origin` 的 sandbox，无法读取后台 DOM、Cookie、Storage、
+React 实例或 CSRF Token。消息接收端同时校验 iframe Window、每次挂载的随机令牌、协议版本、
+请求方法和目标路径。
+入口响应还包含限制脚本、网络连接、表单提交和父页面来源的 CSP。插件需要通过 SDK 调用
+服务端，不应尝试直接访问后台页面状态。
+
 页面支持以下安全的内容区块：
 
 - `text`：`{type, title?, content}`；

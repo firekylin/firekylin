@@ -1,6 +1,9 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 const test = require('node:test');
 const AdminRegistry = require('../../src/plugin/admin');
 
@@ -79,4 +82,42 @@ test('admin page layouts reject unknown types and cross-page references', async(
   })}, 'example');
   await assert.rejects(admin.loadPage('example', 'bad-type', {}), /unsupported section/);
   await assert.rejects(admin.loadPage('example', 'bad-reference', {}), /Unknown admin form reference/);
+});
+
+test('iframe pages expose safe metadata and only serve files beside their entry', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-admin-iframe-'));
+  fs.mkdirSync(path.join(root, 'admin/assets'), {recursive: true});
+  fs.writeFileSync(path.join(root, 'admin/index.html'), '<script src="assets/app.js"></script>');
+  fs.writeFileSync(path.join(root, 'admin/assets/app.js'), 'window.app = true;');
+  fs.writeFileSync(path.join(root, 'secret.txt'), 'secret');
+  const admin = new AdminRegistry();
+  admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
+  admin.registerPage({
+    id: 'custom', panel: 'tools', title: 'Custom', iframe: {entry: 'admin/index.html', height: 9000}
+  }, 'example');
+
+  assert.deepEqual(admin.manifest()[0].pages[0].iframe, {height: 2400});
+  assert.equal(admin.iframeAsset('example', 'custom', '', root).path, path.join(root, 'admin/index.html'));
+  assert.equal(admin.iframeAsset('example', 'custom', 'assets/app.js', root).path,
+    path.join(root, 'admin/assets/app.js'));
+  assert.equal(admin.iframeAsset('example', 'custom', '../secret.txt', root), null);
+  assert.throws(() => admin.registerForm({
+    id: 'form', page: 'custom', title: 'Form', fields: [{name: 'name', label: 'Name'}], submit() {}
+  }, 'example'), /cannot register forms/);
+  assert.throws(() => admin.registerAction({
+    id: 'action', page: 'custom', label: 'Action', handler() {}
+  }, 'example'), /cannot register actions/);
+});
+
+test('iframe entries reject absolute paths, traversal and mixed page loaders', () => {
+  const admin = new AdminRegistry();
+  admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
+  for (const entry of ['/admin/index.html', '../index.html', 'admin\\..\\index.html', 'admin/app.js']) {
+    assert.throws(() => admin.registerPage({
+      id: `page-${Math.random()}`, panel: 'tools', title: 'Bad', iframe: {entry}
+    }, 'example'), /relative HTML path/);
+  }
+  assert.throws(() => admin.registerPage({
+    id: 'mixed', panel: 'tools', title: 'Mixed', iframe: {entry: 'admin/index.html'}, load() {}
+  }, 'example'), /cannot define load/);
 });
