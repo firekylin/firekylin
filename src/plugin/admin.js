@@ -89,6 +89,33 @@ function validateSections(sections, registry, pluginId, pageId, location = 'sect
         if (!action || action.page !== pageId) throw new Error(`Unknown admin action reference: ${actionId}`);
       }
     }
+    if (section.type === 'table' && typeof section.search !== 'undefined') {
+      if (section.search !== true &&
+          (!section.search || typeof section.search !== 'object' || Array.isArray(section.search))) {
+        throw new TypeError(`Admin page ${pageId} ${label}.search must be true or an object`);
+      }
+      if (section.search && section.search !== true && typeof section.search.keys !== 'undefined' &&
+          (!Array.isArray(section.search.keys) || section.search.keys.some(key => typeof key !== 'string' || !key))) {
+        throw new TypeError(`Admin page ${pageId} ${label}.search.keys must be an array of strings`);
+      }
+    }
+    if (section.type === 'table' && typeof section.selection !== 'undefined') {
+      if (!section.selection || typeof section.selection !== 'object' || Array.isArray(section.selection) ||
+          !Array.isArray(section.selection.actions) || !section.selection.actions.length) {
+        throw new TypeError(`Admin page ${pageId} ${label}.selection requires actions`);
+      }
+      if (typeof section.selection.input !== 'undefined') {
+        identifier(section.selection.input, `Admin page ${pageId} ${label}.selection input`);
+      }
+      for (const item of section.selection.actions) {
+        if (!item || typeof item !== 'object') {
+          throw new TypeError(`Admin page ${pageId} ${label}.selection action must be an object`);
+        }
+        const actionId = identifier(item.action, `Admin page ${pageId} ${label}.selection action reference`);
+        const action = registry.actions.get(registry.key(pluginId, actionId));
+        if (!action || action.page !== pageId) throw new Error(`Unknown admin action reference: ${actionId}`);
+      }
+    }
   });
 }
 

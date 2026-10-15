@@ -383,7 +383,12 @@ register(ctx) {
               {key: 'operations', title: '操作', type: 'actions'}],
             rows: [{id: 1, title: 'Hello', views: 100, operations: [
               {label: '重建', action: 'rebuild', input: {id: 1}}
-            ]}], toolbar: [{label: '新建', href: '/admin/plugins/example/edit', type: 'primary'}]},
+            ]}],
+            search: {keys: ['title'], placeholder: '搜索文章'},
+            selection: {input: 'ids', actions: [
+              {action: 'rebuild', label: '重建选中项'}
+            ]},
+            toolbar: [{label: '新建', href: '/admin/plugins/example/edit', type: 'primary'}]},
           {type: 'grid', columns: 2, items: [
             {type: 'form', id: 'settings'},
             {type: 'markdown', title: '使用说明', content: '**保存**后新配置立即生效。'}
@@ -456,7 +461,9 @@ ctx.admin.registerPage({
 
 - `text`：`{type, title?, content}`；
 - `description`：`{type, title?, items: [{label, value}]}`；
-- `table`：`{type, title?, rowKey?, pagination?, columns: [{key, title}], rows}`；
+- `table`：`{type, title?, rowKey?, pagination?, columns, rows, toolbar?, search?, selection?}`。`search.keys`
+  声明参与前端关键词过滤的列；`selection.actions` 在表格左侧显示复选框，并把选中行键通过
+  `selection.input`（默认 `ids`）传给已注册动作；
 - `stat`：统计数字卡片，支持 `prefix`、`suffix` 和 `precision`；
 - `list`：标题及说明组成的列表；
 - `markdown`：安全的 Markdown 子集，支持标题、列表、粗体、行内代码和链接；

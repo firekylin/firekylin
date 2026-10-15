@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Alert, Button, Card, Descriptions, Divider, Empty, Form, Image, List, Progress, Space, Statistic, Table, Typography } from 'antd';
+import { Alert, Button, Card, Descriptions, Divider, Dropdown, Empty, Form, Image, Input, List, Progress, Space, Statistic, Table, Typography } from 'antd';
 import { FormField, FormFieldSchema } from './form-field';
 import { ProtocolList, ProtocolNode, ProtocolRenderer, ProtocolRendererMap } from './renderer';
 
@@ -76,6 +76,48 @@ function TableActions({items, context}: {items: any[]; context: PageSectionConte
     return <Space>{(items || []).map((item, index) => <TableAction key={index} item={item} context={context} />)}</Space>;
 }
 
+function TableSection({node, context}: {node: PageSection; context: PageSectionContext}) {
+    const [keyword, setKeyword] = React.useState('');
+    const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
+    const search = node.search && typeof node.search === 'object' ? node.search : node.search ? {} : null;
+    const selection = node.selection && typeof node.selection === 'object' ? node.selection : null;
+    const searchableKeys = search && Array.isArray(search.keys) && search.keys.length
+        ? search.keys : (node.columns || []).filter(column => column.type !== 'actions').map(column => column.key);
+    const normalizedKeyword = keyword.trim().toLocaleLowerCase();
+    const rows = normalizedKeyword ? (node.rows || []).filter(row => searchableKeys.some(key =>
+        String(row[key] == null ? '' : row[key]).toLocaleLowerCase().includes(normalizedKeyword)
+    )) : node.rows || [];
+    const bulkActions = selection ? (selection.actions || []).map((item: any, index: number) => ({
+        ...item, menuKey: item.key || `${item.action}-${index}`
+    })) : [];
+    const bulkItems = bulkActions.map((item: any) => ({
+        key: item.menuKey,
+        label: item.label || context.actions.find(action => action.id === item.action)?.label || item.action,
+        danger: item.type === 'danger' || context.actions.find(action => action.id === item.action)?.type === 'danger'
+    }));
+    const runBulkAction = ({key}: {key: string}) => {
+        const item = bulkActions.find((candidate: any) => candidate.menuKey === key);
+        const action = context.actions.find(candidate => candidate.id === item?.action);
+        if (!item || !action || !selectedRowKeys.length) return;
+        context.run(action, {...(item.input || {}), [selection.input || 'ids']: selectedRowKeys.join(',')});
+        setSelectedRowKeys([]);
+    };
+    const controls = search || selection || node.toolbar ? <Space wrap>
+        {search ? <Input.Search allowClear value={keyword} placeholder={search.placeholder || '搜索'}
+            onChange={event => setKeyword(event.target.value)} style={{width: search.width || 240}} /> : null}
+        {selection ? <Dropdown menu={{items: bulkItems, onClick: runBulkAction}} disabled={!selectedRowKeys.length}>
+            <Button>批量操作{selectedRowKeys.length ? `（${selectedRowKeys.length}）` : ''}</Button>
+        </Dropdown> : null}
+        {node.toolbar ? <TableActions items={node.toolbar} context={context} /> : null}
+    </Space> : undefined;
+    return card(node, <Table pagination={node.pagination ? undefined : false}
+        rowSelection={selection ? {selectedRowKeys, onChange: setSelectedRowKeys} : undefined}
+        rowKey={node.rowKey || 'id'} columns={(node.columns || []).map(column => ({
+            title: column.title, dataIndex: column.key, key: column.key,
+            render: column.type === 'actions' ? (items: any[]) => <TableActions items={items} context={context} /> : undefined
+        }))} dataSource={rows} />, controls);
+}
+
 function PluginForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
     return <Card title={item.title} style={{marginBottom: 16}}>
         <Form layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
@@ -106,11 +148,7 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
         items={(node.items || []).map((item, index) => ({
             key: index, label: item.label, children: String(item.value == null ? '' : item.value)
         }))} />),
-    table: ({node, context}) => card(node, <Table pagination={node.pagination ? undefined : false}
-        rowKey={node.rowKey || 'id'} columns={(node.columns || []).map(column => ({
-            title: column.title, dataIndex: column.key, key: column.key,
-            render: column.type === 'actions' ? (items: any[]) => <TableActions items={items} context={context} /> : undefined
-        }))} dataSource={node.rows || []} />, node.toolbar ? <TableActions items={node.toolbar} context={context} /> : undefined),
+    table: ({node, context}) => <TableSection node={node} context={context} />,
     stat: ({node}) => card(node, <div style={{display: 'grid', gap: 24,
         gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, node.columns || 3))}, minmax(0, 1fr))`}}>
         {(node.items || []).map((item, index) => <Statistic key={index} title={item.label} value={item.value}

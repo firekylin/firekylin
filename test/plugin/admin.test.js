@@ -81,6 +81,25 @@ test('admin page layouts reject unknown types and cross-page references', async(
   await assert.rejects(admin.loadPage('example', 'bad-reference', {}), /Unknown admin form reference/);
 });
 
+test('admin tables validate search and selected-row actions', async() => {
+  const admin = new AdminRegistry();
+  admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
+  admin.registerPage({id: 'items', panel: 'tools', title: 'Items', load: () => ({sections: [{
+    type: 'table', columns: [{key: 'title', title: 'Title'}], rows: [{id: 1, title: 'One'}],
+    search: {keys: ['title'], placeholder: 'Search items'},
+    selection: {input: 'ids', actions: [{action: 'remove', label: 'Remove'}]}
+  }]})}, 'example');
+  admin.registerAction({id: 'remove', page: 'items', label: 'Remove', handler: input => input}, 'example');
+  const loaded = await admin.loadPage('example', 'items', {});
+  assert.deepEqual(loaded.content.sections[0].search.keys, ['title']);
+  assert.equal(loaded.content.sections[0].selection.actions[0].action, 'remove');
+
+  admin.registerPage({id: 'invalid-table', panel: 'tools', title: 'Invalid', load: () => ({sections: [{
+    type: 'table', search: {keys: [null]}, selection: {actions: []}
+  }]})}, 'example');
+  await assert.rejects(admin.loadPage('example', 'invalid-table', {}), /search.keys/);
+});
+
 test('admin pages can be routable without appearing in the panel menu', async() => {
   const admin = new AdminRegistry();
   admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
