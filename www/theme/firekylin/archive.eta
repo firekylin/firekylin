@@ -9,7 +9,7 @@
   <div class="entry-content">
     <h3><%= yearMonth %> (<%= data.length %>)</h3>
     <ul>
-      <% data.forEach(item => { %><li><a href="/post/<%= item.pathname %>.html" title="<%= item.title %>"><%= item.title %></a>&nbsp; <span class="date"><%= firekylin.think.datetime(item.create_time, 'YYYY-MM-DD') %></span></li><% }) %>
+      <% data.forEach(item => { %><li><a href="<%= archive.permalinkFor(item) %>" title="<%= item.title %>"><%= item.title %></a>&nbsp; <span class="date"><%= firekylin.think.datetime(item.create_time, 'YYYY-MM-DD') %></span></li><% }) %>
     </ul>
   </div>
   <% }) %>

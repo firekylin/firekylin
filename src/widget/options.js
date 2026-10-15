@@ -1,4 +1,5 @@
 const Widget = require('./base');
+const permalink = require('../service/permalink');
 
 function parse(value, fallback) {
   try {
@@ -44,6 +45,11 @@ module.exports = class extends Widget {
 
   get siteUrl() {
     return this.row.siteUrl;
+  }
+
+  contentPermalink(content, type) {
+    const contentType = typeof type === 'undefined' ? content.type : type;
+    return permalink.generate(contentType, content, this.row);
   }
 
   themeUrl(pathname = '') {

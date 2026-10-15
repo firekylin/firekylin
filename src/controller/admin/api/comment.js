@@ -3,6 +3,7 @@
 
 const Base = require('./base');
 const CommentModerationService = require('../../../service/comment-moderation');
+const permalink = require('../../../service/permalink');
 
 module.exports = class extends Base {
   async getAction() {
@@ -42,7 +43,7 @@ module.exports = class extends Base {
     const [users, posts] = await Promise.all([
       userIds.length ? this.model('user').where({id: ['IN', userIds]}).field('id,name,display_name,email,url,avatar')
         .select() : [],
-      postIds.length ? this.model('post').where({id: ['IN', postIds]}).field('id,title,pathname,type')
+      postIds.length ? this.model('post').where({id: ['IN', postIds]}).field('id,title,pathname,type,create_time')
         .select() : []
     ]);
     const userMap = new Map(users.map(user => [String(user.id), user]));
@@ -51,7 +52,7 @@ module.exports = class extends Base {
       const user = userMap.get(String(item.user_id)) || {};
       const email = user.email || item.mail || '';
       const post = postMap.get(Number(item.post_id));
-      const postUrl = post ? `/${Number(post.type) === 1 ? 'page' : 'post'}/${post.pathname}.html` : item.url;
+      const postUrl = post ? permalink.generate(post.type, post, this.authOptions) : item.url;
       return {
         ...item,
         author_name: user.display_name || user.name || item.nick || '匿名',

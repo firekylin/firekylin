@@ -3,6 +3,7 @@ const dayjs = require('dayjs');
 const Base = require('./base');
 const PostQueryService = require('../../../service/post-query');
 const PostCommandService = require('../../../service/post-command');
+const permalink = require('../../../service/permalink');
 
 module.exports = class extends Base {
   constructor(...args) {
@@ -137,7 +138,7 @@ module.exports = class extends Base {
       const site_url = Object.prototype.hasOwnProperty.call(options, 'site_url')
         ? options.site_url
         : `http://${this.ctx.host}`;
-      post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
+      post.markdown_content = `> 原文：${site_url}${permalink.generate('post', post, options)}
 
 ${post.markdown_content}`;
     }

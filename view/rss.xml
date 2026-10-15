@@ -14,19 +14,19 @@ const xmlSafe = value => String(value || '').replace(/[^\x09\x0A\x0D\x20-\xFF\x8
     <% firekylin.list.forEach(item => { %>
     <item>
       <title><%= item.title %></title>
-      <link><%= site.siteUrl %>/post/<%= item.pathname %>.html</link>
+      <link><%= site.siteUrl + site.contentPermalink(item, 'post') %></link>
       <description><![CDATA[
       <% if (item.summary) { %>
       <%~ xmlSafe(item.summary) %>
         <% if (item.summary !== item.content) { %>
-        <p class="more"><a href="<%= site.siteUrl %>/post/<%= item.pathname %>.html" title="<%= item.title %>">[...]</a></p>
+        <p class="more"><a href="<%= site.siteUrl + site.contentPermalink(item, 'post') %>" title="<%= item.title %>">[...]</a></p>
         <% } %>
       <% } else { %>
       <%~ xmlSafe(item.content) %>
       <% } %>
       ]]></description>
       <pubDate><%= new Date(item.create_time).toUTCString() %></pubDate>
-      <guid><%= site.siteUrl %>/post/<%= item.pathname %>.html</guid>
+      <guid><%= site.siteUrl + site.contentPermalink(item, 'post') %></guid>
     </item>
     <% }) %>
   </channel>
