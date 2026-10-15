@@ -16,9 +16,9 @@ class SideBar extends React.Component<any, any> {
 
         const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce((routes, plugin) =>
             routes.concat(plugin.panels.filter(panel =>
-                plugin.pages.some(page => page.panel === panel.id)
+                plugin.pages.some(page => page.panel === panel.id && page.menu !== false)
             ).map(panel => {
-                const pages = plugin.pages.filter(page => page.panel === panel.id);
+                const pages = plugin.pages.filter(page => page.panel === panel.id && page.menu !== false);
                 return {
                     url: `/plugins/${plugin.id}/${pages[0].id}`,
                     icon: panel.icon || 'plugin',

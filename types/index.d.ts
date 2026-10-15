@@ -57,6 +57,8 @@ declare namespace Firekylin {
     title: string;
     description?: string;
     order?: number;
+    /** Set to false to keep the page routable without showing it in the admin sidebar. */
+    menu?: boolean;
     load?(context: AdminPageContext): AdminPageContent | Promise<AdminPageContent>;
   }
 
