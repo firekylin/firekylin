@@ -119,15 +119,22 @@ function TableSection({node, context}: {node: PageSection; context: PageSectionC
 }
 
 function PluginForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
+    const renderField = (field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
+        hidden={field.type === 'hidden'} preserve={false}
+        valuePropName={field.type === 'switch' ? 'checked' : 'value'}
+        extra={field.description} rules={[{required: field.required, message: `请填写${field.label}`}]}>
+        <FormField field={field} />
+    </Form.Item>;
     return <Card title={item.title} style={{marginBottom: 16}}>
         <Form layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
             onFinish={formValues => submit(item.id, formValues)}>
-            {item.fields.map((field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
-                hidden={field.type === 'hidden'}
-                valuePropName={field.type === 'switch' ? 'checked' : 'value'}
-                extra={field.description} rules={[{required: field.required, message: `请填写${field.label}`}]}>
-                <FormField field={field} />
-            </Form.Item>)}
+            {item.fields.map((field: FormFieldSchema) => field.visibleWhen
+                ? <Form.Item key={field.name} noStyle shouldUpdate={(previous, current) =>
+                    previous[field.visibleWhen!.field] !== current[field.visibleWhen!.field]}>
+                    {({getFieldValue}) => field.visibleWhen!.values.includes(getFieldValue(field.visibleWhen!.field))
+                        ? renderField(field) : null}
+                </Form.Item>
+                : renderField(field))}
             <Button type="primary" htmlType="submit">{item.submitLabel}</Button>
         </Form>
     </Card>;

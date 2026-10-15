@@ -20,6 +20,8 @@ function registerExample(admin) {
       {name: 'id', type: 'hidden', label: 'ID'},
       {name: 'enabled', type: 'switch', label: '启用'},
       {name: 'color', type: 'select', label: '颜色', required: true, options: [{label: '蓝色', value: 'blue'}]},
+      {name: 'caption', type: 'text', label: '说明', required: true,
+        visibleWhen: {field: 'color', values: ['red']}},
       {name: 'secret', type: 'password', label: '密钥'}
     ],
     load: async() => ({id: 'record-1', enabled: true, color: 'blue', secret: 'do-not-return'}),
@@ -38,6 +40,7 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
   assert.equal(manifest[0].panels[0].title, '内容工具');
   assert.equal(manifest[0].forms[0].fields[0].type, 'hidden');
   assert.equal(manifest[0].forms[0].fields[2].options[0].value, 'blue');
+  assert.deepEqual(manifest[0].forms[0].fields[3].visibleWhen, {field: 'color', values: ['red']});
   assert.equal('handler' in manifest[0].actions[0], false);
   assert.deepEqual(await admin.loadPage('example', 'settings', {}), {
     page: {id: 'settings', title: '阅读设置', panel: 'tools', description: undefined, order: 100},
@@ -49,8 +52,9 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
   });
   assert.deepEqual(await admin.loadForm('example', 'preferences', {}), {id: 'record-1', enabled: true, color: 'blue'});
   assert.deepEqual(await admin.submitForm('example', 'preferences', {
-    enabled: false, color: 'blue', injected: 'discarded'
+    enabled: false, color: 'blue', caption: 'discarded while hidden', injected: 'discarded'
   }, {}), {saved: {enabled: false, color: 'blue'}});
+  await assert.rejects(admin.submitForm('example', 'preferences', {color: 'red'}, {}), /caption/);
   await assert.rejects(admin.submitForm('example', 'preferences', {enabled: true}, {}), {status: 400});
   assert.deepEqual(await admin.runAction('example', 'rebuild', {all: true}, {}), {received: {all: true}});
 });
@@ -63,6 +67,10 @@ test('admin registry validates relationships and removes every plugin resource',
     id: 'invalid-radio', page: 'settings', title: 'Invalid',
     fields: [{name: 'choice', type: 'radio', label: 'Choice'}], submit() {}
   }, 'example'), /requires options/);
+  assert.throws(() => admin.registerForm({
+    id: 'invalid-condition', page: 'settings', title: 'Invalid',
+    fields: [{name: 'value', label: 'Value', visibleWhen: {field: 'missing', values: ['yes']}}], submit() {}
+  }, 'example'), /visibleWhen references/);
   assert.throws(() => admin.registerPanel({id: 'tools', title: 'Again'}, 'example'), /already registered/);
   admin.removePlugin('example');
   assert.deepEqual(admin.manifest(), []);

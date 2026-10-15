@@ -480,7 +480,9 @@ Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持
 
 表单字段支持 `text`、`textarea`、`number`、`switch`、`select`、`password`、`email`、
 `url`、`radio`、`checkbox`、`color` 和 `code`。字段还可以
-声明 `description`、`placeholder`、`required`；`select` 必须提供 `options`。动作的 `type`
+声明 `description`、`placeholder`、`required`；`select`、`radio` 和 `checkbox` 必须提供 `options`。
+使用 `visibleWhen: {field: 'type', values: ['image']}` 可以仅在另一个字段匹配指定值时显示并提交该字段。
+动作的 `type`
 支持 `default`、`primary` 和 `danger`。所有返回内容都作为数据由宿主渲染和转义。
 
 ## 完整 Demo：阅读统计插件

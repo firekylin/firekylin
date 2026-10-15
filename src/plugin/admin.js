@@ -40,7 +40,7 @@ function publicPage(page) {
 function normalizeFields(fields, formId) {
   if (!Array.isArray(fields) || !fields.length) throw new TypeError(`Admin form ${formId} requires fields`);
   const names = new Set();
-  return fields.map(field => {
+  const normalizedFields = fields.map(field => {
     if (!field || typeof field !== 'object') throw new TypeError(`Admin form ${formId} field must be an object`);
     const name = identifier(field.name, `Admin form ${formId} field name`);
     if (names.has(name)) throw new Error(`Duplicate admin form field: ${formId}.${name}`);
@@ -58,12 +58,33 @@ function normalizeFields(fields, formId) {
       placeholder: typeof field.placeholder === 'string' ? field.placeholder : undefined,
       required: field.required === true
     };
+    if (typeof field.visibleWhen !== 'undefined') {
+      const condition = field.visibleWhen;
+      if (!condition || typeof condition !== 'object' || Array.isArray(condition)) {
+        throw new TypeError(`Admin form ${formId}.${name} visibleWhen must be an object`);
+      }
+      const controller = identifier(condition.field, `Admin form ${formId}.${name} visibleWhen field`);
+      if (!Array.isArray(condition.values) || !condition.values.length) {
+        throw new TypeError(`Admin form ${formId}.${name} visibleWhen.values must be a non-empty array`);
+      }
+      normalized.visibleWhen = {field: controller, values: clone(condition.values)};
+    }
     if (field.options) normalized.options = field.options.map(option => ({
       label: requiredString(option.label, `Admin form ${formId}.${name} option label`),
       value: option.value
     }));
     return normalized;
   });
+  for (const field of normalizedFields) {
+    if (field.visibleWhen && (!names.has(field.visibleWhen.field) || field.visibleWhen.field === field.name)) {
+      throw new TypeError(`Admin form ${formId}.${field.name} visibleWhen references an invalid field`);
+    }
+  }
+  return normalizedFields;
+}
+
+function fieldIsVisible(field, values) {
+  return !field.visibleWhen || field.visibleWhen.values.includes(values[field.visibleWhen.field]);
 }
 
 function validateSections(sections, registry, pluginId, pageId, location = 'sections') {
@@ -277,11 +298,13 @@ class AdminRegistry {
     const form = this.forms.get(this.key(pluginId, formId));
     if (!form) return null;
     const allowed = Object.fromEntries(form.fields
-      .filter(field => Object.prototype.hasOwnProperty.call(values || {}, field.name))
+      .filter(field => fieldIsVisible(field, values || {}) &&
+        Object.prototype.hasOwnProperty.call(values || {}, field.name))
       .map(field => [field.name, values[field.name]]));
     for (const field of form.fields) {
       const value = allowed[field.name];
-      if (field.required && (typeof value === 'undefined' || value === null || value === '')) {
+      if (field.required && fieldIsVisible(field, allowed) &&
+          (typeof value === 'undefined' || value === null || value === '')) {
         const error = new Error(`Required admin form field is missing: ${field.name}`);
         error.status = 400;
         throw error;

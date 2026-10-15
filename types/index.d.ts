@@ -81,6 +81,8 @@ declare namespace Firekylin {
     placeholder?: string;
     required?: boolean;
     options?: Array<{label: string; value: unknown}>;
+    /** Only show and submit this field when another field matches one of these values. */
+    visibleWhen?: {field: string; values: unknown[]};
   }
 
   interface AdminFormDefinition {
