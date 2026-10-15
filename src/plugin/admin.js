@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const ID_PATTERN = /^[a-z][a-z0-9._-]*$/i;
 const FIELD_TYPES = new Set([
   'text', 'textarea', 'number', 'switch', 'select', 'password', 'email', 'url', 'radio', 'checkbox',
@@ -26,13 +29,29 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function normalizeIframe(value, pageId) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError(`Admin page ${pageId} iframe must be an object`);
+  }
+  const entry = requiredString(value.entry, `Admin page ${pageId} iframe entry`).replace(/\\/g, '/');
+  if (entry.startsWith('/') || entry.split('/').includes('..') || path.posix.extname(entry).toLowerCase() !== '.html') {
+    throw new TypeError(`Admin page ${pageId} iframe entry must be a relative HTML path`);
+  }
+  const height = Number(value.height);
+  return {
+    entry: path.posix.normalize(entry),
+    height: Number.isFinite(height) ? Math.min(2400, Math.max(320, height)) : 720
+  };
+}
+
 function publicPage(page) {
   return {
     id: page.id,
     title: page.title,
     panel: page.panel,
     description: page.description,
-    order: page.order
+    order: page.order,
+    ...(page.iframe ? {iframe: {height: page.iframe.height}} : {})
   };
 }
 
@@ -126,6 +145,10 @@ class AdminRegistry {
     if (!this.panels.has(this.key(pluginId, panel))) throw new Error(`Unknown admin panel: ${panel}`);
     const key = this.key(pluginId, id);
     if (this.pages.has(key)) throw new Error(`Admin page already registered: ${id}`);
+    const iframe = typeof definition.iframe === 'undefined' ? undefined : normalizeIframe(definition.iframe, id);
+    if (iframe && typeof definition.load === 'function') {
+      throw new TypeError(`Admin iframe page ${id} cannot define load()`);
+    }
     const page = {
       pluginId,
       id,
@@ -133,6 +156,7 @@ class AdminRegistry {
       title: requiredString(definition.title, `Admin page ${id} title`),
       description: typeof definition.description === 'string' ? definition.description : undefined,
       order: Number.isFinite(definition.order) ? definition.order : 100,
+      iframe,
       load: typeof definition.load === 'function' ? definition.load : async() => ({})
     };
     this.pages.set(key, page);
@@ -143,7 +167,9 @@ class AdminRegistry {
     if (!definition || typeof definition !== 'object') throw new TypeError('Admin form must be an object');
     const id = identifier(definition.id, 'Admin form id');
     const page = identifier(definition.page, `Admin form ${id} page`);
-    if (!this.pages.has(this.key(pluginId, page))) throw new Error(`Unknown admin page: ${page}`);
+    const registeredPage = this.pages.get(this.key(pluginId, page));
+    if (!registeredPage) throw new Error(`Unknown admin page: ${page}`);
+    if (registeredPage.iframe) throw new Error(`Admin iframe page ${page} cannot register forms`);
     if (typeof definition.submit !== 'function') throw new TypeError(`Admin form ${id} requires submit(values, context)`);
     const key = this.key(pluginId, id);
     if (this.forms.has(key)) throw new Error(`Admin form already registered: ${id}`);
@@ -165,7 +191,9 @@ class AdminRegistry {
     if (!definition || typeof definition !== 'object') throw new TypeError('Admin action must be an object');
     const id = identifier(definition.id, 'Admin action id');
     const page = identifier(definition.page, `Admin action ${id} page`);
-    if (!this.pages.has(this.key(pluginId, page))) throw new Error(`Unknown admin page: ${page}`);
+    const registeredPage = this.pages.get(this.key(pluginId, page));
+    if (!registeredPage) throw new Error(`Unknown admin page: ${page}`);
+    if (registeredPage.iframe) throw new Error(`Admin iframe page ${page} cannot register actions`);
     if (typeof definition.handler !== 'function') throw new TypeError(`Admin action ${id} requires handler(input, context)`);
     const type = definition.type || 'default';
     if (!ACTION_TYPES.has(type)) throw new TypeError(`Unsupported admin action type: ${type}`);
@@ -217,6 +245,28 @@ class AdminRegistry {
     }
     if (typeof content.sections !== 'undefined') validateSections(content.sections, this, pluginId, pageId);
     return {page: publicPage(page), content};
+  }
+
+  iframeAsset(pluginId, pageId, requestedPath, pluginRoot) {
+    const page = this.pages.get(this.key(pluginId, pageId));
+    if (!page || !page.iframe || typeof pluginRoot !== 'string') return null;
+    const entry = path.resolve(pluginRoot, page.iframe.entry);
+    const assetRoot = path.dirname(entry);
+    const request = requestedPath || path.basename(entry);
+    if (request.includes('\0') || request.includes('\\') || path.isAbsolute(request)) return null;
+    const asset = path.resolve(assetRoot, request);
+    const relative = path.relative(assetRoot, asset);
+    if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) return null;
+    try {
+      const realRoot = fs.realpathSync(assetRoot);
+      const realAsset = fs.realpathSync(asset);
+      const realRelative = path.relative(realRoot, realAsset);
+      if (realRelative === '..' || realRelative.startsWith(`..${path.sep}`) || path.isAbsolute(realRelative)) return null;
+      if (!fs.statSync(realAsset).isFile()) return null;
+      return {path: realAsset, entry: realAsset === fs.realpathSync(entry)};
+    } catch {
+      return null;
+    }
   }
 
   async loadForm(pluginId, formId, context) {

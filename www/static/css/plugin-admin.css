@@ -1,0 +1,15 @@
+:root {
+  color: var(--fk-colorText, #262626);
+  background: var(--fk-colorBg, #fff);
+  font: 14px/1.5715 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+[data-theme="dark"] { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; color: inherit; background: inherit; }
+.fk-plugin-page { padding: 24px; }
+.fk-plugin-card { padding: 24px; margin-bottom: 16px; border: 1px solid #f0f0f0; border-radius: 8px; background: var(--fk-colorBg, #fff); }
+.fk-plugin-field { display: grid; gap: 8px; margin-bottom: 16px; }
+.fk-plugin-input { width: 100%; min-height: 32px; padding: 4px 11px; color: inherit; background: transparent; border: 1px solid #d9d9d9; border-radius: 6px; }
+.fk-plugin-button { min-height: 32px; padding: 4px 15px; border: 1px solid #d9d9d9; border-radius: 6px; cursor: pointer; }
+.fk-plugin-button-primary { color: #fff; background: var(--fk-colorPrimary, #1677ff); border-color: var(--fk-colorPrimary, #1677ff); }

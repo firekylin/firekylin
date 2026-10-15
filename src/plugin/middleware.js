@@ -1,6 +1,25 @@
 'use strict';
 
 const adminAuth = require('../service/admin-auth');
+const fs = require('fs');
+const path = require('path');
+
+const ASSET_TYPES = {
+  '.css': 'text/css; charset=utf-8',
+  '.gif': 'image/gif',
+  '.html': 'text/html; charset=utf-8',
+  '.ico': 'image/x-icon',
+  '.jpeg': 'image/jpeg',
+  '.jpg': 'image/jpeg',
+  '.js': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2'
+};
 
 function adminResponse(data) {
   return {errno: 0, errmsg: '', data};
@@ -23,6 +42,32 @@ async function handleAdminExtension(manager, ctx) {
   if ((user.type | 0) !== 1) return ctx.throw(403, 'Administrator permission required');
   if (ctx.method === 'GET' && ctx.path === prefix) {
     ctx.body = adminResponse(manager.admin.manifest());
+    return true;
+  }
+  const iframeMatch = new RegExp(`^${prefix}/([^/]+)/pages/([^/]+)/iframe(?:/(.*))?/?$`).exec(ctx.path);
+  if (iframeMatch && ['GET', 'HEAD'].includes(ctx.method)) {
+    const [, pluginId, pageId, requestedPath] = iframeMatch.map(value => value && decodeURIComponent(value));
+    const plugin = manager.plugins && manager.plugins.get(pluginId);
+    const asset = plugin && manager.admin.iframeAsset(pluginId, pageId, requestedPath, plugin.root);
+    if (!asset) return ctx.throw(404, 'Plugin admin asset not found');
+    ctx.type = ASSET_TYPES[path.extname(asset.path).toLowerCase()] || 'application/octet-stream';
+    ctx.set('X-Content-Type-Options', 'nosniff');
+    ctx.set('Cache-Control', asset.entry ? 'no-store' : 'private, max-age=3600');
+    if (asset.entry) {
+      const policy = [
+        'default-src \'none\'',
+        'script-src \'self\'',
+        'style-src \'self\' \'unsafe-inline\'',
+        'img-src \'self\' data: blob:',
+        'font-src \'self\'',
+        'connect-src \'none\'',
+        'frame-ancestors \'self\'',
+        'base-uri \'none\'',
+        'form-action \'none\''
+      ].join('; ');
+      ctx.set('Content-Security-Policy', policy);
+    }
+    ctx.body = ctx.method === 'HEAD' ? '' : fs.createReadStream(asset.path);
     return true;
   }
   const match = new RegExp(`^${prefix}/([^/]+)/(pages|forms|actions)/([^/]+)$`).exec(ctx.path);
