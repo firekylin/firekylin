@@ -1,7 +1,8 @@
 {
   "name": "firekylin",
   "bin": {
-    "firekylin": "bin/firekylin.js"
+    "firekylin": "bin/firekylin.js",
+    "firekylin-marketplace-change": "bin/marketplace-change.js"
   },
   "main": "index.js",
   "description": "A Simple & Fast Node Bloging Platform Base On ThinkJS 3.x & ReactJS & ES2015+",
