@@ -46,7 +46,7 @@ widget.loadProjectWidgets(getContext());
 const projectContext = getContext();
 const packageRuntime = {
   themeInstaller: new ThemeInstaller({
-    themesPath: projectContext.themesPath,
+    themesPath: projectContext.themesPath || path.join(projectContext.projectPath, 'themes'),
     backupPath: path.join(projectContext.projectPath, '.firekylin', 'theme-backups'),
     firekylinVersion: pack.version,
     readOnly: Boolean(process.env.VERCEL)
@@ -60,10 +60,12 @@ const packageApi = {
   list: async() => {
     const options = await think.model('options').getOptions();
     return new PackageCatalog({pluginManager: global.firekylin.plugins,
-      themesPath: projectContext.themesPath, firekylinVersion: pack.version}).installed(options.theme);
+      themesPath: projectContext.themesPath || path.join(projectContext.projectPath, 'themes'),
+      firekylinVersion: pack.version}).installed(options.theme);
   },
   check: manifest => new PackageCatalog({pluginManager: global.firekylin.plugins,
-    themesPath: projectContext.themesPath, firekylinVersion: pack.version}).check(manifest),
+    themesPath: projectContext.themesPath || path.join(projectContext.projectPath, 'themes'),
+    firekylinVersion: pack.version}).check(manifest),
   installPlugin: (name, version) => packageRuntime.pluginInstaller.install(name, version),
   uninstallPlugin: name => packageRuntime.pluginInstaller.uninstall(name),
   installTheme: (archive, options) => packageRuntime.themeInstaller.install(archive, options),
