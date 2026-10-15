@@ -6,7 +6,7 @@ const {spawn} = require('child_process');
 const semver = require('semver');
 
 function validatePackage(name, version) {
-  if (!/^@firekylin\/plugin-[a-z0-9][a-z0-9._-]*$/.test(String(name || ''))) {
+  if (!/^(?:@firekylin\/plugin-|firekylin-plugin-)[a-z0-9][a-z0-9._-]*$/.test(String(name || ''))) {
     throw new Error('UNTRUSTED_PLUGIN_PACKAGE');
   }
   if (!semver.valid(version)) throw new Error('PLUGIN_VERSION_MUST_BE_EXACT');
@@ -106,7 +106,7 @@ class PluginInstaller {
   }
 
   uninstall(name) {
-    if (!/^@firekylin\/plugin-[a-z0-9][a-z0-9._-]*$/.test(String(name || ''))) {
+    if (!/^(?:@firekylin\/plugin-|firekylin-plugin-)[a-z0-9][a-z0-9._-]*$/.test(String(name || ''))) {
       throw new Error('UNTRUSTED_PLUGIN_PACKAGE');
     }
     return this.mutate(['remove', '--ignore-scripts', name]);

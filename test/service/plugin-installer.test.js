@@ -48,6 +48,9 @@ test('restores dependency files when installation fails', async t => {
 });
 
 test('rejects untrusted names, ranges, read-only installs and concurrent operations', async t => {
+  assert.deepEqual(validatePackage('firekylin-plugin-backup', '1.0.0'), {
+    name: 'firekylin-plugin-backup', version: '1.0.0'
+  });
   assert.throws(() => validatePackage('other/plugin', '1.0.0'), /UNTRUSTED/);
   assert.throws(() => validatePackage('@firekylin/plugin-demo', '^1.0.0'), /EXACT/);
   const {root, installer} = await setup(t, async() => ({stdout: '', stderr: ''}));
