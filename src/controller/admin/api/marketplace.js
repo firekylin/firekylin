@@ -4,6 +4,7 @@ const pack = require('../../../../package.json');
 const Base = require('./base');
 const {PackageCatalog} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
+const {PluginInstaller} = require('../../../service/plugin-installer');
 const path = require('path');
 
 module.exports = class extends Base {
@@ -37,6 +38,11 @@ module.exports = class extends Base {
     });
   }
 
+  pluginInstaller() {
+    const projectPath = process.env.FIREKYLIN_PROJECT_PATH || think.ROOT_PATH;
+    return new PluginInstaller({projectPath, readOnly: Boolean(process.env.VERCEL)});
+  }
+
   async mutate(operation) {
     try {
       if (operation === 'theme.install') {
@@ -51,6 +57,12 @@ module.exports = class extends Base {
         return this.success(await this.installer().rollback(this.post('backup')));
       }
       if (operation === 'theme.backups') return this.success(await this.installer().backups());
+      if (operation === 'plugin.install') {
+        return this.success(await this.pluginInstaller().install(this.post('name'), this.post('version')));
+      }
+      if (operation === 'plugin.uninstall') {
+        return this.success(await this.pluginInstaller().uninstall(this.post('name')));
+      }
       return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
     } catch (error) {
       return this.fail(error.message);
