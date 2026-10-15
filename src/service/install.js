@@ -135,6 +135,9 @@ module.exports = class extends think.Service {
         }
       }
     } else {
+      if (!/^[a-zA-Z0-9_]+$/.test(this.dbConfig.database)) {
+        return Promise.reject(new Error('数据库名称含有非法字符'));
+      }
       const sql = {
         mysql: 'SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`=\'' +
         this.dbConfig.database + '\'',
