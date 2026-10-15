@@ -13,6 +13,9 @@ const {registerManagementTools} = require('../plugin/management-tools');
 const {registerMediaTools} = require('../plugin/media-tools');
 const {migrateOAuthModels} = require('../mcp/oauth-schema');
 const pack = require('../../package.json');
+const {PackageCatalog} = require('../service/package-catalog');
+const {ThemeInstaller} = require('../service/theme-installer');
+const {PluginInstaller} = require('../service/plugin-installer');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
   ? global.firekylin.plugins
@@ -41,12 +44,40 @@ widget.ensureWidgetMap(widgets);
 widget.loadProjectWidgets(getContext());
 
 const projectContext = getContext();
+const packageRuntime = {
+  themeInstaller: new ThemeInstaller({
+    themesPath: projectContext.themesPath,
+    backupPath: path.join(projectContext.projectPath, '.firekylin', 'theme-backups'),
+    firekylinVersion: pack.version,
+    readOnly: Boolean(process.env.VERCEL)
+  }),
+  pluginInstaller: new PluginInstaller({
+    projectPath: projectContext.projectPath,
+    readOnly: Boolean(process.env.VERCEL)
+  })
+};
+const packageApi = {
+  list: async() => {
+    const options = await think.model('options').getOptions();
+    return new PackageCatalog({pluginManager: global.firekylin.plugins,
+      themesPath: projectContext.themesPath, firekylinVersion: pack.version}).installed(options.theme);
+  },
+  check: manifest => new PackageCatalog({pluginManager: global.firekylin.plugins,
+    themesPath: projectContext.themesPath, firekylinVersion: pack.version}).check(manifest),
+  installPlugin: (name, version) => packageRuntime.pluginInstaller.install(name, version),
+  uninstallPlugin: name => packageRuntime.pluginInstaller.uninstall(name),
+  installTheme: (archive, options) => packageRuntime.themeInstaller.install(archive, options),
+  themeBackups: () => packageRuntime.themeInstaller.backups(),
+  rollbackTheme: backup => packageRuntime.themeInstaller.rollback(backup)
+};
 const pluginManager = existingPluginManager || new PluginManager({
   projectPath: projectContext.projectPath,
   config: projectContext.config || {},
   version: pack.version,
-  logger: console
+  logger: console,
+  packageApi
 });
+pluginManager.packageApi = packageApi;
 global.firekylin.plugins = pluginManager;
 registerContentTools(pluginManager.tools, {
   getModel: () => think.model('post'),
