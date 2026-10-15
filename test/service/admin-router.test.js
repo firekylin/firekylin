@@ -30,3 +30,12 @@ test('Vite deduplicates React and Router context packages', () => {
     assert.match(config, new RegExp(`dedupe: \\[[^\\]]*['"]${dependency}['"]`));
   }
 });
+
+test('production entry uses a hashed filename instead of a query-string module version', () => {
+  const config = fs.readFileSync(path.resolve(__dirname, '../../vite.config.ts'), 'utf8');
+  const template = fs.readFileSync(path.resolve(__dirname, '../../view/admin.eta'), 'utf8');
+  assert.match(config, /entryFileNames:\s*['"]assets\/\[name\]-\[hash\]\.js['"]/);
+  assert.match(config, /manifest:\s*true/);
+  assert.doesNotMatch(template, /admin\.js\?v=/);
+  assert.match(template, /adminAssets\.script/);
+});

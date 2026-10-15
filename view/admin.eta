@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="/static/module/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/css/admin.css">
   <link rel="stylesheet" href="/static/css/icon.css">
-  <link rel="stylesheet" href="/static/dist/assets/admin.css?v=<%= firekylin.adminAssetVersion %>">
+  <% firekylin.adminAssets.styles.forEach(style => { %><link rel="stylesheet" href="<%= style %>">
+  <% }) %>
 </head>
 <body>
 <script>
@@ -30,6 +31,6 @@ window.SysConfig = {
 };
 </script>
 <div id="app"></div>
-<script type="module" src="/static/dist/assets/admin.js?v=<%= firekylin.adminAssetVersion %>"></script>
+<script type="module" src="<%= firekylin.adminAssets.script %>"></script>
 </body>
 </html>
