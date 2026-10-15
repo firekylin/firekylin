@@ -80,3 +80,18 @@ test('admin page layouts reject unknown types and cross-page references', async(
   await assert.rejects(admin.loadPage('example', 'bad-type', {}), /unsupported section/);
   await assert.rejects(admin.loadPage('example', 'bad-reference', {}), /Unknown admin form reference/);
 });
+
+test('admin pages can be routable without appearing in the panel menu', async() => {
+  const admin = new AdminRegistry();
+  admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');
+  admin.registerPage({
+    id: 'detail', panel: 'tools', title: 'Detail', menu: false,
+    load: async() => ({sections: [{type: 'text', content: 'hidden page'}]})
+  }, 'example');
+
+  assert.equal(admin.manifest()[0].pages[0].menu, false);
+  assert.deepEqual(await admin.loadPage('example', 'detail', {}), {
+    page: {id: 'detail', title: 'Detail', panel: 'tools', description: undefined, order: 100, menu: false},
+    content: {sections: [{type: 'text', content: 'hidden page'}]}
+  });
+});

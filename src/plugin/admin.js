@@ -32,7 +32,8 @@ function publicPage(page) {
     title: page.title,
     panel: page.panel,
     description: page.description,
-    order: page.order
+    order: page.order,
+    ...(page.menu === false ? {menu: false} : {})
   };
 }
 
@@ -133,6 +134,7 @@ class AdminRegistry {
       title: requiredString(definition.title, `Admin page ${id} title`),
       description: typeof definition.description === 'string' ? definition.description : undefined,
       order: Number.isFinite(definition.order) ? definition.order : 100,
+      menu: definition.menu !== false,
       load: typeof definition.load === 'function' ? definition.load : async() => ({})
     };
     this.pages.set(key, page);

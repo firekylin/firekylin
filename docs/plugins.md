@@ -431,6 +431,22 @@ register(ctx) {
 表单/动作；同一插件内的 ID 必须唯一。页面 `load`、表单 `load/submit` 和动作 `handler`
 都会收到 `{ctx, user, pluginId}` 上下文。
 
+编辑器、详情页或向导等不需要显示在侧栏中的页面可以设置 `menu: false`。页面仍属于指定
+Panel，并会正常注册 `/admin/plugins/<plugin-id>/<page-id>` 路由，可通过页面链接或后台
+路由跳转访问；如果一个 Panel 只有隐藏页面，该 Panel 也不会显示在侧栏中：
+
+```js
+ctx.admin.registerPage({
+  id: 'article-detail',
+  panel: 'reading-tools',
+  title: '文章详情',
+  menu: false,
+  async load() {
+    return {sections: [{type: 'text', content: '详情内容'}]};
+  }
+});
+```
+
 `sections` 同时是页面布局：`form` 可以把已注册表单插入任意位置，`actions` 可以插入指定
 动作按钮，`grid` 可以递归排列其他区块。引用必须属于当前插件的当前页面；未知类型和错误
 引用会被拒绝。如果页面没有使用 `form` 或 `actions` 引用，Firekylin 会保持兼容布局：动作
