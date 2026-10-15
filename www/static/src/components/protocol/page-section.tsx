@@ -177,7 +177,8 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
         gridTemplateColumns: `repeat(${Math.max(1, Math.min(4, node.columns || 2))}, minmax(0, 1fr))`}}>
         <ProtocolList nodes={node.items || []} context={context} renderers={pageSectionRenderers} />
     </div>,
-    tabs: ({node, context}) => <Tabs items={(node.items || []).map(tab => ({
+    tabs: ({node, context}) => <Tabs style={{marginInlineStart: PAGE_SECTION_CONTENT_INSET}}
+        items={(node.items || []).map(tab => ({
         key: tab.key,
         label: tab.label,
         children: <ProtocolList nodes={tab.sections || []} context={context} renderers={pageSectionRenderers} />
