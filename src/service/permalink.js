@@ -5,6 +5,16 @@ const DEFAULT_PATTERNS = {
   page: '/page/{slug}.html'
 };
 const TOKENS = new Set(['slug', 'id', 'year', 'month', 'day']);
+const RESERVED_PATHS = new Set([
+  '/', '/search', '/search.html', '/tags', '/tags.html', '/categories', '/categories.html',
+  '/archives', '/rss', '/rss.xml', '/sitemap', '/sitemap.xml', '/opensearch.xml'
+]);
+
+function isReservedPath(value) {
+  const pathname = String(value || '').length > 1 ? String(value).replace(/\/$/, '') : String(value || '');
+  return RESERVED_PATHS.has(pathname.toLowerCase()) ||
+    /^\/(?:admin|api|static|theme|themes|uploads)(?:\/|$)/i.test(pathname);
+}
 
 function pattern(options, type) {
   const key = type === 'page' || type === 1 ? 'page_permalink' : 'post_permalink';
@@ -58,7 +68,10 @@ function generate(type, content, options = {}) {
   } catch {
     selected = DEFAULT_PATTERNS[type === 'page' || type === 1 ? 'page' : 'post'];
   }
-  return selected.replace(/\{([a-z]+)\}/g, (match, token) => values[token]);
+  const generated = selected.replace(/\{([a-z]+)\}/g, (match, token) => values[token]);
+  if (!isReservedPath(generated)) return generated;
+  const fallback = DEFAULT_PATTERNS[type === 'page' || type === 1 ? 'page' : 'post'];
+  return fallback.replace(/\{([a-z]+)\}/g, (match, token) => values[token]);
 }
 
 function compile(type, options = {}) {
@@ -98,4 +111,4 @@ function match(pathname, options = {}) {
   return matches;
 }
 
-module.exports = {DEFAULT_PATTERNS, validate, generate, compile, match};
+module.exports = {DEFAULT_PATTERNS, validate, generate, compile, match, isReservedPath};

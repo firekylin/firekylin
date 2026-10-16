@@ -36,7 +36,7 @@ test('custom permalink middleware rewrites a public content request internally',
 test('custom permalink middleware leaves reserved and unknown routes untouched', async() => {
   let optionReads = 0;
   global.think = {model: () => ({async getOptions() { optionReads++; return {} }})};
-  for (const path of ['/search.html', '/missing.html', '/admin']) {
+  for (const path of ['/search.html', '/missing.html', '/admin', '/post/hello.html', '/page/about']) {
     const ctx = {method: 'GET', path, url: path, state: {}};
     await middleware()(ctx, () => {});
     assert.equal(ctx.path, path);

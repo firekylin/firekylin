@@ -2,16 +2,13 @@
 
 const permalink = require('../service/permalink');
 
-const RESERVED_PATHS = new Set([
-  '/', '/search', '/search.html', '/tags', '/tags.html', '/categories', '/categories.html',
-  '/archives', '/rss', '/rss.xml', '/sitemap', '/sitemap.xml', '/opensearch.xml'
-]);
-
 module.exports = function permalinkMiddleware() {
   return async function resolvePermalink(ctx, next) {
     const normalizedPath = ctx.path.length > 1 ? ctx.path.replace(/\/$/, '') : ctx.path;
-    if (!['GET', 'HEAD', 'POST'].includes(ctx.method) || RESERVED_PATHS.has(normalizedPath)) return next();
-    if (/^\/(?:admin|api|static|theme|themes|uploads)(?:\/|$)/.test(ctx.path)) return next();
+    if (!['GET', 'HEAD', 'POST'].includes(ctx.method) || permalink.isReservedPath(normalizedPath)) return next();
+    // The built-in routes remain authoritative so old inbound links cannot be
+    // captured by a custom pattern for the other content type.
+    if (/^\/(?:post|page)\/[^/]+(?:\.html|\.json)?\/?$/i.test(ctx.path)) return next();
     let options;
     try { options = await think.model('options').getOptions() } catch { return next() }
     const candidates = permalink.match(ctx.path, options);

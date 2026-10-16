@@ -60,6 +60,28 @@ function pathnameFromUrl(url, options) {
   return {type: candidates[0].type, pathname: candidates[0].params.slug};
 }
 
+async function resolveCommentPostId(controller, url, options) {
+  const target = pathnameFromUrl(url, options);
+  let post = target ? await controller.model('post').where({...target, status: 3, is_public: 1})
+    .field('id')
+    .find() : {};
+  if (think.isEmpty(post)) {
+    for (const candidate of permalink.match(String(url || '').split(/[?#]/, 1)[0], options)) {
+      const where = candidate.params.slug
+        ? {type: candidate.type, pathname: candidate.params.slug}
+        : {type: candidate.type, id: Number(candidate.params.id) || 0};
+      const found = await controller.model('post').where({...where, status: 3, is_public: 1})
+        .field('id')
+        .find();
+      if (!think.isEmpty(found)) {
+        if (!think.isEmpty(post) && post.id !== found.id) return null;
+        post = found;
+      }
+    }
+  }
+  return post && post.id ? Number(post.id) : null;
+}
+
 function stringList(value) {
   if (Array.isArray(value)) return value.map(item => String(item).trim()).filter(Boolean);
   if (typeof value !== 'string') return [];
@@ -84,25 +106,7 @@ module.exports = class extends think.Service {
     const postIds = new Map();
     const resolvePostId = async url => {
       if (postIds.has(url)) return postIds.get(url);
-      const target = pathnameFromUrl(url, options);
-      let post = target ? await controller.model('post').where(target)
-        .field('id')
-        .find() : {};
-      if (think.isEmpty(post)) {
-        for (const candidate of permalink.match(String(url || '').split(/[?#]/, 1)[0], options)) {
-          const where = candidate.params.slug
-            ? {type: candidate.type, pathname: candidate.params.slug}
-            : {type: candidate.type, id: Number(candidate.params.id) || 0};
-          const found = await controller.model('post').where(where)
-            .field('id')
-            .find();
-          if (!think.isEmpty(found)) {
-            if (!think.isEmpty(post) && post.id !== found.id) return null;
-            post = found;
-          }
-        }
-      }
-      const id = post && post.id ? Number(post.id) : null;
+      const id = await resolveCommentPostId(controller, url, options);
       postIds.set(url, id);
       return id;
     };
@@ -246,3 +250,4 @@ module.exports = class extends think.Service {
 
 module.exports.renderMarkdown = renderMarkdown;
 module.exports.pathnameFromUrl = pathnameFromUrl;
+module.exports.resolveCommentPostId = resolveCommentPostId;

@@ -35,3 +35,10 @@ test('identical post and page patterns return both content candidates', () => {
     {type: 1, params: {slug: 'about'}}
   ]);
 });
+
+test('generated permalinks fall back when dynamic values collide with reserved routes', () => {
+  const options = {post_permalink: '/{slug}', page_permalink: '/{slug}'};
+  assert.equal(permalink.generate('post', {pathname: 'admin'}, options), '/post/admin.html');
+  assert.equal(permalink.generate('page', {pathname: 'search'}, options), '/page/search.html');
+  assert.equal(permalink.generate('post', {pathname: 'hello'}, options), '/hello');
+});

@@ -571,7 +571,7 @@ module.exports = class extends Base {
     const result = await this.where(where)
       .page(page, await this.getPostsListSize())
       .setRelation(false)
-      .field('title,pathname,summary,create_time,options')
+      .field('id,title,pathname,summary,create_time,options')
       .order('create_time DESC')
       .countSelect(false);
     result.data = redactProtectedPosts(result.data);

@@ -81,7 +81,11 @@ module.exports = class extends Base {
         getTagModel: () => this.model('tag')
       });
       // Preserve existing push integration, but do not block persistence on a remote service.
-      if (data.options && data.markdown_content) void this.pushPost(data).catch(error => think.logger.error(error));
+      if (data.options && data.markdown_content) {
+        const persisted = await this.model('post').where({id: Number(result && result.id || result)}).setRelation(false)
+          .find();
+        void this.pushPost({...data, ...persisted}).catch(error => think.logger.error(error));
+      }
       return this.success(result);
     });
   }
