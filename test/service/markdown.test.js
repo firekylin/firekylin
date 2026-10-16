@@ -60,7 +60,7 @@ test('project config and plugins can extend markdown-it', async() => {
 
 test('math and code highlighting retain their server-side output hooks', async() => {
   const html = await renderMarkdown([
-    '`$x + y$`',
+    '$x + y$',
     '',
     '```math',
     'x^2',

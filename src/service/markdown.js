@@ -2,38 +2,52 @@
 
 const MarkdownIt = require('markdown-it');
 const markdownItAnchor = require('markdown-it-anchor');
-const markdownItFootnote = require('markdown-it-footnote');
 const hljs = require('highlight.js');
-const MathJax = require('mathjax');
 const {filter} = require('../plugin/runtime');
 
-const mathJaxReady = MathJax.init({
-  loader: {load: ['input/tex', 'output/svg']},
-  svg: {fontCache: 'none'}
-});
+let builtinPlugins;
+let sharedMathjaxConfig;
+let sharedMathjaxInstance;
 
-const ALERT_NAMES = new Set(['note', 'tip', 'important', 'warning', 'caution']);
+async function loadBuiltinPlugins() {
+  if (!builtinPlugins) {
+    builtinPlugins = Promise.all([
+      import('@mdit/plugin-alert'),
+      import('@mdit/plugin-footnote'),
+      import('@mdit/plugin-mathjax')
+    ]).then(([alertModule, footnoteModule, mathjaxModule]) => ({
+      alert: alertModule.alert,
+      footnote: footnoteModule.footnote,
+      createMathjaxInstance: mathjaxModule.createMathjaxInstance,
+      mathjax: mathjaxModule.mathjax
+    }));
+  }
+  return builtinPlugins;
+}
 
-function alertPlugin(md) {
-  md.core.ruler.after('block', 'firekylin_alert', state => {
-    for (let i = 0; i < state.tokens.length - 2; i++) {
-      const open = state.tokens[i];
-      const inline = state.tokens[i + 2];
-      if (open.type !== 'blockquote_open' || inline.type !== 'inline') continue;
-      const match = inline.content.match(/^\[!([A-Z]+)\](?:\n|$)/);
-      const name = match && match[1].toLowerCase();
-      if (!ALERT_NAMES.has(name)) continue;
-      open.attrJoin('class', `markdown-alert markdown-alert-${name}`);
-      inline.content = inline.content.slice(match[0].length);
-      if (inline.children && inline.children[0] && inline.children[0].type === 'text') {
-        inline.children[0].content = inline.children[0].content.slice(match[0].length);
-      }
-      const titleOpen = new state.Token('html_block', '', 0);
-      titleOpen.content = `<p class="markdown-alert-title">${name[0].toUpperCase()}${name.slice(1)}</p>\n`;
-      state.tokens.splice(i + 1, 0, titleOpen);
-      i++;
+function createMathjax(builtins, options) {
+  const configuredTransformer = options.transformer;
+  return builtins.createMathjaxInstance({
+    output: 'svg',
+    mathFence: true,
+    ...options,
+    transformer(content, display) {
+      const transformed = configuredTransformer ? configuredTransformer(content, display) : content;
+      const type = display ? 'block' : 'inline';
+      return `<span class="firekylin-markdown-mathjax-${type}">${transformed}</span>`;
     }
   });
+}
+
+function resolveMathjax(builtins, configured, renderOptions) {
+  if (renderOptions.mathjax) {
+    return createMathjax(builtins, {...(configured.mathjax || {}), ...renderOptions.mathjax});
+  }
+  if (!sharedMathjaxInstance || sharedMathjaxConfig !== configured.mathjax) {
+    sharedMathjaxConfig = configured.mathjax;
+    sharedMathjaxInstance = createMathjax(builtins, configured.mathjax || {});
+  }
+  return sharedMathjaxInstance;
 }
 
 function imageOnlyPlugin(md) {
@@ -72,29 +86,9 @@ function configuredMarkdown() {
   return think.config('markdown') || {};
 }
 
-async function renderMath(token, formulaType) {
-  await mathJaxReady;
-  const node = await MathJax.tex2svgPromise(token.content, {display: formulaType === 'block'});
-  const svg = MathJax.startup.adaptor.serializeXML(node);
-  token.type = formulaType === 'block' ? 'html_block' : 'html_inline';
-  token.tag = '';
-  token.content = `<span class="firekylin-markdown-mathjax-${formulaType}">${svg}</span>`;
-  token.children = null;
-}
-
-async function transformMath(tokens) {
-  for (const token of tokens) {
-    if (token.type === 'fence' && token.info.trim() === 'math') await renderMath(token, 'block');
-    else if (token.type === 'code_inline' && token.content.startsWith('$') && token.content.endsWith('$')) {
-      token.content = token.content.slice(1, -1);
-      await renderMath(token, 'inline');
-    }
-    if (token.children) await transformMath(token.children);
-  }
-}
-
 async function createMarkdownParser(renderOptions = {}) {
   const configured = configuredMarkdown();
+  const builtins = await loadBuiltinPlugins();
   const markdownOptions = {
     html: true,
     linkify: true,
@@ -111,8 +105,12 @@ async function createMarkdownParser(renderOptions = {}) {
     }
   });
 
-  if (renderOptions.footnote !== false) md.use(markdownItFootnote);
-  if (renderOptions.alert !== false) md.use(alertPlugin);
+  if (renderOptions.footnote !== false) md.use(builtins.footnote);
+  if (renderOptions.alert !== false) md.use(builtins.alert, configured.alert);
+  if (renderOptions.math !== false) {
+    const mathjaxInstance = await resolveMathjax(builtins, configured, renderOptions);
+    if (mathjaxInstance) md.use(builtins.mathjax, mathjaxInstance);
+  }
   if (renderOptions.imageOnly !== false) md.use(imageOnlyPlugin);
   if (renderOptions.code !== false) md.use(codePlugin);
 
@@ -140,9 +138,7 @@ async function createMarkdownParser(renderOptions = {}) {
 async function renderMarkdown(content, options = {}) {
   const {md, tocEntries} = await createMarkdownParser(options);
   const env = options.env || {};
-  const tokens = md.parse(String(content || ''), env);
-  if (options.math !== false) await transformMath(tokens);
-  let html = md.renderer.render(tokens, md.options, env);
+  let html = md.render(String(content || ''), env);
   if (options.toc && tocEntries.length && typeof options.renderToc === 'function') {
     html = `${options.renderToc(tocEntries)}${html}`;
   }

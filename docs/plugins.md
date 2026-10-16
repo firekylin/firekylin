@@ -148,6 +148,8 @@ module.exports = {
 
 `plugins` 支持插件函数、`[插件函数, 配置]`，或 `{plugin, options}` 三种形式。内置的脚注、Alert、
 代码高亮、MathJax、TOC、Mermaid 和纯图片段落处理会先注册，外部插件可继续增加或覆盖规则。
+其中 Alert、脚注和 MathJax 分别使用 `@mdit/plugin-alert`、`@mdit/plugin-footnote` 和
+`@mdit/plugin-mathjax`；可通过 `markdown.alert` 与 `markdown.mathjax` 传入对应插件配置。
 
 例如给文章正文追加声明：
 
