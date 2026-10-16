@@ -48,7 +48,7 @@ module.exports = class extends think.Service {
   }
 
   form(ctx, error = false) {
-    const action = escapeHtml(ctx.path || ctx.url);
+    const action = escapeHtml(ctx.state && ctx.state.originalPermalink || ctx.path || ctx.url);
     return `<form class="post-password-form" method="post" action="${action}">
   <p>${error ? '密码错误，请重新输入。' : '这篇文章受密码保护，请输入密码访问。'}</p>
   <p><input type="password" name="protectPassword" autocomplete="current-password" required> <button type="submit">提交</button></p>

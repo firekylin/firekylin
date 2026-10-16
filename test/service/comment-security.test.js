@@ -5,7 +5,7 @@ const test = require('node:test');
 
 global.think = {Service: class {}};
 const CommentService = require('../../src/service/comment');
-const {pathnameFromUrl, renderMarkdown} = require('../../src/service/comment');
+const {pathnameFromUrl, renderMarkdown, resolveCommentPostId} = require('../../src/service/comment');
 
 test('comment markdown removes unsafe links and image sources', () => {
   const output = renderMarkdown([
@@ -32,6 +32,26 @@ test('comment paths decode browser-encoded post pathnames', () => {
   assert.deepEqual(pathnameFromUrl('/post/%E4%B8%AD%E6%96%87.html'), {type: 0, pathname: '中文'});
   assert.deepEqual(pathnameFromUrl('/page/about.html'), {type: 1, pathname: 'about'});
   assert.equal(pathnameFromUrl('/post/%E4.html'), null);
+});
+
+test('comment URL resolution ignores unpublished permalink collisions', async() => {
+  const rows = [
+    {id: 7, type: 0, pathname: 'same', status: 3, is_public: 1},
+    {id: 8, type: 1, pathname: 'same', status: 0, is_public: 1}
+  ];
+  global.think.isEmpty = value => !value || !Object.keys(value).length;
+  const controller = {model: () => {
+    let where;
+    return {
+      where(value) { where = value; return this },
+      field() { return this },
+      async find() {
+        return rows.find(row => Object.entries(where).every(([key, value]) => row[key] === value)) || {};
+      }
+    };
+  }};
+  const options = {post_permalink: '/{slug}.html', page_permalink: '/{slug}.html'};
+  assert.equal(await resolveCommentPostId(controller, '/same.html', options), 7);
 });
 
 test('comment input enforces configured length and anonymous metadata', () => {

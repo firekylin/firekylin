@@ -478,7 +478,7 @@ module.exports = class extends Base {
       create_time: ['<', createTime],
       id: ['!=', detail.id]
     });
-    const prevPromise = this.field('title,pathname,options')
+    const prevPromise = this.field('id,title,pathname,create_time,options')
       .setRelation(false)
       .where(prevWhere)
       .order('create_time DESC')
@@ -487,14 +487,18 @@ module.exports = class extends Base {
       create_time: ['>', createTime],
       id: ['!=', detail.id]
     });
-    const nextPromise = this.field('title,pathname,options')
+    const nextPromise = this.field('id,title,pathname,create_time,options')
       .setRelation(false)
       .where(nextWhere)
       .order('create_time ASC')
       .find();
     const [prev, next] = await Promise.all([prevPromise, nextPromise]);
-    detail.prev = redactProtectedPosts([prev]).map(item => ({title: item.title, pathname: item.pathname}))[0];
-    detail.next = redactProtectedPosts([next]).map(item => ({title: item.title, pathname: item.pathname}))[0];
+    detail.prev = redactProtectedPosts([prev]).map(item => ({
+      id: item.id, title: item.title, pathname: item.pathname, create_time: item.create_time
+    }))[0];
+    detail.next = redactProtectedPosts([next]).map(item => ({
+      id: item.id, title: item.title, pathname: item.pathname, create_time: item.create_time
+    }))[0];
     return detail;
   }
   async getPostRssList() {
@@ -518,7 +522,7 @@ module.exports = class extends Base {
   }
 
   async getPostSitemapList() {
-    const field = 'pathname,type,update_time';
+    const field = 'id,pathname,type,create_time,update_time';
     const where = {
       is_public: 1, // 公开
       status: 3, // 已经发布
@@ -567,7 +571,7 @@ module.exports = class extends Base {
     const result = await this.where(where)
       .page(page, await this.getPostsListSize())
       .setRelation(false)
-      .field('title,pathname,summary,create_time,options')
+      .field('id,title,pathname,summary,create_time,options')
       .order('create_time DESC')
       .countSelect(false);
     result.data = redactProtectedPosts(result.data);

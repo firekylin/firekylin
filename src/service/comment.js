@@ -6,6 +6,7 @@ const {marked, Renderer} = require('marked');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
+const permalink = require('./permalink');
 
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
@@ -45,14 +46,40 @@ function renderMarkdown(value) {
   return marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'), {renderer});
 }
 
-function pathnameFromUrl(url) {
+function pathnameFromUrl(url, options) {
   const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
-  if (!match) return null;
-  try {
-    return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
-  } catch (e) {
-    return null;
+  if (match) {
+    try {
+      return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
+    } catch (e) {
+      return null;
+    }
   }
+  const candidates = permalink.match(String(url || '').split(/[?#]/, 1)[0], options);
+  if (candidates.length !== 1 || !candidates[0].params.slug) return null;
+  return {type: candidates[0].type, pathname: candidates[0].params.slug};
+}
+
+async function resolveCommentPostId(controller, url, options) {
+  const target = pathnameFromUrl(url, options);
+  let post = target ? await controller.model('post').where({...target, status: 3, is_public: 1})
+    .field('id')
+    .find() : {};
+  if (think.isEmpty(post)) {
+    for (const candidate of permalink.match(String(url || '').split(/[?#]/, 1)[0], options)) {
+      const where = candidate.params.slug
+        ? {type: candidate.type, pathname: candidate.params.slug}
+        : {type: candidate.type, id: Number(candidate.params.id) || 0};
+      const found = await controller.model('post').where({...where, status: 3, is_public: 1})
+        .field('id')
+        .find();
+      if (!think.isEmpty(found)) {
+        if (!think.isEmpty(post) && post.id !== found.id) return null;
+        post = found;
+      }
+    }
+  }
+  return post && post.id ? Number(post.id) : null;
 }
 
 function stringList(value) {
@@ -79,10 +106,7 @@ module.exports = class extends think.Service {
     const postIds = new Map();
     const resolvePostId = async url => {
       if (postIds.has(url)) return postIds.get(url);
-      const target = pathnameFromUrl(url);
-      const post = target ? await controller.model('post').where(target).field('id')
-        .find() : {};
-      const id = post && post.id ? Number(post.id) : null;
+      const id = await resolveCommentPostId(controller, url, options);
       postIds.set(url, id);
       return id;
     };
@@ -143,7 +167,7 @@ module.exports = class extends think.Service {
       ip: controller.ctx.ip,
       origin: controller.ctx.get('origin'),
       referrer: controller.ctx.referrer(),
-      requestUrl: controller.ctx.url,
+      requestUrl: controller.ctx.state.originalPermalink || controller.ctx.url,
       serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/comment`
     };
     ctx.state.oauthServices = [];
@@ -166,9 +190,25 @@ module.exports = class extends think.Service {
   }
 
   async validateCommentTarget(controller, url) {
-    const target = pathnameFromUrl(url);
-    if (!target) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
-    const post = await controller.model('post').where({...target, status: 3, is_public: 1, allow_comment: 1}).find();
+    const options = await controller.model('options').getOptions();
+    const direct = pathnameFromUrl(url, options);
+    const targets = direct ? [direct] : permalink.match(String(url || '').split(/[?#]/, 1)[0], options)
+      .map(candidate => candidate.params.slug ? {type: candidate.type, pathname: candidate.params.slug} : {
+        type: candidate.type, id: Number(candidate.params.id) || 0
+      });
+    if (!targets.length) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
+    let post = {};
+    for (const target of targets) {
+      const current = await controller.model('post').where({
+        ...target, status: 3, is_public: 1, allow_comment: 1
+      }).find();
+      if (!think.isEmpty(current)) {
+        if (!think.isEmpty(post) && post.id !== current.id) {
+          throw new CommentError('INVALID_PATH', 409, 'Comment target is ambiguous');
+        }
+        post = current;
+      }
+    }
     if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
@@ -194,8 +234,10 @@ module.exports = class extends think.Service {
     if (!target) return;
     let postId = Number(target.post_id || target.id || target);
     if (!postId && typeof target === 'string') {
-      const path = pathnameFromUrl(target);
-      const post = path ? await controller.model('post').where(path).field('id')
+      const options = await controller.model('options').getOptions();
+      const path = pathnameFromUrl(target, options);
+      const post = path ? await controller.model('post').where(path)
+        .field('id')
         .find() : {};
       postId = Number(post.id);
     }
@@ -208,3 +250,4 @@ module.exports = class extends think.Service {
 
 module.exports.renderMarkdown = renderMarkdown;
 module.exports.pathnameFromUrl = pathnameFromUrl;
+module.exports.resolveCommentPostId = resolveCommentPostId;

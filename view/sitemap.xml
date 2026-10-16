@@ -14,7 +14,7 @@ latestTags.next();
   </url>
   <% firekylin.postList.forEach(item => { %>
   <url>
-    <loc><%= site.siteUrl %>/<%= item.type === 1 ? 'page' : 'post' %>/<%= item.pathname %>.html</loc>
+    <loc><%= site.siteUrl + site.contentPermalink(item) %></loc>
     <lastmod><%= firekylin.think.datetime(item.update_time, 'YYYY-MM-DD') %></lastmod>
     <priority><%= item.type === 1 ? 0.7 : 0.6 %></priority>
   </url>
