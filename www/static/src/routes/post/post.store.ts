@@ -174,6 +174,11 @@ class PostStore {
       }
     );
   }
+
+  bulkPost(operation: 'edit' | 'delete' | 'forceDelete', ids: number[], changes: {cate?: any[]; tag?: string[]} = {}) {
+    this.setLoading(true);
+    return http.post<any>('/admin/api/post?method=put', {operation, ids, ...changes});
+  }
   // 重置
   resetPostInfo() {
     this.setPostInfo({

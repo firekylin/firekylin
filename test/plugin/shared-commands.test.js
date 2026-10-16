@@ -66,6 +66,27 @@ test('update checks ownership before preparing protected options', async() => {
   assert.ok(operations.some(([type, value]) => type === 'save' && value.options.includes('postPasswordHash')));
 });
 
+test('bulk edit de-duplicates ids and updates categories and tags', async() => {
+  const {svc, operations, setPost} = fixture();
+  setPost({id: 7, user_id: 3, status: 0, pathname: 'existing'});
+  const result = await svc.bulk({ids: [7, 8, 8], operation: 'edit', cate: [{id: 2}], tag: ['news']}, {id: 3, type: 2}, {
+    getTagModel: () => ({setRelation() {return this}, where() {return this}, async thenAdd() {return {id: 5}}})
+  });
+  const saves = operations.filter(([name]) => name === 'save');
+  assert.equal(result.affectedRows, 2);
+  assert.equal(saves.length, 2);
+  assert.deepEqual(saves[0][1].cate, [{id: 2}]);
+  assert.deepEqual(saves[0][1].tag, [{tag_id: 5, name: 'news'}]);
+});
+
+test('bulk permanent delete validates the selection before deleting', async() => {
+  const {svc, operations, setPost} = fixture();
+  setPost({id: 7, user_id: 3, status: 4, pathname: 'existing'});
+  const result = await svc.bulk({ids: [7, 8], operation: 'forceDelete'}, {id: 3, type: 2});
+  assert.equal(result.affectedRows, 2);
+  assert.deepEqual(operations.filter(([name]) => name === 'delete').map(([, id]) => id), [7, 8]);
+});
+
 test('shared moderator requires administrator and updates comment count', async() => {
   const operations = [];
   const getModel = () => ({

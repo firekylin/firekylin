@@ -92,8 +92,33 @@ class PostCommandService {
     } else if (data.create_time && options.normalizePublishTime) {
       data = options.normalizePublishTime(data, post);
     }
+    if (options.getTagModel && Object.prototype.hasOwnProperty.call(data, 'tag') && !data.markdown_content) {
+      data.tag = await this.resolveTags(data.tag, options.getTagModel);
+    }
     const affectedRows = await model.savePost(data);
     return {id: data.id, affectedRows};
+  }
+
+  async bulk(input, principal, options = {}) {
+    const ids = [...new Set((input.ids || []).map(Number))];
+    if (!ids.length || ids.some(id => !Number.isSafeInteger(id) || id < 1)) {
+      throw new TypeError('Invalid post ID');
+    }
+    await Promise.all(ids.map(id => this.editable(id, principal)));
+    if (input.operation === 'delete') {
+      await Promise.all(ids.map(id => this.update({id, status: 4}, principal)));
+    } else if (input.operation === 'forceDelete') {
+      await Promise.all(ids.map(id => this.remove(id, principal)));
+    } else if (input.operation === 'edit') {
+      const changes = {};
+      if (Object.prototype.hasOwnProperty.call(input, 'cate')) changes.cate = input.cate;
+      if (Object.prototype.hasOwnProperty.call(input, 'tag')) changes.tag = input.tag;
+      if (!Object.keys(changes).length) throw new TypeError('Bulk edit requires a change');
+      await Promise.all(ids.map(id => this.update({id, ...changes}, principal, options)));
+    } else {
+      throw new TypeError('Invalid bulk operation');
+    }
+    return {affectedRows: ids.length};
   }
 
   async remove(id, principal) {
