@@ -112,11 +112,42 @@ theme.afterRender
 user.beforeCreate
 content.beforeCreate
 content.beforeUpdate
+markdown.configure
 content.markdown
 content.html
 content.excerpt
 content.render
 ```
+
+`markdown.configure` 接收正文渲染使用的 `markdown-it` 实例，可直接安装任意兼容插件：
+
+```js
+const markdownItMark = require('markdown-it-mark');
+
+module.exports = {
+  register(ctx) {
+    ctx.events.on('markdown.configure', markdown => {
+      markdown.use(markdownItMark);
+    });
+  }
+};
+```
+
+也可以在项目的 `firekylin.config.js` 中统一设置解析选项和扩展：
+
+```js
+const markdownItMark = require('markdown-it-mark');
+
+module.exports = {
+  markdown: {
+    options: {breaks: true, typographer: true},
+    plugins: [markdownItMark, [anotherPlugin, {option: true}]]
+  }
+};
+```
+
+`plugins` 支持插件函数、`[插件函数, 配置]`，或 `{plugin, options}` 三种形式。内置的脚注、Alert、
+代码高亮、MathJax、TOC、Mermaid 和纯图片段落处理会先注册，外部插件可继续增加或覆盖规则。
 
 例如给文章正文追加声明：
 

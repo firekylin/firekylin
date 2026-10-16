@@ -1,12 +1,4 @@
-const { Marked } = require('marked');
-const { markedHighlight } = require('marked-highlight');
-const markedFootnote = require('marked-footnote');
-const markedAlert = require('marked-alert');
-const hljs = require('highlight.js');
-const markedMathjaxExtension = require('../service/marked-mathjax-extension');
-const markedTocExtension = require('../service/marked-toc-extension');
-const markedImgonlyExtension = require('../service/marked-imgonly-extension');
-const markedMermaidExtension = require('../service/marked-mermaid-extension');
+const {renderMarkdown} = require('../service/markdown');
 const Base = require('./base');
 const {emit, filter} = require('../plugin/runtime');
 
@@ -242,60 +234,11 @@ module.exports = class extends Base {
    * @return {string}
    */
   async markdownToHtml(content, option = { toc: true, highlight: true }) {
-    const extensions = [];
-    // 增加 footnote 支持
-    extensions.push(markedFootnote());
-    // 增加 alert 支持
-    extensions.push(markedAlert());
-    // 增加 highlight 支持
-    if (option.highlight) {
-      let detectedLang = null;
-      // 自定义钩子：将检测到的语言写入 token（walker 链中最后执行）
-      extensions.push({
-        walkTokens(token) {
-          if (token.type === 'code' && !token.lang && detectedLang) {
-            token.lang = detectedLang;
-          }
-          detectedLang = null;
-        }
-      });
-      // marked-highlight：高亮并存储检测到的语言（walker 链中第二个执行）
-      extensions.push(markedHighlight({
-        emptyLangClass: 'hljs',
-        langPrefix: 'hljs lang-',
-        highlight(code, lang) {
-          const result = hljs.highlightAuto(code, lang ? [lang] : undefined);
-          detectedLang = result.language;
-          return result.value;
-        }
-      }));
-    }
-    // MathJax extension（walker 链中最先执行）
-    extensions.push(markedMathjaxExtension());
-    // TOC + heading anchor extension（仅定义 renderer，不参与 walker 链）
-    const tocEntries = [];
-    if (option.toc) {
-      extensions.push(markedTocExtension({
-        generateTocName: this.generateTocName.bind(this),
-        tocEntries
-      }));
-    }
-    // 纯图片段落标记：在渲染阶段为仅含图片的段落添加class
-    extensions.push(markedImgonlyExtension());
-    // mermaid代码块改写，便于前端渲染
-    extensions.push(markedMermaidExtension());
-
-    // markdown渲染
-    const marked = new Marked(...extensions);
-    let markedContent = await marked.parse(content);
-
-    // TOC后处理，把TOC加到渲染后的HTML开头
-    if (option.toc && tocEntries.length > 0) {
-      const tocHtml = this.buildTocHtml(tocEntries);
-      markedContent = `<div class="toc">${tocHtml}</div>${markedContent}`;
-    }
-
-    return markedContent;
+    return renderMarkdown(content, {
+      ...option,
+      slugify: this.generateTocName.bind(this),
+      renderToc: entries => `<div class="toc">${this.buildTocHtml(entries)}</div>`
+    });
   }
 
   /**

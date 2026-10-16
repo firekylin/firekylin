@@ -1,7 +1,7 @@
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
-import { marked } from 'marked';
+import MarkdownIt from 'markdown-it';
 import classnames from 'classnames';
 import * as React from 'react';
 
@@ -14,6 +14,7 @@ import EditorLinkModal from './link-modal/link-modal';
 import EditorImageModal from './image-modal/image-modal';
 import { http } from '../../utils/http';
 const confirm = Modal.confirm;
+const markdown = new MarkdownIt({html: true, linkify: true});
 
 interface MdEditorProps {
   onFullScreen: (isFullScreen: any) => void;
@@ -51,7 +52,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       mode: 'split',
       isFullScreen: false,
       isMonospace: true,
-      result: marked(this.props.content),
+      result: markdown.render(this.props.content),
       linkUrl: '',
       linkText: '',
       content: null,
@@ -99,7 +100,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           content: '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章?',
             onOk: () => {
                 let content = localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id];
-                this.setState({ result: marked(content) });
+                this.setState({ result: markdown.render(content) });
                 this.props.onChange(content);
             },
             onCancel: () => {
@@ -206,7 +207,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   componentWillReceiveProps(nextProps: any) {
     if (nextProps.content === this.props.content) { return; }
-    this.setState({result: marked(nextProps.content)});
+    this.setState({result: markdown.render(nextProps.content)});
   }
 
   componentWillUnmount () {
@@ -463,7 +464,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     }
     let content = e.target.value;
     this._ltr = setTimeout(() => {
-      this.setState({ result: marked(content) });
+      this.setState({ result: markdown.render(content) });
       localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + ''] = content;
     },                     300);
     this.props.onChange(content);
