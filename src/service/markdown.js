@@ -6,7 +6,6 @@ const hljs = require('highlight.js');
 const {filter} = require('../plugin/runtime');
 
 let builtinPlugins;
-let sharedMathjaxConfig;
 let sharedMathjaxInstance;
 
 async function loadBuiltinPlugins() {
@@ -25,28 +24,19 @@ async function loadBuiltinPlugins() {
   return builtinPlugins;
 }
 
-function createMathjax(builtins, options) {
-  const configuredTransformer = options.transformer;
+function createMathjax(builtins) {
   return builtins.createMathjaxInstance({
     output: 'svg',
     mathFence: true,
-    ...options,
     transformer(content, display) {
-      const transformed = configuredTransformer ? configuredTransformer(content, display) : content;
       const type = display ? 'block' : 'inline';
-      return `<span class="firekylin-markdown-mathjax-${type}">${transformed}</span>`;
+      return `<span class="firekylin-markdown-mathjax-${type}">${content}</span>`;
     }
   });
 }
 
-function resolveMathjax(builtins, configured, renderOptions) {
-  if (renderOptions.mathjax) {
-    return createMathjax(builtins, {...(configured.mathjax || {}), ...renderOptions.mathjax});
-  }
-  if (!sharedMathjaxInstance || sharedMathjaxConfig !== configured.mathjax) {
-    sharedMathjaxConfig = configured.mathjax;
-    sharedMathjaxInstance = createMathjax(builtins, configured.mathjax || {});
-  }
+function resolveMathjax(builtins) {
+  if (!sharedMathjaxInstance) sharedMathjaxInstance = createMathjax(builtins);
   return sharedMathjaxInstance;
 }
 
@@ -106,9 +96,9 @@ async function createMarkdownParser(renderOptions = {}) {
   });
 
   if (renderOptions.footnote !== false) md.use(builtins.footnote);
-  if (renderOptions.alert !== false) md.use(builtins.alert, configured.alert);
+  if (renderOptions.alert !== false) md.use(builtins.alert);
   if (renderOptions.math !== false) {
-    const mathjaxInstance = await resolveMathjax(builtins, configured, renderOptions);
+    const mathjaxInstance = await resolveMathjax(builtins);
     if (mathjaxInstance) md.use(builtins.mathjax, mathjaxInstance);
   }
   if (renderOptions.imageOnly !== false) md.use(imageOnlyPlugin);

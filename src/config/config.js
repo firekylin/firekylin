@@ -30,8 +30,6 @@ module.exports = {
   markdown: {
     options: {},
     plugins: [],
-    alert: {},
-    mathjax: {},
     ...projectMarkdown
   },
 
