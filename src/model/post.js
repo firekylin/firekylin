@@ -173,24 +173,31 @@ module.exports = class extends Base {
    */
   async getContentAndSummary(data) {
     const options = await this.model('options').getOptions();
-    const postTocManual = options.postTocManual === '1';
+    const rendered = await this.renderContent(data, options);
+    const markdown = rendered.markdown;
     const auto_summary = parseInt(options.auto_summary);
-
-    let showToc;
-    if (postTocManual) {
-      showToc = /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
-    } else {
-      showToc = data.type / 1 === 0 || /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
-    }
-    const markdown = await filter('content.markdown', data.markdown_content, {post: data});
-    data.content = await this.markdownToHtml(markdown, { toc: showToc, highlight: true });
+    data.content = rendered.content;
     data.summary = await this.getSummary(markdown, auto_summary);
 
-    data.content = await filter('content.html', data.content, {post: data});
-    data.content = await filter('content.render', data.content, {post: data, type: 'content'});
     data.summary = await filter('content.excerpt', data.summary, {post: data});
     data.summary = await filter('content.render', data.summary, {post: data, type: 'summary'});
     return data;
+  }
+
+  /**
+   * 使用文章正文的完整渲染链路生成 HTML。
+   * 后台预览和文章保存共用此方法，避免两端的 Markdown 能力产生差异。
+   */
+  async renderContent(data, options) {
+    options = options || await this.model('options').getOptions();
+    const postTocManual = options.postTocManual === '1';
+    const hasTocMarker = /(?:^|[\r\n]+)\s*<!--toc-->\s*[\r\n]+/i.test(data.markdown_content);
+    const showToc = postTocManual ? hasTocMarker : data.type / 1 === 0 || hasTocMarker;
+    const markdown = await filter('content.markdown', data.markdown_content, {post: data});
+    data.content = await this.markdownToHtml(markdown, {toc: showToc, highlight: true});
+    data.content = await filter('content.html', data.content, {post: data});
+    data.content = await filter('content.render', data.content, {post: data, type: 'content'});
+    return {content: data.content, markdown};
   }
 
   /**
