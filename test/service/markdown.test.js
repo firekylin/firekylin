@@ -8,12 +8,14 @@ const {renderMarkdown} = require('../../src/service/markdown');
 
 test('markdown-it renderer keeps the built-in Firekylin extensions', async() => {
   const html = await renderMarkdown([
-    '# Hello world',
+    '# **Hello** `world`',
     '',
     '> [!NOTE]',
     '> message',
     '',
     '![one](one.png) ![two](two.png)',
+    '',
+    '- [x] done',
     '',
     '```mermaid',
     'graph TD; A-->B',
@@ -26,12 +28,14 @@ test('markdown-it renderer keeps the built-in Firekylin extensions', async() => 
     toc: true,
     math: false,
     slugify: value => value.toLowerCase().replace(/\s+/g, '-'),
-    renderToc: entries => `<nav>${entries.map(entry => entry.id).join(',')}</nav>`
+    renderToc: entries => `<nav>${entries.map(entry => `${entry.id}:${entry.content}`).join(',')}</nav>`
   });
 
-  assert.match(html, /^<nav>hello-world<\/nav>/);
+  assert.match(html, /^<nav>hello-world:<strong>Hello<\/strong> <code>world<\/code><\/nav>/);
+  assert.match(html, /<h1><a id="hello-world" class="anchor" href="#hello-world"><\/a>/);
   assert.match(html, /class="markdown-alert markdown-alert-note"/);
   assert.match(html, /class="firekylin-markdown-img-only"/);
+  assert.match(html, /type="checkbox"[^>]*checked/);
   assert.match(html, /<pre class="mermaid">graph TD; A-->B/);
   assert.match(html, /class="footnotes"/);
 });

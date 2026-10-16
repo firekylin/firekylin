@@ -2,6 +2,7 @@
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
 import MarkdownIt from 'markdown-it';
+import { tasklist } from '@mdit/plugin-tasklist';
 import classnames from 'classnames';
 import * as React from 'react';
 
@@ -14,7 +15,7 @@ import EditorLinkModal from './link-modal/link-modal';
 import EditorImageModal from './image-modal/image-modal';
 import { http } from '../../utils/http';
 const confirm = Modal.confirm;
-const markdown = new MarkdownIt({html: true, linkify: true});
+const markdown = new MarkdownIt({html: true, linkify: true}).use(tasklist);
 
 interface MdEditorProps {
   onFullScreen: (isFullScreen: any) => void;

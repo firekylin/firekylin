@@ -13,12 +13,14 @@ async function loadBuiltinPlugins() {
     builtinPlugins = Promise.all([
       import('@mdit/plugin-alert'),
       import('@mdit/plugin-footnote'),
-      import('@mdit/plugin-mathjax')
-    ]).then(([alertModule, footnoteModule, mathjaxModule]) => ({
+      import('@mdit/plugin-mathjax'),
+      import('@mdit/plugin-tasklist')
+    ]).then(([alertModule, footnoteModule, mathjaxModule, tasklistModule]) => ({
       alert: alertModule.alert,
       footnote: footnoteModule.footnote,
       createMathjaxInstance: mathjaxModule.createMathjaxInstance,
-      mathjax: mathjaxModule.mathjax
+      mathjax: mathjaxModule.mathjax,
+      tasklist: tasklistModule.tasklist
     }));
   }
   return builtinPlugins;
@@ -101,6 +103,7 @@ async function createMarkdownParser(renderOptions = {}) {
     const mathjaxInstance = await resolveMathjax(builtins);
     if (mathjaxInstance) md.use(builtins.mathjax, mathjaxInstance);
   }
+  if (renderOptions.tasklist !== false) md.use(builtins.tasklist);
   if (renderOptions.imageOnly !== false) md.use(imageOnlyPlugin);
   if (renderOptions.code !== false) md.use(codePlugin);
 
@@ -108,14 +111,18 @@ async function createMarkdownParser(renderOptions = {}) {
   if (renderOptions.toc) {
     md.use(markdownItAnchor, {
       slugify: renderOptions.slugify,
-      permalink: markdownItAnchor.permalink.linkInsideHeader({
-        symbol: '',
-        placement: 'before',
-        class: 'anchor',
-        ariaHidden: false
-      }),
-      callback(token, info) {
-        tocEntries.push({id: info.slug, content: token.content, level: Number(token.tag.slice(1))});
+      tabIndex: false,
+      permalink(slug, anchorOptions, state, idx) {
+        const heading = state.tokens[idx];
+        const inline = state.tokens[idx + 1];
+        const content = md.renderer.renderInline(inline.children, md.options, state.env);
+        tocEntries.push({id: slug, content, level: Number(heading.tag.slice(1))});
+
+        const idIndex = heading.attrIndex('id');
+        if (idIndex >= 0) heading.attrs.splice(idIndex, 1);
+        const open = new state.Token('link_open', 'a', 1);
+        open.attrs = [['id', slug], ['class', 'anchor'], ['href', `#${slug}`]];
+        inline.children.unshift(open, new state.Token('link_close', 'a', -1));
       }
     });
   }

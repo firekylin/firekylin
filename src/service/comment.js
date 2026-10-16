@@ -8,6 +8,8 @@ const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
 const permalink = require('./permalink');
 
+const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
+
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
 }
@@ -22,8 +24,9 @@ function safeMarkdownUrl(value, image = false) {
   return image ? ['http', 'https'].includes(scheme[1]) : ['http', 'https', 'mailto'].includes(scheme[1]);
 }
 
-function renderMarkdown(value) {
+async function renderMarkdown(value) {
   const markdown = new MarkdownIt({html: false, linkify: false});
+  markdown.use(await tasklistPlugin);
   markdown.validateLink = () => true;
   let unsafeLinkDepth = 0;
   markdown.renderer.rules.link_open = (tokens, idx, options, env, self) => {
@@ -39,10 +42,11 @@ function renderMarkdown(value) {
     unsafeLinkDepth--;
     return '';
   };
+  const renderImage = markdown.renderer.rules.image;
   markdown.renderer.rules.image = (tokens, idx, options, env, self) => {
     const token = tokens[idx];
     if (!safeMarkdownUrl(token.attrGet('src'), true)) return markdown.utils.escapeHtml(token.content);
-    return self.renderToken(tokens, idx, options);
+    return renderImage(tokens, idx, options, env, self);
   };
   return markdown.render(String(value));
 }
