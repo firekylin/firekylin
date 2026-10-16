@@ -7,8 +7,8 @@ global.think = {Service: class {}};
 const CommentService = require('../../src/service/comment');
 const {pathnameFromUrl, renderMarkdown, resolveCommentPostId} = require('../../src/service/comment');
 
-test('comment markdown removes unsafe links and image sources', () => {
-  const output = renderMarkdown([
+test('comment markdown removes unsafe links and image sources', async() => {
+  const output = await renderMarkdown([
     '[unsafe](javascript:alert(1))',
     '[encoded](javascript&#58;alert(1))',
     '![image](data:text/html;base64,PHNjcmlwdD4=)',
@@ -20,12 +20,24 @@ test('comment markdown removes unsafe links and image sources', () => {
   assert.match(output, /href="https:\/\/example\.com\/path"/);
 });
 
-test('comment markdown escapes raw HTML while preserving safe formatting', () => {
-  const output = renderMarkdown('<script>alert(1)</script> **bold** ![pixel](data:image/png;base64,AA==)');
+test('comment markdown escapes raw HTML while preserving safe formatting', async() => {
+  const output = await renderMarkdown('<script>alert(1)</script> **bold** ![pixel](data:image/png;base64,AA==)');
   assert.doesNotMatch(output, /<script>/);
   assert.match(output, /&lt;script&gt;/);
   assert.match(output, /<strong>bold<\/strong>/);
   assert.match(output, /src="data:image\/png;base64,AA=="/);
+  assert.match(output, /alt="pixel"/);
+});
+
+test('comment markdown preserves task lists and image alt text', async() => {
+  const output = await renderMarkdown('- [x] done\n\n![description](https://example.com/a.png)');
+  assert.match(output, /type="checkbox"[^>]*checked/);
+  assert.match(output, /alt="description"/);
+});
+
+test('comment markdown automatically links safe bare URLs', async() => {
+  const output = await renderMarkdown('Visit https://example.com/path');
+  assert.match(output, /<a href="https:\/\/example\.com\/path">https:\/\/example\.com\/path<\/a>/);
 });
 
 test('comment paths decode browser-encoded post pathnames', () => {

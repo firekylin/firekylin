@@ -2,27 +2,21 @@
 /* eslint-disable max-len */
 
 const crypto = require('crypto');
-const {marked, Renderer} = require('marked');
+const MarkdownIt = require('markdown-it');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
 const permalink = require('./permalink');
 
+const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
+
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
 }
 
-function escapeAttribute(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
 function safeMarkdownUrl(value, image = false) {
   let decoded = String(value || '').replace(/&colon;|&#0*58;|&#x0*3a;/ig, ':');
-  try { decoded = decodeURIComponent(decoded) } catch (e) {} // eslint-disable-line no-empty
+  try { decoded = decodeURIComponent(decoded) } catch {} // eslint-disable-line no-empty
   const normalized = decoded.replace(/[\u0000-\u0020]+/g, '').toLowerCase(); // eslint-disable-line no-control-regex
   const scheme = normalized.match(/^([a-z][a-z0-9+.-]*):/);
   if (!scheme) return true;
@@ -30,20 +24,31 @@ function safeMarkdownUrl(value, image = false) {
   return image ? ['http', 'https'].includes(scheme[1]) : ['http', 'https', 'mailto'].includes(scheme[1]);
 }
 
-function renderMarkdown(value) {
-  const renderer = new Renderer();
-  renderer.link = function({href, title, tokens}) {
-    const text = this.parser.parseInline(tokens);
-    if (!safeMarkdownUrl(href)) return text;
-    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
-    return `<a href="${escapeAttribute(href)}"${titleAttribute}>${text}</a>`;
+async function renderMarkdown(value) {
+  const markdown = new MarkdownIt({html: false, linkify: true});
+  markdown.use(await tasklistPlugin);
+  markdown.validateLink = () => true;
+  let unsafeLinkDepth = 0;
+  markdown.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+    const href = tokens[idx].attrGet('href');
+    if (!safeMarkdownUrl(href)) {
+      unsafeLinkDepth++;
+      return '';
+    }
+    return self.renderToken(tokens, idx, options);
   };
-  renderer.image = ({href, title, text}) => {
-    if (!safeMarkdownUrl(href, true)) return escapeAttribute(text || '');
-    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
-    return `<img src="${escapeAttribute(href)}" alt="${escapeAttribute(text || '')}"${titleAttribute}>`;
+  markdown.renderer.rules.link_close = () => {
+    if (!unsafeLinkDepth) return '</a>';
+    unsafeLinkDepth--;
+    return '';
   };
-  return marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'), {renderer});
+  const renderImage = markdown.renderer.rules.image;
+  markdown.renderer.rules.image = (tokens, idx, options, env, self) => {
+    const token = tokens[idx];
+    if (!safeMarkdownUrl(token.attrGet('src'), true)) return markdown.utils.escapeHtml(token.content);
+    return renderImage(tokens, idx, options, env, self);
+  };
+  return markdown.render(String(value));
 }
 
 function pathnameFromUrl(url, options) {
@@ -51,7 +56,7 @@ function pathnameFromUrl(url, options) {
   if (match) {
     try {
       return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
-    } catch (e) {
+    } catch {
       return null;
     }
   }

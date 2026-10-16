@@ -1,7 +1,6 @@
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
-import { marked } from 'marked';
 import classnames from 'classnames';
 import * as React from 'react';
 
@@ -33,6 +32,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   previewControl: any;
   _syncScroll: any;
   _ltr: any;
+  _previewSubscription: any;
+  _previewRequest = 0;
 
   editorPanel: HTMLDivElement | null;
   editor: HTMLTextAreaElement | null;
@@ -51,7 +52,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       mode: 'split',
       isFullScreen: false,
       isMonospace: true,
-      result: marked(this.props.content),
+      result: '',
       linkUrl: '',
       linkText: '',
       content: null,
@@ -99,7 +100,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
           content: '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章?',
             onOk: () => {
                 let content = localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id];
-                this.setState({ result: marked(content) });
+                this._renderPreview(content);
                 this.props.onChange(content);
             },
             onCancel: () => {
@@ -112,6 +113,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     (this.textControl as HTMLTextAreaElement).addEventListener('scroll', e => this._syncScroll(e), false);
     this.previewControl.addEventListener('scroll', this._syncScroll, false);
     this._bindMouse();
+    this._renderPreview(this.props.content);
   }
 
   _bindPaste(e: ClipboardEvent) {
@@ -206,12 +208,33 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   componentWillReceiveProps(nextProps: any) {
     if (nextProps.content === this.props.content) { return; }
-    this.setState({result: marked(nextProps.content)});
+    this._schedulePreview(nextProps.content, nextProps.info.type);
   }
 
   componentWillUnmount () {
+    clearTimeout(this._ltr);
+    this._previewRequest++;
+    if (this._previewSubscription) this._previewSubscription.unsubscribe();
     this.textControl = null;
     this.previewControl = null;
+  }
+
+  _renderPreview(content: string, type = this.props.info.type) {
+    const request = ++this._previewRequest;
+    if (this._previewSubscription) this._previewSubscription.unsubscribe();
+    this._previewSubscription = http.post<{html: string}>('/admin/api/markdown', {
+      markdown_content: content,
+      type,
+    }).subscribe(res => {
+      if (request === this._previewRequest && res.errno === 0 && res.data) {
+        this.setState({result: res.data.html});
+      }
+    });
+  }
+
+  _schedulePreview(content: string, type = this.props.info.type) {
+    clearTimeout(this._ltr);
+    this._ltr = setTimeout(() => this._renderPreview(content, type), 300);
   }
 
   handleLinkCreate() {
@@ -458,14 +481,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   // event handlers
   _onChange (e: any) {
-    if (this._ltr) {
-      clearTimeout(this._ltr);
-    }
     let content = e.target.value;
-    this._ltr = setTimeout(() => {
-      this.setState({ result: marked(content) });
-      localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + ''] = content;
-    },                     300);
+    this._schedulePreview(content);
+    localStorage['unsavetype' + this.props.info.type + 'id' + this.props.info.id + ''] = content;
     this.props.onChange(content);
   }
 
