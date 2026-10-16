@@ -49,11 +49,27 @@ function imageOnlyPlugin(md) {
     const inline = tokens[idx + 1];
     const children = inline && inline.type === 'inline' ? inline.children || [] : [];
     const imageOnly = children.some(token => token.type === 'image') && children.every(token =>
-      token.type === 'image' || (token.type === 'text' && !token.content.trim())
+      token.type === 'image' || ['softbreak', 'hardbreak'].includes(token.type) ||
+      (token.type === 'text' && !token.content.trim())
     );
     if (imageOnly) tokens[idx].attrJoin('class', 'firekylin-markdown-img-only');
     return original(tokens, idx, options, env, self);
   };
+}
+
+function legacyInlineMathPlugin(md) {
+  md.core.ruler.after('inline', 'firekylin_legacy_inline_math', state => {
+    for (const token of state.tokens) {
+      for (const child of token.children || []) {
+        if (child.type !== 'code_inline' || child.content.length < 3 ||
+          !child.content.startsWith('$') || !child.content.endsWith('$')) continue;
+        child.type = 'math_inline';
+        child.tag = 'math';
+        child.markup = '$';
+        child.content = child.content.slice(1, -1);
+      }
+    }
+  });
 }
 
 function codePlugin(md) {
@@ -101,7 +117,10 @@ async function createMarkdownParser(renderOptions = {}) {
   if (renderOptions.alert !== false) md.use(builtins.alert);
   if (renderOptions.math !== false) {
     const mathjaxInstance = await resolveMathjax(builtins);
-    if (mathjaxInstance) md.use(builtins.mathjax, mathjaxInstance);
+    if (mathjaxInstance) {
+      md.use(builtins.mathjax, mathjaxInstance);
+      md.use(legacyInlineMathPlugin);
+    }
   }
   if (renderOptions.tasklist !== false) md.use(builtins.tasklist);
   if (renderOptions.imageOnly !== false) md.use(imageOnlyPlugin);

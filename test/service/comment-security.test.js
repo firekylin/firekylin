@@ -35,6 +35,11 @@ test('comment markdown preserves task lists and image alt text', async() => {
   assert.match(output, /alt="description"/);
 });
 
+test('comment markdown automatically links safe bare URLs', async() => {
+  const output = await renderMarkdown('Visit https://example.com/path');
+  assert.match(output, /<a href="https:\/\/example\.com\/path">https:\/\/example\.com\/path<\/a>/);
+});
+
 test('comment paths decode browser-encoded post pathnames', () => {
   assert.deepEqual(pathnameFromUrl('/post/%E4%B8%AD%E6%96%87.html'), {type: 0, pathname: '中文'});
   assert.deepEqual(pathnameFromUrl('/page/about.html'), {type: 1, pathname: 'about'});

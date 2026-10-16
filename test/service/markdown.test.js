@@ -13,7 +13,8 @@ test('markdown-it renderer keeps the built-in Firekylin extensions', async() => 
     '> [!NOTE]',
     '> message',
     '',
-    '![one](one.png) ![two](two.png)',
+    '![one](one.png)',
+    '![two](two.png)',
     '',
     '- [x] done',
     '',
@@ -66,6 +67,8 @@ test('math and code highlighting retain their server-side output hooks', async()
   const html = await renderMarkdown([
     '$x + y$',
     '',
+    '`$legacy + formula$`',
+    '',
     '```math',
     'x^2',
     '```',
@@ -76,6 +79,8 @@ test('math and code highlighting retain their server-side output hooks', async()
   ].join('\n'), {toc: false});
 
   assert.match(html, /firekylin-markdown-mathjax-inline/);
+  assert.doesNotMatch(html, /<code>\$legacy \+ formula\$<\/code>/);
+  assert.match(html, /legacy \+ formula/);
   assert.match(html, /firekylin-markdown-mathjax-block/);
   assert.match(html, /class="hljs lang-js"/);
 });

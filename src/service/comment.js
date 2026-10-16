@@ -25,7 +25,7 @@ function safeMarkdownUrl(value, image = false) {
 }
 
 async function renderMarkdown(value) {
-  const markdown = new MarkdownIt({html: false, linkify: false});
+  const markdown = new MarkdownIt({html: false, linkify: true});
   markdown.use(await tasklistPlugin);
   markdown.validateLink = () => true;
   let unsafeLinkDepth = 0;
