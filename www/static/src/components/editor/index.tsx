@@ -208,7 +208,7 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
 
   componentWillReceiveProps(nextProps: any) {
     if (nextProps.content === this.props.content) { return; }
-    this._schedulePreview(nextProps.content, nextProps.info);
+    this._schedulePreview(nextProps.content, nextProps.info.type);
   }
 
   componentWillUnmount () {
@@ -219,13 +219,12 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this.previewControl = null;
   }
 
-  _renderPreview(content: string, info = this.props.info) {
+  _renderPreview(content: string, type = this.props.info.type) {
     const request = ++this._previewRequest;
     if (this._previewSubscription) this._previewSubscription.unsubscribe();
     this._previewSubscription = http.post<{html: string}>('/admin/api/markdown', {
       markdown_content: content,
-      id: info.id,
-      type: info.type,
+      type,
     }).subscribe(res => {
       if (request === this._previewRequest && res.errno === 0 && res.data) {
         this.setState({result: res.data.html});
@@ -233,9 +232,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     });
   }
 
-  _schedulePreview(content: string, info = this.props.info) {
+  _schedulePreview(content: string, type = this.props.info.type) {
     clearTimeout(this._ltr);
-    this._ltr = setTimeout(() => this._renderPreview(content, info), 300);
+    this._ltr = setTimeout(() => this._renderPreview(content, type), 300);
   }
 
   handleLinkCreate() {
