@@ -12,6 +12,7 @@ export interface FormFieldSchema {
     placeholder?: string;
     required?: boolean;
     options?: Array<{label: string; value: any}>;
+    visibleWhen?: {field: string; values: any[]};
 }
 
 export type FieldRenderer = React.ComponentType<{field: FormFieldSchema; [key: string]: any}>;

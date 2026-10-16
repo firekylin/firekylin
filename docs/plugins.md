@@ -383,7 +383,12 @@ register(ctx) {
               {key: 'operations', title: '操作', type: 'actions'}],
             rows: [{id: 1, title: 'Hello', views: 100, operations: [
               {label: '重建', action: 'rebuild', input: {id: 1}}
-            ]}], toolbar: [{label: '新建', href: '/admin/plugins/example/edit', type: 'primary'}]},
+            ]}],
+            search: {keys: ['title'], placeholder: '搜索文章'},
+            selection: {input: 'ids', actions: [
+              {action: 'rebuild', label: '重建选中项'}
+            ]},
+            toolbar: [{label: '新建', href: '/admin/plugins/example/edit', type: 'primary'}]},
           {type: 'grid', columns: 2, items: [
             {type: 'form', id: 'settings'},
             {type: 'markdown', title: '使用说明', content: '**保存**后新配置立即生效。'}
@@ -456,7 +461,9 @@ ctx.admin.registerPage({
 
 - `text`：`{type, title?, content}`；
 - `description`：`{type, title?, items: [{label, value}]}`；
-- `table`：`{type, title?, rowKey?, pagination?, columns: [{key, title}], rows}`；
+- `table`：`{type, title?, rowKey?, pagination?, columns, rows, toolbar?, search?, selection?}`。`search.keys`
+  声明参与前端关键词过滤的列；`selection.actions` 在表格左侧显示复选框，并把选中行键通过
+  `selection.input`（默认 `ids`）传给已注册动作；
 - `stat`：统计数字卡片，支持 `prefix`、`suffix` 和 `precision`；
 - `list`：标题及说明组成的列表；
 - `markdown`：安全的 Markdown 子集，支持标题、列表、粗体、行内代码和链接；
@@ -464,6 +471,7 @@ ctx.admin.registerPage({
 - `links`：经过协议检查的链接列表；
 - `code`：只读代码或日志；
 - `grid`：`{type, columns?, items}`，以一至四列递归布局其他区块；
+- `tabs`：`{type, items: [{key, label, sections}]}`，使用标签页组织多组区块或表单；
 - `form`：`{type: 'form', id}`，引用当前页面的表单；
 - `actions`：`{type: 'actions', ids?}`，引用部分或全部当前页面动作。
 
@@ -472,7 +480,9 @@ Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持
 
 表单字段支持 `text`、`textarea`、`number`、`switch`、`select`、`password`、`email`、
 `url`、`radio`、`checkbox`、`color` 和 `code`。字段还可以
-声明 `description`、`placeholder`、`required`；`select` 必须提供 `options`。动作的 `type`
+声明 `description`、`placeholder`、`required`；`select`、`radio` 和 `checkbox` 必须提供 `options`。
+使用 `visibleWhen: {field: 'type', values: ['image']}` 可以仅在另一个字段匹配指定值时显示并提交该字段。
+动作的 `type`
 支持 `default`、`primary` 和 `danger`。所有返回内容都作为数据由宿主渲染和转义。
 
 ## 完整 Demo：阅读统计插件
