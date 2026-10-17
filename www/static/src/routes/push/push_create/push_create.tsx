@@ -4,79 +4,70 @@ import { PushProps } from '../push.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
 import { message, Input } from 'antd';
-
-@inject('pushStore')
-@observer
-class PushCreateForm extends React.Component<PushProps,any> {
-    formRef = React.createRef<FormInstance>();
-
-    pushStore;
-    id;
-
-    constructor(props: PushProps) {
-        super(props);
-        this.pushStore = this.props.pushStore;
-        this.id = this.props.match.params.id;
-    }
-
-    resetPushCreateParams() {
-        this.pushStore.setPushCreateParam({
-            submitting: false,
-            pushInfo: {
-                appKey : '',
-                appSecret : '',
-                title : '',
-                url : '',
-            }
+function PushCreateForm(props: PushProps) {
+    const [state, setState] = React.useState(() => ({}));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
         });
-    }
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+        legacy.formRef = React.createRef<FormInstance>();
 
-    componentDidMount() {
-        if (this.id) {
-            this.pushStore.getPushInfo(this.id);
+        legacy.pushStore = props.pushStore;
+        legacy.id = props.match.params.id;
+        legacy.handleValidSubmit = (values: any) => {
+            legacy.pushStore.setPushCreateParam({ submitting: true });
+            if (legacy.id) {
+                values.id = legacy.id;
+            }
+            legacy.pushStore.savePush(values).then(() => {
+                setTimeout(() => props.history.push('/push/list'), 1000);
+            });
+        };
+    }
+    legacy.resetPushCreateParams = function resetPushCreateParams() {
+        legacy.pushStore.setPushCreateParam({
+            submitting: false,
+            pushInfo: { appKey: '', appSecret: '', title: '', url: '' },
+        });
+    };
+    legacy.onMount = function onMount() {
+        if (legacy.id) {
+            legacy.pushStore.getPushInfo(legacy.id);
         } else {
-            this.resetPushCreateParams();
+            legacy.resetPushCreateParams();
         }
-    }
-
-    componentDidUpdate(prevProps: any) {
-        if (prevProps.match.params.id !== this.props.match.params.id) {
-            this.id = this.props.match.params.id;
-            if (this.id) {
-                this.pushStore.getPushInfo(this.id);
+    };
+    legacy.afterUpdate = function afterUpdate(prevProps: any) {
+        if (prevProps.match.params.id !== props.match.params.id) {
+            legacy.id = props.match.params.id;
+            if (legacy.id) {
+                legacy.pushStore.getPushInfo(legacy.id);
             } else {
-                this.resetPushCreateParams();
+                legacy.resetPushCreateParams();
             }
             return;
         }
-        const { pushInfo } = this.pushStore.pushCreateParam;
-        this.formRef.current?.setFieldsValue({
+        const { pushInfo } = legacy.pushStore.pushCreateParam;
+        legacy.formRef.current?.setFieldsValue({
             title: pushInfo.title,
             url: pushInfo.url,
             appKey: pushInfo.appKey,
             appSecret: pushInfo.appSecret,
         });
-    }
-
-    /**
-     * save
-     * @return {}       []
-     */
-    handleValidSubmit = (values: any) => {
-        this.pushStore.setPushCreateParam({submitting: true});
-        if (this.id) {
-            values.id = this.id;
-        }
-        this.pushStore.savePush(values).then(() => {
-            setTimeout(() => this.props.history.push('/push/list'), 1000);
-        });
-    }
-
-    /**
-     * render
-     * @return {} []
-     */
-    render() {
+    };
+    legacy.render = function render() {
         const formItemLayout = {
             labelCol: {
                 xl: { span: 2 },
@@ -92,74 +83,111 @@ class PushCreateForm extends React.Component<PushProps,any> {
                 xl: {
                     span: 16,
                     offset: 1,
-                }
+                },
             },
         };
         let props = {};
-        if (this.pushStore.pushCreateParam.submitting) {
+        if (legacy.pushStore.pushCreateParam.submitting) {
             props.disabled = true;
         }
 
         return (
             <div className="fk-content-wrap">
-                <BreadCrumb {...this.props} />
+                <BreadCrumb {...props} />
                 <div className="manage-container">
                     <Form
-                        ref={this.formRef}
+                        ref={legacy.formRef}
                         className="tag-create clearfix"
-                        onFinish={this.handleValidSubmit}
+                        onFinish={legacy.handleValidSubmit}
                         scrollToFirstError
                     >
-                        <div className="alert alert-info" role="alert" style={{maxWidth: '700px'}}>
-                            推送功能是指在本系统写博客时可以将文章推送到其他也使用 Firekylin 构建的博客系统中。
+                        <div
+                            className="alert alert-info"
+                            role="alert"
+                            style={{ maxWidth: '700px' }}
+                        >
+                            推送功能是指在本系统写博客时可以将文章推送到其他也使用
+                            Firekylin 构建的博客系统中。
                             最明显的需求就是个人写博客时需要将文章推送到团队博客中。如果每次都是写完后把内容拷贝到团队博客中势必非常麻烦，
                             使用推送功能就非常简单了。
                         </div>
-                        <Form.Item label="网站名称" {...formItemLayout}
+                        <Form.Item
+                            label="网站名称"
+                            {...formItemLayout}
                             name="title"
-                            rules={[{
+                            rules={[
+                                {
                                     required: true,
-                                    message: '请填写网站名称!'
-                                }]}
+                                    message: '请填写网站名称!',
+                                },
+                            ]}
                         >
                             <Input placeholder="请填写网站名称" />
                         </Form.Item>
-                        <Form.Item label="网站地址" {...formItemLayout}
+                        <Form.Item
+                            label="网站地址"
+                            {...formItemLayout}
                             name="url"
-                            rules={[{
-                                required: true,
-                                message: '请填写网站地址!'
-                            }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写网站地址!',
+                                },
+                            ]}
                         >
                             <Input placeholder="请填写网站地址" />
                         </Form.Item>
-                        <Form.Item label="推送公钥" {...formItemLayout}
+                        <Form.Item
+                            label="推送公钥"
+                            {...formItemLayout}
                             name="appKey"
-                            rules={[{
-                                required: true,
-                                message: '请填写推送公钥!'
-                            }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写推送公钥!',
+                                },
+                            ]}
                         >
                             <Input placeholder="请填写推送公钥" />
                         </Form.Item>
-                        <Form.Item label="推送秘钥" {...formItemLayout}
+                        <Form.Item
+                            label="推送秘钥"
+                            {...formItemLayout}
                             name="appSecret"
-                            rules={[{
-                                required: true,
-                                message: '请填写推送秘钥!'
-                            }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写推送秘钥!',
+                                },
+                            ]}
                         >
                             <Input placeholder="请填写推送秘钥" />
                         </Form.Item>
-                        <Form.Item  {...tailFormItemLayout}>
+                        <Form.Item {...tailFormItemLayout}>
                             <button type="submit" {...props} className="btn btn-primary">
-                                {this.pushStore.pushCreateParam.submitting ? '提交中...' : '提交'}
+                                {legacy.pushStore.pushCreateParam.submitting
+                                    ? '提交中...'
+                                    : '提交'}
                             </button>
                         </Form.Item>
-                </Form>
+                    </Form>
                 </div>
             </div>
-    );
-    }
+        );
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    const previousRef = React.useRef({ props: props, state: state, mounted: false });
+    React.useEffect(() => {
+        if (previousRef.current.mounted)
+            legacy.afterUpdate(
+                previousRef.current.props,
+                previousRef.current.state,
+            );
+        previousRef.current = { props: props, state: state, mounted: true };
+    });
+    return legacy.render();
 }
-export default PushCreateForm;
+
+export default inject('pushStore')(observer(PushCreateForm));

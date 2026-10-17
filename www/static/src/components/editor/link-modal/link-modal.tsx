@@ -9,28 +9,42 @@ interface EditorLinkModalProps extends ModalProps {
     innerLinks: any[];
     onFormReady?: (formRef: React.RefObject<FormInstance>) => void;
 }
-
-class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
-    formRef = React.createRef<FormInstance>();
-
-    componentDidMount() {
-        this.props.onFormReady?.(this.formRef);
-    }
-
-    handleChange = value => {
-        const selectedLink = this.props.innerLinks.filter(
-            link => link.title === value,
-        )[0];
-        const pathname = selectedLink.pathname;
-        const title = selectedLink.title;
-        this.formRef.current?.setFieldsValue({
-            innerLinkUrl: pathname,
-            innerLinkText: title,
+function EditorLinkModalForm(props: EditorLinkModalProps) {
+    const [state, setState] = React.useState(() => ({}));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
         });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+        legacy.formRef = React.createRef<FormInstance>();
+        legacy.handleChange = (value) => {
+            const selectedLink = props.innerLinks.filter(
+                (link) => link.title === value,
+            )[0];
+            const pathname = selectedLink.pathname;
+            const title = selectedLink.title;
+            legacy.formRef.current?.setFieldsValue({
+                innerLinkUrl: pathname,
+                innerLinkText: title,
+            });
+        };
     }
-
-    render() {
-        const { onCancel, onCreate, innerLinks } = this.props;
+    legacy.onMount = function onMount() {
+        props.onFormReady?.(legacy.formRef);
+    };
+    legacy.render = function render() {
+        const { onCancel, onCreate, innerLinks } = props;
         const formItemLayout = {
             labelCol: {
                 xl: { span: 4 },
@@ -42,8 +56,8 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
         return (
             <Modal
                 title="插入链接"
-                open={this.props.open}
-                onOk={() => onCreate(this.formRef)}
+                open={props.open}
+                onOk={() => onCreate(legacy.formRef)}
                 onCancel={onCancel}
             >
                 <Tabs
@@ -56,11 +70,19 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                             key: '0',
                             label: '插入外链',
                             children: (
-                                <Form ref={this.formRef}>
-                                    <Form.Item {...formItemLayout} label="链接文本：" name="linkText">
+                                <Form ref={legacy.formRef}>
+                                    <Form.Item
+                                        {...formItemLayout}
+                                        label="链接文本："
+                                        name="linkText"
+                                    >
                                         <Input />
                                     </Form.Item>
-                                    <Form.Item {...formItemLayout} label="链接地址：" name="linkUrl">
+                                    <Form.Item
+                                        {...formItemLayout}
+                                        label="链接地址："
+                                        name="linkUrl"
+                                    >
                                         <Input />
                                     </Form.Item>
                                 </Form>
@@ -71,15 +93,19 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                             label: '插入内链',
                             children: (
                                 <Form>
-                                    <Form.Item {...formItemLayout} label="链接文本：" name="innerLinkText">
+                                    <Form.Item
+                                        {...formItemLayout}
+                                        label="链接文本："
+                                        name="innerLinkText"
+                                    >
                                         <Select
                                             showSearch={true}
                                             placeholder="请输入文章标题"
                                             defaultActiveFirstOption={false}
                                             showArrow={false}
                                             filterOption={false}
-                                            onSearch={this.props.fetchData}
-                                            onChange={this.handleChange}
+                                            onSearch={props.fetchData}
+                                            onChange={legacy.handleChange}
                                             notFoundContent="未找到文章"
                                         >
                                             {innerLinks.map((d: any) => (
@@ -89,7 +115,11 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                                             ))}
                                         </Select>
                                     </Form.Item>
-                                    <Form.Item {...formItemLayout} label="链接地址：" name="innerLinkUrl">
+                                    <Form.Item
+                                        {...formItemLayout}
+                                        label="链接地址："
+                                        name="innerLinkUrl"
+                                    >
                                         <Input />
                                     </Form.Item>
                                 </Form>
@@ -99,7 +129,11 @@ class EditorLinkModalForm extends React.Component<EditorLinkModalProps, any> {
                 />
             </Modal>
         );
-    }
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    return legacy.render();
 }
 
 export default EditorLinkModalForm;

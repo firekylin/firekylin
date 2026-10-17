@@ -6,7 +6,7 @@
     "lib": ["es2017", "dom"],
     "sourceMap": true,
     "allowJs": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "paths": { "@admin/*": ["./www/static/src/*"] },
     "forceConsistentCasingInFileNames": true,

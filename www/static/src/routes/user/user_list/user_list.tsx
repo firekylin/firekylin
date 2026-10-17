@@ -6,25 +6,35 @@ import { observer, inject } from '@admin/utils/mobx-react';
 import { UserProps } from '../user.model';
 import { message, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
+function DefaultComponent(props: UserProps) {
+    const [state, setState] = React.useState(() => ({}));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
 
-@inject('userStore')
-@observer
-export default class extends React.Component<UserProps, any> {
-    public userStore: any;
-
-    constructor(props: UserProps) {
-        super(props);
-        this.userStore = this.props.userStore;
-        this.userStore.setKey('0');
+        legacy.userStore = props.userStore;
+        legacy.userStore.setKey('0');
     }
-    componentDidMount() {
-        this.userStore.getUserList();
-    }
-    pass(user: any) {
-        this.userStore.passUser(user.id);
-    }
-
-    handleDelete(user: any) {
+    legacy.onMount = function onMount() {
+        legacy.userStore.getUserList();
+    };
+    legacy.pass = function pass(user: any) {
+        legacy.userStore.passUser(user.id);
+    };
+    legacy.handleDelete = function handleDelete(user: any) {
         if (user.post_num > 0) {
             return Modal.error({
                 title: '无法删除',
@@ -32,10 +42,10 @@ export default class extends React.Component<UserProps, any> {
                     <div>
                         <p>当前用户的文章数不为0，请先删除该用户下的所有文章!</p>
                     </div>
-                )
-            })
+                ),
+            });
         }
-        const that = this;
+        const that = legacy;
         return Modal.confirm({
             title: '确定删除该用户吗？',
             content: '删除后无法恢复',
@@ -44,14 +54,13 @@ export default class extends React.Component<UserProps, any> {
                 that.userStore.deleteUser(user.id);
             },
         });
-    }
-    handleSelect(type: any) {
-        this.userStore.setKey(type);
-        return this.userStore.getUserList(type === '3' ? 'contributor' : '');
-    }
-
-    deny(user: any) {
-        const that = this;
+    };
+    legacy.handleSelect = function handleSelect(type: any) {
+        legacy.userStore.setKey(type);
+        return legacy.userStore.getUserList(type === '3' ? 'contributor' : '');
+    };
+    legacy.deny = function deny(user: any) {
+        const that = legacy;
         return Modal.confirm({
             title: '拒绝该用户的申请后会直接删除该账号',
             content: '删除后无法恢复',
@@ -70,9 +79,8 @@ export default class extends React.Component<UserProps, any> {
                 );
             },
         });
-    }
-
-    getUserType(user: any) {
+    };
+    legacy.getUserType = function getUserType(user: any) {
         switch (user.type) {
             case 1:
                 return '管理员';
@@ -85,10 +93,9 @@ export default class extends React.Component<UserProps, any> {
             default:
                 return '';
         }
-    }
-
-    getUserList() {
-        if (this.userStore.loading) {
+    };
+    legacy.getUserList = function getUserList() {
+        if (legacy.userStore.loading) {
             return (
                 <tr>
                     <td className="center" colSpan="11">
@@ -97,7 +104,7 @@ export default class extends React.Component<UserProps, any> {
                 </tr>
             );
         }
-        if (!this.userStore.userList.length) {
+        if (!legacy.userStore.userList.length) {
             return (
                 <tr>
                     <td className="center" colSpan="11">
@@ -106,20 +113,28 @@ export default class extends React.Component<UserProps, any> {
                 </tr>
             );
         }
-        return this.userStore.userList.map(item => {
+        return legacy.userStore.userList.map((item) => {
             return (
                 <tr key={item.id}>
                     <td scope="row">{item.id}</td>
                     <td>{item.display_name || item.name}</td>
                     <td>{item.email}</td>
                     <td>
-                        {(item.social_accounts || []).length ? item.social_accounts.map(account => (
-                            <span key={account.provider} className="label label-info" style={{marginRight: 4}}>
-                                {account.provider}
-                            </span>
-                        )) : <span className="gray">未绑定</span>}
+                        {(item.social_accounts || []).length ? (
+                            item.social_accounts.map((account) => (
+                                <span
+                                    key={account.provider}
+                                    className="label label-info"
+                                    style={{ marginRight: 4 }}
+                                >
+                                    {account.provider}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="gray">未绑定</span>
+                        )}
                     </td>
-                    <td>{this.getUserType(item)}</td>
+                    <td>{legacy.getUserType(item)}</td>
                     <td>
                         {item.status === 1 ? (
                             <span className="label label-success">有效</span>
@@ -133,7 +148,7 @@ export default class extends React.Component<UserProps, any> {
                     <td>{item.last_login_time}</td>
                     <td>
                         <Space size="small">
-                            {this.userStore.key === '0' ? (
+                            {legacy.userStore.key === '0' ? (
                                 <Link to={`/user/edit/${item.id}`}>
                                     <Button
                                         type="primary"
@@ -147,15 +162,15 @@ export default class extends React.Component<UserProps, any> {
                                 <button
                                     type="button"
                                     className="btn btn-success btn-xs"
-                                    onClick={this.pass.bind(this, item)}
+                                    onClick={legacy.pass.bind(null, item)}
                                 >
                                     <span className="glyphicon glyphicon-ok" />
                                     通过
                                 </button>
                             )}
-                            {this.userStore.key === '0' ? (
+                            {legacy.userStore.key === '0' ? (
                                 <Button
-                                    onClick={this.handleDelete.bind(this, item)}
+                                    onClick={legacy.handleDelete.bind(null, item)}
                                     type="primary"
                                     danger
                                     icon={<DeleteOutlined />}
@@ -167,7 +182,7 @@ export default class extends React.Component<UserProps, any> {
                                 <button
                                     type="button"
                                     className="btn btn-warning btn-xs"
-                                    onClick={this.deny.bind(this, item)}
+                                    onClick={legacy.deny.bind(null, item)}
                                 >
                                     <span className="glyphicon glyphicon-remove" />
                                     拒绝
@@ -178,16 +193,16 @@ export default class extends React.Component<UserProps, any> {
                 </tr>
             );
         });
-    }
-    render() {
+    };
+    legacy.render = function render() {
         const TabPane = Tabs.TabPane;
         return (
             <div className="fk-content-wrap">
-                <BreadCrumb {...this.props} />
+                <BreadCrumb {...props} />
                 <div className="manage-container">
                     <Tabs
-                        defaultActiveKey={this.props.userStore.key.toString()}
-                        onChange={type => this.handleSelect(type)}
+                        defaultActiveKey={props.userStore.key.toString()}
+                        onChange={(type) => legacy.handleSelect(type)}
                     >
                         <TabPane key="0" tab="全　部" />
                         <TabPane key="3" tab="审核中" />
@@ -208,10 +223,15 @@ export default class extends React.Component<UserProps, any> {
                                 <th>操作</th>
                             </tr>
                         </thead>
-                        <tbody>{this.getUserList()}</tbody>
+                        <tbody>{legacy.getUserList()}</tbody>
                     </table>
                 </div>
             </div>
         );
-    }
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    return legacy.render();
 }
+export default inject('userStore')(observer(DefaultComponent));

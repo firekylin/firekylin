@@ -1,23 +1,16 @@
 import * as React from 'react';
 import { NavLink } from '../utils/router';
 import { InitiateRoutes, InitiateThemePages } from './data/routes.data';
-class SideBar extends React.Component<any, any> {
-    state = this.initState();
-    
-    constructor(props: any) {
-        super(props);
+
+function createSidebarState() {
+    const themePages = [...InitiateThemePages];
+    if (!window.SysConfig.config.disallow_file_edit) {
+        themePages.push({url: '/appearance/edit', title: '编辑主题'});
     }
-
-    initState() {
-        const themePages = [...InitiateThemePages];
-        if (!window.SysConfig.config.disallow_file_edit) {
-            themePages.push({url: '/appearance/edit', title: '编辑主题'});
-        }
-
-        const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce((routes, plugin) =>
-            routes.concat(plugin.panels.filter(panel =>
-                plugin.pages.some(page => page.panel === panel.id && page.menu !== false)
-            ).map(panel => {
+    const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce(
+        (routes, plugin) => routes.concat(plugin.panels
+            .filter(panel => plugin.pages.some(page => page.panel === panel.id && page.menu !== false))
+            .map(panel => {
                 const pages = plugin.pages.filter(page => page.panel === panel.id && page.menu !== false);
                 return {
                     url: `/plugins/${plugin.id}/${pages[0].id}`,
@@ -26,38 +19,105 @@ class SideBar extends React.Component<any, any> {
                     type: 1,
                     children: pages.length > 1 ? pages.map(page => ({
                         url: `/plugins/${plugin.id}/${page.id}`,
-                        title: page.title
-                    })) : undefined
+                        title: page.title,
+                    })) : undefined,
                 };
-            })), []);
+            })),
+        [],
+    );
+    return {routes: [...InitiateRoutes(themePages), ...pluginRoutes], isActive: {}};
+}
+function SideBar(props: any) {
+    const [state, setState] = React.useState(createSidebarState);
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+    }
+    legacy.initState = function initState() {
+        const themePages = [...InitiateThemePages];
+        if (!window.SysConfig.config.disallow_file_edit) {
+            themePages.push({ url: '/appearance/edit', title: '编辑主题' });
+        }
+
+        const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce(
+            (routes, plugin) =>
+                routes.concat(
+                    plugin.panels
+                        .filter((panel) =>
+                            plugin.pages.some(
+                                (page) => page.panel === panel.id && page.menu !== false,
+                            ),
+                        )
+                        .map((panel) => {
+                            const pages = plugin.pages.filter(
+                                (page) => page.panel === panel.id && page.menu !== false,
+                            );
+                            return {
+                                url: `/plugins/${plugin.id}/${pages[0].id}`,
+                                icon: panel.icon || 'plugin',
+                                title: panel.title,
+                                type: 1,
+                                children:
+                                    pages.length > 1
+                                        ? pages.map((page) => ({
+                                              url: `/plugins/${plugin.id}/${page.id}`,
+                                              title: page.title,
+                                          }))
+                                        : undefined,
+                            };
+                        }),
+                ),
+            [],
+        );
         return {
             routes: [...InitiateRoutes(themePages), ...pluginRoutes],
-            isActive: {}
+            isActive: {},
         };
-    }
-    isActive(routeUrl: string): boolean {
+    };
+    legacy.isActive = function isActive(routeUrl: string): boolean {
         const currentPath = location.pathname.replace(/^\/admin(?=\/|$)/, '');
         return currentPath === routeUrl || currentPath.startsWith(`${routeUrl}/`);
-    }
-    isSectionActive(route: any): boolean {
-        return this.isActive(route.url) || Boolean(route.children && route.children.some(child =>
-            this.isActive(child.url)));
-    }
-    open(routeUrl: string) {
-        this.props.history.push(routeUrl);
-    }
-
-    render() {
-        let routes = this.state.routes;
+    };
+    legacy.isSectionActive = function isSectionActive(route: any): boolean {
+        return (
+            legacy.isActive(route.url) ||
+            Boolean(
+                route.children &&
+                route.children.some((child) => legacy.isActive(child.url)),
+            )
+        );
+    };
+    legacy.open = function open(routeUrl: string) {
+        props.history.push(routeUrl);
+    };
+    legacy.render = function render() {
+        let routes = legacy.state.routes;
         let userType = window.SysConfig.userInfo.type || 0;
         if (userType === 4) {
             routes = [
-                {url: '/comment', icon: 'topic', title: '我的评论'},
-                {url: `/user/edit/${window.SysConfig.userInfo.id}`, icon: 'user', title: '账号设置'},
-                {url: '/user/edit_pwd', icon: 'setting', title: '修改密码'},
+                { url: '/comment', icon: 'topic', title: '我的评论' },
+                {
+                    url: `/user/edit/${window.SysConfig.userInfo.id}`,
+                    icon: 'user',
+                    title: '账号设置',
+                },
+                { url: '/user/edit_pwd', icon: 'setting', title: '修改密码' },
             ];
         } else {
-            routes = routes.filter(item => {
+            routes = routes.filter((item) => {
                 if (!item.type) {
                     return true;
                 }
@@ -70,41 +130,53 @@ class SideBar extends React.Component<any, any> {
             <div className="fk-side ps-container" id="fk-side">
                 <div className="mod">
                     <div className="mod-logo">
-                        <h1><a href="/">{window.SysConfig.options.title}</a></h1>
+                        <h1>
+                            <a href="/">{window.SysConfig.options.title}</a>
+                        </h1>
                     </div>
                 </div>
-                <ul className="mod-bar" style={{marginTop: 10}}>
+                <ul className="mod-bar" style={{ marginTop: 10 }}>
                     <input type="hidden" id="hide_values" value="0" />
-                    {routes.map((route, i) =>
+                    {routes.map((route, i) => (
                         <li key={i}>
-                            <NavLink to={route.url} onClick={() => this.open(route.url)}
-                                className={`icon icon-${route.icon} ${route.children && this.isSectionActive(route) ? 'active' : ''}`}
+                            <NavLink
+                                to={route.url}
+                                onClick={() => legacy.open(route.url)}
+                                className={`icon icon-${route.icon} ${route.children && legacy.isSectionActive(route) ? 'active' : ''}`}
                                 activeClassName="active"
                             >
                                 <span>{route.title}</span>
                             </NavLink>
-                            {
-                                route.children 
-                                ?
-                                    <ul style={{height: 49 * (this.isSectionActive(route) ? route.children.length : 0)}}>
-                                        {route.children.map((child, j) =>
+                            {route.children ? (
+                                <ul
+                                    style={{
+                                        height:
+                                            49 *
+                                            (legacy.isSectionActive(route)
+                                                ? route.children.length
+                                                : 0),
+                                    }}
+                                >
+                                    {route.children.map((child, j) => (
                                         <li key={j}>
-                                            <NavLink to={child.url} onClick={() => this.open(child.url)}
-                                                activeClassName="active">
+                                            <NavLink
+                                                to={child.url}
+                                                onClick={() => legacy.open(child.url)}
+                                                activeClassName="active"
+                                            >
                                                 <span>{child.title}</span>
                                             </NavLink>
                                         </li>
-                                        )}
-                                    </ul>
-                                :
-                                null
-                            }
+                                    ))}
+                                </ul>
+                            ) : null}
                         </li>
-                    )}
+                    ))}
                 </ul>
             </div>
         );
-    }
+    };
+    return legacy.render();
 }
 
 export default SideBar;

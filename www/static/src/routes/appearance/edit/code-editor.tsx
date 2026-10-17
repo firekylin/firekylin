@@ -1,6 +1,16 @@
-import React from 'react';
-import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
-import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
+import React, { useEffect, useRef } from 'react';
+import {
+    autocompletion,
+    closeBrackets,
+    closeBracketsKeymap,
+    completionKeymap,
+} from '@codemirror/autocomplete';
+import {
+    defaultKeymap,
+    history,
+    historyKeymap,
+    indentWithTab,
+} from '@codemirror/commands';
 import { css } from '@codemirror/lang-css';
 import { javascript } from '@codemirror/lang-javascript';
 import { html } from '@codemirror/lang-html';
@@ -41,16 +51,38 @@ const editorLayout = EditorView.theme({
     '.cm-scroller': { overflow: 'auto' },
 });
 
-export default class CodeEditor extends React.Component<CodeEditorProps> {
-    private container: HTMLDivElement | null = null;
-    private editor?: EditorView;
-    private language = new Compartment();
+function getLanguage(path: string): Extension {
+    const extension = path.split('.').pop()?.toLowerCase();
+    switch (extension) {
+        case 'js':
+            return javascript();
+        case 'json':
+            return json();
+        case 'css':
+            return css();
+        case 'eta':
+        case 'ejs':
+            return eta();
+        case 'html':
+        default:
+            return html();
+    }
+}
 
-    componentDidMount() {
-        this.editor = new EditorView({
-            parent: this.container as HTMLDivElement,
+export default function CodeEditor({ path, value, onChange }: CodeEditorProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const editorRef = useRef<EditorView | null>(null);
+    const languageRef = useRef(new Compartment());
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+        const language = languageRef.current;
+        const editor = new EditorView({
+            parent: containerRef.current,
             state: EditorState.create({
-                doc: this.props.value,
+                doc: value,
                 extensions: [
                     lineNumbers(),
                     highlightActiveLineGutter(),
@@ -78,57 +110,38 @@ export default class CodeEditor extends React.Component<CodeEditorProps> {
                     ]),
                     monokai,
                     editorLayout,
-                    this.language.of(this.getLanguage(this.props.path)),
-                    EditorView.updateListener.of(update => {
+                    language.of(getLanguage(path)),
+                    EditorView.updateListener.of((update) => {
                         if (update.docChanged) {
-                            this.props.onChange(update.state.doc.toString());
+                            onChangeRef.current(update.state.doc.toString());
                         }
                     }),
                 ],
             }),
         });
-    }
+        editorRef.current = editor;
+        return () => {
+            editor.destroy();
+            editorRef.current = null;
+        };
+    }, []);
 
-    componentDidUpdate(previous: CodeEditorProps) {
-        if (!this.editor) return;
+    useEffect(() => {
+        editorRef.current?.dispatch({
+            effects: languageRef.current.reconfigure(getLanguage(path)),
+        });
+    }, [path]);
 
-        if (previous.path !== this.props.path) {
-            this.editor.dispatch({
-                effects: this.language.reconfigure(this.getLanguage(this.props.path)),
+    useEffect(() => {
+        const editor = editorRef.current;
+        if (!editor) return;
+        const currentValue = editor.state.doc.toString();
+        if (currentValue !== value) {
+            editor.dispatch({
+                changes: { from: 0, to: currentValue.length, insert: value },
             });
         }
+    }, [value]);
 
-        const currentValue = this.editor.state.doc.toString();
-        if (currentValue !== this.props.value) {
-            this.editor.dispatch({
-                changes: { from: 0, to: currentValue.length, insert: this.props.value },
-            });
-        }
-    }
-
-    componentWillUnmount() {
-        this.editor?.destroy();
-    }
-
-    getLanguage(path: string): Extension {
-        const extension = path.split('.').pop()?.toLowerCase();
-        switch (extension) {
-            case 'js':
-                return javascript();
-            case 'json':
-                return json();
-            case 'css':
-                return css();
-            case 'eta':
-            case 'ejs':
-                return eta();
-            case 'html':
-            default:
-                return html();
-        }
-    }
-
-    render() {
-        return <div ref={element => { this.container = element; }} />;
-    }
+    return <div ref={containerRef} />;
 }

@@ -7,71 +7,78 @@ import { inject, observer } from '@admin/utils/mobx-react';
 import { GeneralProps } from './general.model';
 import type { UploadChangeParam } from 'antd/es/upload/interface';
 import './general.less';
-
-@inject('generalStore')
-@observer
-class GeneralForm extends React.Component<GeneralProps, {}> {
-    formRef = React.createRef<FormInstance>();
-
-    constructor(props: GeneralProps) {
-        super(props);
+function GeneralForm(props: GeneralProps) {
+    const [state, setState] = React.useState(() => ({}));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+        legacy.formRef = React.createRef<FormInstance>();
+        legacy.handleSubmit = (values: any) => {
+            props.generalStore.submit(values);
+        };
+        legacy.handleChange = (info: UploadChangeParam, type: 'logo' | 'favicon') => {
+            if (info.file.status === 'uploading') {
+                legacy.setState({ loading: true });
+                return;
+            }
+            if (info.file.status === 'done') {
+                legacy.setState({ loading: false });
+                legacy.handleFile(info, type);
+            }
+        };
     }
-
-    componentDidMount() {
+    legacy.onMount = function onMount() {
         //
-    }
-
-    handleSubmit = (values: any) => {
-        this.props.generalStore.submit(values);
-    }
-
-    handleChange = (info: UploadChangeParam, type: 'logo' | 'favicon') => {
-        if (info.file.status === 'uploading') {
-          this.setState({ loading: true });
-          return;
-        }
-        if (info.file.status === 'done') {
-          this.setState({loading: false});
-          this.handleFile(info, type);
-        }
-    }
-
-    getBase64(img: any, callback: Function) {
+    };
+    legacy.getBase64 = function getBase64(img: any, callback: Function) {
         const reader = new FileReader();
         reader.addEventListener('load', () => callback(reader.result));
         reader.readAsDataURL(img);
-    }
-
-    handleFile(fileInfo: UploadChangeParam, type: 'logo' | 'favicon') {
+    };
+    legacy.handleFile = function handleFile(
+        fileInfo: UploadChangeParam,
+        type: 'logo' | 'favicon',
+    ) {
         if (fileInfo.file.response.errno !== 0) {
             message.error(fileInfo.file.response.errmsg);
         } else {
             const url = fileInfo.file.response.data;
             if (type === 'logo') {
-                this.formRef.current?.setFieldsValue({
-                    logo_url: url
+                legacy.formRef.current?.setFieldsValue({
+                    logo_url: url,
                 });
                 window.SysConfig.options.logo_url = url;
-                this.props.generalStore.setData({options: window.SysConfig.options});
+                props.generalStore.setData({ options: window.SysConfig.options });
             } else {
-                this.formRef.current?.setFieldsValue({
-                    favicon_url: url
+                legacy.formRef.current?.setFieldsValue({
+                    favicon_url: url,
                 });
                 window.SysConfig.options.favicon_url = url;
-                this.props.generalStore.setData({options: window.SysConfig.options});
+                props.generalStore.setData({ options: window.SysConfig.options });
             }
         }
-    }
-
-    beforeUpload(file: File) {
+    };
+    legacy.beforeUpload = function beforeUpload(file: File) {
         const isLt5M = file.size / 1024 / 1024 < 5;
         if (!isLt5M) {
             message.error('图片必须小于5MB!');
         }
         return isLt5M;
-    }
-
-    render() {
+    };
+    legacy.render = function render() {
         const formItemLayout = {
             labelCol: {
                 xl: { span: 24 },
@@ -84,15 +91,15 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         };
         const tailFormItemLayout = {
             wrapperCol: {
-              xl: {
-                span: 16,
-                offset: 0,
-              }
+                xl: {
+                    span: 16,
+                    offset: 0,
+                },
             },
         };
 
         const { options } = window.SysConfig;
-        const { loading } = this.props.generalStore;
+        const { loading } = props.generalStore;
         const { logo_url, favicon_url } = options;
         let [logoUrl, iconUrl] = [logo_url, favicon_url];
         if (logoUrl && !logoUrl.includes('data:image')) {
@@ -103,54 +110,68 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
         }
         const uploadButton = (
             <div>
-              {this.props.generalStore.loading.logo ? <LoadingOutlined /> : <PlusOutlined />}
-              <div className="ant-upload-text">Upload</div>
+                {props.generalStore.loading.logo ? (
+                    <LoadingOutlined />
+                ) : (
+                    <PlusOutlined />
+                )}
+                <div className="ant-upload-text">Upload</div>
             </div>
         );
 
         return (
             <>
-                <BreadCrumb className="breadcrumb" {...this.props} />
+                <BreadCrumb className="breadcrumb" {...props} />
                 <div className="options-general-page page-list">
                     <h3 className="page-title">基本设置</h3>
-                    <Form ref={this.formRef} onFinish={this.handleSubmit} layout="vertical" scrollToFirstError>
+                    <Form
+                        ref={legacy.formRef}
+                        onFinish={legacy.handleSubmit}
+                        layout="vertical"
+                        scrollToFirstError
+                    >
                         <Form.Item
                             {...formItemLayout}
                             label="站点名称"
                             name="title"
-                            rules={[{
-                                required: true, message: '请填写站点名称',
-                            }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写站点名称',
+                                },
+                            ]}
                             initialValue={options.title}
                         >
                             <Input />
                         </Form.Item>
-                        <Form.Item
-                            {...formItemLayout}
-                            label="LOGO 地址"
-                        >
+                        <Form.Item {...formItemLayout} label="LOGO 地址">
                             <Upload
                                 name="file"
                                 listType="picture-card"
                                 accept=""
                                 className="avatar-uploader"
                                 showUploadList={false}
-                                style={{width: 140, height: 140}}
+                                style={{ width: 140, height: 140 }}
                                 action="/admin/api/file"
-                                beforeUpload={this.beforeUpload}
-                                onChange={e => this.handleChange(e, 'logo')}
+                                beforeUpload={legacy.beforeUpload}
+                                onChange={(e) => legacy.handleChange(e, 'logo')}
                             >
-                                {logoUrl ? <img src={logo_url} alt="avatar" /> : uploadButton}
+                                {logoUrl ? (
+                                    <img src={logo_url} alt="avatar" />
+                                ) : (
+                                    uploadButton
+                                )}
                             </Upload>
-                            <Form.Item
-                                name="logo_url"
-                                initialValue={logo_url}
-                                noStyle
-                            >
-                                <Input onChange={e => {
-                                    window.SysConfig.options.logo_url = e.target.value;
-                                    this.props.generalStore.setData({options: window.SysConfig.options});
-                                }} />
+                            <Form.Item name="logo_url" initialValue={logo_url} noStyle>
+                                <Input
+                                    onChange={(e) => {
+                                        window.SysConfig.options.logo_url =
+                                            e.target.value;
+                                        props.generalStore.setData({
+                                            options: window.SysConfig.options,
+                                        });
+                                    }}
+                                />
                             </Form.Item>
                             <p>尺寸最好为 140x140px。</p>
                         </Form.Item>
@@ -158,9 +179,12 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
                             {...formItemLayout}
                             label="站点描述"
                             name="description"
-                            rules={[{
-                                required: true, message: '请填写站点描述',
-                            }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写站点描述',
+                                },
+                            ]}
                             initialValue={options.description}
                         >
                             <Input />
@@ -173,32 +197,38 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
                         >
                             <Input />
                         </Form.Item>
-                        <Form.Item
-                            {...formItemLayout}
-                            label="Favicon 地址"
-                        >
+                        <Form.Item {...formItemLayout} label="Favicon 地址">
                             <Upload
                                 name="file"
                                 listType="picture-card"
                                 accept=".ico"
                                 className="avatar-uploader"
                                 showUploadList={false}
-                                style={{width: 140, height: 140}}
+                                style={{ width: 140, height: 140 }}
                                 action="/admin/api/file"
-                                beforeUpload={this.beforeUpload}
-                                onChange={e => this.handleChange(e, 'favicon')}
+                                beforeUpload={legacy.beforeUpload}
+                                onChange={(e) => legacy.handleChange(e, 'favicon')}
                             >
-                                {iconUrl ? <img src={favicon_url} alt="avatar" /> : uploadButton}
+                                {iconUrl ? (
+                                    <img src={favicon_url} alt="avatar" />
+                                ) : (
+                                    uploadButton
+                                )}
                             </Upload>
                             <Form.Item
                                 name="favicon_url"
                                 initialValue={favicon_url}
                                 noStyle
                             >
-                                <Input onChange={e => {
-                                    window.SysConfig.options.favicon_url = e.target.value;
-                                    this.props.generalStore.setData({options: window.SysConfig.options});
-                                }} />
+                                <Input
+                                    onChange={(e) => {
+                                        window.SysConfig.options.favicon_url =
+                                            e.target.value;
+                                        props.generalStore.setData({
+                                            options: window.SysConfig.options,
+                                        });
+                                    }}
+                                />
                             </Form.Item>
                             <p>尺寸最好为 128x128px。</p>
                         </Form.Item>
@@ -244,12 +274,23 @@ class GeneralForm extends React.Component<GeneralProps, {}> {
                             <Input />
                         </Form.Item>
                         <Form.Item {...tailFormItemLayout}>
-                            <Button type="primary" htmlType="submit" loading={loading.submit}>提交</Button>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={loading.submit}
+                            >
+                                提交
+                            </Button>
                         </Form.Item>
                     </Form>
                 </div>
             </>
         );
-    }
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    return legacy.render();
 }
-export default GeneralForm;
+
+export default inject('generalStore')(observer(GeneralForm));

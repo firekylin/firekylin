@@ -3,40 +3,56 @@ import { Form, FormInstance } from 'antd';
 import { Input } from 'antd';
 import './article-header.less';
 import classNames from 'classnames';
+function ArticleHeaderForm(props: any) {
+    const [state, setState] = React.useState(() => ({}));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+        legacy.formRef = React.createRef<FormInstance>();
+        legacy.id = 0;
 
-class ArticleHeaderForm extends React.Component<any, {}> {
-    formRef = React.createRef<FormInstance>();
-
-    id: number = 0;
-
-    constructor(props: any) {
-        super(props);
-        this.id = this.props.match.params.id || 0;
+        legacy.id = props.match.params.id || 0;
     }
-
-    componentDidUpdate(prevProps: any) {
-        this.formRef.current?.setFieldsValue({ title: this.props.title });
-    }
-
-    render() {
-        const type = this.props.type;
+    legacy.afterUpdate = function afterUpdate(prevProps: any) {
+        legacy.formRef.current?.setFieldsValue({ title: props.title });
+    };
+    legacy.render = function render() {
+        const type = props.type;
         const baseUrl = `${location.origin}/${['post', 'page'][type]}/`;
-        let postUrl = `/${['post', 'page'][type]}/${encodeURIComponent(this.props.pathname)}.html`;
+        let postUrl = `/${['post', 'page'][type]}/${encodeURIComponent(props.pathname)}.html`;
         return (
             <div className="article-header">
                 <div className="article-header-title">
-                    <h5>{`${this.id ? '编辑' : '撰写'}${type ? '页面' : '文章'}`}</h5>
-                    <Form ref={this.formRef}>
+                    <h5>{`${legacy.id ? '编辑' : '撰写'}${type ? '页面' : '文章'}`}</h5>
+                    <Form ref={legacy.formRef}>
                         <Form.Item
                             name="title"
-                            rules={[{
-                                required: true, message: '请输入标题',
-                            }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请输入标题',
+                                },
+                            ]}
                         >
                             <Input
-                                onChange={e => this.props.handleTitle(e)}
+                                onChange={(e) => props.handleTitle(e)}
                                 placeholder="标题"
-                                className={classNames({'has-error': this.props.hasError.title})}
+                                className={classNames({
+                                    'has-error': props.hasError.title,
+                                })}
                             />
                         </Form.Item>
                     </Form>
@@ -44,24 +60,41 @@ class ArticleHeaderForm extends React.Component<any, {}> {
                 <div className="article-header-pathname">
                     <span>{baseUrl}</span>
                     <Input
-                        className={classNames('pathname-input', {'has-error': this.props.hasError.pathname})}
-                        disabled={this.props.status === 3}
-                        value={this.props.pathname}
-                        onChange={e => this.props.handlePath(e)}
+                        className={classNames('pathname-input', {
+                            'has-error': props.hasError.pathname,
+                        })}
+                        disabled={props.status === 3}
+                        value={props.pathname}
+                        onChange={(e) => props.handlePath(e)}
                     />
+
                     <span>.html </span>
-                    {this.props.status === 3 && this.props.isPublic ?
-                        <a style={{marginLeft: 8}} href={postUrl} target="_blank">
+                    {props.status === 3 && props.isPublic ? (
+                        <a style={{ marginLeft: 8 }} href={postUrl} target="_blank">
                             <span className="glyphicon glyphicon-link" />
-                        </a> : null
-                    }
-                    <a title="预览" style={{marginLeft: 8}} onClick={() => this.props.preview()}>
+                        </a>
+                    ) : null}
+                    <a
+                        title="预览"
+                        style={{ marginLeft: 8 }}
+                        onClick={() => props.preview()}
+                    >
                         <span className="glyphicon glyphicon-eye-open" />
                     </a>
                 </div>
             </div>
         );
-    }
+    };
+    const previousRef = React.useRef({ props: props, state: state, mounted: false });
+    React.useEffect(() => {
+        if (previousRef.current.mounted)
+            legacy.afterUpdate(
+                previousRef.current.props,
+                previousRef.current.state,
+            );
+        previousRef.current = { props: props, state: state, mounted: true };
+    });
+    return legacy.render();
 }
 
 export default ArticleHeaderForm;

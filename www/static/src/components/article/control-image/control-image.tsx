@@ -6,27 +6,25 @@ interface ACImageProps {
     handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-class ArticleControlImage extends React.Component<ACImageProps, any> {
-    constructor(props: any) {
-        super(props);
-    }
-
-    render() {
-        const imageUrl = this.props.imageUrl;
-
-        return (
-            <>
-                <Input value={this.props.imageUrl} onChange={this.props.handleImageChange} placeholder="请输入图片链接" />
-                {
-                    imageUrl 
-                    ?   <img src={imageUrl} title={imageUrl}
-                            className="img-thumbnail featured-image"
-                            onClick={() => window.open(imageUrl, '_blank')} />
-                    :   null
-                 }
-            </>
-        );
-    }
+function ArticleControlImage(props: ACImageProps) {
+    const { imageUrl, handleImageChange } = props;
+    return (
+        <>
+            <Input
+                value={imageUrl}
+                onChange={handleImageChange}
+                placeholder="请输入图片链接"
+            />
+            {imageUrl ? (
+                <img
+                    src={imageUrl}
+                    title={imageUrl}
+                    className="img-thumbnail featured-image"
+                    onClick={() => window.open(imageUrl, '_blank')}
+                />
+            ) : null}
+        </>
+    );
 }
 
 export default ArticleControlImage;

@@ -8,25 +8,23 @@ interface ACPublicProps {
     handlePublicChange: (e: RadioChangeEvent) => void;
 }
 
-class ArticleControlPublic extends React.Component<ACPublicProps, any> {
-    constructor(props: any) {
-        super(props);
-    }
-
-    render() {
-        const radioStyle = {
-          display: 'flex',
-          alignItems: 'center',
-          height: '30px',
-          lineHeight: '30px',
-        };
-        return (
-          <RadioGroup onChange={this.props.handlePublicChange} value={this.props.isPublic}>
-            <Radio style={radioStyle} value={'1'}>公开</Radio>
-            <Radio style={radioStyle} value={'0'}>不公开</Radio>
-          </RadioGroup>
-        );
-    }
+function ArticleControlPublic({ handlePublicChange, isPublic }: ACPublicProps) {
+    const radioStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        height: '30px',
+        lineHeight: '30px',
+    };
+    return (
+        <RadioGroup onChange={handlePublicChange} value={isPublic}>
+            <Radio style={radioStyle} value={'1'}>
+                公开
+            </Radio>
+            <Radio style={radioStyle} value={'0'}>
+                不公开
+            </Radio>
+        </RadioGroup>
+    );
 }
 
 export default ArticleControlPublic;
