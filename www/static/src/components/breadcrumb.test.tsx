@@ -13,7 +13,7 @@ describe('BreadCrumb', () => {
 
         const view = render(
             <BrowserRouter>
-                <BreadCrumb location={{ pathname: '/dashboard' }} />
+                <BreadCrumb />
             </BrowserRouter>,
         );
 

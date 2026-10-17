@@ -1,5 +1,5 @@
 import classnames from 'classnames';
-import { Link } from '../utils/router';
+import { Link, useLocation } from '../utils/router';
 import * as React from 'react';
 import { SideBarItem } from './types/routes.model';
 import { InitiateRoutes } from './data/routes.data';
@@ -9,6 +9,7 @@ interface BreadCrumbState {
     crumb: SideBarItem[];
 }
 function BreadCrumb(props: any) {
+    const location = useLocation();
     const [state, setState] = React.useState(() => ({
         userOpen: false,
         crumb: [],
@@ -53,8 +54,8 @@ function BreadCrumb(props: any) {
             });
         });
 
-        if (legacy.crumbs[props.location.pathname]) {
-            legacy.state.crumb = legacy.crumbs[props.location.pathname];
+        if (legacy.crumbs[location.pathname]) {
+            legacy.state.crumb = legacy.crumbs[location.pathname];
         }
     }
     legacy.onMount = function onMount() {
@@ -93,7 +94,7 @@ function BreadCrumb(props: any) {
                         <Link to="/dashboard">首页</Link>
                     </li>
                     {legacy.state.crumb.map((item, i) => {
-                        if (item.url === props.location.pathname) {
+                        if (item.url === location.pathname) {
                             return (
                                 <li key={i} className="active">
                                     {item.title}

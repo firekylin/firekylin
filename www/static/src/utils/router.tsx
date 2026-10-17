@@ -9,7 +9,7 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
-export { BrowserRouter, Link };
+export { BrowserRouter, Link, useLocation };
 
 export interface RouteComponentProps<Params extends object = {}> {
     history: {

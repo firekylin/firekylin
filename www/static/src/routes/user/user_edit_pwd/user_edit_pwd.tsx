@@ -9,7 +9,7 @@ import UserStore from '../user.store';
 interface UserEditPWDProps {
     userStore: UserStore;
 }
-function UserEditPwdForm(props: UserEditPWDProps) {
+export function UserEditPwdForm(props: UserEditPWDProps) {
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -47,11 +47,11 @@ function UserEditPwdForm(props: UserEditPWDProps) {
         };
     }
     legacy.render = function render() {
-        let props = {
+        const formProps = {
             disabled: false,
         };
         if (legacy.userStore.userEditPwdState.submitting) {
-            props.disabled = true;
+            formProps.disabled = true;
         }
 
         let options = window.SysConfig.options;
@@ -128,7 +128,11 @@ function UserEditPwdForm(props: UserEditPWDProps) {
                             >
                                 <Input type="password" placeholder="请再次输入密码" />
                             </Form.Item>
-                            <button type="submit" {...props} className="btn btn-primary">
+                            <button
+                                type="submit"
+                                {...formProps}
+                                className="btn btn-primary"
+                            >
                                 {legacy.userStore.userEditPwdState.submitting
                                     ? '提交中...'
                                     : '提交'}
