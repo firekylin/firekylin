@@ -26,6 +26,17 @@ function exposedTools(tools, scopes) {
     tool.requiredPermissions.every(permission => scopes.has(permission)));
 }
 
+function toolAnnotations(tool) {
+  const readOnly = /^(posts\.(?:list|get|search|listManaged|getManaged)|categories\.list|tags\.list|comments\.list)$/.test(tool.name);
+  const destructive = /^(posts\.delete)$/.test(tool.name);
+  return {
+    readOnlyHint: readOnly,
+    destructiveHint: destructive,
+    idempotentHint: readOnly,
+    openWorldHint: false
+  };
+}
+
 function createServerFactory({tools, auth, sdk, logger}) {
   const {McpServer, fromJsonSchema} = sdk;
   return () => {
@@ -33,6 +44,7 @@ function createServerFactory({tools, auth, sdk, logger}) {
     for (const tool of exposedTools(tools.list(), auth.scopes)) {
       server.registerTool(tool.name, {
         description: tool.description,
+        annotations: toolAnnotations(tool),
         inputSchema: fromJsonSchema(tool.inputSchema || {type: 'object', properties: {}, additionalProperties: false})
       }, async input => {
         const started = Date.now();
@@ -133,4 +145,4 @@ async function createMcpEndpoint({
   };
 }
 
-module.exports = {createMcpEndpoint, createServerFactory, exposedTools, readBody};
+module.exports = {createMcpEndpoint, createServerFactory, exposedTools, toolAnnotations, readBody};

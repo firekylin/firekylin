@@ -10,7 +10,8 @@ module.exports = class extends BaseRest {
       'api/post/put', 'api/post/post', 'api/post/delete',
       'api/markdown/post',
       'api/file/post', 'api/file/get',
-      'api/attachment/delete'
+      'api/attachment/delete',
+      'api/mcp/delete'
     ];
   }
 

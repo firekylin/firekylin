@@ -169,6 +169,10 @@ export const InitiateRoutes = (themePages) => [{
             {
                 url: '/options/export',
                 title: '导出数据'
+            },
+            {
+                url: '/options/mcp',
+                title: 'AI 应用授权'
             }
         ]
     }
