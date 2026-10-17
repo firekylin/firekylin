@@ -52,6 +52,15 @@ test('manager discovers and activates a plugin with an isolated context', async(
   delete global.__firekylinPluginCalled;
 });
 
+test('package management API is only exposed to plugins declaring its permission', () => {
+  const api = {list() { return [] }};
+  const manager = new PluginManager({packageApi: api});
+  const allowed = {manifest: {id: 'market', permissions: ['packages:manage']}, root: '/tmp', plugin: {}};
+  const denied = {manifest: {id: 'other', permissions: []}, root: '/tmp', plugin: {}};
+  assert.equal(manager.context(allowed).packages.list, api.list);
+  assert.equal('packages' in manager.context(denied), false);
+});
+
 test('manager isolates invalid plugins and continues loading', async() => {
   const root = project();
   writePlugin(root, 'invalid', 'module.exports = {};');

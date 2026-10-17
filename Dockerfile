@@ -38,6 +38,8 @@ FROM node:24-alpine
 ENV APP_PATH=/opt/firekylin
 ENV VOLUME_PATH=/var/lib/firekylin
 
+RUN npm i -g pnpm@12.11.2
+
 COPY --from=builder /app/output $APP_PATH
 
 WORKDIR $APP_PATH

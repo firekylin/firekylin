@@ -81,7 +81,7 @@ function resolveInside(root, entry, label) {
 }
 
 class PluginManager {
-  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus} = {}) {
+  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi} = {}) {
     this.projectPath = projectPath || process.cwd();
     this.config = config || {};
     this.logger = logger || console;
@@ -93,6 +93,7 @@ class PluginManager {
     this.admin = new AdminRegistry();
     this.plugins = new Map();
     this.states = new Map();
+    this.packageApi = packageApi;
   }
 
   logError(error, listener) {
@@ -181,6 +182,7 @@ class PluginManager {
 
   context(record) {
     const pluginId = record.manifest.id;
+    const permissions = Array.isArray(record.manifest.permissions) ? record.manifest.permissions : [];
     return Object.freeze({
       id: pluginId,
       manifest: Object.freeze({...record.manifest}),
@@ -203,6 +205,9 @@ class PluginManager {
         registerForm: definition => this.admin.registerForm(definition, pluginId),
         registerAction: definition => this.admin.registerAction(definition, pluginId)
       }),
+      ...(this.packageApi && permissions.includes('packages:manage') ? {
+        packages: Object.freeze({...this.packageApi})
+      } : {}),
       widgets: Object.freeze({
         Widget,
         ContentsWidget,
