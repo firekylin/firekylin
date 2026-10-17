@@ -5,6 +5,7 @@ import CategoryStore from './category.store';
 export interface CategoryCreateParams {
     name: string;
     pathname: string;
+    description: string;
     pid: number;
 }
 

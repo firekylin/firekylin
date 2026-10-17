@@ -3,6 +3,7 @@ const dayjs = require('dayjs');
 const Base = require('./base');
 const PostQueryService = require('../../../service/post-query');
 const PostCommandService = require('../../../service/post-command');
+const permalink = require('../../../service/permalink');
 
 module.exports = class extends Base {
   constructor(...args) {
@@ -52,7 +53,13 @@ module.exports = class extends Base {
         PATHNAME_EXIST: 'PATHNAME_EXIST',
         'Post not found or permission denied': 'USER_NO_PERMISSION',
         'Authenticated author required': 'USER_NO_PERMISSION',
-        'Invalid post ID': 'PARAMS_ERROR'
+        'Invalid post ID': 'PARAMS_ERROR',
+        'Invalid author ID': 'PARAMS_ERROR',
+        'Invalid is_public': 'PARAMS_ERROR',
+        'Invalid allow_comment': 'PARAMS_ERROR',
+        'Only administrators can change post authors': 'USER_NO_PERMISSION',
+        'Invalid bulk operation': 'PARAMS_ERROR',
+        'Bulk edit requires a change': 'PARAMS_ERROR'
       };
       if (Object.hasOwn(failures, error.message)) return this.fail(failures[error.message]);
       throw error;
@@ -80,7 +87,11 @@ module.exports = class extends Base {
         getTagModel: () => this.model('tag')
       });
       // Preserve existing push integration, but do not block persistence on a remote service.
-      if (data.options && data.markdown_content) void this.pushPost(data).catch(error => think.logger.error(error));
+      if (data.options && data.markdown_content) {
+        const persisted = await this.model('post').where({id: Number(result && result.id || result)}).setRelation(false)
+          .find();
+        void this.pushPost({...data, ...persisted}).catch(error => think.logger.error(error));
+      }
       return this.success(result);
     });
   }
@@ -90,6 +101,14 @@ module.exports = class extends Base {
    */
   async putAction() {
     return this.runCommand(async() => {
+      if (!this.id && Array.isArray(this.post('ids'))) {
+        const result = await this.commandService().bulk(this.post(), this.userInfo, {
+          getTagModel: () => this.model('tag'),
+          getUserModel: () => this.model('user'),
+          prepare: (next, post) => this.prepareProtection(next, post.options)
+        });
+        return this.success(result);
+      }
       if (!this.id) return this.fail('PARAMS_ERROR');
       const data = {...this.post(), id: Number(this.id)};
       const result = await this.commandService().update(data, this.userInfo, {
@@ -137,7 +156,7 @@ module.exports = class extends Base {
       const site_url = Object.prototype.hasOwnProperty.call(options, 'site_url')
         ? options.site_url
         : `http://${this.ctx.host}`;
-      post.markdown_content = `> 原文：${site_url}/post/${post.pathname}.html
+      post.markdown_content = `> 原文：${site_url}${permalink.generate('post', post, options)}
 
 ${post.markdown_content}`;
     }

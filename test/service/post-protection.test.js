@@ -38,3 +38,9 @@ test('password prompt escapes its action URL', () => {
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /name="protectPassword"/);
 });
+
+test('password prompt preserves a custom permalink after an internal rewrite', () => {
+  const service = new PostProtection();
+  const html = service.form({path: '/post/hello.html', state: {originalPermalink: '/hello.html?source=list'}});
+  assert.match(html, /action="\/hello\.html\?source=list"/);
+});

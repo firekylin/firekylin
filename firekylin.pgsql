@@ -4,7 +4,8 @@ CREATE TABLE fk_cate (
     id SERIAL PRIMARY KEY,
     name character varying(255) UNIQUE,
     pid integer DEFAULT 0,
-    pathname character varying(255)
+    pathname character varying(255),
+    description text
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS fk_cate_pkey ON fk_cate(id int4_ops);

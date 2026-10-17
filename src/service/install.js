@@ -205,6 +205,8 @@ module.exports = class extends think.Service {
     await optionsModel.updateOptions('password_salt', salt);
     await optionsModel.updateOptions('logo_url', '/static/img/firekylin.jpg');
     await optionsModel.updateOptions('theme', 'firekylin');
+    await optionsModel.updateOptions('post_permalink', '/post/{slug}.html');
+    await optionsModel.updateOptions('page_permalink', '/page/{slug}.html');
     // optionsModel.close();
   }
 

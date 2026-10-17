@@ -92,8 +92,52 @@ class PostCommandService {
     } else if (data.create_time && options.normalizePublishTime) {
       data = options.normalizePublishTime(data, post);
     }
+    if (options.getTagModel && Object.prototype.hasOwnProperty.call(data, 'tag') && !data.markdown_content) {
+      data.tag = await this.resolveTags(data.tag, options.getTagModel);
+    }
     const affectedRows = await model.savePost(data);
     return {id: data.id, affectedRows};
+  }
+
+  async bulk(input, principal, options = {}) {
+    const ids = [...new Set((input.ids || []).map(Number))];
+    if (!ids.length || ids.some(id => !Number.isSafeInteger(id) || id < 1)) {
+      throw new TypeError('Invalid post ID');
+    }
+    await Promise.all(ids.map(id => this.editable(id, principal)));
+    if (input.operation === 'delete') {
+      await Promise.all(ids.map(id => this.update({id, status: 4}, principal)));
+    } else if (input.operation === 'forceDelete') {
+      await Promise.all(ids.map(id => this.remove(id, principal)));
+    } else if (input.operation === 'edit') {
+      const changes = {};
+      if (Object.prototype.hasOwnProperty.call(input, 'cate')) changes.cate = input.cate;
+      if (Object.prototype.hasOwnProperty.call(input, 'tag')) changes.tag = input.tag;
+      for (const name of ['is_public', 'allow_comment', 'post_password', 'clear_post_password']) {
+        if (Object.prototype.hasOwnProperty.call(input, name)) changes[name] = input[name];
+      }
+      if (Object.prototype.hasOwnProperty.call(input, 'user_id')) {
+        if (this.actor(principal).type !== 1) throw new Error('Only administrators can change post authors');
+        const userId = Number(input.user_id);
+        if (!Number.isSafeInteger(userId) || userId < 1) throw new TypeError('Invalid author ID');
+        if (typeof options.getUserModel === 'function') {
+          const user = await options.getUserModel().where({id: userId, type: ['!=', 4]}).setRelation(false)
+            .find();
+          if (!user || !user.id) throw new TypeError('Invalid author ID');
+        }
+        changes.user_id = userId;
+      }
+      for (const name of ['is_public', 'allow_comment']) {
+        if (Object.prototype.hasOwnProperty.call(changes, name) && ![0, 1].includes(Number(changes[name]))) {
+          throw new TypeError(`Invalid ${name}`);
+        }
+      }
+      if (!Object.keys(changes).length) throw new TypeError('Bulk edit requires a change');
+      await Promise.all(ids.map(id => this.update({id, ...changes}, principal, options)));
+    } else {
+      throw new TypeError('Invalid bulk operation');
+    }
+    return {affectedRows: ids.length};
   }
 
   async remove(id, principal) {

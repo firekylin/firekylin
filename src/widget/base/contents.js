@@ -1,4 +1,5 @@
 const Widget = require('../base');
+const permalink = require('../../service/permalink');
 
 function truncate(value, length, trim) {
   const characters = Array.from(String(value || ''));
@@ -47,10 +48,13 @@ module.exports = class ContentsWidget extends Widget {
   }
 
   get permalink() {
-    const type = this.row.type === 2 || this.row.type === 'attachment'
-      ? 'attachment'
-      : this.row.type === 1 || this.row.type === 'page' ? 'page' : 'post';
-    return `/${type}/${this.row.pathname}.html`;
+    if (this.row.type === 2 || this.row.type === 'attachment') return `/attachment/${this.row.pathname}.html`;
+    const type = this.row.type === 1 || this.row.type === 'page' ? 'page' : 'post';
+    return permalink.generate(type, this.row, this.controller.options);
+  }
+
+  permalinkFor(content, type = 'post') {
+    return permalink.generate(type, content, this.controller.options);
   }
 
   get url() {

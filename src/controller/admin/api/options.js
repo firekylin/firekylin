@@ -1,6 +1,7 @@
 const speakeasy = require('speakeasy');
 const PushToFirekylin = require('../../../service/push-to-firekylin');
 const Base = require('./base');
+const permalink = require('../../../service/permalink');
 
 module.exports = class extends Base {
   /**
@@ -67,6 +68,15 @@ module.exports = class extends Base {
     }
 
     const model = this.model('options');
+    for (const key of ['post_permalink', 'page_permalink']) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        try {
+          data[key] = permalink.validate(data[key]);
+        } catch (error) {
+          return this.fail(error.message);
+        }
+      }
+    }
     if (type === 'push') {
       const { id, ...site } = data;
       return this.setPushSites(id, site);

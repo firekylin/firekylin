@@ -4,6 +4,7 @@ const {getContext} = require('../../lib/project-context');
 
 const context = getContext();
 const projectServer = (context.config && context.config.server) || {};
+const projectMarkdown = (context.config && context.config.markdown) || {};
 
 let port;
 const portFile = path.join(think.ROOT_PATH, 'port');
@@ -21,6 +22,16 @@ module.exports = {
   host: host || process.env.HOST || projectServer.host || '0.0.0.0',
   port: port || process.env.PORT || projectServer.port || 8360,
   workers: 1,
+
+  /**
+   * markdown-it options and plugins. Project config may extend this with:
+   * {options: {...}, plugins: [plugin, [plugin, options], {plugin, options}]}
+   */
+  markdown: {
+    options: {},
+    plugins: [],
+    ...projectMarkdown
+  },
 
   /** disable theme editor */
   DISALLOW_FILE_EDIT: process.env.DISALLOW_FILE_EDIT || false

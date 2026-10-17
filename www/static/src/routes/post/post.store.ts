@@ -11,6 +11,8 @@ class PostStore {
   appStore;
   loading = false;
   postList = [];
+  selectedRowKeys: Array<string | number> = [];
+  bulkEditOpen = false;
   postInfo: PostInfo = {
     title: '',
     pathname: '',
@@ -47,6 +49,10 @@ class PostStore {
 
   setLoading = data => this.loading = data
 
+  setSelectedRowKeys = (keys: Array<string | number>) => this.selectedRowKeys = keys
+
+  setBulkEditOpen = (open: boolean) => this.bulkEditOpen = open
+
   setPostList = data => {
     data.map((post, i) => {
       post.key = post.id;
@@ -66,6 +72,8 @@ class PostStore {
 
   setPlReqParams = (params: PostListRequestParams) => {
     this.plReqParams = Object.assign(this.plReqParams, params);
+    this.setSelectedRowKeys([]);
+    this.setBulkEditOpen(false);
     this.getPostList();
   }
 
@@ -173,6 +181,11 @@ class PostStore {
         message.error(err);
       }
     );
+  }
+
+  bulkPost(operation: 'edit' | 'delete' | 'forceDelete', ids: number[], changes: Record<string, any> = {}) {
+    this.setLoading(true);
+    return http.post<any>('/admin/api/post?method=put', {operation, ids, ...changes});
   }
   // 重置
   resetPostInfo() {

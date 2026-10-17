@@ -29,12 +29,22 @@ declare namespace Firekylin {
     disabled?: boolean;
   }
 
+  interface AdminTableSelectionAction {
+    key?: string;
+    action: string;
+    label?: string;
+    input?: Record<string, unknown>;
+    type?: 'default' | 'primary' | 'danger';
+  }
+
   type AdminPageSection =
     | {type: 'text'; title?: string; content: string}
     | {type: 'description'; title?: string; columns?: number; items: Array<{label: string; value: unknown}>}
     | {type: 'table'; title?: string; rowKey?: string; pagination?: boolean;
       columns: Array<{key: string; title: string; type?: 'text' | 'actions'}>; rows: any[];
-      toolbar?: AdminTableAction[]}
+      toolbar?: AdminTableAction[];
+      search?: true | {keys?: string[]; placeholder?: string; width?: number};
+      selection?: {input?: string; actions: AdminTableSelectionAction[]}}
     | {type: 'stat'; title?: string; columns?: number;
       items: Array<{label: string; value: string | number; prefix?: string; suffix?: string; precision?: number}>}
     | {type: 'list'; title?: string; items: Array<string | {title: string; description?: string}>}
@@ -48,6 +58,7 @@ declare namespace Firekylin {
       items: Array<{label: string; href: string; description?: string}>}
     | {type: 'code'; title?: string; content: string; language?: string}
     | {type: 'grid'; columns?: number; items: AdminPageSection[]}
+    | {type: 'tabs'; items: Array<{key: string; label: string; sections: AdminPageSection[]}>}
     | {type: 'form'; id: string}
     | {type: 'actions'; ids?: string[]};
 
@@ -70,6 +81,8 @@ declare namespace Firekylin {
     placeholder?: string;
     required?: boolean;
     options?: Array<{label: string; value: unknown}>;
+    /** Only show and submit this field when another field matches one of these values. */
+    visibleWhen?: {field: string; values: unknown[]};
   }
 
   interface AdminFormDefinition {

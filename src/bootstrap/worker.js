@@ -139,6 +139,15 @@ if (!global[commentMigrationKey]) {
   });
 }
 
+const categoryMigrationKey = Symbol.for('firekylin.categorySchemaMigration');
+if (!global[categoryMigrationKey]) {
+  global[categoryMigrationKey] = true;
+  think.beforeStartServer(async() => {
+    const migrated = await think.service('category-schema').migrate({skipIfUninstalled: true});
+    if (migrated) think.logger.info('[category] database schema migrated');
+  });
+}
+
 const oauthMigrationKey = Symbol.for('firekylin.mcp.oauthMigration');
 if (!global[oauthMigrationKey]) {
   global[oauthMigrationKey] = true;

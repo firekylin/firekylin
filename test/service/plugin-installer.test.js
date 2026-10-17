@@ -60,3 +60,23 @@ test('rejects untrusted names, ranges, read-only installs and concurrent operati
   const readOnly = new PluginInstaller({projectPath: root, readOnly: true});
   await assert.rejects(readOnly.install('@firekylin/plugin-demo', '1.0.0'), /READ_ONLY/);
 });
+
+test('reclaims a lock left by a process that is no longer running', async t => {
+  const calls = [];
+  const {root} = await setup(t, async() => ({stdout: '', stderr: ''}));
+  const statePath = path.join(root, '.firekylin');
+  await fs.mkdir(statePath, {recursive: true});
+  await fs.writeFile(path.join(statePath, 'package-install.lock'), JSON.stringify({
+    pid: 12345, createdAt: '2026-10-17T00:00:00.000Z'
+  }));
+  const installer = new PluginInstaller({projectPath: root,
+    runner: async(command, args) => {
+      calls.push({command, args});
+      return {stdout: 'installed', stderr: ''};
+    },
+    processRunning: pid => pid !== 12345,
+    now: () => Date.parse('2026-10-17T01:00:00.000Z')});
+  await installer.install('@firekylin/plugin-demo', '1.0.0');
+  assert.equal(calls.length, 1);
+  await assert.rejects(fs.access(path.join(statePath, 'package-install.lock')));
+});

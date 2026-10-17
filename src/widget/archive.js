@@ -7,6 +7,7 @@ module.exports = class extends ContentsWidget {
     this.pagination = null;
     this.archiveTitle = '';
     this.archiveSlug = '';
+    this.archiveDescription = '';
     this.grouped = {};
     this.keyword = '';
   }
@@ -51,6 +52,7 @@ module.exports = class extends ContentsWidget {
       if (think.isEmpty(cate) || !cate.name) return this.controller.ctx.throw(404);
       this.archiveTitle = cate.name;
       this.archiveSlug = cate.pathname;
+      this.archiveDescription = cate.description || '';
       where.cate = cate.pathname;
     }
 

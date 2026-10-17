@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const routerREST = require('think-router-rest');
 const pluginRoutes = require('../plugin/middleware');
+const permalinkRoutes = require('../middleware/permalink');
 const builtinMcp = require('../mcp/middleware');
 const {oauthMiddleware} = require('../mcp/oauth-middleware');
 
@@ -72,12 +73,15 @@ module.exports = [
   {
     handle: 'payload',
     options: {
-      limit: '20mb',
+      limit: '28mb',
       uploadDir: think.TMPDIR_PATH
     }
   },
   {
     handle: pluginRoutes
+  },
+  {
+    handle: permalinkRoutes
   },
   {
     handle: 'router',

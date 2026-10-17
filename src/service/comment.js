@@ -2,26 +2,21 @@
 /* eslint-disable max-len */
 
 const crypto = require('crypto');
-const {marked, Renderer} = require('marked');
+const MarkdownIt = require('markdown-it');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
+const permalink = require('./permalink');
+
+const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
 }
 
-function escapeAttribute(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
 function safeMarkdownUrl(value, image = false) {
   let decoded = String(value || '').replace(/&colon;|&#0*58;|&#x0*3a;/ig, ':');
-  try { decoded = decodeURIComponent(decoded) } catch (e) {} // eslint-disable-line no-empty
+  try { decoded = decodeURIComponent(decoded) } catch {} // eslint-disable-line no-empty
   const normalized = decoded.replace(/[\u0000-\u0020]+/g, '').toLowerCase(); // eslint-disable-line no-control-regex
   const scheme = normalized.match(/^([a-z][a-z0-9+.-]*):/);
   if (!scheme) return true;
@@ -29,30 +24,67 @@ function safeMarkdownUrl(value, image = false) {
   return image ? ['http', 'https'].includes(scheme[1]) : ['http', 'https', 'mailto'].includes(scheme[1]);
 }
 
-function renderMarkdown(value) {
-  const renderer = new Renderer();
-  renderer.link = function({href, title, tokens}) {
-    const text = this.parser.parseInline(tokens);
-    if (!safeMarkdownUrl(href)) return text;
-    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
-    return `<a href="${escapeAttribute(href)}"${titleAttribute}>${text}</a>`;
+async function renderMarkdown(value) {
+  const markdown = new MarkdownIt({html: false, linkify: true});
+  markdown.use(await tasklistPlugin);
+  markdown.validateLink = () => true;
+  let unsafeLinkDepth = 0;
+  markdown.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+    const href = tokens[idx].attrGet('href');
+    if (!safeMarkdownUrl(href)) {
+      unsafeLinkDepth++;
+      return '';
+    }
+    return self.renderToken(tokens, idx, options);
   };
-  renderer.image = ({href, title, text}) => {
-    if (!safeMarkdownUrl(href, true)) return escapeAttribute(text || '');
-    const titleAttribute = title ? ` title="${escapeAttribute(title)}"` : '';
-    return `<img src="${escapeAttribute(href)}" alt="${escapeAttribute(text || '')}"${titleAttribute}>`;
+  markdown.renderer.rules.link_close = () => {
+    if (!unsafeLinkDepth) return '</a>';
+    unsafeLinkDepth--;
+    return '';
   };
-  return marked.parse(String(value).replace(/</g, '&lt;').replace(/>/g, '&gt;'), {renderer});
+  const renderImage = markdown.renderer.rules.image;
+  markdown.renderer.rules.image = (tokens, idx, options, env, self) => {
+    const token = tokens[idx];
+    if (!safeMarkdownUrl(token.attrGet('src'), true)) return markdown.utils.escapeHtml(token.content);
+    return renderImage(tokens, idx, options, env, self);
+  };
+  return markdown.render(String(value));
 }
 
-function pathnameFromUrl(url) {
+function pathnameFromUrl(url, options) {
   const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
-  if (!match) return null;
-  try {
-    return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
-  } catch (e) {
-    return null;
+  if (match) {
+    try {
+      return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
+    } catch {
+      return null;
+    }
   }
+  const candidates = permalink.match(String(url || '').split(/[?#]/, 1)[0], options);
+  if (candidates.length !== 1 || !candidates[0].params.slug) return null;
+  return {type: candidates[0].type, pathname: candidates[0].params.slug};
+}
+
+async function resolveCommentPostId(controller, url, options) {
+  const target = pathnameFromUrl(url, options);
+  let post = target ? await controller.model('post').where({...target, status: 3, is_public: 1})
+    .field('id')
+    .find() : {};
+  if (think.isEmpty(post)) {
+    for (const candidate of permalink.match(String(url || '').split(/[?#]/, 1)[0], options)) {
+      const where = candidate.params.slug
+        ? {type: candidate.type, pathname: candidate.params.slug}
+        : {type: candidate.type, id: Number(candidate.params.id) || 0};
+      const found = await controller.model('post').where({...where, status: 3, is_public: 1})
+        .field('id')
+        .find();
+      if (!think.isEmpty(found)) {
+        if (!think.isEmpty(post) && post.id !== found.id) return null;
+        post = found;
+      }
+    }
+  }
+  return post && post.id ? Number(post.id) : null;
 }
 
 function stringList(value) {
@@ -79,10 +111,7 @@ module.exports = class extends think.Service {
     const postIds = new Map();
     const resolvePostId = async url => {
       if (postIds.has(url)) return postIds.get(url);
-      const target = pathnameFromUrl(url);
-      const post = target ? await controller.model('post').where(target).field('id')
-        .find() : {};
-      const id = post && post.id ? Number(post.id) : null;
+      const id = await resolveCommentPostId(controller, url, options);
       postIds.set(url, id);
       return id;
     };
@@ -143,7 +172,7 @@ module.exports = class extends think.Service {
       ip: controller.ctx.ip,
       origin: controller.ctx.get('origin'),
       referrer: controller.ctx.referrer(),
-      requestUrl: controller.ctx.url,
+      requestUrl: controller.ctx.state.originalPermalink || controller.ctx.url,
       serverUrl: `${controller.ctx.protocol}://${controller.ctx.host}/api/comment`
     };
     ctx.state.oauthServices = [];
@@ -166,9 +195,25 @@ module.exports = class extends think.Service {
   }
 
   async validateCommentTarget(controller, url) {
-    const target = pathnameFromUrl(url);
-    if (!target) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
-    const post = await controller.model('post').where({...target, status: 3, is_public: 1, allow_comment: 1}).find();
+    const options = await controller.model('options').getOptions();
+    const direct = pathnameFromUrl(url, options);
+    const targets = direct ? [direct] : permalink.match(String(url || '').split(/[?#]/, 1)[0], options)
+      .map(candidate => candidate.params.slug ? {type: candidate.type, pathname: candidate.params.slug} : {
+        type: candidate.type, id: Number(candidate.params.id) || 0
+      });
+    if (!targets.length) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
+    let post = {};
+    for (const target of targets) {
+      const current = await controller.model('post').where({
+        ...target, status: 3, is_public: 1, allow_comment: 1
+      }).find();
+      if (!think.isEmpty(current)) {
+        if (!think.isEmpty(post) && post.id !== current.id) {
+          throw new CommentError('INVALID_PATH', 409, 'Comment target is ambiguous');
+        }
+        post = current;
+      }
+    }
     if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
@@ -194,8 +239,10 @@ module.exports = class extends think.Service {
     if (!target) return;
     let postId = Number(target.post_id || target.id || target);
     if (!postId && typeof target === 'string') {
-      const path = pathnameFromUrl(target);
-      const post = path ? await controller.model('post').where(path).field('id')
+      const options = await controller.model('options').getOptions();
+      const path = pathnameFromUrl(target, options);
+      const post = path ? await controller.model('post').where(path)
+        .field('id')
         .find() : {};
       postId = Number(post.id);
     }
@@ -208,3 +255,4 @@ module.exports = class extends think.Service {
 
 module.exports.renderMarkdown = renderMarkdown;
 module.exports.pathnameFromUrl = pathnameFromUrl;
+module.exports.resolveCommentPostId = resolveCommentPostId;
