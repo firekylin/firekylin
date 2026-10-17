@@ -9,6 +9,7 @@ module.exports = class extends BaseRest {
     this.allowList = [
       'api/post/put', 'api/post/post', 'api/post/delete',
       'api/markdown/post',
+      'api/ai/post',
       'api/file/post', 'api/file/get',
       'api/attachment/delete'
     ];
