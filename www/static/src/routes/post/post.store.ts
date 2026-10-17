@@ -175,7 +175,7 @@ class PostStore {
     );
   }
 
-  bulkPost(operation: 'edit' | 'delete' | 'forceDelete', ids: number[], changes: {cate?: any[]; tag?: string[]} = {}) {
+  bulkPost(operation: 'edit' | 'delete' | 'forceDelete', ids: number[], changes: Record<string, any> = {}) {
     this.setLoading(true);
     return http.post<any>('/admin/api/post?method=put', {operation, ids, ...changes});
   }

@@ -113,6 +113,20 @@ class PostCommandService {
       const changes = {};
       if (Object.prototype.hasOwnProperty.call(input, 'cate')) changes.cate = input.cate;
       if (Object.prototype.hasOwnProperty.call(input, 'tag')) changes.tag = input.tag;
+      for (const name of ['is_public', 'allow_comment', 'post_password', 'clear_post_password']) {
+        if (Object.prototype.hasOwnProperty.call(input, name)) changes[name] = input[name];
+      }
+      if (Object.prototype.hasOwnProperty.call(input, 'user_id')) {
+        if (this.actor(principal).type !== 1) throw new Error('Only administrators can change post authors');
+        const userId = Number(input.user_id);
+        if (!Number.isSafeInteger(userId) || userId < 1) throw new TypeError('Invalid author ID');
+        changes.user_id = userId;
+      }
+      for (const name of ['is_public', 'allow_comment']) {
+        if (Object.prototype.hasOwnProperty.call(changes, name) && ![0, 1].includes(Number(changes[name]))) {
+          throw new TypeError(`Invalid ${name}`);
+        }
+      }
       if (!Object.keys(changes).length) throw new TypeError('Bulk edit requires a change');
       await Promise.all(ids.map(id => this.update({id, ...changes}, principal, options)));
     } else {

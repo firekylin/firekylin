@@ -66,17 +66,33 @@ test('update checks ownership before preparing protected options', async() => {
   assert.ok(operations.some(([type, value]) => type === 'save' && value.options.includes('postPasswordHash')));
 });
 
-test('bulk edit de-duplicates ids and updates categories and tags', async() => {
+test('bulk edit de-duplicates ids and updates post metadata', async() => {
   const {svc, operations, setPost} = fixture();
   setPost({id: 7, user_id: 3, status: 0, pathname: 'existing'});
-  const result = await svc.bulk({ids: [7, 8, 8], operation: 'edit', cate: [{id: 2}], tag: ['news']}, {id: 3, type: 2}, {
-    getTagModel: () => ({setRelation() {return this}, where() {return this}, async thenAdd() {return {id: 5}}})
+  const result = await svc.bulk({
+    ids: [7, 8, 8], operation: 'edit', cate: [{id: 2}], tag: ['news'],
+    is_public: 0, allow_comment: 0, post_password: 'secret'
+  }, {id: 3, type: 2}, {
+    getTagModel: () => ({setRelation() {return this}, where() {return this}, async thenAdd() {return {id: 5}}}),
+    prepare: data => ({...data, options: '{"postPasswordHash":"hash"}'})
   });
   const saves = operations.filter(([name]) => name === 'save');
   assert.equal(result.affectedRows, 2);
   assert.equal(saves.length, 2);
   assert.deepEqual(saves[0][1].cate, [{id: 2}]);
   assert.deepEqual(saves[0][1].tag, [{tag_id: 5, name: 'news'}]);
+  assert.equal(saves[0][1].is_public, 0);
+  assert.equal(saves[0][1].allow_comment, 0);
+  assert.equal(saves[0][1].options, '{"postPasswordHash":"hash"}');
+});
+
+test('bulk author changes require an administrator', async() => {
+  const {svc, setPost} = fixture();
+  setPost({id: 7, user_id: 3, status: 0, pathname: 'existing'});
+  await assert.rejects(
+    svc.bulk({ids: [7], operation: 'edit', user_id: 4}, {id: 3, type: 2}),
+    /Only administrators/
+  );
 });
 
 test('bulk permanent delete validates the selection before deleting', async() => {

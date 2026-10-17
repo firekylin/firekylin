@@ -54,6 +54,10 @@ module.exports = class extends Base {
         'Post not found or permission denied': 'USER_NO_PERMISSION',
         'Authenticated author required': 'USER_NO_PERMISSION',
         'Invalid post ID': 'PARAMS_ERROR',
+        'Invalid author ID': 'PARAMS_ERROR',
+        'Invalid is_public': 'PARAMS_ERROR',
+        'Invalid allow_comment': 'PARAMS_ERROR',
+        'Only administrators can change post authors': 'USER_NO_PERMISSION',
         'Invalid bulk operation': 'PARAMS_ERROR',
         'Bulk edit requires a change': 'PARAMS_ERROR'
       };
@@ -99,7 +103,8 @@ module.exports = class extends Base {
     return this.runCommand(async() => {
       if (!this.id && Array.isArray(this.post('ids'))) {
         const result = await this.commandService().bulk(this.post(), this.userInfo, {
-          getTagModel: () => this.model('tag')
+          getTagModel: () => this.model('tag'),
+          prepare: (next, post) => this.prepareProtection(next, post.options)
         });
         return this.success(result);
       }

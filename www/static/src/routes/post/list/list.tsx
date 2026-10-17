@@ -18,6 +18,9 @@ class PostListForm extends React.Component<PostListProps, {}> {
         this.props.postStore.getPostList();
         this.props.sharedStore.getCategoryList();
         this.props.sharedStore.getTagList();
+        this.props.sharedStore.getUserList().subscribe(res => {
+            if (res.errno === 0) this.props.sharedStore.setUserList(res.data);
+        });
     }
     pageChanged(page: number) {
         this.props.postStore.setPlReqParams({
