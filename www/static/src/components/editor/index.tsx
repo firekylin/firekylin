@@ -52,6 +52,8 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
       mode: 'split',
       isFullScreen: false,
       isMonospace: true,
+      aiAvailable: false,
+      aiLoading: false,
       result: '',
       linkUrl: '',
       linkText: '',
@@ -114,6 +116,9 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
     this.previewControl.addEventListener('scroll', this._syncScroll, false);
     this._bindMouse();
     this._renderPreview(this.props.content);
+    http.get<{enabled: boolean}>('/admin/api/ai').subscribe(res => {
+      if (res.errno === 0 && res.data) this.setState({aiAvailable: res.data.enabled});
+    });
   }
 
   _bindPaste(e: ClipboardEvent) {
@@ -399,6 +404,49 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
   }
 
   // widgets constructors
+  runAI(task: 'post.summary' | 'post.polish') {
+    const original = this.props.content;
+    if (!original || this.state.aiLoading) return;
+    this.setState({aiLoading: true});
+    http.post<{text: string}>('/admin/api/ai', {
+      task, markdown_content: original
+    }).subscribe(res => {
+      this.setState({aiLoading: false});
+      if (res.errno !== 0 || !res.data?.text) {
+        message.error('AI 生成失败，请检查模型配置');
+        return;
+      }
+      const proposed = res.data.text;
+      if (task === 'post.summary') {
+        Modal.info({
+          title: 'AI 摘要建议（仅预览）',
+          width: 720,
+          content: <pre style={{whiteSpace: 'pre-wrap', maxHeight: '60vh', overflow: 'auto'}}>{proposed}</pre>
+        });
+        return;
+      }
+      Modal.confirm({
+        title: '确认应用 AI 润色结果？',
+        width: 860,
+        content: <div style={{maxHeight: '60vh', overflow: 'auto'}}>
+          <p>原文不会自动保存。确认后只会替换当前编辑器文本，请手动保存文章。</p>
+          <pre style={{whiteSpace: 'pre-wrap'}}>{proposed}</pre>
+        </div>,
+        onOk: () => {
+          if (this.props.content !== original) {
+            message.warning('生成期间文章内容已变化，请重新运行 AI 润色');
+            return;
+          }
+          this.props.onChange(proposed);
+          this._schedulePreview(proposed);
+        }
+      });
+    }, () => {
+      this.setState({aiLoading: false});
+      message.error('AI 请求失败');
+    });
+  }
+
   _getToolBar () {
     return (
       <ul className={classnames('md-toolbar clearfix', {hide: this.state.mode === 'preview'})}>
@@ -428,6 +476,13 @@ class MarkDownEditor extends React.Component<MdEditorProps, any> {
         <li className="tb-btn spliter"/>
         <li className="tb-btn"><a title="分割线(Ctrl + R)" onClick={() => this._insertHr()} className="editor-toolbar">{this._svgIcon(icons.hr)}</a></li>
         <li className="tb-btn"><a title="插入 more 标签" onClick={() => this._insertMore()} className="editor-toolbar">{this._svgIcon(icons.more)}</a></li>
+        {this.state.aiAvailable && <li className="tb-btn spliter" />}
+        {this.state.aiAvailable && <li className="tb-btn"><a
+          title="AI 生成文章摘要" className="editor-toolbar"
+          onClick={() => this.runAI('post.summary')}>AI 摘要</a></li>}
+        {this.state.aiAvailable && <li className="tb-btn"><a
+          title="AI 润色（先预览再应用）" className="editor-toolbar"
+          onClick={() => this.runAI('post.polish')}>AI 润色</a></li>}
         {this._getExternalBtn()}
       </ul>
     );
