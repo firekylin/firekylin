@@ -30,8 +30,6 @@ function BreadCrumb(props: any) {
     if (!legacy.__initialized) {
         legacy.__initialized = true;
 
-        legacy.bindHandleDocumentClick = legacy.handleDocumentClick.bind(null);
-
         const themePages = [
             { url: '/appearance/theme', title: '主题管理' },
             { url: '/appearance/navigation', title: '菜单管理' },
@@ -72,6 +70,9 @@ function BreadCrumb(props: any) {
             });
         }
     };
+    if (!legacy.bindHandleDocumentClick) {
+        legacy.bindHandleDocumentClick = legacy.handleDocumentClick.bind(null);
+    }
     legacy.toggleUser = function toggleUser() {
         legacy.setState({
             userOpen: !legacy.state.userOpen,
