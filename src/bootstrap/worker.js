@@ -8,6 +8,7 @@ const widget = require('../widget/registry');
 const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
+const {createOpenAICompatibleProvider} = require('../ai/openai-compatible');
 const {registerContentTools} = require('../plugin/content-tools');
 const {registerManagementTools} = require('../plugin/management-tools');
 const {registerMediaTools} = require('../plugin/media-tools');
@@ -81,6 +82,13 @@ const pluginManager = existingPluginManager || new PluginManager({
 });
 pluginManager.packageApi = packageApi;
 global.firekylin.plugins = pluginManager;
+const aiConfig = (projectContext.config && projectContext.config.ai) || {};
+if (aiConfig.provider && aiConfig.baseUrl && !pluginManager.ai.providers.has(aiConfig.provider)) {
+  pluginManager.ai.registerProvider(aiConfig.provider, createOpenAICompatibleProvider({
+    baseUrl: aiConfig.baseUrl,
+    apiKey: aiConfig.apiKey || process.env.FIREKYLIN_AI_API_KEY || ''
+  }));
+}
 registerContentTools(pluginManager.tools, {
   getModel: () => think.model('post'),
   now: () => think.datetime()

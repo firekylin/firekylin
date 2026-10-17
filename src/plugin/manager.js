@@ -8,6 +8,7 @@ const EventBus = require('./events');
 const RouteRegistry = require('./routes');
 const TemplateRegistry = require('./templates');
 const ToolRegistry = require('./tools');
+const {AIRuntime} = require('../ai/runtime');
 const AdminRegistry = require('./admin');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
@@ -90,6 +91,7 @@ class PluginManager {
     this.routes = new RouteRegistry();
     this.templates = new TemplateRegistry();
     this.tools = new ToolRegistry();
+    this.ai = new AIRuntime();
     this.admin = new AdminRegistry();
     this.plugins = new Map();
     this.states = new Map();
@@ -194,6 +196,10 @@ class PluginManager {
         register: route => this.routes.register(route, pluginId)
       }),
       templates: this.templates.api(pluginId),
+      ai: Object.freeze({
+        registerProvider: (name, provider) => this.ai.registerProvider(name, provider, pluginId),
+        generate: request => this.ai.generate(request)
+      }),
       tools: Object.freeze({
         register: definition => this.tools.register(definition, pluginId),
         list: () => this.tools.list(),
@@ -251,6 +257,7 @@ class PluginManager {
       this.routes.removePlugin(record.manifest.id);
       this.templates.removePlugin(record.manifest.id);
       this.tools.removePlugin(record.manifest.id);
+      this.ai.removePlugin(record.manifest.id);
       this.admin.removePlugin(record.manifest.id);
       removeWidgetsBySource(record.manifest.id);
       this.logger.error?.(`[plugin:${record.manifest.id}] activation failed: ${error.stack || error.message}`);
@@ -267,6 +274,7 @@ class PluginManager {
       this.routes.removePlugin(id);
       this.templates.removePlugin(id);
       this.tools.removePlugin(id);
+      this.ai.removePlugin(id);
       this.admin.removePlugin(id);
       removeWidgetsBySource(id);
       record.status = 'inactive';
