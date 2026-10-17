@@ -171,13 +171,15 @@ function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => admi
         return oauthError(ctx, 'access_denied', 403);
       }
       if (ctx.method === 'GET') {
+        const redirectOrigin = new URL(redirectUri).origin;
         const csrf = await store.createGrant('consent', {
           userId: Number(user.id), clientId, scopes, resource, parent: requestId
         });
         const displayed = scopes.map(item => '<li>' + escapeHtml(item) + '</li>').join('');
         ctx.type = 'text/html; charset=utf-8';
         ctx.set('Content-Security-Policy',
-          'default-src \'none\'; style-src \'unsafe-inline\'; form-action \'self\'; ' +
+          'default-src \'none\'; style-src \'unsafe-inline\'; ' +
+          'form-action \'self\' ' + redirectOrigin + '; ' +
           'base-uri \'none\'; frame-ancestors \'none\''
         );
         ctx.set('X-Frame-Options', 'DENY');

@@ -130,6 +130,9 @@ test('OAuth login consent, code exchange, refresh and replay protection', async(
   const consent = ctx({path: '/oauth/authorize', query: parameters, session, user: principal});
   await handler(consent);
   assert.match(consent.body, /同意授权/);
+  assert.equal(consent.responseHeaders['Content-Security-Policy'],
+    'default-src \'none\'; style-src \'unsafe-inline\'; ' +
+    'form-action \'self\' http://127.0.0.1:4444; base-uri \'none\'; frame-ancestors \'none\'');
   const csrf = /name="csrf" value="([^"<>]+)"/.exec(consent.body)[1];
 
   const approved = ctx({
