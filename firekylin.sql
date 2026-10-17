@@ -30,6 +30,7 @@ CREATE TABLE `fk_cate` (
   `name` varchar(255) NOT NULL,
   `pid` int(11) NOT NULL DEFAULT '0',
   `pathname` varchar(255) DEFAULT NULL,
+  `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

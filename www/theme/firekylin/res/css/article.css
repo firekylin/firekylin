@@ -282,6 +282,13 @@ article.categories section a.child {
   padding-left: 2em;
   font-size: 14px;
 }
+article.categories section a small {
+  display: block;
+  margin-top: 4px;
+  color: #999;
+  font-size: 13px;
+  font-weight: normal;
+}
 
 
 a.anchor {
