@@ -15,11 +15,16 @@ class McpAuthorizationService {
     const grants = await this.getModel('mcp_oauth_grant')
       .where({user_id: userId, revoked: 0, kind: ['IN', ['access', 'refresh']],
         expires_at: ['>', this.now()]})
-      .field('client_id,scopes,created_at,expires_at,kind').setRelation(false).select();
+      .field('client_id,scopes,created_at,expires_at,kind')
+      .setRelation(false)
+      .select();
     const clientIds = [...new Set(grants.map(item => item.client_id))];
     if (!clientIds.length) return [];
     const clients = await this.getModel('mcp_oauth_client')
-      .where({client_id: ['IN', clientIds]}).field('client_id,name').setRelation(false).select();
+      .where({client_id: ['IN', clientIds]})
+      .field('client_id,name')
+      .setRelation(false)
+      .select();
     const clientMap = new Map(clients.map(item => [item.client_id, item.name]));
     const grouped = new Map();
     for (const grant of grants) {
