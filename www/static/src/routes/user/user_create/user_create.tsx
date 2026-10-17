@@ -11,7 +11,7 @@ import { RouteComponentProps } from '@admin/utils/router';
 interface UserCreateProps extends RouteComponentProps<any> {
     userStore: UserStore;
 }
-function UserCreateForm(props: UserCreateProps) {
+export function UserCreateForm(props: UserCreateProps) {
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -26,6 +26,17 @@ function UserCreateForm(props: UserCreateProps) {
             return next;
         });
         if (callback) queueMicrotask(callback);
+    };
+    legacy.setUserInfoEmpty = function setUserInfoEmpty() {
+        legacy.userStore.setUserInfo({
+            name: '',
+            display_name: '',
+            status: '',
+            type: '',
+            email: '',
+            app_key: '',
+            app_secret: '',
+        });
     };
     if (!legacy.__initialized) {
         legacy.__initialized = true;
@@ -100,17 +111,6 @@ function UserCreateForm(props: UserCreateProps) {
             status: userInfo.status ? userInfo.status.toString() : '',
         });
     };
-    legacy.setUserInfoEmpty = function setUserInfoEmpty() {
-        legacy.userStore.setUserInfo({
-            name: '',
-            display_name: '',
-            status: '',
-            type: '',
-            email: '',
-            app_key: '',
-            app_secret: '',
-        });
-    };
     legacy.generateKey = function generateKey() {
         if (legacy.id) {
             legacy.userStore.generateKey(legacy.id);
@@ -170,7 +170,7 @@ function UserCreateForm(props: UserCreateProps) {
             let ldap_user_page = options.ldap_user_page;
             return (
                 <div className="fk-content-wrap">
-                    <BreadCrumb {...formProps} />
+                    <BreadCrumb {...props} />
                     <div className="manage-container">
                         <h3 style={{ marginBottom: '20px' }}>LDAP提示</h3>
                         <p>
@@ -194,7 +194,7 @@ function UserCreateForm(props: UserCreateProps) {
 
         return (
             <div className="fk-content-wrap">
-                <BreadCrumb {...formProps} />
+                <BreadCrumb {...props} />
                 <div className="manage-container">
                     <Form
                         ref={legacy.formRef}
