@@ -68,17 +68,16 @@ class PostListForm extends React.Component<PostListProps, {}> {
         return (
             <>
                 <Form.Item className="forms">
-                    <Space size="small" className="bulk-operation-buttons">
+                    {postStore.selectedRowKeys.length > 0 && <Space size="small" className="bulk-operation-buttons">
                         <Button
-                            disabled={!postStore.selectedRowKeys.length || String(postStore.plReqParams.status) === '4'}
+                            disabled={String(postStore.plReqParams.status) === '4'}
                             onClick={() => postStore.setBulkEditOpen(true)}
                         >批量编辑</Button>
                         <Button
                             danger
-                            disabled={!postStore.selectedRowKeys.length}
                             onClick={this.bulkDelete}
                         >批量删除</Button>
-                    </Space>
+                    </Space>}
                     <Select
                         defaultValue=""
                         style={{width: 120}}
