@@ -111,7 +111,9 @@ test('OAuth login consent, code exchange, refresh and replay protection', async(
     getUser: async id => ({id, name: 'Admin', status: 1, type: 1})
   });
   const client = await store.registerClient({
-    name: 'Codex', redirectUris: ['http://127.0.0.1:4444/callback']
+    name: 'Codex', redirectUris: [
+      'http://127.0.0.1:4444/callback', 'http://[::1]:4444/callback'
+    ]
   });
   const verifier = 'v'.repeat(64);
   const parameters = {
@@ -133,6 +135,13 @@ test('OAuth login consent, code exchange, refresh and replay protection', async(
   assert.equal(consent.responseHeaders['Content-Security-Policy'],
     'default-src \'none\'; style-src \'unsafe-inline\'; ' +
     'form-action \'self\' http://127.0.0.1:4444; base-uri \'none\'; frame-ancestors \'none\'');
+  const ipv6Consent = ctx({path: '/oauth/authorize', query: {
+    ...parameters, redirect_uri: 'http://[::1]:4444/callback', state: 'ipv6-state'
+  }, session, user: principal});
+  await handler(ipv6Consent);
+  assert.equal(ipv6Consent.responseHeaders['Content-Security-Policy'],
+    'default-src \'none\'; style-src \'unsafe-inline\'; ' +
+    'base-uri \'none\'; frame-ancestors \'none\'');
   const csrf = /name="csrf" value="([^"<>]+)"/.exec(consent.body)[1];
 
   const approved = ctx({
