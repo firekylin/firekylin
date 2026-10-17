@@ -8,7 +8,7 @@ const FIELD_TYPES = new Set([
 const ACTION_TYPES = new Set(['default', 'primary', 'danger']);
 const SECTION_TYPES = new Set([
   'text', 'description', 'table', 'stat', 'list', 'markdown', 'image', 'progress', 'empty', 'divider',
-  'links', 'code', 'grid', 'form', 'actions'
+  'links', 'code', 'grid', 'tabs', 'form', 'actions'
 ]);
 
 function requiredString(value, label) {
@@ -40,7 +40,7 @@ function publicPage(page) {
 function normalizeFields(fields, formId) {
   if (!Array.isArray(fields) || !fields.length) throw new TypeError(`Admin form ${formId} requires fields`);
   const names = new Set();
-  return fields.map(field => {
+  const normalizedFields = fields.map(field => {
     if (!field || typeof field !== 'object') throw new TypeError(`Admin form ${formId} field must be an object`);
     const name = identifier(field.name, `Admin form ${formId} field name`);
     if (names.has(name)) throw new Error(`Duplicate admin form field: ${formId}.${name}`);
@@ -58,12 +58,33 @@ function normalizeFields(fields, formId) {
       placeholder: typeof field.placeholder === 'string' ? field.placeholder : undefined,
       required: field.required === true
     };
+    if (typeof field.visibleWhen !== 'undefined') {
+      const condition = field.visibleWhen;
+      if (!condition || typeof condition !== 'object' || Array.isArray(condition)) {
+        throw new TypeError(`Admin form ${formId}.${name} visibleWhen must be an object`);
+      }
+      const controller = identifier(condition.field, `Admin form ${formId}.${name} visibleWhen field`);
+      if (!Array.isArray(condition.values) || !condition.values.length) {
+        throw new TypeError(`Admin form ${formId}.${name} visibleWhen.values must be a non-empty array`);
+      }
+      normalized.visibleWhen = {field: controller, values: clone(condition.values)};
+    }
     if (field.options) normalized.options = field.options.map(option => ({
       label: requiredString(option.label, `Admin form ${formId}.${name} option label`),
       value: option.value
     }));
     return normalized;
   });
+  for (const field of normalizedFields) {
+    if (field.visibleWhen && (!names.has(field.visibleWhen.field) || field.visibleWhen.field === field.name)) {
+      throw new TypeError(`Admin form ${formId}.${field.name} visibleWhen references an invalid field`);
+    }
+  }
+  return normalizedFields;
+}
+
+function fieldIsVisible(field, values) {
+  return !field.visibleWhen || field.visibleWhen.values.includes(values[field.visibleWhen.field]);
 }
 
 function validateSections(sections, registry, pluginId, pageId, location = 'sections') {
@@ -76,6 +97,20 @@ function validateSections(sections, registry, pluginId, pageId, location = 'sect
     if (section.type === 'grid') {
       validateSections(section.items, registry, pluginId, pageId, `${label}.items`);
     }
+    if (section.type === 'tabs') {
+      if (!Array.isArray(section.items) || !section.items.length) {
+        throw new TypeError(`Admin page ${pageId} ${label}.items must be a non-empty array`);
+      }
+      const keys = new Set();
+      section.items.forEach((tab, tabIndex) => {
+        if (!tab || typeof tab !== 'object') throw new TypeError(`Admin page ${pageId} ${label} tab must be an object`);
+        const key = identifier(tab.key, `Admin page ${pageId} ${label} tab key`);
+        if (keys.has(key)) throw new Error(`Duplicate admin tab key: ${key}`);
+        keys.add(key);
+        requiredString(tab.label, `Admin page ${pageId} ${label} tab label`);
+        validateSections(tab.sections, registry, pluginId, pageId, `${label}.items[${tabIndex}].sections`);
+      });
+    }
     if (section.type === 'form') {
       const formId = identifier(section.id, `Admin page ${pageId} form reference`);
       const form = registry.forms.get(registry.key(pluginId, formId));
@@ -85,6 +120,33 @@ function validateSections(sections, registry, pluginId, pageId, location = 'sect
       if (!Array.isArray(section.ids)) throw new TypeError(`Admin page ${pageId} ${label}.ids must be an array`);
       for (const id of section.ids) {
         const actionId = identifier(id, `Admin page ${pageId} action reference`);
+        const action = registry.actions.get(registry.key(pluginId, actionId));
+        if (!action || action.page !== pageId) throw new Error(`Unknown admin action reference: ${actionId}`);
+      }
+    }
+    if (section.type === 'table' && typeof section.search !== 'undefined') {
+      if (section.search !== true &&
+          (!section.search || typeof section.search !== 'object' || Array.isArray(section.search))) {
+        throw new TypeError(`Admin page ${pageId} ${label}.search must be true or an object`);
+      }
+      if (section.search && section.search !== true && typeof section.search.keys !== 'undefined' &&
+          (!Array.isArray(section.search.keys) || section.search.keys.some(key => typeof key !== 'string' || !key))) {
+        throw new TypeError(`Admin page ${pageId} ${label}.search.keys must be an array of strings`);
+      }
+    }
+    if (section.type === 'table' && typeof section.selection !== 'undefined') {
+      if (!section.selection || typeof section.selection !== 'object' || Array.isArray(section.selection) ||
+          !Array.isArray(section.selection.actions) || !section.selection.actions.length) {
+        throw new TypeError(`Admin page ${pageId} ${label}.selection requires actions`);
+      }
+      if (typeof section.selection.input !== 'undefined') {
+        identifier(section.selection.input, `Admin page ${pageId} ${label}.selection input`);
+      }
+      for (const item of section.selection.actions) {
+        if (!item || typeof item !== 'object') {
+          throw new TypeError(`Admin page ${pageId} ${label}.selection action must be an object`);
+        }
+        const actionId = identifier(item.action, `Admin page ${pageId} ${label}.selection action reference`);
         const action = registry.actions.get(registry.key(pluginId, actionId));
         if (!action || action.page !== pageId) throw new Error(`Unknown admin action reference: ${actionId}`);
       }
@@ -236,11 +298,13 @@ class AdminRegistry {
     const form = this.forms.get(this.key(pluginId, formId));
     if (!form) return null;
     const allowed = Object.fromEntries(form.fields
-      .filter(field => Object.prototype.hasOwnProperty.call(values || {}, field.name))
+      .filter(field => fieldIsVisible(field, values || {}) &&
+        Object.prototype.hasOwnProperty.call(values || {}, field.name))
       .map(field => [field.name, values[field.name]]));
     for (const field of form.fields) {
       const value = allowed[field.name];
-      if (field.required && (typeof value === 'undefined' || value === null || value === '')) {
+      if (field.required && fieldIsVisible(field, allowed) &&
+          (typeof value === 'undefined' || value === null || value === '')) {
         const error = new Error(`Required admin form field is missing: ${field.name}`);
         error.status = 400;
         throw error;

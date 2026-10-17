@@ -4,7 +4,8 @@ CREATE TABLE fk_cate (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE,
   pid INTEGER NOT NULL DEFAULT 0,
-  pathname TEXT
+  pathname TEXT,
+  description TEXT
 );
 
 

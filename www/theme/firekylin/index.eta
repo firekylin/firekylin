@@ -10,6 +10,7 @@
   <h1 class="intro">标签<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= archive.archiveTitle %></a>下的文章</h1>
   <% } else if (archive.is('cate')) { %>
   <h1 class="intro">分类<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= archive.archiveTitle %></a>下的文章</h1>
+  <% if (archive.archiveDescription) { %><p class="intro"><%= archive.archiveDescription %></p><% } %>
   <% } %>
   <% while (archive.next()) { %>
   <article class="post">

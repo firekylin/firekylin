@@ -62,6 +62,23 @@ test('archive list exposes pagination, archive metadata and content formatters',
   assert.equal(archive.author(), 'Author');
 });
 
+test('category archive exposes its description to themes', async() => {
+  const models = {
+    cate: {
+      where() { return this },
+      async find() { return {name: 'Guides', pathname: 'guides', description: 'Practical tutorials'} }
+    },
+    post: {
+      async getPostList() { return {currentPage: 1, totalPages: 1, count: 0, data: []} }
+    }
+  };
+  const controller = createController({params: {cate: 'guides'}, models});
+  const archive = new Archive(controller, {type: 'index'});
+  await archive.execute();
+
+  assert.equal(archive.archiveDescription, 'Practical tutorials');
+});
+
 test('archive detail formats relations, content and permissions', async() => {
   const post = {
     async getPostDetail() {
@@ -104,7 +121,8 @@ test('attachment is an independent content type with its own permalink', async()
       };
     }
   };
-  const archive = new Archive(createController({params: {pathname: 'manual'}, models: {post: query}}), {type: 'attachment'});
+  const controller = createController({params: {pathname: 'manual'}, models: {post: query}});
+  const archive = new Archive(controller, {type: 'attachment'});
   await archive.execute();
   archive.next();
 

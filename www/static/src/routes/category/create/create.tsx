@@ -39,6 +39,7 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
         this.formRef.current?.setFieldsValue({
             name: categoryInfo.name,
             pathname: categoryInfo.pathname,
+            description: categoryInfo.description,
             pid: categoryInfo.pid,
         });
     }
@@ -49,6 +50,7 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
             id: 0,
             name: '',
             pathname: '',
+            description: '',
             post_cate: 0,
             pid: 0
         });
@@ -113,6 +115,13 @@ class CategoryCreate extends React.Component<CategoryCreateProps, {}> {
                             }]}
                         >
                             <Input />
+                        </Form.Item>
+                        <Form.Item
+                            {...formItemLayout}
+                            label="分类描述"
+                            name="description"
+                        >
+                            <Input.TextArea rows={4} placeholder="用于说明这个分类，并显示在分类页面" />
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}

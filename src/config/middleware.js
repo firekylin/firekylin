@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const routerREST = require('think-router-rest');
 const pluginRoutes = require('../plugin/middleware');
+const permalinkRoutes = require('../middleware/permalink');
 const builtinMcp = require('../mcp/middleware');
 const {oauthMiddleware} = require('../mcp/oauth-middleware');
 
@@ -78,6 +79,9 @@ module.exports = [
   },
   {
     handle: pluginRoutes
+  },
+  {
+    handle: permalinkRoutes
   },
   {
     handle: 'router',

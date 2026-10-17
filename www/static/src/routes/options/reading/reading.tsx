@@ -34,6 +34,8 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
             postsListSize: options.postsListSize || 10,
             auto_summary: options.auto_summary || 0,
             feedFullText: options.feedFullText || '1',
+            post_permalink: options.post_permalink || '/post/{slug}.html',
+            page_permalink: options.page_permalink || '/page/{slug}.html',
         });
     }
 
@@ -152,6 +154,27 @@ class ReadingForm extends React.Component<ReadingProps, {}> {
                             <Input />
                         </Form.Item>
                         <p>此数目用于指定文章归档输出时每页显示的文章数目.</p>
+                        <Form.Item
+                            {...formItemLayout}
+                            label="文章永久链接格式"
+                            name="post_permalink"
+                            rules={[{required: true}, {pattern: /^\/.*\{(?:slug|id)\}.*$/,
+                                message: '请输入以 / 开头且包含 {slug} 或 {id} 的路径'}]}
+                        >
+                            <Input placeholder="/post/{slug}.html" />
+                        </Form.Item>
+                        <p>支持 <code>{'{slug}'}</code>、<code>{'{id}'}</code>、<code>{'{year}'}</code>、
+                            <code>{'{month}'}</code> 和 <code>{'{day}'}</code>，例如 <code>/{'{slug}'}.html</code>。</p>
+                        <Form.Item
+                            {...formItemLayout}
+                            label="独立页面永久链接格式"
+                            name="page_permalink"
+                            rules={[{required: true}, {pattern: /^\/.*\{(?:slug|id)\}.*$/,
+                                message: '请输入以 / 开头且包含 {slug} 或 {id} 的路径'}]}
+                        >
+                            <Input placeholder="/page/{slug}.html" />
+                        </Form.Item>
+                        <p>文章与独立页面使用相同格式时，请确保二者的 slug 不重复。</p>
                         <Form.Item
                             {...formItemLayout}
                             label="自动生成摘要截取的字符数"

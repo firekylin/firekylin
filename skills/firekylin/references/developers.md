@@ -141,6 +141,7 @@ Do not invent a generic plugin enable/disable UI, guaranteed configuration switc
 | --- | --- |
 | user.beforeCreate | User creation data |
 | content.beforeCreate / content.beforeUpdate | Content write data |
+| markdown.configure | `markdown-it` parser instance; call `.use()` to install extensions |
 | content.markdown | Markdown before rendering |
 | content.html | Generated body HTML |
 | content.excerpt | Generated excerpt |
