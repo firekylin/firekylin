@@ -6,123 +6,163 @@ import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
 import { Select, Button } from 'antd';
 import './theme.less';
-
-@inject('themeStore', 'sharedStore')
-@observer class ThemeForm extends React.Component<ThemeProps, {}> {
-    formRef = React.createRef<FormInstance>();
-
-    state = {
-        themeConfig: {}
+function ThemeForm(props: ThemeProps) {
+    const [state, setState] = React.useState(() => ({
+        themeConfig: {},
+    }));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
     };
-    constructor(props: any) {
-        super(props);
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+        legacy.formRef = React.createRef<FormInstance>();
     }
-    componentDidMount() {
-        this.props.themeStore.getThemeList();
-        this.props.themeStore.getOptions().subscribe(res => {
+    legacy.onMount = function onMount() {
+        props.themeStore.getThemeList();
+        props.themeStore.getOptions().subscribe((res) => {
             if (res.errno !== 0) return;
             window.SysConfig.options = res.data as any;
-            this.initializeOptions(res.data);
+            legacy.initializeOptions(res.data);
         });
-    }
-
-    initializeOptions(options: any) {
+    };
+    legacy.initializeOptions = function initializeOptions(options: any) {
         let themeConfig = options.themeConfig;
         try {
-            if (typeof(themeConfig) === 'string') {
+            if (typeof themeConfig === 'string') {
                 themeConfig = JSON.parse(themeConfig);
             }
         } catch (e) {
             themeConfig = {};
         }
-        this.setState({themeConfig: themeConfig || {}});
-        this.props.themeStore.setData({theme: options.theme || 'firekylin'});
-        this.formRef.current?.setFieldsValue({theme: options.theme || 'firekylin'});
-    }
-
-    updateThemeConfig(name: string, value: any) {
-        this.setState(({themeConfig}: any) => ({
-            themeConfig: {...themeConfig, [name]: value}
+        legacy.setState({ themeConfig: themeConfig || {} });
+        props.themeStore.setData({ theme: options.theme || 'firekylin' });
+        legacy.formRef.current?.setFieldsValue({ theme: options.theme || 'firekylin' });
+    };
+    legacy.updateThemeConfig = function updateThemeConfig(name: string, value: any) {
+        legacy.setState(({ themeConfig }: any) => ({
+            themeConfig: { ...themeConfig, [name]: value },
         }));
-    }
-
-    // 显示主题配置
-    renderThemeConfig() {
-        const { themeStore } = this.props;
+    };
+    legacy.renderThemeConfig = function renderThemeConfig() {
+        const { themeStore } = props;
         if (themeStore.themeList.length === 0) {
             return null;
         }
 
-        let theme = themeStore.themeList.filter(themeItem => themeItem.id === themeStore.data.theme)[0];
+        let theme = themeStore.themeList.filter(
+            (themeItem) => themeItem.id === themeStore.data.theme,
+        )[0];
         if (!theme.configElements || !Array.isArray(theme.configElements)) {
             return null;
         }
 
         return (
-          <div>
-            <h3 style={{marginBottom: '20px'}}>{theme.name} 主题选项</h3>
-            <Form
-                className="clearfix options-general"
-                layout="vertical"
-                onFinish={() => this.saveThemeConfig()}
-            >
-                {theme.configElements.map((element, index) => <Form.Item key={element.name || index} label={element.label}
-                    help={element.help}>
-                    <ConfigField field={element} value={this.state.themeConfig[element.name]}
-                        onChange={value => this.updateThemeConfig(element.name, value)} />
-                </Form.Item>)}
-                <Form.Item>
-                    <Button type="primary" htmlType="submit">保存配置</Button>
-                </Form.Item>
-            </Form>
-          </div>
+            <div>
+                <h3 style={{ marginBottom: '20px' }}>{theme.name} 主题选项</h3>
+                <Form
+                    className="clearfix options-general"
+                    layout="vertical"
+                    onFinish={() => legacy.saveThemeConfig()}
+                >
+                    {theme.configElements.map((element, index) => (
+                        <Form.Item
+                            key={element.name || index}
+                            label={element.label}
+                            help={element.help}
+                        >
+                            <ConfigField
+                                field={element}
+                                value={legacy.state.themeConfig[element.name]}
+                                onChange={(value) =>
+                                    legacy.updateThemeConfig(element.name, value)
+                                }
+                            />
+                        </Form.Item>
+                    ))}
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">
+                            保存配置
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </div>
         );
-    }
-
-    saveThemeConfig() {
-        this.props.themeStore.themeConfigSave({themeConfig: JSON.stringify(this.state.themeConfig)});
-    }
-    handleSubmit(values: any) {
-        this.props.themeStore.themeSelect(values);
-    }
-    handleThemeChanged(theme: string) {
-        this.props.themeStore.setData({theme});
-        this.formRef.current?.setFieldsValue({theme});
-    }
-    render() {
+    };
+    legacy.saveThemeConfig = function saveThemeConfig() {
+        props.themeStore.themeConfigSave({
+            themeConfig: JSON.stringify(legacy.state.themeConfig),
+        });
+    };
+    legacy.handleSubmit = function handleSubmit(values: any) {
+        props.themeStore.themeSelect(values);
+    };
+    legacy.handleThemeChanged = function handleThemeChanged(theme: string) {
+        props.themeStore.setData({ theme });
+        legacy.formRef.current?.setFieldsValue({ theme });
+    };
+    legacy.render = function render() {
         const Option = Select.Option;
-        const { themeStore } = this.props;
+        const { themeStore } = props;
         const { themeList } = themeStore;
         return (
             <div className="appearance-theme">
-                <BreadCrumb {...this.props} />
+                <BreadCrumb {...props} />
                 <div className="appearance-theme-wrapper">
                     <h3 className="theme-title">主题设置</h3>
-                    <Form ref={this.formRef} onFinish={values => this.handleSubmit(values)} layout="vertical" scrollToFirstError>
+                    <Form
+                        ref={legacy.formRef}
+                        onFinish={(values) => legacy.handleSubmit(values)}
+                        layout="vertical"
+                        scrollToFirstError
+                    >
                         <Form.Item
                             label="主题选择"
                             name="theme"
                             initialValue={window.SysConfig.options.theme}
                         >
                             <Select
-                                style={{width: 600}}
+                                style={{ width: 600 }}
                                 placeholder="请选择主题"
-                                onChange={(theme: string) => this.handleThemeChanged(theme)}
+                                onChange={(theme: string) =>
+                                    legacy.handleThemeChanged(theme)
+                                }
                             >
                                 {themeList.map((theme, key) => {
-                                    return <Option key={key.toString()} value={theme.id}>{`${theme.name} - ${theme.version}`}</Option>;
+                                    return (
+                                        <Option
+                                            key={key.toString()}
+                                            value={theme.id}
+                                        >{`${theme.name} - ${theme.version}`}</Option>
+                                    );
                                 })}
                             </Select>
                         </Form.Item>
                         <Form.Item>
-                            <Button type="primary" htmlType="submit">提交</Button>
+                            <Button type="primary" htmlType="submit">
+                                提交
+                            </Button>
                         </Form.Item>
                     </Form>
-                    {this.renderThemeConfig()}
+                    {legacy.renderThemeConfig()}
                 </div>
             </div>
         );
-    }
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    return legacy.render();
 }
 
-export default ThemeForm;
+export default inject('themeStore', 'sharedStore')(observer(ThemeForm));

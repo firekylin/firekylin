@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Route, Redirect, Switch, useRouteComponentProps } from '../utils/router';
 import Loading from './loading';
 import './container.less';
@@ -20,53 +19,50 @@ const Comment = lazy(() => import('./comment/comment'));
 const PluginAdmin = lazy(() => import('./plugin/plugin-admin'));
 const Media = lazy(() => import('./media/media'));
 
-class Container extends React.Component<any, {}> {
-    constructor(props: any) {
-        super(props);
-    }
-
-    getOptions() {
-        http.get('/admin/api/options').subscribe(res => {
+function Container(props: any) {
+    useEffect(() => {
+        if (window.SysConfig.userInfo.type === 4) return;
+        const subscription = http.get('/admin/api/options').subscribe((res) => {
             if (res.errno === 0) {
                 window.SysConfig.options = res.data as any;
             }
         });
-    }
+        return () => subscription.unsubscribe();
+    }, []);
 
-    componentWillMount() {
-        if (window.SysConfig.userInfo.type !== 4) this.getOptions();
-    }
-    render() {
-        const isCommenter = window.SysConfig.userInfo.type === 4;
-        return (
-            <>
-                    <Sidebar {...this.props} />
-                    <div className="content">
-                        <Suspense fallback={<Loading />}>
-                            <Switch>
-                                {isCommenter ? <Route path="/comment" component={Comment} /> : null}
-                                {isCommenter ? <Route path={`/user`} component={User} /> : null}
-                                {isCommenter ? <Redirect to="/comment" /> : null}
-                                <Route exact={true} path="/dashboard" component={DashBoard}
-                                />
-                                <Route path="/post" component={Post} />
-                                <Route path="/page" component={Page} />
-                                <Route path="/cate" component={Category} />
-                                <Route path="/tag" component={Tag} />
-                                <Route path={`/user`} component={User} />
-                                <Route path={`/push`} component={Push} />
-                                <Route path="/appearance" component={Appearance} />
-                                <Route path="/options" component={Options} />
-                                <Route path="/comment" component={Comment} />
-                                <Route path="/plugins/:pluginId/:pageId" component={PluginAdmin} />
-                                <Route path="/media" component={Media} />
-                                <Redirect to="/dashboard" />
-                            </Switch>
-                        </Suspense>
-                    </div>
-            </>
-        );
-    }
+    const isCommenter = window.SysConfig.userInfo.type === 4;
+    return (
+        <>
+            <Sidebar {...props} />
+            <div className="content">
+                <Suspense fallback={<Loading />}>
+                    <Switch>
+                        {isCommenter ? (
+                            <Route path="/comment" component={Comment} />
+                        ) : null}
+                        {isCommenter ? <Route path={`/user`} component={User} /> : null}
+                        {isCommenter ? <Redirect to="/comment" /> : null}
+                        <Route exact={true} path="/dashboard" component={DashBoard} />
+                        <Route path="/post" component={Post} />
+                        <Route path="/page" component={Page} />
+                        <Route path="/cate" component={Category} />
+                        <Route path="/tag" component={Tag} />
+                        <Route path={`/user`} component={User} />
+                        <Route path={`/push`} component={Push} />
+                        <Route path="/appearance" component={Appearance} />
+                        <Route path="/options" component={Options} />
+                        <Route path="/comment" component={Comment} />
+                        <Route
+                            path="/plugins/:pluginId/:pageId"
+                            component={PluginAdmin}
+                        />
+                        <Route path="/media" component={Media} />
+                        <Redirect to="/dashboard" />
+                    </Switch>
+                </Suspense>
+            </div>
+        </>
+    );
 }
 
 export default function ContainerWithRouter() {

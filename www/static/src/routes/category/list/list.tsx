@@ -9,57 +9,59 @@ import './list.less';
 import { Category } from '../../../models/category.model';
 import { TABLE_DELAY } from '../../../config';
 const confirm = Modal.confirm;
-
-@inject('categoryStore', 'sharedStore')
-@observer class CategoryList extends React.Component<CategoryListProps, {}> {
-    constructor(props: any) {
-        super(props);
+function CategoryList(props: CategoryListProps) {
+    const [state, setState] = React.useState(() => ({}));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
     }
-    componentDidMount() {
-        this.props.sharedStore.getCategoryList();
-        this.props.sharedStore.getDefaultCategory();
-    }
-
-    delete(id: number) {
+    legacy.onMount = function onMount() {
+        props.sharedStore.getCategoryList();
+        props.sharedStore.getDefaultCategory();
+    };
+    legacy.delete = function (id: number) {
         confirm({
             title: '提示',
             content: '确定删除吗?',
             onOk: () => {
-                this.props.categoryStore.deleteCategoryId(id);
-            }
+                props.categoryStore.deleteCategoryId(id);
+            },
         });
-    }
-
-    setDefault(id: number) {
-        this.props.categoryStore.setDefaultCategory(id);
-    }
-    render() {
+    };
+    legacy.setDefault = function setDefault(id: number) {
+        props.categoryStore.setDefaultCategory(id);
+    };
+    legacy.render = function render() {
         const Column = Table.Column;
-        const { categoryList, defaultCategory, loading } = this.props.sharedStore;
+        const { categoryList, defaultCategory, loading } = props.sharedStore;
         return (
             <div className="category-list">
-                <BreadCrumb {...this.props} />
-                <Table 
+                <BreadCrumb {...props} />
+                <Table
                     dataSource={categoryList}
-                    loading={{spinning: loading.category, delay: TABLE_DELAY}}
+                    loading={{ spinning: loading.category, delay: TABLE_DELAY }}
                     className="page-list"
-                    rowKey={category => category.id.toString()}
+                    rowKey={(category) => category.id.toString()}
                 >
-                    <Column
-                        title="名称"
-                        key="name"
-                        dataIndex="name"
-                    />
-                    <Column
-                        title="缩略名"
-                        dataIndex="pathname"
-                        key="pathname"
-                    />
-                    <Column
-                        title="文章数"
-                        dataIndex="post_cate"
-                        key="post_cate"
-                    />
+                    <Column title="名称" key="name" dataIndex="name" />
+
+                    <Column title="缩略名" dataIndex="pathname" key="pathname" />
+
+                    <Column title="文章数" dataIndex="post_cate" key="post_cate" />
+
                     <Column
                         title="操作"
                         key="action"
@@ -67,8 +69,12 @@ const confirm = Modal.confirm;
                             <Space size="small">
                                 <Button
                                     disabled={defaultCategory === post.id.toString()}
-                                    onClick={() => this.setDefault(post.id)}
-                                    className={classnames({'fk-btn-success': !(defaultCategory === post.id.toString())})}
+                                    onClick={() => legacy.setDefault(post.id)}
+                                    className={classnames({
+                                        'fk-btn-success': !(
+                                            defaultCategory === post.id.toString()
+                                        ),
+                                    })}
                                     type="primary"
                                     icon={<StarOutlined />}
                                     size="small"
@@ -76,20 +82,35 @@ const confirm = Modal.confirm;
                                     默认
                                 </Button>
                                 <Button
-                                    onClick={() => this.props.history.push(`/cate/edit/${post.id}`)}
+                                    onClick={() =>
+                                        props.history.push(`/cate/edit/${post.id}`)
+                                    }
                                     type="primary"
                                     icon={<EditOutlined />}
                                     size="small"
                                 >
                                     编辑
                                 </Button>
-                                <Button onClick={() => this.delete(post.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+                                <Button
+                                    onClick={() => legacy.delete(post.id)}
+                                    type="primary"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    size="small"
+                                >
+                                    删除
+                                </Button>
                             </Space>
                         )}
                     />
                 </Table>
             </div>
         );
-    }
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    return legacy.render();
 }
-export default CategoryList;
+
+export default inject('categoryStore', 'sharedStore')(observer(CategoryList));

@@ -29,36 +29,43 @@ import { ArticleEnum } from './article.enum';
 import ArticleControlThemeFields from './control-theme-fields/control-theme-fields';
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
-
-@inject('sharedStore', 'userStore', 'articleStore')
-@observer
-class Article extends React.Component<ArticleProps, {}> {
-    static defaultProps: ArticleProps;
-    type: ArticleTypeEnum;
-    articleId = 0;
-    articleInfo = this.props.articleStore.articleInfo;
-
-    state = {
+function Article(props: ArticleProps) {
+    const [state, setState] = React.useState(() => ({
         hasError: {
             pathname: false,
             title: false,
         },
-        autocompletePathname: !this.props.match.params.id,
+        autocompletePathname: !props.match.params.id,
         postPassword: '',
         clearPostPassword: false,
         customFieldsValid: true,
+    }));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
+        });
+        if (callback) queueMicrotask(callback);
     };
-
-    constructor(props: any) {
-        super(props);
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+        legacy.articleId = 0;
+        legacy.articleInfo = props.articleStore.articleInfo;
     }
-    init() {
-        const sharedStore = this.props.sharedStore;
-        const userStore = this.props.userStore;
-        const articleStore = this.props.articleStore;
+    legacy.init = function init() {
+        const sharedStore = props.sharedStore;
+        const userStore = props.userStore;
+        const articleStore = props.articleStore;
         articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
 
-        if (this.isPage()) {
+        if (legacy.isPage()) {
             sharedStore.getTemplateList(window.SysConfig.options.theme || 'firekylin');
         }
         sharedStore.getThemeFields(window.SysConfig.options.theme || 'firekylin');
@@ -69,130 +76,125 @@ class Article extends React.Component<ArticleProps, {}> {
             sharedStore.getCategoryList$,
             sharedStore.getDefaultCategory$,
         );
-        merged$.subscribe(res => {
+        merged$.subscribe((res) => {
             sharedStore.setCategoryList(res[0].data);
             const defaultCategoryAry = res[0].data.filter(
-                cat => cat.id === +res[1].data,
+                (cat) => cat.id === +res[1].data,
             );
             articleStore.setArticleInfo({ cate: defaultCategoryAry });
         });
         // Get Tags
         sharedStore.getTagList();
         // Get Users
-        userStore.getUserList$().subscribe(res => {
+        userStore.getUserList$().subscribe((res) => {
             userStore.setUserList(res.data);
             articleStore.setArticleInfo({
                 user_id: userStore.userList.length > 0 ? userStore.userList[0].id : '',
             });
         });
-    }
-    // 是否是页面
-    isPage() {
-        return this.type;
-    }
-    componentDidMount() {
-        this.type = this.props.type;
-        this.init();
-        const id = +this.props.match.params.id;
-        this.articleId = id || 0;
+    };
+    legacy.isPage = function isPage() {
+        return legacy.type;
+    };
+    legacy.onMount = function onMount() {
+        legacy.type = props.type;
+        legacy.init();
+        const id = +props.match.params.id;
+        legacy.articleId = id || 0;
         if (id) {
-            this.props.articleStore.getArticleInfoById(id, this.type);
+            props.articleStore.getArticleInfoById(id, legacy.type);
         } else {
-            this.props.articleStore.resetArticleInfo();
+            props.articleStore.resetArticleInfo();
         }
-    }
-    componentWillReceiveProps(nextProps: any) {
-        const currentId = +this.props.match.params.id || 0;
-        const nextId = +nextProps.match.params.id || 0;
+    };
+    legacy.onPropsChange = function onPropsChange(
+        previousProps: any,
+    ) {
+        const currentId = +previousProps.match.params.id || 0;
+        const nextId = +props.match.params.id || 0;
         if (nextId !== currentId) {
-            this.articleId = nextId;
-            this.setState({ postPassword: '', clearPostPassword: false });
-            this.props.articleStore.resetArticleInfo();
-            this.init();
+            legacy.articleId = nextId;
+            legacy.setState({ postPassword: '', clearPostPassword: false });
+            props.articleStore.resetArticleInfo();
+            legacy.init();
             if (nextId) {
-                this.props.articleStore.getArticleInfoById(nextId, this.type);
+                props.articleStore.getArticleInfoById(nextId, legacy.type);
             }
         }
-    }
-    // 发布日期
-    onDateChange(date: Dayjs | null) {
+    };
+    legacy.onDateChange = function onDateChange(date: Dayjs | null) {
         if (date) {
-            this.props.articleStore.setArticleInfo({
+            props.articleStore.setArticleInfo({
                 create_time: date.format('YYYY-MM-DD HH:mm:ss'),
             });
         }
-    }
-    // Tag
-    handleTagChange(tags: string[]) {
-        this.props.articleStore.setArticleInfo({ tag: tags });
-    }
-    // 是否公开
-    handlePublicChange(e: RadioChangeEvent) {
-        this.props.articleStore.setArticleInfo({ is_public: e.target.value });
-    }
-    // 封面图片
-    handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-        this.props.articleStore.setArticleInfo({
+    };
+    legacy.handleTagChange = function handleTagChange(tags: string[]) {
+        props.articleStore.setArticleInfo({ tag: tags });
+    };
+    legacy.handlePublicChange = function handlePublicChange(e: RadioChangeEvent) {
+        props.articleStore.setArticleInfo({ is_public: e.target.value });
+    };
+    legacy.handleImageChange = function handleImageChange(
+        e: React.ChangeEvent<HTMLInputElement>,
+    ) {
+        props.articleStore.setArticleInfo({
             options: {
                 featuredImage: `${e.target.value}`,
             },
         });
-    }
-    // 选择作者
-    handleUserChange(value: string) {
-        this.props.articleStore.setArticleInfo({ user_id: value });
-    }
-
-    fieldsWithThemeDefaults() {
+    };
+    legacy.handleUserChange = function handleUserChange(value: string) {
+        props.articleStore.setArticleInfo({ user_id: value });
+    };
+    legacy.fieldsWithThemeDefaults = function fieldsWithThemeDefaults() {
         const defaults = Object.fromEntries(
-            this.props.sharedStore.themeFields
-                .filter(field => field && field.name && field.default !== undefined)
-                .map(field => [field.name, field.default]),
+            props.sharedStore.themeFields
+                .filter((field) => field && field.name && field.default !== undefined)
+                .map((field) => [field.name, field.default]),
         );
-        return {...defaults, ...(this.props.articleStore.articleInfo.options.fields || {})};
-    }
-
-    handleSave(): void {
-        this.handleSubmit(ArticleEnum.SAVE);
-    }
-    handleSaveDraft() {
-        this.handleSubmit(ArticleEnum.DRAFT);
-    }
-
-    handleSubmit(status: ArticleEnum) {
-        const { articleInfo } = this.props.articleStore;
+        return { ...defaults, ...(props.articleStore.articleInfo.options.fields || {}) };
+    };
+    legacy.handleSave = function handleSave(): void {
+        legacy.handleSubmit(ArticleEnum.SAVE);
+    };
+    legacy.handleSaveDraft = function handleSaveDraft() {
+        legacy.handleSubmit(ArticleEnum.DRAFT);
+    };
+    legacy.handleSubmit = function handleSubmit(status: ArticleEnum) {
+        const { articleInfo } = props.articleStore;
 
         if (!articleInfo.title) {
-            this.setState({
-                hasError: Object.assign({}, this.state.hasError, { title: true }),
+            legacy.setState({
+                hasError: Object.assign({}, legacy.state.hasError, { title: true }),
             });
             return;
         } else {
-            this.setState({
-                hasError: Object.assign({}, this.state.hasError, { title: false }),
+            legacy.setState({
+                hasError: Object.assign({}, legacy.state.hasError, { title: false }),
             });
         }
         if (!articleInfo.pathname) {
-            this.setState({
-                hasError: Object.assign({}, this.state.hasError, { pathname: true }),
+            legacy.setState({
+                hasError: Object.assign({}, legacy.state.hasError, { pathname: true }),
             });
             return;
         } else {
-            this.setState({
-                hasError: Object.assign({}, this.state.hasError, { pathname: false }),
+            legacy.setState({
+                hasError: Object.assign({}, legacy.state.hasError, { pathname: false }),
             });
         }
-        if (!this.state.customFieldsValid) {
+        if (!legacy.state.customFieldsValid) {
             message.error('自定义字段名称不能重复');
             return;
         }
 
         const params: any = {};
-        if (this.articleId) {
-            params.id = this.articleId;
+        if (legacy.articleId) {
+            params.id = legacy.articleId;
         }
 
-        this.props.articleStore.setArticleInfo({ status });
+        props.articleStore.setArticleInfo({ status });
 
         params.status = status;
         params.title = articleInfo.title;
@@ -201,16 +203,16 @@ class Article extends React.Component<ArticleProps, {}> {
 
         if (params.status === ArticleEnum.SAVE && !params.markdown_content) {
             message.error('没有内容不能提交呢！');
-            this.props.articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
+            props.articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
             return;
         }
         params.create_time = articleInfo.create_time;
-        params.type = this.type; // type: 0为文章，1为页面
+        params.type = legacy.type; // type: 0为文章，1为页面
         params.allow_comment = articleInfo.allow_comment ? 1 : 0;
         params.push_sites = articleInfo.options.push_sites;
 
-        if (this.type === ArticleTypeEnum.POST) {
-            params.cate = articleInfo.cate.map(cate => cate.id);
+        if (legacy.type === ArticleTypeEnum.POST) {
+            params.cate = articleInfo.cate.map((cate) => cate.id);
             params.tag = articleInfo.tag;
             params.user_id = articleInfo.user_id;
         }
@@ -222,32 +224,35 @@ class Article extends React.Component<ArticleProps, {}> {
             featuredImage: articleInfo.options.featuredImage,
             push_sites: articleInfo.options.push_sites,
             passwordProtected: articleInfo.options.passwordProtected,
-            fields: this.fieldsWithThemeDefaults(),
+            fields: legacy.fieldsWithThemeDefaults(),
         });
-        if (this.state.postPassword) params.post_password = this.state.postPassword;
-        if (this.state.clearPostPassword) params.clear_post_password = 1;
+        if (legacy.state.postPassword) params.post_password = legacy.state.postPassword;
+        if (legacy.state.clearPostPassword) params.clear_post_password = 1;
         // 删除缓存
-        localStorage.removeItem('unsavetype' + this.type + 'id' + params.id);
+        localStorage.removeItem('unsavetype' + legacy.type + 'id' + params.id);
         // 保存
-        const type = this.isPage() ? 'page' : 'post';
-        this.props.articleStore.articleSubmit(params, this.type).subscribe(res => {
+        const type = legacy.isPage() ? 'page' : 'post';
+        props.articleStore.articleSubmit(params, legacy.type).subscribe((res) => {
             if (res.errno === 0) {
-                const passwordProtected = this.state.clearPostPassword
+                const passwordProtected = legacy.state.clearPostPassword
                     ? false
-                    : Boolean(this.state.postPassword || articleInfo.options.passwordProtected);
-                this.setState({ postPassword: '', clearPostPassword: false });
+                    : Boolean(
+                          legacy.state.postPassword ||
+                          articleInfo.options.passwordProtected,
+                      );
+                legacy.setState({ postPassword: '', clearPostPassword: false });
                 articleStore.setArticleInfo({
                     options: { passwordProtected },
                 });
                 const createdId = !params.id && Number(res.data.id);
                 if (createdId) {
                     params.id = createdId;
-                    this.articleId = createdId;
-                    this.props.history.replace(`/${type}/edit/${createdId}`);
+                    legacy.articleId = createdId;
+                    props.history.replace(`/${type}/edit/${createdId}`);
                 }
 
                 if (status === ArticleEnum.SAVE && articleInfo.is_public) {
-                    this.props.articleStore.getArticleInfoById(params.id, this.type);
+                    props.articleStore.getArticleInfoById(params.id, legacy.type);
                     message.success(
                         <>
                             发布成功, &nbsp;&nbsp;
@@ -255,7 +260,7 @@ class Article extends React.Component<ArticleProps, {}> {
                                 href={`/${type}/${articleInfo.pathname}.html`}
                                 target="_blank"
                             >
-                                {this.isPage() ? '点此查看页面' : '点此查看文章'}
+                                {legacy.isPage() ? '点此查看页面' : '点此查看文章'}
                             </a>
                         </>,
                     );
@@ -263,31 +268,33 @@ class Article extends React.Component<ArticleProps, {}> {
                     message.success('保存成功');
                 }
             } else {
-                this.props.articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
+                props.articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
             }
         });
-    }
-
-    handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
-        const {autocompletePathname, hasError} = this.state;
+    };
+    legacy.handleTitle = function handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
+        const { autocompletePathname, hasError } = legacy.state;
         const nextHasError = Object.assign({}, hasError);
-        const {articleInfo, setArticleInfo} = this.props.articleStore;
+        const { articleInfo, setArticleInfo } = props.articleStore;
         const nextInfo = {
             title: e.target.value,
-            pathname: articleInfo.pathname
+            pathname: articleInfo.pathname,
         };
         hasError.title = false;
 
-        if(autocompletePathname && pinyin.isSupported()) {
+        if (autocompletePathname && pinyin.isSupported()) {
             let text = '';
             let lastToken;
-            const format = str => str ? str.toLowerCase() : '';
+            const format = (str) => (str ? str.toLowerCase() : '');
             const tokens = pinyin.parse(nextInfo.title);
-            tokens.forEach(v => {
-                if(v.type === 2) {
-                    text += text && !/\n|\s/.test(lastToken.target) ? '-' + format(v.target) : format(v.target)
+            tokens.forEach((v) => {
+                if (v.type === 2) {
+                    text +=
+                        text && !/\n|\s/.test(lastToken.target)
+                            ? '-' + format(v.target)
+                            : format(v.target);
                 } else {
-                    text += (lastToken && lastToken.type === 2 ? '-' : '') + v.target; 
+                    text += (lastToken && lastToken.type === 2 ? '-' : '') + v.target;
                 }
                 lastToken = v;
             });
@@ -296,47 +303,47 @@ class Article extends React.Component<ArticleProps, {}> {
             hasError.pathname = false;
         }
 
-        this.setState({hasError: nextHasError});
+        legacy.setState({ hasError: nextHasError });
         setArticleInfo(nextInfo);
-    }
-    handlePath(e: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({
+    };
+    legacy.handlePath = function handlePath(e: React.ChangeEvent<HTMLInputElement>) {
+        legacy.setState({
             autocompletePathname: false,
-            hasError: Object.assign({}, this.state.hasError, { pathname: false }),
+            hasError: Object.assign({}, legacy.state.hasError, { pathname: false }),
         });
-        this.props.articleStore.setArticleInfo({ pathname: e.target.value });
-    }
-    preview() {
-        const { articleInfo } = this.props.articleStore;
+        props.articleStore.setArticleInfo({ pathname: e.target.value });
+    };
+    legacy.preview = function preview() {
+        const { articleInfo } = props.articleStore;
         const previewData: PreviewData = {
             title: articleInfo.title || 'Untitled',
             pathname: articleInfo.pathname || 'untitled',
             markdown_content: articleInfo.markdown_content,
             create_time: articleInfo.create_time,
             update_time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-            user: this.props.userStore.userList.filter(
-                user => +user.id === +articleInfo.user_id,
+            user: props.userStore.userList.filter(
+                (user) => +user.id === +articleInfo.user_id,
             )[0],
             comment_num: 0,
             allow_comment: 0,
             options: JSON.stringify({
                 ...articleInfo.options,
-                fields: this.fieldsWithThemeDefaults(),
+                fields: legacy.fieldsWithThemeDefaults(),
             }),
         };
 
-        if (this.type === 0) {
-            previewData.tag = articleInfo.tag.map(tagName => {
+        if (legacy.type === 0) {
+            previewData.tag = articleInfo.tag.map((tagName) => {
                 return (
-                    this.props.sharedStore.tagList.filter(
-                        tag => tag.name === tagName,
+                    props.sharedStore.tagList.filter(
+                        (tag) => tag.name === tagName,
                     )[0] || { name: tagName }
                 );
             });
             previewData.cate = articleInfo.cate;
         }
 
-        const previewUrl = `/${['post', 'page'][this.type]}/${
+        const previewUrl = `/${['post', 'page'][legacy.type]}/${
             previewData.pathname
         }.html?preview=true`;
 
@@ -354,10 +361,10 @@ class Article extends React.Component<ArticleProps, {}> {
         document.body.appendChild(form);
         form.submit();
         document.body.removeChild(form);
-    }
-    render() {
-        const sharedStore = this.props.sharedStore;
-        const articleStore = this.props.articleStore;
+    };
+    legacy.render = function render() {
+        const sharedStore = props.sharedStore;
+        const articleStore = props.articleStore;
         const { articleInfo } = articleStore;
         const { tagList, templateList, themeFields } = sharedStore;
         return (
@@ -365,28 +372,30 @@ class Article extends React.Component<ArticleProps, {}> {
                 <Row>
                     <Col span={19}>
                         <ArticleHeader
-                            {...this.props}
+                            {...props}
                             handleTitle={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                this.handleTitle(e)
+                                legacy.handleTitle(e)
                             }
                             handlePath={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                this.handlePath(e)
+                                legacy.handlePath(e)
                             }
-                            preview={() => this.preview()}
+                            preview={() => legacy.preview()}
                             title={articleInfo.title}
                             pathname={articleInfo.pathname}
                             status={articleInfo.status}
                             isPublic={articleInfo.is_public}
-                            type={this.type}
-                            hasError={this.state.hasError}
+                            type={legacy.type}
+                            hasError={legacy.state.hasError}
                         />
-                        <ArticleEditor type={this.props.type} id={this.props.match.params.id} />
+
+                        <ArticleEditor type={props.type} id={props.match.params.id} />
                     </Col>
                     <Col span={5} className="article-control-panel">
                         <ArticleControlHeader
-                            save={() => this.handleSave()}
-                            saveDraft={() => this.handleSaveDraft()}
+                            save={() => legacy.handleSave()}
+                            saveDraft={() => legacy.handleSaveDraft()}
                         />
+
                         <section className="release-date">
                             <h5>发布日期</h5>
                             <DatePicker
@@ -396,40 +405,40 @@ class Article extends React.Component<ArticleProps, {}> {
                                 format="YYYY-MM-DD HH:mm:ss"
                                 value={dayjs(articleInfo.create_time)}
                                 placeholder="请选择日期"
-                                onChange={date => this.onDateChange(date)}
+                                onChange={(date) => legacy.onDateChange(date)}
                             />
                         </section>
-                        {this.isPage() ? null : (
+                        {legacy.isPage() ? null : (
                             <section className="category">
                                 <h5>分类</h5>
                                 <ArticleControlCategory
                                     catInitial={
                                         articleInfo.cate && articleInfo.cate.length > 0
-                                            ? articleInfo.cate.map(item => item.id)
+                                            ? articleInfo.cate.map((item) => item.id)
                                             : []
                                     }
                                 />
                             </section>
                         )}
-                        {this.isPage() ? null : (
+                        {legacy.isPage() ? null : (
                             <section className="category">
                                 <h5>标签</h5>
                                 <ArticleControlTag
                                     tag={articleInfo.tag}
                                     tagList={tagList}
-                                    handleTagChange={values =>
-                                        this.handleTagChange(values)
+                                    handleTagChange={(values) =>
+                                        legacy.handleTagChange(values)
                                     }
                                 />
                             </section>
                         )}
-                        {this.isPage() ? (
+                        {legacy.isPage() ? (
                             <section className="category">
                                 <h5>自定义模版</h5>
                                 <ArticleControlTemplate
                                     template={articleInfo.options.template}
                                     templateList={templateList}
-                                    handleTemplateChange={value =>
+                                    handleTemplateChange={(value) =>
                                         articleStore.setArticleInfo({
                                             options: { template: value },
                                         })
@@ -443,14 +452,17 @@ class Article extends React.Component<ArticleProps, {}> {
                                 <ArticleControlThemeFields
                                     fields={themeFields}
                                     values={articleInfo.options.fields || {}}
-                                    onChange={(name, value) => articleStore.setArticleInfo({
-                                        options: {
-                                            fields: {
-                                                ...(articleInfo.options.fields || {}),
-                                                [name]: value,
+                                    onChange={(name, value) =>
+                                        articleStore.setArticleInfo({
+                                            options: {
+                                                fields: {
+                                                    ...(articleInfo.options.fields ||
+                                                        {}),
+                                                    [name]: value,
+                                                },
                                             },
-                                        },
-                                    })}
+                                        })
+                                    }
                                 />
                             </section>
                         ) : null}
@@ -458,23 +470,38 @@ class Article extends React.Component<ArticleProps, {}> {
                             <h5>公开度</h5>
                             <ArticleControlPublic
                                 isPublic={articleInfo.is_public}
-                                handlePublicChange={e => this.handlePublicChange(e)}
+                                handlePublicChange={(e) => legacy.handlePublicChange(e)}
                             />
                         </section>
-                        {this.isPage() ? null : (
+                        {legacy.isPage() ? null : (
                             <section className="category">
                                 <h5>访问密码</h5>
                                 <Input.Password
-                                    value={this.state.postPassword}
-                                    disabled={this.state.clearPostPassword}
-                                    placeholder={articleInfo.options.passwordProtected ? '留空则保持原密码' : '留空则不启用密码'}
+                                    value={legacy.state.postPassword}
+                                    disabled={legacy.state.clearPostPassword}
+                                    placeholder={
+                                        articleInfo.options.passwordProtected
+                                            ? '留空则保持原密码'
+                                            : '留空则不启用密码'
+                                    }
                                     maxLength={256}
-                                    onChange={e => this.setState({ postPassword: e.target.value, clearPostPassword: false })}
+                                    onChange={(e) =>
+                                        legacy.setState({
+                                            postPassword: e.target.value,
+                                            clearPostPassword: false,
+                                        })
+                                    }
                                 />
+
                                 {articleInfo.options.passwordProtected ? (
                                     <Checkbox
-                                        checked={this.state.clearPostPassword}
-                                        onChange={e => this.setState({ clearPostPassword: e.target.checked, postPassword: '' })}
+                                        checked={legacy.state.clearPostPassword}
+                                        onChange={(e) =>
+                                            legacy.setState({
+                                                clearPostPassword: e.target.checked,
+                                                postPassword: '',
+                                            })
+                                        }
                                     >
                                         取消密码保护
                                     </Checkbox>
@@ -484,7 +511,7 @@ class Article extends React.Component<ArticleProps, {}> {
                         <section className="category">
                             <h5>权限控制</h5>
                             <Checkbox
-                                onChange={e =>
+                                onChange={(e) =>
                                     articleStore.setArticleInfo({
                                         allow_comment: e.target.checked,
                                     })
@@ -498,41 +525,51 @@ class Article extends React.Component<ArticleProps, {}> {
                             <h5>封面图片</h5>
                             <ArticleControlImage
                                 imageUrl={articleInfo.options.featuredImage}
-                                handleImageChange={e => this.handleImageChange(e)}
+                                handleImageChange={(e) => legacy.handleImageChange(e)}
                             />
                         </section>
                         <section className="category custom-fields">
                             <h5>自定义字段</h5>
                             <ArticleControlFields
                                 fields={Object.fromEntries(
-                                    Object.entries(articleInfo.options.fields || {}).filter(
-                                        ([name]) => !themeFields.some(field => field.name === name),
+                                    Object.entries(
+                                        articleInfo.options.fields || {},
+                                    ).filter(
+                                        ([name]) =>
+                                            !themeFields.some(
+                                                (field) => field.name === name,
+                                            ),
                                     ),
                                 )}
-                                onChange={fields => {
-                                    const themeFieldNames = new Set(themeFields.map(field => field.name));
-                                    const themeFieldValues = Object.fromEntries(
-                                        Object.entries(articleInfo.options.fields || {}).filter(
-                                            ([name]) => themeFieldNames.has(name),
-                                        ),
+                                onChange={(fields) => {
+                                    const themeFieldNames = new Set(
+                                        themeFields.map((field) => field.name),
                                     );
-                                    articleStore.setArticleInfo({options: {
-                                        fields: {...themeFieldValues, ...fields},
-                                    }});
+                                    const themeFieldValues = Object.fromEntries(
+                                        Object.entries(
+                                            articleInfo.options.fields || {},
+                                        ).filter(([name]) => themeFieldNames.has(name)),
+                                    );
+                                    articleStore.setArticleInfo({
+                                        options: {
+                                            fields: { ...themeFieldValues, ...fields },
+                                        },
+                                    });
                                 }}
-                                onValidityChange={customFieldsValid =>
-                                    this.setState({customFieldsValid})
+                                onValidityChange={(customFieldsValid) =>
+                                    legacy.setState({ customFieldsValid })
                                 }
                             />
                         </section>
-                        {this.isPage() || window.SysConfig.userInfo.type !== 1 ? null : (
+                        {legacy.isPage() ||
+                        window.SysConfig.userInfo.type !== 1 ? null : (
                             <section className="category">
                                 <h5>选择作者</h5>
                                 <ArticleControlUser
                                     user={articleInfo.user_id}
-                                    users={this.props.userStore.userList}
-                                    handleUserChange={value =>
-                                        this.handleUserChange(value)
+                                    users={props.userStore.userList}
+                                    handleUserChange={(value) =>
+                                        legacy.handleUserChange(value)
                                     }
                                 />
                             </section>
@@ -541,7 +578,16 @@ class Article extends React.Component<ArticleProps, {}> {
                 </Row>
             </div>
         );
-    }
+    };
+    React.useEffect(() => {
+        legacy.onMount();
+    }, []);
+    const previousRef = React.useRef({ props: props, state: state, mounted: false });
+    React.useEffect(() => {
+        if (previousRef.current.mounted) legacy.onPropsChange(previousRef.current.props);
+        previousRef.current = { props: props, state: state, mounted: true };
+    });
+    return legacy.render();
 }
 
-export default Article;
+export default inject('sharedStore', 'userStore', 'articleStore')(observer(Article));

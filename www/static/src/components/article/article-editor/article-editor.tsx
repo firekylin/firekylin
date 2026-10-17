@@ -5,12 +5,8 @@ import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
-@inject('postStore', 'articleStore')
-@observer
-class ArticleEditor extends React.Component<any, ArticleEditorState> {
-    id: number;
-    type: number;
-    state: ArticleEditorState = {
+export function ArticleEditor(props: any) {
+    const [state, setState] = React.useState(() => ({
         postSubmitting: false,
         draftSubmitting: false,
         postInfo: {
@@ -26,7 +22,7 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
                 template: '',
                 featuredImage: '',
                 push_sites: [],
-                fields: {}
+                fields: {},
             },
             status: 3,
             user_id: '',
@@ -39,54 +35,77 @@ class ArticleEditor extends React.Component<any, ArticleEditorState> {
         users: [],
         isFullScreen: false,
         wordCount: 0,
-    };
-    constructor(props: any) {
-        super(props);
-        this.id = this.props.id;
-        this.type = this.props.type;
-    }
-
-    componentWillReceiveProps(nextProps: any) {
-        if (nextProps) {
-            this.setState({wordCount: tools.wordCount(this.state.postInfo.markdown_content)});
-        }
-    }
-
-    handleFetchData(keyword: string) {
-        this.props.postStore.setPlReqParams({
-            status: 3,
-            keyword: keyword
+    }));
+    const legacyRef = React.useRef({});
+    const legacy = legacyRef.current as any;
+    legacy.state = state;
+    legacy.setState = (update: any, callback?: () => void) => {
+        setState((previous: any) => {
+            const next = {
+                ...previous,
+                ...(typeof update === 'function' ? update(previous, props) : update),
+            };
+            legacy.state = next;
+            return next;
         });
+        if (callback) queueMicrotask(callback);
+    };
+    if (!legacy.__initialized) {
+        legacy.__initialized = true;
+
+        legacy.id = props.id;
+        legacy.type = props.type;
     }
-    render(postInfo: PostInfo = this.state.postInfo) {
+    legacy.handleFetchData = function handleFetchData(keyword: string) {
+        props.postStore.setPlReqParams({
+            status: 3,
+            keyword: keyword,
+        });
+    };
+    legacy.render = function render(postInfo: PostInfo = legacy.state.postInfo) {
         return (
             <div className="article-editor">
                 <MarkDownEditor
-                    content={this.props.articleStore.articleInfo.markdown_content}
-                    onChange={content => {
+                    content={props.articleStore.articleInfo.markdown_content}
+                    onChange={(content) => {
                         postInfo.markdown_content = content;
-                        this.props.articleStore.setArticleInfo({markdown_content: content});
-                        this.setState({postInfo, wordCount: tools.wordCount(this.state.postInfo.markdown_content)});
+                        props.articleStore.setArticleInfo({ markdown_content: content });
+                        legacy.setState({
+                            postInfo,
+                            wordCount: tools.wordCount(
+                                legacy.state.postInfo.markdown_content,
+                            ),
+                        });
                     }}
-                    onFullScreen={isFullScreen => this.setState({isFullScreen})}
-                    info={{id: this.id, type: this.type}}
-                    innerLinks={this.props.postStore.postList}
-                    fetchData={keyword => this.handleFetchData(keyword)}
+                    onFullScreen={(isFullScreen) => legacy.setState({ isFullScreen })}
+                    info={{ id: legacy.id, type: legacy.type }}
+                    innerLinks={props.postStore.postList}
+                    fetchData={(keyword) => legacy.handleFetchData(keyword)}
                 />
+
                 <p style={{ lineHeight: '30px' }}>
                     <span className="pull-left">
                         文章使用 markdown 格式，格式说明请见
-                        <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">
-                        这里
+                        <a
+                            href="https://guides.github.com/features/mastering-markdown/"
+                            target="_blank"
+                        >
+                            这里
                         </a>
                     </span>
-                    <span className="pull-right">
-                        字数：{this.state.wordCount}
-                    </span>
+                    <span className="pull-right">字数：{legacy.state.wordCount}</span>
                 </p>
             </div>
         );
-    }
+    };
+    const markdownContent = props.articleStore.articleInfo.markdown_content;
+    React.useEffect(() => {
+        const wordCount = tools.wordCount(markdownContent);
+        setState((previous) =>
+            previous.wordCount === wordCount ? previous : { ...previous, wordCount },
+        );
+    }, [markdownContent]);
+    return legacy.render();
 }
 
-export default ArticleEditor;
+export default inject('postStore', 'articleStore')(observer(ArticleEditor));

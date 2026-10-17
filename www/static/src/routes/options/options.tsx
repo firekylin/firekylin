@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Redirect, Route, Switch } from '@admin/utils/router';
 import { OptionsProps } from './options.model';
 import General from './general/general';
@@ -12,25 +11,25 @@ import OptionsExport from './export/export';
 import OptionsUpload from './upload/upload';
 import OptionsImport from './import/import';
 
-export default class Options extends React.Component<OptionsProps, any> {
-    render() {
-        const { match } = this.props;
-        return (
-            <>
-                <Switch>
-                    <Route path={`${match.path}/general`} component={General}/>
-                    <Route path={`${match.path}/reading`} component={Reading}/>
-                    <Route path={`${match.path}/two_factor_auth`} component={TwoFactorAuth}/>
-                    <Route path={`${match.path}/ldap`} component={LDAP}/>
-                    <Route path={`${match.path}/comment`} component={Comment}/>
-                    <Route path={`${match.path}/analytic`} component={Analysis}/>
-                    <Route path={`${match.path}/push`} component={OptionsPush}/>
-                    <Route path={`${match.path}/export`} component={OptionsExport}/>
-                    <Route path={`${match.path}/upload`} component={OptionsUpload}/>
-                    <Route path={`${match.path}/import`} component={OptionsImport}/>
-                    <Redirect to={`${match.path}/general`}/>
-                </Switch>
-            </>
-        );
-    }
+export default function Options({ match }: OptionsProps) {
+    return (
+        <>
+            <Switch>
+                <Route path={`${match.path}/general`} component={General} />
+                <Route path={`${match.path}/reading`} component={Reading} />
+                <Route
+                    path={`${match.path}/two_factor_auth`}
+                    component={TwoFactorAuth}
+                />
+                <Route path={`${match.path}/ldap`} component={LDAP} />
+                <Route path={`${match.path}/comment`} component={Comment} />
+                <Route path={`${match.path}/analytic`} component={Analysis} />
+                <Route path={`${match.path}/push`} component={OptionsPush} />
+                <Route path={`${match.path}/export`} component={OptionsExport} />
+                <Route path={`${match.path}/upload`} component={OptionsUpload} />
+                <Route path={`${match.path}/import`} component={OptionsImport} />
+                <Redirect to={`${match.path}/general`} />
+            </Switch>
+        </>
+    );
 }
