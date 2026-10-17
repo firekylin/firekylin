@@ -38,4 +38,39 @@ test('checks Firekylin, Node.js and package type compatibility', () => {
   assert.deepEqual(compatibility({type: 'library'}, runtime), {
     compatible: false, reasons: ['UNSUPPORTED_PACKAGE_TYPE']
   });
+  assert.deepEqual(compatibility({firekylin: {type: 'plugin', engine: '>=2'}, engines: {
+    firekylin: '>=3'
+  }}, runtime), {compatible: true, reasons: []});
+});
+
+test('lists discovered plugins that failed to load', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-plugin-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({
+    name: '@firekylin/broken', version: '1.0.0', description: 'Needs a newer Firekylin',
+    firekylin: {type: 'plugin', id: 'broken', permissions: ['content:read']}
+  }));
+  const pluginManager = {plugins: new Map(), discover: () => [root]};
+  const catalog = new PackageCatalog({pluginManager, firekylinVersion: '2.10.6'});
+  assert.deepEqual(catalog.plugins(), [{
+    id: 'broken', name: '@firekylin/broken', version: '1.0.0',
+    description: 'Needs a newer Firekylin', permissions: ['content:read'], source: 'local', status: 'error'
+  }]);
+});
+
+test('lists symlinked themes only when their target stays inside the themes root', t => {
+  const themesPath = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-themes-'));
+  const externalPath = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-external-theme-'));
+  t.after(() => {
+    fs.rmSync(themesPath, {recursive: true, force: true});
+    fs.rmSync(externalPath, {recursive: true, force: true});
+  });
+  fs.mkdirSync(path.join(themesPath, 'targets'));
+  fs.writeFileSync(path.join(themesPath, 'targets/package.json'), JSON.stringify({name: 'Linked', version: '1.0.0'}));
+  fs.writeFileSync(path.join(externalPath, 'package.json'), JSON.stringify({name: 'External', version: '1.0.0'}));
+  fs.symlinkSync(path.join(themesPath, 'targets'), path.join(themesPath, 'linked'));
+  fs.symlinkSync(externalPath, path.join(themesPath, 'external'));
+  const catalog = new PackageCatalog({themesPath, firekylinVersion: '2.10.6'});
+  assert.deepEqual(catalog.themes('linked').map(theme => theme.id), ['linked', 'targets']);
+  assert.equal(catalog.themes('linked')[0].active, true);
 });
