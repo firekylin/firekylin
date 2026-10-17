@@ -53,7 +53,13 @@ module.exports = class extends Base {
         PATHNAME_EXIST: 'PATHNAME_EXIST',
         'Post not found or permission denied': 'USER_NO_PERMISSION',
         'Authenticated author required': 'USER_NO_PERMISSION',
-        'Invalid post ID': 'PARAMS_ERROR'
+        'Invalid post ID': 'PARAMS_ERROR',
+        'Invalid author ID': 'PARAMS_ERROR',
+        'Invalid is_public': 'PARAMS_ERROR',
+        'Invalid allow_comment': 'PARAMS_ERROR',
+        'Only administrators can change post authors': 'USER_NO_PERMISSION',
+        'Invalid bulk operation': 'PARAMS_ERROR',
+        'Bulk edit requires a change': 'PARAMS_ERROR'
       };
       if (Object.hasOwn(failures, error.message)) return this.fail(failures[error.message]);
       throw error;
@@ -95,6 +101,14 @@ module.exports = class extends Base {
    */
   async putAction() {
     return this.runCommand(async() => {
+      if (!this.id && Array.isArray(this.post('ids'))) {
+        const result = await this.commandService().bulk(this.post(), this.userInfo, {
+          getTagModel: () => this.model('tag'),
+          getUserModel: () => this.model('user'),
+          prepare: (next, post) => this.prepareProtection(next, post.options)
+        });
+        return this.success(result);
+      }
       if (!this.id) return this.fail('PARAMS_ERROR');
       const data = {...this.post(), id: Number(this.id)};
       const result = await this.commandService().update(data, this.userInfo, {
