@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Table, Button, Checkbox, Input, Select, Space, message } from 'antd';
+import { Table, Button, Checkbox, Input, Radio, Select, Space, message } from 'antd';
 import './list-table.less';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { Link } from '../../../../utils/router';
@@ -211,11 +211,13 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
                         checked={this.state.editCategories}
                         onChange={event => this.setState({editCategories: event.target.checked})}
                     >更新分类</Checkbox>
-                    <Checkbox.Group
+                    <Select
+                        mode="multiple"
                         disabled={!this.state.editCategories}
                         value={this.state.categoryIds}
                         onChange={values => this.setState({categoryIds: values.map(Number)})}
                         options={sharedStore.categoryList.map(cat => ({label: cat.name, value: cat.id}))}
+                        placeholder="请选择分类"
                     />
                 </div>
                 <div className="bulk-edit-field">
@@ -238,12 +240,14 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
                         checked={this.state.editVisibility}
                         onChange={event => this.setState({editVisibility: event.target.checked})}
                     >更新公开度</Checkbox>
-                    <Select
+                    <Radio.Group
                         disabled={!this.state.editVisibility}
                         value={this.state.isPublic}
-                        onChange={isPublic => this.setState({isPublic})}
-                        options={[{label: '公开', value: 1}, {label: '不公开', value: 0}]}
-                    />
+                        onChange={event => this.setState({isPublic: event.target.value})}
+                    >
+                        <Radio value={1}>公开</Radio>
+                        <Radio value={0}>不公开</Radio>
+                    </Radio.Group>
                 </div>
                 <div className="bulk-edit-field">
                     <Checkbox
