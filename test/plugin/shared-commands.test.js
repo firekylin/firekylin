@@ -95,6 +95,20 @@ test('bulk author changes require an administrator', async() => {
   );
 });
 
+test('bulk author changes reject commenter accounts', async() => {
+  const {svc, setPost} = fixture();
+  setPost({id: 7, user_id: 1, status: 0, pathname: 'existing'});
+  const commenterModel = {
+    where() {return this}, setRelation() {return this}, async find() {return {}}
+  };
+  await assert.rejects(
+    svc.bulk({ids: [7], operation: 'edit', user_id: 4}, {id: 1, type: 1}, {
+      getUserModel: () => commenterModel
+    }),
+    /Invalid author ID/
+  );
+});
+
 test('bulk permanent delete validates the selection before deleting', async() => {
   const {svc, operations, setPost} = fixture();
   setPost({id: 7, user_id: 3, status: 4, pathname: 'existing'});

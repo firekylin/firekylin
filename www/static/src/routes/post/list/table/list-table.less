@@ -2,28 +2,31 @@
     margin: 10px 20px;
 }
 
-.bulk-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-
-    .ant-select { width: 140px; }
-}
-
 .bulk-edit-field {
     margin-bottom: 20px;
 
-    > label {
-        display: block;
+    > .ant-checkbox-wrapper:first-child {
+        display: flex;
+        align-items: center;
         font-weight: 500;
         margin-bottom: 8px;
+        white-space: nowrap;
+
+        > span:last-child { white-space: nowrap; }
     }
 
     .ant-checkbox-group {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
+
+        .ant-checkbox-wrapper {
+            align-items: center;
+            display: flex;
+            white-space: nowrap;
+
+            > span:last-child { white-space: nowrap; }
+        }
     }
 
     > .ant-select,
@@ -32,13 +35,28 @@
         margin-top: 8px;
         width: 100%;
     }
+
+    > .ant-select {
+        .ant-select-selector {
+            display: flex;
+            flex-wrap: nowrap;
+            min-width: 0;
+        }
+
+        .ant-select-arrow { flex: none; }
+    }
+
+    .bulk-edit-option {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+        white-space: nowrap;
+    }
 }
 
-.bulk-edit-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-
-    .ant-select { width: 160px; }
-    .ant-input-affix-wrapper { flex: 1; }
+.bulk-edit-help {
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 4px;
 }

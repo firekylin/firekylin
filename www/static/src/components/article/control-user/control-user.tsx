@@ -14,7 +14,7 @@ class ArticleControlUser extends React.Component<ACUserProps, any> {
     }
 
     render() {
-        const users = this.props.users;
+        const users = this.props.users.filter(user => Number(user.type) !== 4);
 
         return (
             <Select

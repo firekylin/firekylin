@@ -2,8 +2,7 @@ import * as React from 'react';
 import './list.less';
 import { observer, inject } from '@admin/utils/mobx-react';
 import PostListTable from './table/list-table';
-import { Form } from 'antd';
-import { Tabs, Input, Select } from 'antd';
+import { Button, Form, Input, Modal, Select, Space, Tabs, message } from 'antd';
 import { PostListProps } from './list.model';
 import BreadCrumb from '../../../components/breadcrumb';
 const TabPane = Tabs.TabPane;
@@ -28,12 +27,39 @@ class PostListForm extends React.Component<PostListProps, {}> {
         });
     }
     tabChanged(key: string) {
+        this.props.postStore.setSelectedRowKeys([]);
         this.props.postStore.setPlReqParams({
             status: key
         });
     }
-    handleSubmit() {
-        //
+
+    bulkDelete = () => {
+        const {postStore} = this.props;
+        const ids = postStore.selectedRowKeys.map(Number);
+        if (!ids.length) return message.warning('请先选择文章');
+        const force = String(postStore.plReqParams.status) === '4';
+        Modal.confirm({
+            title: '提示',
+            content: `确定${force ? '永久删除' : '将'}选中的 ${ids.length} 篇文章${force ? '' : '移入回收站'}吗？`,
+            onOk: () => new Promise<void>((resolve, reject) => {
+                postStore.bulkPost(force ? 'forceDelete' : 'delete', ids).subscribe(res => {
+                    if (res.errno !== 0) {
+                        message.error(res.errmsg || '批量删除失败');
+                        postStore.setLoading(false);
+                        reject(new Error(res.errmsg || '批量删除失败'));
+                        return;
+                    }
+                    message.success(`已处理 ${ids.length} 篇文章`);
+                    postStore.setSelectedRowKeys([]);
+                    postStore.getPostList();
+                    resolve();
+                }, error => {
+                    message.error(error instanceof Error ? error.message : String(error));
+                    postStore.setLoading(false);
+                    reject(error);
+                });
+            })
+        });
     }
 
     getOperations() {
@@ -42,9 +68,20 @@ class PostListForm extends React.Component<PostListProps, {}> {
         return (
             <>
                 <Form.Item className="forms">
+                    <Space size="small" className="bulk-operation-buttons">
+                        <Button
+                            disabled={!postStore.selectedRowKeys.length || String(postStore.plReqParams.status) === '4'}
+                            onClick={() => postStore.setBulkEditOpen(true)}
+                        >批量编辑</Button>
+                        <Button
+                            danger
+                            disabled={!postStore.selectedRowKeys.length}
+                            onClick={this.bulkDelete}
+                        >批量删除</Button>
+                    </Space>
                     <Select
                         defaultValue=""
-                        style={{float: 'left', width: 120}}
+                        style={{width: 120}}
                         placeholder="请选择分类"
                         onChange={(selectedValue: string) => postStore.setPlReqParams({cate: selectedValue, page: 1})}
                     >
@@ -69,6 +106,7 @@ class PostListForm extends React.Component<PostListProps, {}> {
                     <Tabs className="tabs"
                         defaultActiveKey=""
                         type="card"
+                        destroyOnHidden={true}
                         onChange={key => {this.tabChanged(key); }}
                         tabBarExtraContent={this.getOperations()}
                     >

@@ -104,6 +104,7 @@ module.exports = class extends Base {
       if (!this.id && Array.isArray(this.post('ids'))) {
         const result = await this.commandService().bulk(this.post(), this.userInfo, {
           getTagModel: () => this.model('tag'),
+          getUserModel: () => this.model('user'),
           prepare: (next, post) => this.prepareProtection(next, post.options)
         });
         return this.success(result);

@@ -120,6 +120,11 @@ class PostCommandService {
         if (this.actor(principal).type !== 1) throw new Error('Only administrators can change post authors');
         const userId = Number(input.user_id);
         if (!Number.isSafeInteger(userId) || userId < 1) throw new TypeError('Invalid author ID');
+        if (typeof options.getUserModel === 'function') {
+          const user = await options.getUserModel().where({id: userId, type: ['!=', 4]}).setRelation(false)
+            .find();
+          if (!user || !user.id) throw new TypeError('Invalid author ID');
+        }
         changes.user_id = userId;
       }
       for (const name of ['is_public', 'allow_comment']) {

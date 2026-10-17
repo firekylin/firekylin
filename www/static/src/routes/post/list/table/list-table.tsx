@@ -11,9 +11,6 @@ import { TABLE_DELAY } from '../../../../config';
 const confirm = Modal.confirm;
 
 interface PostListTableState {
-    selectedRowKeys: React.Key[];
-    bulkAction: string;
-    editOpen: boolean;
     categoryIds: number[];
     tags: string[];
     editCategories: boolean;
@@ -21,7 +18,6 @@ interface PostListTableState {
     editVisibility: boolean;
     isPublic: number;
     editPassword: boolean;
-    passwordAction: 'set' | 'clear';
     postPassword: string;
     editPermission: boolean;
     allowComment: number;
@@ -33,9 +29,9 @@ interface PostListTableState {
 @observer
 class PostListTable extends React.Component<PostListProps, PostListTableState> {
     state: PostListTableState = {
-        selectedRowKeys: [], bulkAction: '', editOpen: false, categoryIds: [], tags: [],
+        categoryIds: [], tags: [],
         editCategories: false, editTags: false, editVisibility: false, isPublic: 1,
-        editPassword: false, passwordAction: 'set', postPassword: '',
+        editPassword: false, postPassword: '',
         editPermission: false, allowComment: 1, editAuthor: false
     };
 
@@ -61,58 +57,32 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
         this.props.postStore.refusePostById(id);
     }
 
-    applyBulk = (): void => {
-        const {selectedRowKeys, bulkAction} = this.state;
-        if (!selectedRowKeys.length) {
-            message.warning('请先选择文章');
-            return;
-        }
-        if (!bulkAction) {
-            message.warning('请选择批量操作');
-            return;
-        }
-        if (bulkAction === 'edit') {
-            this.setState({editOpen: true});
-            return;
-        }
-        const force = bulkAction === 'forceDelete';
-        confirm({
-            title: '提示',
-            content: `确定${force ? '永久删除' : '将'}选中的 ${selectedRowKeys.length} 篇文章${force ? '' : '移入回收站'}吗？`,
-            onOk: () => this.runBulk(force ? 'forceDelete' : 'delete')
-        });
-    }
-
-    runBulk = (operation: 'edit' | 'delete' | 'forceDelete') => {
+    runBulk = () => {
         const changes: Record<string, any> = {};
-        if (operation === 'edit' && this.state.editCategories) {
+        if (this.state.editCategories) {
             changes.cate = this.state.categoryIds.map(id => ({id}));
         }
-        if (operation === 'edit' && this.state.editTags) changes.tag = this.state.tags;
-        if (operation === 'edit' && this.state.editVisibility) changes.is_public = this.state.isPublic;
-        if (operation === 'edit' && this.state.editPassword) {
-            if (this.state.passwordAction === 'clear') changes.clear_post_password = 1;
-            else changes.post_password = this.state.postPassword;
+        if (this.state.editTags) changes.tag = this.state.tags;
+        if (this.state.editVisibility) changes.is_public = this.state.isPublic;
+        if (this.state.editPassword) {
+            if (this.state.postPassword) changes.post_password = this.state.postPassword;
+            else changes.clear_post_password = 1;
         }
-        if (operation === 'edit' && this.state.editPermission) {
+        if (this.state.editPermission) {
             changes.allow_comment = this.state.allowComment;
         }
-        if (operation === 'edit' && this.state.editAuthor) changes.user_id = this.state.userId;
-        if (operation === 'edit' && !Object.keys(changes).length) {
+        if (this.state.editAuthor) changes.user_id = this.state.userId;
+        if (!Object.keys(changes).length) {
             message.warning('请选择要更新的内容');
             return Promise.reject(new Error('请选择要更新的内容'));
         }
-        if (operation === 'edit' && this.state.editPassword &&
-            this.state.passwordAction === 'set' && !this.state.postPassword) {
-            message.warning('请输入访问密码');
-            return Promise.reject(new Error('请输入访问密码'));
-        }
-        if (operation === 'edit' && this.state.editAuthor && !this.state.userId) {
+        if (this.state.editAuthor && !this.state.userId) {
             message.warning('请选择作者');
             return Promise.reject(new Error('请选择作者'));
         }
         return new Promise<void>((resolve, reject) => {
-            this.props.postStore.bulkPost(operation, this.state.selectedRowKeys.map(Number), changes).subscribe(
+            const ids = this.props.postStore.selectedRowKeys.map(Number);
+            this.props.postStore.bulkPost('edit', ids, changes).subscribe(
                 res => {
                     if (res.errno !== 0) {
                         const error = new Error(res.errmsg || '批量操作失败');
@@ -121,13 +91,15 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
                         reject(error);
                         return;
                     }
-                    message.success(`已处理 ${this.state.selectedRowKeys.length} 篇文章`);
+                    message.success(`已处理 ${ids.length} 篇文章`);
                     this.setState({
-                        selectedRowKeys: [], bulkAction: '', editOpen: false, categoryIds: [], tags: [],
+                        categoryIds: [], tags: [],
                         editCategories: false, editTags: false, editVisibility: false, isPublic: 1,
-                        editPassword: false, passwordAction: 'set', postPassword: '',
+                        editPassword: false, postPassword: '',
                         editPermission: false, allowComment: 1, editAuthor: false, userId: undefined
                     });
+                    this.props.postStore.setSelectedRowKeys([]);
+                    this.props.postStore.setBulkEditOpen(false);
                     this.props.postStore.getPostList();
                     resolve();
                 },
@@ -162,31 +134,17 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
 
     render() {
         const Column = Table.Column;
-        const { postList, loading, pagination, plReqParams } = this.props.postStore;
+        const { postList, loading, pagination, selectedRowKeys, bulkEditOpen } = this.props.postStore;
         const {sharedStore} = this.props;
-        const inTrash = String(plReqParams.status) === '4';
         return (
             <>
-            <div className="bulk-actions">
-                <Select
-                    value={this.state.bulkAction}
-                    onChange={bulkAction => this.setState({bulkAction})}
-                    options={inTrash ? [
-                        {value: '', label: '批量操作'}, {value: 'forceDelete', label: '永久删除'}
-                    ] : [
-                        {value: '', label: '批量操作'}, {value: 'edit', label: '编辑'}, {value: 'delete', label: '移入回收站'}
-                    ]}
-                />
-                <Button onClick={this.applyBulk} disabled={!this.state.selectedRowKeys.length}>应用</Button>
-                {!!this.state.selectedRowKeys.length && <span>已选择 {this.state.selectedRowKeys.length} 项</span>}
-            </div>
             <Table
                 dataSource={postList}
                 loading={{spinning: loading, delay: TABLE_DELAY}}
                 pagination={pagination}
                 rowSelection={{
-                    selectedRowKeys: this.state.selectedRowKeys,
-                    onChange: selectedRowKeys => this.setState({selectedRowKeys})
+                    selectedRowKeys,
+                    onChange: keys => this.props.postStore.setSelectedRowKeys(keys)
                 }}
                 onChange={e => {
                     this.props.postStore.setPlReqParams({
@@ -240,13 +198,13 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
                 />
             </Table>
             <Modal
-                title={`批量编辑 ${this.state.selectedRowKeys.length} 篇文章`}
-                open={this.state.editOpen}
+                title={`批量编辑 ${selectedRowKeys.length} 篇文章`}
+                open={bulkEditOpen}
                 okText="更新"
                 cancelText="取消"
                 confirmLoading={loading}
-                onCancel={() => this.setState({editOpen: false})}
-                onOk={() => this.runBulk('edit')}
+                onCancel={() => this.props.postStore.setBulkEditOpen(false)}
+                onOk={this.runBulk}
             >
                 <div className="bulk-edit-field">
                     <Checkbox
@@ -292,33 +250,26 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
                         checked={this.state.editPassword}
                         onChange={event => this.setState({editPassword: event.target.checked})}
                     >更新访问密码</Checkbox>
-                    <div className="bulk-edit-row">
-                        <Select
-                            disabled={!this.state.editPassword}
-                            value={this.state.passwordAction}
-                            onChange={passwordAction => this.setState({passwordAction})}
-                            options={[{label: '设置密码', value: 'set'}, {label: '取消密码保护', value: 'clear'}]}
-                        />
-                        {this.state.passwordAction === 'set' && <Input.Password
-                            disabled={!this.state.editPassword}
-                            value={this.state.postPassword}
-                            maxLength={256}
-                            placeholder="输入新的访问密码"
-                            onChange={event => this.setState({postPassword: event.target.value})}
-                        />}
-                    </div>
+                    <Input.Password
+                        disabled={!this.state.editPassword}
+                        value={this.state.postPassword}
+                        maxLength={256}
+                        placeholder="输入新的访问密码"
+                        onChange={event => this.setState({postPassword: event.target.value})}
+                    />
+                    <div className="bulk-edit-help">勾选更新后，留空将取消所选文章的密码保护。</div>
                 </div>
                 <div className="bulk-edit-field">
                     <Checkbox
                         checked={this.state.editPermission}
                         onChange={event => this.setState({editPermission: event.target.checked})}
                     >更新权限控制</Checkbox>
-                    <Select
+                    <Checkbox
+                        className="bulk-edit-option"
                         disabled={!this.state.editPermission}
-                        value={this.state.allowComment}
-                        onChange={allowComment => this.setState({allowComment})}
-                        options={[{label: '允许评论', value: 1}, {label: '禁止评论', value: 0}]}
-                    />
+                        checked={Boolean(this.state.allowComment)}
+                        onChange={event => this.setState({allowComment: event.target.checked ? 1 : 0})}
+                    >允许评论</Checkbox>
                 </div>
                 {window.SysConfig.userInfo.type === 1 && <div className="bulk-edit-field">
                     <Checkbox
@@ -332,7 +283,9 @@ class PostListTable extends React.Component<PostListProps, PostListTableState> {
                         onChange={userId => this.setState({userId})}
                         optionFilterProp="label"
                         placeholder="选择作者"
-                        options={sharedStore.userList.map(user => ({label: user.name, value: user.id}))}
+                        options={sharedStore.userList
+                            .filter(user => Number(user.type) !== 4)
+                            .map(user => ({label: user.name, value: user.id}))}
                     />
                 </div>}
             </Modal>
