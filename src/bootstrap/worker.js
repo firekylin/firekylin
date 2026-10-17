@@ -16,6 +16,7 @@ const pack = require('../../package.json');
 const {PackageCatalog} = require('../service/package-catalog');
 const {ThemeInstaller} = require('../service/theme-installer');
 const {PluginInstaller} = require('../service/plugin-installer');
+const {createDeploymentAdapter} = require('../service/package-deployment');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
   ? global.firekylin.plugins
@@ -44,6 +45,8 @@ widget.ensureWidgetMap(widgets);
 widget.loadProjectWidgets(getContext());
 
 const projectContext = getContext();
+const deploymentAdapter = createDeploymentAdapter(projectContext.config && projectContext.config.marketplace &&
+  projectContext.config.marketplace.deployment);
 const packageRuntime = {
   themeInstaller: new ThemeInstaller({
     themesPath: projectContext.themesPath || path.join(projectContext.projectPath, 'themes'),
@@ -57,6 +60,7 @@ const packageRuntime = {
   })
 };
 const packageApi = {
+  mutationMode: deploymentAdapter ? 'deployment' : 'local',
   list: async() => {
     const options = await think.model('options').getOptions();
     return new PackageCatalog({pluginManager: global.firekylin.plugins,
@@ -72,6 +76,7 @@ const packageApi = {
   themeBackups: () => packageRuntime.themeInstaller.backups(),
   rollbackTheme: backup => packageRuntime.themeInstaller.rollback(backup)
 };
+if (deploymentAdapter) packageApi.deploy = change => deploymentAdapter.deploy(change);
 const pluginManager = existingPluginManager || new PluginManager({
   projectPath: projectContext.projectPath,
   config: projectContext.config || {},
