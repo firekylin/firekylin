@@ -56,7 +56,7 @@ function TwoFactorAuthForm(props: TwoFactorAuthProps) {
                     if (res.errno === 0) {
                         message.success('关闭二步验证成功');
                         window.SysConfig.options.two_factor_auth = '';
-                        legacy.forceUpdate();
+                        legacy.setState({ options: { ...window.SysConfig.options } });
                     }
                 });
             },
@@ -68,7 +68,7 @@ function TwoFactorAuthForm(props: TwoFactorAuthProps) {
                 message.success('开启二步验证成功');
                 window.SysConfig.options.two_factor_auth =
                     props.twoFactorAuthStore.data.secret;
-                legacy.forceUpdate();
+                legacy.setState({ options: { ...window.SysConfig.options } });
             }
         });
     };

@@ -25,24 +25,17 @@ function CategoryCreate(props: CategoryCreateProps) {
     if (!legacy.__initialized) {
         legacy.__initialized = true;
         legacy.formRef = React.createRef<FormInstance>();
-        legacy.handleSubmit = (values: any) => {
-            const { createCategory, updateCategory } = props.categoryStore;
-            const id = props.match.params.id;
-            if (id) {
-                updateCategory(id, Object.assign({}, values)).subscribe((res) => {
-                    if (res.errno === 0) {
-                        props.history.push('/cate/list');
-                    }
-                });
-            } else {
-                createCategory(Object.assign({}, values)).subscribe((res) => {
-                    if (res.errno === 0) {
-                        props.history.push('/cate/list');
-                    }
-                });
-            }
-        };
     }
+    legacy.handleSubmit = (values: any) => {
+        const { createCategory, updateCategory } = props.categoryStore;
+        const id = props.match.params.id;
+        const request = id
+            ? updateCategory(id, { ...values })
+            : createCategory({ ...values });
+        request.subscribe((res) => {
+            if (res.errno === 0) props.history.push('/cate/list');
+        });
+    };
     legacy.onMount = function onMount() {
         props.categoryStore.getRootCategory();
         if (props.match.params.id) {

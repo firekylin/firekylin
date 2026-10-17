@@ -28,18 +28,15 @@ function EditorLinkModalForm(props: EditorLinkModalProps) {
     if (!legacy.__initialized) {
         legacy.__initialized = true;
         legacy.formRef = React.createRef<FormInstance>();
-        legacy.handleChange = (value) => {
-            const selectedLink = props.innerLinks.filter(
-                (link) => link.title === value,
-            )[0];
-            const pathname = selectedLink.pathname;
-            const title = selectedLink.title;
-            legacy.formRef.current?.setFieldsValue({
-                innerLinkUrl: pathname,
-                innerLinkText: title,
-            });
-        };
     }
+    legacy.handleChange = (value: string) => {
+        const selectedLink = props.innerLinks.find((link) => link.title === value);
+        if (!selectedLink) return;
+        legacy.formRef.current?.setFieldsValue({
+            innerLinkUrl: selectedLink.pathname,
+            innerLinkText: selectedLink.title,
+        });
+    };
     legacy.onMount = function onMount() {
         props.onFormReady?.(legacy.formRef);
     };

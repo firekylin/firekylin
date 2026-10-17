@@ -29,3 +29,10 @@ test('admin UI contains only function components and hooks', () => {
 
   assert.deepEqual(violations, []);
 });
+
+test('admin function components do not call class-only forceUpdate', () => {
+  const offenders = sourceFiles(adminRoot).filter(file =>
+    /(?:this|legacy)\.forceUpdate\s*\(/.test(fs.readFileSync(file, 'utf8'))
+  );
+  assert.deepEqual(offenders, [], 'replace forceUpdate with explicit hook state updates');
+});

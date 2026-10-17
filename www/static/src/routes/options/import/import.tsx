@@ -68,8 +68,7 @@ function OptionsImportForm(props: OptionsImportProps) {
         //
     };
     legacy.beforeUpload = function beforeUpload(file: RcFile) {
-        legacy.setState({ fileList: [file] }, () => console.log(legacy.state.fileList));
-        legacy.forceUpdate();
+        legacy.setState({ fileList: [file] });
         return false;
     };
     legacy.handleUpload = function handleUpload() {
