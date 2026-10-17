@@ -5,6 +5,7 @@ const Base = require('./base');
 const {PackageCatalog} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
 const path = require('path');
+const cluster = require('cluster');
 
 module.exports = class extends Base {
   catalog() {
@@ -45,15 +46,24 @@ module.exports = class extends Base {
         const result = await this.installer().install(Buffer.from(encoded, 'base64'), {
           replace: this.post('replace') === true
         });
+        this.reloadActiveTheme(result.id);
         return this.success(result);
       }
       if (operation === 'theme.rollback') {
-        return this.success(await this.installer().rollback(this.post('backup')));
+        const result = await this.installer().rollback(this.post('backup'));
+        this.reloadActiveTheme(result.id);
+        return this.success(result);
       }
       if (operation === 'theme.backups') return this.success(await this.installer().backups());
       return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
     } catch (error) {
       return this.fail(error.message);
+    }
+  }
+
+  reloadActiveTheme(theme) {
+    if (theme === this.authOptions.theme && cluster.isWorker) {
+      process.send('think-cluster-reload-workers');
     }
   }
 };

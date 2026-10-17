@@ -31,11 +31,22 @@ function isSymlink(entry) {
   return Number.isInteger(permissions) && (permissions & 0o170000) === 0o120000;
 }
 
+function assertExtractedSize(entries) {
+  const bytes = entries.reduce((total, entry) => {
+    const size = entry._data && entry._data.uncompressedSize;
+    if (!Number.isSafeInteger(size) || size < 0) throw new Error('UNSAFE_THEME_ARCHIVE');
+    return total + size;
+  }, 0);
+  if (bytes > MAX_EXTRACTED_BYTES) throw new Error('THEME_ARCHIVE_TOO_LARGE');
+}
+
 class ThemeInstaller {
-  constructor({themesPath, backupPath, firekylinVersion, readOnly = false, now = () => new Date()}) {
+  constructor({themesPath, backupPath, firekylinVersion, nodeVersion = process.version,
+    readOnly = false, now = () => new Date()}) {
     this.themesPath = path.resolve(themesPath);
     this.backupPath = path.resolve(backupPath);
     this.firekylinVersion = firekylinVersion;
+    this.nodeVersion = String(nodeVersion).replace(/^v/, '');
     this.readOnly = readOnly;
     this.now = now;
   }
@@ -54,6 +65,7 @@ class ThemeInstaller {
     const manifests = files.filter(entry => /(^|\/)package\.json$/.test(entry.name));
     if (manifests.length !== 1) throw new Error('THEME_ARCHIVE_REQUIRES_ONE_MANIFEST');
     const manifestEntry = manifests[0];
+    assertExtractedSize([manifestEntry]);
     const prefix = manifestEntry.name.slice(0, -'package.json'.length);
     let manifest;
     try {
@@ -64,11 +76,16 @@ class ThemeInstaller {
     const metadata = manifest.firekylin || {};
     if (metadata.type && metadata.type !== 'theme') throw new Error('PACKAGE_IS_NOT_A_THEME');
     const id = safeId(metadata.id || manifest.id || manifest.name);
-    const engine = manifest.engines && manifest.engines.firekylin || metadata.engine;
+    const engines = manifest.engines || {};
+    const engine = metadata.engine || engines.firekylin;
     if (engine && (!semver.validRange(engine) || !semver.satisfies(this.firekylinVersion, engine))) {
       throw new Error('INCOMPATIBLE_FIREKYLIN_VERSION');
     }
+    if (engines.node && (!semver.validRange(engines.node) || !semver.satisfies(this.nodeVersion, engines.node))) {
+      throw new Error('INCOMPATIBLE_NODE_VERSION');
+    }
     const entries = files.filter(entry => entry.name.startsWith(prefix));
+    assertExtractedSize(entries);
     if (!entries.some(entry => entry.name.slice(prefix.length) === 'index.eta')) {
       throw new Error('THEME_INDEX_TEMPLATE_REQUIRED');
     }
@@ -148,7 +165,7 @@ class ThemeInstaller {
     const id = safeId(match[1]);
     const source = inside(this.backupPath, backup);
     const destination = inside(this.themesPath, id);
-    const displaced = `${backup}-rollback`;
+    const displaced = this.backupName(id);
     try { await fs.rename(destination, inside(this.backupPath, displaced)) } catch (error) {
       if (error.code !== 'ENOENT') throw error;
     }
