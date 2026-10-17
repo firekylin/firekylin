@@ -4,6 +4,11 @@ const Base = require('./base');
 const {getContext} = require('../../../../lib/project-context');
 
 module.exports = class extends Base {
+  getAction() {
+    const config = (getContext().config || {}).ai || {};
+    return this.success({enabled: Boolean(config.provider && config.model && config.baseUrl)});
+  }
+
   async postAction() {
     const config = (getContext().config || {}).ai || {};
     if (!config.provider || !config.model) return this.fail('AI_NOT_CONFIGURED');
