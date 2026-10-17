@@ -8,8 +8,8 @@
   <h1 class="title">分类</h1>
   <div class="entry-content"><section>
     <% while (categories.next()) { const cate = categories.row; %>
-    <a href="/cate/<%= cate.pathname %>" data-cate="<%= cate.name %>"><%= cate.name %>(<%= cate.count %>)</a>
-      <% if (cate.children) { cate.children.forEach(child => { %><a href="/cate/<%= child.pathname %>" data-cate="<%= child.name %>" class="child"><%= child.name %>(<%= child.count %>)</a><% }) } %>
+    <a href="/cate/<%= cate.pathname %>" data-cate="<%= cate.name %>"><%= cate.name %>(<%= cate.count %>)<% if (cate.description) { %><small><%= cate.description %></small><% } %></a>
+      <% if (cate.children) { cate.children.forEach(child => { %><a href="/cate/<%= child.pathname %>" data-cate="<%= child.name %>" class="child"><%= child.name %>(<%= child.count %>)<% if (child.description) { %><small><%= child.description %></small><% } %></a><% }) } %>
     <% } %>
   </section></div>
 </article>

@@ -11,9 +11,11 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
   const originalFirekylin = global.firekylin;
   const originalThink = global.think;
   const migrationKey = Symbol.for('firekylin.commentSchemaMigration');
+  const categoryMigrationKey = Symbol.for('firekylin.categorySchemaMigration');
   const oauthKey = Symbol.for('firekylin.mcp.oauthMigration');
   const originalOAuthMigration = global[oauthKey];
   const originalMigration = global[migrationKey];
+  const originalCategoryMigration = global[categoryMigrationKey];
   const workerPath = path.join(__dirname, '..', '..', 'src', 'bootstrap', 'worker.js');
   let managerInstances = 0;
   let pluginLoads = 0;
@@ -40,6 +42,7 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
   };
   global.think = {beforeStartServer: hook => startHooks.push(hook)};
   delete global[migrationKey];
+  delete global[categoryMigrationKey];
   delete global[oauthKey];
 
   try {
@@ -51,7 +54,7 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     assert.equal(global.firekylin.plugins, firstManager);
     assert.equal(managerInstances, 1);
     assert.equal(pluginLoads, 1);
-    assert.equal(startHooks.length, 2);
+    assert.equal(startHooks.length, 3);
     assert.equal(firstManager.tools.list().length, 15);
     assert.ok(firstManager.tools.has('posts.create_draft', 'core:management'));
     assert.ok(firstManager.tools.has('media.upload', 'core:media'));
@@ -66,5 +69,7 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     else global.think = originalThink;
     if (originalMigration === undefined) delete global[migrationKey];
     else global[migrationKey] = originalMigration;
+    if (originalCategoryMigration === undefined) delete global[categoryMigrationKey];
+    else global[categoryMigrationKey] = originalCategoryMigration;
   }
 });
