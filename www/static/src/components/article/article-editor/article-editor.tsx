@@ -5,7 +5,7 @@ import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
-function ArticleEditor(props: any) {
+export function ArticleEditor(props: any) {
     const [state, setState] = React.useState(() => ({
         postSubmitting: false,
         draftSubmitting: false,
@@ -56,15 +56,6 @@ function ArticleEditor(props: any) {
         legacy.id = props.id;
         legacy.type = props.type;
     }
-    legacy.onPropsChange = function onPropsChange(
-        nextProps: any,
-    ) {
-        if (nextProps) {
-            legacy.setState({
-                wordCount: tools.wordCount(legacy.state.postInfo.markdown_content),
-            });
-        }
-    };
     legacy.handleFetchData = function handleFetchData(keyword: string) {
         props.postStore.setPlReqParams({
             status: 3,
@@ -107,11 +98,13 @@ function ArticleEditor(props: any) {
             </div>
         );
     };
-    const previousRef = React.useRef({ props: props, state: state, mounted: false });
+    const markdownContent = props.articleStore.articleInfo.markdown_content;
     React.useEffect(() => {
-        if (previousRef.current.mounted) legacy.onPropsChange(previousRef.current.props);
-        previousRef.current = { props: props, state: state, mounted: true };
-    });
+        const wordCount = tools.wordCount(markdownContent);
+        setState((previous) =>
+            previous.wordCount === wordCount ? previous : { ...previous, wordCount },
+        );
+    }, [markdownContent]);
     return legacy.render();
 }
 
