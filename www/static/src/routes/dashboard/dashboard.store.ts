@@ -10,6 +10,7 @@ class DashBoardStore {
   posts = [];
   systemInfo: SystemInfo = {
     config: {},
+    mcpEnabled: true,
     count: {
       cates: 0,
       comments: 0,
