@@ -20,11 +20,16 @@ Only active administrator/editor accounts (type 1/2) can authorize; anonymous us
 
 Authorization needs state, resource, client_id, redirect_uri, scope, and PKCE S256. Clients must validate state/metadata. Current code/consent TTL=600 seconds, access=1 hour, refresh=30 days. Refresh rotates on single use; it does not guarantee old access-token revocation. Registration allows supported HTTPS/loopback redirects, up to 5 URIs. IP registration rate limiting is process-local, not globally distributed.
 
-Fixed scopes: posts:read, posts:manage:read, posts:write, posts:publish, posts:delete, taxonomy:read, comments:read, comments:moderate, media:write. Plugin scopes do not automatically enter the allowlist. Editors cannot receive administrator publish/delete/comment scopes; tools additionally enforce ownership/live role.
+Fixed scopes: posts:read, posts:manage:read, posts:write, posts:publish, posts:delete,
+taxonomy:read, taxonomy:write, comments:read, comments:write, comments:moderate,
+settings:read, settings:write, media:write. Plugin scopes do not automatically enter the allowlist.
+Editors cannot receive administrator publish/delete/taxonomy/comment/settings scopes; tools additionally enforce
+ownership/live role.
 
 ## Tool inventory
 
-“Discoverable” still depends on scope/role/configuration. **Hidden** means the current remote server always excludes requiresApproval tools. Those declarations document internal implementation only; do not bypass the policy.
+“Discoverable” still depends on scope, role, and configuration. Tools marked **Confirm** require a literal
+`confirm: true` argument for every remote call in addition to OAuth and live role checks.
 
 | Tool | Scope | Remote | Arguments/results |
 | --- | --- | --- | --- |
@@ -35,13 +40,22 @@ Fixed scopes: posts:read, posts:manage:read, posts:write, posts:publish, posts:d
 | posts.get_managed | posts:manage:read | Discoverable | id; Markdown/status/is_public; missing object errors, non-admin own posts only |
 | posts.create_draft | posts:write | Discoverable | Required title/pathname/markdown_content; current user's private draft, numeric ID |
 | posts.update_draft | posts:write | Discoverable | id plus at least one content field; owned/authorized draft only; {id,affectedRows} |
-| posts.update | posts:write | **Hidden** | id plus content changes; published editor changes may enter review |
-| posts.publish | posts:publish | **Hidden** | Administrator id; status=3, does not alter is_public/publication time |
-| posts.delete | posts:delete | **Hidden** | id; permanent deletion, not trash |
+| posts.update | posts:write | **Confirm** | id plus content changes; published editor changes may enter review |
+| posts.publish | posts:publish | **Confirm** | Administrator id; status=3, does not alter is_public/publication time |
+| posts.delete | posts:delete | **Confirm** | id; permanent deletion, not trash |
 | categories.list | taxonomy:read | Discoverable | {}; id/name/pathname/pid list |
 | tags.list | taxonomy:read | Discoverable | {}; id/name/pathname list |
+| categories.create/update | taxonomy:write | Discoverable | Administrator; name/pathname and optional parent ID |
+| categories.delete | taxonomy:write | **Confirm** | Administrator id; deletes category relations |
+| tags.create/update | taxonomy:write | Discoverable | Administrator; name/pathname |
+| tags.delete | taxonomy:write | **Confirm** | Administrator id; deletes tag relations |
 | comments.list | comments:read | Discoverable | Administrator; page=1, limit=20 (1..100), approved/waiting/spam status; excludes email |
-| comments.approve | comments:moderate | **Hidden** | Administrator id; approve waiting comment |
+| comments.create | comments:write | Discoverable | Administrator; post_id/comment plus optional author metadata |
+| comments.update | comments:write | **Confirm** | Administrator id and Markdown content |
+| comments.approve | comments:moderate | **Confirm** | Administrator id; approve waiting comment |
+| comments.moderate | comments:moderate | **Confirm** | Administrator id; approved/waiting/spam/delete |
+| settings.get | settings:read | Discoverable | Administrator; returns MCP-safe settings only |
+| settings.update | settings:write | **Confirm** | Administrator; allowlisted settings object only |
 | media.upload | media:write | Discoverable | name/format/base64; uploader URL |
 
 Read [tools.json](tools.json) for exact required fields, additionalProperties, types, bounds, and descriptions. Runtime validation adds constraints beyond schemas: safe positive integer IDs, title/pathname <=255 chars, nonempty Markdown <=1 million chars. Do not pass undeclared category/status/userid to draft tools.
@@ -81,10 +95,12 @@ SDK results use content text blocks, usually JSON-serialized business values. Ch
 - 404: version/mcp.enabled/proxy path; not every 2.8.0 artifact includes this implementation.
 - POST 415/413: JSON Content-Type/request size; transport currently limits 8 MiB, uploads have smaller constraints.
 - OAuth 400: redirect/resource/PKCE/state/code binding; preserve validation.
-- Missing publish/delete/approve: hidden policy; use authorized admin operations or deliver reviewable drafts.
+- Missing management tools: reconnect and authorize the matching administrator scopes; high-risk calls also need
+  `confirm: true`.
 - Missing plugin tools: loading/naming/scopes/approval flags; lowercase IDs and no core:* ownership impersonation.
 
-MCP does not cover page creation, taxonomy writes, site settings, account management, backups, or arbitrary imports. Use the appropriate admin/file/maintenance workflow.
+MCP does not cover page creation, account management, sensitive credentials, backups, or arbitrary imports. Use the
+appropriate admin/file/maintenance workflow.
 
 ## Update metadata
 

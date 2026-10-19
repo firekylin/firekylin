@@ -39,7 +39,8 @@ Firekylin 自带 **OAuth 授权服务器**，MCP 客户端连接博客不需要�
 - 授权页核验 JWT 登录、一次性持久化 CSRF Token、Scope、Redirect URI 和 PKCE Challenge。
 - 动态注册仅支持 HTTPS 和 localhost/loopback 回调。公开注册接口应通过反向代理限制注册频率。
 - MCP 执行会继续经过 Tool Registry 的 Scope 判断和共享业务 Service 的角色/资源权限判断。
-- 需要审批的发布、删除等 Tool 目前仍不会暴露给远程 MCP 客户端；授权页面不能替代单次高风险动作审批。
+- 发布、删除、审核和设置修改等高风险 Tool 除 OAuth Scope 与管理员权限外，还要求每次调用显式传入
+  `confirm: true`。OAuth 授权页面不能替代这项逐次确认。
 - 在反向代理层配置 TLS、限流、IP 防滥用与适当的请求体限制。
 - Access Token 默认 1 小时有效，Refresh Token 默认 30 天，刷新时执行轮换。服务器重启不会丢失数据库里的授权记录。
 - 修改密码、退出网页登录与撤销 OAuth 授权属于不同操作。管理员若需要立即撤销某客户端的所有授权，可使用后台撤销入口（尚待实现），或者禁用关联用户。单个令牌也可经 `/oauth/revoke` 撤销。
@@ -55,6 +56,16 @@ pnpm lint-break-on-errors
 需要在部署环境用 MCP Inspector / Codex 验证：发现、动态注册、重定向登录、授权码交换、Token 刷新、工具调用、拒绝授权、一次性授权码不可重放、HTTPS 反向代理。
 
 **注意：** 这是待审查的实现分支，仍需要端到端联调与安全审查，不要直接用于公网生产环境。
+
+## 管理接口权限
+
+管理员可以按需授权 `posts:publish`、`posts:delete`、`taxonomy:write`、`comments:write`、
+`comments:moderate`、`settings:read` 和 `settings:write`。编辑者不能获得这些管理员 Scope。
+
+远程 MCP 支持文章发布与永久删除，评论发布、编辑和审核，分类与标签的增删改，以及站点设置读取和修改。
+删除、已有内容修改、审核和设置修改均属于高风险操作，需要在 Tool 参数中额外携带 `confirm: true`。
+站点设置仅开放常规展示、阅读、分析和评论配置白名单，不允许通过 MCP 修改 JWT 密钥、上传服务凭据、
+LDAP、双因素认证或推送目标等敏感配置。
 
 
 ## 旧版源码部署

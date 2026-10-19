@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const {Readable} = require('node:stream');
 const {isAllowedOrigin} = require('../../src/mcp/oauth-auth');
-const {exposedTools, createServerFactory, createMcpEndpoint, readBody} = require('../../src/mcp/server');
+const {exposedTools, remoteInputSchema, createServerFactory, createMcpEndpoint, readBody} = require('../../src/mcp/server');
 
 test('Origin headers are rejected unless explicitly allowed', () => {
   assert.equal(isAllowedOrigin(undefined, []), true);
@@ -13,7 +13,7 @@ test('Origin headers are rejected unless explicitly allowed', () => {
   assert.equal(isAllowedOrigin('https://evil.example', ['https://site.example']), false);
 });
 
-test('MCP only advertises authorized tools and never approval-gated tools', () => {
+test('MCP advertises scoped tools and adds explicit confirmation to approval-gated tools', () => {
   const tools = [
     {name: 'posts.list', requiredPermissions: ['posts:read'], requiresApproval: false},
     {name: 'posts.create_draft', requiredPermissions: ['posts:write'], requiresApproval: false},
@@ -21,7 +21,29 @@ test('MCP only advertises authorized tools and never approval-gated tools', () =
   ];
   assert.deepEqual(exposedTools(tools, new Set(['posts:read'])).map(tool => tool.name), ['posts.list']);
   assert.deepEqual(exposedTools(tools, new Set(['posts:read', 'posts:write', 'posts:publish']))
-    .map(tool => tool.name), ['posts.list', 'posts.create_draft']);
+    .map(tool => tool.name), ['posts.list', 'posts.create_draft', 'posts.publish']);
+  const schema = remoteInputSchema({...tools[2], inputSchema: {type: 'object', properties: {id: {type: 'integer'}}, required: ['id']}});
+  assert.deepEqual(schema.required, ['id', 'confirm']);
+  assert.equal(schema.properties.confirm.const, true);
+});
+
+test('approval-gated remote tools require confirm=true and do not forward it', async() => {
+  const registered = new Map();
+  class FakeMcpServer { registerTool(name, descriptor, cb) {registered.set(name, {descriptor, cb})} }
+  let executed;
+  const factory = createServerFactory({
+    sdk: {McpServer: FakeMcpServer, fromJsonSchema: schema => schema},
+    auth: {principal: {id: 1, type: 1}, scopes: new Set(['posts:delete']), tokenId: 'token'},
+    logger: {info() {}, error() {}},
+    tools: {
+      list: () => [{name: 'posts.delete', description: 'Delete', requiredPermissions: ['posts:delete'],
+        inputSchema: {type: 'object', properties: {id: {type: 'integer'}}, required: ['id']}, requiresApproval: true}],
+      async execute(name, input, context) { executed = {name, input, approved: await context.approve()}; return executed }
+    }
+  });
+  factory();
+  const response = await registered.get('posts.delete').cb({id: 9, confirm: true});
+  assert.deepEqual(JSON.parse(response.content[0].text), {name: 'posts.delete', input: {id: 9}, approved: true});
 });
 
 test('registered Tool execution uses scoped OAuth identity', async() => {

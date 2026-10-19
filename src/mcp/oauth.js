@@ -10,7 +10,8 @@ const {
 const FORM_LIMIT = 32 * 1024;
 const allowedScopes = new Set([
   'posts:read', 'posts:manage:read', 'posts:write', 'posts:publish', 'posts:delete',
-  'taxonomy:read', 'comments:read', 'comments:moderate', 'media:write'
+  'taxonomy:read', 'taxonomy:write', 'comments:read', 'comments:write', 'comments:moderate',
+  'settings:read', 'settings:write', 'media:write'
 ]);
 
 function json(ctx, value, status = 200) {
@@ -33,7 +34,8 @@ function authorizable(scopes, user) {
   if (!user || ![1, 2].includes(Number(user.type))) return false;
   return scopes.every(scope => allowedScopes.has(scope) &&
     (Number(user.type) === 1 || ![
-      'posts:publish', 'posts:delete', 'comments:read', 'comments:moderate'
+      'posts:publish', 'posts:delete', 'comments:read', 'comments:moderate',
+      'taxonomy:write', 'comments:write', 'settings:read', 'settings:write'
     ].includes(scope)));
 }
 

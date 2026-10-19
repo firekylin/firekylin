@@ -27,8 +27,18 @@ function fixture() {
     async savePost(data) {calls.push(['save', data]); return 1;},
     async deletePost(id) {calls.push(['delete', id]); return 1;}
   };
-  const cate = {setRelation() {return this;}, async select() {return [{id: 1, name: 'Tech', pathname: 'tech', pid: 0, secret: 'x'}]}};
-  const tag = {setRelation() {return this;}, async select() {return [{id: 2, name: 'Node', pathname: 'node'}]}};
+  const cate = {
+    setRelation() {return this;}, async select() {return [{id: 1, name: 'Tech', pathname: 'tech', pid: 0, secret: 'x'}]},
+    async addCate(data) {calls.push(['cate.add', data]); return {id: 11}},
+    async saveCate(data) {calls.push(['cate.save', data]); return 1},
+    async deleteCate(value) {calls.push(['cate.delete', value]); return 1}
+  };
+  const tag = {
+    setRelation() {return this;}, async select() {return [{id: 2, name: 'Node', pathname: 'node'}]},
+    async addTag(data) {calls.push(['tag.add', data]); return {id: 12}},
+    async saveTag(data) {calls.push(['tag.save', data]); return 1},
+    async deleteTag(value) {calls.push(['tag.delete', value]); return 1}
+  };
   const comment = {
     where(where) {calls.push(['comment.where', where]); return this;},
     setRelation() {return this;},
@@ -36,9 +46,14 @@ function fixture() {
     page() {return this;},
     async select() {return [{id: 4, comment: 'hello', nick: 'guest', email: 'secret'}];},
     async find() {return {id: 4, post_id: 5, status: 'waiting'};},
-    async update(data) {calls.push(['comment.update', data]); return 1;}
+    async update(data) {calls.push(['comment.update', data]); return 1;},
+    async delete() {calls.push(['comment.delete']); return 1;}
   };
-  const models = {post, cate, tag, comment};
+  const options = {
+    async getOptions() {return {title: 'Blog', post_permalink: '/post/{slug}.html', jwt_secret: 'hidden'}},
+    async updateOptions(data) {calls.push(['options.update', data])}
+  };
+  const models = {post, cate, tag, comment, options};
   const registry = new ToolRegistry();
   registerManagementTools(registry, {
     getModel: name => models[name], now: () => 'now',
@@ -59,9 +74,12 @@ function fixture() {
 test('registers all management tools', () => {
   const {registry} = fixture();
   assert.deepEqual(registry.list().map(item => item.name), [
-    'posts.list_managed', 'posts.get_managed', 'posts.update',
+    'posts.list_managed', 'categories.create', 'categories.update', 'categories.delete',
+    'tags.create', 'tags.update', 'tags.delete', 'posts.get_managed',
+    'comments.create', 'comments.update', 'comments.moderate', 'posts.update',
     'posts.create_draft', 'posts.update_draft', 'posts.publish', 'posts.delete',
-    'categories.list', 'tags.list', 'comments.list', 'comments.approve'
+    'categories.list', 'tags.list', 'comments.list', 'comments.approve',
+    'settings.get', 'settings.update'
   ]);
 });
 
@@ -108,6 +126,16 @@ test('taxonomy tools return safe fields only', async() => {
   assert.deepEqual(await run('tags.list', {}), [{id: 2, name: 'Node', pathname: 'node'}]);
 });
 
+test('taxonomy writes require admin and destructive operations require approval', async() => {
+  const {run, calls, editor} = fixture();
+  await assert.rejects(run('categories.create', {name: 'Life', pathname: 'life'}, editor), /Administrator/);
+  assert.deepEqual(await run('categories.create', {name: 'Life', pathname: 'life'}), {id: 11});
+  assert.deepEqual(await run('tags.update', {id: 2, name: 'Node.js'}), {id: 2, affectedRows: 1});
+  await assert.rejects(run('categories.delete', {id: 1}, undefined, () => false), /Explicit approval/);
+  await run('categories.delete', {id: 1});
+  assert.ok(calls.some(([action, value]) => action === 'cate.delete' && value === 1));
+});
+
 test('comment tools require admin and synchronize counts on approval', async() => {
   const {run, calls, editor} = fixture();
   await assert.rejects(run('comments.list', {}, editor), /Administrator/);
@@ -117,6 +145,17 @@ test('comment tools require admin and synchronize counts on approval', async() =
   await assert.rejects(run('comments.approve', {id: 4}, editor), /Administrator/);
   await run('comments.approve', {id: 4});
   assert.ok(calls.some(([action, postId]) => action === 'syncCount' && postId === 5));
+  await run('comments.moderate', {id: 4, status: 'spam'});
+  assert.ok(calls.some(([action, data]) => action === 'comment.update' && data.status === 'spam'));
+});
+
+test('site settings expose and update only allowlisted values', async() => {
+  const {run, calls, editor} = fixture();
+  await assert.rejects(run('settings.get', {}, editor), /Administrator/);
+  assert.deepEqual(await run('settings.get', {}), {title: 'Blog', post_permalink: '/post/{slug}.html'});
+  await run('settings.update', {settings: {title: 'New blog', postsListSize: 20}});
+  assert.deepEqual(calls.find(([action]) => action === 'options.update')[1], {title: 'New blog', postsListSize: '20'});
+  await assert.rejects(run('settings.update', {settings: {jwt_secret: 'nope'}}), /Unsupported setting/);
 });
 
 test('tools reject unsupported arguments and unauthenticated calls', async() => {

@@ -1,6 +1,6 @@
 {
   "package": "firekylin",
-  "manifestVersion": "2.8.0",
+  "manifestVersion": "2.12.0",
   "scope": "Built-in registry metadata, not a deployed client tools/list response",
   "tools": [
     {
@@ -109,6 +109,174 @@
       "requiresApproval": false
     },
     {
+      "name": "categories.create",
+      "description": "Create a blog category",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pid": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "name",
+          "pathname"
+        ]
+      },
+      "requiredPermissions": [
+        "taxonomy:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "categories.update",
+      "description": "Update a blog category",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pid": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "taxonomy:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "categories.delete",
+      "description": "Delete a blog category and detach it from posts",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "taxonomy:write"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "tags.create",
+      "description": "Create a blog tag",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "name",
+          "pathname"
+        ]
+      },
+      "requiredPermissions": [
+        "taxonomy:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "tags.update",
+      "description": "Update a blog tag",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "pathname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "taxonomy:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "tags.delete",
+      "description": "Delete a blog tag and detach it from posts",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "requiredPermissions": [
+        "taxonomy:write"
+      ],
+      "requiresApproval": true
+    },
+    {
       "name": "posts.get_managed",
       "description": "Read an article or draft available to the authenticated author",
       "inputSchema": {
@@ -128,6 +296,104 @@
         "posts:manage:read"
       ],
       "requiresApproval": false
+    },
+    {
+      "name": "comments.create",
+      "description": "Publish a comment as the authenticated administrator",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "post_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100000
+          },
+          "nick": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "mail": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "link": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "post_id",
+          "comment"
+        ]
+      },
+      "requiredPermissions": [
+        "comments:write"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "comments.update",
+      "description": "Edit an existing comment (administrator only)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "comment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100000
+          }
+        },
+        "required": [
+          "id",
+          "comment"
+        ]
+      },
+      "requiredPermissions": [
+        "comments:write"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "comments.moderate",
+      "description": "Approve, hold, mark as spam, or delete a comment (administrator only)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "waiting",
+              "spam",
+              "delete"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      },
+      "requiredPermissions": [
+        "comments:moderate"
+      ],
+      "requiresApproval": true
     },
     {
       "name": "posts.update",
@@ -352,6 +618,41 @@
       },
       "requiredPermissions": [
         "comments:moderate"
+      ],
+      "requiresApproval": true
+    },
+    {
+      "name": "settings.get",
+      "description": "Read MCP-manageable site settings (administrator only)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "requiredPermissions": [
+        "settings:read"
+      ],
+      "requiresApproval": false
+    },
+    {
+      "name": "settings.update",
+      "description": "Update allowlisted site settings (administrator only)",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "settings": {
+            "type": "object",
+            "minProperties": 1
+          }
+        },
+        "required": [
+          "settings"
+        ]
+      },
+      "requiredPermissions": [
+        "settings:write"
       ],
       "requiresApproval": true
     },
