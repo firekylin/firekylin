@@ -7,7 +7,7 @@ const permalink = require('../service/permalink');
 
 const SETTING_KEYS = new Set([
   'title', 'description', 'site_url', 'logo_url', 'favicon_url', 'keywords', 'github_url',
-  'twitter_url', 'miitbeian', 'mpsbeian', 'frontPageType', 'postTocManual',
+  'twitter_url', 'miitbeian', 'mpsbeian', 'frontPage', 'postTocManual',
   'auditFreshCreateTime', 'postsListSize', 'post_permalink', 'page_permalink',
   'auto_summary', 'feedFullText', 'analyze_code', 'comment'
 ]);
@@ -413,6 +413,14 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
       }
       for (const key of ['post_permalink', 'page_permalink']) {
         if (Object.hasOwn(settings, key)) settings[key] = permalink.validate(text(settings[key], key, 255));
+      }
+      if (Object.hasOwn(settings, 'frontPage') &&
+          (typeof settings.frontPage !== 'string' || settings.frontPage.length > 255)) {
+        throw new TypeError('Invalid frontPage');
+      }
+      if (Object.hasOwn(settings, 'comment') &&
+          (!settings.comment || typeof settings.comment !== 'object' || Array.isArray(settings.comment))) {
+        throw new TypeError('Invalid comment settings');
       }
       const serialized = Object.fromEntries(Object.entries(settings).map(([key, value]) => [
         key, typeof value === 'object' ? JSON.stringify(value) : String(value)

@@ -156,6 +156,11 @@ test('site settings expose and update only allowlisted values', async() => {
   await run('settings.update', {settings: {title: 'New blog', postsListSize: 20}});
   assert.deepEqual(calls.find(([action]) => action === 'options.update')[1], {title: 'New blog', postsListSize: '20'});
   await assert.rejects(run('settings.update', {settings: {jwt_secret: 'nope'}}), /Unsupported setting/);
+  await assert.rejects(run('settings.update', {settings: {comment: 'disabled'}}), /Invalid comment settings/);
+  await run('settings.update', {settings: {frontPage: '', comment: {audit: true}}});
+  assert.deepEqual(calls.filter(([action]) => action === 'options.update').at(-1)[1], {
+    frontPage: '', comment: '{"audit":true}'
+  });
 });
 
 test('tools reject unsupported arguments and unauthenticated calls', async() => {
