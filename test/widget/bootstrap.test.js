@@ -55,8 +55,10 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     assert.equal(managerInstances, 1);
     assert.equal(pluginLoads, 1);
     assert.equal(startHooks.length, 3);
-    assert.equal(firstManager.tools.list().length, 15);
+    assert.equal(firstManager.tools.list().length, 26);
     assert.ok(firstManager.tools.has('posts.create_draft', 'core:management'));
+    assert.ok(firstManager.tools.has('comments.moderate', 'core:management'));
+    assert.ok(firstManager.tools.has('settings.update', 'core:management'));
     assert.ok(firstManager.tools.has('media.upload', 'core:media'));
   } finally {
     if (originalOAuthMigration === undefined) delete global[oauthKey];
