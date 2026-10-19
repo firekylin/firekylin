@@ -16,7 +16,8 @@ test('real MCP SDK handles initialization, discovery, calls and schema validatio
     execute(input) {executions++; return {id: input.id}}
   }, 'test');
   tools.register({name: 'posts.publish', description: 'Publish', requiredPermissions: ['posts:read'],
-    requiresApproval: true, execute() {throw new Error('must not execute')}
+    inputSchema: {type: 'object', properties: {id: {type: 'integer', minimum: 1}}, required: ['id']},
+    requiresApproval: true, execute(input) {return {id: input.id, published: true}}
   }, 'test');
   const endpoint = await createMcpEndpoint({sdk, tools, config: {requireHttps: false},
     verifier: async authorization => authorization === 'Bearer ' + token ? {
@@ -40,10 +41,14 @@ test('real MCP SDK handles initialization, discovery, calls and schema validatio
     capabilities: {}, clientInfo: {name: 'regression', version: '1.0.0'}}, 1);
   assert.equal(initialized.result.serverInfo.name, 'firekylin');
   const listed = await call('tools/list', {}, 2);
-  assert.deepEqual(listed.result.tools.map(tool => tool.name), ['posts.get']);
+  assert.deepEqual(listed.result.tools.map(tool => tool.name), ['posts.get', 'posts.publish']);
+  const publish = listed.result.tools.find(tool => tool.name === 'posts.publish');
+  assert.deepEqual(publish.inputSchema.required, ['id', 'confirm']);
   const result = await call('tools/call', {name: 'posts.get', arguments: {id: 7}}, 3);
   assert.deepEqual(JSON.parse(result.result.content[0].text), {id: 7});
   const invalid = await call('tools/call', {name: 'posts.get', arguments: {id: 'invalid'}}, 4);
   assert.ok(invalid.error || invalid.result.isError);
   assert.equal(executions, 1);
+  const published = await call('tools/call', {name: 'posts.publish', arguments: {id: 8, confirm: true}}, 5);
+  assert.deepEqual(JSON.parse(published.result.content[0].text), {id: 8, published: true});
 });

@@ -22,8 +22,24 @@ async function readBody(req, limit = MAX_REQUEST_BYTES) {
 }
 
 function exposedTools(tools, scopes) {
-  return tools.filter(tool => !tool.requiresApproval &&
-    tool.requiredPermissions.every(permission => scopes.has(permission)));
+  return tools.filter(tool => tool.requiredPermissions.every(permission => scopes.has(permission)));
+}
+
+function remoteInputSchema(tool) {
+  const schema = tool.inputSchema || {type: 'object', properties: {}, additionalProperties: false};
+  if (!tool.requiresApproval) return schema;
+  return {
+    ...schema,
+    properties: {
+      ...(schema.properties || {}),
+      confirm: {
+        type: 'boolean',
+        const: true,
+        description: 'Explicitly confirm this high-risk or irreversible operation'
+      }
+    },
+    required: [...new Set([...(schema.required || []), 'confirm'])]
+  };
 }
 
 function createServerFactory({tools, auth, sdk, logger}) {
@@ -33,14 +49,15 @@ function createServerFactory({tools, auth, sdk, logger}) {
     for (const tool of exposedTools(tools.list(), auth.scopes)) {
       server.registerTool(tool.name, {
         description: tool.description,
-        inputSchema: fromJsonSchema(tool.inputSchema || {type: 'object', properties: {}, additionalProperties: false})
+        inputSchema: fromJsonSchema(remoteInputSchema(tool))
       }, async input => {
         const started = Date.now();
         try {
-          const value = await tools.execute(tool.name, input, {
+          const {confirm, ...toolInput} = input || {};
+          const value = await tools.execute(tool.name, toolInput, {
             principal: auth.principal,
-            authorize: permission => auth.scopes.has(permission)
-            // No approve callback: high-risk tools are strictly disabled.
+            authorize: permission => auth.scopes.has(permission),
+            approve: () => confirm === true
           });
           logger.info?.('[mcp] ' + JSON.stringify({
             action: tool.name, tokenId: auth.tokenId,
@@ -133,4 +150,4 @@ async function createMcpEndpoint({
   };
 }
 
-module.exports = {createMcpEndpoint, createServerFactory, exposedTools, readBody};
+module.exports = {createMcpEndpoint, createServerFactory, exposedTools, remoteInputSchema, readBody};
