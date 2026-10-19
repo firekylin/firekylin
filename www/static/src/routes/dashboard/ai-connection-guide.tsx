@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Modal, message } from 'antd';
 
-type Client = 'chatgpt' | 'claude' | 'codex' | 'other';
+type Client = 'chatgpt' | 'claude' | 'claudecode' | 'codex' | 'other';
 
 const CLIENTS: { id: Client; label: string; steps: string[] }[] = [
     { id: 'chatgpt', label: 'ChatGPT', steps: [
@@ -16,10 +16,16 @@ const CLIENTS: { id: Client; label: string; steps: string[] }[] = [
         '在 Firekylin 登录和确认 OAuth 授权。',
         '在 Claude 中请求列出最近的文章，确认工具能够调用。'
     ] },
+    { id: 'claudecode', label: 'Claude Code', steps: [
+        '复制完整配置提示词发送给 Claude Code，安装官方 Skill 并配置 MCP。',
+        '如无法自动配置，请按官方 Skill 文档手动安装目录并添加远程 MCP。',
+        '按照客户端提示完成 Firekylin OAuth 授权。',
+        '调用 posts.list 验证是否可以读取真实文章。'
+    ] },
     { id: 'codex', label: 'Codex', steps: [
-        '在终端执行下方 codex mcp add 命令。',
+        '复制完整配置提示词发送给 Codex，安装官方 Skill 并配置 MCP。',
+        '如自动配置失败，可手动执行下方 codex mcp add 命令。',
         '运行 codex mcp login firekylin，并完成浏览器中的 OAuth 授权。',
-        '可按仓库 README 的说明安装 Firekylin Skill，辅助 Codex 理解博客工作流。',
         '让 Codex 调用 posts.list 验证连接。'
     ] },
     { id: 'other', label: '其他客户端', steps: [
@@ -50,6 +56,22 @@ export default function AIConnectionGuide({ siteUrl, enabled }: {siteUrl?: strin
     const available = enabled !== false && !!endpoint;
     const details = CLIENTS.find(item => item.id === client)!;
     const command = endpoint ? 'codex mcp add firekylin --url ' + endpoint : '';
+    const supportsSkill = client === 'codex' || client === 'claudecode';
+    const installPrompt = available && supportsSkill ? [
+        '请帮我在当前 AI 编码客户端中配置 Firekylin 博客管理能力：',
+        '',
+        '1. 从官方仓库安装 Firekylin Skill：',
+        '   https://github.com/firekylin/firekylin/tree/master/skills/firekylin',
+        '   确保包含 SKILL.md、references、scripts，并验证能够加载。',
+        '2. 配置远程 Streamable HTTP MCP，名称 firekylin，地址：',
+        '   ' + endpoint,
+        '3. 引导我通过 Firekylin 官方 OAuth 页面登录并授权。',
+        '   不要让我在聊天中提供 Access Token、Cookie 或其他密钥。',
+        '4. 授权后调用 posts.list 读取最近五篇文章，验证连接。',
+        '',
+        '如果当前客户端无法自动安装或修改 MCP 配置，请说明限制，',
+        '给出手动步骤。不要声称未经验证的连接已成功。'
+    ].join('\\n') : '';
 
     const copy = async (value: string) => {
         try {
@@ -96,6 +118,23 @@ export default function AIConnectionGuide({ siteUrl, enabled }: {siteUrl?: strin
                     </div>
                 </>}
                 <ol>{details.steps.map(step => <li key={step} style={{ marginBottom: 8 }}>{step}</li>)}</ol>
+                {client === 'chatgpt' && <p className="alert alert-info">
+                    普通 ChatGPT 对话不能仅凭提示词安装仓库 Skill；请按照上述步骤连接 MCP。
+                </p>}
+                {client === 'claude' && <p className="alert alert-info">
+                    此处为 Claude 远程连接器。如果使用 Claude Code，请选择“Claude Code”查看 Skill 安装方法。
+                </p>}
+                {supportsSkill && available && <>
+                    <label htmlFor="firekylin-install-prompt">让 AI 帮我安装 Skill 与 MCP</label>
+                    <textarea id="firekylin-install-prompt" className="form-control" readOnly
+                        value={installPrompt} rows={11} style={{ resize: 'vertical', marginBottom: 8 }}/>
+                    <button className="btn btn-primary" type="button"
+                        onClick={() => copy(installPrompt)}>复制完整配置提示词</button>
+                    <p style={{ marginTop: 12 }}>
+                        <a href="https://github.com/firekylin/firekylin/tree/master/skills/firekylin"
+                            target="_blank" rel="noopener noreferrer">Firekylin Skill 安装说明</a>
+                    </p>
+                </>}
                 {client === 'codex' && available && <>
                     <label htmlFor="firekylin-codex-command">Codex MCP 配置命令</label>
                     <div style={{ display: 'flex', gap: 8 }}>
