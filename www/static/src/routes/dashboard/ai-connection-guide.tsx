@@ -70,7 +70,7 @@ export default function AIConnectionGuide({ siteUrl, enabled }: {siteUrl?: strin
             <button className="btn btn-primary" type="button" onClick={() => setVisible(true)}>
                 连接 AI
             </button>
-            <Modal title="连接 Firekylin 到 AI 助手" visible={visible} footer={null}
+            <Modal title="连接 Firekylin 到 AI 助手" open={visible} footer={null}
                 onCancel={() => setVisible(false)} width={620}>
                 <p>选择你使用的客户端，按步骤添加 Firekylin 的 MCP 服务。</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
