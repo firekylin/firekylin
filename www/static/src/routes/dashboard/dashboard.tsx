@@ -3,6 +3,7 @@ import './dashboard.less';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
+import AIConnectionGuide from './ai-connection-guide';
 import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
@@ -199,6 +200,10 @@ function DashBoard(props: DashBoardProps) {
                             </NavLink>
                         ))}
                     </div>
+                    <AIConnectionGuide
+                        siteUrl={props.dashBoardStore.systemInfo.config.site_url}
+                        enabled={props.dashBoardStore.systemInfo.mcpEnabled}
+                    />
                     <hr />
                     <div className="row">
                         <div className="col-md-5">
