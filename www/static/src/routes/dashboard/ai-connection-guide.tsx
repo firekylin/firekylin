@@ -71,7 +71,7 @@ export default function AIConnectionGuide({ siteUrl, enabled }: {siteUrl?: strin
         '',
         '如果当前客户端无法自动安装或修改 MCP 配置，请说明限制，',
         '给出手动步骤。不要声称未经验证的连接已成功。'
-    ].join('\\n') : '';
+    ].join('\n') : '';
 
     const copy = async (value: string) => {
         try {
