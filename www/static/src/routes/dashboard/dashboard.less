@@ -2,3 +2,49 @@
   text-align: center;
   margin-left: 235px;
 }
+
+.ai-skill-entry {
+  cursor: pointer;
+
+  svg {
+    transform-origin: center;
+    animation: ai-skill-sparkle 3.2s ease-in-out infinite;
+  }
+
+  &:hover,
+  &:focus {
+    color: #337ab7 !important;
+
+    svg {
+      animation-duration: 1.4s;
+    }
+  }
+}
+
+@keyframes ai-skill-sparkle {
+  0%,
+  68%,
+  100% {
+    opacity: .65;
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+
+  78% {
+    opacity: 1;
+    transform: scale(1.16) rotate(-5deg);
+    filter: drop-shadow(0 0 4px rgba(51, 122, 183, .65));
+  }
+
+  88% {
+    opacity: .9;
+    transform: scale(1.04) rotate(3deg);
+    filter: drop-shadow(0 0 2px rgba(51, 122, 183, .35));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-skill-entry svg {
+    animation: none;
+  }
+}

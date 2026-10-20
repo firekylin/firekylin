@@ -23,7 +23,9 @@ Example prompts:
 - `Use $firekylin as a theme/plugin developer to add a recent-posts Widget.`
 - `Use $firekylin as a maintainer to review upgrades, database backups, and MCP authorization.`
 
-Invocation syntax varies by client; you can also ask it to load the Firekylin skill. **Installing a skill does not install the service, connect MCP, or grant site permissions.** Remote operations require the site's `/mcp` connection and OAuth authorization. File access alone supports development or preparing content, not claiming remote changes occurred.
+Invocation syntax varies by client; you can also ask it to load the Firekylin skill. On first use, ask the skill to connect your blog. It will request the public blog address, check the site's management endpoint, use the client's supported connection flow, and guide you through Firekylin login and authorization. Some clients may require a restart or a new conversation before the connection becomes available.
+
+Installing the skill does not grant site permissions by itself. Never paste a password, Cookie, authorization code, access token, or refresh token into chat. File access alone supports development or preparing content, not claiming remote changes occurred.
 
 ## Contents
 
