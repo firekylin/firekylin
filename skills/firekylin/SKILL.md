@@ -21,6 +21,19 @@ Baseline: master `d3d00ec`, 2026-10-13, after the MCP/OAuth series merged. Its p
 
 Load only references needed for the next step. These roles describe work, not permissions. Account privileges, OAuth scopes, tool policy, and user authorization independently constrain operations.
 
+## Connect a deployed blog
+
+When the user wants to manage a deployed blog and authenticated Firekylin tools are not already available:
+
+1. Ask for the blog's public base URL. Present this as connecting the blog; do not require the user to understand MCP terminology unless manual setup or troubleshooting makes it necessary.
+2. Normalize the URL to its origin. Require HTTPS except for explicit loopback development, and reject embedded credentials, query strings, and fragments.
+3. With the user's supplied site in scope, test `<origin>/mcp` using the client's protocol-aware connection support or a bounded unauthenticated initialize request. A `401` challenge can prove the protected service exists; an ordinary GET returning `405` is not enough by itself. Do not follow redirects to a different origin or send credentials during discovery.
+4. Configure an OAuth-capable remote connection named `firekylin` for `<origin>/mcp` using the current client's supported configuration mechanism. In Codex CLI, when command execution is available, use `codex mcp add firekylin --url <origin>/mcp`. If the client cannot change its own configuration, give the exact manual action and stop before claiming a connection.
+5. Start authorization through the client. Ask the user to complete login and consent only on the Firekylin page opened by the client. Never ask them to paste a password, Cookie, authorization code, access token, or refresh token into chat.
+6. If the client requires a restart or a new conversation to load the connection, say so clearly. After it is available, discover the live tools and call `posts.list` with `{"limit":5}`. Report success only after receiving a valid response from the user's site.
+
+If discovery fails, distinguish an invalid URL, unreachable host, missing/disabled endpoint, TLS/proxy failure, unsupported client, and authorization failure. Load [MCP reference](references/mcp-tools.md) only when technical setup or troubleshooting is needed.
+
 ## Establish context
 
 1. Identify whether the target is a deployed site, an independent site project, or the core repository. Verify the URL/directory; do not infer production status from its name.
