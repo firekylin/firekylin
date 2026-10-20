@@ -83,7 +83,8 @@ export default function AIConnectionGuide() {
 
     return (
         <>
-            <button type="button" title="安装博客管理 Skill" aria-label="安装博客管理 Skill"
+            <button type="button" className="ai-skill-entry"
+                title="安装博客管理 Skill" aria-label="安装博客管理 Skill"
                 onClick={() => setVisible(true)}
                 style={{
                     display: 'block', padding: '15px 12px', border: 0,
