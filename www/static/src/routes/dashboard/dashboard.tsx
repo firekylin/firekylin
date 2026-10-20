@@ -163,7 +163,8 @@ function DashBoard(props: DashBoardProps) {
 
         return (
             <div className="fk-content-wrap">
-                <BreadCrumb className="breadcrumb" {...props} />
+                <BreadCrumb className="breadcrumb" {...props}
+                    actions={<AIConnectionGuide />}/>
                 <div className="manage-container">
                     {versions.needUpdate ? (
                         <p className="bg-info update-message">
@@ -200,7 +201,6 @@ function DashBoard(props: DashBoardProps) {
                             </NavLink>
                         ))}
                     </div>
-                    <AIConnectionGuide />
                     <hr />
                     <div className="row">
                         <div className="col-md-5">
