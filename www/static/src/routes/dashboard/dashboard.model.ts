@@ -8,7 +8,6 @@ export interface DashBoardProps extends BaseProps, RouterProps {
 
 export interface SystemInfo {
     config: any;
-    mcpEnabled?: boolean;
     count: {
         cates: number;
         comments: number;
