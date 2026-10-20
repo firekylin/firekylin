@@ -200,10 +200,7 @@ function DashBoard(props: DashBoardProps) {
                             </NavLink>
                         ))}
                     </div>
-                    <AIConnectionGuide
-                        siteUrl={props.dashBoardStore.systemInfo.config.site_url}
-                        enabled={props.dashBoardStore.systemInfo.mcpEnabled}
-                    />
+                    <AIConnectionGuide />
                     <hr />
                     <div className="row">
                         <div className="col-md-5">
