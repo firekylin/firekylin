@@ -127,6 +127,7 @@ function BreadCrumb(props: any) {
                     className="nav navbar-nav navbar-right userinfo"
                     ref={(ul) => (legacy.userInfoRef = ul)}
                 >
+                    {props.actions ? <li>{props.actions}</li> : null}
                     <li className={legacy.getUserClass()}>
                         <a
                             onClick={() => legacy.toggleUser()}
