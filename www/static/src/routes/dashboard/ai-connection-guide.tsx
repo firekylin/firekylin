@@ -82,14 +82,18 @@ export default function AIConnectionGuide() {
     };
 
     return (
-        <section className="ai-connection-guide" style={{
-            margin: '24px 0', padding: '20px 24px', border: '1px solid #e8e8e8',
-            borderRadius: 8, background: '#fafafa'
-        }}>
-            <h4 style={{ marginTop: 0 }}>用 AI 管理博客</h4>
-            <p>安装 Firekylin 博客管理 Skill，用自然语言搜索文章、创建草稿和查看评论。</p>
-            <button className="btn btn-primary" type="button" onClick={() => setVisible(true)}>
-                安装博客管理 Skill
+        <>
+            <button type="button" title="安装博客管理 Skill" aria-label="安装博客管理 Skill"
+                onClick={() => setVisible(true)}
+                style={{
+                    display: 'block', padding: '15px 12px', border: 0,
+                    background: 'transparent', color: '#777', lineHeight: '20px'
+                }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"
+                    style={{ display: 'block' }}>
+                    <path fill="currentColor"
+                        d="M12 2l1.45 4.55L18 8l-4.55 1.45L12 14l-1.45-4.55L6 8l4.55-1.45L12 2zm6 11l.95 3.05L22 17l-3.05.95L18 21l-.95-3.05L14 17l3.05-.95L18 13zM5 12l.95 3.05L9 16l-3.05.95L5 20l-.95-3.05L1 16l3.05-.95L5 12z"/>
+                </svg>
             </button>
             <Modal title="安装 Firekylin 博客管理 Skill" open={visible} footer={null}
                 onCancel={() => setVisible(false)} width={620}>
@@ -118,6 +122,6 @@ export default function AIConnectionGuide() {
                     请勿在聊天中发送密码、Cookie 或访问令牌。
                 </p>
             </Modal>
-        </section>
+        </>
     );
 }
