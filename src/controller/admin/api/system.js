@@ -6,7 +6,6 @@ const {pipeline} = require('stream/promises');
 const semver = require('semver');
 const pack = require('../../../../package.json');
 const Base = require('./base');
-const {getMcpConfig} = require('../../../mcp/config');
 
 async function fetchWithTimeout(url) {
   const response = await fetch(url, {signal: AbortSignal.timeout(1000)});
@@ -56,7 +55,6 @@ module.exports = class extends Base {
     return this.success({
       versions: data,
       config,
-      mcpEnabled: getMcpConfig().enabled !== false,
       count: {
         posts: await this.model('post').where(where).count(),
         cates: await this.model('cate').count(),
