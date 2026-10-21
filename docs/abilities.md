@@ -37,6 +37,8 @@ checks visibility, permissions and explicit approval before calling an executor.
 
 ## Admin and MCP post reads
 
+Post read ability definitions live in `src/ability/posts.js` and are registered
+through the management plugin bootstrap for backward compatibility.
 The admin post list/detail API now calls the registered
 `posts.list_managed` and `posts.get_managed` abilities, rather than
 directly constructing a separate query service. Both adapters reuse
