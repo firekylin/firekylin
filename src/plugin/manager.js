@@ -7,7 +7,7 @@ const semver = require('semver');
 const EventBus = require('./events');
 const RouteRegistry = require('./routes');
 const TemplateRegistry = require('./templates');
-const ToolRegistry = require('./tools');
+const AbilityRegistry = require('../ability/registry');
 const AdminRegistry = require('./admin');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
@@ -89,7 +89,8 @@ class PluginManager {
     this.events = eventBus || new EventBus({onError: (error, listener) => this.logError(error, listener)});
     this.routes = new RouteRegistry();
     this.templates = new TemplateRegistry();
-    this.tools = new ToolRegistry();
+    this.abilities = new AbilityRegistry();
+    this.tools = this.abilities; // Compatibility alias for existing plugins and MCP tools.
     this.admin = new AdminRegistry();
     this.plugins = new Map();
     this.states = new Map();
