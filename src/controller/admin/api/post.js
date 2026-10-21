@@ -23,7 +23,7 @@ module.exports = class extends Base {
 
     // The authenticated admin API and MCP share the same registered post abilities.
     // Transport-specific formatting stays in this controller.
-    const abilities = global.firekylin.plugins.tools;
+    const abilities = global.firekylin.plugins.abilities;
     const context = {
       channel: 'admin',
       principal: this.userInfo,
