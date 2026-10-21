@@ -21,8 +21,8 @@ module.exports = function builtinMcp() {
         const origin = publicOrigin(options.site_url);
         return createMcpEndpoint({
           tools: {
-            list: () => global.firekylin.plugins.tools.list(),
-            execute: (name, input, context) => global.firekylin.plugins.tools.execute(name, input, context)
+            list: options => global.firekylin.plugins.abilities.list(options),
+            execute: (name, input, context) => global.firekylin.plugins.abilities.execute(name, input, context)
           },
           config,
           verifier: oauthVerifier(),
