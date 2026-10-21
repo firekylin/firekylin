@@ -10,6 +10,7 @@ function fixture() {
   let existing = null;
   let activeWhere;
   const post = {
+    config: {prefix: 'fk_'},
     where(where) {activeWhere = where; calls.push(['post.where', where]); return this;},
     field() {return this;},
     order() {return this;},
@@ -185,4 +186,33 @@ test('updating published article through tool requires approval', async() => {
   await assert.rejects(run('posts.update', {id: 8, title: 'New'}, editor, () => false), /Explicit approval/);
   await run('posts.update', {id: 8, title: 'New'}, editor);
   assert.ok(calls.some(([kind, data]) => kind === 'save' && data.status === 1));
+});
+
+test('managed post ability preserves admin detail and limits MCP fields', async() => {
+  const {registry, setExisting, editor} = fixture();
+  setExisting({
+    id: 8, user_id: 2, status: 0, title: 'Draft',
+    markdown_content: '# draft', options: '{"postPasswordHash":"secret"}'
+  });
+  const context = channel => ({
+    channel, principal: editor, authorize: permission => permission === 'posts:manage:read'
+  });
+  const fromAdmin = await registry.execute('posts.get_managed', {id: 8}, context('admin'));
+  const fromMcp = await registry.execute('posts.get_managed', {id: 8}, context('mcp'));
+  assert.equal(fromAdmin.options, '{"postPasswordHash":"secret"}');
+  assert.equal(fromMcp.options, undefined);
+  assert.equal(fromMcp.markdown_content, '# draft');
+});
+
+test('managed list ability supports admin category filter', async() => {
+  const {registry, editor} = fixture();
+  // Category filtering joins post_cate and returns the same pagination structure
+  // used by the admin API.
+  const result = await registry.execute('posts.list_managed', {
+    page: 1, limit: 15, keyword: 'hello'
+  }, {
+    channel: 'admin', principal: editor,
+    authorize: permission => permission === 'posts:manage:read'
+  });
+  assert.deepEqual(result, {count: 0, data: []});
 });
