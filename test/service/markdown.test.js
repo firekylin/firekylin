@@ -37,8 +37,39 @@ test('markdown-it renderer keeps the built-in Firekylin extensions', async() => 
   assert.match(html, /class="markdown-alert markdown-alert-note"/);
   assert.match(html, /class="firekylin-markdown-img-only"/);
   assert.match(html, /type="checkbox"[^>]*checked/);
-  assert.match(html, /<pre class="mermaid">graph TD; A-->B/);
+  assert.match(html, /<svg[^>]*class="pele pele-flowchart"/);
+  assert.doesNotMatch(html, /<pre class="mermaid">/);
   assert.match(html, /class="footnotes"/);
+});
+
+test('mermaid diagrams render safe SVG on the server', async() => {
+  const html = await renderMarkdown([
+    '```mermaid',
+    'flowchart LR',
+    '  accTitle: First diagram',
+    '  A["<script>alert(1)</script>"] --> B',
+    '  click B "javascript:alert(2)"',
+    '```',
+    '',
+    '```mermaid',
+    'flowchart LR',
+    '  accTitle: Second diagram',
+    '  C --> D',
+    '```'
+  ].join('\n'), {math: false});
+
+  assert.equal((html.match(/<svg/g) || []).length, 2);
+  assert.match(html, />alert\(1\)<\/text>/);
+  assert.doesNotMatch(html, /<script|javascript:|onload=|onclick=|<foreignObject/i);
+  assert.match(html, /id="firekylin-mermaid-0-title"/);
+  assert.match(html, /id="firekylin-mermaid-1-title"/);
+});
+
+test('invalid mermaid stays visible as escaped source', async() => {
+  const html = await renderMarkdown('```mermaid\nnot a diagram <img src=x onerror=alert(1)>\n```', {math: false});
+
+  assert.match(html, /<pre class="mermaid"><code>not a diagram &lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.doesNotMatch(html, /<img|<svg/);
 });
 
 test('project config and plugins can extend markdown-it', async() => {

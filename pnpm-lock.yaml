@@ -268,6 +268,9 @@ importers:
       on-finished:
         specifier: ^2.4.1
         version: 2.4.1
+      pele:
+        specifier: ^1.8.0
+        version: 1.8.0
       phpass:
         specifier: ^1.0.0
         version: 1.0.0
@@ -3429,6 +3432,10 @@ packages:
 
   pause-stream@0.0.11:
     resolution: {integrity: sha512-e3FBlXLmN/D1S+zHzanP4E/4Z60oFAa3O051qt1pxa7DEJWKAyil6upYVXCWadEnuoqa4Pkc9oUx9zsxYeRv8A==}
+
+  pele@1.8.0:
+    resolution: {integrity: sha512-AYmHttE70cwNJVXdfPMCANGivFlmc3bGGpMG0GqH5S5vE3RgtEuLlkqbhRfe94Csv/ZEd1TUbv2dMUHpw4p1Bg==}
+    engines: {node: '>=20'}
 
   pg-cloudflare@1.4.1:
     resolution: {integrity: sha512-6PQbsFWZcp9EmJEwy5cGQ2La+AMWpP46lgbb8X+U/XsHIUweYDNCpeuKck5RxL2MdVFi7krbbEi5nX4Zh7JhrQ==}
@@ -7407,6 +7414,8 @@ snapshots:
   pause-stream@0.0.11:
     dependencies:
       through: 2.3.8
+
+  pele@1.8.0: {}
 
   pg-cloudflare@1.4.1:
     optional: true
