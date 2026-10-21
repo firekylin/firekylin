@@ -204,10 +204,9 @@ test('managed post ability preserves admin detail and limits MCP fields', async(
   assert.equal(fromMcp.markdown_content, '# draft');
 });
 
-test('managed list ability supports admin category filter', async() => {
+test('managed list ability keeps admin pagination contract', async() => {
   const {registry, editor} = fixture();
-  // Category filtering joins post_cate and returns the same pagination structure
-  // used by the admin API.
+  // Both transports receive the same pagination structure from the shared query service.
   const result = await registry.execute('posts.list_managed', {
     page: 1, limit: 15, keyword: 'hello'
   }, {
