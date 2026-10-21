@@ -8,7 +8,9 @@ class AbilityRegistry {
   register(definition, owner) {
     if (!owner || typeof owner !== 'string') throw new TypeError('Tool owner required');
     if (!definition || typeof definition !== 'object') throw new TypeError('Tool definition required');
-    const {name, description, execute, requiredPermissions = [], requiresApproval = false, expose = {mcp: true}} = definition;
+    const {
+      name, description, execute, requiredPermissions = [], requiresApproval = false, expose = {mcp: true}
+    } = definition;
     if (typeof name !== 'string' || !/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/.test(name)) {
       throw new TypeError('Invalid tool name');
     }
@@ -39,15 +41,18 @@ class AbilityRegistry {
   get(name) {
     const entry = this.tools.get(name);
     if (!entry) return null;
-    const {execute, ...metadata} = entry;
+    const metadata = {...entry};
+    delete metadata.execute;
     return {...metadata, requiredPermissions: [...entry.requiredPermissions], expose: {...entry.expose}};
   }
 
   list(options = {}) {
     const {channel} = options;
-    return [...this.tools.values()].filter(tool => !channel || tool.expose[channel] === true).map(({name, description, inputSchema, requiredPermissions, requiresApproval}) => ({
-      name, description, inputSchema, requiredPermissions: [...requiredPermissions], requiresApproval
-    }));
+    return [...this.tools.values()]
+      .filter(tool => !channel || tool.expose[channel] === true)
+      .map(({name, description, inputSchema, requiredPermissions, requiresApproval}) => ({
+        name, description, inputSchema, requiredPermissions: [...requiredPermissions], requiresApproval
+      }));
   }
 
   async execute(name, input, context = {}) {

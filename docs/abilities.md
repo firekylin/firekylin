@@ -35,10 +35,22 @@ registry.register({
 `registry.execute(name, input, {channel, principal, authorize, approve})`
 checks visibility, permissions and explicit approval before calling an executor.
 
-## Admin and MCP post reads
+## Built-in ability layout
 
-Post read ability definitions live in `src/ability/posts.js` and are registered
-through the management plugin bootstrap for backward compatibility.
+Built-in definitions live under `src/ability`, grouped by domain. Public post
+abilities are split into `content/posts/list.js`, `get.js`, and `search.js`;
+managed post reads are split into `management/posts/list-managed.js` and
+`get-managed.js`; media upload lives in `media/upload.js`. The remaining
+management abilities are registered from `management/index.js` while sharing
+the existing command/query services.
+
+The worker imports these modules directly and registers them in
+`pluginManager.abilities`. Files in `src/plugin/*-tools.js` only re-export the
+new modules so old imports keep working. `ToolRegistry` remains a compatibility
+import of `AbilityRegistry`; it does not own another registry or execution path.
+
+## Admin and MCP adapters
+
 The admin post list/detail API now calls the registered
 `posts.list_managed` and `posts.get_managed` abilities, rather than
 directly constructing a separate query service. Both adapters reuse
@@ -54,9 +66,5 @@ in the admin controller; OAuth scopes and approval continue to apply to MCP.
 not request parameters. Setting `channel: 'admin'` or `channel: 'mcp'` is not
 an authentication mechanism. Existing business resource/ownership checks must
 still run inside the ability/service. Schemas are exposed to MCP for validation,
-but direct internal callers must provide validated inputs; the registry does not
-yet implement a universal JSON Schema validator.
-
-Next steps: extend the same approach to write operations, expose a native
-Ability API to plugins, and add central input validation without weakening
-backward compatibility with third-party tools.
+while every built-in executor also validates direct internal input. The registry
+keeps transport validation separate from business authorization and ownership.
