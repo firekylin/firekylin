@@ -46,7 +46,7 @@ function createServerFactory({tools, auth, sdk, logger}) {
   const {McpServer, fromJsonSchema} = sdk;
   return () => {
     const server = new McpServer({name: 'firekylin', version: '1.0.0'});
-    for (const tool of exposedTools(tools.list(), auth.scopes)) {
+    for (const tool of exposedTools(tools.list({channel: 'mcp'}), auth.scopes)) {
       server.registerTool(tool.name, {
         description: tool.description,
         inputSchema: fromJsonSchema(remoteInputSchema(tool))
@@ -56,6 +56,7 @@ function createServerFactory({tools, auth, sdk, logger}) {
           const {confirm, ...toolInput} = input || {};
           const value = await tools.execute(tool.name, toolInput, {
             principal: auth.principal,
+            channel: 'mcp',
             authorize: permission => auth.scopes.has(permission),
             approve: () => confirm === true
           });
