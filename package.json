@@ -65,6 +65,7 @@
     "markdown-it-anchor": "^10.0.0",
     "nodemailer": "^10.1.0",
     "on-finished": "^2.4.1",
+    "pele": "^1.8.0",
     "phpass": "^1.0.0",
     "qiniu": "^7.15.2",
     "semver": "^7.8.5",

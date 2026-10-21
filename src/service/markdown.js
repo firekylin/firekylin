@@ -6,6 +6,7 @@ const hljs = require('highlight.js');
 const {filter} = require('../plugin/runtime');
 
 let builtinPlugins;
+let peleModule;
 let sharedMathjaxInstance;
 
 async function loadBuiltinPlugins() {
@@ -24,6 +25,11 @@ async function loadBuiltinPlugins() {
     }));
   }
   return builtinPlugins;
+}
+
+async function loadPele() {
+  if (!peleModule) peleModule = import('pele');
+  return peleModule;
 }
 
 function createMathjax(builtins) {
@@ -72,11 +78,21 @@ function legacyInlineMathPlugin(md) {
   });
 }
 
-function codePlugin(md) {
+function codePlugin(md, renderMermaid) {
   const originalFence = md.renderer.rules.fence;
+  let mermaidIndex = 0;
   md.renderer.rules.fence = (tokens, idx, options, env, self) => {
     const token = tokens[idx];
-    if (token.info.trim().split(/\s+/)[0] === 'mermaid') return `<pre class="mermaid">${token.content}</pre>`;
+    if (token.info.trim().split(/\s+/)[0] === 'mermaid') {
+      try {
+        const {svg} = renderMermaid(token.content, {
+          idPrefix: `firekylin-mermaid-${mermaidIndex++}`
+        });
+        return `${svg}\n`;
+      } catch {
+        return `<pre class="mermaid"><code>${md.utils.escapeHtml(token.content)}</code></pre>\n`;
+      }
+    }
     return originalFence(tokens, idx, options, env, self);
   };
 }
@@ -97,6 +113,7 @@ function configuredMarkdown() {
 async function createMarkdownParser(renderOptions = {}) {
   const configured = configuredMarkdown();
   const builtins = await loadBuiltinPlugins();
+  const {render: renderMermaid} = await loadPele();
   const markdownOptions = {
     html: true,
     linkify: true,
@@ -124,7 +141,7 @@ async function createMarkdownParser(renderOptions = {}) {
   }
   if (renderOptions.tasklist !== false) md.use(builtins.tasklist);
   if (renderOptions.imageOnly !== false) md.use(imageOnlyPlugin);
-  if (renderOptions.code !== false) md.use(codePlugin);
+  if (renderOptions.code !== false) md.use(codePlugin, renderMermaid);
 
   const tocEntries = [];
   if (renderOptions.toc) {
