@@ -1,7 +1,7 @@
 'use strict';
 
 const PostCommandService = require('../service/post-command');
-const PostQueryService = require('../service/post-query');
+const {createPostReadAbilities} = require('../ability/posts');
 const CommentModerationService = require('../service/comment-moderation');
 const permalink = require('../service/permalink');
 
@@ -39,7 +39,7 @@ async function renderComment(value) {
 
 function registerManagementTools(registry, {getModel, now, getCommentService}) {
   const commands = new PostCommandService({getModel: () => getModel('post'), now});
-  const queries = new PostQueryService({getModel: () => getModel('post'), now});
+  const postReadAbilities = createPostReadAbilities({getModel, now});
   const register = definition => {
     if (!registry.has(definition.name, 'core:management')) registry.register(definition, 'core:management');
   };
@@ -54,37 +54,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
     });
   };
 
-  register({
-    name: 'posts.list_managed', description: 'List posts available to the authenticated author',
-    expose: {mcp: true, admin: true},
-    requiredPermissions: ['posts:manage:read'],
-    inputSchema: objectSchema({
-      page: idSchema, limit: {type: 'integer', minimum: 1, maximum: 100},
-      status: {type: 'integer', minimum: 0, maximum: 4},
-      keyword: {type: 'string', maxLength: 120},
-      cate: {type: 'string', maxLength: 30}
-    }, []),
-    async execute(raw, context) {
-      const principal = commands.actor(actor(context));
-      const input = object(raw);
-      keys(input, ['page', 'limit', 'status', 'keyword', 'cate']);
-      const page = input.page === undefined ? 1 : id(input.page);
-      const pageSize = input.limit === undefined ? 15 : id(input.limit);
-      if (pageSize > 100) throw new TypeError('Invalid limit');
-      if (input.status !== undefined && (!Number.isInteger(input.status) || input.status < 0 || input.status > 4)) {
-        throw new TypeError('Invalid status');
-      }
-      if (input.keyword !== undefined && (typeof input.keyword !== 'string' || input.keyword.length > 120)) {
-        throw new TypeError('Invalid keyword');
-      }
-      const result = await queries.listAdmin({
-        userInfo: principal, page, pageSize,
-        status: input.status === undefined ? undefined : input.status,
-        keyword: input.keyword, cate: input.cate
-      });
-      return {count: result.count, data: result.data};
-    }
-  });
+  register(postReadAbilities.list);
 
   const taxonomyDefinition = (kind, method, description, requiresApproval = false) => ({
     name: `${kind}.${method}`, description,
@@ -141,24 +111,7 @@ function registerManagementTools(registry, {getModel, now, getCommentService}) {
     taxonomyDefinition('tags', 'delete', 'Delete a blog tag and detach it from posts', true)
   ]) register(definition);
 
-  register({
-    name: 'posts.get_managed', description: 'Read an article or draft available to the authenticated author',
-    expose: {mcp: true, admin: true},
-    requiredPermissions: ['posts:manage:read'],
-    inputSchema: objectSchema({id: idSchema}, ['id']),
-    async execute(raw, context) {
-      const principal = commands.actor(actor(context));
-      const input = object(raw);
-      keys(input, ['id']);
-      const post = await queries.getAdmin(id(input.id), principal);
-      if (!post || !post.id) throw new Error('Post not found or permission denied');
-      if (context.channel === 'admin') return post;
-      const {
-        id: postId, title, pathname, markdown_content, summary, status, is_public, create_time, update_time
-      } = post;
-      return {id: postId, title, pathname, markdown_content, summary, status, is_public, create_time, update_time};
-    }
-  });
+  register(postReadAbilities.get);
 
   register({
     name: 'comments.create', description: 'Publish a comment as the authenticated administrator',
