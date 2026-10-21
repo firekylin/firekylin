@@ -33,6 +33,7 @@ module.exports = class extends think.Controller {
     delete options.jwt_secret;
     delete options.comment_jwt_secret;
     delete options.comment_schema_version;
+    delete options.ai_credentials;
     // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);

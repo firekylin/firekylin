@@ -111,6 +111,33 @@ declare namespace Firekylin {
     registerAction(definition: AdminActionDefinition): () => boolean;
   }
 
+  interface AIModelDefinition {
+    id: string;
+    label?: string;
+    capabilities?: string[];
+  }
+
+  interface AIProviderDefinition {
+    id: string;
+    label?: string;
+    models: AIModelDefinition[];
+    generate(request: {provider: string; model: string; messages: Array<{role: string; content: string}>;
+      [key: string]: unknown}, context: {signal?: AbortSignal; [key: string]: unknown}): unknown | Promise<unknown>;
+  }
+
+  interface AIPluginAPI {
+    registerProvider(definition: AIProviderDefinition): () => boolean;
+    providers(): Promise<Array<{id: string; label: string; models: Array<AIModelDefinition & {selected: boolean}>}>>;
+    select(provider: string, model: string): Promise<{provider: string; model: string}>;
+    generate(request: Record<string, unknown>, context?: Record<string, unknown>): Promise<unknown>;
+    credentials: {
+      get(name: string): Promise<string | undefined>;
+      has(name: string): Promise<boolean>;
+      set(name: string, value: string): Promise<void>;
+      delete(name: string): Promise<void>;
+    };
+  }
+
   interface WidgetRow {
     [key: string]: any;
   }

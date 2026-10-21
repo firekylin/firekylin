@@ -17,6 +17,7 @@ module.exports = class extends think.Model {
       delete ret.jwt_secret;
       delete ret.comment_jwt_secret;
       delete ret.comment_schema_version;
+      delete ret.ai_credentials;
     }
 
     // comment type
