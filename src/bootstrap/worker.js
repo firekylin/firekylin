@@ -8,9 +8,9 @@ const widget = require('../widget/registry');
 const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
-const {registerContentTools} = require('../plugin/content-tools');
-const {registerManagementTools} = require('../plugin/management-tools');
-const {registerMediaTools} = require('../plugin/media-tools');
+const {registerContentAbilities} = require('../ability/content');
+const {registerManagementAbilities} = require('../ability/management');
+const {registerMediaAbilities} = require('../ability/media/upload');
 const {migrateOAuthModels} = require('../mcp/oauth-schema');
 const pack = require('../../package.json');
 const {PackageCatalog} = require('../service/package-catalog');
@@ -81,16 +81,16 @@ const pluginManager = existingPluginManager || new PluginManager({
 });
 pluginManager.packageApi = packageApi;
 global.firekylin.plugins = pluginManager;
-registerContentTools(pluginManager.tools, {
+registerContentAbilities(pluginManager.abilities, {
   getModel: () => think.model('post'),
   now: () => think.datetime()
 });
-registerManagementTools(pluginManager.tools, {
+registerManagementAbilities(pluginManager.abilities, {
   getModel: name => think.model(name),
   now: () => think.datetime(),
   getCommentService: () => think.service('comment')
 });
-registerMediaTools(pluginManager.tools, {
+registerMediaAbilities(pluginManager.abilities, {
   getUploadConfig: async() => (await think.model('options').getOptions()).upload,
   getUploader: type => think.service('upload/' + type)
 });
