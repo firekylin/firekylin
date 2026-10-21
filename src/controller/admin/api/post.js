@@ -1,7 +1,6 @@
 const PushToFirekylin = require('../../../service/push-to-firekylin');
 const dayjs = require('dayjs');
 const Base = require('./base');
-const PostQueryService = require('../../../service/post-query');
 const PostCommandService = require('../../../service/post-command');
 const permalink = require('../../../service/permalink');
 
@@ -22,14 +21,22 @@ module.exports = class extends Base {
   async getAction() {
     if (this.get('type') === 'lastest') return this.lastest();
 
-    const service = new PostQueryService({
-      getModel: () => this.model('post'),
-      now: () => think.datetime()
-    });
+    // The authenticated admin API and MCP share the same registered post abilities.
+    // Transport-specific formatting stays in this controller.
+    const abilities = global.firekylin.plugins.tools;
+    const context = {
+      channel: 'admin',
+      principal: this.userInfo,
+      authorize: permission => permission === 'posts:manage:read'
+    };
     let data;
     if (this.id) {
-      data = await service.getAdmin(this.id, this.userInfo);
-      if (!data || !data.id) return this.fail('USER_NO_PERMISSION');
+      try {
+        data = await abilities.execute('posts.get_managed', {id: Number(this.id)}, context);
+      } catch (error) {
+        if (error.message === 'Post not found or permission denied') return this.fail('USER_NO_PERMISSION');
+        throw error;
+      }
       data.options = data.options ? JSON.parse(data.options) || {} : {};
       data.options.passwordProtected = Boolean(data.options.postPasswordHash);
       delete data.options.postPasswordHash;
@@ -39,10 +46,15 @@ module.exports = class extends Base {
       const pageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0
         ? Math.min(requestedPageSize, 100)
         : 15;
-      data = await service.listAdmin({
-        userInfo: this.userInfo, status, keyword, cate,
-        page: this.get('page'), pageSize
-      });
+      const rawPage = Number(this.get('page'));
+      const page = Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+      const numericStatus = status === undefined || status === '' ? undefined : Number(status);
+      data = await abilities.execute('posts.list_managed', {
+        page, limit: pageSize,
+        ...(numericStatus === undefined ? {} : {status: numericStatus}),
+        ...(keyword ? {keyword} : {}),
+        ...(cate ? {cate: String(cate)} : {})
+      }, context);
     }
     return this.success(data);
   }
