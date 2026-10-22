@@ -109,7 +109,6 @@ declare namespace Firekylin {
     registerPage(definition: AdminPageDefinition): () => boolean;
     registerForm(definition: AdminFormDefinition): () => boolean;
     registerAction(definition: AdminActionDefinition): () => boolean;
-    registerEditorAction(definition: {id: string; action: string; label: string; order?: number}): () => boolean;
   }
 
   interface AIModelDefinition {
@@ -122,13 +121,17 @@ declare namespace Firekylin {
     id: string;
     label?: string;
     models: AIModelDefinition[];
+    configured?(): boolean | Promise<boolean>;
+    admin?: {formId: string; testActionId: string};
     generate(request: {provider: string; model: string; messages: Array<{role: string; content: string}>;
       [key: string]: unknown}, context: {signal?: AbortSignal; [key: string]: unknown}): unknown | Promise<unknown>;
   }
 
   interface AIPluginAPI {
     registerProvider(definition: AIProviderDefinition): () => boolean;
-    providers(): Promise<Array<{id: string; label: string; models: Array<AIModelDefinition & {selected: boolean}>}>>;
+    providers(): Promise<Array<{id: string; label: string; configured?: boolean;
+      admin?: {pluginId: string; formId: string; testActionId: string};
+      models: Array<AIModelDefinition & {selected: boolean}>}>>;
     select(provider: string, model: string): Promise<{provider: string; model: string}>;
     generate(request: Record<string, unknown>, context?: Record<string, unknown>): Promise<unknown>;
     credentials: {

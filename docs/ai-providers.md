@@ -13,6 +13,7 @@ module.exports = {
       label: 'Example AI',
       models: [{id: 'example-small', label: 'Example Small', capabilities: ['text']}],
       configured: () => ctx.ai.credentials.has('apiKey'),
+      admin: {formId: 'settings', testActionId: 'test-connection'},
       async generate(request, {signal}) {
         return {text: await callProvider(request.model, request.messages, signal)};
       }
@@ -22,16 +23,22 @@ module.exports = {
 ```
 
 `ctx.ai.generate()` uses the selected provider and model unless the request explicitly names them. The
-administrator's **AI 服务** page lists installed providers, their optional `configured` status, and links to
-provider settings. It is the only place users select the global default provider and model. Provider plugins
-may expose their own administrator form for API keys and endpoints; saving connection settings should not
-call `ctx.ai.select()`. Connection tests should explicitly pass both provider and model so they work even when
+administrator's **AI 连接** page lists installed providers and their optional `configured` status. Users select
+a provider there, fill its plugin-supplied form and test the connection without leaving the page. The provider's
+`admin` metadata names a plugin-scoped form and test action registered through `ctx.admin`; the containing
+page may be hidden from the sidebar with `menu: false`. **AI 连接** is also the only place users select the
+global default provider and model. Saving connection settings should not call `ctx.ai.select()`.
+Connection tests should explicitly pass both provider and model so they work even when
 another provider is the default. Provider plugins persist secrets with `ctx.ai.credentials`. Credentials are
 encrypted with AES-256-GCM, scoped to the owning plugin, persisted in separate option rows so concurrent
 plugins cannot overwrite each other's credentials, omitted from public options and never returned by
 password forms. Set `FIREKYLIN_AI_CREDENTIAL_KEY` to a stable secret in production; otherwise Firekylin uses
 the site's JWT secret for compatibility. Rotating the active encryption key requires providers to save their
 credentials again.
+
+The provider picker includes **添加更多 AI 服务商**, which opens an npm search for packages with the
+`firekylin-plugin-ai-provider` prefix. Installing a package still requires the normal plugin installation
+workflow; the search link does not install third-party code automatically.
 
 Provider handlers receive an abort signal and should pass it to outbound requests. The shared client rejects
 unknown providers and models and applies a 60-second timeout.

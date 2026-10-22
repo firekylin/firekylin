@@ -16,6 +16,9 @@ test('AI provider registry exposes metadata and removes plugin providers', () =>
   ]}]);
   registry.removeOwner('plugin');
   assert.equal(registry.has('example'), false);
+  assert.throws(() => registry.register({id: 'bad', models: [{id: 'small'}],
+    admin: {formId: '../other', testActionId: 'test'}, generate() {}}, 'plugin'),
+  /Invalid AI provider admin configuration/);
 });
 
 test('AI client validates selection and delegates generation', async() => {
@@ -41,31 +44,30 @@ test('AI admin shows installed providers and changes default only when explicitl
   }});
   manager.aiProviders.register({
     id: 'deepseek', label: 'DeepSeek', models: [{id: 'deepseek-flash'}],
+    admin: {formId: 'settings', testActionId: 'test-connection'},
     configured: async() => true, generate: () => ({text: 'OK'})
   }, 'ai-provider-deepseek');
   manager.aiProviders.register({
     id: 'openai', label: 'OpenAI', models: [{id: 'gpt-small'}],
     configured: async() => false, generate: () => ({text: 'OK'})
   }, 'ai-provider-openai');
-  manager.admin.registerPanel({id: 'connection', title: 'DeepSeek'}, 'ai-provider-deepseek');
-  manager.admin.registerPage({id: 'settings', panel: 'connection', title: '设置', load: () => ({})},
-    'ai-provider-deepseek');
   const {registerAIAdmin} = require('../../src/ai/admin');
   registerAIAdmin(manager);
   const page = await manager.admin.loadPage('core-ai', 'connections');
-  assert.equal(page.content.sections[0].items[0].value, '未选择');
-  assert.equal(page.content.sections[1].items[0].href, '/admin/plugins/ai-provider-deepseek/settings');
-  assert.match(page.content.sections[1].items[0].description, /已配置/);
-  assert.match(page.content.sections[1].items[1].description, /未配置/);
+  assert.equal(page.page.title, 'AI 连接');
+  assert.equal(page.content.providers[0].configured, true);
+  assert.deepEqual(page.content.providers[0].admin, {
+    pluginId: 'ai-provider-deepseek', formId: 'settings', testActionId: 'test-connection'
+  });
+  assert.equal(page.content.providers[1].configured, false);
+  assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').pages[0].id, 'connections');
   assert.deepEqual(selected, {});
-  assert.deepEqual(manager.admin.manifest().find(item => item.id === 'core-ai').forms[0].fields[0].options,
-    [{label: 'DeepSeek / deepseek-flash', value: 'deepseek/deepseek-flash'},
-      {label: 'OpenAI / gpt-small', value: 'openai/gpt-small'}]);
-  await manager.admin.submitForm('core-ai', 'default-model', {selection: 'deepseek/deepseek-flash'});
+  assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').panels[0].title, 'AI 连接');
+  await manager.admin.runAction('core-ai', 'select-default', {provider: 'deepseek', model: 'deepseek-flash'});
   assert.deepEqual(selected, {provider: 'deepseek', model: 'deepseek-flash'});
-  await assert.rejects(() => manager.admin.submitForm('core-ai', 'default-model', {
-    selection: 'unknown/model'
-  }), /Invalid AI provider\/model selection/);
+  await assert.rejects(() => manager.admin.runAction('core-ai', 'select-default', {
+    provider: 'unknown', model: 'model'
+  }), /not available/);
 });
 
 test('AI client combines caller cancellation and timeout', async() => {

@@ -38,12 +38,19 @@ class AIProviderRegistry {
     if (!PROVIDER_ID.test(id)) throw new TypeError(`Invalid AI provider id: ${id}`);
     if (this.providers.has(id)) throw new Error(`AI provider already registered: ${id}`);
     if (typeof definition.generate !== 'function') throw new TypeError(`AI provider ${id} requires generate(request, context)`);
+    const admin = definition.admin;
+    if (admin && (!admin.formId || !admin.testActionId ||
+        !PROVIDER_ID.test(admin.formId) || !PROVIDER_ID.test(admin.testActionId))) {
+      throw new TypeError(`Invalid AI provider admin configuration: ${id}`);
+    }
     const provider = Object.freeze({
       id,
       owner,
       label: requiredString(definition.label || id, `AI provider ${id} label`),
       models: normalizeModels(definition.models, id),
       configured: typeof definition.configured === 'function' ? definition.configured : undefined,
+      admin: admin ? Object.freeze({pluginId: owner, formId: admin.formId,
+        testActionId: admin.testActionId}) : undefined,
       generate: definition.generate
     });
     this.providers.set(id, provider);
@@ -51,7 +58,8 @@ class AIProviderRegistry {
   }
 
   list() {
-    return [...this.providers.values()].map(({id, label, models}) => ({id, label, models: clone(models)}));
+    return [...this.providers.values()].map(({id, label, models, admin}) => ({id, label, models: clone(models),
+      ...(admin ? {admin: {...admin}} : {})}));
   }
 
   has(id) {
