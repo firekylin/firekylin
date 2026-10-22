@@ -107,31 +107,33 @@ export default function AIConnections() {
 
     return <div className="fk-content-wrap">
         <BreadCrumb />
-        <h3 className="page-title">AI 连接</h3>
-        <Spin spinning={loading || working}>
-            <Card title="AI 服务商" style={{marginBottom: 16}}>
-                <Select aria-label="选择 AI 服务商" value={providerId} onChange={changeProvider} allowClear
-                    placeholder="请选择" style={{width: '100%', maxWidth: 420}}
-                    options={[...providers.map(item => ({label: item.label, value: item.id})),
-                        {label: '添加更多 AI 服务商', value: MORE_PROVIDERS}]} />
-            </Card>
-            {provider && form && displayedFormValues ? <PageForm key={provider.id} item={form} values={displayedFormValues}
-                submit={() => {}} form={providerForm} hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
-            {provider && !form ? <Alert type="warning" showIcon style={{marginBottom: 16}}
-                message="该服务商没有提供连接配置表单" /> : null}
-            {provider ? <Card title="模型与连接测试">
-                <Space direction="vertical" style={{width: '100%'}}>
-                    <Select aria-label="选择 AI 模型" value={modelId} onChange={setModelId}
-                        style={{width: '100%', maxWidth: 420}}
-                        options={provider.models.map(item => ({label: item.label, value: item.id}))} />
-                    <Button onClick={testConnection} disabled={!provider.admin || !modelId}>测试连接</Button>
-                    <Typography.Text type="secondary">
-                        {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : '切换下拉框不会改变当前默认服务商。'}
-                    </Typography.Text>
-                </Space>
-            </Card> : null}
-            <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={!dirty || Boolean(provider && !modelId)}
-                style={{marginTop: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>保存</Button>
-        </Spin>
+        <div className="page-list">
+            <h3 className="page-title">AI 连接</h3>
+            <Spin spinning={loading || working}>
+                <Card title="AI 服务商" style={{marginBottom: 16}}>
+                    <Select aria-label="选择 AI 服务商" value={providerId} onChange={changeProvider} allowClear
+                        placeholder="请选择" style={{width: '100%', maxWidth: 420}}
+                        options={[...providers.map(item => ({label: item.label, value: item.id})),
+                            {label: '添加更多 AI 服务商', value: MORE_PROVIDERS}]} />
+                </Card>
+                {provider && form && displayedFormValues ? <PageForm key={provider.id} item={form} values={displayedFormValues}
+                    submit={() => {}} form={providerForm} hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
+                {provider && !form ? <Alert type="warning" showIcon style={{marginBottom: 16}}
+                    message="该服务商没有提供连接配置表单" /> : null}
+                {provider ? <Card title="模型与连接测试">
+                    <Space direction="vertical" style={{width: '100%'}}>
+                        <Select aria-label="选择 AI 模型" value={modelId} onChange={setModelId}
+                            style={{width: '100%', maxWidth: 420}}
+                            options={provider.models.map(item => ({label: item.label, value: item.id}))} />
+                        <Button onClick={testConnection} disabled={!provider.admin || !modelId}>测试连接</Button>
+                        <Typography.Text type="secondary">
+                            {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : '切换下拉框不会改变当前默认服务商。'}
+                        </Typography.Text>
+                    </Space>
+                </Card> : null}
+                <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={!dirty || Boolean(provider && !modelId)}
+                    style={{marginTop: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>保存</Button>
+            </Spin>
+        </div>
     </div>;
 }
