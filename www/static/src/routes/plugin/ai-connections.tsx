@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
-import {Alert, Button, Card, message, Select, Space, Spin, Typography} from 'antd';
+import {Alert, Button, Card, Form, message, Select, Space, Spin, Typography} from 'antd';
+import {firstValueFrom} from 'rxjs';
 import {PageForm, PAGE_SECTION_CONTENT_INSET} from '../../components/protocol/page-section';
 import {http} from '../../utils/http';
 
@@ -22,6 +23,8 @@ export default function AIConnections() {
     const [loading, setLoading] = useState(true);
     const [working, setWorking] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
+    const [settingsDirty, setSettingsDirty] = useState(false);
+    const [providerForm] = Form.useForm();
     const provider = providers.find(item => item.id === providerId);
     const descriptor = provider?.admin && (window.SysConfig.pluginAdmin || [])
         .find(item => item.id === provider.admin?.pluginId);
@@ -29,12 +32,11 @@ export default function AIConnections() {
     const csrf = {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}};
 
     useEffect(() => {
-        const subscription = http.get<any>('/admin/api/plugins/core-ai/pages/connections').subscribe(res => {
+        const subscription = http.get<any>('/admin/api/ai-connections').subscribe(res => {
             if (res.errno === 0) {
-                const items = (res.data as any).content.providers || [];
+                const items = (res.data as any).providers || [];
                 setProviders(items);
-                setProviderId(current => items.some((item: Provider) => item.id === current) ? current :
-                    items.find((item: Provider) => item.models.some(model => model.selected))?.id);
+                setProviderId(items.find((item: Provider) => item.models.some(model => model.selected))?.id);
             }
             setLoading(false);
         });
@@ -44,6 +46,7 @@ export default function AIConnections() {
     useEffect(() => {
         setModelId(provider?.models.find(item => item.selected)?.id || provider?.models[0]?.id);
         setFormValues(undefined);
+        setSettingsDirty(false);
         if (!provider?.admin) return;
         const {pluginId, formId} = provider.admin;
         const subscription = http.get<any>(`/admin/api/plugins/${pluginId}/forms/${formId}`).subscribe(res => {
@@ -59,18 +62,6 @@ export default function AIConnections() {
         }
         setProviderId(value);
     };
-    const submit = (_formId: string, values: Record<string, any>) => {
-        if (!provider?.admin) return;
-        setWorking(true);
-        http.post<any>(`/admin/api/plugins/${provider.admin.pluginId}/forms/${provider.admin.formId}`,
-            values, csrf).subscribe(res => {
-            setWorking(false);
-            if (res.errno === 0) {
-                message.success((res.data as any).message || '连接配置已保存');
-                setReloadKey(key => key + 1);
-            }
-        });
-    };
     const testConnection = () => {
         if (!provider?.admin || !modelId) return;
         setWorking(true);
@@ -80,19 +71,31 @@ export default function AIConnections() {
             if (res.errno === 0) message.success((res.data as any).message || '连接成功');
         });
     };
-    const saveConnection = () => {
-        if (provider && !modelId) return;
-        const action = provider ? 'select-default' : 'clear-default';
-        const input = provider ? {provider: provider.id, model: modelId} : {};
+    const savedProvider = providers.find(item => item.models.some(model => model.selected));
+    const savedModel = savedProvider?.models.find(item => item.selected)?.id;
+    const dirty = providerId !== savedProvider?.id || (providerId && modelId !== savedModel) || settingsDirty;
+    const saveConnection = async () => {
+        if (!dirty || (provider && !modelId)) return;
         setWorking(true);
-        http.post<any>(`/admin/api/plugins/core-ai/actions/${action}`,
-            input, csrf).subscribe(res => {
-            setWorking(false);
+        try {
+            if (provider?.admin && form && settingsDirty) {
+                const values = await providerForm.validateFields();
+                const configured = await firstValueFrom(http.post<any>(
+                    `/admin/api/plugins/${provider.admin.pluginId}/forms/${provider.admin.formId}`, values, csrf));
+                if (configured.errno !== 0) return;
+            }
+            const res = await firstValueFrom(http.post<any>('/admin/api/ai-connections',
+                {provider: provider?.id || null, model: modelId}, csrf));
             if (res.errno === 0) {
-                message.success((res.data as any).message || '默认模型已更新');
+                message.success('AI 连接已保存');
+                setSettingsDirty(false);
                 setReloadKey(key => key + 1);
             }
-        });
+        } catch (error) {
+            // Ant Design displays field validation errors next to the affected controls.
+        } finally {
+            setWorking(false);
+        }
     };
 
     return <div className="fk-content-wrap">
@@ -106,12 +109,9 @@ export default function AIConnections() {
                     placeholder="请选择" style={{width: '100%', maxWidth: 420}}
                     options={[...providers.map(item => ({label: item.label, value: item.id})),
                         {label: '添加更多 AI 服务商', value: MORE_PROVIDERS}]} />
-                <Button type="primary" onClick={saveConnection} style={{marginInlineStart: 12}}
-                    disabled={Boolean(provider && (!modelId || provider.configured === false))}>
-                    {provider ? '保存 AI 连接' : '保存并禁用 AI 连接'}
-                </Button>
             </Card>
-            {provider && form ? <PageForm key={provider.id} item={form} values={formValues} submit={submit} /> : null}
+            {provider && form && formValues ? <PageForm key={provider.id} item={form} values={formValues}
+                submit={() => {}} form={providerForm} hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
             {provider && !form ? <Alert type="warning" showIcon style={{marginBottom: 16}}
                 message="该服务商没有提供连接配置表单" /> : null}
             {provider ? <Card title="模型与连接测试">
@@ -125,6 +125,8 @@ export default function AIConnections() {
                     </Typography.Text>
                 </Space>
             </Card> : null}
+            <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={!dirty || Boolean(provider && !modelId)}
+                style={{marginTop: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>保存</Button>
         </Spin>
     </div>;
 }

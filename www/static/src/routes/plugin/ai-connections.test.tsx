@@ -17,21 +17,30 @@ describe('AI connections', () => {
     });
 
     beforeEach(() => {
+        globalThis.ResizeObserver = class {
+            observe() {}
+            unobserve() {}
+            disconnect() {}
+        } as any;
         window.SysConfig = {pluginAdmin: [], csrfToken: 'test-csrf'} as unknown as typeof window.SysConfig;
-        vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {content: {providers: [{
+        vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {providers: [{
             id: 'deepseek', label: 'DeepSeek', configured: false,
             models: [{id: 'deepseek-flash', label: 'DeepSeek Flash', selected: false}]
-        }]}}} as any));
+        }]}} as any));
         vi.mocked(http.post).mockReturnValue(of({errno: 0, data: {message: 'AI 连接已禁用。'}} as any));
     });
 
-    it('leaves the provider empty and saves a cleared default', async() => {
+    it('leaves the provider empty and enables save after a change', async() => {
         const view = render(<AIConnections />);
         await waitFor(() => expect(view.getByText('请选择')).toBeInTheDocument());
         expect(view.queryByText('未配置')).not.toBeInTheDocument();
-        fireEvent.click(view.getByRole('button', {name: '保存并禁用 AI 连接'}));
+        expect(view.getByRole('button', {name: '保存'})).toBeDisabled();
+        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
+        fireEvent.click(view.getByText('DeepSeek'));
+        await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeEnabled());
+        fireEvent.click(view.getByRole('button', {name: '保存'}));
         await waitFor(() => expect(http.post).toHaveBeenCalledWith(
-            '/admin/api/plugins/core-ai/actions/clear-default', {},
+            '/admin/api/ai-connections', {provider: 'deepseek', model: 'deepseek-flash'},
             {headers: {'X-CSRF-Token': 'test-csrf'}}
         ));
     });

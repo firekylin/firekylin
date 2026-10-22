@@ -52,6 +52,7 @@ function Container(props: any) {
                         <Route path="/appearance" component={Appearance} />
                         <Route path="/options" component={Options} />
                         <Route path="/comment" component={Comment} />
+                        <Route exact={true} path="/plugins/core-ai/connections" component={() => <Redirect to="/options/ai" />} />
                         <Route
                             path="/plugins/:pluginId/:pageId"
                             component={PluginAdmin}

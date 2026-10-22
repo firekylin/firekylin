@@ -35,7 +35,7 @@ test('AI client validates selection and delegates generation', async() => {
   await assert.rejects(() => client.select('example', 'missing'), /not available/);
 });
 
-test('AI admin shows installed providers and changes default only when explicitly submitted', async() => {
+test('AI service lists providers without registering a second admin page', async() => {
   const {PluginManager} = require('../../src/plugin/manager');
   let selected = {};
   const manager = new PluginManager({aiStore: {
@@ -51,30 +51,23 @@ test('AI admin shows installed providers and changes default only when explicitl
     id: 'openai', label: 'OpenAI', models: [{id: 'gpt-small'}],
     configured: async() => false, generate: () => ({text: 'OK'})
   }, 'ai-provider-openai');
-  const {registerAIAdmin} = require('../../src/ai/admin');
-  registerAIAdmin(manager);
-  const page = await manager.admin.loadPage('core-ai', 'connections');
-  assert.equal(page.page.title, 'AI 连接');
-  assert.equal(page.content.providers[0].configured, true);
-  assert.deepEqual(page.content.providers[0].admin, {
+  const providers = await manager.ai.models();
+  assert.equal(providers[0].configured, true);
+  assert.deepEqual(providers[0].admin, {
     pluginId: 'ai-provider-deepseek', formId: 'settings', testActionId: 'test-connection'
   });
-  assert.equal(page.content.providers[1].configured, false);
-  assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').pages[0].id, 'connections');
+  assert.equal(providers[1].configured, false);
+  assert.equal(manager.admin.manifest().some(item => item.id === 'core-ai'), false);
   assert.deepEqual(selected, {});
-  assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').panels[0].title, 'AI 连接');
-  await manager.admin.runAction('core-ai', 'select-default', {provider: 'deepseek', model: 'deepseek-flash'});
+  await manager.ai.select('deepseek', 'deepseek-flash');
   assert.deepEqual(selected, {provider: 'deepseek', model: 'deepseek-flash'});
-  await manager.admin.runAction('core-ai', 'clear-default');
+  await manager.ai.clear();
   assert.deepEqual(selected, {});
-  assert.equal((await manager.admin.loadPage('core-ai', 'connections')).content.providers
+  assert.equal((await manager.ai.models())
     .some(provider => provider.models.some(model => model.selected)), false);
   await assert.rejects(() => manager.ai.generate({messages: [{role: 'user', content: 'hello'}]}),
     /Provider must be a non-empty string/);
-  assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').pages[0].menu, false);
-  await assert.rejects(() => manager.admin.runAction('core-ai', 'select-default', {
-    provider: 'unknown', model: 'model'
-  }), /not available/);
+  await assert.rejects(() => manager.ai.select('unknown', 'model'), /not available/);
 });
 
 test('AI client combines caller cancellation and timeout', async() => {
