@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, message, Select, Space, Spin, Typography} from 'antd';
 import {firstValueFrom} from 'rxjs';
+import BreadCrumb from '../../components/breadcrumb';
 import {PageForm, PAGE_SECTION_CONTENT_INSET} from '../../components/protocol/page-section';
 import {http} from '../../utils/http';
 
@@ -99,10 +100,7 @@ export default function AIConnections() {
     };
 
     return <div className="fk-content-wrap">
-        <Space direction="vertical" size={4} style={{marginBottom: 20, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
-            <Typography.Title level={3} style={{margin: 0}}>AI 连接</Typography.Title>
-            <Typography.Text type="secondary">选择服务商并配置连接；清空选择后保存可停用默认 AI 功能。</Typography.Text>
-        </Space>
+        <BreadCrumb />
         <Spin spinning={loading || working}>
             <Card title="AI 服务商" style={{marginBottom: 16}}>
                 <Select aria-label="选择 AI 服务商" value={providerId} onChange={changeProvider} allowClear
