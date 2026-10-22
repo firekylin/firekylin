@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, message, Select, Space, Spin, Typography} from 'antd';
 import {firstValueFrom} from 'rxjs';
 import BreadCrumb from '../../components/breadcrumb';
+import {SAVED_SECRET_MASK} from '../../components/protocol/form-field';
 import {PageForm, PAGE_SECTION_CONTENT_INSET} from '../../components/protocol/page-section';
 import {http} from '../../utils/http';
 
@@ -30,6 +31,10 @@ export default function AIConnections() {
     const descriptor = provider?.admin && (window.SysConfig.pluginAdmin || [])
         .find(item => item.id === provider.admin?.pluginId);
     const form = descriptor?.forms.find(item => item.id === provider?.admin?.formId);
+    const hasSavedApiKey = provider?.configured && form?.fields.some(item =>
+        item.name === 'apiKey' && item.type === 'password');
+    const displayedFormValues = formValues && hasSavedApiKey
+        ? {...formValues, apiKey: SAVED_SECRET_MASK} : formValues;
     const csrf = {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}};
 
     useEffect(() => {
@@ -81,6 +86,7 @@ export default function AIConnections() {
         try {
             if (provider?.admin && form && settingsDirty) {
                 const values = await providerForm.validateFields();
+                if (hasSavedApiKey && values.apiKey === SAVED_SECRET_MASK) delete values.apiKey;
                 const configured = await firstValueFrom(http.post<any>(
                     `/admin/api/plugins/${provider.admin.pluginId}/forms/${provider.admin.formId}`, values, csrf));
                 if (configured.errno !== 0) return;
@@ -101,6 +107,7 @@ export default function AIConnections() {
 
     return <div className="fk-content-wrap">
         <BreadCrumb />
+        <h3 className="page-title">AI 连接</h3>
         <Spin spinning={loading || working}>
             <Card title="AI 服务商" style={{marginBottom: 16}}>
                 <Select aria-label="选择 AI 服务商" value={providerId} onChange={changeProvider} allowClear
@@ -108,7 +115,7 @@ export default function AIConnections() {
                     options={[...providers.map(item => ({label: item.label, value: item.id})),
                         {label: '添加更多 AI 服务商', value: MORE_PROVIDERS}]} />
             </Card>
-            {provider && form && formValues ? <PageForm key={provider.id} item={form} values={formValues}
+            {provider && form && displayedFormValues ? <PageForm key={provider.id} item={form} values={displayedFormValues}
                 submit={() => {}} form={providerForm} hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
             {provider && !form ? <Alert type="warning" showIcon style={{marginBottom: 16}}
                 message="该服务商没有提供连接配置表单" /> : null}
