@@ -11,6 +11,7 @@ const AbilityRegistry = require('../ability/registry');
 const AdminRegistry = require('./admin');
 const AIProviderRegistry = require('../ai/registry');
 const AIClient = require('../ai/client');
+const {registerAIAdmin} = require('../ai/admin');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
@@ -102,6 +103,7 @@ class PluginManager {
     this.plugins = new Map();
     this.states = new Map();
     this.packageApi = packageApi;
+    registerAIAdmin(this);
   }
 
   logError(error, listener) {
@@ -185,6 +187,7 @@ class PluginManager {
       }
     }
     for (const record of this.plugins.values()) await this.activate(record);
+    registerAIAdmin(this);
     return this.plugins;
   }
 
@@ -265,6 +268,7 @@ class PluginManager {
       await record.plugin.register(ctx);
       if (typeof record.plugin.activate === 'function') await record.plugin.activate(ctx);
       record.status = 'active';
+      registerAIAdmin(this);
       await this.events.emit('plugin.activated', {pluginId: record.manifest.id});
     } catch (error) {
       record.status = 'error';
@@ -291,6 +295,7 @@ class PluginManager {
       this.tools.removePlugin(id);
       this.admin.removePlugin(id);
       this.aiProviders.removeOwner(id);
+      registerAIAdmin(this);
       removeWidgetsBySource(id);
       record.status = 'inactive';
       await this.events.emit('plugin.deactivated', {pluginId: id});

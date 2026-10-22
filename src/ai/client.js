@@ -14,11 +14,14 @@ class AIClient {
 
   async models() {
     const selected = await this.preferences.get();
-    return this.providers.list().map(provider => ({...provider,
+    return Promise.all(this.providers.list().map(async provider => ({...provider,
+      ...(this.providers.get(provider.id).configured ? {
+        configured: Boolean(await this.providers.get(provider.id).configured())
+      } : {}),
       models: provider.models.map(model => ({...model,
         selected: selected.provider === provider.id && selected.model === model.id
       }))
-    }));
+    })));
   }
 
   async select(providerId, modelId) {

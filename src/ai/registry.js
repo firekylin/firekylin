@@ -43,6 +43,7 @@ class AIProviderRegistry {
       owner,
       label: requiredString(definition.label || id, `AI provider ${id} label`),
       models: normalizeModels(definition.models, id),
+      configured: typeof definition.configured === 'function' ? definition.configured : undefined,
       generate: definition.generate
     });
     this.providers.set(id, provider);

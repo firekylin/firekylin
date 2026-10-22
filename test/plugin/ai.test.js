@@ -32,6 +32,42 @@ test('AI client validates selection and delegates generation', async() => {
   await assert.rejects(() => client.select('example', 'missing'), /not available/);
 });
 
+test('AI admin shows installed providers and changes default only when explicitly submitted', async() => {
+  const {PluginManager} = require('../../src/plugin/manager');
+  let selected = {};
+  const manager = new PluginManager({aiStore: {
+    getPreferences: async() => selected,
+    setPreferences: async value => { selected = value }
+  }});
+  manager.aiProviders.register({
+    id: 'deepseek', label: 'DeepSeek', models: [{id: 'deepseek-flash'}],
+    configured: async() => true, generate: () => ({text: 'OK'})
+  }, 'ai-provider-deepseek');
+  manager.aiProviders.register({
+    id: 'openai', label: 'OpenAI', models: [{id: 'gpt-small'}],
+    configured: async() => false, generate: () => ({text: 'OK'})
+  }, 'ai-provider-openai');
+  manager.admin.registerPanel({id: 'connection', title: 'DeepSeek'}, 'ai-provider-deepseek');
+  manager.admin.registerPage({id: 'settings', panel: 'connection', title: '设置', load: () => ({})},
+    'ai-provider-deepseek');
+  const {registerAIAdmin} = require('../../src/ai/admin');
+  registerAIAdmin(manager);
+  const page = await manager.admin.loadPage('core-ai', 'connections');
+  assert.equal(page.content.sections[0].items[0].value, '未选择');
+  assert.equal(page.content.sections[1].items[0].href, '/admin/plugins/ai-provider-deepseek/settings');
+  assert.match(page.content.sections[1].items[0].description, /已配置/);
+  assert.match(page.content.sections[1].items[1].description, /未配置/);
+  assert.deepEqual(selected, {});
+  assert.deepEqual(manager.admin.manifest().find(item => item.id === 'core-ai').forms[0].fields[0].options,
+    [{label: 'DeepSeek / deepseek-flash', value: 'deepseek/deepseek-flash'},
+      {label: 'OpenAI / gpt-small', value: 'openai/gpt-small'}]);
+  await manager.admin.submitForm('core-ai', 'default-model', {selection: 'deepseek/deepseek-flash'});
+  assert.deepEqual(selected, {provider: 'deepseek', model: 'deepseek-flash'});
+  await assert.rejects(() => manager.admin.submitForm('core-ai', 'default-model', {
+    selection: 'unknown/model'
+  }), /Invalid AI provider\/model selection/);
+});
+
 test('AI client combines caller cancellation and timeout', async() => {
   const registry = new AIProviderRegistry();
   registry.register({
