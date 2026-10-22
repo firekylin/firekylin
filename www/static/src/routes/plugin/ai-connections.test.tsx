@@ -1,5 +1,5 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
-import {of} from 'rxjs';
+import {of, Subject} from 'rxjs';
 import {MemoryRouter} from '../../utils/router';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
@@ -48,6 +48,29 @@ describe('AI connections', () => {
             '/admin/api/ai-connections', {provider: 'deepseek', model: 'deepseek-flash'},
             {headers: {'X-CSRF-Token': 'test-csrf'}}
         ));
+    });
+
+    it('keeps the saved model selected after provider data refreshes', async() => {
+        const refreshed = new Subject<any>();
+        const provider = (selectedModel: string) => ({errno: 0, data: {providers: [{
+            id: 'deepseek', label: 'DeepSeek',
+            models: [
+                {id: 'model-one', label: 'Model One', selected: selectedModel === 'model-one'},
+                {id: 'model-two', label: 'Model Two', selected: selectedModel === 'model-two'}
+            ]
+        }]}});
+        vi.mocked(http.get).mockReturnValueOnce(of(provider('model-one')) as any)
+            .mockReturnValueOnce(refreshed as any);
+        const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
+        await waitFor(() => expect(view.getByRole('combobox', {name: '选择 AI 模型'})).toBeInTheDocument());
+        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 模型'}));
+        fireEvent.click(view.getByText('Model Two'));
+        fireEvent.click(view.getByRole('button', {name: '保存'}));
+        await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+        refreshed.next(provider('model-two'));
+        await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeDisabled());
+        const modelSelect = view.getByRole('combobox', {name: '选择 AI 模型'}).closest('.ant-select');
+        expect(modelSelect?.querySelector('.ant-select-content-has-value')).toHaveAttribute('title', 'Model Two');
     });
 
     it('shows a mask for a saved API key without submitting the mask', async() => {

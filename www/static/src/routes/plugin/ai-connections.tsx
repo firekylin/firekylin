@@ -59,7 +59,7 @@ export default function AIConnections() {
             if (res.errno === 0) setFormValues(res.data || {});
         });
         return () => subscription.unsubscribe();
-    }, [providerId, reloadKey]);
+    }, [provider]);
 
     const changeProvider = (value: string | undefined) => {
         if (value === MORE_PROVIDERS) {

@@ -93,7 +93,8 @@ test('AI service lists providers without registering a second admin page', async
   assert.deepEqual(selected, {});
   await manager.ai.select('deepseek', 'deepseek-flash');
   assert.deepEqual(selected, {provider: 'deepseek', model: 'deepseek-flash'});
-  await manager.ai.clear();
+  const pluginAI = manager.context({manifest: {id: 'ai-test-plugin'}, root: process.cwd()}).ai;
+  await pluginAI.clear();
   assert.deepEqual(selected, {});
   assert.equal((await manager.ai.models())
     .some(provider => provider.models.some(model => model.selected)), false);
