@@ -34,6 +34,10 @@ class AIClient {
     return {provider: provider.id, model: modelId};
   }
 
+  async clear() {
+    await this.preferences.set({});
+  }
+
   async generate(request, context = {}) {
     if (!request || typeof request !== 'object' || Array.isArray(request)) {
       throw new TypeError('AI request must be an object');

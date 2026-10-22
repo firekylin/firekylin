@@ -8,7 +8,7 @@ function registerAIAdmin(manager) {
   admin.removePlugin(OWNER);
   admin.registerPanel({id: 'connections', title: 'AI 连接', icon: 'robot', order: 69}, OWNER);
   admin.registerPage({
-    id: 'connections', panel: 'connections', title: 'AI 连接',
+    id: 'connections', panel: 'connections', title: 'AI 连接', menu: false,
     description: '选择 AI 服务商、配置连接并设置默认模型。',
     load: async() => ({providers: await manager.ai.models()})
   }, OWNER);
@@ -17,6 +17,13 @@ function registerAIAdmin(manager) {
     handler: async input => {
       const selected = await manager.ai.select(input.provider, input.model);
       return {message: `已将 ${selected.provider} / ${selected.model} 设为默认。`};
+    }
+  }, OWNER);
+  admin.registerAction({
+    id: 'clear-default', page: 'connections', label: '禁用 AI 连接',
+    handler: async() => {
+      await manager.ai.clear();
+      return {message: 'AI 连接已禁用。'};
     }
   }, OWNER);
 }

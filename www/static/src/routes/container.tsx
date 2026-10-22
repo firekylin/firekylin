@@ -17,7 +17,6 @@ const Appearance = lazy(() => import('./appearance/appearance'));
 const Options = lazy(() => import('./options/options'));
 const Comment = lazy(() => import('./comment/comment'));
 const PluginAdmin = lazy(() => import('./plugin/plugin-admin'));
-const AIConnections = lazy(() => import('./plugin/ai-connections'));
 const Media = lazy(() => import('./media/media'));
 
 function Container(props: any) {
@@ -53,7 +52,6 @@ function Container(props: any) {
                         <Route path="/appearance" component={Appearance} />
                         <Route path="/options" component={Options} />
                         <Route path="/comment" component={Comment} />
-                        <Route exact={true} path="/plugins/core-ai/connections" component={AIConnections} />
                         <Route
                             path="/plugins/:pluginId/:pageId"
                             component={PluginAdmin}

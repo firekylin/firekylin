@@ -133,6 +133,7 @@ declare namespace Firekylin {
       admin?: {pluginId: string; formId: string; testActionId: string};
       models: Array<AIModelDefinition & {selected: boolean}>}>>;
     select(provider: string, model: string): Promise<{provider: string; model: string}>;
+    clear(): Promise<void>;
     generate(request: Record<string, unknown>, context?: Record<string, unknown>): Promise<unknown>;
     credentials: {
       get(name: string): Promise<string | undefined>;

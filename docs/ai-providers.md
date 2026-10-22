@@ -23,11 +23,14 @@ module.exports = {
 ```
 
 `ctx.ai.generate()` uses the selected provider and model unless the request explicitly names them. The
-administrator's **AI 连接** page lists installed providers and their optional `configured` status. Users select
+administrator's **系统设置 → AI 连接** page lists installed providers and their optional `configured` status. Users select
 a provider there, fill its plugin-supplied form and test the connection without leaving the page. The provider's
 `admin` metadata names a plugin-scoped form and test action registered through `ctx.admin`; the containing
 page may be hidden from the sidebar with `menu: false`. **AI 连接** is also the only place users select the
 global default provider and model. Saving connection settings should not call `ctx.ai.select()`.
+Clearing the provider choice and saving removes the global default, so feature plugins that rely on the
+default cannot generate until a provider is selected again. Explicit provider/model requests, such as a
+connection test, remain available.
 Connection tests should explicitly pass both provider and model so they work even when
 another provider is the default. Provider plugins persist secrets with `ctx.ai.credentials`. Credentials are
 encrypted with AES-256-GCM, scoped to the owning plugin, persisted in separate option rows so concurrent

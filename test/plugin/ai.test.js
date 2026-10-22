@@ -65,6 +65,13 @@ test('AI admin shows installed providers and changes default only when explicitl
   assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').panels[0].title, 'AI 连接');
   await manager.admin.runAction('core-ai', 'select-default', {provider: 'deepseek', model: 'deepseek-flash'});
   assert.deepEqual(selected, {provider: 'deepseek', model: 'deepseek-flash'});
+  await manager.admin.runAction('core-ai', 'clear-default');
+  assert.deepEqual(selected, {});
+  assert.equal((await manager.admin.loadPage('core-ai', 'connections')).content.providers
+    .some(provider => provider.models.some(model => model.selected)), false);
+  await assert.rejects(() => manager.ai.generate({messages: [{role: 'user', content: 'hello'}]}),
+    /Provider must be a non-empty string/);
+  assert.equal(manager.admin.manifest().find(item => item.id === 'core-ai').pages[0].menu, false);
   await assert.rejects(() => manager.admin.runAction('core-ai', 'select-default', {
     provider: 'unknown', model: 'model'
   }), /not available/);
