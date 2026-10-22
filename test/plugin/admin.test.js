@@ -76,6 +76,25 @@ test('admin registry validates relationships and removes every plugin resource',
   assert.deepEqual(admin.manifest(), []);
 });
 
+test('admin registry exposes forms and actions without a plugin page', async() => {
+  const admin = new AdminRegistry();
+  admin.registerForm({
+    id: 'settings', title: 'Settings', fields: [{name: 'key', label: 'Key', type: 'password'}],
+    load: () => ({key: 'hidden'}), submit: values => values
+  }, 'provider');
+  admin.registerAction({id: 'test', label: 'Test', handler: () => ({ok: true})}, 'provider');
+  const [plugin] = admin.manifest();
+  assert.deepEqual(plugin.panels, []);
+  assert.deepEqual(plugin.pages, []);
+  assert.equal(plugin.forms[0].id, 'settings');
+  assert.equal(plugin.actions[0].id, 'test');
+  assert.deepEqual(await admin.loadForm('provider', 'settings', {}), {});
+  assert.deepEqual(await admin.submitForm('provider', 'settings', {key: 'new'}, {}), {key: 'new'});
+  assert.deepEqual(await admin.runAction('provider', 'test', {}, {}), {ok: true});
+  admin.removePlugin('provider');
+  assert.deepEqual(admin.manifest(), []);
+});
+
 test('admin page layouts reject unknown types and cross-page references', async() => {
   const admin = new AdminRegistry();
   admin.registerPanel({id: 'tools', title: 'Tools'}, 'example');

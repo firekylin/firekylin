@@ -2,6 +2,7 @@ import React from 'react';
 import {
     BrowserRouter,
     Link,
+    MemoryRouter,
     matchPath,
     Navigate,
     NavLink as RouterNavLink,
@@ -9,7 +10,7 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
-export { BrowserRouter, Link, useLocation };
+export { BrowserRouter, Link, MemoryRouter, useLocation };
 
 export interface RouteComponentProps<Params extends object = {}> {
     history: {

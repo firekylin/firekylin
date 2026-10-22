@@ -139,6 +139,10 @@ export const InitiateRoutes = (themePages) => [{
                 title: '阅读设置'
             },
             {
+                url: '/options/ai',
+                title: 'AI 连接'
+            },
+            {
                 url: '/options/two_factor_auth',
                 title: '两步验证'
             },

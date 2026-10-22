@@ -9,6 +9,8 @@ const RouteRegistry = require('./routes');
 const TemplateRegistry = require('./templates');
 const AbilityRegistry = require('../ability/registry');
 const AdminRegistry = require('./admin');
+const AIProviderRegistry = require('../ai/registry');
+const AIClient = require('../ai/client');
 const {Widget, ContentsWidget, MetasWidget, registerWidget, removeWidgetsBySource} = require('../widget/registry');
 
 const REQUIRED_MANIFEST_FIELDS = ['id', 'name', 'version', 'entry'];
@@ -81,7 +83,7 @@ function resolveInside(root, entry, label) {
 }
 
 class PluginManager {
-  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi} = {}) {
+  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi, aiStore} = {}) {
     this.projectPath = projectPath || process.cwd();
     this.config = config || {};
     this.logger = logger || console;
@@ -92,6 +94,11 @@ class PluginManager {
     this.abilities = new AbilityRegistry();
     this.tools = this.abilities; // Compatibility alias for existing plugins and MCP tools.
     this.admin = new AdminRegistry();
+    this.aiProviders = new AIProviderRegistry();
+    this.aiStore = aiStore;
+    this.ai = aiStore ? new AIClient({providers: this.aiProviders, preferences: {
+      get: () => aiStore.getPreferences(), set: value => aiStore.setPreferences(value)
+    }}) : null;
     this.plugins = new Map();
     this.states = new Map();
     this.packageApi = packageApi;
@@ -206,6 +213,19 @@ class PluginManager {
         registerForm: definition => this.admin.registerForm(definition, pluginId),
         registerAction: definition => this.admin.registerAction(definition, pluginId)
       }),
+      ai: this.ai ? Object.freeze({
+        registerProvider: definition => this.aiProviders.register(definition, pluginId),
+        providers: () => this.ai.models(),
+        select: (provider, model) => this.ai.select(provider, model),
+        clear: () => this.ai.clear(),
+        generate: (request, context) => this.ai.generate(request, context),
+        credentials: Object.freeze({
+          get: name => this.aiStore.getCredential(pluginId, name),
+          has: name => this.aiStore.hasCredential(pluginId, name),
+          set: (name, value) => this.aiStore.setCredential(pluginId, name, value),
+          delete: name => this.aiStore.deleteCredential(pluginId, name)
+        })
+      }) : undefined,
       ...(this.packageApi && permissions.includes('packages:manage') ? {
         packages: Object.freeze({...this.packageApi})
       } : {}),
@@ -253,6 +273,7 @@ class PluginManager {
       this.templates.removePlugin(record.manifest.id);
       this.tools.removePlugin(record.manifest.id);
       this.admin.removePlugin(record.manifest.id);
+      this.aiProviders.removeOwner(record.manifest.id);
       removeWidgetsBySource(record.manifest.id);
       this.logger.error?.(`[plugin:${record.manifest.id}] activation failed: ${error.stack || error.message}`);
     }
@@ -269,6 +290,7 @@ class PluginManager {
       this.templates.removePlugin(id);
       this.tools.removePlugin(id);
       this.admin.removePlugin(id);
+      this.aiProviders.removeOwner(id);
       removeWidgetsBySource(id);
       record.status = 'inactive';
       await this.events.emit('plugin.deactivated', {pluginId: id});

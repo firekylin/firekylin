@@ -16,6 +16,7 @@ const pack = require('../../package.json');
 const {PackageCatalog} = require('../service/package-catalog');
 const {ThemeInstaller} = require('../service/theme-installer');
 const {PluginInstaller} = require('../service/plugin-installer');
+const {AIStore} = require('../ai/store');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
   ? global.firekylin.plugins
@@ -77,7 +78,14 @@ const pluginManager = existingPluginManager || new PluginManager({
   config: projectContext.config || {},
   version: pack.version,
   logger: console,
-  packageApi
+  packageApi,
+  aiStore: new AIStore({
+    getOptions: includePrivate => think.model('options').getOptions(includePrivate),
+    updateOptions: (key, value) => think.model('options').updateOptions(key, value),
+    getCredentialValue: key => think.model('options').getCredentialValue(key),
+    setCredentialValue: (key, value) => think.model('options').setCredentialValue(key, value),
+    deleteCredentialValue: key => think.model('options').deleteCredentialValue(key)
+  })
 });
 pluginManager.packageApi = packageApi;
 global.firekylin.plugins = pluginManager;
