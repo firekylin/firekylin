@@ -5,7 +5,10 @@ import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
+import { Button, Dropdown, message } from 'antd';
+import { http } from '../../../utils/http';
 export function ArticleEditor(props: any) {
+    const [aiLoading, setAiLoading] = React.useState(false);
     const [state, setState] = React.useState(() => ({
         postSubmitting: false,
         draftSubmitting: false,
@@ -82,6 +85,15 @@ export function ArticleEditor(props: any) {
                     innerLinks={props.postStore.postList}
                     fetchData={(keyword) => legacy.handleFetchData(keyword)}
                 />
+                {editorActions.length ? <div style={{marginTop: 8}}>
+                    <Dropdown menu={{items: editorActions.map(action => ({
+                        key: `${action.pluginId}:${action.id}`,
+                        label: action.label,
+                        onClick: () => runEditorAction(action),
+                    }))}} disabled={aiLoading}>
+                        <Button loading={aiLoading}>AI 助手</Button>
+                    </Dropdown>
+                </div> : null}
 
                 <p style={{ lineHeight: '30px' }}>
                     <span className="pull-left">
@@ -99,6 +111,25 @@ export function ArticleEditor(props: any) {
         );
     };
     const markdownContent = props.articleStore.articleInfo.markdown_content;
+    const editorActions = (window.SysConfig.pluginAdmin || []).flatMap(plugin =>
+        (plugin.editorActions || []).map(action => ({...action, pluginId: plugin.id})),
+    );
+    const runEditorAction = (item: any) => {
+        setAiLoading(true);
+        http.post<any>(`/admin/api/plugins/${item.pluginId}/actions/${item.action}`, {
+            title: props.articleStore.articleInfo.title || '',
+            content: props.articleStore.articleInfo.markdown_content || '',
+        }, {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}}).subscribe(res => {
+            setAiLoading(false);
+            if (res.errno !== 0) return;
+            const result = res.data as any;
+            props.articleStore.setArticleInfo({
+                ...(typeof result.title === 'string' ? {title: result.title} : {}),
+                ...(typeof result.content === 'string' ? {markdown_content: result.content} : {}),
+            });
+            message.success(result.message || 'AI 内容已生成');
+        });
+    };
     React.useEffect(() => {
         const wordCount = tools.wordCount(markdownContent);
         setState((previous) =>

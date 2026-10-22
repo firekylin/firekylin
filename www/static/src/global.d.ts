@@ -5,7 +5,11 @@ interface Window {
             disallow_file_edit: any;
         };
         csrfToken: string;
-        pluginAdmin: Array<any>;
+        pluginAdmin: Array<{
+            id: string;
+            editorActions?: Array<{id: string; action: string; label: string; order: number}>;
+            [key: string]: any;
+        }>;
         options: {
             title: string;
             two_factor_auth: string;

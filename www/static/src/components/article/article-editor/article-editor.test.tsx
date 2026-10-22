@@ -6,9 +6,11 @@ import { ArticleEditor } from './article-editor';
 vi.mock('../../editor', () => ({
     default: ({ content }: { content: string }) => <div>{content}</div>,
 }));
+vi.mock('../../../utils/http', () => ({http: {post: vi.fn()}}));
 
 describe('ArticleEditor', () => {
     it('settles after content updates and can be unmounted during navigation', () => {
+        window.SysConfig = {pluginAdmin: []} as any;
         const articleStore = {
             articleInfo: { markdown_content: 'first draft' },
             setArticleInfo: vi.fn(),

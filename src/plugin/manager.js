@@ -211,7 +211,8 @@ class PluginManager {
         registerPanel: definition => this.admin.registerPanel(definition, pluginId),
         registerPage: definition => this.admin.registerPage(definition, pluginId),
         registerForm: definition => this.admin.registerForm(definition, pluginId),
-        registerAction: definition => this.admin.registerAction(definition, pluginId)
+        registerAction: definition => this.admin.registerAction(definition, pluginId),
+        registerEditorAction: definition => this.admin.registerEditorAction(definition, pluginId)
       }),
       ai: this.ai ? Object.freeze({
         registerProvider: definition => this.aiProviders.register(definition, pluginId),

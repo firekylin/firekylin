@@ -109,6 +109,7 @@ declare namespace Firekylin {
     registerPage(definition: AdminPageDefinition): () => boolean;
     registerForm(definition: AdminFormDefinition): () => boolean;
     registerAction(definition: AdminActionDefinition): () => boolean;
+    registerEditorAction(definition: {id: string; action: string; label: string; order?: number}): () => boolean;
   }
 
   interface AIModelDefinition {
