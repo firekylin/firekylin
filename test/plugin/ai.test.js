@@ -43,6 +43,30 @@ test('AI client validates selection and delegates generation', async() => {
   await assert.rejects(() => client.select('example', 'missing'), /not available/);
 });
 
+test('AI client rejects unsupported model capabilities before calling a provider', async() => {
+  const registry = new AIProviderRegistry();
+  let calls = 0;
+  registry.register({
+    id: 'text-only', models: [{id: 'chat', capabilities: ['text']}],
+    generate: () => { calls++; return {text: 'OK'} }
+  });
+  const client = new AIClient({providers: registry, preferences: {
+    get: async() => ({provider: 'text-only', model: 'chat'})
+  }});
+  await assert.rejects(client.generate({capability: 'image', messages: [{role: 'user', content: 'Draw a cat'}]}),
+    {code: 'AI_UNSUPPORTED_CAPABILITY', status: 400,
+      message: 'AI model does not support image: text-only/chat'});
+  assert.equal(calls, 0);
+  assert.deepEqual(await client.generate({messages: [{role: 'user', content: 'Hello'}]}), {text: 'OK'});
+  assert.equal(calls, 1);
+  registry.register({
+    id: 'image-ready', models: [{id: 'draw', capabilities: ['image']}],
+    generate: request => ({capability: request.capability})
+  });
+  assert.deepEqual(await client.generate({provider: 'image-ready', model: 'draw', capability: 'image',
+    messages: [{role: 'user', content: 'Draw a cat'}]}), {capability: 'image'});
+});
+
 test('AI service lists providers without registering a second admin page', async() => {
   const {PluginManager} = require('../../src/plugin/manager');
   let selected = {};

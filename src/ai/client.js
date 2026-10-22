@@ -47,8 +47,16 @@ class AIClient {
     const modelId = request.model || selected.model;
     const provider = this.providers.get(nonEmpty(providerId, 'Provider'));
     if (!provider) throw new Error(`AI provider is not available: ${providerId}`);
-    if (!provider.models.some(model => model.id === modelId)) {
+    const model = provider.models.find(item => item.id === modelId);
+    if (!model) {
       throw new Error(`AI model is not available: ${providerId}/${modelId}`);
+    }
+    const capability = request.capability === undefined ? 'text' : nonEmpty(request.capability, 'AI capability');
+    if (!model.capabilities.includes(capability)) {
+      const error = new Error(`AI model does not support ${capability}: ${providerId}/${modelId}`);
+      error.code = 'AI_UNSUPPORTED_CAPABILITY';
+      error.status = 400;
+      throw error;
     }
     if (!Array.isArray(request.messages) || !request.messages.length) {
       throw new TypeError('AI request requires messages');

@@ -28,10 +28,15 @@ module.exports = {
 API for future admin presentation. Logos must use HTTPS or a site-relative URL; neither field is rendered as HTML.
 
 `ctx.ai.generate()` uses the selected provider and model unless the request explicitly names them. The
+request's `capability` defaults to `text`. Feature plugins requesting image generation must pass
+`capability: 'image'`; the client checks the chosen model's `capabilities` before calling the provider and
+returns `AI_UNSUPPORTED_CAPABILITY` (HTTP 400) when the model does not support it. Capability metadata
+does not by itself implement image generation: a provider must also handle that request and response format.
+The model picker can use the same metadata to filter incompatible models in future feature-specific UI.
 administrator's **系统设置 → AI 连接** page lists installed providers and their optional `configured` status. Users select
 a provider there, fill its plugin-supplied form and test the connection without leaving the page. The provider's
-`admin` metadata names a plugin-scoped form and test action registered through `ctx.admin`; the containing
-page may be hidden from the sidebar with `menu: false`. **AI 连接** is also the only place users select the
+`admin` metadata names a plugin-scoped form and test action registered through `ctx.admin`; providers do not
+need their own panel or page. **AI 连接** is also the only place users select the
 global default provider and model. Saving connection settings should not call `ctx.ai.select()`.
 Clearing the provider choice and saving removes the global default, so feature plugins that rely on the
 default cannot generate until a provider is selected again. Explicit provider/model requests, such as a

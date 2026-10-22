@@ -116,6 +116,7 @@ declare namespace Firekylin {
   interface AIModelDefinition {
     id: string;
     label?: string;
+    /** Defaults to ['text']; e.g. ['text', 'image'] for models supporting both. */
     capabilities?: string[];
   }
 
@@ -127,7 +128,8 @@ declare namespace Firekylin {
     models: AIModelDefinition[];
     configured?(): boolean | Promise<boolean>;
     admin?: {formId: string; testActionId: string};
-    generate(request: {provider: string; model: string; messages: Array<{role: string; content: string}>;
+    generate(request: {provider: string; model: string; capability?: string;
+      messages: Array<{role: string; content: string}>;
       [key: string]: unknown}, context: {signal?: AbortSignal; [key: string]: unknown}): unknown | Promise<unknown>;
   }
 
