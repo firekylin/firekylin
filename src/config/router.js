@@ -1,4 +1,5 @@
 module.exports = [
+  [/^admin\/api\/ai-connections\/?$/i, 'admin/api/ai_connections'],
   [/^api\/comment\/(?:api\/)?([^/]+)(?:\/([^/]+))?\/?$/i, 'api/comment/index?resource=:1&id=:2'],
   // [/^admin/, 'admin'],
 

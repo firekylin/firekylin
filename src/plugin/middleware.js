@@ -52,37 +52,9 @@ async function handleAdminExtension(manager, ctx) {
   return true;
 }
 
-async function handleAIConnections(manager, ctx) {
-  if (ctx.path !== '/admin/api/ai-connections') return false;
-  if (!manager.ai) return ctx.throw(404, 'AI service unavailable');
-  if (!ctx.state.jwtSecret) {
-    const options = await think.model('options').getOptions(true);
-    ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
-  }
-  const user = adminAuth.currentUser(ctx) || {};
-  if ((user.type | 0) !== 1) return ctx.throw(403, 'Administrator permission required');
-  if (ctx.method === 'GET') {
-    ctx.body = adminResponse({providers: await manager.ai.models()});
-    return true;
-  }
-  if (ctx.method !== 'POST') return false;
-  const token = ctx.get('X-CSRF-Token');
-  if (!token || token !== adminAuth.csrfToken(ctx)) return ctx.throw(403, 'CSRF validation failed');
-  const body = requestBody(ctx);
-  if (!Object.prototype.hasOwnProperty.call(body, 'provider')) return ctx.throw(400, 'Provider required');
-  if (body.provider === null || body.provider === '') {
-    await manager.ai.clear();
-  } else {
-    await manager.ai.select(body.provider, body.model);
-  }
-  ctx.body = adminResponse({message: 'AI 连接已保存'});
-  return true;
-}
-
 module.exports = function pluginRoutes() {
   return async function pluginRouteMiddleware(ctx, next) {
     const manager = global.firekylin && global.firekylin.plugins;
-    if (manager && await handleAIConnections(manager, ctx)) return;
     if (manager && await handleAdminExtension(manager, ctx)) return;
     const route = manager && manager.routes.match(ctx.method, ctx.path);
     if (!route) return next();
