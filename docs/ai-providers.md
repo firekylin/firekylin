@@ -11,6 +11,8 @@ module.exports = {
     ctx.ai.registerProvider({
       id: 'example',
       label: 'Example AI',
+      description: 'Example text generation provider',
+      logo: 'https://example.com/logo.svg',
       models: [{id: 'example-small', label: 'Example Small', capabilities: ['text']}],
       configured: () => ctx.ai.credentials.has('apiKey'),
       admin: {formId: 'settings', testActionId: 'test-connection'},
@@ -21,6 +23,9 @@ module.exports = {
   }
 };
 ```
+
+`description` and `logo` are optional provider metadata returned by `ctx.ai.providers()` and the AI connections
+API for future admin presentation. Logos must use HTTPS or a site-relative URL; neither field is rendered as HTML.
 
 `ctx.ai.generate()` uses the selected provider and model unless the request explicitly names them. The
 administrator's **系统设置 → AI 连接** page lists installed providers and their optional `configured` status. Users select

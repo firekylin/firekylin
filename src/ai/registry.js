@@ -7,6 +7,21 @@ function requiredString(value, label) {
   return value.trim();
 }
 
+function optionalString(value, label) {
+  return value === undefined ? undefined : requiredString(value, label);
+}
+
+function logoUrl(value) {
+  const logo = optionalString(value, 'AI provider logo');
+  if (logo === undefined) return undefined;
+  if (logo.startsWith('/') && !logo.startsWith('//')) return logo;
+  try {
+    const url = new URL(logo);
+    if (url.protocol === 'https:' && !url.username && !url.password) return logo;
+  } catch { /* Invalid URL below. */ }
+  throw new TypeError('AI provider logo must be an HTTPS or site-relative URL');
+}
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -47,6 +62,8 @@ class AIProviderRegistry {
       id,
       owner,
       label: requiredString(definition.label || id, `AI provider ${id} label`),
+      description: optionalString(definition.description, `AI provider ${id} description`),
+      logo: logoUrl(definition.logo),
       models: normalizeModels(definition.models, id),
       configured: typeof definition.configured === 'function' ? definition.configured : undefined,
       admin: admin ? Object.freeze({pluginId: owner, formId: admin.formId,
@@ -58,7 +75,8 @@ class AIProviderRegistry {
   }
 
   list() {
-    return [...this.providers.values()].map(({id, label, models, admin}) => ({id, label, models: clone(models),
+    return [...this.providers.values()].map(({id, label, description, logo, models, admin}) => ({id, label,
+      ...(description ? {description} : {}), ...(logo ? {logo} : {}), models: clone(models),
       ...(admin ? {admin: {...admin}} : {})}));
   }
 

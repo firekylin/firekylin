@@ -9,9 +9,11 @@ const {AIStore, credentialKey, encrypt, decrypt} = require('../../src/ai/store')
 test('AI provider registry exposes metadata and removes plugin providers', () => {
   const registry = new AIProviderRegistry();
   registry.register({
-    id: 'example', label: 'Example', models: [{id: 'small'}], generate() {}
+    id: 'example', label: 'Example', description: 'Example provider',
+    logo: 'https://example.com/logo.svg', models: [{id: 'small'}], generate() {}
   }, 'plugin');
-  assert.deepEqual(registry.list(), [{id: 'example', label: 'Example', models: [
+  assert.deepEqual(registry.list(), [{id: 'example', label: 'Example',
+    description: 'Example provider', logo: 'https://example.com/logo.svg', models: [
     {id: 'small', label: 'small', capabilities: ['text']}
   ]}]);
   registry.removeOwner('plugin');
@@ -19,6 +21,10 @@ test('AI provider registry exposes metadata and removes plugin providers', () =>
   assert.throws(() => registry.register({id: 'bad', models: [{id: 'small'}],
     admin: {formId: '../other', testActionId: 'test'}, generate() {}}, 'plugin'),
   /Invalid AI provider admin configuration/);
+  assert.throws(() => registry.register({id: 'unsafe', logo: 'javascript:alert(1)',
+    models: [{id: 'small'}], generate() {}}, 'plugin'), /logo must be an HTTPS/);
+  assert.throws(() => registry.register({id: 'insecure', logo: 'http://example.com/logo.svg',
+    models: [{id: 'small'}], generate() {}}, 'plugin'), /logo must be an HTTPS/);
 });
 
 test('AI client validates selection and delegates generation', async() => {

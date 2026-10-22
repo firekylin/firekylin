@@ -120,6 +120,8 @@ declare namespace Firekylin {
   interface AIProviderDefinition {
     id: string;
     label?: string;
+    description?: string;
+    logo?: string;
     models: AIModelDefinition[];
     configured?(): boolean | Promise<boolean>;
     admin?: {formId: string; testActionId: string};
@@ -129,7 +131,8 @@ declare namespace Firekylin {
 
   interface AIPluginAPI {
     registerProvider(definition: AIProviderDefinition): () => boolean;
-    providers(): Promise<Array<{id: string; label: string; configured?: boolean;
+    providers(): Promise<Array<{id: string; label: string; description?: string; logo?: string;
+      configured?: boolean;
       admin?: {pluginId: string; formId: string; testActionId: string};
       models: Array<AIModelDefinition & {selected: boolean}>}>>;
     select(provider: string, model: string): Promise<{provider: string; model: string}>;
