@@ -7,7 +7,7 @@ import {PageForm, PAGE_SECTION_CONTENT_INSET} from '../../components/protocol/pa
 import {http} from '../../utils/http';
 
 const MORE_PROVIDERS = '__more_providers__';
-const NPM_SEARCH = 'https://www.npmjs.com/search?q=firekylin-plugin-ai-provider';
+const NPM_SEARCH = 'https://www.npmjs.com/search?q=firekylin-plugin-ai-provider-';
 
 interface Provider {
     id: string;
