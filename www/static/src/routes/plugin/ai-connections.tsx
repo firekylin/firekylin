@@ -31,7 +31,7 @@ export default function AIConnections() {
     const descriptor = provider?.admin && (window.SysConfig.pluginAdmin || [])
         .find(item => item.id === provider.admin?.pluginId);
     const form = descriptor?.forms.find(item => item.id === provider?.admin?.formId);
-    const hasSavedApiKey = provider?.configured && form?.fields.some(item =>
+    const hasSavedApiKey = provider?.configured === true && form?.fields.some(item =>
         item.name === 'apiKey' && item.type === 'password');
     const displayedFormValues = formValues && hasSavedApiKey
         ? {...formValues, apiKey: SAVED_SECRET_MASK} : formValues;

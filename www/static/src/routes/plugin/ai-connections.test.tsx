@@ -1,7 +1,7 @@
-import {fireEvent, render, waitFor, within} from '@testing-library/react';
+import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
 import {of} from 'rxjs';
 import {MemoryRouter} from 'react-router-dom';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import AIConnections from './ai-connections';
 import {http} from '../../utils/http';
@@ -12,6 +12,7 @@ vi.mock('../../utils/http', () => ({
 }));
 
 describe('AI connections', () => {
+    afterEach(() => cleanup());
     it('appears under system settings', () => {
         const options = InitiateRoutes(InitiateThemePages).find(item => item.url === '/options');
         expect(options?.children?.some(item => item.url === '/options/ai')).toBe(true);
@@ -70,5 +71,21 @@ describe('AI connections', () => {
             {baseUrl: 'https://example.com'},
             {headers: {'X-CSRF-Token': 'test-csrf'}}
         ));
+    });
+
+    it('keeps the API Key input empty when no key is configured', async() => {
+        window.SysConfig.pluginAdmin = [{id: 'ai-provider-deepseek', forms: [{id: 'settings',
+            title: 'Provider 设置', fields: [
+                {name: 'apiKey', type: 'password', label: 'API Key'},
+                {name: 'baseUrl', type: 'url', label: 'API Base URL'}
+            ]}]}] as any;
+        vi.mocked(http.get).mockImplementation((url: string) => of(url.includes('/forms/')
+            ? {errno: 0, data: {baseUrl: 'https://api.deepseek.com'}}
+            : {errno: 0, data: {providers: [{id: 'deepseek', label: 'DeepSeek', configured: false,
+                admin: {pluginId: 'ai-provider-deepseek', formId: 'settings', testActionId: 'test-connection'},
+                models: [{id: 'deepseek-flash', label: 'DeepSeek Flash', selected: true}]}]}}) as any);
+        const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
+        const key = await within(view.container).findByLabelText('API Key') as HTMLInputElement;
+        expect(key.value).toBe('');
     });
 });
