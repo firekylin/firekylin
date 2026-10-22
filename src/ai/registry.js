@@ -14,7 +14,7 @@ function optionalString(value, label) {
 function logoUrl(value) {
   const logo = optionalString(value, 'AI provider logo');
   if (logo === undefined) return undefined;
-  if (logo.startsWith('/') && !logo.startsWith('//')) return logo;
+  if (logo.startsWith('/') && !logo.startsWith('//') && !logo.includes('\\')) return logo;
   try {
     const url = new URL(logo);
     if (url.protocol === 'https:' && !url.username && !url.password) return logo;

@@ -25,6 +25,8 @@ test('AI provider registry exposes metadata and removes plugin providers', () =>
     models: [{id: 'small'}], generate() {}}, 'plugin'), /logo must be an HTTPS/);
   assert.throws(() => registry.register({id: 'insecure', logo: 'http://example.com/logo.svg',
     models: [{id: 'small'}], generate() {}}, 'plugin'), /logo must be an HTTPS/);
+  assert.throws(() => registry.register({id: 'ambiguous', logo: '/\\example.com/logo.svg',
+    models: [{id: 'small'}], generate() {}}, 'plugin'), /logo must be an HTTPS/);
 });
 
 test('AI client validates selection and delegates generation', async() => {
