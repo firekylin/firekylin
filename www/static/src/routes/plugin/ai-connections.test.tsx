@@ -1,6 +1,6 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
 import {of} from 'rxjs';
-import {MemoryRouter} from 'react-router-dom';
+import {MemoryRouter} from '../../utils/router';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import AIConnections from './ai-connections';
