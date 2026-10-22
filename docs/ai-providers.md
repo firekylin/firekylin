@@ -22,7 +22,8 @@ module.exports = {
 
 `ctx.ai.generate()` uses the selected provider and model unless the request explicitly names them. Provider
 plugins may expose their own administrator form and persist secrets with `ctx.ai.credentials`. Credentials are
-encrypted with AES-256-GCM, scoped to the owning plugin, omitted from public options and never returned by
+encrypted with AES-256-GCM, scoped to the owning plugin, persisted in separate option rows so concurrent
+plugins cannot overwrite each other's credentials, omitted from public options and never returned by
 password forms. Set `FIREKYLIN_AI_CREDENTIAL_KEY` to a stable secret in production; otherwise Firekylin uses
 the site's JWT secret for compatibility. Rotating the active encryption key requires providers to save their
 credentials again.

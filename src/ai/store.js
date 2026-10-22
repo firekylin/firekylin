@@ -2,7 +2,7 @@
 
 const crypto = require('node:crypto');
 
-const CREDENTIALS_KEY = 'ai_credentials';
+const CREDENTIAL_PREFIX = 'ai_credential_';
 const PREFERENCES_KEY = 'ai_preferences';
 
 function parse(value) {
@@ -33,10 +33,21 @@ function decrypt(value, secret) {
   return Buffer.concat([decipher.update(Buffer.from(value.data, 'base64')), decipher.final()]).toString('utf8');
 }
 
+function credentialKey(owner, name) {
+  if (typeof owner !== 'string' || !owner || typeof name !== 'string' || !name) {
+    throw new TypeError('Credential owner and name are required');
+  }
+  return CREDENTIAL_PREFIX + crypto.createHash('sha256').update(JSON.stringify([owner, name])).digest('hex');
+}
+
 class AIStore {
-  constructor({getOptions, updateOptions, encryptionKey}) {
+  constructor({getOptions, updateOptions, getCredentialValue, setCredentialValue, deleteCredentialValue,
+    encryptionKey}) {
     this.getOptions = getOptions;
     this.updateOptions = updateOptions;
+    this.getCredentialValue = getCredentialValue;
+    this.setCredentialValue = setCredentialValue;
+    this.deleteCredentialValue = deleteCredentialValue;
     this.encryptionKey = encryptionKey;
   }
 
@@ -47,33 +58,22 @@ class AIStore {
   }
 
   async getCredential(owner, name) {
-    const options = await this.getOptions(true);
-    const credentials = parse(options[CREDENTIALS_KEY]);
-    const value = credentials[owner] && credentials[owner][name];
-    return value ? decrypt(value, await this.secret()) : undefined;
+    const value = await this.getCredentialValue(credentialKey(owner, name));
+    return value ? decrypt(JSON.parse(value), await this.secret()) : undefined;
   }
 
   async hasCredential(owner, name) {
-    const options = await this.getOptions(true);
-    const credentials = parse(options[CREDENTIALS_KEY]);
-    return Boolean(credentials[owner] && credentials[owner][name]);
+    return Boolean(await this.getCredentialValue(credentialKey(owner, name)));
   }
 
   async setCredential(owner, name, value) {
     if (typeof value !== 'string' || !value) throw new TypeError('Credential value must be a non-empty string');
-    const options = await this.getOptions(true);
-    const credentials = parse(options[CREDENTIALS_KEY]);
-    credentials[owner] = credentials[owner] || {};
-    credentials[owner][name] = encrypt(value, await this.secret());
-    await this.updateOptions(CREDENTIALS_KEY, JSON.stringify(credentials));
+    const encrypted = encrypt(value, await this.secret());
+    await this.setCredentialValue(credentialKey(owner, name), JSON.stringify(encrypted));
   }
 
   async deleteCredential(owner, name) {
-    const options = await this.getOptions(true);
-    const credentials = parse(options[CREDENTIALS_KEY]);
-    if (credentials[owner]) delete credentials[owner][name];
-    if (credentials[owner] && !Object.keys(credentials[owner]).length) delete credentials[owner];
-    await this.updateOptions(CREDENTIALS_KEY, JSON.stringify(credentials));
+    await this.deleteCredentialValue(credentialKey(owner, name));
   }
 
   async getPreferences() {
@@ -86,4 +86,4 @@ class AIStore {
   }
 }
 
-module.exports = {AIStore, encrypt, decrypt};
+module.exports = {AIStore, CREDENTIAL_PREFIX, credentialKey, encrypt, decrypt};

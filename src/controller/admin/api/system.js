@@ -6,6 +6,7 @@ const {pipeline} = require('stream/promises');
 const semver = require('semver');
 const pack = require('../../../../package.json');
 const Base = require('./base');
+const {CREDENTIAL_PREFIX} = require('../../../ai/store');
 
 async function fetchWithTimeout(url) {
   const response = await fetch(url, {signal: AbortSignal.timeout(1000)});
@@ -51,6 +52,10 @@ module.exports = class extends Base {
     delete config.jwt_secret;
     delete config.comment_jwt_secret;
     delete config.comment_schema_version;
+    delete config.ai_credentials;
+    for (const key of Object.keys(config)) {
+      if (key.startsWith(CREDENTIAL_PREFIX)) delete config[key];
+    }
 
     return this.success({
       versions: data,

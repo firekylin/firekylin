@@ -1,5 +1,6 @@
 const Widget = require('./base');
 const permalink = require('../service/permalink');
+const {CREDENTIAL_PREFIX} = require('../ai/store');
 
 function parse(value, fallback) {
   try {
@@ -17,6 +18,10 @@ module.exports = class extends Widget {
     delete options.jwt_secret;
     delete options.comment_jwt_secret;
     delete options.comment_schema_version;
+    delete options.ai_credentials;
+    for (const key of Object.keys(options)) {
+      if (key.startsWith(CREDENTIAL_PREFIX)) delete options[key];
+    }
     options.navigation = parse(options.navigation, []);
     options.themeConfig = parse(options.themeConfig, {});
     options.siteUrl = options.site_url || `http://${this.ctx.host}`;

@@ -49,8 +49,10 @@ class AIClient {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(new Error('AI request timed out')), this.timeout);
     try {
+      const signal = context.signal
+        ? AbortSignal.any([context.signal, controller.signal]) : controller.signal;
       return await provider.generate({...request, provider: providerId, model: modelId}, {
-        ...context, signal: context.signal || controller.signal
+        ...context, signal
       });
     } finally {
       clearTimeout(timer);

@@ -81,7 +81,10 @@ const pluginManager = existingPluginManager || new PluginManager({
   packageApi,
   aiStore: new AIStore({
     getOptions: includePrivate => think.model('options').getOptions(includePrivate),
-    updateOptions: (key, value) => think.model('options').updateOptions(key, value)
+    updateOptions: (key, value) => think.model('options').updateOptions(key, value),
+    getCredentialValue: key => think.model('options').getCredentialValue(key),
+    setCredentialValue: (key, value) => think.model('options').setCredentialValue(key, value),
+    deleteCredentialValue: key => think.model('options').deleteCredentialValue(key)
   })
 });
 pluginManager.packageApi = packageApi;

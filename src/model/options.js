@@ -1,3 +1,10 @@
+const {CREDENTIAL_PREFIX} = require('../ai/store');
+
+function isDuplicateKey(error) {
+  return ['ER_DUP_ENTRY', '23505', 'SQLITE_CONSTRAINT', 'SQLITE_CONSTRAINT_PRIMARYKEY'].includes(error.code) ||
+    /duplicate key|unique constraint|UNIQUE constraint failed/i.test(error.message || '');
+}
+
 module.exports = class extends think.Model {
   get pk() {
     return 'key';
@@ -18,6 +25,9 @@ module.exports = class extends think.Model {
       delete ret.comment_jwt_secret;
       delete ret.comment_schema_version;
       delete ret.ai_credentials;
+      for (const key of Object.keys(ret)) {
+        if (key.startsWith(CREDENTIAL_PREFIX)) delete ret[key];
+      }
     }
 
     // comment type
@@ -105,5 +115,27 @@ module.exports = class extends think.Model {
       // doesn't wait for return
       await postModel.updateAllPostSummaries();
     }
+  }
+
+  async getCredentialValue(key) {
+    const row = await this.where({key}).find();
+    return row && row.key ? row.value : undefined;
+  }
+
+  async setCredentialValue(key, value) {
+    // Each credential has its own primary-key row, so writes for different plugins cannot overwrite each other.
+    const updated = await this.where({key}).update({value});
+    if (Number(updated) > 0) return;
+    try {
+      await this.add({key, value});
+    } catch (error) {
+      if (!isDuplicateKey(error)) throw error;
+      // Another worker inserted this key after our update attempt.
+      await this.where({key}).update({value});
+    }
+  }
+
+  async deleteCredentialValue(key) {
+    await this.where({key}).delete();
   }
 };
