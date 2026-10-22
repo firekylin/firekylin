@@ -9,10 +9,10 @@ const load = Module._load;
 let Controller;
 try {
   Module._load = function(name, parent, isMain) {
-    if (name === './base' && parent.filename.endsWith('/admin/api/ai_connections.js')) return class {};
+    if (name === './base' && parent.filename.endsWith('/admin/api/ai-connections.js')) return class {};
     return load.call(this, name, parent, isMain);
   };
-  Controller = require('../../src/controller/admin/api/ai_connections');
+  Controller = require('../../src/controller/admin/api/ai-connections');
 } finally { Module._load = load }
 
 function controller(userType = 1) {
@@ -32,10 +32,23 @@ function controller(userType = 1) {
   return instance;
 }
 
-test('AI connections route uses the ThinkJS controller', () => {
+test('AI connections use the ThinkJS default controller route', () => {
   const routes = require('../../src/config/router');
-  assert.equal(routes[0][1], 'admin/api/ai_connections');
-  assert.equal(routes[0][0].test('admin/api/ai-connections'), true);
+  const hasExplicitRoute = routes.some(([pattern]) =>
+    pattern instanceof RegExp && pattern.test('admin/api/ai-connections'));
+  assert.equal(hasExplicitRoute, false);
+  const Router = Module.createRequire(require.resolve('thinkjs'))('think-router/router');
+  const ctx = {
+    path: '/admin/api/ai-connections', method: 'GET',
+    app: {modules: [], controllers: {'admin/api/ai-connections': Controller}, routers: []},
+    param() {}
+  };
+  const router = new Router(ctx, () => {}, {
+    prefix: ['/'], suffix: ['.html'], enableDefaultRouter: true,
+    optimizeHomepageRouter: true, defaultController: 'index', defaultAction: 'index'
+  });
+  router.run();
+  assert.equal(ctx.controller, 'admin/api/ai-connections');
 });
 
 test('AI connections controller lists providers and selects or clears the default', async t => {
