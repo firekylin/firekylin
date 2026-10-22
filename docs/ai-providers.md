@@ -34,7 +34,8 @@ returns `AI_UNSUPPORTED_CAPABILITY` (HTTP 400) when the model does not support i
 does not by itself implement image generation: a provider must also handle that request and response format.
 The model picker can use the same metadata to filter incompatible models in future feature-specific UI.
 administrator's **系统设置 → AI 连接** page lists installed providers and their optional `configured` status. Users select
-a provider there, fill its plugin-supplied form and test the connection without leaving the page. The provider's
+a provider there, fill its plugin-supplied form and test the connection without leaving the page. The AI connection
+endpoint is a ThinkJS admin controller; provider form and test-action endpoints remain plugin-scoped. The provider's
 `admin` metadata names a plugin-scoped form and test action registered through `ctx.admin`; providers do not
 need their own panel or page. **AI 连接** is also the only place users select the
 global default provider and model. Saving connection settings should not call `ctx.ai.select()`.
