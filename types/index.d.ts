@@ -87,7 +87,8 @@ declare namespace Firekylin {
 
   interface AdminFormDefinition {
     id: string;
-    page: string;
+    /** Omit for a form embedded in another admin page, such as AI Connections. */
+    page?: string;
     title: string;
     submitLabel?: string;
     fields: AdminFormField[];
@@ -97,7 +98,8 @@ declare namespace Firekylin {
 
   interface AdminActionDefinition {
     id: string;
-    page: string;
+    /** Omit for an action embedded in another admin page. */
+    page?: string;
     label: string;
     type?: 'default' | 'primary' | 'danger';
     confirm?: string;

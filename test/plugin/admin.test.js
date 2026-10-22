@@ -31,9 +31,6 @@ function registerExample(admin) {
     id: 'rebuild', page: 'settings', label: '重建', type: 'danger', confirm: '确定？',
     handler: async input => ({received: input})
   }, 'example');
-  admin.registerEditorAction({
-    id: 'rewrite', action: 'rebuild', label: '改写', order: 20
-  }, 'example');
 }
 
 test('admin registry exposes a serializable manifest and executes handlers', async() => {
@@ -45,9 +42,6 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
   assert.equal(manifest[0].forms[0].fields[2].options[0].value, 'blue');
   assert.deepEqual(manifest[0].forms[0].fields[3].visibleWhen, {field: 'color', values: ['red']});
   assert.equal('handler' in manifest[0].actions[0], false);
-  assert.deepEqual(manifest[0].editorActions, [
-    {id: 'rewrite', action: 'rebuild', label: '改写', order: 20}
-  ]);
   assert.deepEqual(await admin.loadPage('example', 'settings', {}), {
     page: {id: 'settings', title: '阅读设置', panel: 'tools', description: undefined, order: 100},
     content: {sections: [
@@ -78,10 +72,26 @@ test('admin registry validates relationships and removes every plugin resource',
     fields: [{name: 'value', label: 'Value', visibleWhen: {field: 'missing', values: ['yes']}}], submit() {}
   }, 'example'), /visibleWhen references/);
   assert.throws(() => admin.registerPanel({id: 'tools', title: 'Again'}, 'example'), /already registered/);
-  assert.throws(() => admin.registerEditorAction({
-    id: 'missing', action: 'missing', label: 'Missing'
-  }, 'example'), /Unknown editor action/);
   admin.removePlugin('example');
+  assert.deepEqual(admin.manifest(), []);
+});
+
+test('admin registry exposes forms and actions without a plugin page', async() => {
+  const admin = new AdminRegistry();
+  admin.registerForm({
+    id: 'settings', title: 'Settings', fields: [{name: 'key', label: 'Key', type: 'password'}],
+    load: () => ({key: 'hidden'}), submit: values => values
+  }, 'provider');
+  admin.registerAction({id: 'test', label: 'Test', handler: () => ({ok: true})}, 'provider');
+  const [plugin] = admin.manifest();
+  assert.deepEqual(plugin.panels, []);
+  assert.deepEqual(plugin.pages, []);
+  assert.equal(plugin.forms[0].id, 'settings');
+  assert.equal(plugin.actions[0].id, 'test');
+  assert.deepEqual(await admin.loadForm('provider', 'settings', {}), {});
+  assert.deepEqual(await admin.submitForm('provider', 'settings', {key: 'new'}, {}), {key: 'new'});
+  assert.deepEqual(await admin.runAction('provider', 'test', {}, {}), {ok: true});
+  admin.removePlugin('provider');
   assert.deepEqual(admin.manifest(), []);
 });
 
