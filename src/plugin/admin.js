@@ -160,7 +160,6 @@ class AdminRegistry {
     this.pages = new Map();
     this.forms = new Map();
     this.actions = new Map();
-    this.editorActions = new Map();
   }
 
   key(pluginId, id) {
@@ -249,27 +248,11 @@ class AdminRegistry {
     return () => this.actions.delete(key);
   }
 
-  registerEditorAction(definition, pluginId = 'core') {
-    if (!definition || typeof definition !== 'object') throw new TypeError('Editor action must be an object');
-    const id = identifier(definition.id, 'Editor action id');
-    const action = identifier(definition.action, `Editor action ${id} action`);
-    if (!this.actions.has(this.key(pluginId, action))) throw new Error(`Unknown editor action handler: ${action}`);
-    const key = this.key(pluginId, id);
-    if (this.editorActions.has(key)) throw new Error(`Editor action already registered: ${id}`);
-    const editorAction = {
-      pluginId, id, action,
-      label: requiredString(definition.label, `Editor action ${id} label`),
-      order: Number.isFinite(definition.order) ? definition.order : 100
-    };
-    this.editorActions.set(key, editorAction);
-    return () => this.editorActions.delete(key);
-  }
-
   manifest() {
     const plugins = new Map();
     const ensure = pluginId => {
       if (!plugins.has(pluginId)) {
-        plugins.set(pluginId, {id: pluginId, panels: [], pages: [], forms: [], actions: [], editorActions: []});
+        plugins.set(pluginId, {id: pluginId, panels: [], pages: [], forms: [], actions: []});
       }
       return plugins.get(pluginId);
     };
@@ -283,13 +266,9 @@ class AdminRegistry {
     for (const action of this.actions.values()) ensure(action.pluginId).actions.push({
       id: action.id, page: action.page, label: action.label, type: action.type, confirm: action.confirm
     });
-    for (const action of this.editorActions.values()) ensure(action.pluginId).editorActions.push({
-      id: action.id, action: action.action, label: action.label, order: action.order
-    });
     for (const plugin of plugins.values()) {
       plugin.panels.sort((a, b) => a.order - b.order);
       plugin.pages.sort((a, b) => a.order - b.order);
-      plugin.editorActions.sort((a, b) => a.order - b.order);
     }
     return [...plugins.values()].filter(plugin => plugin.pages.length || plugin.forms.length || plugin.actions.length);
   }
@@ -345,7 +324,7 @@ class AdminRegistry {
   }
 
   removePlugin(pluginId) {
-    for (const registry of [this.panels, this.pages, this.forms, this.actions, this.editorActions]) {
+    for (const registry of [this.panels, this.pages, this.forms, this.actions]) {
       for (const [key, value] of registry) if (value.pluginId === pluginId) registry.delete(key);
     }
   }
