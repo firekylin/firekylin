@@ -32,6 +32,18 @@ import ArticleControlThemeFields from './control-theme-fields/control-theme-fiel
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 function Article(props: ArticleProps) {
+    const sidebarRef = React.useRef<HTMLDivElement>(null);
+    React.useLayoutEffect(() => {
+        const measureSidebar = () => {
+            const sidebar = sidebarRef.current;
+            if (sidebar) {
+                sidebar.style.setProperty('--article-sidebar-top', `${Math.max(0, sidebar.getBoundingClientRect().top)}px`);
+            }
+        };
+        measureSidebar();
+        window.addEventListener('resize', measureSidebar);
+        return () => window.removeEventListener('resize', measureSidebar);
+    }, []);
     const [state, setState] = React.useState(() => ({
         hasError: {
             pathname: false,
@@ -398,7 +410,7 @@ function Article(props: ArticleProps) {
 
                         <ArticleEditor type={props.type} id={props.match.params.id} />
                     </Col>
-                    <Col span={5} className="article-control-panel">
+                    <Col span={5} className="article-control-panel" ref={sidebarRef}>
                         <ArticleControlHeader
                             save={() => legacy.handleSave()}
                             saveDraft={() => legacy.handleSaveDraft()}

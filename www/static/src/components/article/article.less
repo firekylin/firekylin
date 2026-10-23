@@ -1,11 +1,27 @@
 .post-article {
     .article-control-panel {
         padding-left: 30px;
+        padding-right: 4px;
+        max-height: calc(100dvh - var(--article-sidebar-top, 120px) - 16px);
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+        scrollbar-gutter: stable;
+        padding-bottom: 15px;
+
         .article-control-header {
-            margin-top: 22px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            margin-top: 0;
+            padding-top: 22px;
+            padding-bottom: 12px;
+            background: #fff;
             button {
                 padding: 0 20px;
             }
+        }
+        .article-control-header + .release-date {
+            margin-top: 3px;
         }
         .control-item {
             margin-top: 15px;
@@ -84,10 +100,6 @@
             background: #ddd;
         }
 
-        &::after {
-            margin-right: 18px;
-        }
-
         &:hover {
             color: #333;
         }
@@ -98,9 +110,13 @@
         }
     }
 
+    .advanced-controls-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
     .advanced-controls-arrow {
-        position: absolute;
-        right: 2px;
         width: 0;
         height: 0;
         border-right: 5px solid transparent;

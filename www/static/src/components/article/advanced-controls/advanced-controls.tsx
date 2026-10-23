@@ -9,8 +9,9 @@ export default function AdvancedControls({children}: {children: ReactNode}) {
             <button type="button" className="advanced-controls-toggle"
                 aria-expanded={expanded} aria-controls={contentId}
                 onClick={() => setExpanded(value => !value)}>
-                <span>高级功能</span>
-                <i className="advanced-controls-arrow" aria-hidden="true" />
+                <span className="advanced-controls-label">高级功能
+                    <i className="advanced-controls-arrow" aria-hidden="true" />
+                </span>
             </button>
             <div id={contentId} hidden={!expanded}>
                 {children}
