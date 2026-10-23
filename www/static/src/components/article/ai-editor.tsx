@@ -10,7 +10,7 @@ export function AIButton({operation, minimum, label, icon}: any) {
     if (!ai?.available) return null;
     const disabled = [...(ai.content || '')].length <= minimum || ai.busy;
     return <Tooltip title={disabled ? `正文需超过 ${minimum} 个字符，且没有正在进行的 AI 请求` : label}>
-        <span><Button type="text" aria-label={label} aria-busy={ai.busy === operation} disabled={disabled}
+        <span><Button type="text" className="ai-editor-action" aria-label={label} aria-busy={ai.busy === operation} disabled={disabled}
             icon={ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
             onClick={() => ai.run(operation)} /></span>
     </Tooltip>;

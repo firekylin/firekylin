@@ -1,3 +1,13 @@
 .ai-review { max-height: 60vh; overflow: auto; pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; padding: 8px; } section { margin: 12px 0; border: 1px solid #ddd; padding: 8px; } }
 .ai-review-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; .removed { background: #fff1f0; } .added { background: #f6ffed; padding: 8px; } }
 .cover-picker { position: relative; .cover-clear { position: absolute; right: 6px; top: 6px; opacity: 0; } &:hover .cover-clear, &:focus-within .cover-clear { opacity: 1; } .cover-open { width: 100%; min-height: 140px; border: 1px dashed #aaa; border-radius: 6px; background: transparent; cursor: pointer; img { max-width: 100%; max-height: 220px; object-fit: contain; } } }
+
+.ai-editor-action:not(:disabled) .ai-sparkle-icon,
+.ai-editor-action[aria-busy='true'] .ai-sparkle-icon {
+    color: rgba(0, 0, 0, .4);
+}
+
+.ai-editor-action:not(:disabled):hover .ai-sparkle-icon,
+.ai-editor-action:not(:disabled):focus-visible .ai-sparkle-icon {
+    color: rgba(0, 0, 0, .5);
+}
