@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
 import { ActionGroup, hasLayoutReferences, PAGE_SECTION_CONTENT_INSET, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
 import { http } from '../../utils/http';
+import {Redirect} from '../../utils/router';
 import BreadCrumb from '../../components/breadcrumb';
 
 function extension(pluginId: string) {
@@ -39,6 +40,9 @@ function PluginAdmin(props: any) {
         return () => subscriptions.forEach(subscription => subscription.unsubscribe());
     }, [pluginId, pageId, search, reloadKey]);
 
+    if (pluginId === 'ai-content' && pageId === 'settings' && props.location.pathname.includes('/plugins/')) {
+        return <Redirect to="/options/smart-content" />;
+    }
     if (!descriptor || !page) return <Alert type="error" message="插件后台页面不存在或已停用" showIcon />;
 
     const submit = (formId: string, values: any) => http.post<any>(
@@ -85,6 +89,10 @@ function PluginAdmin(props: any) {
         {!explicitLayout ? forms.map(item => <PageForm key={item.id} item={item}
             values={formValues[item.id]} submit={submit} />) : null}
     </div>;
+}
+
+export function SmartContentSettings(props: any) {
+    return <PluginAdmin {...props} match={{...props.match, params: {pluginId: 'ai-content', pageId: 'settings'}}} />;
 }
 
 export default PluginAdmin;
