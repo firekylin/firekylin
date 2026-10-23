@@ -125,7 +125,7 @@ can leave unfinished records. Audit write failures produce a generic diagnostic 
 AI result or original exception. When a provider ignores cancellation, core stops waiting; it cannot
 guarantee the remote provider stops processing or billing.
 
-Text recording is off by default. Enabling it affects only subsequent calls. Each direction keeps at
+Request and response text are always recorded for subsequent calls; there is no recording switch. Each direction keeps at
 most 10,000 Unicode characters of message/output text, with truncation flags. Images, binary payloads,
 request headers and complete network responses are not stored. Common API key/JWT/authorization/cookie
 patterns are redacted before persistence. This does not guarantee detection of sensitive natural language.
@@ -134,8 +134,19 @@ Errors store a safe category and generic description rather than upstream error 
 The admin-only `/admin/api/ai-logs` endpoint supports paginated GET lists (without text) or GET `id`
 details. Filters: `from` inclusive, `to` exclusive (ISO timestamps or UTC dates), `actor_id`, `scenario`,
 `provider`, `model`, `status`. Summaries use the same filters and sum known counts independently.
-CSRF-protected POST operations are `{action: 'settings', recordContent: boolean}` and
+CSRF-protected POST cleanup operations are
 `{action: 'cleanup', scope: 'filtered', filters: {provider: 'example'}}` (all matching pages; an explicit
 empty filter object selects every log), `{action: 'cleanup', ids: [positive IDs]}` (at most 100) or `{action: 'cleanup', before: ISO timestamp}`.
 Core creates the prefixed audit table/indexes during installed-site startup for SQLite, MySQL, TiDB,
-and PostgreSQL. New installations follow the existing startup migration lifecycle.
+and PostgreSQL. Web installation also creates the audit schema before completion, without requiring a restart.
+
+The log list includes non-commenter backend users as caller filter options and current provider metadata
+for names, logos and model labels. Date ranges use local calendar days in the UI (inclusive end day).
+The list shows total tokens and throughput, calculated as total tokens / elapsed seconds, to two decimals.
+Zero/missing duration or missing usage yields unknown throughput rather than infinity.
+
+Details group base metadata, model metadata, token usage, request text, response text and request context.
+The JSON context captures the initiating request URL/method/source/query/body parameters and generation
+arguments. No complete headers, credential fields, image parts or binary values are retained. Individual
+strings are capped at 10,000 characters, with a 100,000-character string budget and bounded structure;
+truncation is explicitly marked while preserving valid JSON. Older logs without context remain readable.

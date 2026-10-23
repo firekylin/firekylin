@@ -80,7 +80,7 @@ const pluginManager = existingPluginManager || new PluginManager({
   version: pack.version,
   logger: console,
   packageApi,
-  aiAudit: new Audit({model: () => think.model('ai_audit_log'), options: () => think.model('options')}),
+  aiAudit: new Audit({model: () => think.model('ai_audit_log')}),
   aiStore: new AIStore({
     getOptions: includePrivate => think.model('options').getOptions(includePrivate),
     updateOptions: (key, value) => think.model('options').updateOptions(key, value),

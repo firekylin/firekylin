@@ -114,7 +114,8 @@ test('abnormal process exit preserves durable unfinished metadata', async t => {
     assert.equal(row.status, 'unfinished');
     assert.equal(row.provider, 'example');
     assert.equal(row.model, 'small');
-    assert.equal(row.request_text, null);
+    assert.equal(row.request_text, 'do not persist');
+    assert.ok(JSON.parse(row.request_context).generation);
     assert.equal(row.actor_name, '系统任务');
   } finally {await socket.close()}
 });

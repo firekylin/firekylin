@@ -1,8 +1,9 @@
 'use strict';
 const {randomUUID} = require('node:crypto');
 const context = require('./ai-audit-context');
+const {redact, textContent} = require('./ai-audit-privacy');
+const {sanitizeContext, safeUrl} = require('./ai-audit-request');
 
-const SETTINGS_KEY = 'ai_audit_settings';
 const TOKEN_FIELDS = ['input_tokens', 'output_tokens', 'total_tokens',
   'cache_read_tokens', 'cache_write_tokens', 'reasoning_tokens'];
 function number(value) { return Number.isSafeInteger(value) && value >= 0 ? value : null }
@@ -26,21 +27,6 @@ function usage(result = {}) {
   }
   return normalized;
 }
-function redact(text) {
-  return text.replace(/^(\s*(?:authorization|cookie|set-cookie)\s*:)[^\r\n]*/gmi, '$1 [REDACTED]')
-    .replace(/data:[^\s;,]+;base64,[A-Za-z0-9+/=]+/gi, '[BINARY OMITTED]')
-    .replace(/eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[REDACTED]')
-    .replace(/\b(?:sk|gsk|AIza|ghp|github_pat|xox[baprs])[-_A-Za-z0-9]{12,}/g, '[REDACTED]')
-    .replace(/\bBearer\s+[^\s"'<>]+/gi, 'Bearer [REDACTED]')
-    .replace(/((?:api[-_ ]?key|authorization|cookie|password|secret|access[-_ ]?token)\s*["']?\s*[:=]\s*)[^\r\n,;]+/gi, '$1[REDACTED]')
-    .replace(/(https?:\/\/)[^\s/@]+:[^\s/@]+@/gi, '$1[REDACTED]@');
-}
-function textContent(value) {
-  if (typeof value !== 'string' || !value) return {text: null, truncated: 0};
-  const safe = redact(value);
-  const characters = Array.from(safe);
-  return {text: characters.slice(0, 10000).join(''), truncated: characters.length > 10000 ? 1 : 0};
-}
 function requestText(request) {
   return (Array.isArray(request?.messages) ? request.messages : []).map(message => {
     if (typeof message.content === 'string') return message.content;
@@ -55,13 +41,7 @@ function safeLabel(value, limit = 128) {
   return typeof value === 'string' ? redact(value).slice(0, limit) : null;
 }
 class Audit {
-  constructor({model, options, logger = console}) { this.model = model; this.options = options; this.logger = logger }
-  async settings() {
-    const values = await this.options().getOptions(true);
-    try {
-      return {recordContent: JSON.parse(values[SETTINGS_KEY] || '{}').recordContent === true};
-    } catch { return {recordContent: false} }
-  }
+  constructor({model, logger = console}) { this.model = model; this.logger = logger }
   async safe(stage, callback) {
     try { return await callback() } catch {
       // Never print database errors: they can contain SQL, credentials or recorded text.
@@ -71,24 +51,31 @@ class Audit {
   }
   async start(request, call) {
     return this.safe('start', async() => {
-      const settings = await this.settings();
-      const input = settings.recordContent ? textContent(requestText(request)) : {text: null, truncated: 0};
-      const identity = context.current();
+      const input = textContent(requestText(request));
+      const {request: httpRequest, ...identity} = context.current();
+      const metadata = httpRequest || {};
+      const requestContext = sanitizeContext({...metadata, url: safeUrl(metadata.url), method: metadata.method || null,
+        source: identity.source,
+        generation: request});
       const row = {...identity, actor_name: safeLabel(identity.actor_name, 200), request_id: randomUUID(),
         plugin_id: safeLabel(call.pluginId), scenario: safeLabel(call.scenario || identity.scenario) || 'unspecified',
         started_at: Date.now(), status: 'unfinished', provider: null, model: null, capability: null,
-        content_recorded: settings.recordContent ? 1 : 0, request_text: input.text, request_truncated: input.truncated};
+        content_recorded: 1, request_context: JSON.stringify(requestContext),
+        request_text: input.text, request_truncated: input.truncated};
       const id = await this.model().add(row);
-      return {id, started: row.started_at, recorded: settings.recordContent};
+      return {id, started: row.started_at, recorded: true, context: requestContext};
     });
   }
   async resolve(entry, request) {
     if (!entry) return;
-    return this.safe('resolve', () => this.model().where({id: entry.id}).update({
-      provider: safeLabel(request.provider), model: safeLabel(request.model, 256),
-      capability: safeLabel(request.capability || 'text', 64)
-    }));
+    return this.safe('resolve', async() => {
+      const metadata = {provider: safeLabel(request.provider), model: safeLabel(request.model, 256),
+        capability: safeLabel(request.capability || 'text', 64)};
+      const requestContext = {...entry.context, generation: {...entry.context?.generation, ...metadata}};
+      await this.model().where({id: entry.id}).update({...metadata, request_context: JSON.stringify(requestContext)});
+    });
   }
+
   async finish(entry, {request, result, error, timeout, cancelled, failed = Boolean(error)}) {
     if (!entry) return;
     return this.safe('finish', async() => {
@@ -110,4 +97,4 @@ class Audit {
     });
   }
 }
-module.exports = {Audit, SETTINGS_KEY, TOKEN_FIELDS, usage, redact, textContent, requestText};
+module.exports = {Audit, TOKEN_FIELDS, usage, redact, textContent, requestText};

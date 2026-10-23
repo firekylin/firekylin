@@ -37,19 +37,16 @@ test('all read and write audit endpoints deny non-administrators', async() => {
     await assert.rejects(instance.postAction(), {status: 403});
   }
 });
-test('write endpoints require CSRF; settings validate booleans; cleanup returns deletion count', async() => {
-  const {instance, calls, settings} = setup();
-  instance.post = () => ({action: 'settings', recordContent: true, user: {id: 99}});
+test('cleanup requires CSRF and the retired settings operation cannot change recording', async() => {
+  const {instance, calls} = setup();
+  instance.post = () => ({action: 'cleanup', ids: [1, 2]});
   await assert.rejects(instance.postAction(), {status: 403});
   instance.ctx.headers['X-CSRF-Token'] = auth.csrfToken(instance.ctx);
   await assert.rejects(instance.postAction(), /PREVENT_NEXT_PROCESS/);
-  assert.equal(JSON.parse(settings.ai_audit_settings).recordContent, true);
-  instance.post = () => ({action: 'settings', recordContent: 'true'});
-  await assert.rejects(instance.postAction(), {status: 400});
-  instance.post = () => ({action: 'cleanup', ids: [1, 2]});
-  await assert.rejects(instance.postAction(), /PREVENT_NEXT_PROCESS/);
   assert.equal(instance.result.deleted, 2);
   assert.deepEqual(calls, [{id: ['IN', [1, 2]]}]);
+  instance.post = () => ({action: 'settings', recordContent: false});
+  await assert.rejects(instance.postAction(), {status: 400});
   instance.post = () => ({action: 'cleanup'});
   await assert.rejects(instance.postAction(), {status: 400});
 });
@@ -81,4 +78,20 @@ test('filtered cleanup reuses validated list filters and still requires administ
   await assert.rejects(instance.postAction(), /PREVENT_NEXT_PROCESS/);
   assert.deepEqual(calls, [{provider: 'deepseek', status: 'failure'}]);
   assert.equal(instance.result.deleted, 2);
+});
+
+test('caller options include backend roles only and never expose credential fields', async() => {
+  const {instance} = setup();
+  const queries = [];
+  instance.model = name => {
+    const chain = {where(condition) {queries.push({name, condition}); return chain},
+      field(fields) {chain.fields = fields; return chain}, setRelation: () => chain, order: () => chain,
+      page: () => chain, select: async() => name === 'user' ? [{id: 1, name: 'admin'}] : [],
+      find: async() => ({calls: 0})};
+    return chain;
+  };
+  await assert.rejects(instance.getAction(), /PREVENT_NEXT_PROCESS/);
+  assert.deepEqual(queries.find(item => item.name === 'user').condition, {type: ['IN', [1, 2, 3]]});
+  assert.deepEqual(instance.result.actors, [{id: 1, name: 'admin'}]);
+  assert.equal(instance.result.settings, undefined);
 });

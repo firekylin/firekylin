@@ -55,7 +55,8 @@ function createServerFactory({tools, auth, sdk, logger}) {
         const started = Date.now();
         try {
           const {confirm, ...toolInput} = input || {};
-          const value = await auditContext.run({source: 'mcp', user: () => auth.principal},
+          const value = await auditContext.run({source: 'mcp', user: () => auth.principal,
+            request: () => ({url: '/mcp', method: 'POST', tool: tool.name, parameters: toolInput})},
             () => tools.execute(tool.name, toolInput, {
               principal: auth.principal,
               channel: 'mcp',

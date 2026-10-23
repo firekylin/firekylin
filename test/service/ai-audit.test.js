@@ -33,8 +33,8 @@ test('records success metadata, trusted identity, related calls, native usage an
   assert.notEqual(rows[0].request_id, rows[1].request_id);
   assert.equal(rows[0].input_tokens, 0);
   assert.equal(rows[0].total_tokens, 2);
-  assert.equal(rows[0].request_text, null);
-  assert.equal(rows[0].response_text, null);
+  assert.equal(rows[0].request_text, 'hello');
+  assert.equal(rows[0].response_text, 'answer');
   assert.equal(rows[0].provider_request_id, 'req-provider');
 });
 test('concurrent async contexts stay isolated; system and anonymous calls are explicit', async() => {
@@ -95,14 +95,14 @@ test('unsettled calls leave unfinished rows and persistence failures cannot chan
   assert.equal(await updateFailure.client.generate(request), result);
   assert.equal(updateFailure.rows[0].status, 'unfinished');
 });
-test('recording switch applies to future calls; captures text only, redacts and truncates Unicode', async() => {
+test('records text by default, ignoring retired settings; redacts and truncates Unicode', async() => {
   const {client, rows, options} = setup(() => ({text: 'sk-abcdefghijklmnop ' + '字'.repeat(10001)}));
   await client.generate(request);
   options.getOptions = async() => ({ai_audit_settings: '{"recordContent":true}'});
   await client.generate({messages: [{role: 'user', content: [
     {type: 'text', text: 'Authorization: Bearer secret\nhello'}, {type: 'image_url', image_url: {url: 'data:image/png;base64,secret'}}
   ]}]});
-  assert.equal(rows[0].content_recorded, 0);
+  assert.equal(rows[0].content_recorded, 1);
   assert.equal(rows[1].content_recorded, 1);
   assert.ok(!rows[1].request_text.includes('secret'));
   assert.ok(!rows[1].response_text.includes('sk-'));
@@ -127,4 +127,34 @@ test('timeout completes when a provider ignores cancellation and null exceptions
   const nullError = setup(() => {throw null});
   try {await nullError.client.generate(request); assert.fail('must reject')} catch (error) {assert.equal(error, null)}
   assert.equal(nullError.rows[0].status, 'failure');
+});
+
+test('request context preserves business parameters and excludes secrets, headers and binary content', async() => {
+  const {client, rows} = setup(() => ({text: 'done'}));
+  await context.run({source: 'admin', user: () => ({id: 4, name: 'user'}), request: () => ({
+    url: '/admin/api/ai-editor?access_token=private&operation=title', method: 'POST',
+    headers: {Authorization: 'do-not-save'}, parameters: {operation: 'title', content: 'article',
+      password: 'hidden', nested: {apiKey: 'hidden', count: 2}, images: ['binary'], maxOutputTokens: 300},
+  })}, () => client.generate(request));
+  const stored = JSON.parse(rows[0].request_context);
+  assert.equal(stored.method, 'POST');
+  assert.equal(stored.source, 'admin');
+  assert.equal(stored.parameters.content, 'article');
+  assert.equal(stored.parameters.maxOutputTokens, 300);
+  assert.equal(stored.parameters.nested.count, 2);
+  assert.equal(stored.parameters.nested.apiKey, '[REDACTED]');
+  assert.equal(stored.parameters.password, '[REDACTED]');
+  assert.equal(stored.headers, undefined);
+  assert.equal(stored.parameters.images, undefined);
+  assert.ok(!rows[0].request_context.includes('private'));
+  assert.equal(stored.generation.messages[0].content, 'hello');
+});
+test('context JSON remains valid under truncation and cyclic or image values', () => {
+  const {sanitizeContext} = require('../../src/service/ai-audit-request');
+  const input = {text: 'a'.repeat(10001), image: {type: 'image', data: 'do-not-save'}};
+  input.cycle = input;
+  const cleaned = sanitizeContext(input);
+  assert.equal(cleaned.context_truncated, true);
+  assert.ok(cleaned.text.endsWith('[TRUNCATED]'));
+  assert.ok(!JSON.stringify(cleaned).includes('do-not-save'));
 });

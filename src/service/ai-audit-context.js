@@ -11,6 +11,7 @@ function current() {
   if (!context) return {actor_id: null, actor_name: '系统任务', source: 'system', correlation_id: randomUUID()};
   const user = context.user?.();
   return {actor_id: user?.id || null, actor_name: user?.name || (user?.id ? String(user.id) : '未知'),
-    scenario: context.scenario, source: context.source || 'http', correlation_id: context.correlationId};
+    request: context.request?.(), scenario: context.scenario,
+    source: context.source || 'http', correlation_id: context.correlationId};
 }
 module.exports = {run, current};

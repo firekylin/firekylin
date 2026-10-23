@@ -20,6 +20,17 @@ function definition(config) {
 async function migrate({model, config}) {
   const {type, table, columns} = definition(config);
   await model.query(`CREATE TABLE IF NOT EXISTS ${table} (${columns})`);
+  // Also upgrade tables created by earlier audit versions.
+  let fields;
+  if (type === 'sqlite') fields = await model.query(`PRAGMA table_info(${table})`);
+  else if (type === 'postgresql') {
+    fields = await model.query(`SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = '${table}'`);
+  } else fields = await model.query(`SHOW COLUMNS FROM ${table}`);
+  if (!fields.some(field => (field.name || field.column_name || field.Field) === 'request_context')) {
+    try {await model.query(`ALTER TABLE ${table} ADD COLUMN request_context ${['mysql', 'tidb'].includes(type) ? 'MEDIUMTEXT' : 'TEXT'}`)} catch (error) {
+      if (!['ER_DUP_FIELDNAME', '42701'].includes(error.code) && !/duplicate column name/i.test(error.message)) throw error;
+    }
+  }
   for (const field of ['started_at', 'actor_id', 'scenario', 'provider', 'model', 'status', 'correlation_id']) {
     const index = `${table}_${field}_idx`;
     if (type === 'mysql' || type === 'tidb') {

@@ -2,7 +2,6 @@
 const Base = require('./base');
 const auth = require('../../../service/admin-auth');
 const query = require('../../../service/ai-audit-query');
-const {Audit, SETTINGS_KEY} = require('../../../service/ai-audit');
 
 module.exports = class extends Base {
   requireAdmin(write = false) {
@@ -12,7 +11,6 @@ module.exports = class extends Base {
       if (!token || token !== auth.csrfToken(this.ctx)) return this.ctx.throw(403, 'CSRF validation failed');
     }
   }
-  audit() { return new Audit({model: () => this.model('ai_audit_log'), options: () => this.model('options')}) }
   async getAction() {
     this.requireAdmin();
     const input = this.get();
@@ -23,7 +21,12 @@ module.exports = class extends Base {
       if (!data.id) return this.ctx.throw(404, 'Log not found');
     } else {
       data = await query.list(() => this.model('ai_audit_log'), input);
-      data.settings = await this.audit().settings();
+      data.actors = await this.model('user').where({type: ['IN', [1, 2, 3]]})
+        .field('id,name,display_name')
+        .setRelation(false)
+        .order('id ASC')
+        .select();
+      data.providers = global.firekylin?.plugins?.aiProviders?.list() || [];
     }
     return this.success(data);
   }
@@ -39,11 +42,7 @@ module.exports = class extends Base {
     this.requireAdmin(true);
     const input = this.post() || {};
     let data;
-    if (input.action === 'settings') {
-      if (typeof input.recordContent !== 'boolean') return this.ctx.throw(400, 'Invalid recording settings');
-      await this.model('options').updateOptions(SETTINGS_KEY, JSON.stringify({recordContent: input.recordContent}));
-      data = {recordContent: input.recordContent};
-    } else if (input.action === 'cleanup') {
+    if (input.action === 'cleanup') {
       const where = query.cleanup(input);
       data = {deleted: await this.model('ai_audit_log').where(where).delete()};
     } else return this.ctx.throw(400, 'Invalid audit action');
