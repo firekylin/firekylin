@@ -87,6 +87,11 @@ class AIClient {
     const signal = context.signal
       ? AbortSignal.any([context.signal, controller.signal]) : controller.signal;
     let onAbort;
+    let active = true;
+    const reportUsage = (raw, response) => {
+      if (!active || signal.aborted || !provider.usage) return;
+      state.usageMetadata = {...state.usageMetadata, ...provider.usage.metadata(raw, response)};
+    };
     try {
       const aborted = new Promise((resolve, reject) => {
         onAbort = () => reject(signal.reason || new Error('AI request cancelled'));
@@ -94,9 +99,11 @@ class AIClient {
         if (signal.aborted) onAbort();
       });
       if (signal.aborted) return await aborted;
-      return await Promise.race([Promise.resolve().then(() => provider.generate(
-        {...request, provider: providerId, model: modelId}, {...context, signal})), aborted]);
+      const result = await Promise.race([Promise.resolve().then(() => provider.generate(
+        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage})), aborted]);
+      return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
     } finally {
+      active = false;
       signal.removeEventListener('abort', onAbort);
       clearTimeout(timer);
     }

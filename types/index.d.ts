@@ -137,12 +137,26 @@ declare namespace Firekylin {
     capabilities?: string[];
   }
 
+  type AIUsageSelector = string | AIUsageSelector[] |
+    {field: string; default?: number} | {sum: AIUsageSelector[]};
+  interface AIUsageAdapter {
+    protocol?: 'chat-completions' | 'responses';
+    fields?: Partial<Record<keyof AIUsageDetails, AIUsageSelector>>;
+    requestIdHeaders?: string[];
+  }
+  interface AIProviderContext {
+    signal?: AbortSignal;
+    /** Report native counters as soon as available, including before rejecting empty output. */
+    reportUsage(rawUsage?: unknown, response?: {headers?: {get(name: string): string | null}}): void;
+    [key: string]: unknown;
+  }
   interface AIProviderDefinition {
     id: string;
     label?: string;
     models: AIModelDefinition[];
+    usageAdapter?: AIUsageAdapter;
     generate(request: {provider: string; model: string; messages: Array<{role: string; content: string}>;
-      [key: string]: unknown}, context: {signal?: AbortSignal; [key: string]: unknown}): unknown | Promise<unknown>;
+      [key: string]: unknown}, context: AIProviderContext): unknown | Promise<unknown>;
   }
 
   interface AIPluginAPI {
@@ -175,7 +189,7 @@ declare namespace Firekylin {
     admin?: {formId: string; testActionId: string};
     generate(request: {provider: string; model: string; capability?: string;
       messages: Array<{role: string; content: string}>;
-      [key: string]: unknown}, context: {signal?: AbortSignal; [key: string]: unknown}): unknown | Promise<unknown>;
+      [key: string]: unknown}, context: AIProviderContext): unknown | Promise<unknown>;
   }
 
   interface AIPluginAPI {

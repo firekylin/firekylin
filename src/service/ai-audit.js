@@ -76,7 +76,7 @@ class Audit {
     });
   }
 
-  async finish(entry, {request, result, error, timeout, cancelled, failed = Boolean(error)}) {
+  async finish(entry, {request, result, error, timeout, cancelled, usageMetadata, failed = Boolean(error)}) {
     if (!entry) return;
     return this.safe('finish', async() => {
       const status = failed ? (timeout ? 'timeout' : cancelled ? 'cancelled' : 'failure') : 'success';
@@ -91,8 +91,9 @@ class Audit {
       await this.model().where({id: entry.id}).update({
         provider: safeLabel(request?.provider), model: safeLabel(request?.model, 256),
         capability: safeLabel(request?.capability || 'text', 64), status, duration_ms: Date.now() - entry.started,
-        ...usage(result || error), error_category: category, error_message: category ? `AI call ended: ${category}` : null,
-        provider_request_id: safeLabel(result?.providerRequestId || error?.providerRequestId, 256),
+        ...usage({...(result || error), ...usageMetadata}), error_category: category, error_message: category ? `AI call ended: ${category}` : null,
+        provider_request_id: safeLabel(usageMetadata?.providerRequestId ||
+          result?.providerRequestId || error?.providerRequestId, 256),
         response_text: output.text, response_truncated: output.truncated});
     });
   }

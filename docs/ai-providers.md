@@ -150,3 +150,27 @@ The JSON context captures the initiating request URL/method/source/query/body pa
 arguments. No complete headers, credential fields, image parts or binary values are retained. Individual
 strings are capped at 10,000 characters, with a 100,000-character string budget and bounded structure;
 truncation is explicitly marked while preserving valid JSON. Older logs without context remain readable.
+
+
+### Declarative usage adapters
+
+Declare `usageAdapter` on the provider definition. Core supports `protocol: 'chat-completions'`
+and `protocol: 'responses'` for standard field names. Override only differences in `fields`, keyed
+by `AIUsageDetails` names. Selectors can be dotted paths, ordered fallback arrays, `{field, default}`
+for optional counters, or `{sum: [...]}` for native counters that must be combined. Missing required
+operands remain unknown; cached and reasoning details are not added to the total a second time.
+
+```js
+usageAdapter: {protocol: 'chat-completions', fields: {
+  cacheReadTokens: ['prompt_cache_hit_tokens', 'prompt_tokens_details.cached_tokens']
+}}
+```
+
+The generation context supplies `reportUsage(rawUsage, response)`. Call it with `undefined` usage
+as soon as response headers arrive, then with native usage after parsing JSON and before checking
+for empty output. Core extracts only normalized counters and the request ID synchronously, adds
+`usageDetails` to successful results, and makes reported metadata available to auditing even if the
+provider throws, times out or is cancelled later. Original provider errors remain unchanged. Reports
+after completion or cancellation are ignored; full response objects and headers are never stored.
+Existing providers without declarations keep their previous return values and legacy usage support.
+No additional utility npm package is required.
