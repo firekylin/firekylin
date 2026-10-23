@@ -150,13 +150,14 @@ module.exports = class extends Base {
    */
   async updateAllPostSummaries() {
     // get all posts' id and mark down content
-    const posts = await this.field('id, markdown_content, summary').setRelation(false).select();
+    const posts = await this.field('id, markdown_content, options').setRelation(false).select();
     const allPromises = [];
 
     if (posts.length > 0) {
       for (let i = 0; i < posts.length; i++) {
         const item = posts[i];
-        if (typeof item.summary === 'string' && item.summary.trim()) continue;
+        const postOptions = typeof item.options === 'string' ? JSON.parse(item.options || '{}') : (item.options || {});
+        if (postOptions.summaryCustomized === true) continue;
         const summary = await this.getSummary(item.markdown_content);
 
         allPromises.push(this.where({ id: item.id }).update({ summary }));
@@ -178,7 +179,10 @@ module.exports = class extends Base {
     const markdown = rendered.markdown;
     const auto_summary = parseInt(options.auto_summary);
     data.content = rendered.content;
-    if (typeof data.summary !== 'string' || !data.summary.trim()) {
+    const postOptions = typeof data.options === 'string' ? JSON.parse(data.options || '{}') : (data.options || {});
+    postOptions.summaryCustomized = typeof data.summary === 'string' && Boolean(data.summary.trim());
+    data.options = JSON.stringify(postOptions);
+    if (!postOptions.summaryCustomized) {
       data.summary = await this.getSummary(markdown, auto_summary);
     }
 

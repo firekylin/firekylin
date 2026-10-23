@@ -17,6 +17,7 @@ class ArticleStore {
     create_time: new Date().toUTCString(),
     allow_comment: true,
     options: {
+      summaryCustomized: false,
       template: '',
       featuredImage: '',
       push_sites: [],
@@ -51,6 +52,7 @@ class ArticleStore {
       create_time: new Date().toUTCString(),
       allow_comment: true,
       options: {
+        summaryCustomized: false,
         template: '',
         featuredImage: '',
         push_sites: [],
@@ -93,10 +95,15 @@ class ArticleStore {
                 res.data.options.fields = res.data.options.fields && typeof res.data.options.fields === 'object'
                     && !Array.isArray(res.data.options.fields) ? res.data.options.fields : {};
                 res.data.summary = res.data.summary || '';
+                res.data.options.summaryCustomized = res.data.options.summaryCustomized === true;
                 this.setArticleInfo({ ...res.data });
             }
         }
     );
+  }
+
+  summaryForSubmit() {
+    return this.articleInfo.options.summaryCustomized ? this.articleInfo.summary : undefined;
   }
 
   // 发布文章 / 草稿

@@ -39,6 +39,7 @@ export interface ArticleInfo {
     allow_comment: boolean;
     // options: string;
     options: {
+        summaryCustomized?: boolean;
         template: string;
         featuredImage: string;
         push_sites: any[];
@@ -51,6 +52,7 @@ export interface ArticleInfo {
 }
 
 export interface ArticleInfoOptions {
+    summaryCustomized?: boolean;
     template: string;
     featuredImage: string;
     push_sites: any[];

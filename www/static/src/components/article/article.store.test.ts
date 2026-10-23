@@ -15,3 +15,20 @@ it('loads the summary field and resets it when starting another article', () => 
     store.resetArticleInfo();
     expect(store.articleInfo.summary).toBe('');
 });
+it('does not submit a loaded automatic excerpt when the body changes', () => {
+    vi.mocked(http.get).mockReturnValueOnce(of({errno: 0, data: article({})}) as any);
+    const store = new ArticleStore();
+    store.getArticleInfoById(1, 0);
+    store.setArticleInfo({markdown_content: 'changed opening\n<!--more-->\nrest'});
+    expect(store.articleInfo.summary).toBe('stored summary');
+    expect(store.summaryForSubmit()).toBeUndefined();
+});
+it('preserves customized summaries on reopening and restores automatic mode after clearing', () => {
+    vi.mocked(http.get).mockReturnValueOnce(of({errno: 0, data: article({summaryCustomized: true})}) as any);
+    const store = new ArticleStore();
+    store.getArticleInfoById(1, 0);
+    store.setArticleInfo({markdown_content: 'changed body'});
+    expect(store.summaryForSubmit()).toBe('stored summary');
+    store.setArticleInfo({summary: '', options: {summaryCustomized: false}});
+    expect(store.summaryForSubmit()).toBeUndefined();
+});

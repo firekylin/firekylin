@@ -123,5 +123,5 @@ it('AI summary writes only to the existing summary field', async() => {
     const store = {articleInfo: {markdown_content: '字'.repeat(251)}, setArticleInfo: vi.fn()};
     render(<Harness store={store} />);
     fireEvent.click(await screen.findByRole('button', {name: '智能生成摘要'}));
-    await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({summary: 'AI 摘要'}));
+    await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({summary: 'AI 摘要', options: {summaryCustomized: true}}));
 });
