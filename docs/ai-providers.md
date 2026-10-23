@@ -100,7 +100,7 @@ feature, and late responses cannot replace a newer suggestion. Suggestions are n
 ## Call audit logs
 
 All calls through the shared client are recorded by core, including connection tests and plugin calls.
-Administrators can inspect **系统设置 → AI 调用日志**. Records are retained permanently unless an
+Administrators can inspect **管理工具 → AI 调用日志**. Records are retained permanently unless an
 administrator manually deletes selected records or records before a date. No cost estimates are made.
 Each generation gets a request ID; calls in one operation share a correlation ID. Authentication comes
 from server-side async request context, never `request.user`, `actor`, or another submitted identity.

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { NavLink } from '../utils/router';
+import { NavLink, useLocation } from '../utils/router';
 import { InitiateRoutes, InitiateThemePages } from './data/routes.data';
 
 function createSidebarState() {
@@ -28,6 +28,7 @@ function createSidebarState() {
     return {routes: [...InitiateRoutes(themePages), ...pluginRoutes], isActive: {}};
 }
 function SideBar(props: any) {
+    const {pathname} = useLocation();
     const [state, setState] = React.useState(createSidebarState);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -88,17 +89,14 @@ function SideBar(props: any) {
         };
     };
     legacy.isActive = function isActive(routeUrl: string): boolean {
-        const currentPath = location.pathname.replace(/^\/admin(?=\/|$)/, '');
+        const currentPath = pathname.replace(/^\/admin(?=\/|$)/, '');
         return currentPath === routeUrl || currentPath.startsWith(`${routeUrl}/`);
     };
+    legacy.isRouteActive = function isRouteActive(route: any): boolean {
+        return (route.activePaths || [route.url]).some(path => legacy.isActive(path));
+    };
     legacy.isSectionActive = function isSectionActive(route: any): boolean {
-        return (
-            legacy.isActive(route.url) ||
-            Boolean(
-                route.children &&
-                route.children.some((child) => legacy.isActive(child.url)),
-            )
-        );
+        return legacy.isRouteActive(route) || Boolean(route.children?.some(child => legacy.isRouteActive(child)));
     };
     legacy.open = function open(routeUrl: string) {
         props.history.push(routeUrl);
@@ -117,15 +115,10 @@ function SideBar(props: any) {
                 { url: '/user/edit_pwd', icon: 'setting', title: '修改密码' },
             ];
         } else {
-            routes = routes.filter((item) => {
-                if (!item.type) {
-                    return true;
-                }
-                if (userType <= item.type) {
-                    return true;
-                }
-            });
+            routes = routes.filter(item => !item.type || userType <= item.type);
         }
+        routes = routes.map(route => ({...route, children: route.children?.filter(child =>
+            child.menu !== false && (!child.type || userType <= child.type))}));
         return (
             <div className="fk-side ps-container" id="fk-side">
                 <div className="mod">
@@ -142,9 +135,12 @@ function SideBar(props: any) {
                             <NavLink
                                 to={route.url}
                                 onClick={() => legacy.open(route.url)}
-                                className={`icon icon-${route.icon} ${route.children && legacy.isSectionActive(route) ? 'active' : ''}`}
+                                className={`icon ${typeof route.icon === 'string' ? `icon-${route.icon}` : ''} ${route.children && legacy.isSectionActive(route) ? 'active' : ''}`}
                                 activeClassName="active"
                             >
+                                {route.icon && typeof route.icon !== 'string' ? React.createElement(route.icon, {
+                                    style: {display: 'inline-block', width: 35, fontSize: 16, verticalAlign: 'middle'},
+                                }) : null}
                                 <span>{route.title}</span>
                             </NavLink>
                             {route.children ? (
@@ -162,6 +158,7 @@ function SideBar(props: any) {
                                             <NavLink
                                                 to={child.url}
                                                 onClick={() => legacy.open(child.url)}
+                                                className={legacy.isRouteActive(child) ? 'active' : ''}
                                                 activeClassName="active"
                                             >
                                                 <span>{child.title}</span>

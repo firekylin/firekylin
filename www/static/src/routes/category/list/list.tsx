@@ -49,7 +49,7 @@ function CategoryList(props: CategoryListProps) {
         const { categoryList, defaultCategory, loading } = props.sharedStore;
         return (
             <div className="category-list">
-                <BreadCrumb {...props} />
+                <BreadCrumb {...props} actions={<Button type="primary" onClick={() => props.history.push('/cate/create')}>添加分类</Button>} />
                 <Table
                     dataSource={categoryList}
                     loading={{ spinning: loading.category, delay: TABLE_DELAY }}

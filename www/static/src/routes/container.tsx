@@ -14,6 +14,7 @@ const Category = lazy(() => import('./category/category'));
 const Tag = lazy(() => import('./tag/tag'));
 const Push = lazy(() => import('./push/push'));
 const Appearance = lazy(() => import('./appearance/appearance'));
+const Tools = lazy(() => import('./tools/tools'));
 const Options = lazy(() => import('./options/options'));
 const Comment = lazy(() => import('./comment/comment'));
 const PluginAdmin = lazy(() => import('./plugin/plugin-admin'));
@@ -50,6 +51,7 @@ function Container(props: any) {
                         <Route path={`/user`} component={User} />
                         <Route path={`/push`} component={Push} />
                         <Route path="/appearance" component={Appearance} />
+                        <Route path="/tools" component={Tools} />
                         <Route path="/options" component={Options} />
                         <Route path="/comment" component={Comment} />
                         <Route

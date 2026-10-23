@@ -54,7 +54,7 @@ export function TagList(props: TagProps) {
 
     return (
         <div className="category-list">
-            <BreadCrumb {...props} />
+            <BreadCrumb {...props} actions={<Button type="primary" onClick={() => props.history.push('/tag/create')}>添加标签</Button>} />
             <Table 
                 dataSource={tagList}
                 loading={{spinning: loading, delay: TABLE_DELAY}}

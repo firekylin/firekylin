@@ -7,10 +7,7 @@ import LDAP from './ldap/ldap';
 import Comment from './comment/comment';
 import Analysis from './analysis/analysis';
 import OptionsPush from './push/push';
-import OptionsExport from './export/export';
 import OptionsUpload from './upload/upload';
-import OptionsImport from './import/import';
-import AIAuditLogs from './ai-logs/ai-logs';
 import SmartContentSettings from './smart-content/smart-content';
 import AIConnections from '../plugin/ai-connections';
 
@@ -20,7 +17,8 @@ export default function Options({ match }: OptionsProps) {
             <Switch>
                 <Route path={`${match.path}/general`} component={General} />
                 <Route path={`${match.path}/reading`} component={Reading} />
-                <Route path={`${match.path}/ai-logs`} component={AIAuditLogs} />
+                <Route path={`${match.path}/ai-logs`} render={({location}) =>
+                    <Redirect to={`/tools/ai-logs${location.search}${location.hash}`} />} />
                 <Route path={`${match.path}/smart-content`} component={SmartContentSettings} />
                 <Route path={`${match.path}/ai`} component={AIConnections} />
                 <Route
@@ -31,9 +29,11 @@ export default function Options({ match }: OptionsProps) {
                 <Route path={`${match.path}/comment`} component={Comment} />
                 <Route path={`${match.path}/analytic`} component={Analysis} />
                 <Route path={`${match.path}/push`} component={OptionsPush} />
-                <Route path={`${match.path}/export`} component={OptionsExport} />
+                <Route path={`${match.path}/export`} render={({location}) =>
+                    <Redirect to={`/tools/export${location.search}${location.hash}`} />} />
                 <Route path={`${match.path}/upload`} component={OptionsUpload} />
-                <Route path={`${match.path}/import`} component={OptionsImport} />
+                <Route path={`${match.path}/import`} render={({location}) =>
+                    <Redirect to={`/tools/import${location.search}${location.hash}`} />} />
                 <Redirect to={`${match.path}/general`} />
             </Switch>
         </>

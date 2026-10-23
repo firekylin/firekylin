@@ -1,3 +1,5 @@
+import {ToolOutlined} from '@ant-design/icons';
+
 export const InitiateThemePages = [
     {
         url: '/appearance/theme',
@@ -18,14 +20,13 @@ export const InitiateRoutes = (themePages) => [{
         url: '/post',
         icon: 'topic',
         title: '文章管理',
-        children: [{
-                url: '/post/list',
-                title: '文章列表'
-            },
-            {
-                url: '/post/create',
-                title: '添加文章'
-            }
+        children: [
+            {url: '/post/list', title: '文章列表', activePaths: ['/post']},
+            {url: '/cate/list', title: '分类列表', activePaths: ['/cate'], type: 1},
+            {url: '/tag/list', title: '标签列表', activePaths: ['/tag'], type: 1},
+            {url: '/post/create', title: '添加文章', menu: false},
+            {url: '/cate/create', title: '添加分类', menu: false, type: 1},
+            {url: '/tag/create', title: '添加标签', menu: false, type: 1},
         ]
     },
     {
@@ -40,36 +41,6 @@ export const InitiateRoutes = (themePages) => [{
             {
                 url: '/page/create',
                 title: '添加页面'
-            }
-        ]
-    },
-    {
-        url: '/cate',
-        icon: 'report',
-        title: '分类管理',
-        type: 1,
-        children: [{
-                url: '/cate/list',
-                title: '分类列表'
-            },
-            {
-                url: '/cate/create',
-                title: '添加分类'
-            }
-        ]
-    },
-    {
-        url: '/tag',
-        icon: 'favor',
-        title: '标签管理',
-        type: 1,
-        children: [{
-                url: '/tag/list',
-                title: '标签列表'
-            },
-            {
-                url: '/tag/create',
-                title: '添加标签'
             }
         ]
     },
@@ -143,10 +114,6 @@ export const InitiateRoutes = (themePages) => [{
                 title: 'AI 连接'
             },
             {
-                url: '/options/ai-logs',
-                title: 'AI 调用日志'
-            },
-            {
                 url: '/options/smart-content',
                 title: '智能内容'
             },
@@ -174,14 +141,17 @@ export const InitiateRoutes = (themePages) => [{
                 url: '/options/push',
                 title: '推送设置'
             },
-            {
-                url: '/options/import',
-                title: '导入数据'
-            },
-            {
-                url: '/options/export',
-                title: '导出数据'
-            }
+        ]
+    },
+    {
+        url: '/tools',
+        icon: ToolOutlined,
+        title: '管理工具',
+        type: 1,
+        children: [
+            {url: '/tools/ai-logs', title: 'AI 调用日志'},
+            {url: '/tools/import', title: '导入数据'},
+            {url: '/tools/export', title: '导出数据'},
         ]
     }
 ];
