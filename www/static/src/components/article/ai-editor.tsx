@@ -10,8 +10,8 @@ export function AIButton({operation, minimum, label, icon}: any) {
     if (!ai?.available) return null;
     const disabled = [...(ai.content || '')].length <= minimum || ai.busy;
     return <Tooltip title={disabled ? `正文需超过 ${minimum} 个字符，且没有正在进行的 AI 请求` : label}>
-        <span><Button type="text" aria-label={label} disabled={disabled}
-            loading={ai.busy === operation} icon={icon || <AISparkleIcon />}
+        <span><Button type="text" aria-label={label} aria-busy={ai.busy === operation} disabled={disabled}
+            icon={ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
             onClick={() => ai.run(operation)} /></span>
     </Tooltip>;
 }
@@ -104,7 +104,7 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
     };
     const dialogs = <>
         <Modal title="标题建议" open={dialog === 'title'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}} footer={[
-            <Button key="regenerate" disabled={!!busy} loading={busy === 'title'} onClick={() => request('title')}>重新生成</Button>,
+            <Button key="regenerate" disabled={!!busy} aria-busy={busy === 'title'} icon={<AISparkleIcon loading={busy === 'title'} />} onClick={() => request('title')}>重新生成</Button>,
             <Button key="use" type="primary" disabled={!!busy || !suggestion.trim()} onClick={() => {applyTitle(suggestion); setDialog('')}}>使用</Button>
         ]}>
             <p>请审阅编辑该标题，觉得不合适可以尝试重新生成。</p>

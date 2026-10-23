@@ -1,0 +1,23 @@
+.ai-sparkle-icon {
+    display: inline-block;
+    vertical-align: -0.125em;
+    transform-origin: center;
+
+    &.is-loading {
+        animation: ai-star-loading 4.8s ease-in-out infinite;
+    }
+}
+
+// Three breaths over 3.6 seconds, then two complete Z-axis turns over 1.2 seconds.
+@keyframes ai-star-loading {
+    0%, 25%, 50%, 75% { opacity: 1; transform: scale(1) rotateZ(0deg); }
+    12.5%, 37.5%, 62.5% { opacity: .35; transform: scale(.72) rotateZ(0deg); }
+    100% { opacity: 1; transform: scale(1) rotateZ(720deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ai-sparkle-icon.is-loading {
+        animation: none;
+        opacity: .6;
+    }
+}
