@@ -18,6 +18,7 @@
     "test:widget": "node --test test/widget/*.test.js",
     "test:admin": "node --test test/service/admin-assets.test.js test/service/admin-router.test.js test/service/admin-hooks.test.js",
     "test:admin-ui": "vitest run --config vitest.config.ts",
+    "test:ai-audit": "node --test test/service/ai-audit*.test.js test/controller/ai-logs.test.js",
     "test:auth": "node --test test/service/admin-auth.test.js test/service/hugo-import.test.js test/plugin/jwt-route.test.js",
     "test:plugin": "node --test test/plugin/*.test.js",
     "test:cli": "node --test test/cli/*.test.js",

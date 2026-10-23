@@ -16,8 +16,18 @@ test('web installation creates audit schema before marking the site installed, w
   t.after(async() => {await socket.close()});
   service.insertData = service.createAccount = service.addStartPost = async() => {};
   service.getModel = name => name === 'options' ? {getOptions: async() => ({})} : model;
+  let schemaReady = false;
+  service.createAccount = async() => {
+    assert.equal(await model.count(), 0);
+    const fields = await model.query('PRAGMA table_info(fresh_ai_audit_log)');
+    assert.ok(fields.some(field => field.name === 'request_context'));
+    schemaReady = true;
+  };
   let installed = false;
-  global.firekylin = {setInstalled: () => {installed = true}};
+  global.firekylin = {setInstalled: () => {
+    assert.equal(schemaReady, true);
+    installed = true;
+  }};
   await service.saveSiteInfo({});
   assert.equal(installed, true);
   assert.equal(await model.count(), 0);
