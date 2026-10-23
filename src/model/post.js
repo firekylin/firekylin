@@ -150,12 +150,13 @@ module.exports = class extends Base {
    */
   async updateAllPostSummaries() {
     // get all posts' id and mark down content
-    const posts = await this.field('id, markdown_content').setRelation(false).select();
+    const posts = await this.field('id, markdown_content, summary').setRelation(false).select();
     const allPromises = [];
 
     if (posts.length > 0) {
       for (let i = 0; i < posts.length; i++) {
         const item = posts[i];
+        if (typeof item.summary === 'string' && item.summary.trim()) continue;
         const summary = await this.getSummary(item.markdown_content);
 
         allPromises.push(this.where({ id: item.id }).update({ summary }));
@@ -177,7 +178,9 @@ module.exports = class extends Base {
     const markdown = rendered.markdown;
     const auto_summary = parseInt(options.auto_summary);
     data.content = rendered.content;
-    data.summary = await this.getSummary(markdown, auto_summary);
+    if (typeof data.summary !== 'string' || !data.summary.trim()) {
+      data.summary = await this.getSummary(markdown, auto_summary);
+    }
 
     data.summary = await filter('content.excerpt', data.summary, {post: data});
     data.summary = await filter('content.render', data.summary, {post: data, type: 'summary'});

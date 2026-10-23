@@ -81,3 +81,16 @@ test('racing inserts for the same credential key retry against the existing row'
   ]);
   assert.equal(rows.get(key), 'second');
 });
+
+test('core option migration inserts once and never overwrites saved settings', async() => {
+  const rows = new Map();
+  const key = 'ai_content_features';
+  const results = await Promise.all([
+    new MemoryOptions(rows).ensureOption(key, '{"slug":true}'),
+    new MemoryOptions(rows).ensureOption(key, '{"slug":false}')
+  ]);
+  assert.deepEqual(results, ['{"slug":true}', '{"slug":true}']);
+  rows.set(key, '{"slug":false,"autocomplete":true}');
+  assert.equal(await new MemoryOptions(rows).ensureOption(key, '{"slug":true}'),
+    '{"slug":false,"autocomplete":true}');
+});

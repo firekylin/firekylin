@@ -56,3 +56,43 @@ workflow; the search link does not install third-party code automatically.
 
 Provider handlers receive an abort signal and should pass it to outbound requests. The shared client rejects
 unknown providers and models and applies a 60-second timeout.
+
+## Article editor
+
+The article editor provides title suggestions, summaries, article review and translation through
+`/admin/api/ai-editor`. These controls are visible only when the selected model supports `text` and its
+provider is not explicitly unconfigured. The endpoint uses the shared AI client and requires an authenticated
+administrator or author plus CSRF validation. It generates suggestions without saving the article.
+
+Title and summary generation require more than 250 Unicode characters of body content; review requires
+more than 100, and translation more than 10. Review changes are accepted, rejected or edited before replacing
+the body. Translation optionally includes the title.
+
+Summaries use the existing `summary` field directly. A non-empty submitted summary takes precedence; an
+empty or omitted summary uses `getSummary` with the existing `<!--more-->` and excerpt-length behavior.
+Bulk excerpt rebuilding preserves non-empty summaries. Password-protected articles hide summaries until
+unlocked. No database migration is required.
+
+
+### Optional content assistance
+
+All seven feature switches are built into **系统设置 → 智能内容** (`/admin/options/smart-content`).
+The core settings API `/admin/api/smart-content` requires administrator access and CSRF validation for writes.
+Settings are stored in the existing `ai_content_features` option row; no AI Content plugin is needed.
+Slug generation, classification and autocomplete are opt-in. All switches are checked on every generation request.
+
+If the core option is absent, existing encrypted `ai-content/settings` credentials are imported automatically,
+even when the old plugin is inactive or removed. The import only inserts a missing row, so concurrent saves
+and existing core settings take precedence. Legacy credentials are retained. The old plugin page URL redirects
+to the built-in page, and obsolete AI Content sidebar panels are hidden.
+
+Slug generation requires more than 250 characters and opens an editable suggestion dialog. The server
+normalizes the result and checks uniqueness both when generating and when using the suggestion; the normal
+save-time pathname collision validation remains authoritative. Category and tag selection use existing
+choices only, require more than 250 characters and fill the unsaved editor state.
+
+Autocomplete waits 1.2 seconds after input pauses, requests short continuations near the cursor, and renders
+them in lighter text without a background. Three dots breathe in sequence beside the cursor while a request
+is running and disappear immediately when input interrupts it or the request finishes. Tab accepts a suggestion; typing, selection changes, Escape and blur dismiss it.
+Input-method composition pauses requests. Requests are cancelled on edits, navigation and disabling the
+feature, and late responses cannot replace a newer suggestion. Suggestions are never saved automatically.

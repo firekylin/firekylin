@@ -143,6 +143,10 @@ export const InitiateRoutes = (themePages) => [{
                 title: 'AI 连接'
             },
             {
+                url: '/options/smart-content',
+                title: '智能内容'
+            },
+            {
                 url: '/options/two_factor_auth',
                 title: '两步验证'
             },

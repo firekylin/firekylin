@@ -251,7 +251,9 @@ class AdminRegistry {
   manifest() {
     const plugins = new Map();
     const ensure = pluginId => {
-      if (!plugins.has(pluginId)) plugins.set(pluginId, {id: pluginId, panels: [], pages: [], forms: [], actions: []});
+      if (!plugins.has(pluginId)) {
+        plugins.set(pluginId, {id: pluginId, panels: [], pages: [], forms: [], actions: []});
+      }
       return plugins.get(pluginId);
     };
     for (const panel of this.panels.values()) ensure(panel.pluginId).panels.push({

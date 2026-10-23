@@ -117,6 +117,16 @@ module.exports = class extends think.Model {
     }
   }
 
+  async ensureOption(key, value) {
+    try {
+      await this.add({key, value});
+    } catch (error) {
+      if (!isDuplicateKey(error)) throw error;
+    }
+    const row = await this.where({key}).find();
+    return row.value;
+  }
+
   async getCredentialValue(key) {
     const row = await this.where({key}).find();
     return row && row.key ? row.value : undefined;

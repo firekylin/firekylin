@@ -1,11 +1,33 @@
+html:has(.post-article),
+body:has(.post-article),
+.manage-container:has(.post-article) {
+    overflow: hidden;
+}
+
 .post-article {
     .article-control-panel {
         padding-left: 30px;
+        padding-right: 4px;
+        max-height: calc(100dvh - var(--article-sidebar-top, 120px) - 56px);
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+        scrollbar-gutter: stable;
+        padding-bottom: 15px;
+
         .article-control-header {
-            margin-top: 22px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            margin-top: 0;
+            padding-top: 22px;
+            padding-bottom: 12px;
+            background: #fff;
             button {
                 padding: 0 20px;
             }
+        }
+        .article-control-header + .release-date {
+            margin-top: 3px;
         }
         .control-item {
             margin-top: 15px;
@@ -55,5 +77,67 @@
                 margin: -4px 0 8px;
             }
         }
+    }
+}
+
+.post-article .article-control-panel .advanced-controls {
+    margin-top: 15px;
+
+    .advanced-controls-toggle {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        min-height: 30px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #777;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+
+        &::before,
+        &::after {
+            content: '';
+            height: 1px;
+            background: #ddd;
+        }
+
+        &:hover {
+            color: #333;
+        }
+
+        &:focus-visible {
+            outline: 2px solid #0081ff;
+            outline-offset: 3px;
+        }
+    }
+
+    .advanced-controls-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .advanced-controls-arrow {
+        width: 0;
+        height: 0;
+        border-right: 5px solid transparent;
+        border-bottom: 6px solid currentColor;
+        border-left: 5px solid transparent;
+        transition: transform .2s ease;
+    }
+
+    [aria-expanded='true'] .advanced-controls-arrow {
+        transform: rotate(180deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .post-article .article-control-panel .advanced-controls-arrow {
+        transition: none;
     }
 }

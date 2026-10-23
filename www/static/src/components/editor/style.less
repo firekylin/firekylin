@@ -350,3 +350,50 @@ input {
   overflow: hidden;
   text-transform: capitalize;
 }
+.md-editor { position: relative; }
+.md-editor textarea.has-ai-suggestion { color: transparent; caret-color: #333; }
+.ai-completion-mirror {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    color: #333;
+    .ai-completion-ghost { color: #999; }
+}
+
+.ai-completion-mirror.is-loading { color: transparent; }
+.ai-completion-loading {
+    position: relative;
+    display: inline-block;
+    width: 0;
+    height: 1em;
+    vertical-align: middle;
+    color: #999;
+    > span {
+        position: absolute;
+        left: 3px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    i {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: ai-completion-dot-breathe 1.2s ease-in-out infinite;
+        &:nth-child(2) { animation-delay: .16s; }
+        &:nth-child(3) { animation-delay: .32s; }
+    }
+}
+@keyframes ai-completion-dot-breathe {
+    0%, 70%, 100% { opacity: .25; transform: scale(.75); }
+    35% { opacity: 1; transform: scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ai-completion-loading i { animation: none; opacity: .6; }
+}

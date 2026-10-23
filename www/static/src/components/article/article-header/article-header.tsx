@@ -1,9 +1,11 @@
+import {AIContext, AIButton} from '../ai-editor';
 import * as React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Input } from 'antd';
 import './article-header.less';
 import classNames from 'classnames';
 function ArticleHeaderForm(props: any) {
+    const ai = React.useContext(AIContext);
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -48,6 +50,8 @@ function ArticleHeaderForm(props: any) {
                             ]}
                         >
                             <Input
+                                disabled={ai?.busy === 'title'}
+                                suffix={<AIButton operation="title" minimum={250} label="AI生成标题" />}
                                 onChange={(e) => props.handleTitle(e)}
                                 placeholder="标题"
                                 className={classNames({
@@ -63,7 +67,8 @@ function ArticleHeaderForm(props: any) {
                         className={classNames('pathname-input', {
                             'has-error': props.hasError.pathname,
                         })}
-                        disabled={props.status === 3}
+                        disabled={ai?.busy === 'slug' || (props.status === 3 && !ai?.features?.slug)}
+                        suffix={<AIButton operation="slug" minimum={250} label="智能 Slug" />}
                         value={props.pathname}
                         onChange={(e) => props.handlePath(e)}
                     />

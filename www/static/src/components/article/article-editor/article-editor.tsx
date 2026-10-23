@@ -5,7 +5,10 @@ import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
+
+
 export function ArticleEditor(props: any) {
+
     const [state, setState] = React.useState(() => ({
         postSubmitting: false,
         draftSubmitting: false,
@@ -82,7 +85,6 @@ export function ArticleEditor(props: any) {
                     innerLinks={props.postStore.postList}
                     fetchData={(keyword) => legacy.handleFetchData(keyword)}
                 />
-
                 <p style={{ lineHeight: '30px' }}>
                     <span className="pull-left">
                         文章使用 markdown 格式，格式说明请见

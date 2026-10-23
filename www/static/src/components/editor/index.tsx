@@ -1,6 +1,8 @@
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
+import {useContentSuggestions} from './content-suggestions/use-content-suggestions';
+import { AIContext, AIToolbar } from '../article/ai-editor';
 import classnames from 'classnames';
 import * as React from 'react';
 
@@ -429,9 +431,23 @@ function MarkDownEditor(props: MdEditorProps) {
                         <textarea
                             ref={(textarea) => (legacy.textControl = textarea)}
                             name="content"
-                            onChange={(e) => legacy._onChange(e)}
+                            onChange={(e) => {legacy._onChange(e); completion.selection()}}
+                            className={completion.visible ? 'has-ai-suggestion' : undefined}
+                            onKeyDownCapture={completion.onKeyDownCapture}
+                            onSelect={completion.selection}
+                            onPointerDown={completion.dismiss}
+                            onFocus={completion.onFocus} onBlur={completion.onBlur}
+                            onCompositionStart={completion.onCompositionStart} onCompositionEnd={completion.onCompositionEnd}
+                            onScroll={completion.syncMirror}
+                            aria-description={completion.visible ? '按 Tab 接受建议，其他按键忽略建议' : undefined}
                             value={props.content}
                         />
+                        {(completion.visible || completion.loading) && <div
+                            className={classnames('ai-completion-mirror', {'is-loading': completion.loading})}
+                            ref={completion.mirrorRef} aria-hidden="true">
+                            {completion.visible ? <>{props.content.slice(0, completion.visible.cursor)}<span className="ai-completion-ghost">{completion.visible.text}</span>{props.content.slice(completion.visible.cursor)}</>
+                                : <>{props.content.slice(0, completion.loadingCursor)}<span className="ai-completion-loading"><span><i /><i /><i /></span></span>{props.content.slice(completion.loadingCursor)}</>}
+                        </div>}
                     </div>
                     <div
                         className={previewClass}
@@ -681,6 +697,7 @@ function MarkDownEditor(props: MdEditorProps) {
                         {legacy._svgIcon(icons.more)}
                     </a>
                 </li>
+                <AIToolbar />
                 {legacy._getExternalBtn()}
             </ul>
         );
@@ -761,6 +778,13 @@ function MarkDownEditor(props: MdEditorProps) {
             </ul>
         );
     };
+    const ai = React.useContext(AIContext);
+    const completion = useContentSuggestions({content: props.content || '',
+        enabled: !!(ai?.available && ai.features?.autocomplete && !ai.busy),
+        scope: `${props.info.type}:${props.info.id || 'new'}`,
+        getTextarea: () => legacy.textControl,
+        onChange: content => legacy._onChange({target: {value: content}}),
+    });
     legacy._onChange = function _onChange(e: any) {
         let content = e.target.value;
         legacy._schedulePreview(content);

@@ -7,6 +7,7 @@ import { ArticleEnum } from './article.enum';
 
 class ArticleStore {
   articleInfo: ArticleInfo = {
+    summary: '',
     title: '',
     pathname: '',
     markdown_content: '',
@@ -40,6 +41,7 @@ class ArticleStore {
   // 重置
   resetArticleInfo() {
     this.setArticleInfo({
+      summary: '',
       title: '',
       pathname: '',
       markdown_content: '',
@@ -90,6 +92,7 @@ class ArticleStore {
                 }
                 res.data.options.fields = res.data.options.fields && typeof res.data.options.fields === 'object'
                     && !Array.isArray(res.data.options.fields) ? res.data.options.fields : {};
+                res.data.summary = res.data.summary || '';
                 this.setArticleInfo({ ...res.data });
             }
         }

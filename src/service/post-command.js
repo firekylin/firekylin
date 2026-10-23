@@ -85,7 +85,8 @@ class PostCommandService {
       if (Number(data.status) === 3 && this.actor(principal).type !== 1) data.status = 1;
       // Preserve the original publication date on updates.
       data.update_time = this.now();
-      const prepared = await model.getContentAndSummary({...post, ...data});
+      // Only a summary supplied in this request overrides automatic generation.
+      const prepared = await model.getContentAndSummary({...post, ...data, summary: data.summary});
       data.content = prepared.content;
       data.summary = prepared.summary;
       if (options.getTagModel && data.tag) data.tag = await this.resolveTags(data.tag, options.getTagModel);

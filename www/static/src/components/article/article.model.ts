@@ -28,6 +28,7 @@ export interface PreviewData {
 }
 
 export interface ArticleInfo {
+    summary?: string;
     title: string;
     pathname: string;
     markdown_content: string;
