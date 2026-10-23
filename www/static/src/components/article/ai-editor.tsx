@@ -9,7 +9,12 @@ export function AIButton({operation, minimum, label, icon}: any) {
     const ai = React.useContext(AIContext);
     if (!ai?.available) return null;
     const disabled = [...(ai.content || '')].length <= minimum || ai.busy;
-    return <Tooltip title={operation === 'title' ? '当正文内容超过 250 个字时可以智能生成标题' : disabled ? `正文需超过 ${minimum} 个字符，且没有正在进行的 AI 请求` : label}>
+    const tooltip = operation === 'title'
+        ? '当正文内容超过 250 个字时可以智能生成标题'
+        : operation === 'summary'
+            ? disabled ? '当正文内容超过250个字时可以智能生成摘要' : '智能生成摘要'
+            : disabled ? `正文需超过 ${minimum} 个字符，且没有正在进行的 AI 请求` : label;
+    return <Tooltip title={tooltip}>
         <span><Button type="text" className="ai-editor-action" aria-label={label} aria-busy={ai.busy === operation} disabled={disabled}
             icon={ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
             onClick={() => ai.run(operation)} /></span>
