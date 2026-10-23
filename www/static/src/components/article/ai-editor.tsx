@@ -21,8 +21,8 @@ export function AIButton({operation, minimum, label, icon}: any) {
                     ? disabled ? '当正文内容超过10个字是可以使用智能翻译' : '智能翻译'
                     : label;
     return <Tooltip title={tooltip}>
-        <span><Button type="text" className="ai-editor-action" aria-label={label} aria-busy={ai.busy === operation} disabled={disabled}
-            icon={ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
+        <span><Button type="text" className="ai-editor-action" aria-label={label} aria-busy={operation !== 'review' && ai.busy === operation} disabled={disabled}
+            icon={operation !== 'review' && ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
             onClick={() => ai.run(operation)} /></span>
     </Tooltip>;
 }
@@ -59,6 +59,7 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
         try {
             const res = await axios.post('/admin/api/ai-editor', {operation, ...snapshot.current, language, translateTitle},
                 {signal: controller.signal, headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
+            if (controller.signal.aborted) return;
             if (res.data.errno !== 0) throw new Error(res.data.errmsg || 'AI 请求失败');
             const {text, title} = res.data.data;
             if (typeof text !== 'string') throw new Error('AI 未返回有效内容');
@@ -77,6 +78,11 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
             window.alert(error.response?.data?.errmsg || error.message || 'AI 请求失败');
             if (operation === 'review') setDialog('');
         } finally { if (!controller.signal.aborted) setBusy('') }
+    };
+    const closeReview = () => {
+        pending.current?.abort();
+        setBusy('');
+        setDialog('');
     };
     const run = (operation: string) => {
         snapshot.current = {content: store.articleInfo.markdown_content || '', title: store.articleInfo.title || ''};
@@ -142,9 +148,9 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
                 ]} />
             <p><Checkbox checked={translateTitle} disabled={!!busy} onChange={e => setTranslateTitle(e.target.checked)}>同步翻译标题</Checkbox></p>
         </Modal>
-        <Modal title="文章审阅" width="min(1280px, 96vw)" open={dialog === 'review'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
+        <Modal title="文章审阅" width="min(1280px, 96vw)" open={dialog === 'review'} onCancel={closeReview} closable keyboard mask={{closable: true}}
             footer={<Button type="primary" disabled={!!busy || unresolved || !changes.length} onClick={applyReview}>更新正文</Button>}>
-            {busy === 'review' ? <Spin description="正在审阅文章…" /> : <ReviewMerge
+            {busy === 'review' ? <div className="review-loading" role="status"><Spin /><p>正在审阅文章…</p></div> : <ReviewMerge
                 changes={changes} onChange={decide}
                 onDecideAll={decision => setChanges(previous => previous.map(change =>
                     change.unchanged || change.decision ? change : {...change, decision}))} />}

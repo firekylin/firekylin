@@ -76,3 +76,21 @@ describe('review diff', () => {
         expect(changes.map(c => c.proposed).join('')).toBe(after);
     });
 });
+it('closing review aborts the request and leaves the toolbar icon unchanged', async() => {
+    let signal: AbortSignal;
+    vi.mocked(axios.post).mockImplementationOnce((url, data, config) => {
+        signal = config!.signal as AbortSignal;
+        return new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(new Error('cancelled'))));
+    });
+    const store = {articleInfo: {markdown_content: '字'.repeat(101)}, setArticleInfo: vi.fn()};
+    render(<Harness store={store} />);
+    const button = await screen.findByRole('button', {name: '文章审阅'});
+    fireEvent.click(button);
+    expect(button).toHaveAttribute('aria-busy', 'false');
+    expect(button.querySelector('.is-loading')).toBeNull();
+    await screen.findByRole('status');
+    fireEvent.click(screen.getByRole('button', {name: /close/i}));
+    await waitFor(() => expect(signal.aborted).toBe(true));
+    expect(window.alert).not.toHaveBeenCalled();
+    expect(button).not.toBeDisabled();
+});

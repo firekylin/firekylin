@@ -85,3 +85,26 @@ test('real response helpers preserve successful AI responses and terminate only 
   await assert.rejects(instance.postAction(), {message: 'PREVENT_NEXT_PROCESS'});
   assert.deepEqual(responses, [{errno: 1, errmsg: 'Provider unavailable'}]);
 });
+test('closing the HTTP response cancels provider generation without an error response', async t => {
+  const {EventEmitter} = require('node:events');
+  const {instance, ai} = setup(t);
+  instance.ctx.req = new EventEmitter();
+  instance.ctx.res = new EventEmitter();
+  instance.ctx.res.writableEnded = false;
+  instance.post = () => ({operation: 'review', content: '字'.repeat(101)});
+  let started;
+  const ready = new Promise(resolve => { started = resolve });
+  let signal;
+  ai.generate = async(_, context) => {
+    signal = context.signal;
+    started();
+    return new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(signal.reason)));
+  };
+  const request = instance.postAction();
+  await ready;
+  instance.ctx.res.emit('close');
+  assert.equal(signal.aborted, true);
+  assert.equal(await request, undefined);
+  assert.equal(instance.ctx.res.listenerCount('close'), 0);
+  assert.equal(instance.ctx.req.listenerCount('aborted'), 0);
+});
