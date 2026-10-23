@@ -17,24 +17,14 @@ export default function Options({ match }: OptionsProps) {
             <Switch>
                 <Route path={`${match.path}/general`} component={General} />
                 <Route path={`${match.path}/reading`} component={Reading} />
-                <Route path={`${match.path}/ai-logs`} render={({location}) =>
-                    <Redirect to={`/tools/ai-logs${location.search}${location.hash}`} />} />
                 <Route path={`${match.path}/smart-content`} component={SmartContentSettings} />
                 <Route path={`${match.path}/ai`} component={AIConnections} />
-                <Route
-                    path={`${match.path}/two_factor_auth`}
-                    component={TwoFactorAuth}
-                />
+                <Route path={`${match.path}/two_factor_auth`} component={TwoFactorAuth} />
                 <Route path={`${match.path}/ldap`} component={LDAP} />
                 <Route path={`${match.path}/comment`} component={Comment} />
                 <Route path={`${match.path}/analytic`} component={Analysis} />
                 <Route path={`${match.path}/push`} component={OptionsPush} />
-                <Route path={`${match.path}/export`} render={({location}) =>
-                    <Redirect to={`/tools/export${location.search}${location.hash}`} />} />
                 <Route path={`${match.path}/upload`} component={OptionsUpload} />
-                <Route path={`${match.path}/import`} render={({location}) =>
-                    <Redirect to={`/tools/import${location.search}${location.hash}`} />} />
-                <Redirect to={`${match.path}/general`} />
             </Switch>
         </>
     );

@@ -1,8 +1,8 @@
-import {Redirect, Route, Switch} from '../../utils/router';
-import type {RouteComponentProps} from '../../utils/router';
-import AIAuditLogs from '../options/ai-logs/ai-logs';
-import DataImport from '../options/import/import';
-import DataExport from '../options/export/export';
+import { Redirect, Route, Switch } from '@admin/utils/router';
+import type {RouteComponentProps} from '@admin/utils/router';
+import AIAuditLogs from './ai-logs/ai-logs';
+import DataImport from './import/import';
+import DataExport from './export/export';
 
 export default function Tools({match}: RouteComponentProps) {
     return <Switch>

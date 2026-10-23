@@ -2,7 +2,6 @@ import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, message, Spin, Switch} from 'antd';
 import axios from 'axios';
 import BreadCrumb from '../../../components/breadcrumb';
-import {PAGE_SECTION_CONTENT_INSET} from '../../../components/protocol/page-section';
 
 export const CONTENT_FEATURES = [
     {name: 'summary', label: '生成摘要', description: '正文超过 250 个字时，概括全文生成摘要并填入内容摘要，可继续编辑。'},
@@ -14,7 +13,7 @@ export const CONTENT_FEATURES = [
     {name: 'autocomplete', label: '内容自动建议', description: '写作暂停时，在光标处提示后续内容；按 Tab 接受，继续输入或按 Esc 忽略。'},
 ];
 
-export default function SmartContentSettings() {
+export default function SmartContentSettings(props) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true), [saving, setSaving] = useState(false);
     const [error, setError] = useState(''), [reload, setReload] = useState(0);
@@ -42,8 +41,8 @@ export default function SmartContentSettings() {
         finally { setSaving(false) }
     };
     return <div className="fk-content-wrap">
-        <BreadCrumb />
-        <div style={{marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
+        <BreadCrumb {...props}/>
+        <div className="page-list">
             <h3 className="page-title">智能内容</h3>
             <p>文章内容会发送到“AI 连接”中配置的服务。生成结果只写入编辑器，请审阅后再保存或发布。</p>
             {error ? <Alert type="error" showIcon title={error} action={<Button onClick={() => setReload(value => value + 1)}>重试</Button>} />

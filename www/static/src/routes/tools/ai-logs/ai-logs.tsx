@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/json';
 import BreadCrumb from '../../../components/breadcrumb';
-import {PAGE_SECTION_CONTENT_INSET} from '../../../components/protocol/page-section';
 import './ai-logs.less';
 
 hljs.registerLanguage('json', json);
@@ -56,7 +55,7 @@ function TextRecord({log, direction}: {log: Log; direction: 'request' | 'respons
         {text === null ? <p>{direction === 'response' ? '调用未返回内容' : '请求不含可记录文本'}</p>
             : <pre style={{whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 280, overflow: 'auto'}}>{text}</pre>}</>;
 }
-export default function AIAuditLogs() {
+export default function AIAuditLogs(props) {
     const [filters, setFilters] = useState<Record<string, string>>({});
     const [query, setQuery] = useState({}), [page, setPage] = useState(1), [reload, setReload] = useState(0);
     const [data, setData] = useState<any>({rows: [], summary: {}, total: 0});
@@ -102,9 +101,8 @@ export default function AIAuditLogs() {
     const summary = data.summary;
     const providerFor = (row: Log): Provider | undefined => (data.providers || []).find(provider => provider.id === row.provider);
     const modelName = (row: Log) => providerFor(row)?.models?.find(model => model.id === row.model)?.label || value(row.model);
-    return <div className="fk-content-wrap"><BreadCrumb /><div style={{marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
+    return <div className="fk-content-wrap"><BreadCrumb className="breadcrumb" {...props} /><div className="page-list">
         <h3 className="page-title">AI 调用日志</h3>
-        <p className="ai-logs-subtitle">查看 AI 调用记录、Token 用量和处理表现，追溯每一次调用。</p>
         <div className="ai-logs-stats" aria-label="筛选结果统计">
             <Card loading={loading}><Statistic title="请求次数" value={summary.calls || 0} suffix="次" />
                 <p>成功 {summary.successes || 0} 次 · 失败/超时/取消 {summary.failures || 0} 次</p></Card>
