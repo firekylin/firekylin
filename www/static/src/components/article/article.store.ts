@@ -18,6 +18,7 @@ class ArticleStore {
     options: {
       template: '',
       featuredImage: '',
+      customSummary: '',
       push_sites: [],
       passwordProtected: false,
       fields: {}
@@ -51,6 +52,7 @@ class ArticleStore {
       options: {
         template: '',
         featuredImage: '',
+        customSummary: '',
         push_sites: [],
         passwordProtected: false,
         fields: {}
@@ -90,6 +92,10 @@ class ArticleStore {
                 }
                 res.data.options.fields = res.data.options.fields && typeof res.data.options.fields === 'object'
                     && !Array.isArray(res.data.options.fields) ? res.data.options.fields : {};
+                if (res.data.options.customSummary === undefined && res.data.summary) {
+                  res.data.summary = new DOMParser().parseFromString(res.data.summary, 'text/html').body.textContent || '';
+                }
+                res.data.options.customSummary = res.data.options.customSummary ?? undefined;
                 this.setArticleInfo({ ...res.data });
             }
         }

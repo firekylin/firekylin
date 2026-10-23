@@ -5,10 +5,11 @@ import { RadioChangeEvent } from 'antd';
 
 interface ACPublicProps {
     isPublic: string;
+    allowPassword?: boolean;
     handlePublicChange: (e: RadioChangeEvent) => void;
 }
 
-function ArticleControlPublic({ handlePublicChange, isPublic }: ACPublicProps) {
+function ArticleControlPublic({ handlePublicChange, isPublic, allowPassword = true }: ACPublicProps) {
     const radioStyle = {
         display: 'flex',
         alignItems: 'center',
@@ -20,6 +21,7 @@ function ArticleControlPublic({ handlePublicChange, isPublic }: ACPublicProps) {
             <Radio style={radioStyle} value={'1'}>
                 公开
             </Radio>
+            {allowPassword && <Radio style={radioStyle} value={'password'}>密码访问</Radio>}
             <Radio style={radioStyle} value={'0'}>
                 不公开
             </Radio>

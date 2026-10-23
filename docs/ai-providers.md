@@ -56,3 +56,19 @@ workflow; the search link does not install third-party code automatically.
 
 Provider handlers receive an abort signal and should pass it to outbound requests. The shared client rejects
 unknown providers and models and applies a 60-second timeout.
+
+## Article editor
+
+The article editor provides title suggestions, summaries, article review and translation through
+`/admin/api/ai-editor`. These controls are visible only when the selected model supports `text` and its
+provider is not explicitly unconfigured. The endpoint uses the shared AI client and requires an authenticated
+administrator or author plus CSRF validation. It generates suggestions without saving the article.
+
+Title and summary generation require more than 250 Unicode characters of body content; review requires
+more than 100, and translation more than 10. Review changes are accepted, rejected or edited before replacing
+the body. Translation optionally includes the title.
+
+Custom summary source is stored in the existing post `options.customSummary` value. The rendered excerpt
+continues to use `summary`; an empty custom source restores the existing `<!--more-->` and excerpt-length
+behavior. Changing automatic excerpt settings preserves custom summaries. Password-protected articles hide
+custom summaries until unlocked. No database migration is required.

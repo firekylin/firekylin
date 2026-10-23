@@ -98,6 +98,7 @@ module.exports = class extends ContentsWidget {
     }
 
     delete detail.options.postPasswordHash;
+    delete detail.options.customSummary;
     detail.title = '此内容被密码保护';
     detail.content = protection.form(this.ctx, error);
     detail.summary = '这篇文章受密码保护。';

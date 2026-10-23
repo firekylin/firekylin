@@ -1,5 +1,6 @@
 import React from 'react';
-import { Row, Col, Input, message } from 'antd';
+import {AIContext, AIButton, useEditorAI} from './ai-editor';
+import { Row, Col, Input, message, Collapse } from 'antd';
 import generatePicker from 'antd/es/date-picker/generatePicker';
 import { inject, observer } from '@admin/utils/mobx-react';
 import dayjs from 'dayjs';
@@ -39,6 +40,7 @@ function Article(props: ArticleProps) {
         postPassword: '',
         clearPostPassword: false,
         customFieldsValid: true,
+        passwordMode: false,
     }));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -114,7 +116,7 @@ function Article(props: ArticleProps) {
         const nextId = +props.match.params.id || 0;
         if (nextId !== currentId) {
             legacy.articleId = nextId;
-            legacy.setState({ postPassword: '', clearPostPassword: false });
+            legacy.setState({ postPassword: '', clearPostPassword: false, passwordMode: false });
             props.articleStore.resetArticleInfo();
             legacy.init();
             if (nextId) {
@@ -133,7 +135,9 @@ function Article(props: ArticleProps) {
         props.articleStore.setArticleInfo({ tag: tags });
     };
     legacy.handlePublicChange = function handlePublicChange(e: RadioChangeEvent) {
-        props.articleStore.setArticleInfo({ is_public: e.target.value });
+        const passwordMode = e.target.value === 'password';
+        legacy.setState({passwordMode, clearPostPassword: !passwordMode, postPassword: ''});
+        props.articleStore.setArticleInfo({ is_public: passwordMode ? '1' : e.target.value });
     };
     legacy.handleImageChange = function handleImageChange(
         e: React.ChangeEvent<HTMLInputElement>,
@@ -189,6 +193,9 @@ function Article(props: ArticleProps) {
             return;
         }
 
+        if (legacy.state.passwordMode && !legacy.state.postPassword && !articleInfo.options.passwordProtected) {
+            message.error('请设置访问密码'); return;
+        }
         const params: any = {};
         if (legacy.articleId) {
             params.id = legacy.articleId;
@@ -241,7 +248,7 @@ function Article(props: ArticleProps) {
                           articleInfo.options.passwordProtected,
                       );
                 legacy.setState({ postPassword: '', clearPostPassword: false });
-                articleStore.setArticleInfo({
+                props.articleStore.setArticleInfo({
                     options: { passwordProtected },
                 });
                 const createdId = !params.id && Number(res.data.id);
@@ -432,58 +439,49 @@ function Article(props: ArticleProps) {
                                 />
                             </section>
                         )}
-                        {legacy.isPage() ? (
+                        <section className="category">
+                            <h5>封面图片</h5>
+                            <ArticleControlImage
+                                imageUrl={articleInfo.options.featuredImage}
+                                handleImageChange={(e) => legacy.handleImageChange(e)}
+                            />
+                        </section>
+                        <section className="category">
+                            <h5>内容摘要 <AIButton operation="summary" minimum={250} label="AI生成摘要" /></h5>
+                            <Input.TextArea aria-label="内容摘要" autoSize={{minRows: 4}} disabled={ai.busy === 'summary'}
+                                value={articleInfo.options.customSummary ?? articleInfo.summary ?? ''}
+                                placeholder="留空则从正文自动生成摘要"
+                                onChange={e => articleStore.setArticleInfo({summary: e.target.value, options: {customSummary: e.target.value}})} />
+                        </section>
+                        <Collapse items={[{key: 'advanced', label: '高级功能', forceRender: true, children: <>
+                        {legacy.isPage() ||
+                        window.SysConfig.userInfo.type !== 1 ? null : (
                             <section className="category">
-                                <h5>自定义模版</h5>
-                                <ArticleControlTemplate
-                                    template={articleInfo.options.template}
-                                    templateList={templateList}
-                                    handleTemplateChange={(value) =>
-                                        articleStore.setArticleInfo({
-                                            options: { template: value },
-                                        })
+                                <h5>选择作者</h5>
+                                <ArticleControlUser
+                                    user={articleInfo.user_id}
+                                    users={props.userStore.userList}
+                                    handleUserChange={(value) =>
+                                        legacy.handleUserChange(value)
                                     }
                                 />
                             </section>
-                        ) : null}
-                        {themeFields.length > 0 ? (
-                            <section className="category theme-fields">
-                                <h5>主题字段</h5>
-                                <ArticleControlThemeFields
-                                    fields={themeFields}
-                                    values={articleInfo.options.fields || {}}
-                                    onChange={(name, value) =>
-                                        articleStore.setArticleInfo({
-                                            options: {
-                                                fields: {
-                                                    ...(articleInfo.options.fields ||
-                                                        {}),
-                                                    [name]: value,
-                                                },
-                                            },
-                                        })
-                                    }
-                                />
-                            </section>
-                        ) : null}
+                        )}
+
                         <section className="category">
                             <h5>公开度</h5>
                             <ArticleControlPublic
-                                isPublic={articleInfo.is_public}
+                                allowPassword={!legacy.isPage()}
+                                isPublic={legacy.state.passwordMode || (articleInfo.options.passwordProtected && !legacy.state.clearPostPassword) ? 'password' : articleInfo.is_public}
                                 handlePublicChange={(e) => legacy.handlePublicChange(e)}
                             />
                         </section>
-                        {legacy.isPage() ? null : (
+                        {(legacy.state.passwordMode || (articleInfo.options.passwordProtected && !legacy.state.clearPostPassword)) ? (
                             <section className="category">
                                 <h5>访问密码</h5>
                                 <Input.Password
                                     value={legacy.state.postPassword}
-                                    disabled={legacy.state.clearPostPassword}
-                                    placeholder={
-                                        articleInfo.options.passwordProtected
-                                            ? '留空则保持原密码'
-                                            : '留空则不启用密码'
-                                    }
+                                    placeholder={articleInfo.options.passwordProtected ? '留空则保持原密码' : '请输入访问密码'}
                                     maxLength={256}
                                     onChange={(e) =>
                                         legacy.setState({
@@ -493,21 +491,8 @@ function Article(props: ArticleProps) {
                                     }
                                 />
 
-                                {articleInfo.options.passwordProtected ? (
-                                    <Checkbox
-                                        checked={legacy.state.clearPostPassword}
-                                        onChange={(e) =>
-                                            legacy.setState({
-                                                clearPostPassword: e.target.checked,
-                                                postPassword: '',
-                                            })
-                                        }
-                                    >
-                                        取消密码保护
-                                    </Checkbox>
-                                ) : null}
                             </section>
-                        )}
+                        ) : null}
                         <section className="category">
                             <h5>权限控制</h5>
                             <Checkbox
@@ -520,13 +505,6 @@ function Article(props: ArticleProps) {
                             >
                                 允许评论
                             </Checkbox>
-                        </section>
-                        <section className="category">
-                            <h5>封面图片</h5>
-                            <ArticleControlImage
-                                imageUrl={articleInfo.options.featuredImage}
-                                handleImageChange={(e) => legacy.handleImageChange(e)}
-                            />
                         </section>
                         <section className="category custom-fields">
                             <h5>自定义字段</h5>
@@ -561,19 +539,41 @@ function Article(props: ArticleProps) {
                                 }
                             />
                         </section>
-                        {legacy.isPage() ||
-                        window.SysConfig.userInfo.type !== 1 ? null : (
+                        {legacy.isPage() ? (
                             <section className="category">
-                                <h5>选择作者</h5>
-                                <ArticleControlUser
-                                    user={articleInfo.user_id}
-                                    users={props.userStore.userList}
-                                    handleUserChange={(value) =>
-                                        legacy.handleUserChange(value)
+                                <h5>自定义模版</h5>
+                                <ArticleControlTemplate
+                                    template={articleInfo.options.template}
+                                    templateList={templateList}
+                                    handleTemplateChange={(value) =>
+                                        articleStore.setArticleInfo({
+                                            options: { template: value },
+                                        })
                                     }
                                 />
                             </section>
-                        )}
+                        ) : null}
+                        {themeFields.length > 0 ? (
+                            <section className="category theme-fields">
+                                <h5>主题字段</h5>
+                                <ArticleControlThemeFields
+                                    fields={themeFields}
+                                    values={articleInfo.options.fields || {}}
+                                    onChange={(name, value) =>
+                                        articleStore.setArticleInfo({
+                                            options: {
+                                                fields: {
+                                                    ...(articleInfo.options.fields ||
+                                                        {}),
+                                                    [name]: value,
+                                                },
+                                            },
+                                        })
+                                    }
+                                />
+                            </section>
+                        ) : null}
+                        </>}]} />
                     </Col>
                 </Row>
             </div>
@@ -587,7 +587,8 @@ function Article(props: ArticleProps) {
         if (previousRef.current.mounted) legacy.onPropsChange(previousRef.current.props);
         previousRef.current = { props: props, state: state, mounted: true };
     });
-    return legacy.render();
+    const ai = useEditorAI(props.articleStore, title => legacy.handleTitle({target: {value: title}}), props.match.params.id);
+    return <AIContext.Provider value={ai}>{legacy.render()}{ai.dialogs}</AIContext.Provider>;
 }
 
 export default inject('sharedStore', 'userStore', 'articleStore')(observer(Article));

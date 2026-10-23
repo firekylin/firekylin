@@ -10,6 +10,7 @@ function redactProtectedPosts(posts) {
     }
     if (!options.postPasswordHash) return post;
     delete options.postPasswordHash;
+    delete options.customSummary;
     return Object.assign({}, post, {
       title: '此内容被密码保护',
       summary: '这篇文章受密码保护。',
@@ -150,12 +151,14 @@ module.exports = class extends Base {
    */
   async updateAllPostSummaries() {
     // get all posts' id and mark down content
-    const posts = await this.field('id, markdown_content').setRelation(false).select();
+    const posts = await this.field('id, markdown_content, options').setRelation(false).select();
     const allPromises = [];
 
     if (posts.length > 0) {
       for (let i = 0; i < posts.length; i++) {
         const item = posts[i];
+        const options = typeof item.options === 'string' ? JSON.parse(item.options || '{}') : (item.options || {});
+        if (typeof options.customSummary === 'string' && options.customSummary.trim()) continue;
         const summary = await this.getSummary(item.markdown_content);
 
         allPromises.push(this.where({ id: item.id }).update({ summary }));
@@ -177,7 +180,10 @@ module.exports = class extends Base {
     const markdown = rendered.markdown;
     const auto_summary = parseInt(options.auto_summary);
     data.content = rendered.content;
-    data.summary = await this.getSummary(markdown, auto_summary);
+    const postOptions = typeof data.options === 'string' ? JSON.parse(data.options || '{}') : (data.options || {});
+    data.summary = typeof postOptions.customSummary === 'string' && postOptions.customSummary.trim()
+      ? await this.markdownToHtml(postOptions.customSummary, {toc: false, highlight: true})
+      : await this.getSummary(markdown, auto_summary);
 
     data.summary = await filter('content.excerpt', data.summary, {post: data});
     data.summary = await filter('content.render', data.summary, {post: data, type: 'summary'});
