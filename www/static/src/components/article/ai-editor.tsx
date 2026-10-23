@@ -6,22 +6,24 @@ import axios from 'axios';
 import {Button, Checkbox, Input, Modal, Select, Spin, Tooltip} from 'antd';
 import {FileSearchOutlined, TranslationOutlined} from '@ant-design/icons';
 import './ai-editor.less';
+const TITLE_TOOLTIP = '当正文内容超过 250 个字时可以智能生成标题';
+const AI_TOOLTIPS: Record<string, {enabled: string; disabled: string}> = {
+    title: {enabled: TITLE_TOOLTIP, disabled: TITLE_TOOLTIP},
+    summary: {enabled: '智能生成摘要', disabled: '当正文内容超过250个字时可以智能生成摘要'},
+    review: {enabled: '智能审阅', disabled: '当正文内容超过100个字时可以使用智能审阅'},
+    translate: {enabled: '智能翻译', disabled: '当正文内容超过10个字是可以使用智能翻译'},
+    slug: {enabled: '智能 Slug', disabled: '当正文内容超过250个字时可以使用智能 Slug'},
+    category: {enabled: '智能分类选择', disabled: '当正文内容超过250个字时可以使用智能分类选择'},
+    tags: {enabled: '智能标签选择', disabled: '当正文内容超过250个字时可以使用智能标签选择'},
+};
+
 export const AIContext = React.createContext<any>(null);
 export function AIButton({operation, minimum, label, icon}: any) {
     const ai = React.useContext(AIContext);
     const feature = ({review: 'rewrite', tags: 'category'})[operation] || operation;
     if (!ai?.available || ai.features?.[feature] === false) return null;
-    const disabled = [...(ai.content || '')].length <= minimum || ai.busy;
-    const extraLabels = {slug: '智能 Slug', category: '智能分类选择', tags: '智能标签选择'};
-    const tooltip = extraLabels[operation] ? disabled ? `当正文内容超过250个字时可以使用${extraLabels[operation]}` : extraLabels[operation] : operation === 'title'
-        ? '当正文内容超过 250 个字时可以智能生成标题'
-        : operation === 'summary'
-            ? disabled ? '当正文内容超过250个字时可以智能生成摘要' : '智能生成摘要'
-            : operation === 'review'
-                ? disabled ? '当正文内容超过100个字时可以使用智能审阅' : '智能审阅'
-                : operation === 'translate'
-                    ? disabled ? '当正文内容超过10个字是可以使用智能翻译' : '智能翻译'
-                    : label;
+    const disabled = [...(ai.content || '')].length <= minimum || Boolean(ai.busy);
+    const tooltip = AI_TOOLTIPS[operation]?.[disabled ? 'disabled' : 'enabled'] ?? label;
     return <Tooltip title={tooltip}>
         <span><Button type="text" className="ai-editor-action" aria-label={label} aria-busy={operation !== 'review' && ai.busy === operation} disabled={disabled}
             icon={operation !== 'review' && ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
