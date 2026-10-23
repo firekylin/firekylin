@@ -1,6 +1,7 @@
 'use strict';
 
 const {Readable} = require('node:stream');
+const auditContext = require('../service/ai-audit-context');
 const {isAllowedOrigin} = require('./oauth-auth');
 
 const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
@@ -54,12 +55,14 @@ function createServerFactory({tools, auth, sdk, logger}) {
         const started = Date.now();
         try {
           const {confirm, ...toolInput} = input || {};
-          const value = await tools.execute(tool.name, toolInput, {
-            principal: auth.principal,
-            channel: 'mcp',
-            authorize: permission => auth.scopes.has(permission),
-            approve: () => confirm === true
-          });
+          const value = await auditContext.run({source: 'mcp', user: () => auth.principal,
+            request: () => ({url: '/mcp', method: 'POST', tool: tool.name, parameters: toolInput})},
+            () => tools.execute(tool.name, toolInput, {
+              principal: auth.principal,
+              channel: 'mcp',
+              authorize: permission => auth.scopes.has(permission),
+              approve: () => confirm === true
+            }));
           logger.info?.('[mcp] ' + JSON.stringify({
             action: tool.name, tokenId: auth.tokenId,
             userId: auth.principal.id, ok: true, durationMs: Date.now() - started

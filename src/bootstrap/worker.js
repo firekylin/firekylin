@@ -17,6 +17,7 @@ const {PackageCatalog} = require('../service/package-catalog');
 const {ThemeInstaller} = require('../service/theme-installer');
 const {PluginInstaller} = require('../service/plugin-installer');
 const {AIStore} = require('../ai/store');
+const {Audit} = require('../service/ai-audit');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
   ? global.firekylin.plugins
@@ -79,6 +80,7 @@ const pluginManager = existingPluginManager || new PluginManager({
   version: pack.version,
   logger: console,
   packageApi,
+  aiAudit: new Audit({model: () => think.model('ai_audit_log')}),
   aiStore: new AIStore({
     getOptions: includePrivate => think.model('options').getOptions(includePrivate),
     updateOptions: (key, value) => think.model('options').updateOptions(key, value),
@@ -170,6 +172,22 @@ if (!global[oauthMigrationKey]) {
     } catch (error) {
       if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
       throw error;
+    }
+  });
+}
+
+const auditMigrationKey = Symbol.for('firekylin.aiAuditMigration');
+if (!global[auditMigrationKey]) {
+  global[auditMigrationKey] = true;
+  think.beforeStartServer(async() => {
+    try {
+      const options = await think.model('options').getOptions(true);
+      if (!options.site_url) return;
+      await require('../service/ai-audit-schema').migrate({model: think.model('user'), config: think.config('model')});
+    } catch (error) {
+      if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
+      // Audit infrastructure must not prevent otherwise valid AI calls or site startup.
+      think.logger.error('[ai-audit] schema migration failed');
     }
   });
 }

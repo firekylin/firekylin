@@ -13,6 +13,8 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
   const migrationKey = Symbol.for('firekylin.commentSchemaMigration');
   const categoryMigrationKey = Symbol.for('firekylin.categorySchemaMigration');
   const oauthKey = Symbol.for('firekylin.mcp.oauthMigration');
+  const auditMigrationKey = Symbol.for('firekylin.aiAuditMigration');
+  const originalAuditMigration = global[auditMigrationKey];
   const originalOAuthMigration = global[oauthKey];
   const originalMigration = global[migrationKey];
   const originalCategoryMigration = global[categoryMigrationKey];
@@ -45,17 +47,19 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
   delete global[migrationKey];
   delete global[categoryMigrationKey];
   delete global[oauthKey];
+  delete global[auditMigrationKey];
 
   try {
     delete require.cache[workerPath];
     require(workerPath);
     const firstManager = global.firekylin.plugins;
+    assert.equal(startHooks.length, 4);
     delete require.cache[workerPath];
     assert.doesNotThrow(() => require(workerPath));
     assert.equal(global.firekylin.plugins, firstManager);
     assert.equal(managerInstances, 1);
     assert.equal(pluginLoads, 1);
-    assert.equal(startHooks.length, 3);
+    assert.equal(startHooks.length, 4);
     assert.equal(firstManager.tools, firstManager.abilities);
     assert.equal(firstManager.tools.list().length, 26);
     assert.ok(firstManager.tools.has('posts.create_draft', 'core:management'));
@@ -63,6 +67,8 @@ test('worker bootstrap can be evaluated again with a retained registry', () => {
     assert.ok(firstManager.tools.has('settings.update', 'core:management'));
     assert.ok(firstManager.tools.has('media.upload', 'core:media'));
   } finally {
+    if (originalAuditMigration === undefined) delete global[auditMigrationKey];
+    else global[auditMigrationKey] = originalAuditMigration;
     if (originalOAuthMigration === undefined) delete global[oauthKey];
     else global[oauthKey] = originalOAuthMigration;
     Module._load = originalLoad;

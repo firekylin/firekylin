@@ -32,24 +32,31 @@ async function handleAdminExtension(manager, ctx) {
     if (!token || token !== adminAuth.csrfToken(ctx)) return ctx.throw(403, 'CSRF validation failed');
   }
   const [, pluginId, resource, resourceId] = match.map(value => value && decodeURIComponent(value));
+  const auditContext = require('../service/ai-audit-context');
   const context = {ctx, user, pluginId};
-  let result;
-  if (resource === 'pages' && ctx.method === 'GET') {
-    result = await manager.admin.loadPage(pluginId, resourceId, context);
-  }
-  if (resource === 'forms' && ctx.method === 'GET') {
-    result = await manager.admin.loadForm(pluginId, resourceId, context);
-  }
-  if (resource === 'forms' && ctx.method === 'POST') {
-    result = await manager.admin.submitForm(pluginId, resourceId, requestBody(ctx), context);
-  }
-  if (resource === 'actions' && ctx.method === 'POST') {
-    result = await manager.admin.runAction(pluginId, resourceId, requestBody(ctx), context);
-  }
-  if (typeof result === 'undefined') return false;
-  if (result === null) return ctx.throw(404, 'Plugin admin resource not found');
-  ctx.body = adminResponse(result);
-  return true;
+  // Resource names come from registered routes, not the caller identity.
+  const provider = (manager.aiProviders?.list() || []).find(item =>
+    item.admin?.pluginId === pluginId && item.admin?.testActionId === resourceId);
+  const store = {user: () => user, source: 'admin', scenario: provider ? 'connection.test' : `plugin.${resource}.${resourceId}`};
+  return auditContext.run(store, async() => {
+    let result;
+    if (resource === 'pages' && ctx.method === 'GET') {
+      result = await manager.admin.loadPage(pluginId, resourceId, context);
+    }
+    if (resource === 'forms' && ctx.method === 'GET') {
+      result = await manager.admin.loadForm(pluginId, resourceId, context);
+    }
+    if (resource === 'forms' && ctx.method === 'POST') {
+      result = await manager.admin.submitForm(pluginId, resourceId, requestBody(ctx), context);
+    }
+    if (resource === 'actions' && ctx.method === 'POST') {
+      result = await manager.admin.runAction(pluginId, resourceId, requestBody(ctx), context);
+    }
+    if (typeof result === 'undefined') return false;
+    if (result === null) return ctx.throw(404, 'Plugin admin resource not found');
+    ctx.body = adminResponse(result);
+    return true;
+  });
 }
 
 module.exports = function pluginRoutes() {

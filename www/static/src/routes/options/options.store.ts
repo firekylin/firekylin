@@ -6,7 +6,7 @@ import CommentStore from './comment/comment.store';
 import AnalysisStore from './analysis/analysis.store';
 import OptionsPushStore from './push/push.store';
 import OptionsUploadStore from './upload/upload.store';
-import OptionsImportStore from './import/import.store';
+import OptionsImportStore from '../tools/import/import.store';
 
 class OptionsStore {
     generalStore: GeneralStore;

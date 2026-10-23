@@ -6,10 +6,11 @@ function nonEmpty(value, label) {
 }
 
 class AIClient {
-  constructor({providers, preferences, timeout = 60000}) {
+  constructor({providers, preferences, timeout = 60000, audit}) {
     this.providers = providers;
     this.preferences = preferences;
     this.timeout = timeout;
+    this.audit = audit;
   }
 
   async models() {
@@ -39,12 +40,28 @@ class AIClient {
   }
 
   async generate(request, context = {}) {
+    const entry = await this.audit?.start(request, context);
+    const state = {request, entry};
+    try {
+      const result = await this.perform(request, context, state);
+      await this.audit?.finish(entry, {...state, result});
+      return result;
+    } catch (error) {
+      await this.audit?.finish(entry, {...state, error, failed: true,
+        timeout: state.timeout || error?.name === 'TimeoutError' || error?.code === 'ETIMEDOUT',
+        cancelled: Boolean(context.signal?.aborted)});
+      throw error;
+    }
+  }
+
+  async perform(request, context, state) {
     if (!request || typeof request !== 'object' || Array.isArray(request)) {
       throw new TypeError('AI request must be an object');
     }
     const selected = await this.preferences.get();
     const providerId = request.provider || selected.provider;
     const modelId = request.model || selected.model;
+    state.request = {...request, provider: providerId, model: modelId};
     const provider = this.providers.get(nonEmpty(providerId, 'Provider'));
     if (!provider) throw new Error(`AI provider is not available: ${providerId}`);
     const model = provider.models.find(item => item.id === modelId);
@@ -61,15 +78,33 @@ class AIClient {
     if (!Array.isArray(request.messages) || !request.messages.length) {
       throw new TypeError('AI request requires messages');
     }
+    await this.audit?.resolve(state.entry, state.request);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(new Error('AI request timed out')), this.timeout);
+    const timer = setTimeout(() => {
+      state.timeout = true;
+      controller.abort(new Error('AI request timed out'));
+    }, this.timeout);
+    const signal = context.signal
+      ? AbortSignal.any([context.signal, controller.signal]) : controller.signal;
+    let onAbort;
+    let active = true;
+    const reportUsage = (raw, response) => {
+      if (!active || signal.aborted || !provider.usage) return;
+      state.usageMetadata = {...state.usageMetadata, ...provider.usage.metadata(raw, response)};
+    };
     try {
-      const signal = context.signal
-        ? AbortSignal.any([context.signal, controller.signal]) : controller.signal;
-      return await provider.generate({...request, provider: providerId, model: modelId}, {
-        ...context, signal
+      const aborted = new Promise((resolve, reject) => {
+        onAbort = () => reject(signal.reason || new Error('AI request cancelled'));
+        signal.addEventListener('abort', onAbort, {once: true});
+        if (signal.aborted) onAbort();
       });
+      if (signal.aborted) return await aborted;
+      const result = await Promise.race([Promise.resolve().then(() => provider.generate(
+        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage})), aborted]);
+      return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
     } finally {
+      active = false;
+      signal.removeEventListener('abort', onAbort);
       clearTimeout(timer);
     }
   }

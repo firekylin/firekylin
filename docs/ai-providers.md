@@ -96,3 +96,81 @@ them in lighter text without a background. Three dots breathe in sequence beside
 is running and disappear immediately when input interrupts it or the request finishes. Tab accepts a suggestion; typing, selection changes, Escape and blur dismiss it.
 Input-method composition pauses requests. Requests are cancelled on edits, navigation and disabling the
 feature, and late responses cannot replace a newer suggestion. Suggestions are never saved automatically.
+
+## Call audit logs
+
+All calls through the shared client are recorded by core, including connection tests and plugin calls.
+Administrators can inspect **管理工具 → AI 调用日志**. Records are retained permanently unless an
+administrator manually deletes selected records or records before a date. No cost estimates are made.
+Each generation gets a request ID; calls in one operation share a correlation ID. Authentication comes
+from server-side async request context, never `request.user`, `actor`, or another submitted identity.
+Outside requests, calls are attributed to system tasks. Unauthenticated HTTP calls are marked unknown.
+Plugin wrappers add their owning plugin ID. Plugins can supply a descriptive server-side scenario:
+
+```js
+const result = await ctx.ai.generate({messages: [{role: 'user', content: article}]}, {
+  scenario: 'article.outline', signal
+});
+```
+
+Provider results retain native `usage` and may add `usageDetails` (see `Firekylin.AIUsageDetails`) with
+`inputTokens`, `outputTokens`, `totalTokens`, `cacheReadTokens`, `cacheWriteTokens`, `reasoningTokens`.
+Use `null` for unavailable counts; zero means a known zero. Input/output counts include their applicable
+cache/reasoning components, so detail fields must not be added again. Total can be derived only when
+both input and output are known. Providers may add `providerRequestId` to results or thrown errors;
+never attach a whole response for auditing. Unrecognized/older usage fields remain unknown.
+
+Calls start as unfinished and are finalized on success, failure, timeout or cancellation. A process exit
+can leave unfinished records. Audit write failures produce a generic diagnostic and do not replace the
+AI result or original exception. When a provider ignores cancellation, core stops waiting; it cannot
+guarantee the remote provider stops processing or billing.
+
+Request and response text are always recorded for subsequent calls; there is no recording switch. Each direction keeps at
+most 10,000 Unicode characters of message/output text, with truncation flags. Images, binary payloads,
+request headers and complete network responses are not stored. Common API key/JWT/authorization/cookie
+patterns are redacted before persistence. This does not guarantee detection of sensitive natural language.
+Errors store a safe category and generic description rather than upstream error bodies.
+
+The admin-only `/admin/api/ai-logs` endpoint supports paginated GET lists (without text) or GET `id`
+details. Filters: `from` inclusive, `to` exclusive (ISO timestamps or UTC dates), `actor_id`, `scenario`,
+`provider`, `model`, `status`. Summaries use the same filters and sum known counts independently.
+CSRF-protected POST cleanup operations are
+`{action: 'cleanup', scope: 'filtered', filters: {provider: 'example'}}` (all matching pages; an explicit
+empty filter object selects every log), `{action: 'cleanup', ids: [positive IDs]}` (at most 100) or `{action: 'cleanup', before: ISO timestamp}`.
+Core creates the prefixed audit table/indexes during installed-site startup for SQLite, MySQL, TiDB,
+and PostgreSQL. Web installation also creates the audit schema before completion, without requiring a restart.
+
+The log list includes non-commenter backend users as caller filter options and current provider metadata
+for names, logos and model labels. Date ranges use local calendar days in the UI (inclusive end day).
+The list shows total tokens and throughput, calculated as total tokens / elapsed seconds, to two decimals.
+Zero/missing duration or missing usage yields unknown throughput rather than infinity.
+
+Details group base metadata, model metadata, token usage, request text, response text and request context.
+The JSON context captures the initiating request URL/method/source/query/body parameters and generation
+arguments. No complete headers, credential fields, image parts or binary values are retained. Individual
+strings are capped at 10,000 characters, with a 100,000-character string budget and bounded structure;
+truncation is explicitly marked while preserving valid JSON. Older logs without context remain readable.
+
+
+### Declarative usage adapters
+
+Declare `usageAdapter` on the provider definition. Core supports `protocol: 'chat-completions'`
+and `protocol: 'responses'` for standard field names. Override only differences in `fields`, keyed
+by `AIUsageDetails` names. Selectors can be dotted paths, ordered fallback arrays, `{field, default}`
+for optional counters, or `{sum: [...]}` for native counters that must be combined. Missing required
+operands remain unknown; cached and reasoning details are not added to the total a second time.
+
+```js
+usageAdapter: {protocol: 'chat-completions', fields: {
+  cacheReadTokens: ['prompt_cache_hit_tokens', 'prompt_tokens_details.cached_tokens']
+}}
+```
+
+The generation context supplies `reportUsage(rawUsage, response)`. Call it with `undefined` usage
+as soon as response headers arrive, then with native usage after parsing JSON and before checking
+for empty output. Core extracts only normalized counters and the request ID synchronously, adds
+`usageDetails` to successful results, and makes reported metadata available to auditing even if the
+provider throws, times out or is cancelled later. Original provider errors remain unchanged. Reports
+after completion or cancellation are ignored; full response objects and headers are never stored.
+Existing providers without declarations keep their previous return values and legacy usage support.
+No additional utility npm package is required.

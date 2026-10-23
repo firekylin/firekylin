@@ -1,5 +1,7 @@
 'use strict';
 
+const {usageAdapter} = require('./usage');
+
 const PROVIDER_ID = /^[a-z][a-z0-9._-]*$/;
 
 function requiredString(value, label) {
@@ -68,6 +70,7 @@ class AIProviderRegistry {
       configured: typeof definition.configured === 'function' ? definition.configured : undefined,
       admin: admin ? Object.freeze({pluginId: owner, formId: admin.formId,
         testActionId: admin.testActionId}) : undefined,
+      usage: definition.usageAdapter ? usageAdapter(definition.usageAdapter) : undefined,
       generate: definition.generate
     });
     this.providers.set(id, provider);
