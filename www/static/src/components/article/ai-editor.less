@@ -11,3 +11,43 @@
 .ai-editor-action:not(:disabled):focus-visible .ai-sparkle-icon {
     color: rgba(0, 0, 0, .5);
 }
+
+.md-toolbar .ai-editor-action.ant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    padding: 5px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: #fff;
+    color: #999;
+    font-size: 20px;
+    vertical-align: top;
+
+    .anticon,
+    .ai-sparkle-icon {
+        width: 20px;
+        height: 20px;
+        color: inherit;
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    &:not(:disabled):hover,
+    &:not(:disabled):focus-visible {
+        background: #f6f6f6;
+        color: #0081ff;
+    }
+
+    &:disabled {
+        background: #fff;
+        color: #d2d2d2;
+    }
+}
