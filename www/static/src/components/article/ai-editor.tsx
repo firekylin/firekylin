@@ -1,3 +1,5 @@
+import ReviewMerge from './review-merge/review-merge';
+import {reviewChanges, mergedContent} from './review-merge/diff';
 import AISparkleIcon from '../ai-sparkle-icon';
 import React from 'react';
 import axios from 'axios';
@@ -28,29 +30,7 @@ export function AIToolbar() {
     return <><li className="tb-btn"><AIButton operation="review" minimum={100} label="文章审阅" icon={<FileSearchOutlined />} /></li>
         <li className="tb-btn"><AIButton operation="translate" minimum={10} label="翻译" icon={<TranslationOutlined />} /></li></>;
 }
-// Paragraph anchors keep unchanged Markdown outside suggestions and bound comparison cost.
-export function reviewChanges(before: string, after: string) {
-    const a = before.split(/(?<=\n)/), b = after.split(/(?<=\n)/);
-    const result: any[] = [];
-    let i = 0, j = 0;
-    while (i < a.length || j < b.length) {
-        if (i < a.length && j < b.length && a[i] === b[j]) {
-            result.push({original: a[i++], proposed: b[j++], unchanged: true}); continue;
-        }
-        let ai = a.length, bj = b.length, found = false;
-        for (let distance = 1; distance < 160 && !found; distance++) {
-            for (let offset = 0; offset <= distance; offset++) {
-                const x = i + offset, y = j + distance - offset;
-                if (x < a.length && y < b.length && a[x] === b[y]) {
-                    ai = x; bj = y; found = true; break;
-                }
-            }
-        }
-        result.push({original: a.slice(i, ai).join(''), proposed: b.slice(j, bj).join(''), decision: ''});
-        i = ai; j = bj;
-    }
-    return result;
-}
+export {reviewChanges} from './review-merge/diff';
 export function useEditorAI(store: any, applyTitle: (title: string) => void, scope?: string) {
     const [available, setAvailable] = React.useState(false);
     const [busy, setBusy] = React.useState('');
@@ -108,7 +88,7 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
     const unresolved = changes.some(change => !change.unchanged && !change.decision);
     const applyReview = () => {
         if (store.articleInfo.markdown_content !== snapshot.current.content && !window.confirm('正文已发生变化，是否使用审阅结果覆盖当前正文？')) return;
-        store.setArticleInfo({markdown_content: changes.map(change => change.unchanged || change.decision === 'reject' ? change.original : change.proposed).join('')});
+        store.setArticleInfo({markdown_content: mergedContent(changes)});
         setDialog('');
     };
     const dialogs = <>
@@ -162,14 +142,12 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
                 ]} />
             <p><Checkbox checked={translateTitle} disabled={!!busy} onChange={e => setTranslateTitle(e.target.checked)}>同步翻译标题</Checkbox></p>
         </Modal>
-        <Modal title="文章审阅" width={1000} open={dialog === 'review'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
+        <Modal title="文章审阅" width="min(1280px, 96vw)" open={dialog === 'review'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
             footer={<Button type="primary" disabled={!!busy || unresolved || !changes.length} onClick={applyReview}>更新正文</Button>}>
-            {busy === 'review' ? <Spin description="正在审阅文章…" /> : <>
-                {unresolved && <p>还有未处理的建议： <Button onClick={() => setChanges(c => c.map(x => x.unchanged || x.decision ? x : {...x, decision: 'accept'}))}>全部接受</Button> <Button onClick={() => setChanges(c => c.map(x => x.unchanged || x.decision ? x : {...x, decision: 'reject'}))}>全部拒绝</Button></p>}
-                <div className="ai-review">{changes.map((change, index) => change.unchanged ? <pre key={index}>{change.original}</pre> :
-                    <section key={index}><div className="ai-review-columns"><pre className="removed">{change.original || '（新增）'}</pre><div className="added"><Input.TextArea aria-label={`修改建议 ${index + 1}`} autoSize value={change.proposed} onChange={e => decide(index, {proposed: e.target.value, decision: 'edit'})} /></div></div>
-                        <Button type={change.decision === 'accept' ? 'primary' : 'default'} onClick={() => decide(index, {decision: 'accept'})}>接受</Button> <Button type={change.decision === 'reject' ? 'primary' : 'default'} onClick={() => decide(index, {decision: 'reject'})}>拒绝</Button> {change.decision === 'edit' && '已手动合并'}</section>)}</div>
-            </>}
+            {busy === 'review' ? <Spin description="正在审阅文章…" /> : <ReviewMerge
+                changes={changes} onChange={decide}
+                onDecideAll={decision => setChanges(previous => previous.map(change =>
+                    change.unchanged || change.decision ? change : {...change, decision}))} />}
         </Modal>
     </>;
     return {available, busy, run, content: store.articleInfo.markdown_content, dialogs};
