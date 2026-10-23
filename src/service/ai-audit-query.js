@@ -44,6 +44,19 @@ function pagination(input) {
   return {page, size};
 }
 function cleanup(input) {
+  if (input.scope === 'filtered') {
+    const selected = input.filters;
+    const allowed = ['from', 'to', 'actor_id', 'scenario', 'provider', 'model', 'status'];
+    if (Object.hasOwn(input, 'ids') || Object.hasOwn(input, 'before') ||
+        !selected || typeof selected !== 'object' || Array.isArray(selected) ||
+        Object.entries(selected).some(([key, value]) => !allowed.includes(key) ||
+          (typeof value !== 'string' && !(key === 'actor_id' && Number.isSafeInteger(value) && value > 0)))) {
+      return invalid();
+    }
+    // An explicit empty filter object means all logs. Pagination never limits this operation.
+    return filters(selected);
+  }
+  if (input.scope !== undefined) return invalid();
   if (Array.isArray(input.ids) && !input.before && input.ids.length > 0 && input.ids.length <= 100 &&
       input.ids.every(id => Number.isSafeInteger(id) && id > 0)) return {id: ['IN', [...new Set(input.ids)]]};
   if (input.before && !input.ids) return {started_at: ['<', date(input.before)]};
@@ -56,6 +69,7 @@ async function list(model, input) {
     SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) AS successes,
     SUM(CASE WHEN status IN ('failure','timeout','cancelled') THEN 1 ELSE 0 END) AS failures,
     SUM(CASE WHEN input_tokens IS NULL OR output_tokens IS NULL OR total_tokens IS NULL THEN 1 ELSE 0 END) AS unknown_usage,
+    AVG(duration_ms) AS average_duration_ms,
     SUM(input_tokens) AS input_tokens,SUM(output_tokens) AS output_tokens,SUM(total_tokens) AS total_tokens`;
   const [rows, summary] = await Promise.all([
     model().where(where).field(LIST_FIELDS)
@@ -66,6 +80,7 @@ async function list(model, input) {
       .find()
   ]);
   for (const key of Object.keys(summary)) if (summary[key] !== null) summary[key] = Number(summary[key]);
+  summary.success_rate = summary.calls ? (summary.successes || 0) / summary.calls * 100 : null;
   return {rows, summary, total: summary.calls || 0, page, pageSize: size};
 }
 module.exports = {STATUSES, LIST_FIELDS, date, filters, pagination, cleanup, list};

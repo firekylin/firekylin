@@ -1,0 +1,32 @@
+.ai-logs-subtitle {
+    color: #888;
+    margin-bottom: 24px;
+}
+.ai-logs-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+    p { color: #888; font-size: 12px; margin: 12px 0 0; }
+}
+.ai-logs-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.ai-logs-filters { flex: 1; min-width: 0; }
+.ai-logs-danger-actions { flex-shrink: 0; justify-content: flex-end; }
+.ai-logs-recording {
+    margin-top: 24px;
+    p { color: #888; margin: 12px 0 0; }
+}
+@media (max-width: 1200px) {
+    .ai-logs-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ai-logs-toolbar { flex-wrap: wrap; }
+    .ai-logs-danger-actions { margin-left: auto; }
+}
+@media (max-width: 600px) {
+    .ai-logs-stats { grid-template-columns: 1fr; }
+}

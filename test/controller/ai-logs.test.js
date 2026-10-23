@@ -72,3 +72,13 @@ test('inherited REST mutation methods cannot bypass CSRF or update audit rows', 
   assert.throws(() => instance.putAction(), {status: 405});
   assert.throws(() => instance.deleteAction(), {status: 405});
 });
+
+test('filtered cleanup reuses validated list filters and still requires administrator CSRF', async() => {
+  const {instance, calls} = setup();
+  instance.post = () => ({action: 'cleanup', scope: 'filtered', filters: {provider: 'deepseek', status: 'failure'}});
+  await assert.rejects(instance.postAction(), {status: 403});
+  instance.ctx.headers['X-CSRF-Token'] = auth.csrfToken(instance.ctx);
+  await assert.rejects(instance.postAction(), /PREVENT_NEXT_PROCESS/);
+  assert.deepEqual(calls, [{provider: 'deepseek', status: 'failure'}]);
+  assert.equal(instance.result.deleted, 2);
+});

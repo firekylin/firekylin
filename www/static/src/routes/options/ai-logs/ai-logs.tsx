@@ -1,9 +1,10 @@
 import {useEffect, useState} from 'react';
-import {Alert, AutoComplete, Button, Descriptions, Input, Modal, Select, Space, Spin, Switch, Table, message} from 'antd';
+import {Alert, AutoComplete, Button, Card, Descriptions, Input, Modal, Select, Space, Spin, Statistic, Switch, Table, message} from 'antd';
 import type {Key} from 'react';
 import axios from 'axios';
 import BreadCrumb from '../../../components/breadcrumb';
 import {PAGE_SECTION_CONTENT_INSET} from '../../../components/protocol/page-section';
+import './ai-logs.less';
 
 type Log = {id: number; [key: string]: any};
 const statuses: Record<string, string> = {unfinished: '未完成', success: '成功', failure: '失败', timeout: '超时', cancelled: '取消'};
@@ -38,14 +39,15 @@ export default function AIAuditLogs() {
     const [selected, setSelected] = useState<Key[]>([]);
     const [detailId, setDetailId] = useState<number | null>(null), [detail, setDetail] = useState<Log | null>(null);
     const [detailError, setDetailError] = useState('');
-    const [before, setBefore] = useState('');
+    const [clearing, setClearing] = useState(false);
+    const [confirmation, setConfirmation] = useState<{input: Record<string, unknown>; description: string} | null>(null);
     useEffect(() => {
         const controller = new AbortController();
         setLoading(true); setError('');
         void (async() => {
             try {
                 const result = await read({...query, page}, controller.signal);
-                if (!controller.signal.aborted) setData(result);
+                if (!controller.signal.aborted) setData({...result, filters: query});
             } catch (e: any) {
                 if (!controller.signal.aborted) setError(e.response?.data?.errmsg || e.message);
             } finally {if (!controller.signal.aborted) setLoading(false)}
@@ -66,35 +68,57 @@ export default function AIAuditLogs() {
         try { await write({action: 'settings', recordContent}); setData(previous => ({...previous, settings: {recordContent}})); message.success('记录设置已保存，仅影响之后的调用') }
         catch (e: any) { message.error(e.response?.data?.errmsg || e.message) } finally {setBusy(false)}
     };
-    const cleanup = (input: any, description: string) => Modal.confirm({title: '确认清理 AI 调用日志？', content: description,
-        okText: '永久删除', okButtonProps: {danger: true}, cancelText: '取消', onOk: async() => {
-            try {const result = await write({action: 'cleanup', ...input}); setSelected([]); setReload(v => v + 1); message.success(`已删除 ${result.deleted} 条日志`)}
-            catch (e: any) {message.error(e.response?.data?.errmsg || e.message); throw e}
-        }});
+    const cleanup = (input: Record<string, unknown>, description: string) => setConfirmation({input, description});
+    const confirmCleanup = async() => {
+        if (!confirmation) return;
+        setClearing(true);
+        try {
+            const result = await write({action: 'cleanup', ...confirmation.input});
+            setConfirmation(null); setSelected([]); setPage(1); setReload(v => v + 1);
+            message.success(`已删除 ${result.deleted} 条日志`);
+        } catch (e: any) {message.error(e.response?.data?.errmsg || e.message)}
+        finally {setClearing(false)}
+    };
     const summary = data.summary;
     return <div className="fk-content-wrap"><BreadCrumb /><div style={{marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
         <h3 className="page-title">AI 调用日志</h3>
-        <p>日志永久保留，可手动清理。Token 为供应商报告的用量，缺失时显示“未知”；暂不估算费用。</p>
-        <Space wrap><Switch aria-label="记录请求与返回文本" checked={data.settings?.recordContent === true}
-            disabled={loading || busy} loading={busy} onChange={changeRecording} />记录请求与返回文本（默认关闭）</Space>
-        <p>开启后仅保存之后调用的脱敏文本，每个方向最多 10,000 个字符。已过滤常见凭证模式，无法保证识别所有自然语言敏感信息。</p>
-        <Space wrap style={{marginBottom: 16}}>
-            <Input type="date" aria-label="开始日期" value={filters.from || ''} onChange={e => updateFilter('from', e.target.value)} />
-            <Input type="date" aria-label="结束日期（不含）" title="结束日期（不含当天）" value={filters.to || ''} onChange={e => updateFilter('to', e.target.value)} />
-            <Input placeholder="调用人 ID" aria-label="调用人 ID" style={{width: 120}} value={filters.actor_id || ''} onChange={e => updateFilter('actor_id', e.target.value)} />
-            <AutoComplete aria-label="场景" placeholder="全部场景" allowClear style={{width: 150}} value={filters.scenario || undefined}
-                options={Object.entries(scenarios).map(([v, label]) => ({value: v, label}))} onChange={v => updateFilter('scenario', v || '')} />
-            {['provider', 'model'].map(key => <Input key={key} aria-label={key === 'provider' ? '供应商' : '模型'} placeholder={key === 'provider' ? '供应商 ID' : '模型 ID'}
-                style={{width: 150}} value={filters[key] || ''} onChange={e => updateFilter(key, e.target.value)} />)}
-            <Select aria-label="状态" placeholder="全部状态" allowClear style={{width: 120}} value={filters.status || undefined}
-                options={Object.entries(statuses).map(([v, label]) => ({value: v, label}))} onChange={v => updateFilter('status', v || '')} />
-            <Button type="primary" onClick={() => {setPage(1); setSelected([]); setQuery({...filters, ...(filters.from ? {from: localMidnight(filters.from)} : {}), ...(filters.to ? {to: localMidnight(filters.to)} : {})})}}>筛选</Button>
-            <Button onClick={() => {setFilters({}); setQuery({}); setPage(1); setSelected([])}}>重置</Button>
-            <Button onClick={() => setReload(v => v + 1)}>刷新</Button>
-        </Space>
+        <p className="ai-logs-subtitle">查看 AI 调用记录、Token 用量和处理表现，追溯每一次调用。</p>
+        <div className="ai-logs-stats" aria-label="筛选结果统计">
+            <Card loading={loading}><Statistic title="请求次数" value={summary.calls || 0} suffix="次" />
+                <p>成功 {summary.successes || 0} 次 · 失败/超时/取消 {summary.failures || 0} 次</p></Card>
+            <Card loading={loading}><Statistic title="Tokens 数量" value={summary.total_tokens ?? '未知'} />
+                <p>仅汇总已知用量 · 用量不完整 {summary.unknown_usage || 0} 次</p></Card>
+            <Card loading={loading}><Statistic title="平均处理时间" value={summary.average_duration_ms ?? '未知'}
+                precision={summary.average_duration_ms == null ? undefined : 0} suffix={summary.average_duration_ms == null ? undefined : 'ms'} />
+                <p>仅统计已记录处理时间的请求</p></Card>
+            <Card loading={loading}><Statistic title="成功率" value={summary.success_rate ?? '未知'}
+                precision={summary.success_rate == null ? undefined : 1} suffix={summary.success_rate == null ? undefined : '%'} />
+                <p>成功请求 / 全部请求</p></Card>
+        </div>
+        <div className="ai-logs-toolbar">
+            <Space wrap className="ai-logs-filters">
+                <Input type="date" aria-label="开始日期" value={filters.from || ''} onChange={e => updateFilter('from', e.target.value)} />
+                <Input type="date" aria-label="结束日期（不含）" title="结束日期（不含当天）" value={filters.to || ''} onChange={e => updateFilter('to', e.target.value)} />
+                <Input placeholder="调用人 ID" aria-label="调用人 ID" style={{width: 120}} value={filters.actor_id || ''} onChange={e => updateFilter('actor_id', e.target.value)} />
+                <AutoComplete aria-label="场景" placeholder="全部场景" allowClear style={{width: 150}} value={filters.scenario || undefined}
+                    options={Object.entries(scenarios).map(([v, label]) => ({value: v, label}))} onChange={v => updateFilter('scenario', v || '')} />
+                {['provider', 'model'].map(key => <Input key={key} aria-label={key === 'provider' ? '供应商' : '模型'} placeholder={key === 'provider' ? '供应商 ID' : '模型 ID'}
+                    style={{width: 150}} value={filters[key] || ''} onChange={e => updateFilter(key, e.target.value)} />)}
+                <Select aria-label="状态" placeholder="全部状态" allowClear style={{width: 120}} value={filters.status || undefined}
+                    options={Object.entries(statuses).map(([v, label]) => ({value: v, label}))} onChange={v => updateFilter('status', v || '')} />
+                <Button type="primary" onClick={() => {setPage(1); setSelected([]); setQuery({...filters, ...(filters.from ? {from: localMidnight(filters.from)} : {}), ...(filters.to ? {to: localMidnight(filters.to)} : {})})}}>筛选</Button>
+                <Button onClick={() => {setFilters({}); setQuery({}); setPage(1); setSelected([])}}>重置</Button>
+                <Button onClick={() => setReload(v => v + 1)}>刷新</Button>
+            </Space>
+            <Space wrap className="ai-logs-danger-actions">
+                <Button danger disabled={loading || clearing || !!error || !selected.length}
+                    onClick={() => cleanup({ids: [...selected]}, `将永久删除选中的 ${selected.length} 条日志。`)}>清理选中日志</Button>
+                <Button danger disabled={loading || clearing || !!error || !data.total}
+                    onClick={() => cleanup({scope: 'filtered', filters: {...data.filters}},
+                        `将永久删除当前已应用筛选条件下的所有日志（当前 ${data.total} 条，包含所有分页）。${Object.values(data.filters || {}).some(Boolean) ? '' : '当前没有筛选条件，将清理全部日志。'}此操作不可撤销。`)}>清理当前所有日志</Button>
+            </Space>
+        </div>
         {error && <Alert type="error" title={error} showIcon />}
-        <p>调用 {summary.calls || 0} 次 · 成功 {summary.successes || 0} · 失败/超时/取消 {summary.failures || 0} · 用量不完整 {summary.unknown_usage || 0} 次</p>
-        <p>已知 Token 汇总：输入 {value(summary.input_tokens)} · 输出 {value(summary.output_tokens)} · 总计 {value(summary.total_tokens)}（各列仅汇总已知值）</p>
         <Table<Log> rowKey="id" loading={loading} dataSource={data.rows} scroll={{x: 1300}}
             rowSelection={{selectedRowKeys: selected, onChange: setSelected}}
             pagination={{current: page, pageSize: 20, total: data.total, showSizeChanger: false, onChange: next => {setPage(next); setSelected([])}}}
@@ -108,9 +132,18 @@ export default function AIAuditLogs() {
                 ...['input_tokens', 'output_tokens', 'total_tokens'].map((key, i) => ({title: ['输入 Token', '输出 Token', '总 Token'][i], dataIndex: key, render: value})),
                 {title: '详情', render: (_, row) => <Button type="link" onClick={() => setDetailId(row.id)}>查看</Button>},
             ]} />
-        <Space wrap><Button danger disabled={!selected.length} onClick={() => cleanup({ids: selected}, `将永久删除选中的 ${selected.length} 条日志。`)}>清理选中日志</Button>
-            <Input type="date" aria-label="清理日期" value={before} onChange={e => setBefore(e.target.value)} />
-            <Button danger disabled={!before} onClick={() => cleanup({before: localMidnight(before)}, `将永久删除 ${before} 之前的日志（不含当天）。`)}>清理指定日期之前</Button></Space>
+        <Card className="ai-logs-recording" title="日志记录设置">
+            <Space wrap><Switch aria-label="记录请求与返回文本" checked={data.settings?.recordContent === true}
+                disabled={loading || busy} loading={busy} onChange={changeRecording} />记录请求与返回文本（默认关闭）</Space>
+            <p>开启后仅保存之后调用的脱敏文本，每个方向最多 10,000 个字符。已过滤常见凭证模式，无法保证识别所有自然语言敏感信息。</p>
+            <p>日志永久保留，可手动清理。Token 为供应商报告的用量，缺失时显示“未知”；暂不估算费用。</p>
+        </Card>
+        <Modal title="确认清理 AI 调用日志？" open={confirmation !== null} okText="永久删除" cancelText="取消"
+            okButtonProps={{danger: true}} confirmLoading={clearing} cancelButtonProps={{disabled: clearing}}
+            closable={!clearing} maskClosable={!clearing} keyboard={!clearing}
+            onOk={confirmCleanup} onCancel={() => {if (!clearing) setConfirmation(null)}}>
+            {confirmation?.description}
+        </Modal>
         <Modal title="AI 调用详情" open={detailId !== null} footer={null} onCancel={() => setDetailId(null)} width={850}>
             {detailError ? <Alert type="error" title={detailError} /> : !detail ? <Spin /> : <>
                 <Descriptions column={1} size="small" items={[

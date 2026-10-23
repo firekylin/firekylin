@@ -28,9 +28,14 @@ test('SQLite migration, writes, filtering, paginated lists, scoped statistics an
         {text: 'result', usage: {prompt_tokens: 3, completion_tokens: 2}}, error: i === 2 ? new Error('fail') : null});
     }
   });
+  for (let i = 0; i < entries.length; i++) {
+    await model().where({id: entries[i].id}).update({duration_ms: i === 2 ? null : (i + 1) * 100});
+  }
   const all = await query.list(model, {});
   assert.equal(all.total, 3);
   assert.equal(all.summary.calls, 3);
+  assert.equal(all.summary.average_duration_ms, 150);
+  assert.equal(all.summary.success_rate, 2 / 3 * 100);
   assert.equal(all.summary.successes, 2);
   assert.equal(all.summary.failures, 1);
   assert.equal(all.summary.unknown_usage, 1);
@@ -41,15 +46,21 @@ test('SQLite migration, writes, filtering, paginated lists, scoped statistics an
     actor_id: '1', status: 'success', from: '2000-01-01', to: '2100-01-01', page: 2, pageSize: 1});
   assert.equal(filtered.rows.length, 1);
   assert.equal(filtered.total, 2);
+  assert.equal(filtered.summary.average_duration_ms, 150);
+  assert.equal(filtered.summary.success_rate, 100);
   assert.equal(filtered.summary.total_tokens, 5);
   assert.equal(filtered.summary.unknown_usage, 1);
   assert.equal((await query.list(model, {from: '2100-01-01'})).total, 0);
   assert.equal((await model().where({id: entries[0].id}).find()).request_text, 'private text');
-  assert.equal(await model().where(query.cleanup({ids: [entries[0].id]})).delete(), 1);
-  assert.equal(await model().where(query.cleanup({before: '2100-01-01'})).delete(), 2);
+  assert.equal(await model().where(query.cleanup({scope: 'filtered', filters: {scenario: 'editor.summary'}})).delete(), 2);
+  assert.equal((await query.list(model, {})).total, 1);
+  assert.equal((await query.list(model, {})).rows[0].scenario, 'editor.title');
+  assert.equal(await model().where(query.cleanup({scope: 'filtered', filters: {}})).delete(), 1);
   const empty = await query.list(model, {});
   assert.equal(empty.summary.total_tokens, null);
   assert.equal(empty.total, 0);
+  assert.equal(empty.summary.average_duration_ms, null);
+  assert.equal(empty.summary.success_rate, null);
 });
 
 test('dialect schema uses configured prefixes and idempotent indexes for all supported backends', async() => {
@@ -75,7 +86,9 @@ test('invalid filters and unbounded cleanup cannot reach the database', () => {
   for (const input of [{status: 'other'}, {actor_id: '1 OR 1=1'}, {from: 'bad'}, {from: '2026-01-01', to: '2025-01-01'}]) {
     assert.throws(() => query.filters(input), {status: 400});
   }
-  for (const input of [{}, {ids: []}, {ids: [-1]}, {ids: [1], before: '2026-01-01'}, {before: 'invalid'}]) {
+  for (const input of [{}, {ids: []}, {ids: [-1]}, {ids: [1], before: '2026-01-01'}, {before: 'invalid'}, {scope: 'filtered'}, {scope: 'filtered', filters: {page: 1}},
+    {scope: 'filtered', filters: {status: false}}, {scope: 'filtered', filters: []},
+    {scope: 'filtered', filters: {status: 'invalid'}}, {scope: 'filtered', filters: {}, ids: [1]}]) {
     assert.throws(() => query.cleanup(input), {status: 400});
   }
   for (const input of [{pageSize: 1000}, {page: -1}, {page: 'bad'}]) assert.throws(() => query.pagination(input), {status: 400});

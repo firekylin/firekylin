@@ -11,7 +11,7 @@ beforeEach(() => {
     vi.mocked(axios.get).mockImplementation(async(_url, config) => ({data: {errno: 0, data: (config?.params as {id?: number})?.id ?
         {id: 1, started_at: 1, actor_name: 'Admin', status: 'success', content_recorded: 0, request_text: null, response_text: null} :
         {rows: [{id: 1, started_at: 1, actor_name: 'Admin', scenario: 'editor.title', status: 'success', input_tokens: null, output_tokens: 0, total_tokens: null}],
-            total: 1, summary: {calls: 1, successes: 1, unknown_usage: 1}, settings: {recordContent: false}}}}));
+            total: 1, summary: {calls: 1, successes: 1, unknown_usage: 1, average_duration_ms: 250, success_rate: 100}, settings: {recordContent: false}}}}));
     vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {deleted: 1}}});
 });
 it('shows unknown tokens and recording state, sends filters and saves recording with CSRF', async() => {
@@ -20,6 +20,12 @@ it('shows unknown tokens and recording state, sends filters and saves recording 
     await waitFor(() => expect(toggle).not.toBeDisabled());
     expect(toggle).not.toBeChecked();
     expect(screen.getByText(/用量不完整 1 次/)).toBeInTheDocument();
+    for (const label of ['请求次数', 'Tokens 数量', '平均处理时间', '成功率']) {
+        expect(screen.getByText(label)).toBeInTheDocument();
+    }
+    expect(screen.getByText('250')).toBeInTheDocument();
+    expect(screen.getByText((_, element) => element?.classList.contains('ant-statistic-content-value') === true && element.textContent === '100.0')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '清理选中日志'})).toBeDisabled();
     expect(screen.getAllByText('未知').length).toBeGreaterThan(0);
     fireEvent.change(screen.getByRole('textbox', {name: '供应商'}), {target: {value: 'deepseek'}});
     fireEvent.click(screen.getByRole('button', {name: /筛\s*选/}));
@@ -44,4 +50,21 @@ it('manual cleanup asks for confirmation before sending deletion', async() => {
     fireEvent.click(await screen.findByRole('button', {name: /永久删除/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/ai-logs', {action: 'cleanup', ids: [1]},
         {headers: {'X-CSRF-Token': 'csrf-test'}}));
+});
+
+it('clears all pages of the applied filter, ignoring unapplied edits', async() => {
+    render(<MemoryRouter><AIAuditLogs /></MemoryRouter>);
+    await screen.findByRole('button', {name: /查\s*看/});
+    fireEvent.change(screen.getByRole('textbox', {name: '供应商'}), {target: {value: 'deepseek'}});
+    fireEvent.click(screen.getByRole('button', {name: /筛\s*选/}));
+    await waitFor(() => expect(axios.get).toHaveBeenLastCalledWith('/admin/api/ai-logs', expect.objectContaining({params: {provider: 'deepseek', page: 1}})));
+    const clearAll = screen.getByRole('button', {name: '清理当前所有日志'});
+    await waitFor(() => expect(clearAll).not.toBeDisabled());
+    fireEvent.change(screen.getByRole('textbox', {name: '供应商'}), {target: {value: 'openai'}});
+    fireEvent.click(clearAll);
+    expect(axios.post).not.toHaveBeenCalled();
+    expect(await screen.findByText(/包含所有分页/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name: /永久删除/}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/ai-logs',
+        {action: 'cleanup', scope: 'filtered', filters: {provider: 'deepseek'}}, {headers: {'X-CSRF-Token': 'csrf-test'}}));
 });

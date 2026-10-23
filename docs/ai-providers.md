@@ -135,6 +135,7 @@ The admin-only `/admin/api/ai-logs` endpoint supports paginated GET lists (witho
 details. Filters: `from` inclusive, `to` exclusive (ISO timestamps or UTC dates), `actor_id`, `scenario`,
 `provider`, `model`, `status`. Summaries use the same filters and sum known counts independently.
 CSRF-protected POST operations are `{action: 'settings', recordContent: boolean}` and
-`{action: 'cleanup', ids: [positive IDs]}` (at most 100) or `{action: 'cleanup', before: ISO timestamp}`.
+`{action: 'cleanup', scope: 'filtered', filters: {provider: 'example'}}` (all matching pages; an explicit
+empty filter object selects every log), `{action: 'cleanup', ids: [positive IDs]}` (at most 100) or `{action: 'cleanup', before: ISO timestamp}`.
 Core creates the prefixed audit table/indexes during installed-site startup for SQLite, MySQL, TiDB,
 and PostgreSQL. New installations follow the existing startup migration lifecycle.
