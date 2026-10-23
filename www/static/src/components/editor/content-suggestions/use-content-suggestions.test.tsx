@@ -13,6 +13,7 @@ function Harness({enabled = true}: {enabled?: boolean}) {
         onFocus={completion.onFocus} onBlur={completion.onBlur} onSelect={completion.selection}
         onKeyDownCapture={completion.onKeyDownCapture} onCompositionStart={completion.onCompositionStart}
         onCompositionEnd={completion.onCompositionEnd} />
+        {completion.loading && <span role="status">正在生成建议</span>}
         {completion.visible && <span data-testid="candidate">{completion.visible.text}</span>}</>;
 }
 beforeEach(() => {
@@ -68,4 +69,34 @@ it('does not request during IME composition and Escape dismisses a suggestion', 
     expect(screen.queryByTestId('candidate')).toBeNull();
     await act(async() => {vi.advanceTimersByTime(1500)});
     expect(axios.post).toHaveBeenCalledTimes(1);
+});
+it('shows loading only during a live request and removes it as soon as typing interrupts', async() => {
+    let resolve: any;
+    vi.mocked(axios.post).mockImplementationOnce(() => new Promise(done => {resolve = done}));
+    render(<Harness />);
+    const textarea = focus();
+    expect(screen.queryByRole('status')).toBeNull();
+    await act(async() => {vi.advanceTimersByTime(1200)});
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    fireEvent.keyDown(textarea, {key: 'a'});
+    expect(screen.queryByRole('status')).toBeNull();
+    await act(async() => {resolve({data: {errno: 0, data: {text: 'stale'}}})});
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByTestId('candidate')).toBeNull();
+});
+it('replaces loading with a candidate and clears loading on errors', async() => {
+    let resolve: any;
+    vi.mocked(axios.post).mockImplementationOnce(() => new Promise(done => {resolve = done}));
+    render(<Harness />);
+    const textarea = focus();
+    await act(async() => {vi.advanceTimersByTime(1200)});
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    await act(async() => {resolve({data: {errno: 0, data: {text: ' suggestion'}}})});
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.getByTestId('candidate')).toBeInTheDocument();
+    vi.mocked(axios.post).mockRejectedValueOnce(new Error('offline'));
+    fireEvent.change(textarea, {target: {value: 'hello world! new'}});
+    await act(async() => {vi.advanceTimersByTime(1200)});
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByTestId('candidate')).toBeNull();
 });

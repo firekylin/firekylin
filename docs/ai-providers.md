@@ -86,6 +86,7 @@ save-time pathname collision validation remains authoritative. Category and tag 
 choices only, require more than 250 characters and fill the unsaved editor state.
 
 Autocomplete waits 1.2 seconds after input pauses, requests short continuations near the cursor, and renders
-them with a grey background. Tab accepts a suggestion; typing, selection changes, Escape and blur dismiss it.
+them in lighter text without a background. Three dots breathe in sequence beside the cursor while a request
+is running and disappear immediately when input interrupts it or the request finishes. Tab accepts a suggestion; typing, selection changes, Escape and blur dismiss it.
 Input-method composition pauses requests. Requests are cancelled on edits, navigation and disabling the
 feature, and late responses cannot replace a newer suggestion. Suggestions are never saved automatically.

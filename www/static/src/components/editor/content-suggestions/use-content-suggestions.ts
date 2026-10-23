@@ -9,11 +9,13 @@ export function useContentSuggestions({content, enabled, scope, getTextarea, onC
     const [cursor, setCursor] = useState(-1), [focused, setFocused] = useState(false);
     const [composing, setComposing] = useState(false), [dismissed, setDismissed] = useState('');
     const [candidate, setCandidate] = useState<{text: string; content: string; cursor: number; scope: string} | null>(null);
+    const [loadingRequest, setLoadingRequest] = useState<{key: string; cursor: number; controller: AbortController} | null>(null);
     const mirrorRef = useRef<HTMLDivElement>(null);
     const controller = useRef<AbortController | null>(null);
     const key = `${scope}:${cursor}:${content}`;
     const visible = enabled && focused && !composing && candidate?.scope === scope && candidate.content === content && candidate.cursor === cursor ? candidate : null;
-    const cancel = () => { controller.current?.abort(); setCandidate(null) };
+    const loading = enabled && focused && !composing && dismissed !== key && loadingRequest?.key === key && !loadingRequest.controller.signal.aborted;
+    const cancel = () => { controller.current?.abort(); setCandidate(null); setLoadingRequest(null) };
     const dismiss = () => { cancel(); setDismissed(key) };
     const selection = () => {
         const textarea = getTextarea();
@@ -25,13 +27,16 @@ export function useContentSuggestions({content, enabled, scope, getTextarea, onC
         const abort = new AbortController();
         controller.current = abort;
         const timer = setTimeout(async() => {
+            setLoadingRequest({key, cursor, controller: abort});
             try {
                 const response = await axios.post('/admin/api/ai-editor', {operation: 'complete', content, cursor},
                     {signal: abort.signal, headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
                 if (!abort.signal.aborted && response.data.errno === 0 && typeof response.data.data?.text === 'string') {
                     setCandidate({text: response.data.data.text, content, cursor, scope});
                 }
-            } catch { /* Background suggestions should not interrupt writing. */ }
+            } catch { /* Background suggestions should not interrupt writing. */ } finally {
+                setLoadingRequest(previous => previous?.controller === abort ? null : previous);
+            }
         }, 1200);
         return () => { clearTimeout(timer); abort.abort() };
     }, [content, cursor, focused, composing, enabled, scope, dismissed]);
@@ -49,12 +54,12 @@ export function useContentSuggestions({content, enabled, scope, getTextarea, onC
     };
     useEffect(() => {
         syncMirror();
-        if (!visible) return;
+        if (!visible && !loading) return;
         const observer = new ResizeObserver(syncMirror);
         const textarea = getTextarea();
         if (textarea) observer.observe(textarea);
         return () => observer.disconnect();
-    }, [visible]);
+    }, [visible, loading]);
     const onKeyDownCapture = (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.nativeEvent.isComposing) return;
         if (event.key === 'Tab' && !event.shiftKey && visible) {
@@ -68,7 +73,7 @@ export function useContentSuggestions({content, enabled, scope, getTextarea, onC
             dismiss();
         }
     };
-    return {visible, dismiss, mirrorRef, syncMirror, onKeyDownCapture, selection,
+    return {visible, loading: !!loading, loadingCursor: loadingRequest?.cursor ?? cursor, dismiss, mirrorRef, syncMirror, onKeyDownCapture, selection,
         onFocus: () => {setFocused(true); selection()},
         onBlur: () => {setFocused(false); dismiss()},
         onCompositionStart: () => {setComposing(true); cancel()},

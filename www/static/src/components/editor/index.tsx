@@ -442,8 +442,11 @@ function MarkDownEditor(props: MdEditorProps) {
                             aria-description={completion.visible ? '按 Tab 接受建议，其他按键忽略建议' : undefined}
                             value={props.content}
                         />
-                        {completion.visible && <div className="ai-completion-mirror" ref={completion.mirrorRef} aria-hidden="true">
-                            {props.content.slice(0, completion.visible.cursor)}<span className="ai-completion-ghost">{completion.visible.text}</span>{props.content.slice(completion.visible.cursor)}
+                        {(completion.visible || completion.loading) && <div
+                            className={classnames('ai-completion-mirror', {'is-loading': completion.loading})}
+                            ref={completion.mirrorRef} aria-hidden="true">
+                            {completion.visible ? <>{props.content.slice(0, completion.visible.cursor)}<span className="ai-completion-ghost">{completion.visible.text}</span>{props.content.slice(completion.visible.cursor)}</>
+                                : <>{props.content.slice(0, completion.loadingCursor)}<span className="ai-completion-loading"><span><i /><i /><i /></span></span>{props.content.slice(completion.loadingCursor)}</>}
                         </div>}
                     </div>
                     <div
