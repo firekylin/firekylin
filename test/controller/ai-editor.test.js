@@ -112,3 +112,35 @@ test('closing the HTTP response cancels provider generation without an error res
   assert.equal(instance.ctx.res.listenerCount('close'), 0);
   assert.equal(instance.ctx.req.listenerCount('aborted'), 0);
 });
+test('new editor operations enforce settings and validate generated selections', async t => {
+  const {instance, ai} = setup(t);
+  let settings = {slug: false, category: false, autocomplete: false};
+  global.firekylin.plugins.plugins = new Map([['ai-content', {status: 'active'}]]);
+  global.firekylin.plugins.aiStore = {getCredential: async() => JSON.stringify(settings)};
+  instance.post = () => ({operation: 'slug', content: '字'.repeat(251)});
+  assert.equal((await instance.postAction()).errno, 1);
+  settings = {slug: true, category: true, autocomplete: true};
+  instance.model = name => ({
+    where: ({pathname}) => ({setRelation: () => ({find: async() => pathname === 'test' ? {id: 99} : {}})}),
+    setRelation: () => ({field: () => ({select: async() => name === 'cate'
+      ? [{id: 1, name: '父分类', pid: 0}, {id: 2, name: '子分类', pid: 1}]
+      : [{id: 1, name: 'existing'}]})})
+  });
+  ai.generate = async() => ({text: 'test'});
+  assert.equal((await instance.postAction()).data.text, 'test-2');
+  instance.post = () => ({operation: 'slug', candidate: 'test', content: '字'.repeat(251)});
+  assert.equal((await instance.postAction()).data.text, 'test-2');
+  instance.post = () => ({operation: 'category', content: '字'.repeat(251)});
+  ai.generate = async() => ({text: '[2]'});
+  assert.deepEqual((await instance.postAction()).data.categories.map(item => item.id), [1, 2]);
+  ai.generate = async() => ({text: '[999]'});
+  assert.equal((await instance.postAction()).errno, 1);
+  instance.post = () => ({operation: 'tags', content: '字'.repeat(251)});
+  ai.generate = async() => ({text: '["existing"]'});
+  assert.deepEqual((await instance.postAction()).data.tags, ['existing']);
+  ai.generate = async() => ({text: '["invented"]'});
+  assert.equal((await instance.postAction()).errno, 1);
+  instance.post = () => ({operation: 'complete', content: 'hello world!', cursor: 12});
+  ai.generate = async() => ({text: ' more words'});
+  assert.equal((await instance.postAction()).data.text, ' more words');
+});

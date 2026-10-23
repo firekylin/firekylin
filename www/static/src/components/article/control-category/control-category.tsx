@@ -1,8 +1,8 @@
 import {Select} from 'antd';
 import {inject, observer} from '@admin/utils/mobx-react';
-function ArticleControlCategory({sharedStore, articleStore, catInitial}: any) {
+function ArticleControlCategory({sharedStore, articleStore, catInitial, disabled}: any) {
     const categories = sharedStore.categoryList;
-    return <Select mode="multiple" aria-label="分类" style={{width: '100%'}} value={catInitial}
+    return <Select disabled={disabled} mode="multiple" aria-label="分类" style={{width: '100%'}} value={catInitial}
         optionFilterProp="label" placeholder="选择分类" options={categories.map(cat => ({value: cat.id, label: cat.name}))}
         onChange={ids => {
             const selected = new Set(ids);

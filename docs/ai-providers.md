@@ -72,3 +72,20 @@ Custom summary source is stored in the existing post `options.customSummary` val
 continues to use `summary`; an empty custom source restores the existing `<!--more-->` and excerpt-length
 behavior. Changing automatic excerpt settings preserves custom summaries. Password-protected articles hide
 custom summaries until unlocked. No database migration is required.
+
+
+### Optional content assistance
+
+The AI Content plugin's settings page controls `slug`, `category` and `autocomplete`; these new features are
+opt-in. The core editor reads the active plugin's saved settings on load and validates the same switches on
+every generation request. Existing title, summary, review and translation switches are also respected.
+
+Slug generation requires more than 250 characters and opens an editable suggestion dialog. The server
+normalizes the result and checks uniqueness both when generating and when using the suggestion; the normal
+save-time pathname collision validation remains authoritative. Category and tag selection use existing
+choices only, require more than 250 characters and fill the unsaved editor state.
+
+Autocomplete waits 1.2 seconds after input pauses, requests short continuations near the cursor, and renders
+them with a grey background. Tab accepts a suggestion; typing, selection changes, Escape and blur dismiss it.
+Input-method composition pauses requests. Requests are cancelled on edits, navigation and disabling the
+feature, and late responses cannot replace a newer suggestion. Suggestions are never saved automatically.

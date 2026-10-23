@@ -430,8 +430,9 @@ function Article(props: ArticleProps) {
                         </section>
                         {legacy.isPage() ? null : (
                             <section className="category">
-                                <h5>分类</h5>
+                                <h5>分类 <AIButton operation="category" minimum={250} label="智能分类选择" /></h5>
                                 <ArticleControlCategory
+                                    disabled={ai.busy === 'category'}
                                     catInitial={
                                         articleInfo.cate && articleInfo.cate.length > 0
                                             ? articleInfo.cate.map((item) => item.id)
@@ -442,8 +443,9 @@ function Article(props: ArticleProps) {
                         )}
                         {legacy.isPage() ? null : (
                             <section className="category">
-                                <h5>标签</h5>
+                                <h5>标签 <AIButton operation="tags" minimum={250} label="智能标签选择" /></h5>
                                 <ArticleControlTag
+                                    disabled={ai.busy === 'tags'}
                                     tag={articleInfo.tag}
                                     tagList={tagList}
                                     handleTagChange={(values) =>
@@ -600,7 +602,8 @@ function Article(props: ArticleProps) {
         if (previousRef.current.mounted) legacy.onPropsChange(previousRef.current.props);
         previousRef.current = { props: props, state: state, mounted: true };
     });
-    const ai = useEditorAI(props.articleStore, title => legacy.handleTitle({target: {value: title}}), props.match.params.id);
+    const ai = useEditorAI(props.articleStore, title => legacy.handleTitle({target: {value: title}}), props.match.params.id,
+        {type: props.type, applySlug: pathname => legacy.handlePath({target: {value: pathname}})});
     return <AIContext.Provider value={ai}>{legacy.render()}{ai.dialogs}</AIContext.Provider>;
 }
 

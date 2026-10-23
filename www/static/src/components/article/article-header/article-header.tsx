@@ -67,7 +67,8 @@ function ArticleHeaderForm(props: any) {
                         className={classNames('pathname-input', {
                             'has-error': props.hasError.pathname,
                         })}
-                        disabled={props.status === 3}
+                        disabled={ai?.busy === 'slug' || (props.status === 3 && !ai?.features?.slug)}
+                        suffix={<AIButton operation="slug" minimum={250} label="智能 Slug" />}
                         value={props.pathname}
                         onChange={(e) => props.handlePath(e)}
                     />

@@ -350,3 +350,15 @@ input {
   overflow: hidden;
   text-transform: capitalize;
 }
+.md-editor { position: relative; }
+.md-editor textarea.has-ai-suggestion { color: transparent; caret-color: #333; }
+.ai-completion-mirror {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    color: #333;
+    .ai-completion-ghost { background: #eee; color: #999; border-radius: 2px; }
+}

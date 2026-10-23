@@ -4,11 +4,12 @@ import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import axios from 'axios';
 import {AIContext, AIButton, useEditorAI, reviewChanges} from './ai-editor';
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
-function Harness({store, applyTitle = vi.fn()}: any) {
-    const ai = useEditorAI(store, applyTitle);
+function Harness({store, applyTitle = vi.fn(), applySlug = vi.fn()}: any) {
+    const ai = useEditorAI(store, applyTitle, undefined, {type: 0, applySlug});
     return <AIContext.Provider value={ai}><AIButton operation="title" minimum={250} label="AI生成标题" />
         <AIButton operation="review" minimum={100} label="文章审阅" />
-        <AIButton operation="translate" minimum={10} label="翻译" />{ai.dialogs}</AIContext.Provider>;
+        <AIButton operation="translate" minimum={10} label="翻译" /><AIButton operation="slug" minimum={250} label="智能 Slug" />
+        <AIButton operation="category" minimum={250} label="智能分类选择" /><AIButton operation="tags" minimum={250} label="智能标签选择" />{ai.dialogs}</AIContext.Provider>;
 }
 afterEach(() => { cleanup(); vi.restoreAllMocks() });
 beforeEach(() => {
@@ -93,4 +94,27 @@ it('closing review aborts the request and leaves the toolbar icon unchanged', as
     await waitFor(() => expect(signal.aborted).toBe(true));
     expect(window.alert).not.toHaveBeenCalled();
     expect(button).not.toBeDisabled();
+});
+it('reviews an editable Slug and checks uniqueness again when using it', async() => {
+    vi.mocked(axios.get).mockResolvedValueOnce({data: {errno: 0, data: {available: true, features: {slug: true}}}});
+    vi.mocked(axios.post).mockResolvedValueOnce({data: {errno: 0, data: {text: 'suggested-slug'}}})
+        .mockResolvedValueOnce({data: {errno: 0, data: {text: 'edited-slug-2'}}});
+    const applySlug = vi.fn();
+    render(<Harness store={{articleInfo: {markdown_content: '字'.repeat(251)}, setArticleInfo: vi.fn()}} applySlug={applySlug} />);
+    fireEvent.click(await screen.findByRole('button', {name: '智能 Slug'}));
+    fireEvent.change(await screen.findByRole('textbox', {name: '建议 Slug'}), {target: {value: 'edited-slug'}});
+    fireEvent.click(screen.getByRole('button', {name: /使\s*用/}));
+    await waitFor(() => expect(applySlug).toHaveBeenCalledWith('edited-slug-2'));
+    expect(axios.post).toHaveBeenLastCalledWith('/admin/api/ai-editor', expect.objectContaining({operation: 'slug', candidate: 'edited-slug'}), expect.anything());
+});
+it('fills selected categories and tags without a suggestion modal', async() => {
+    vi.mocked(axios.get).mockResolvedValueOnce({data: {errno: 0, data: {available: true, features: {category: true}}}});
+    vi.mocked(axios.post).mockResolvedValueOnce({data: {errno: 0, data: {text: '[1]', categories: [{id: 1, name: '测试'}]}}})
+        .mockResolvedValueOnce({data: {errno: 0, data: {text: '["标签"]', tags: ['标签']}}});
+    const store = {articleInfo: {markdown_content: '字'.repeat(251)}, setArticleInfo: vi.fn()};
+    render(<Harness store={store} />);
+    fireEvent.click(await screen.findByRole('button', {name: '智能分类选择'}));
+    await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({cate: [{id: 1, name: '测试'}]}));
+    fireEvent.click(screen.getByRole('button', {name: '智能标签选择'}));
+    await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({tag: ['标签']}));
 });

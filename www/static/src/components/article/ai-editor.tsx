@@ -9,9 +9,11 @@ import './ai-editor.less';
 export const AIContext = React.createContext<any>(null);
 export function AIButton({operation, minimum, label, icon}: any) {
     const ai = React.useContext(AIContext);
-    if (!ai?.available) return null;
+    const feature = ({review: 'rewrite', tags: 'category'})[operation] || operation;
+    if (!ai?.available || ai.features?.[feature] === false) return null;
     const disabled = [...(ai.content || '')].length <= minimum || ai.busy;
-    const tooltip = operation === 'title'
+    const extraLabels = {slug: '智能 Slug', category: '智能分类选择', tags: '智能标签选择'};
+    const tooltip = extraLabels[operation] ? disabled ? `当正文内容超过250个字时可以使用${extraLabels[operation]}` : extraLabels[operation] : operation === 'title'
         ? '当正文内容超过 250 个字时可以智能生成标题'
         : operation === 'summary'
             ? disabled ? '当正文内容超过250个字时可以智能生成摘要' : '智能生成摘要'
@@ -31,7 +33,8 @@ export function AIToolbar() {
         <li className="tb-btn"><AIButton operation="translate" minimum={10} label="翻译" icon={<TranslationOutlined />} /></li></>;
 }
 export {reviewChanges} from './review-merge/diff';
-export function useEditorAI(store: any, applyTitle: (title: string) => void, scope?: string) {
+export function useEditorAI(store: any, applyTitle: (title: string) => void, scope?: string, options: {type?: number; applySlug?: (slug: string) => void} = {}) {
+    const [features, setFeatures] = React.useState<any>({slug: false, category: false, autocomplete: false});
     const [available, setAvailable] = React.useState(false);
     const [busy, setBusy] = React.useState('');
     const [dialog, setDialog] = React.useState('');
@@ -48,21 +51,30 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
     React.useEffect(() => {
         let active = true;
         axios.get('/admin/api/ai-editor').then(res => {
-            if (active) setAvailable(res.data.errno === 0 && res.data.data.available);
+            if (active) {
+                setAvailable(res.data.errno === 0 && res.data.data.available);
+                setFeatures({slug: false, category: false, autocomplete: false, ...res.data.data?.features});
+            }
         }).catch(() => {});
         return () => { active = false };
     }, []);
-    const request = async(operation: string) => {
+    const request = async(operation: string, candidate?: string) => {
         setBusy(operation);
         const controller = new AbortController();
         pending.current = controller;
         try {
-            const res = await axios.post('/admin/api/ai-editor', {operation, ...snapshot.current, language, translateTitle},
+            const res = await axios.post('/admin/api/ai-editor', {operation, ...snapshot.current, language, translateTitle, candidate, id: Number(scope) || undefined, type: options.type},
                 {signal: controller.signal, headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
             if (controller.signal.aborted) return;
             if (res.data.errno !== 0) throw new Error(res.data.errmsg || 'AI 请求失败');
             const {text, title, suggestions} = res.data.data;
             if (typeof text !== 'string') throw new Error('AI 未返回有效内容');
+            if (operation === 'slug') {
+                if (candidate !== undefined) { options.applySlug?.(text); setDialog('') }
+                else { setSuggestion(text); setDialog('slug') }
+            }
+            if (operation === 'category') store.setArticleInfo({cate: res.data.data.categories});
+            if (operation === 'tags') store.setArticleInfo({tag: res.data.data.tags});
             if (operation === 'title') { setSuggestion(text); setDialog('title') }
             if (operation === 'summary') store.setArticleInfo({summary: text, options: {customSummary: text}});
             if (operation === 'review') setChanges(reviewChanges(snapshot.current.content, text, suggestions));
@@ -98,12 +110,12 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
         setDialog('');
     };
     const dialogs = <>
-        <Modal title="标题建议" open={dialog === 'title'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}} footer={[
-            <Button key="regenerate" disabled={!!busy} aria-busy={busy === 'title'} icon={<AISparkleIcon loading={busy === 'title'} />} onClick={() => request('title')}>重新生成</Button>,
-            <Button key="use" type="primary" disabled={!!busy || !suggestion.trim()} onClick={() => {applyTitle(suggestion); setDialog('')}}>使用</Button>
+        <Modal title={dialog === 'slug' ? 'Slug 建议' : '标题建议'} open={dialog === 'title' || dialog === 'slug'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}} footer={[
+            <Button key="regenerate" disabled={!!busy} aria-busy={!!busy} icon={<AISparkleIcon loading={!!busy} />} onClick={() => request(dialog)}>重新生成</Button>,
+            <Button key="use" type="primary" disabled={!!busy || !suggestion.trim()} onClick={() => {if (dialog === 'slug') void request('slug', suggestion); else {applyTitle(suggestion); setDialog('')}}}>使用</Button>
         ]}>
-            <p>请审阅编辑该标题，觉得不合适可以尝试重新生成。</p>
-            <Input aria-label="建议标题" value={suggestion} disabled={!!busy} onChange={e => setSuggestion(e.target.value)} />
+            <p>{dialog === 'slug' ? '请审阅编辑该 Slug，觉得不合适可以尝试重新生成。使用时会检查唯一性。' : '请审阅编辑该标题，觉得不合适可以尝试重新生成。'}</p>
+            <Input aria-label={dialog === 'slug' ? '建议 Slug' : '建议标题'} value={suggestion} disabled={!!busy} onChange={e => setSuggestion(e.target.value)} />
         </Modal>
         <Modal title="翻译文章" open={dialog === 'translate'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
             footer={<><Button disabled={!!busy} onClick={() => setDialog('')}>取消</Button><Button type="primary" disabled={!!busy} aria-busy={busy === 'translate'} icon={<AISparkleIcon loading={busy === 'translate'} />} onClick={() => request('translate')}>翻译</Button></>}>
@@ -156,5 +168,5 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
                     change.unchanged || change.decision ? change : {...change, decision}))} />}
         </Modal>
     </>;
-    return {available, busy, run, content: store.articleInfo.markdown_content, dialogs};
+    return {available, features, busy, run, content: store.articleInfo.markdown_content, dialogs};
 }
