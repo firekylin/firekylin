@@ -13,7 +13,11 @@ export function AIButton({operation, minimum, label, icon}: any) {
         ? '当正文内容超过 250 个字时可以智能生成标题'
         : operation === 'summary'
             ? disabled ? '当正文内容超过250个字时可以智能生成摘要' : '智能生成摘要'
-            : disabled ? `正文需超过 ${minimum} 个字符，且没有正在进行的 AI 请求` : label;
+            : operation === 'review'
+                ? disabled ? '当正文内容超过100个字时可以使用智能审阅' : '智能审阅'
+                : operation === 'translate'
+                    ? disabled ? '当正文内容超过10个字是可以使用智能翻译' : '智能翻译'
+                    : label;
     return <Tooltip title={tooltip}>
         <span><Button type="text" className="ai-editor-action" aria-label={label} aria-busy={ai.busy === operation} disabled={disabled}
             icon={ai.busy === operation ? <AISparkleIcon loading /> : icon || <AISparkleIcon />}
