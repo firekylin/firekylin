@@ -113,6 +113,24 @@ declare namespace Firekylin {
     registerAction(definition: AdminActionDefinition): () => boolean;
   }
 
+  /** Optional provider metadata; absent counts must be null, never invented zeros. */
+  interface AIUsageDetails {
+    inputTokens: number | null;
+    outputTokens: number | null;
+    totalTokens: number | null;
+    cacheReadTokens: number | null;
+    cacheWriteTokens: number | null;
+    reasoningTokens: number | null;
+  }
+  interface AIGenerationResult {
+    text?: string;
+    /** Native provider usage, preserved for backwards compatibility. */
+    usage?: Record<string, unknown>;
+    usageDetails?: AIUsageDetails;
+    providerRequestId?: string;
+    [key: string]: unknown;
+  }
+
   interface AIModelDefinition {
     id: string;
     label?: string;

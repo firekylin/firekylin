@@ -49,7 +49,7 @@ function oauthVerifier() {
     const grant = await store.lookup('access', match[1]);
     if (!grant) return null;
     const user = await think.model('user').where({id: grant.user_id})
-      .field('id,type,status')
+      .field('id,name,type,status')
             .setRelation(false)
             .find();
     if (!user || !user.id || Number(user.status) !== 1 ||
@@ -58,7 +58,7 @@ function oauthVerifier() {
     const resource = publicOrigin(options.site_url) + '/mcp';
     if (grant.resource !== resource) return null;
     return {
-      principal: {id: Number(user.id), type: Number(user.type)},
+      principal: {id: Number(user.id), type: Number(user.type), name: user.name},
       scopes: new Set(scopeList(grant.scopes)),
       tokenId: String(grant.id)
     };

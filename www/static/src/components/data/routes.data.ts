@@ -143,6 +143,10 @@ export const InitiateRoutes = (themePages) => [{
                 title: 'AI 连接'
             },
             {
+                url: '/options/ai-logs',
+                title: 'AI 调用日志'
+            },
+            {
                 url: '/options/smart-content',
                 title: '智能内容'
             },

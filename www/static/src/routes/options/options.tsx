@@ -10,6 +10,7 @@ import OptionsPush from './push/push';
 import OptionsExport from './export/export';
 import OptionsUpload from './upload/upload';
 import OptionsImport from './import/import';
+import AIAuditLogs from './ai-logs/ai-logs';
 import SmartContentSettings from './smart-content/smart-content';
 import AIConnections from '../plugin/ai-connections';
 
@@ -19,6 +20,7 @@ export default function Options({ match }: OptionsProps) {
             <Switch>
                 <Route path={`${match.path}/general`} component={General} />
                 <Route path={`${match.path}/reading`} component={Reading} />
+                <Route path={`${match.path}/ai-logs`} component={AIAuditLogs} />
                 <Route path={`${match.path}/smart-content`} component={SmartContentSettings} />
                 <Route path={`${match.path}/ai`} component={AIConnections} />
                 <Route

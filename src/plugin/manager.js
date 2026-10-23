@@ -83,7 +83,7 @@ function resolveInside(root, entry, label) {
 }
 
 class PluginManager {
-  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi, aiStore} = {}) {
+  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi, aiStore, aiAudit} = {}) {
     this.projectPath = projectPath || process.cwd();
     this.config = config || {};
     this.logger = logger || console;
@@ -96,7 +96,7 @@ class PluginManager {
     this.admin = new AdminRegistry();
     this.aiProviders = new AIProviderRegistry();
     this.aiStore = aiStore;
-    this.ai = aiStore ? new AIClient({providers: this.aiProviders, preferences: {
+    this.ai = aiStore ? new AIClient({audit: aiAudit, providers: this.aiProviders, preferences: {
       get: () => aiStore.getPreferences(), set: value => aiStore.setPreferences(value)
     }}) : null;
     this.plugins = new Map();
@@ -218,7 +218,7 @@ class PluginManager {
         providers: () => this.ai.models(),
         select: (provider, model) => this.ai.select(provider, model),
         clear: () => this.ai.clear(),
-        generate: (request, context) => this.ai.generate(request, context),
+        generate: (request, context) => this.ai.generate(request, {...context, pluginId}),
         credentials: Object.freeze({
           get: name => this.aiStore.getCredential(pluginId, name),
           has: name => this.aiStore.hasCredential(pluginId, name),
