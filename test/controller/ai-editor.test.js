@@ -58,3 +58,30 @@ test('translation translates title only when requested and reports failures', as
   ai.generate = async() => { throw new Error('Provider unavailable') };
   assert.equal((await instance.postAction()).errmsg, 'Provider unavailable');
 });
+test('real response helpers preserve successful AI responses and terminate only once', async t => {
+  const {instance, ai} = setup(t);
+  const previousThink = global.think;
+  t.after(() => { global.think = previousThink });
+  global.think = require('../../src/extend/think');
+  const helpers = require('../../src/extend/controller');
+  instance.success = helpers.success;
+  instance.fail = helpers.fail;
+  const responses = [];
+  instance.ctx.success = data => responses.push({errno: 0, data});
+  instance.ctx.fail = errmsg => responses.push({errno: 1, errmsg});
+  for (const operation of ['title', 'summary', 'review', 'translate']) {
+    responses.length = 0;
+    instance.post = () => ({operation, content: '字'.repeat(251), language: '英语'});
+    await assert.rejects(instance.postAction(), {message: 'PREVENT_NEXT_PROCESS'});
+    assert.deepEqual(responses, [{errno: 0, data: {text: 'generated', title: undefined}}]);
+  }
+  responses.length = 0;
+  instance.post = () => ({operation: 'translate', content: '字'.repeat(251), language: 'invalid'});
+  await assert.rejects(instance.postAction(), {message: 'PREVENT_NEXT_PROCESS'});
+  assert.deepEqual(responses, [{errno: 1, errmsg: '请选择翻译语种'}]);
+  responses.length = 0;
+  instance.post = () => ({operation: 'title', content: '字'.repeat(251)});
+  ai.generate = async() => { throw new Error('Provider unavailable') };
+  await assert.rejects(instance.postAction(), {message: 'PREVENT_NEXT_PROCESS'});
+  assert.deepEqual(responses, [{errno: 1, errmsg: 'Provider unavailable'}]);
+});

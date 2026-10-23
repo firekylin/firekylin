@@ -28,6 +28,9 @@ module.exports = class extends Base {
       return this.fail('文章内容长度不符合要求');
     }
     if (!await this.available()) return this.fail('请先配置支持文本生成的 AI 连接');
+    const languages = ['英语', '简体中文', '繁体中文', '日语', '韩语', '法语', '德语', '西班牙语'];
+    if (operation === 'translate' && !languages.includes(language)) return this.fail('请选择翻译语种');
+    let response;
     try {
       const generate = async(text, instruction) => {
         const result = await this.ai().generate({capability: 'text', messages: [
@@ -37,13 +40,12 @@ module.exports = class extends Base {
         if (typeof result.text !== 'string' || !result.text.trim()) throw new Error('AI 未返回有效内容');
         return result.text.trim();
       };
-      const languages = ['英语', '简体中文', '繁体中文', '日语', '韩语', '法语', '德语', '西班牙语'];
-      if (operation === 'translate' && !languages.includes(language)) return this.fail('请选择翻译语种');
       const instruction = instructions[operation] + (operation === 'translate' ? `目标语言：${language}。` : '');
       const text = await generate(content, instruction);
       const translatedTitle = operation === 'translate' && translateTitle && title
         ? await generate(String(title), `将标题翻译为${language}，只返回标题纯文本。`) : undefined;
-      return this.success({text, title: translatedTitle});
+      response = {text, title: translatedTitle};
     } catch (error) { return this.fail(error.message || 'AI 请求失败') }
+    return this.success(response);
   }
 };
