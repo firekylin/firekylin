@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('node:module');
 const auth = require('../../src/service/admin-auth');
-const {FEATURES_KEY} = require('../../src/ai/editor-features');
+const {FEATURES_KEY} = require('../../src/service/ai-editor-features');
 
 const load = Module._load;
 let Controller;

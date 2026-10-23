@@ -1,8 +1,8 @@
 'use strict';
 const Base = require('./base');
 const adminAuth = require('../../../service/admin-auth');
-const {editorFeatures, featureFor, uniqueSlug} = require('../../../ai/editor-features');
-const {parseReviewResult} = require('../../../ai/review-result');
+const {editorFeatures, featureFor, uniqueSlug} = require('../../../service/ai-editor-features');
+const {parseReviewResult} = require('../../../service/ai-review-result');
 
 const instructions = {
   slug: '根据正文生成简短准确的英文 URL Slug，仅使用小写英文字母、数字和连字符，不要路径、扩展名或解释。',

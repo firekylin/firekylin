@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {editorFeatures, normalizeSlug, uniqueSlug} = require('../../src/ai/editor-features');
+const {editorFeatures, normalizeSlug, uniqueSlug} = require('../../src/service/ai-editor-features');
 
 test('features preserve legacy settings without requiring an active plugin', async() => {
   assert.equal((await editorFeatures({})).autocomplete, false);
@@ -20,7 +20,7 @@ test('slug validation rejects invalid output and allocates a unique pathname', a
     'hello-world-3');
 });
 test('core settings take precedence and legacy settings migrate without overwriting concurrent saves', async() => {
-  const {FEATURES_KEY} = require('../../src/ai/editor-features');
+  const {FEATURES_KEY} = require('../../src/service/ai-editor-features');
   let rows = {};
   const manager = {aiStore: {getCredential: async() => '{"slug":true,"title":false}'}};
   const model = {getOptions: async() => ({...rows}), ensureOption: async(key, value) => {

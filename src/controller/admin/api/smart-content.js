@@ -1,7 +1,7 @@
 'use strict';
 const Base = require('./base');
 const adminAuth = require('../../../service/admin-auth');
-const {FEATURES_KEY, DEFAULTS, normalizeFeatures, editorFeatures} = require('../../../ai/editor-features');
+const {FEATURES_KEY, DEFAULTS, normalizeFeatures, editorFeatures} = require('../../../service/ai-editor-features');
 
 module.exports = class extends Base {
   requireAdministrator() {

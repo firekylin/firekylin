@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {parseReviewResult} = require('../../src/ai/review-result');
+const {parseReviewResult} = require('../../src/service/ai-review-result');
 
 test('review result preserves Markdown and validates suggestion line references', () => {
   const result = parseReviewResult(JSON.stringify({text: '# Title\nNew\n', suggestions: [
