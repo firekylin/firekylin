@@ -1,6 +1,6 @@
 import React from 'react';
 import {AIContext, AIButton, useEditorAI} from './ai-editor';
-import { Row, Col, Input, message, Collapse } from 'antd';
+import { Row, Col, Input, message } from 'antd';
 import generatePicker from 'antd/es/date-picker/generatePicker';
 import { inject, observer } from '@admin/utils/mobx-react';
 import dayjs from 'dayjs';
@@ -11,6 +11,7 @@ import pinyin from 'tiny-pinyin';
 
 import ArticleHeader from './article-header/article-header';
 import ArticleEditor from './article-editor/article-editor';
+import AdvancedControls from './advanced-controls/advanced-controls';
 import ArticleControlHeader from './control-header/control-header';
 import ArticleControlCategory from './control-category/control-category';
 import ArticleControlTag from './control-tag/control-tag';
@@ -453,7 +454,7 @@ function Article(props: ArticleProps) {
                                 placeholder="留空则从正文自动生成摘要"
                                 onChange={e => articleStore.setArticleInfo({summary: e.target.value, options: {customSummary: e.target.value}})} />
                         </section>
-                        <Collapse items={[{key: 'advanced', label: '高级功能', forceRender: true, children: <>
+                        <AdvancedControls>
                         {legacy.isPage() ||
                         window.SysConfig.userInfo.type !== 1 ? null : (
                             <section className="category">
@@ -573,7 +574,7 @@ function Article(props: ArticleProps) {
                                 />
                             </section>
                         ) : null}
-                        </>}]} />
+                        </AdvancedControls>
                     </Col>
                 </Row>
             </div>
