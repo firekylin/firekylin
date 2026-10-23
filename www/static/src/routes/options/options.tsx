@@ -25,6 +25,7 @@ export default function Options({ match }: OptionsProps) {
                 <Route path={`${match.path}/analytic`} component={Analysis} />
                 <Route path={`${match.path}/push`} component={OptionsPush} />
                 <Route path={`${match.path}/upload`} component={OptionsUpload} />
+                 <Redirect to={`${match.path}/general`} />
             </Switch>
         </>
     );
