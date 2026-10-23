@@ -220,7 +220,7 @@ function Article(props: ArticleProps) {
         params.title = articleInfo.title;
         params.pathname = articleInfo.pathname;
         params.markdown_content = articleInfo.markdown_content;
-        params.summary = props.articleStore.summaryForSubmit();
+        params.summary = articleInfo.summary || '';
 
         if (params.status === ArticleEnum.SAVE && !params.markdown_content) {
             message.error('没有内容不能提交呢！');
@@ -467,7 +467,7 @@ function Article(props: ArticleProps) {
                             <Input.TextArea aria-label="内容摘要" autoSize={{minRows: 4}} disabled={ai.busy === 'summary'}
                                 value={articleInfo.summary || ''}
                                 placeholder="留空则从正文自动生成摘要"
-                                onChange={e => articleStore.setArticleInfo({summary: e.target.value, options: {summaryCustomized: !!e.target.value.trim()}})} />
+                                onChange={e => articleStore.setArticleInfo({summary: e.target.value})} />
                         </section>
                         <AdvancedControls>
                         {legacy.isPage() ||

@@ -70,10 +70,7 @@ the body. Translation optionally includes the title.
 
 Summaries use the existing `summary` field directly. A non-empty submitted summary takes precedence; an
 empty or omitted summary uses `getSummary` with the existing `<!--more-->` and excerpt-length behavior.
-The existing `options.summaryCustomized` boolean distinguishes explicit summaries from automatic excerpts;
-the summary text itself is stored only in `summary`. The editor omits untouched automatic excerpts from
-save requests, so changes to the opening text and `<!--more-->` regenerate them. Bulk excerpt rebuilding
-preserves explicitly customized summaries. Password-protected articles hide summaries until
+Bulk excerpt rebuilding preserves non-empty summaries. Password-protected articles hide summaries until
 unlocked. No database migration is required.
 
 

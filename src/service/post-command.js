@@ -89,7 +89,6 @@ class PostCommandService {
       const prepared = await model.getContentAndSummary({...post, ...data, summary: data.summary});
       data.content = prepared.content;
       data.summary = prepared.summary;
-      if (prepared.options !== undefined) data.options = prepared.options;
       if (options.getTagModel && data.tag) data.tag = await this.resolveTags(data.tag, options.getTagModel);
     } else if (data.create_time && options.normalizePublishTime) {
       data = options.normalizePublishTime(data, post);
