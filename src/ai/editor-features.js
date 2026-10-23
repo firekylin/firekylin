@@ -1,15 +1,24 @@
 'use strict';
 
-const DEFAULTS = {title: true, summary: true, rewrite: true, translate: true,
-  slug: false, category: false, autocomplete: false};
-async function editorFeatures(manager) {
-  const record = manager?.plugins?.get('ai-content');
-  if (record?.status !== 'active' || !manager.aiStore) return {...DEFAULTS};
-  const raw = await manager.aiStore.getCredential('ai-content', 'settings');
+const FEATURES_KEY = 'ai_content_features';
+const DEFAULTS = Object.freeze({title: true, summary: true, rewrite: true, translate: true,
+  slug: false, category: false, autocomplete: false});
+function normalizeFeatures(raw) {
   let settings = {};
   try { settings = typeof raw === 'string' ? JSON.parse(raw) : raw || {} } catch { /* Use defaults. */ }
-  const features = Object.fromEntries(Object.entries(DEFAULTS).map(([key, fallback]) =>
-    [key, typeof settings[key] === 'boolean' ? settings[key] : fallback]));
+  return Object.fromEntries(Object.entries(DEFAULTS).map(([key, fallback]) =>
+    [key, typeof settings?.[key] === 'boolean' ? settings[key] : fallback]));
+}
+async function editorFeatures(manager, optionsModel) {
+  const options = optionsModel ? await optionsModel.getOptions() : {};
+  if (Object.hasOwn(options, FEATURES_KEY)) return normalizeFeatures(options[FEATURES_KEY]);
+  // Old plugin settings remain readable even after its package is removed or disabled.
+  const legacy = await manager?.aiStore?.getCredential('ai-content', 'settings');
+  const features = normalizeFeatures(legacy);
+  if (legacy && optionsModel?.ensureOption) {
+    // Insert only: a concurrent save or another worker's migration always wins.
+    return normalizeFeatures(await optionsModel.ensureOption(FEATURES_KEY, JSON.stringify(features)));
+  }
   return features;
 }
 function featureFor(operation) {
@@ -34,4 +43,4 @@ async function uniqueSlug(value, find) {
   }
   throw new Error('无法生成唯一 Slug，请调整后重试');
 }
-module.exports = {editorFeatures, featureFor, normalizeSlug, uniqueSlug};
+module.exports = {FEATURES_KEY, DEFAULTS, normalizeFeatures, editorFeatures, featureFor, normalizeSlug, uniqueSlug};

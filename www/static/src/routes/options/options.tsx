@@ -10,7 +10,7 @@ import OptionsPush from './push/push';
 import OptionsExport from './export/export';
 import OptionsUpload from './upload/upload';
 import OptionsImport from './import/import';
-import {SmartContentSettings} from '../plugin/plugin-admin';
+import SmartContentSettings from './smart-content/smart-content';
 import AIConnections from '../plugin/ai-connections';
 
 export default function Options({ match }: OptionsProps) {

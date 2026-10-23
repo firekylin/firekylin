@@ -76,9 +76,15 @@ custom summaries until unlocked. No database migration is required.
 
 ### Optional content assistance
 
-The AI Content plugin's settings page controls `slug`, `category` and `autocomplete`; these new features are
-opt-in. The core editor reads the active plugin's saved settings on load and validates the same switches on
-every generation request. Existing title, summary, review and translation switches are also respected.
+All seven feature switches are built into **系统设置 → 智能内容** (`/admin/options/smart-content`).
+The core settings API `/admin/api/smart-content` requires administrator access and CSRF validation for writes.
+Settings are stored in the existing `ai_content_features` option row; no AI Content plugin is needed.
+Slug generation, classification and autocomplete are opt-in. All switches are checked on every generation request.
+
+If the core option is absent, existing encrypted `ai-content/settings` credentials are imported automatically,
+even when the old plugin is inactive or removed. The import only inserts a missing row, so concurrent saves
+and existing core settings take precedence. Legacy credentials are retained. The old plugin page URL redirects
+to the built-in page, and obsolete AI Content sidebar panels are hidden.
 
 Slug generation requires more than 250 characters and opens an editable suggestion dialog. The server
 normalizes the result and checks uniqueness both when generating and when using the suggestion; the normal

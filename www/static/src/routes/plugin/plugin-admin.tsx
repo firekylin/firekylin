@@ -91,8 +91,4 @@ function PluginAdmin(props: any) {
     </div>;
 }
 
-export function SmartContentSettings(props: any) {
-    return <PluginAdmin {...props} match={{...props.match, params: {pluginId: 'ai-content', pageId: 'settings'}}} />;
-}
-
 export default PluginAdmin;

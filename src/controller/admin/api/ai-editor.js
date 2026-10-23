@@ -28,7 +28,7 @@ module.exports = class extends Base {
       provider.models.some(model => model.selected && model.capabilities.includes('text')));
   }
   async getAction() {
-    const features = await editorFeatures(global.firekylin?.plugins);
+    const features = await editorFeatures(global.firekylin?.plugins, this.model('options'));
     return this.success({available: await this.available(), features});
   }
   async slug(value, id, type) {
@@ -50,7 +50,7 @@ module.exports = class extends Base {
         [...content].length <= minimum || content.length > 200000) {
       return this.fail('文章内容长度不符合要求');
     }
-    const features = await editorFeatures(global.firekylin?.plugins);
+    const features = await editorFeatures(global.firekylin?.plugins, this.model('options'));
     if (!features[featureFor(operation)]) return this.fail('该 AI 功能尚未开启');
     if (!await this.available()) return this.fail('请先配置支持文本生成的 AI 连接');
     const languages = [

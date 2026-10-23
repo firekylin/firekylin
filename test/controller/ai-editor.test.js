@@ -24,6 +24,7 @@ function setup(t) {
 }};
   global.firekylin = {plugins: {ai}};
   const instance = new Controller();
+  instance.model = () => ({getOptions: async() => ({})});
   const secret = 'ai-editor-test-secret-at-least-32-bytes';
   const cookie = auth.sign({id: 1, name: 'writer', type: 2}, secret);
   instance.ctx = {state: {jwtSecret: secret}, cookie: () => cookie, get: () => auth.csrfToken(instance.ctx),
@@ -121,6 +122,7 @@ test('new editor operations enforce settings and validate generated selections',
   assert.equal((await instance.postAction()).errno, 1);
   settings = {slug: true, category: true, autocomplete: true};
   instance.model = name => ({
+    getOptions: async() => ({}),
     where: ({pathname}) => ({setRelation: () => ({find: async() => pathname === 'test' ? {id: 99} : {}})}),
     setRelation: () => ({field: () => ({select: async() => name === 'cate'
       ? [{id: 1, name: '父分类', pid: 0}, {id: 2, name: '子分类', pid: 1}]

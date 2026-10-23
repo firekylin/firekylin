@@ -7,7 +7,7 @@ function createSidebarState() {
     if (!window.SysConfig.config.disallow_file_edit) {
         themePages.push({url: '/appearance/edit', title: '编辑主题'});
     }
-    const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce(
+    const pluginRoutes = (window.SysConfig.pluginAdmin || []).filter(plugin => plugin.id !== 'ai-content').reduce(
         (routes, plugin) => routes.concat(plugin.panels
             .filter(panel => plugin.pages.some(page => page.panel === panel.id && page.menu !== false))
             .map(panel => {
@@ -52,7 +52,7 @@ function SideBar(props: any) {
             themePages.push({ url: '/appearance/edit', title: '编辑主题' });
         }
 
-        const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce(
+        const pluginRoutes = (window.SysConfig.pluginAdmin || []).filter(plugin => plugin.id !== 'ai-content').reduce(
             (routes, plugin) =>
                 routes.concat(
                     plugin.panels

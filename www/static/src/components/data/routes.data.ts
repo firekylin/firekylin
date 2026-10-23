@@ -142,9 +142,10 @@ export const InitiateRoutes = (themePages) => [{
                 url: '/options/ai',
                 title: 'AI 连接'
             },
-            ...((window.SysConfig.pluginAdmin || []).some(plugin => plugin.id === 'ai-content' &&
-                plugin.pages.some(page => page.id === 'settings'))
-                ? [{url: '/options/smart-content', title: '智能内容'}] : []),
+            {
+                url: '/options/smart-content',
+                title: '智能内容'
+            },
             {
                 url: '/options/two_factor_auth',
                 title: '两步验证'
