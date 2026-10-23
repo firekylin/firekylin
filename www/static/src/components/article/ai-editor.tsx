@@ -121,7 +121,7 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
         </Modal>
         <Modal title="翻译文章" open={dialog === 'translate'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
             footer={<><Button disabled={!!busy} onClick={() => setDialog('')}>取消</Button><Button type="primary" disabled={!!busy} aria-busy={busy === 'translate'} icon={<AISparkleIcon loading={busy === 'translate'} />} onClick={() => request('translate')}>翻译</Button></>}>
-            <p>翻译为</p><Select aria-label="目标语言" style={{width: '100%'}} value={language} disabled={!!busy} onChange={setLanguage}
+            <p>翻译为</p><Select showSearch optionFilterProp="label" aria-label="目标语言" style={{width: '100%'}} value={language} disabled={!!busy} onChange={setLanguage}
                 options={[
                     {value: '英语', label: 'English'},
                     {value: '简体中文', label: '简体中文'},
@@ -131,6 +131,34 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
                     {value: '法语', label: 'Français'},
                     {value: '德语', label: 'Deutsch'},
                     {value: '西班牙语', label: 'Español'},
+                    {value: '葡萄牙语', label: 'Português'},
+                    {value: '意大利语', label: 'Italiano'},
+                    {value: '荷兰语', label: 'Nederlands'},
+                    {value: '俄语', label: 'Русский'},
+                    {value: '乌克兰语', label: 'Українська'},
+                    {value: '波兰语', label: 'Polski'},
+                    {value: '捷克语', label: 'Čeština'},
+                    {value: '斯洛伐克语', label: 'Slovenčina'},
+                    {value: '匈牙利语', label: 'Magyar'},
+                    {value: '罗马尼亚语', label: 'Română'},
+                    {value: '希腊语', label: 'Ελληνικά'},
+                    {value: '瑞典语', label: 'Svenska'},
+                    {value: '挪威语', label: 'Norsk'},
+                    {value: '丹麦语', label: 'Dansk'},
+                    {value: '芬兰语', label: 'Suomi'},
+                    {value: '土耳其语', label: 'Türkçe'},
+                    {value: '阿拉伯语', label: 'العربية'},
+                    {value: '希伯来语', label: 'עברית'},
+                    {value: '波斯语', label: 'فارسی'},
+                    {value: '印地语', label: 'हिन्दी'},
+                    {value: '孟加拉语', label: 'বাংলা'},
+                    {value: '泰米尔语', label: 'தமிழ்'},
+                    {value: '泰语', label: 'ไทย'},
+                    {value: '越南语', label: 'Tiếng Việt'},
+                    {value: '印尼语', label: 'Bahasa Indonesia'},
+                    {value: '马来语', label: 'Bahasa Melayu'},
+                    {value: '菲律宾语', label: 'Filipino'},
+                    {value: '斯瓦希里语', label: 'Kiswahili'},
                 ]} />
             <p><Checkbox checked={translateTitle} disabled={!!busy} onChange={e => setTranslateTitle(e.target.checked)}>同步翻译标题</Checkbox></p>
         </Modal>

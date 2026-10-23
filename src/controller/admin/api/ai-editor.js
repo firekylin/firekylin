@@ -28,7 +28,14 @@ module.exports = class extends Base {
       return this.fail('文章内容长度不符合要求');
     }
     if (!await this.available()) return this.fail('请先配置支持文本生成的 AI 连接');
-    const languages = ['英语', '简体中文', '繁体中文', '日语', '韩语', '法语', '德语', '西班牙语'];
+    const languages = [
+      '英语', '简体中文', '繁体中文', '日语', '韩语', '法语', '德语', '西班牙语',
+      '葡萄牙语', '意大利语', '荷兰语', '俄语', '乌克兰语', '波兰语',
+      '捷克语', '斯洛伐克语', '匈牙利语', '罗马尼亚语', '希腊语', '瑞典语',
+      '挪威语', '丹麦语', '芬兰语', '土耳其语', '阿拉伯语', '希伯来语',
+      '波斯语', '印地语', '孟加拉语', '泰米尔语', '泰语', '越南语',
+      '印尼语', '马来语', '菲律宾语', '斯瓦希里语',
+    ];
     if (operation === 'translate' && !languages.includes(language)) return this.fail('请选择翻译语种');
     let response;
     try {
