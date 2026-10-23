@@ -3,7 +3,6 @@ import './dashboard.less';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { DashBoardProps } from './dashboard.model';
 import BreadCrumb from '../../components/breadcrumb';
-import AIConnectionGuide from './ai-connection-guide';
 import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
@@ -163,8 +162,7 @@ function DashBoard(props: DashBoardProps) {
 
         return (
             <div className="fk-content-wrap">
-                <BreadCrumb className="breadcrumb" {...props}
-                    actions={<AIConnectionGuide />}/>
+                <BreadCrumb className="breadcrumb" {...props} />
                 <div className="manage-container">
                     {versions.needUpdate ? (
                         <p className="bg-info update-message">

@@ -1,4 +1,5 @@
 const adminAuth = require('../../service/admin-auth');
+const {CREDENTIAL_PREFIX} = require('../../ai/store');
 const {getAdminAssets} = require('../../service/admin-assets');
 
 let adminAssets;
@@ -34,6 +35,9 @@ module.exports = class extends think.Controller {
     delete options.comment_jwt_secret;
     delete options.comment_schema_version;
     delete options.ai_credentials;
+    for (const key of Object.keys(options)) {
+      if (key.startsWith(CREDENTIAL_PREFIX)) delete options[key];
+    }
     // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);

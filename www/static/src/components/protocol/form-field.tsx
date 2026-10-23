@@ -4,6 +4,8 @@ import { Checkbox, Input, InputNumber, Radio, Select, Switch } from 'antd';
 export type FormFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password' |
     'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code' | 'hidden';
 
+export const SAVED_SECRET_MASK = '••••••••';
+
 export interface FormFieldSchema {
     name: string;
     type: FormFieldType;
@@ -19,6 +21,8 @@ export type FieldRenderer = React.ComponentType<{field: FormFieldSchema; [key: s
 export type FieldRendererMap = Partial<Record<FormFieldType, FieldRenderer>>;
 
 const input: FieldRenderer = ({field, ...props}) => <Input {...props} placeholder={field.placeholder}
+    onFocus={field.type === 'password' && props.value === SAVED_SECRET_MASK
+        ? event => event.target.select() : undefined}
     type={field.type === 'password' ? 'password' : field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'} />;
 
 export const defaultFieldRenderers: FieldRendererMap = {

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
 import { ActionGroup, hasLayoutReferences, PAGE_SECTION_CONTENT_INSET, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
 import { http } from '../../utils/http';
+import BreadCrumb from '../../components/breadcrumb';
 
 function extension(pluginId: string) {
     return (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === pluginId);
@@ -67,6 +68,7 @@ function PluginAdmin(props: any) {
     const sectionContext: PageSectionContext = {forms, actions, formValues, submit, run};
 
     return <div className="fk-content-wrap">
+        <BreadCrumb />
         <Space direction="vertical" size={4} style={{marginBottom: 20,
             marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
             <Typography.Title level={3} style={{margin: 0}}>{page.title}</Typography.Title>

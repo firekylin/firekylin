@@ -81,3 +81,11 @@ test('declarative admin endpoints require an administrator and CSRF on writes', 
   assert.deepEqual(calls, [{pluginId: 'demo', formId: 'settings', body: {enabled: true}}]);
   assert.equal(ctx.body.data.message, 'saved');
 });
+
+test('plugin middleware leaves AI connections to the admin controller', async() => {
+  global.firekylin = {plugins: {routes: {match: () => null}}};
+  const ctx = {method: 'GET', path: '/admin/api/ai-connections'};
+  let reachedController = false;
+  await pluginRoutes()(ctx, () => { reachedController = true });
+  assert.equal(reachedController, true);
+});

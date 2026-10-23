@@ -218,6 +218,7 @@ class PluginManager {
         registerProvider: definition => this.aiProviders.register(definition, pluginId),
         providers: () => this.ai.models(),
         select: (provider, model) => this.ai.select(provider, model),
+        clear: () => this.ai.clear(),
         generate: (request, context) => this.ai.generate(request, context),
         credentials: Object.freeze({
           get: name => this.aiStore.getCredential(pluginId, name),

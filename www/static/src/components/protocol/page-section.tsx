@@ -118,7 +118,8 @@ function TableSection({node, context}: {node: PageSection; context: PageSectionC
         }))} dataSource={rows} />, controls);
 }
 
-function PluginForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
+function PluginForm({item, values, submit, form, hideSubmit, onValuesChange}: {item: any; values: any;
+    submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void}) {
     const renderField = (field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
         hidden={field.type === 'hidden'} preserve={false}
         valuePropName={field.type === 'switch' ? 'checked' : 'value'}
@@ -126,7 +127,8 @@ function PluginForm({item, values, submit}: {item: any; values: any; submit: Pag
         <FormField field={field} />
     </Form.Item>;
     return <Card title={item.title} style={{marginBottom: 16}}>
-        <Form layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
+        <Form form={form} layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
+            onValuesChange={onValuesChange}
             onFinish={formValues => submit(item.id, formValues)}>
             {item.fields.map((field: FormFieldSchema) => field.visibleWhen
                 ? <Form.Item key={field.name} noStyle shouldUpdate={(previous, current) =>
@@ -135,7 +137,7 @@ function PluginForm({item, values, submit}: {item: any; values: any; submit: Pag
                         ? renderField(field) : null}
                 </Form.Item>
                 : renderField(field))}
-            <Button type="primary" htmlType="submit">{item.submitLabel}</Button>
+            {!hideSubmit ? <Button type="primary" htmlType="submit">{item.submitLabel}</Button> : null}
         </Form>
     </Card>;
 }
@@ -205,8 +207,10 @@ export function PageSections({sections, context}: {sections: PageSection[]; cont
     return <ProtocolList nodes={sections} context={context} renderers={pageSectionRenderers} />;
 }
 
-export function PageForm({item, values, submit}: {item: any; values: any; submit: PageSectionContext['submit']}) {
-    return <PluginForm item={item} values={values} submit={submit} />;
+export function PageForm({item, values, submit, form, hideSubmit, onValuesChange}: {item: any; values: any;
+    submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void}) {
+    return <PluginForm item={item} values={values} submit={submit} form={form}
+        hideSubmit={hideSubmit} onValuesChange={onValuesChange} />;
 }
 
 export function hasLayoutReferences(sections: PageSection[]): boolean {

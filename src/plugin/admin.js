@@ -207,8 +207,8 @@ class AdminRegistry {
   registerForm(definition, pluginId = 'core') {
     if (!definition || typeof definition !== 'object') throw new TypeError('Admin form must be an object');
     const id = identifier(definition.id, 'Admin form id');
-    const page = identifier(definition.page, `Admin form ${id} page`);
-    if (!this.pages.has(this.key(pluginId, page))) throw new Error(`Unknown admin page: ${page}`);
+    const page = definition.page === undefined ? undefined : identifier(definition.page, `Admin form ${id} page`);
+    if (page && !this.pages.has(this.key(pluginId, page))) throw new Error(`Unknown admin page: ${page}`);
     if (typeof definition.submit !== 'function') throw new TypeError(`Admin form ${id} requires submit(values, context)`);
     const key = this.key(pluginId, id);
     if (this.forms.has(key)) throw new Error(`Admin form already registered: ${id}`);
@@ -229,8 +229,8 @@ class AdminRegistry {
   registerAction(definition, pluginId = 'core') {
     if (!definition || typeof definition !== 'object') throw new TypeError('Admin action must be an object');
     const id = identifier(definition.id, 'Admin action id');
-    const page = identifier(definition.page, `Admin action ${id} page`);
-    if (!this.pages.has(this.key(pluginId, page))) throw new Error(`Unknown admin page: ${page}`);
+    const page = definition.page === undefined ? undefined : identifier(definition.page, `Admin action ${id} page`);
+    if (page && !this.pages.has(this.key(pluginId, page))) throw new Error(`Unknown admin page: ${page}`);
     if (typeof definition.handler !== 'function') throw new TypeError(`Admin action ${id} requires handler(input, context)`);
     const type = definition.type || 'default';
     if (!ACTION_TYPES.has(type)) throw new TypeError(`Unsupported admin action type: ${type}`);
@@ -291,7 +291,7 @@ class AdminRegistry {
       plugin.pages.sort((a, b) => a.order - b.order);
       plugin.editorActions.sort((a, b) => a.order - b.order);
     }
-    return [...plugins.values()].filter(plugin => plugin.pages.length);
+    return [...plugins.values()].filter(plugin => plugin.pages.length || plugin.forms.length || plugin.actions.length);
   }
 
   async loadPage(pluginId, pageId, context) {
