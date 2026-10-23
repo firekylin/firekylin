@@ -1,7 +1,8 @@
+import AISparkleIcon from '../ai-sparkle-icon';
 import React from 'react';
 import axios from 'axios';
 import {Button, Checkbox, Input, Modal, Select, Spin, Tooltip} from 'antd';
-import {RobotOutlined, FileSearchOutlined, TranslationOutlined} from '@ant-design/icons';
+import {FileSearchOutlined, TranslationOutlined} from '@ant-design/icons';
 import './ai-editor.less';
 export const AIContext = React.createContext<any>(null);
 export function AIButton({operation, minimum, label, icon}: any) {
@@ -10,7 +11,7 @@ export function AIButton({operation, minimum, label, icon}: any) {
     const disabled = [...(ai.content || '')].length <= minimum || ai.busy;
     return <Tooltip title={disabled ? `正文需超过 ${minimum} 个字符，且没有正在进行的 AI 请求` : label}>
         <span><Button type="text" aria-label={label} disabled={disabled}
-            loading={ai.busy === operation} icon={icon || <RobotOutlined />}
+            loading={ai.busy === operation} icon={icon || <AISparkleIcon />}
             onClick={() => ai.run(operation)} /></span>
     </Tooltip>;
 }
