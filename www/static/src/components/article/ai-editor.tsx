@@ -116,9 +116,18 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
             <Input aria-label="建议标题" value={suggestion} disabled={!!busy} onChange={e => setSuggestion(e.target.value)} />
         </Modal>
         <Modal title="翻译文章" open={dialog === 'translate'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
-            footer={<><Button disabled={!!busy} onClick={() => setDialog('')}>取消</Button><Button type="primary" disabled={!!busy} loading={busy === 'translate'} onClick={() => request('translate')}>翻译</Button></>}>
+            footer={<><Button disabled={!!busy} onClick={() => setDialog('')}>取消</Button><Button type="primary" disabled={!!busy} aria-busy={busy === 'translate'} icon={<AISparkleIcon loading={busy === 'translate'} />} onClick={() => request('translate')}>翻译</Button></>}>
             <p>翻译为</p><Select aria-label="目标语言" style={{width: '100%'}} value={language} disabled={!!busy} onChange={setLanguage}
-                options={['英语', '简体中文', '繁体中文', '日语', '韩语', '法语', '德语', '西班牙语'].map(value => ({value, label: value}))} />
+                options={[
+                    {value: '英语', label: 'English'},
+                    {value: '简体中文', label: '简体中文'},
+                    {value: '繁体中文', label: '繁體中文'},
+                    {value: '日语', label: '日本語'},
+                    {value: '韩语', label: '한국어'},
+                    {value: '法语', label: 'Français'},
+                    {value: '德语', label: 'Deutsch'},
+                    {value: '西班牙语', label: 'Español'},
+                ]} />
             <p><Checkbox checked={translateTitle} disabled={!!busy} onChange={e => setTranslateTitle(e.target.checked)}>同步翻译标题</Checkbox></p>
         </Modal>
         <Modal title="文章审阅" width={1000} open={dialog === 'review'} onCancel={() => setDialog('')} closable={!busy} keyboard={!busy} mask={{closable: !busy}}
