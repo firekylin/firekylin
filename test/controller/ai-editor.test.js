@@ -18,7 +18,10 @@ function setup(t) {
   t.after(() => { global.firekylin = previous });
   const calls = [];
   const ai = {models: async() => [{configured: true, models: [{selected: true, capabilities: ['text']}]}],
-    generate: async request => { calls.push(request); return {text: 'generated'} }};
+    generate: async request => {
+ calls.push(request); return {text: request.messages[0].content.includes('suggestions')
+      ? JSON.stringify({text: 'generated', suggestions: []}) : 'generated'}
+}};
   global.firekylin = {plugins: {ai}};
   const instance = new Controller();
   const secret = 'ai-editor-test-secret-at-least-32-bytes';
@@ -73,7 +76,8 @@ test('real response helpers preserve successful AI responses and terminate only 
     responses.length = 0;
     instance.post = () => ({operation, content: '字'.repeat(251), language: '英语'});
     await assert.rejects(instance.postAction(), {message: 'PREVENT_NEXT_PROCESS'});
-    assert.deepEqual(responses, [{errno: 0, data: {text: 'generated', title: undefined}}]);
+    assert.deepEqual(responses, [{errno: 0, data: operation === 'review'
+      ? {text: 'generated', suggestions: []} : {text: 'generated', title: undefined}}]);
   }
   responses.length = 0;
   instance.post = () => ({operation: 'translate', content: '字'.repeat(251), language: 'invalid'});

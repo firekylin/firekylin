@@ -5,6 +5,7 @@ export interface ReviewChange {
     originalLine?: number;
     proposedLine?: number;
     unchanged?: boolean;
+    reasons?: string[];
     decision?: '' | 'accept' | 'reject' | 'edit';
 }
 
@@ -50,7 +51,8 @@ export function diffTokens(a: string[], b: string[]): Edit[] {
         ...right.map(text => ({type: 'insert' as const, text})), ...end];
 }
 
-export function reviewChanges(before: string, after: string): ReviewChange[] {
+export interface ReviewSuggestion {originalLine: number | null; proposedLine: number | null; reason: string}
+export function reviewChanges(before: string, after: string, suggestions: ReviewSuggestion[] = []): ReviewChange[] {
     const lines = (text: string) => text.match(/[^\n]*\n|[^\n]+$/g) || [];
     const edits = diffTokens(lines(before), lines(after));
     const changes: ReviewChange[] = [];
@@ -71,6 +73,13 @@ export function reviewChanges(before: string, after: string): ReviewChange[] {
                 originalLine: row < removed.length ? originalLine++ : undefined,
                 proposedLine: row < added.length ? proposedLine++ : undefined, decision: ''});
         }
+    }
+    for (const change of changes) {
+        if (change.unchanged) continue;
+        change.reasons = [...new Set(suggestions.filter(item =>
+            (item.originalLine !== null && item.originalLine === change.originalLine) ||
+            (item.proposedLine !== null && item.proposedLine === change.proposedLine)
+        ).map(item => item.reason))];
     }
     return changes;
 }

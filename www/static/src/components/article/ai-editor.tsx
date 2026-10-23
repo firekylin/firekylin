@@ -61,11 +61,11 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
                 {signal: controller.signal, headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
             if (controller.signal.aborted) return;
             if (res.data.errno !== 0) throw new Error(res.data.errmsg || 'AI 请求失败');
-            const {text, title} = res.data.data;
+            const {text, title, suggestions} = res.data.data;
             if (typeof text !== 'string') throw new Error('AI 未返回有效内容');
             if (operation === 'title') { setSuggestion(text); setDialog('title') }
             if (operation === 'summary') store.setArticleInfo({summary: text, options: {customSummary: text}});
-            if (operation === 'review') setChanges(reviewChanges(snapshot.current.content, text));
+            if (operation === 'review') setChanges(reviewChanges(snapshot.current.content, text, suggestions));
             if (operation === 'translate') {
                 if (store.articleInfo.markdown_content !== snapshot.current.content &&
                     !window.confirm('正文已发生变化，是否使用翻译结果覆盖当前正文？')) return;
@@ -148,7 +148,7 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
                 ]} />
             <p><Checkbox checked={translateTitle} disabled={!!busy} onChange={e => setTranslateTitle(e.target.checked)}>同步翻译标题</Checkbox></p>
         </Modal>
-        <Modal title="文章审阅" width="min(1280px, 96vw)" open={dialog === 'review'} onCancel={closeReview} closable keyboard mask={{closable: true}}
+        <Modal title="智能审阅" width="min(1280px, 96vw)" open={dialog === 'review'} onCancel={closeReview} closable keyboard mask={{closable: true}}
             footer={<Button type="primary" disabled={!!busy || unresolved || !changes.length} onClick={applyReview}>更新正文</Button>}>
             {busy === 'review' ? <div className="review-loading" role="status"><Spin /><p>正在审阅文章…</p></div> : <ReviewMerge
                 changes={changes} onChange={decide}

@@ -43,6 +43,10 @@ function ChangeRow({change, index, number, onChange}: {
                 <Button size="small" type="link" onClick={() => setEditing(value => !value)}>{editing ? '收起编辑' : '手动合并'}</Button>
                 {change.decision && <Button size="small" type="link" onClick={() => onChange(index, {decision: ''})}>撤销决定</Button>}</div>
         </div>
+        <div className="review-suggestion"><strong>修改建议：</strong>
+            {change.reasons?.length ? change.reasons.map((reason, i) => <p key={i}>{reason}</p>)
+                : <p>AI 未提供此处修改的具体说明，请结合下方差异审阅。</p>}
+        </div>
         <LinePair change={change} />
         {editing && <div className="review-manual-edit"><label htmlFor={`review-edit-${number}`}>合并此处内容（可结合两侧文本编辑）</label>
             <Input.TextArea id={`review-edit-${number}`} autoSize={{minRows: 2, maxRows: 12}} value={change.proposed}

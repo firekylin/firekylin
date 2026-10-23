@@ -42,3 +42,12 @@ describe('review diff accuracy', () => {
         }
     });
 });
+it('attaches reasons to the corresponding changed line only', () => {
+    const changes = reviewChanges('one\ntwo\nthree\n', 'one\nTWO\nTHREE\n', [
+        {originalLine: 2, proposedLine: 2, reason: '改善第二行表达'},
+        {originalLine: 3, proposedLine: 3, reason: '改善第三行表达'},
+    ]);
+    expect(changes[1].reasons).toEqual(['改善第二行表达']);
+    expect(changes[2].reasons).toEqual(['改善第三行表达']);
+    expect(changes[0].reasons).toBeUndefined();
+});

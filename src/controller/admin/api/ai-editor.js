@@ -1,11 +1,18 @@
 'use strict';
 const Base = require('./base');
 const adminAuth = require('../../../service/admin-auth');
+const {parseReviewResult} = require('../../../ai/review-result');
 
 const instructions = {
   title: '为文章生成一个准确、有吸引力的标题。只返回标题纯文本。',
   summary: '为文章生成简洁的内容摘要，概括全文主要观点。只返回摘要纯文本。',
-  review: '审阅文章，改善语法、表达与结构，保留作者观点、事实和 Markdown 格式。只返回修改后的完整 Markdown。',
+  review: [
+    '审阅文章，改善语法、表达与结构，保留作者观点、事实和 Markdown 格式。',
+    '仅返回 JSON 对象：{"text":"修改后的完整 Markdown","suggestions":[',
+    '{"originalLine":1,"proposedLine":1,"reason":"简短中文修改建议，说明具体修改及理由"}]}。',
+    '每一处改动都需要建议。行号从 1 开始计数，空行也计入，分别对应原文和修改后的正文。',
+    '新增行的 originalLine 为 null，删除行的 proposedLine 为 null。不要返回 Markdown 代码围栏。'
+  ].join(''),
   translate: '翻译文章，保留 Markdown 格式、代码、链接和事实。只返回翻译后的 Markdown。'
 };
 module.exports = class extends Base {
@@ -57,7 +64,7 @@ module.exports = class extends Base {
       const text = await generate(content, instruction);
       const translatedTitle = operation === 'translate' && translateTitle && title
         ? await generate(String(title), `将标题翻译为${language}，只返回标题纯文本。`) : undefined;
-      response = {text, title: translatedTitle};
+      response = operation === 'review' ? parseReviewResult(text, content) : {text, title: translatedTitle};
     } catch (error) {
       if (controller.signal.aborted) return;
       return this.fail(error.message || 'AI 请求失败');
