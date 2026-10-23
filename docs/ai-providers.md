@@ -68,10 +68,11 @@ Title and summary generation require more than 250 Unicode characters of body co
 more than 100, and translation more than 10. Review changes are accepted, rejected or edited before replacing
 the body. Translation optionally includes the title.
 
-Custom summary source is stored in the existing post `options.customSummary` value. The rendered excerpt
-continues to use `summary`; an empty custom source restores the existing `<!--more-->` and excerpt-length
-behavior. Changing automatic excerpt settings preserves custom summaries. Password-protected articles hide
-custom summaries until unlocked. No database migration is required.
+Summaries use the existing `summary` field directly. A non-empty submitted summary takes precedence; an
+empty or omitted summary uses `getSummary` with the existing `<!--more-->` and excerpt-length behavior.
+Bulk excerpt rebuilding preserves non-empty summaries. Legacy `options.customSummary` values are loaded
+into the summary editor and removed from options on the next save. Password-protected articles hide
+summaries until unlocked. No database migration is required.
 
 
 ### Optional content assistance

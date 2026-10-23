@@ -199,6 +199,7 @@ ${post.markdown_content}`;
     delete incoming.passwordProtected;
     delete incoming.postPasswordHash;
     const options = Object.assign({}, current, incoming);
+    delete options.customSummary;
     if (typeof data.post_password === 'string' && data.post_password.length > 256) {
       throw new Error('Post password is too long');
     }

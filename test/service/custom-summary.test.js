@@ -5,26 +5,56 @@ const assert = require('node:assert/strict');
 global.think = {Model: class {}};
 const Post = require('../../src/model/post');
 
-test('custom summary survives rendering and clearing restores automatic excerpt', async() => {
+function model() {
   const post = new Post();
   post.model = () => ({getOptions: async() => ({auto_summary: 100})});
   post.renderContent = async() => ({markdown: 'body', content: '<p>body</p>'});
-  post.markdownToHtml = async text => `<p>${text}</p>`;
   post.getSummary = async() => 'automatic';
-  const custom = await post.getContentAndSummary({options: JSON.stringify({customSummary: 'overview'})});
-  assert.equal(custom.summary, '<p>overview</p>');
-  const automatic = await post.getContentAndSummary({options: {customSummary: ''}});
-  assert.equal(automatic.summary, 'automatic');
+  return post;
+}
+test('submitted summary is used directly without rendering or storing another field', async() => {
+  const post = model();
+  post.getSummary = async() => { throw new Error('Explicit summary must not be regenerated') };
+  const result = await post.getContentAndSummary({summary: 'overview', options: '{}'});
+  assert.equal(result.summary, 'overview');
+  assert.equal(result.options, '{}');
 });
-test('changing automatic excerpt length preserves custom summaries', async() => {
-  const post = new Post();
+test('empty, whitespace-only and omitted summaries fall back to getSummary', async() => {
+  for (const summary of ['', '  ', undefined, null]) {
+    const result = await model().getContentAndSummary({summary, options: '{}'});
+    assert.equal(result.summary, 'automatic');
+  }
+});
+test('saving removes the legacy option without letting it override submitted summary', async() => {
+  const result = await model().getContentAndSummary({summary: 'new summary',
+    options: JSON.stringify({customSummary: 'legacy summary', featuredImage: 'cover.png'})});
+  assert.equal(result.summary, 'new summary');
+  assert.deepEqual(JSON.parse(result.options), {featuredImage: 'cover.png'});
+});
+test('bulk rebuilding preserves existing summaries and only fills empty ones', async() => {
+  const post = model();
   post.field = () => ({setRelation: () => ({select: async() => [
-    {id: 1, markdown_content: 'body', options: '{"customSummary":"custom"}'},
-    {id: 2, markdown_content: 'body', options: '{}'}
+    {id: 1, markdown_content: 'body', summary: 'existing summary'},
+    {id: 2, markdown_content: 'body', summary: ''}
   ]})});
   const updates = [];
   post.where = ({id}) => ({update: async data => updates.push({id, ...data})});
-  post.getSummary = async() => 'automatic';
   await post.updateAllPostSummaries();
   assert.deepEqual(updates, [{id: 2, summary: 'automatic'}]);
+});
+test('updating body uses only the submitted summary rather than inheriting the old one', async() => {
+  const PostCommandService = require('../../src/service/post-command');
+  const post = model();
+  post.where = () => post;
+  post.setRelation = () => post;
+  post.find = async() => ({id: 1, user_id: 1, status: 0, summary: 'old summary', options: '{}'});
+  let saved;
+  post.savePost = async data => { saved = data; return 1 };
+  const service = new PostCommandService({getModel: () => post, now: () => 'now'});
+  await service.update({id: 1, markdown_content: 'new body'}, {id: 1, type: 1});
+  assert.equal(saved.summary, 'automatic');
+  await service.update({id: 1, markdown_content: 'new body', summary: 'submitted summary'}, {id: 1, type: 1});
+  assert.equal(saved.summary, 'submitted summary');
+  await service.update({id: 1, markdown_content: 'new body', summary: ''}, {id: 1, type: 1});
+  assert.equal(saved.summary, 'automatic');
 });

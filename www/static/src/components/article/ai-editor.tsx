@@ -76,7 +76,7 @@ export function useEditorAI(store: any, applyTitle: (title: string) => void, sco
             if (operation === 'category') store.setArticleInfo({cate: res.data.data.categories});
             if (operation === 'tags') store.setArticleInfo({tag: res.data.data.tags});
             if (operation === 'title') { setSuggestion(text); setDialog('title') }
-            if (operation === 'summary') store.setArticleInfo({summary: text, options: {customSummary: text}});
+            if (operation === 'summary') store.setArticleInfo({summary: text});
             if (operation === 'review') setChanges(reviewChanges(snapshot.current.content, text, suggestions));
             if (operation === 'translate') {
                 if (store.articleInfo.markdown_content !== snapshot.current.content &&

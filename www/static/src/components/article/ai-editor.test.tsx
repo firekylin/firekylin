@@ -9,7 +9,7 @@ function Harness({store, applyTitle = vi.fn(), applySlug = vi.fn()}: any) {
     return <AIContext.Provider value={ai}><AIButton operation="title" minimum={250} label="AI生成标题" />
         <AIButton operation="review" minimum={100} label="文章审阅" />
         <AIButton operation="translate" minimum={10} label="翻译" /><AIButton operation="slug" minimum={250} label="智能 Slug" />
-        <AIButton operation="category" minimum={250} label="智能分类选择" /><AIButton operation="tags" minimum={250} label="智能标签选择" />{ai.dialogs}</AIContext.Provider>;
+        <AIButton operation="summary" minimum={250} label="智能生成摘要" /><AIButton operation="category" minimum={250} label="智能分类选择" /><AIButton operation="tags" minimum={250} label="智能标签选择" />{ai.dialogs}</AIContext.Provider>;
 }
 afterEach(() => { cleanup(); vi.restoreAllMocks() });
 beforeEach(() => {
@@ -117,4 +117,11 @@ it('fills selected categories and tags without a suggestion modal', async() => {
     await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({cate: [{id: 1, name: '测试'}]}));
     fireEvent.click(screen.getByRole('button', {name: '智能标签选择'}));
     await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({tag: ['标签']}));
+});
+it('AI summary writes only to the existing summary field', async() => {
+    vi.mocked(axios.post).mockResolvedValueOnce({data: {errno: 0, data: {text: 'AI 摘要'}}});
+    const store = {articleInfo: {markdown_content: '字'.repeat(251)}, setArticleInfo: vi.fn()};
+    render(<Harness store={store} />);
+    fireEvent.click(await screen.findByRole('button', {name: '智能生成摘要'}));
+    await waitFor(() => expect(store.setArticleInfo).toHaveBeenCalledWith({summary: 'AI 摘要'}));
 });
