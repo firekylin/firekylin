@@ -15,13 +15,16 @@ it.each([
     [PostList, '添加文章', '/post/create'],
     [CategoryList, '添加分类', '/cate/create'],
     [TagList, '添加标签', '/tag/create'],
-] as const)('exposes a header create action for each list', (Component, title, target) => {
+] as const)('places the create action in the list rather than navigation', (Component, title, target) => {
     const push = vi.fn();
     const sharedStore = {categoryList: [], tagList: [], loading: {}, defaultCategory: '',
         getCategoryList: vi.fn(), getDefaultCategory: vi.fn(), getTagList: vi.fn(),
         getUserList: () => of({errno: 0, data: []}), setUserList: vi.fn()};
     const postStore = {selectedRowKeys: [], plReqParams: {}, getPostList: vi.fn()};
     render(<MemoryRouter><Component {...({history: {push}, sharedStore, postStore, categoryStore: {}} as any)} /></MemoryRouter>);
-    fireEvent.click(screen.getByRole('button', {name: title}));
+    const button = screen.getByRole('button', {name: title});
+    expect(button.closest('header')).toBeNull();
+    expect(button.closest(target === '/post/create' ? '.forms' : '.list-toolbar')).not.toBeNull();
+    fireEvent.click(button);
     expect(push).toHaveBeenCalledWith(target);
 });

@@ -129,7 +129,6 @@ function BreadCrumb(props: any) {
                     ref={(ul) => (legacy.userInfoRef = ul)}
                 >
                     <li><AIConnectionGuide /></li>
-                    {props.actions ? <li>{props.actions}</li> : null}
                     <li className={legacy.getUserClass()}>
                         <a
                             onClick={() => legacy.toggleUser()}

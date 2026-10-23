@@ -49,61 +49,63 @@ function CategoryList(props: CategoryListProps) {
         const { categoryList, defaultCategory, loading } = props.sharedStore;
         return (
             <div className="category-list">
-                <BreadCrumb {...props} actions={<Button type="primary" onClick={() => props.history.push('/cate/create')}>添加分类</Button>} />
-                <Table
-                    dataSource={categoryList}
-                    loading={{ spinning: loading.category, delay: TABLE_DELAY }}
-                    className="page-list"
-                    rowKey={(category) => category.id.toString()}
-                >
-                    <Column title="名称" key="name" dataIndex="name" />
+                <BreadCrumb {...props} />
+                <div className="page-list">
+                    <div className="list-toolbar"><Button type="primary" onClick={() => props.history.push('/cate/create')}>添加分类</Button></div>
+                    <Table
+                        dataSource={categoryList}
+                        loading={{ spinning: loading.category, delay: TABLE_DELAY }}
+                        rowKey={(category) => category.id.toString()}
+                    >
+                        <Column title="名称" key="name" dataIndex="name" />
 
-                    <Column title="缩略名" dataIndex="pathname" key="pathname" />
+                        <Column title="缩略名" dataIndex="pathname" key="pathname" />
 
-                    <Column title="文章数" dataIndex="post_cate" key="post_cate" />
+                        <Column title="文章数" dataIndex="post_cate" key="post_cate" />
 
-                    <Column
-                        title="操作"
-                        key="action"
-                        render={(post: Category) => (
-                            <Space size="small">
-                                <Button
-                                    disabled={defaultCategory === post.id.toString()}
-                                    onClick={() => legacy.setDefault(post.id)}
-                                    className={classnames({
-                                        'fk-btn-success': !(
-                                            defaultCategory === post.id.toString()
-                                        ),
-                                    })}
-                                    type="primary"
-                                    icon={<StarOutlined />}
-                                    size="small"
-                                >
-                                    默认
-                                </Button>
-                                <Button
-                                    onClick={() =>
-                                        props.history.push(`/cate/edit/${post.id}`)
-                                    }
-                                    type="primary"
-                                    icon={<EditOutlined />}
-                                    size="small"
-                                >
-                                    编辑
-                                </Button>
-                                <Button
-                                    onClick={() => legacy.delete(post.id)}
-                                    type="primary"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    size="small"
-                                >
-                                    删除
-                                </Button>
-                            </Space>
-                        )}
-                    />
-                </Table>
+                        <Column
+                            title="操作"
+                            key="action"
+                            render={(post: Category) => (
+                                <Space size="small">
+                                    <Button
+                                        disabled={defaultCategory === post.id.toString()}
+                                        onClick={() => legacy.setDefault(post.id)}
+                                        className={classnames({
+                                            'fk-btn-success': !(
+                                                defaultCategory === post.id.toString()
+                                            ),
+                                        })}
+                                        type="primary"
+                                        icon={<StarOutlined />}
+                                        size="small"
+                                    >
+                                        默认
+                                    </Button>
+                                    <Button
+                                        onClick={() =>
+                                            props.history.push(`/cate/edit/${post.id}`)
+                                        }
+                                        type="primary"
+                                        icon={<EditOutlined />}
+                                        size="small"
+                                    >
+                                        编辑
+                                    </Button>
+                                    <Button
+                                        onClick={() => legacy.delete(post.id)}
+                                        type="primary"
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        size="small"
+                                    >
+                                        删除
+                                    </Button>
+                                </Space>
+                            )}
+                        />
+                    </Table>
+                </div>
             </div>
         );
     };

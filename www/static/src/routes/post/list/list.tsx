@@ -121,6 +121,7 @@ function PostListForm(props: PostListProps) {
                         enterButton={true}
                         style={{ width: 200, marginLeft: 10 }}
                     />
+                    <Button type="primary" style={{ marginLeft: 10 }} onClick={() => props.history.push('/post/create')}>添加文章</Button>
                 </Form.Item>
             </>
         );
@@ -128,7 +129,7 @@ function PostListForm(props: PostListProps) {
     legacy.render = function render() {
         return (
             <>
-                <BreadCrumb {...props} actions={<Button type="primary" onClick={() => props.history.push('/post/create')}>添加文章</Button>} />
+                <BreadCrumb {...props} />
                 <div className="page-list post-list">
                     <Tabs
                         className="tabs"

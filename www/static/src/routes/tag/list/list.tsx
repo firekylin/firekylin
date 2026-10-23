@@ -53,47 +53,49 @@ export function TagList(props: TagProps) {
     }
 
     return (
-        <div className="category-list">
-            <BreadCrumb {...props} actions={<Button type="primary" onClick={() => props.history.push('/tag/create')}>添加标签</Button>} />
-            <Table 
-                dataSource={tagList}
-                loading={{spinning: loading, delay: TABLE_DELAY}}
-                className="page-list"
-                rowKey={tag => tag.id.toString()}
-            >
-                <Column
-                    title="名称"
-                    key="name"
-                    dataIndex="name"
-                />
-                <Column
-                    title="缩略名"
-                    dataIndex="pathname"
-                    key="pathname"
-                />
-                <Column
-                    title="文章数"
-                    dataIndex="post_tag"
-                    key="post_tag"
-                />
-                <Column
-                    title="操作"
-                    key="action"
-                    render={(tag: Tag) => (
-                        <Space size="small">
-                            <Button
-                                onClick={() => props.history.push(`/tag/edit/${tag.id}`)}
-                                type="primary"
-                                icon={<EditOutlined />}
-                                size="small"
-                            >
-                                编辑
-                            </Button>
-                            <Button onClick={() => tagDelete(tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
-                        </Space>
-                    )}
-                />
-            </Table>
+        <div className="tag-list">
+            <BreadCrumb {...props} />
+            <div className="page-list">
+                <div className="list-toolbar"><Button type="primary" onClick={() => props.history.push('/tag/create')}>添加标签</Button></div>
+                <Table 
+                    dataSource={tagList}
+                    loading={{spinning: loading, delay: TABLE_DELAY}}
+                    rowKey={tag => tag.id.toString()}
+                >
+                    <Column
+                        title="名称"
+                        key="name"
+                        dataIndex="name"
+                    />
+                    <Column
+                        title="缩略名"
+                        dataIndex="pathname"
+                        key="pathname"
+                    />
+                    <Column
+                        title="文章数"
+                        dataIndex="post_tag"
+                        key="post_tag"
+                    />
+                    <Column
+                        title="操作"
+                        key="action"
+                        render={(tag: Tag) => (
+                            <Space size="small">
+                                <Button
+                                    onClick={() => props.history.push(`/tag/edit/${tag.id}`)}
+                                    type="primary"
+                                    icon={<EditOutlined />}
+                                    size="small"
+                                >
+                                    编辑
+                                </Button>
+                                <Button onClick={() => tagDelete(tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+                            </Space>
+                        )}
+                    />
+                </Table>
+            </div>
         </div>
     );
 }
