@@ -12,14 +12,6 @@ it('loads the summary field and resets it when starting another article', () => 
     const store = new ArticleStore();
     store.getArticleInfoById(1, 0);
     expect(store.articleInfo.summary).toBe('stored summary');
-    expect(store.articleInfo.options).not.toHaveProperty('customSummary');
     store.resetArticleInfo();
     expect(store.articleInfo.summary).toBe('');
-});
-it('reads legacy summary source without carrying it forward in options', () => {
-    vi.mocked(http.get).mockReturnValueOnce(of({errno: 0, data: article({customSummary: 'legacy summary'})}) as any);
-    const store = new ArticleStore();
-    store.getArticleInfoById(1, 0);
-    expect(store.articleInfo.summary).toBe('legacy summary');
-    expect(store.articleInfo.options).not.toHaveProperty('customSummary');
 });

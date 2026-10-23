@@ -10,7 +10,6 @@ function redactProtectedPosts(posts) {
     }
     if (!options.postPasswordHash) return post;
     delete options.postPasswordHash;
-    delete options.customSummary;
     return Object.assign({}, post, {
       title: '此内容被密码保护',
       summary: '这篇文章受密码保护。',
@@ -179,11 +178,6 @@ module.exports = class extends Base {
     const markdown = rendered.markdown;
     const auto_summary = parseInt(options.auto_summary);
     data.content = rendered.content;
-    const postOptions = typeof data.options === 'string' ? JSON.parse(data.options || '{}') : (data.options || {});
-    if (Object.hasOwn(postOptions, 'customSummary')) {
-      delete postOptions.customSummary;
-      data.options = typeof data.options === 'string' ? JSON.stringify(postOptions) : postOptions;
-    }
     if (typeof data.summary !== 'string' || !data.summary.trim()) {
       data.summary = await this.getSummary(markdown, auto_summary);
     }

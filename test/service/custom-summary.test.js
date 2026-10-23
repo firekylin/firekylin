@@ -25,12 +25,6 @@ test('empty, whitespace-only and omitted summaries fall back to getSummary', asy
     assert.equal(result.summary, 'automatic');
   }
 });
-test('saving removes the legacy option without letting it override submitted summary', async() => {
-  const result = await model().getContentAndSummary({summary: 'new summary',
-    options: JSON.stringify({customSummary: 'legacy summary', featuredImage: 'cover.png'})});
-  assert.equal(result.summary, 'new summary');
-  assert.deepEqual(JSON.parse(result.options), {featuredImage: 'cover.png'});
-});
 test('bulk rebuilding preserves existing summaries and only fills empty ones', async() => {
   const post = model();
   post.field = () => ({setRelation: () => ({select: async() => [
