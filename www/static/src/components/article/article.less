@@ -1,8 +1,14 @@
+html:has(.post-article),
+body:has(.post-article),
+.manage-container:has(.post-article) {
+    overflow: hidden;
+}
+
 .post-article {
     .article-control-panel {
         padding-left: 30px;
         padding-right: 4px;
-        max-height: calc(100dvh - var(--article-sidebar-top, 120px) - 16px);
+        max-height: calc(100dvh - var(--article-sidebar-top, 120px) - 56px);
         overflow-y: auto;
         overscroll-behavior-y: contain;
         scrollbar-gutter: stable;
