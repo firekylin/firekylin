@@ -39,6 +39,10 @@ module.exports = class extends think.Model {
       ret.comment = JSON.parse(ret.comment);
     }
     const comment = {...(ret.comment || {})};
+    if (!includePrivate) {
+      delete comment.captchaSecret;
+      delete comment.smtpPass;
+    }
     Reflect.deleteProperty(comment, 'name');
     Reflect.deleteProperty(comment, 'type');
     ret.comment = {

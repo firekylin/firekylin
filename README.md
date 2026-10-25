@@ -215,13 +215,11 @@ declare namespace Firekylin {
 
 ### 评论验证码和邮件通知
 
-在后台「评论设置」选择 Turnstile 或 reCAPTCHA v3，并填写公开 Site Key。
-服务器通过环境变量 `TURNSTILE_KEY` 或 `RECAPTCHA_SECRET` 配置对应私钥，重启生效。
+在后台「评论设置」选择 Turnstile 或 reCAPTCHA v3，填写公开 Site Key 和私钥。
 匿名评论校验失败时拒绝提交；reCAPTCHA v3 最低分数为 0.5，登录用户免验证码。
 
-开启「评论邮件通知」后，配置 `SMTP_HOST`、`SMTP_FROM`，以及按需配置
-`SMTP_USER`、`SMTP_PASS` 和站长收件地址 `AUTHOR_EMAIL`。
-`SMTP_PORT` 默认 465，直接 TLS 默认开启；使用 587/STARTTLS 时设置 `SMTP_SECURE=false`。
+邮件通知可直接在后台配置 SMTP 服务器、端口、TLS、用户名、密码、发件人与站长收件邮箱。
+465 端口开启直接 TLS；587/STARTTLS 关闭直接 TLS。私钥和 SMTP 密码不会回显，留空保存保留原值。
+凭据保存在数据库中，应保护数据库和备份。未填写的配置兼容原有环境变量。
 新评论通知站长，已审核回复通知被回复者，自回复不会发送给本人。
 发送失败不影响评论保存。此设置不包含账号验证或密码找回邮件。
-私钥和 SMTP 凭据仅配置于服务器环境变量。

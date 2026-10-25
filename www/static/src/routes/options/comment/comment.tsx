@@ -66,6 +66,9 @@ function createCommentState() {
             avatarProxy: comment.avatarProxy || '',
             captchaProvider: comment.captchaProvider || 'none',
             captchaSiteKey: comment.captchaSiteKey || '',
+            smtpHost: comment.smtpHost || '', smtpPort: comment.smtpPort || 465,
+            smtpSecure: comment.smtpSecure !== false, smtpUser: comment.smtpUser || '',
+            smtpFrom: comment.smtpFrom || '', authorEmail: comment.authorEmail || '',
             mailNotify: Boolean(comment.mailNotify),
         },
     };
@@ -97,6 +100,9 @@ function CommentForm(props: CommentProps) {
             const reactionImages = lines(values.reactionImages).slice(0, 6);
             const meta = values.meta || [];
             props.commentStore.commentSave({
+                captchaSecret: values.captchaSecret || '', smtpPass: values.smtpPass || '',
+                smtpHost: values.smtpHost, smtpPort: values.smtpPort, smtpSecure: values.smtpSecure,
+                smtpUser: values.smtpUser, smtpFrom: values.smtpFrom, authorEmail: values.authorEmail,
                 captchaProvider: values.captchaProvider,
                 captchaSiteKey: String(values.captchaSiteKey || '').trim(),
                 mailNotify: Boolean(values.mailNotify),
@@ -340,12 +346,22 @@ function CommentForm(props: CommentProps) {
                             <Form.Item label="评论验证码" name="captchaProvider" initialValue={comment.captchaProvider}>
                                 <Select options={[{value: 'none', label: '关闭'}, {value: 'turnstile', label: 'Cloudflare Turnstile'}, {value: 'recaptcha', label: 'reCAPTCHA v3'}]} />
                             </Form.Item>
-                            <Form.Item label="验证码 Site Key" name="captchaSiteKey" initialValue={comment.captchaSiteKey} extra="私钥在服务器配置 TURNSTILE_KEY 或 RECAPTCHA_SECRET；reCAPTCHA 分数阈值为 0.5">
+                            <Form.Item label="验证码 Site Key" name="captchaSiteKey" initialValue={comment.captchaSiteKey} extra="reCAPTCHA 分数阈值为 0.5">
                                 <Input />
                             </Form.Item>
-                            <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="需在服务器配置 SMTP；新评论通知 AUTHOR_EMAIL，已通过审核的回复通知被回复者">
+                            <Form.Item label="验证码私钥" name="captchaSecret" extra="留空保留已保存的私钥；输入新值可替换">
+                                <Input.Password autoComplete="new-password" />
+                            </Form.Item>
+                            <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="新评论通知站长邮箱，已通过审核的回复通知被回复者">
                                 <Switch />
                             </Form.Item>
+                            <Form.Item label="SMTP 服务器" name="smtpHost" initialValue={comment.smtpHost}><Input /></Form.Item>
+                            <Form.Item label="SMTP 用户名" name="smtpUser" initialValue={comment.smtpUser}><Input /></Form.Item>
+                            <Form.Item label="发件人邮箱" name="smtpFrom" initialValue={comment.smtpFrom}><Input /></Form.Item>
+                            <Form.Item label="站长收件邮箱" name="authorEmail" initialValue={comment.authorEmail}><Input /></Form.Item>
+                            <Form.Item label="SMTP 端口" name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} /></Form.Item>
+                            <Form.Item label="直接 TLS" name="smtpSecure" valuePropName="checked" initialValue={comment.smtpSecure} extra="465 端口开启；587/STARTTLS 关闭"><Switch /></Form.Item>
+                            <Form.Item label="SMTP 密码" name="smtpPass" extra="留空保留已保存的密码；输入新值可替换"><Input.Password autoComplete="new-password" /></Form.Item>
                             <Form.Item
                                 label="敏感词"
                                 name="forbiddenWords"

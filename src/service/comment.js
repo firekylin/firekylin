@@ -11,6 +11,18 @@ const permalink = require('./permalink');
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
 function capabilities(config, options, env = process.env, mailer) {
+  env = {
+    ...env,
+    TURNSTILE_KEY: config.captchaSecret || env.TURNSTILE_KEY,
+    RECAPTCHA_SECRET: config.captchaSecret || env.RECAPTCHA_SECRET,
+    SMTP_HOST: config.smtpHost || env.SMTP_HOST,
+    SMTP_PORT: config.smtpPort || env.SMTP_PORT,
+    SMTP_SECURE: typeof config.smtpSecure === 'boolean' ? String(config.smtpSecure) : env.SMTP_SECURE,
+    SMTP_USER: config.smtpUser || env.SMTP_USER,
+    SMTP_PASS: config.smtpPass || env.SMTP_PASS,
+    SMTP_FROM: config.smtpFrom || env.SMTP_FROM,
+    AUTHOR_EMAIL: config.authorEmail || env.AUTHOR_EMAIL
+  };
   const services = {};
   const provider = config.captchaProvider;
   if (['turnstile', 'recaptcha'].includes(provider)) {

@@ -68,6 +68,20 @@ module.exports = class extends Base {
     }
 
     const model = this.model('options');
+    if (Object.prototype.hasOwnProperty.call(data, 'comment')) {
+      let comment;
+      try {
+        comment = typeof data.comment === 'string' ? JSON.parse(data.comment) : data.comment;
+        if (!comment || typeof comment !== 'object' || Array.isArray(comment)) throw new Error();
+      } catch { return this.fail('PARAMS_ERROR') }
+      const previous = (await model.getOptions(true)).comment || {};
+      for (const key of ['captchaSecret', 'smtpPass']) {
+        if (comment[key] !== undefined && typeof comment[key] !== 'string') return this.fail('PARAMS_ERROR');
+        if (!comment[key]) comment[key] = previous[key] || '';
+      }
+      if (comment.smtpPort && (!Number.isInteger(Number(comment.smtpPort)) || Number(comment.smtpPort) < 1 || Number(comment.smtpPort) > 65535)) return this.fail('PARAMS_ERROR');
+      data.comment = JSON.stringify(comment);
+    }
     for (const key of ['post_permalink', 'page_permalink']) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         try {
