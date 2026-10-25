@@ -39,6 +39,7 @@ interface Window {
             ldap_user_page: string;
             ldap_whiteList: string;
             ldap_log: '0' | '1';
+            captcha?: any;
             comment: any;
             analyze_code: string;
             push: '0' | '1';

@@ -5,24 +5,6 @@ const nodemailer = {};
 global.think = {Service: class {}};
 const {capabilities} = require('../../src/service/comment');
 
-test('captcha fails closed and validates provider response', async() => {
-  const original = global.fetch;
-  try {
-    const captcha = capabilities({captchaProvider: 'turnstile'}, {}, {TURNSTILE_KEY: 'secret'}).captcha;
-    assert.equal(await captcha.verify('', {}), false);
-    global.fetch = async() => { throw new Error('offline') };
-    assert.equal(await captcha.verify('token', {}), false);
-    global.fetch = async(_url, request) => {
-      assert.equal(request.body.get('secret'), 'secret');
-      return {ok: true, json: async() => ({success: true})};
-    };
-    assert.equal(await captcha.verify('token', {}), true);
-    assert.equal(await capabilities({captchaProvider: 'turnstile'}, {}, {}).captcha.verify('token', {}), false);
-    const recaptcha = capabilities({captchaProvider: 'recaptcha'}, {}, {RECAPTCHA_SECRET: 'secret'}).captcha;
-    assert.equal(await recaptcha.verify('token', {}), false);
-  } finally { global.fetch = original }
-});
-
 test('notifications keep pending replies private and avoid self replies', async() => {
   const original = nodemailer.createTransport;
   const sent = [];

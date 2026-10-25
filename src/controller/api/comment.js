@@ -1,6 +1,7 @@
 'use strict';
 /* eslint-disable max-len */
 
+const captcha = require('../../service/captcha');
 const adminAuth = require('../../service/admin-auth');
 const Base = require('../base');
 
@@ -23,7 +24,7 @@ module.exports = class extends Base {
     }
     const service = this.service('comment');
     try {
-      const {core, users, config, tokenService, avatarService} = await service.create(this);
+      const {core, users, options, config, tokenService, avatarService} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
       const input = method === 'GET' ? this.get() : this.post();
       let result;
@@ -37,6 +38,7 @@ module.exports = class extends Base {
         } else if (method === 'POST') {
           const post = await service.validateCommentTarget(this, input.url);
           service.validateCommentInput(input, ctx, config);
+          input.captcha = input.captcha || input.turnstile || input.recaptchaV3;
           result = await core.comment.create(input, ctx);
           await service.syncCount(this, post.id);
         } else if (method === 'PUT') {
@@ -57,7 +59,12 @@ module.exports = class extends Base {
             result = userInfo;
           } else result = await core.auth.resolveSession({token: ctx.state.token}, ctx);
         } else if (method === 'DELETE') result = {};
-        else result = await core.auth.login(input, ctx);
+        else {
+          if (!await captcha.verify(captcha.settings(options), input.captcha || input.turnstile || input.recaptchaV3, ctx.ip, 'login')) {
+            this.ctx.throw(403, '验证码校验失败，请重试');
+          }
+          result = await core.auth.login(input, ctx);
+        }
       } else if (resource === 'user') {
         if (method === 'GET') result = id ? await core.user.get({email: input.email}, ctx) : await core.user.list(input, ctx);
         else if (method === 'POST') result = await core.user.register(input, ctx);

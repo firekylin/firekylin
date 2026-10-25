@@ -126,6 +126,10 @@ export const InitiateRoutes = (themePages) => [{
                 title: 'LDAP设置'
             },
             {
+                url: '/options/captcha',
+                title: '验证码设置'
+            },
+            {
                 url: '/options/comment',
                 title: '评论设置'
             },

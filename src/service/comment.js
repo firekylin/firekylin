@@ -2,6 +2,7 @@
 /* eslint-disable max-len */
 
 const crypto = require('crypto');
+const captcha = require('./captcha');
 const MarkdownIt = require('markdown-it');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
@@ -13,8 +14,6 @@ const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tas
 function capabilities(config, options, env = process.env, mailer) {
   env = {
     ...env,
-    TURNSTILE_KEY: config.captchaSecret || env.TURNSTILE_KEY,
-    RECAPTCHA_SECRET: config.captchaSecret || env.RECAPTCHA_SECRET,
     SMTP_HOST: config.smtpHost || env.SMTP_HOST,
     SMTP_PORT: config.smtpPort || env.SMTP_PORT,
     SMTP_SECURE: typeof config.smtpSecure === 'boolean' ? String(config.smtpSecure) : env.SMTP_SECURE,
@@ -24,29 +23,9 @@ function capabilities(config, options, env = process.env, mailer) {
     AUTHOR_EMAIL: config.authorEmail || env.AUTHOR_EMAIL
   };
   const services = {};
-  const provider = config.captchaProvider;
-  if (['turnstile', 'recaptcha'].includes(provider)) {
-    services.captcha = {
-      async verify(token, ctx) {
-        const secret = provider === 'turnstile' ? env.TURNSTILE_KEY : env.RECAPTCHA_SECRET;
-        if (!secret || typeof token !== 'string' || !token || token.length > 8192) return false;
-        try {
-          const response = await fetch(provider === 'turnstile'
-            ? 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
-            : 'https://www.google.com/recaptcha/api/siteverify', {
-            method: 'POST',
-            body: new URLSearchParams({secret, response: token, remoteip: ctx.ip || ''}),
-            signal: AbortSignal.timeout(10000)
-          });
-          if (!response.ok) return false;
-          const result = await response.json();
-          return result.success === true && (provider !== 'recaptcha' ||
-            (typeof result.score === 'number' && result.score >= 0.5));
-        } catch {
-          return false;
-        }
-      }
-    };
+  const captchaConfig = captcha.settings(options);
+  if (captcha.enabled(captchaConfig, 'comment')) {
+    services.captcha = {verify: (token, ctx) => captcha.verify(captchaConfig, token, ctx.ip, 'comment', env)};
   }
   if (config.mailNotify) {
     const transport = env.SMTP_HOST && (mailer || require('nodemailer')).createTransport({

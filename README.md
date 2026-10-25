@@ -215,7 +215,8 @@ declare namespace Firekylin {
 
 ### 评论验证码和邮件通知
 
-在后台「评论设置」选择 Turnstile 或 reCAPTCHA v3，填写公开 Site Key 和私钥。
+在后台「系统设置 → 验证码设置」选择 Turnstile 或 reCAPTCHA v3，填写公开 Site Key 和私钥，勾选登录、评论生效区域。配置独立存储于 `captcha` 选项；原评论配置自动兼容为仅评论生效。
+Turnstile 支持主题、语言及验证通过前隐藏提交按钮；reCAPTCHA v3 支持语言并在提交时评分。登录验证码在密码和 LDAP 校验前验证。第三方 OAuth 和域单点登录使用其身份提供方认证，不显示本地登录验证码。
 匿名评论校验失败时拒绝提交；reCAPTCHA v3 最低分数为 0.5，登录用户免验证码。
 
 邮件通知可直接在后台配置 SMTP 服务器、端口、TLS、用户名、密码、发件人与站长收件邮箱。

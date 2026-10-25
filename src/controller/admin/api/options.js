@@ -1,3 +1,4 @@
+const captcha = require('../../../service/captcha');
 const speakeasy = require('speakeasy');
 const PushToFirekylin = require('../../../service/push-to-firekylin');
 const Base = require('./base');
@@ -68,20 +69,40 @@ module.exports = class extends Base {
     }
 
     const model = this.model('options');
+    let migratedCaptcha;
     if (Object.prototype.hasOwnProperty.call(data, 'comment')) {
       let comment;
       try {
         comment = typeof data.comment === 'string' ? JSON.parse(data.comment) : data.comment;
         if (!comment || typeof comment !== 'object' || Array.isArray(comment)) throw new Error();
       } catch { return this.fail('PARAMS_ERROR') }
-      const previous = (await model.getOptions(true)).comment || {};
-      for (const key of ['captchaSecret', 'smtpPass']) {
+      const previousOptions = await model.getOptions(true);
+      const previous = previousOptions.comment || {};
+      if (!Object.prototype.hasOwnProperty.call(data, 'captcha')) migratedCaptcha = JSON.stringify({...captcha.publicSettings(captcha.settings(previousOptions)), secret: captcha.settings(previousOptions).secret || ''});
+      for (const key of ['smtpPass']) {
         if (comment[key] !== undefined && typeof comment[key] !== 'string') return this.fail('PARAMS_ERROR');
         if (!comment[key]) comment[key] = previous[key] || '';
       }
       if (comment.smtpPort && (!Number.isInteger(Number(comment.smtpPort)) || Number(comment.smtpPort) < 1 || Number(comment.smtpPort) > 65535)) return this.fail('PARAMS_ERROR');
       data.comment = JSON.stringify(comment);
     }
+    if (Object.prototype.hasOwnProperty.call(data, 'captcha')) {
+      let config;
+      try {
+        config = typeof data.captcha === 'string' ? JSON.parse(data.captcha) : data.captcha;
+        if (!config || !['none', 'turnstile', 'recaptcha'].includes(config.provider) ||
+          !Array.isArray(config.areas) || config.areas.some(area => !['login', 'comment'].includes(area)) ||
+          !['auto', 'light', 'dark'].includes(config.theme) ||
+          typeof config.language !== 'string' || !/^[a-zA-Z-]{2,20}$/.test(config.language) ||
+          typeof config.siteKey !== 'string' || typeof config.secret !== 'string') throw new Error();
+        const previous = captcha.settings(await model.getOptions(true));
+        const secret = config.clearSecret ? '' : config.secret || (config.provider === previous.provider ? previous.secret : '') || '';
+        config = {...captcha.publicSettings(config), secret};
+        if (config.provider !== 'none' && config.areas.length && (!config.siteKey || !config.secret)) throw new Error();
+      } catch { return this.fail('验证码配置不完整或格式错误') }
+      data.captcha = JSON.stringify(config);
+    }
+    if (migratedCaptcha) data.captcha = migratedCaptcha;
     for (const key of ['post_permalink', 'page_permalink']) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         try {

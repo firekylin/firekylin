@@ -1,5 +1,7 @@
 'use strict';
 
+const captcha = require('./captcha');
+
 const CLIENT_VERSION = '3.16.0';
 const DEFAULT_RESOURCE_URL = `https://cdn.jsdelivr.net/npm/@waline/client@${CLIENT_VERSION}/dist`;
 
@@ -44,12 +46,15 @@ module.exports = class extends think.Service {
     if (controller.commentRendered) return '';
 
     const settings = controller.options.comment || {};
+    const captchaConfig = captcha.publicSettings(captcha.settings(controller.options));
+    const captchaEnabled = captcha.enabled(captchaConfig, 'comment');
     const resourceURL = normalizeResourceURL(options.resourceURL);
     controller.commentRendered = true;
     const config = {
       serverURL: `${controller.options.siteUrl}/api/comment`,
-      turnstileKey: settings.captchaProvider === 'turnstile' ? settings.captchaSiteKey || '' : '',
-      recaptchaV3Key: settings.captchaProvider === 'recaptcha' ? settings.captchaSiteKey || '' : '',
+      captchaConfig: captchaEnabled ? captchaConfig : null,
+      turnstileKey: captchaEnabled && captchaConfig.provider === 'turnstile' ? captchaConfig.siteKey : '',
+      recaptchaV3Key: captchaEnabled && captchaConfig.provider === 'recaptcha' ? captchaConfig.siteKey : '',
       pageSize: Number(settings.pageSize) || 10,
       lang: settings.locale || 'zh-CN',
       login: settings.forceLogin ? 'force' : 'enable',
@@ -79,11 +84,12 @@ module.exports = class extends think.Service {
     const titleHtml = title ? `<h1 class="title">${escapeHtml(title)}</h1>` : '';
     const configJson = escapeHtml(JSON.stringify(config));
 
-    return `<section id="comments" class="${className}">${titleHtml}<div class="fk-comment-container" data-comment-config="${configJson}">${escapeHtml(loadingText)}</div><script>(function(c){
+    return `<style>.fk-captcha-pending .wl-btn.primary{visibility:hidden}</style><section id="comments" class="${className}">${titleHtml}<div class="fk-comment-container" data-comment-config="${configJson}">${escapeHtml(loadingText)}</div><script>(function(c){
 var start=function(){if(c.dataset.loaded)return;c.dataset.loaded='1';var o=JSON.parse(c.dataset.commentConfig),resources=o.resources;delete o.resources;o.el=c;o.path=location.pathname;
 if(!window.__FK_COMMENT_CLIENT__){window.__FK_COMMENT_CLIENT__=(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=resources.style;document.head.appendChild(l);return import(resources.script)})()}
+var cc=o.captchaConfig;var captchaReady=cc?import('/static/js/captcha.js').then(function(m){return m.prepareWaline(cc,c)}):Promise.resolve();delete o.captchaConfig;
 var session=fetch(o.serverURL+'/api/token',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(r){return r.errno===0?r.data:null}).catch(function(){return null});
-Promise.all([window.__FK_COMMENT_CLIENT__,session]).then(function(r){var u=r[1];if(u&&u.objectId){u.remember=true;localStorage.setItem('WALINE_USER',JSON.stringify(u))}else{localStorage.removeItem('WALINE_USER')}c.textContent='';r[0].init(o)}).catch(function(){c.textContent='评论组件加载失败，请稍后重试。'})};
+Promise.all([window.__FK_COMMENT_CLIENT__,session,captchaReady]).then(function(r){var u=r[1];if(u&&u.objectId){u.remember=true;localStorage.setItem('WALINE_USER',JSON.stringify(u))}else{localStorage.removeItem('WALINE_USER')}c.textContent='';r[0].init(o)}).catch(function(){c.textContent='评论组件加载失败，请稍后重试。'})};
 if('IntersectionObserver'in window){var observer=new IntersectionObserver(function(entries){if(entries[0].isIntersecting){observer.disconnect();start()}},{rootMargin:'1000px'});observer.observe(c)}else{start()}
 })(document.currentScript.previousElementSibling)</script></section>`;
   }

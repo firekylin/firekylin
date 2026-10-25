@@ -64,8 +64,6 @@ function createCommentState() {
             disallowIPList: lines(comment.disallowIPList).join('\n'),
             likeIncMax: Number(comment.likeIncMax) || 1, levels: lines(comment.levels).join(', '),
             avatarProxy: comment.avatarProxy || '',
-            captchaProvider: comment.captchaProvider || 'none',
-            captchaSiteKey: comment.captchaSiteKey || '',
             smtpHost: comment.smtpHost || '', smtpPort: comment.smtpPort || 465,
             smtpSecure: comment.smtpSecure !== false, smtpUser: comment.smtpUser || '',
             smtpFrom: comment.smtpFrom || '', authorEmail: comment.authorEmail || '',
@@ -100,11 +98,9 @@ function CommentForm(props: CommentProps) {
             const reactionImages = lines(values.reactionImages).slice(0, 6);
             const meta = values.meta || [];
             props.commentStore.commentSave({
-                captchaSecret: values.captchaSecret || '', smtpPass: values.smtpPass || '',
+                smtpPass: values.smtpPass || '',
                 smtpHost: values.smtpHost, smtpPort: values.smtpPort, smtpSecure: values.smtpSecure,
                 smtpUser: values.smtpUser, smtpFrom: values.smtpFrom, authorEmail: values.authorEmail,
-                captchaProvider: values.captchaProvider,
-                captchaSiteKey: String(values.captchaSiteKey || '').trim(),
                 mailNotify: Boolean(values.mailNotify),
                 audit: Boolean(values.audit),
                 forceLogin: Boolean(values.forceLogin),
@@ -343,15 +339,6 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Divider orientation="start">安全与用户</Divider>
-                            <Form.Item label="评论验证码" name="captchaProvider" initialValue={comment.captchaProvider}>
-                                <Select options={[{value: 'none', label: '关闭'}, {value: 'turnstile', label: 'Cloudflare Turnstile'}, {value: 'recaptcha', label: 'reCAPTCHA v3'}]} />
-                            </Form.Item>
-                            <Form.Item label="验证码 Site Key" name="captchaSiteKey" initialValue={comment.captchaSiteKey} extra="reCAPTCHA 分数阈值为 0.5">
-                                <Input />
-                            </Form.Item>
-                            <Form.Item label="验证码私钥" name="captchaSecret" extra="留空保留已保存的私钥；输入新值可替换">
-                                <Input.Password autoComplete="new-password" />
-                            </Form.Item>
                             <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="新评论通知站长邮箱，已通过审核的回复通知被回复者">
                                 <Switch />
                             </Form.Item>
