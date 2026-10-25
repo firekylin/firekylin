@@ -12,7 +12,8 @@ let msc = {
   password: process.env.FK_DB_PASSWORD,
   prefix: process.env.FK_DB_PREFIX,
   encoding: process.env.FK_DB_ENCODING,
-  path: process.env.FK_DB_PATH
+  path: process.env.FK_DB_PATH,
+  ssl: process.env.FK_DB_SSL,
 };
 let type = process.env.FK_DB_MODE || 'mysql';
 try {
@@ -73,7 +74,8 @@ module.exports = {
     host: msc.host,
     port: msc.port,
     prefix: msc.prefix,
-    connectionLimit: 1
+    connectionLimit: 1,
+    ssl: msc.ssl ? { rejectUnauthorized: false } : false,
   },
   sqlite: {
     handle: sqlite,
