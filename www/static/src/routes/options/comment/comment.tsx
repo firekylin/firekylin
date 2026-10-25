@@ -64,6 +64,9 @@ function createCommentState() {
             disallowIPList: lines(comment.disallowIPList).join('\n'),
             likeIncMax: Number(comment.likeIncMax) || 1, levels: lines(comment.levels).join(', '),
             avatarProxy: comment.avatarProxy || '',
+            captchaProvider: comment.captchaProvider || 'none',
+            captchaSiteKey: comment.captchaSiteKey || '',
+            mailNotify: Boolean(comment.mailNotify),
         },
     };
 }
@@ -94,6 +97,9 @@ function CommentForm(props: CommentProps) {
             const reactionImages = lines(values.reactionImages).slice(0, 6);
             const meta = values.meta || [];
             props.commentStore.commentSave({
+                captchaProvider: values.captchaProvider,
+                captchaSiteKey: String(values.captchaSiteKey || '').trim(),
+                mailNotify: Boolean(values.mailNotify),
                 audit: Boolean(values.audit),
                 forceLogin: Boolean(values.forceLogin),
                 pageSize: values.pageSize,
@@ -331,6 +337,15 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Divider orientation="start">安全与用户</Divider>
+                            <Form.Item label="评论验证码" name="captchaProvider" initialValue={comment.captchaProvider}>
+                                <Select options={[{value: 'none', label: '关闭'}, {value: 'turnstile', label: 'Cloudflare Turnstile'}, {value: 'recaptcha', label: 'reCAPTCHA v3'}]} />
+                            </Form.Item>
+                            <Form.Item label="验证码 Site Key" name="captchaSiteKey" initialValue={comment.captchaSiteKey} extra="私钥在服务器配置 TURNSTILE_KEY 或 RECAPTCHA_SECRET；reCAPTCHA 分数阈值为 0.5">
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="需在服务器配置 SMTP；新评论通知 AUTHOR_EMAIL，已通过审核的回复通知被回复者">
+                                <Switch />
+                            </Form.Item>
                             <Form.Item
                                 label="敏感词"
                                 name="forbiddenWords"

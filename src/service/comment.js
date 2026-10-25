@@ -2,6 +2,7 @@
 /* eslint-disable max-len */
 
 const crypto = require('crypto');
+const capabilities = require('./comment-capabilities');
 const MarkdownIt = require('markdown-it');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
@@ -151,6 +152,7 @@ module.exports = class extends think.Service {
       },
       logger: think.logger,
       services: {
+        ...capabilities(config, options),
         token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
