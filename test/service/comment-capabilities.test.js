@@ -2,7 +2,8 @@
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const nodemailer = {};
-const capabilities = require('../../src/service/comment-capabilities');
+global.think = {Service: class {}};
+const {capabilities} = require('../../src/service/comment');
 
 test('captcha fails closed and validates provider response', async() => {
   const original = global.fetch;
