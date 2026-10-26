@@ -1,5 +1,6 @@
 import * as React from 'react';
 import classnames from 'classnames';
+import {BetterCaptcha} from '@better-captcha/react';
 import {
     GlobalOutlined,
     LockOutlined,
@@ -25,22 +26,22 @@ function LoginForm(props: LoginProps) {
     }));
     const captchaConfig = window.SysConfig.options.captcha;
     const captchaEnabled = captchaConfig && captchaConfig.provider !== 'none' && captchaConfig.areas?.includes('login');
-    const captchaElement = React.useRef<HTMLDivElement>(null);
-    const captchaController = React.useRef<any>(null);
+    const captchaController = React.useRef<React.ComponentRef<typeof BetterCaptcha>>(null);
     const [captchaPassed, setCaptchaPassed] = React.useState(false);
     const [captchaReady, setCaptchaReady] = React.useState(false);
-    React.useEffect(() => {
-        if (!captchaEnabled || state.forgot || !captchaElement.current) return;
-        let cancelled = false;
-        let controller: any;
-        const runtimeURL = '/static/js/captcha.js';
-        import(/* @vite-ignore */ runtimeURL).then(runtime => runtime.mount(captchaConfig, captchaElement.current, setCaptchaPassed)).then(value => {
-            controller = value;
-            if (cancelled) value.destroy();
-            else {captchaController.current = value; setCaptchaReady(true);}
-        }).catch(() => {if (!cancelled) message.error('验证码加载失败，请刷新重试');});
-        return () => {cancelled = true; controller?.destroy(); captchaController.current = null; setCaptchaReady(false); setCaptchaPassed(false);};
-    }, [captchaEnabled, captchaConfig, state.forgot]);
+    const resetCaptcha = React.useCallback(() => {
+        setCaptchaPassed(false);
+        captchaController.current?.reset();
+    }, []);
+    const captchaOptions = React.useMemo(() => captchaConfig?.provider === 'turnstile' ? {
+        action: 'login', theme: captchaConfig.theme || 'auto', language: captchaConfig.language || 'auto',
+        'expired-callback': () => setCaptchaPassed(false),
+    } : {action: 'login'}, [captchaConfig]);
+    const captchaScriptOptions = React.useMemo(() => {
+        if (captchaConfig?.provider !== 'recaptcha' || captchaConfig.language === 'auto' || !captchaConfig.language) return undefined;
+        const params = new URLSearchParams({render: captchaConfig.siteKey, hl: captchaConfig.language});
+        return {overrideScriptUrl: `https://www.google.com/recaptcha/api.js?${params}`};
+    }, [captchaConfig]);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
     legacy.state = state;
@@ -111,11 +112,12 @@ function LoginForm(props: LoginProps) {
         if (captchaEnabled) {
             try {
                 if (!captchaController.current) throw new Error();
-                values.captcha = await captchaController.current.getToken();
+                if (captchaConfig.provider === 'recaptcha') await captchaController.current.execute();
+                values.captcha = captchaController.current.getResponse();
                 if (!values.captcha) throw new Error();
             } catch {message.error('请先完成验证码验证'); return;}
         }
-        props.loginStore.login(values, () => captchaController.current?.reset());
+        props.loginStore.login(values, resetCaptcha);
     };
     legacy.handleForgotSubmit = function handleForgotSubmit(values: any) {
         props.loginStore.forgot(values);
@@ -408,7 +410,17 @@ function LoginForm(props: LoginProps) {
                                         </a>
                                     </div>
                                 </div>
-                                {captchaEnabled && <div ref={captchaElement} aria-label="登录验证码" />}
+                                {captchaEnabled && <BetterCaptcha
+                                    key={`${captchaConfig.provider}:${captchaConfig.siteKey}`}
+                                    ref={captchaController}
+                                    provider={captchaConfig.provider === 'recaptcha' ? 'recaptcha-v3' : 'turnstile'}
+                                    sitekey={captchaConfig.siteKey}
+                                    options={captchaOptions}
+                                    scriptOptions={captchaScriptOptions}
+                                    onReady={() => setCaptchaReady(true)}
+                                    onSolve={() => setCaptchaPassed(true)}
+                                    onError={() => {setCaptchaPassed(false); message.error('验证码加载或校验失败，请重试');}}
+                                />}
                                 <Button
                                     block
                                     type="primary"
