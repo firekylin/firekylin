@@ -61,6 +61,9 @@ function fixture() {
     getCommentService: () => ({
       async syncCount(controller, postId) {
         calls.push(['syncCount', postId]);
+      },
+      async notifyApprovedReply(controller, comment) {
+        calls.push(['notifyApprovedReply', comment.id]);
       }
     })
   });
@@ -145,6 +148,7 @@ test('comment tools require admin and synchronize counts on approval', async() =
   assert.equal(comments[0].comment, 'hello');
   await assert.rejects(run('comments.approve', {id: 4}, editor), /Administrator/);
   await run('comments.approve', {id: 4});
+  assert.ok(calls.some(([action, id]) => action === 'notifyApprovedReply' && id === 4));
   assert.ok(calls.some(([action, postId]) => action === 'syncCount' && postId === 5));
   await run('comments.moderate', {id: 4, status: 'spam'});
   assert.ok(calls.some(([action, data]) => action === 'comment.update' && data.status === 'spam'));

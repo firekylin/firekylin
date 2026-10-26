@@ -72,7 +72,8 @@ module.exports = class extends Base {
     const service = new CommentModerationService({
       getModel: name => this.model(name),
       now: () => think.datetime(),
-      syncCount: postId => this.service('comment').syncCount(this, postId)
+      syncCount: postId => this.service('comment').syncCount(this, postId),
+      notifyApprovedReply: comment => this.service('comment').notifyApprovedReply(this, comment)
     });
     try {
       await service.moderate({

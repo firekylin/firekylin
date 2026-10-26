@@ -50,7 +50,8 @@ function registerManagementAbilities(registry, {getModel, now, getCommentService
   const commentService = () => {
     if (typeof getCommentService !== 'function') throw new Error('Comment count sync is not configured');
     return new CommentModerationService({
-      getModel, now, syncCount: postId => getCommentService().syncCount({model: getModel}, postId)
+      getModel, now, syncCount: postId => getCommentService().syncCount({model: getModel}, postId),
+      notifyApprovedReply: comment => getCommentService().notifyApprovedReply({model: getModel}, comment)
     });
   };
 

@@ -41,8 +41,20 @@ module.exports = class extends Base {
     return this.success(options);
   }
 
-  postAction() {
+  async postAction() {
     const type = this.get('type');
+    if (type === 'testCommentMail') {
+      const {config = {}, recipient} = this.post();
+      if (!config || typeof config !== 'object' || Array.isArray(config)) return this.fail('PARAMS_ERROR');
+      const options = await this.model('options').getOptions(true);
+      const saved = options.comment || {};
+      try {
+        await require('../../../service/comment').sendTestEmail({
+          ...saved, ...config, smtpPass: config.smtpPass || saved.smtpPass || ''
+        }, recipient, options);
+        return this.success({message: '测试邮件已提交给邮件服务器，请检查收件箱'});
+      } catch (error) { return this.fail('MAIL_TEST_FAILED', error.message) }
+    }
     if (type === '2faAuth') {
       const data = this.post();
       const verified = speakeasy.totp.verify({
@@ -70,6 +82,28 @@ module.exports = class extends Base {
     }
 
     const model = this.model('options');
+    if (Object.prototype.hasOwnProperty.call(data, 'comment')) {
+      let comment;
+      try {
+        comment = typeof data.comment === 'string' ? JSON.parse(data.comment) : data.comment;
+        if (!comment || typeof comment !== 'object' || Array.isArray(comment)) throw new Error();
+      } catch { return this.fail('PARAMS_ERROR') }
+      const previous = (await model.getOptions(true)).comment || {};
+      for (const key of ['smtpPass']) {
+        if (comment[key] !== undefined && typeof comment[key] !== 'string') return this.fail('PARAMS_ERROR');
+        if (!comment[key]) comment[key] = previous[key] || '';
+      }
+      for (const [key, max] of [['mailSubjectTemplate', 500], ['mailBodyTemplate', 20000]]) {
+        if (comment[key] !== undefined && (typeof comment[key] !== 'string' || comment[key].length > max)) {
+          return this.fail('邮件模板格式错误或长度超出限制');
+        }
+      }
+      const port = Number(comment.smtpPort);
+      if (comment.smtpPort && (!Number.isInteger(port) || port < 1 || port > 65535)) {
+        return this.fail('PARAMS_ERROR');
+      }
+      data.comment = JSON.stringify({...previous, ...comment});
+    }
     if (Object.prototype.hasOwnProperty.call(data, 'captcha')) {
       let config;
       try {

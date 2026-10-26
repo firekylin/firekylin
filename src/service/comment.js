@@ -11,6 +11,98 @@ const permalink = require('./permalink');
 
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
+function smtpSettings(config, options, env = process.env) {
+  env = {
+    ...env,
+    SMTP_HOST: config.smtpHost || env.SMTP_HOST,
+    SMTP_PORT: config.smtpPort || env.SMTP_PORT,
+    SMTP_SECURE: typeof config.smtpSecure === 'boolean' ? String(config.smtpSecure) : env.SMTP_SECURE,
+    SMTP_USER: config.smtpUser || env.SMTP_USER,
+    SMTP_PASS: config.smtpPass || env.SMTP_PASS,
+    SMTP_FROM: config.smtpFrom || env.SMTP_FROM,
+    AUTHOR_EMAIL: config.authorEmail || env.AUTHOR_EMAIL
+  };
+  return env;
+}
+
+function mailTransport(env, mailer) {
+  return env.SMTP_HOST && (mailer || require('nodemailer')).createTransport({
+    host: env.SMTP_HOST, port: Number(env.SMTP_PORT) || 465, secure: env.SMTP_SECURE !== 'false',
+    auth: env.SMTP_USER ? {user: env.SMTP_USER, pass: env.SMTP_PASS} : undefined,
+    connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 10000
+  });
+}
+
+const DEFAULT_MAIL_SUBJECT = '[{{siteName}}] {{type}}';
+const DEFAULT_MAIL_BODY = '{{nick}}：\n{{comment}}\n\n{{url}}';
+
+function renderNotificationMail(config, options, comment, parent, recipient, type) {
+  const values = {
+    siteName: options.title || 'Firekylin', siteUrl: options.site_url || '', type,
+    nick: comment.nick || '访客', comment: comment.rawComment || comment.comment || '',
+    parentNick: parent && parent.nick || '', parentComment: parent && parent.comment || '',
+    url: comment.url || options.site_url || '', recipient, status: comment.status || ''
+  };
+  const render = template => template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match);
+  const subject = config.mailSubjectTemplate || DEFAULT_MAIL_SUBJECT;
+  const body = config.mailBodyTemplate || DEFAULT_MAIL_BODY;
+  if (typeof subject !== 'string' || subject.length > 500 || typeof body !== 'string' || body.length > 20000) {
+    throw new Error('邮件标题模板最多 500 字符，正文模板最多 20000 字符');
+  }
+  return {subject: render(subject).replace(/[\r\n]+/g, ' '), text: render(body)};
+}
+
+function notificationServices(config, options, env = process.env, mailer, resolveUser) {
+  env = smtpSettings(config, options, env);
+  const services = {};
+  if (config.mailNotify) {
+    const transport = mailTransport(env, mailer);
+    services.notification = {
+      async send(comment, parent, approvedReply = false) {
+        if (!transport || !env.SMTP_FROM) {
+          think.logger.error('Comment mail requires SMTP_HOST and SMTP_FROM');
+          return;
+        }
+        try {
+          const resolveAuthor = async value => {
+            if (!value || !value.user_id || !resolveUser) return value;
+            const user = await resolveUser(value.user_id);
+            return user && user.email ? {...value, mail: user.email, nick: user.display_name || user.name || value.nick} : value;
+          };
+          [comment, parent] = await Promise.all([resolveAuthor(comment), resolveAuthor(parent)]);
+        } catch {
+          think.logger.error('Comment notification author lookup failed');
+          return;
+        }
+        const recipients = new Set();
+        if (!approvedReply && env.AUTHOR_EMAIL) recipients.add(env.AUTHOR_EMAIL);
+        if (comment.status === 'approved' && parent && parent.mail && parent.mail.toLowerCase() !== String(comment.mail || '').toLowerCase() &&
+          !(parent.user_id && comment.user_id && String(parent.user_id) === String(comment.user_id))) {
+          recipients.add(parent.mail);
+        }
+        let url;
+        try {
+          url = new URL(comment.url, options.site_url);
+          if (url.origin !== new URL(options.site_url).origin) return;
+        } catch { return }
+        for (const to of recipients) {
+          try {
+            await transport.sendMail({
+              from: env.SMTP_FROM, to,
+              ...renderNotificationMail(config, options, {...comment, url: url.href}, parent, to,
+                parent ? '评论有新回复' : '收到新评论')
+            });
+          } catch {
+            think.logger.error('Comment notification delivery failed');
+          }
+        }
+      }
+    };
+  }
+  return services;
+}
+
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
 }
@@ -153,6 +245,9 @@ module.exports = class extends think.Service {
       logger: think.logger,
       services: {
         ...(captcha.enabled(captcha.settings(options), 'comment') ? {captcha: {verify: (token, ctx) => captcha.verify(captcha.settings(options), token, ctx.ip, 'comment')}} : {}),
+        ...notificationServices(config, options, process.env, undefined,
+          id => controller.model('user').where({id}).field('email,name,display_name')
+            .find()),
         token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
@@ -237,6 +332,18 @@ module.exports = class extends think.Service {
     }
   }
 
+  async notifyApprovedReply(controller, comment) {
+    if (!comment.pid) return;
+    const options = await controller.model('options').getOptions(true);
+    const notification = notificationServices(options.comment || {}, options, process.env, undefined,
+      id => controller.model('user').where({id}).field('email,name,display_name')
+        .find()).notification;
+    if (!notification) return;
+    const parent = await controller.model('comment').where({id: comment.pid}).find();
+    if (!parent || !parent.id) return;
+    await notification.send({...comment, status: 'approved'}, parent, true);
+  }
+
   async syncCount(controller, target) {
     if (!target) return;
     let postId = Number(target.post_id || target.id || target);
@@ -258,3 +365,32 @@ module.exports = class extends think.Service {
 module.exports.renderMarkdown = renderMarkdown;
 module.exports.pathnameFromUrl = pathnameFromUrl;
 module.exports.resolveCommentPostId = resolveCommentPostId;
+
+module.exports.notificationServices = notificationServices;
+
+module.exports.sendTestEmail = async function(config, recipient, options, env = process.env, mailer) {
+  if (typeof recipient !== 'string' || !/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(recipient)) {
+    throw new Error('请填写有效的测试收件邮箱');
+  }
+  env = smtpSettings(config, options, env);
+  if (!env.SMTP_HOST || !env.SMTP_FROM) throw new Error('请填写 SMTP 服务器和发件人邮箱');
+  const transport = mailTransport(env, mailer);
+  try {
+    const result = await transport.sendMail({
+      from: env.SMTP_FROM, to: recipient,
+      ...renderNotificationMail(config, options, {
+        nick: '测试用户', rawComment: '这是一封测试邮件，收到此邮件说明 SMTP 配置已生效。',
+        url: options.site_url || '', status: 'approved'
+      }, {nick: '原评论用户', comment: '这是一条用于预览模板的原评论。'}, recipient, '邮件通知测试')
+    });
+    if (result.rejected && result.rejected.length) throw new Error('SMTP 服务器拒绝了测试收件邮箱');
+  } catch (error) {
+    let detail = [error.code, error.command, error.message, error.response].filter(Boolean).join(' | ');
+    for (const secret of [env.SMTP_PASS, env.SMTP_PASS && Buffer.from(env.SMTP_PASS).toString('base64')]) {
+      if (secret) detail = detail.split(secret).join('[隐藏]');
+    }
+    throw new Error(detail.slice(0, 1500) || '邮件发送失败');
+  } finally { transport.close?.() }
+};
+
+module.exports.renderNotificationMail = renderNotificationMail;
