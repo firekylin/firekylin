@@ -1,6 +1,7 @@
 'use strict';
 /* eslint-disable max-len */
 
+const captcha = require('./captcha');
 const crypto = require('crypto');
 const MarkdownIt = require('markdown-it');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
@@ -151,6 +152,7 @@ module.exports = class extends think.Service {
       },
       logger: think.logger,
       services: {
+        ...(captcha.enabled(captcha.settings(options), 'comment') ? {captcha: {verify: (token, ctx) => captcha.verify(captcha.settings(options), token, ctx.ip, 'comment')}} : {}),
         token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),

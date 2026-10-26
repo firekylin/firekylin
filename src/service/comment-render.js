@@ -1,5 +1,7 @@
 'use strict';
 
+const captcha = require('./captcha');
+
 const CLIENT_VERSION = '3.16.0';
 const DEFAULT_RESOURCE_URL = `https://cdn.jsdelivr.net/npm/@waline/client@${CLIENT_VERSION}/dist`;
 
@@ -44,10 +46,14 @@ module.exports = class extends think.Service {
     if (controller.commentRendered) return '';
 
     const settings = controller.options.comment || {};
+    const captchaConfig = captcha.publicSettings(captcha.settings(controller.options));
+    const captchaEnabled = captcha.enabled(captchaConfig, 'comment');
     const resourceURL = normalizeResourceURL(options.resourceURL);
     controller.commentRendered = true;
     const config = {
       serverURL: `${controller.options.siteUrl}/api/comment`,
+      turnstileKey: captchaEnabled && captchaConfig.provider === 'turnstile' ? captchaConfig.siteKey : '',
+      recaptchaV3Key: captchaEnabled && captchaConfig.provider === 'recaptcha-v3' ? captchaConfig.siteKey : '',
       pageSize: Number(settings.pageSize) || 10,
       lang: settings.locale || 'zh-CN',
       login: settings.forceLogin ? 'force' : 'enable',

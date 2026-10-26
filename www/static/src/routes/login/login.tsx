@@ -1,11 +1,13 @@
 import * as React from 'react';
 import classnames from 'classnames';
+import {BetterCaptcha} from '@better-captcha/react';
 import {
     GlobalOutlined,
     LockOutlined,
     SafetyOutlined,
     UserOutlined,
 } from '@ant-design/icons';
+import {message} from 'antd';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Checkbox } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
@@ -22,6 +24,24 @@ function LoginForm(props: LoginProps) {
     const [state, setState] = React.useState(() => ({
         forgot: false,
     }));
+    const captchaConfig = window.SysConfig.options.captcha;
+    const captchaEnabled = captchaConfig && captchaConfig.provider !== 'none' && captchaConfig.areas?.includes('login');
+    const captchaController = React.useRef<React.ComponentRef<typeof BetterCaptcha>>(null);
+    const [captchaPassed, setCaptchaPassed] = React.useState(false);
+    const [captchaReady, setCaptchaReady] = React.useState(false);
+    const resetCaptcha = React.useCallback(() => {
+        setCaptchaPassed(false);
+        captchaController.current?.reset();
+    }, []);
+    const captchaOptions = React.useMemo(() => captchaConfig?.provider === 'turnstile' ? {
+        action: 'login', theme: captchaConfig.theme || 'auto', language: captchaConfig.language || 'auto',
+        'expired-callback': () => setCaptchaPassed(false),
+    } : {action: 'login'}, [captchaConfig]);
+    const captchaScriptOptions = React.useMemo(() => {
+        if (captchaConfig?.provider !== 'recaptcha-v3' || captchaConfig.language === 'auto' || !captchaConfig.language) return undefined;
+        const params = new URLSearchParams({render: captchaConfig.siteKey, hl: captchaConfig.language});
+        return {overrideScriptUrl: `https://www.google.com/recaptcha/api.js?${params}`};
+    }, [captchaConfig]);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
     legacy.state = state;
@@ -88,8 +108,16 @@ function LoginForm(props: LoginProps) {
         }
         return null;
     };
-    legacy.handleSubmit = function handleSubmit(values: any) {
-        props.loginStore.login(values);
+    legacy.handleSubmit = async function handleSubmit(values: any) {
+        if (captchaEnabled) {
+            try {
+                if (!captchaController.current) throw new Error();
+                if (captchaConfig.provider === 'recaptcha-v3') await captchaController.current.execute();
+                values.captcha = captchaController.current.getResponse();
+                if (!values.captcha) throw new Error();
+            } catch {message.error('请先完成验证码验证'); return;}
+        }
+        props.loginStore.login(values, resetCaptcha);
     };
     legacy.handleForgotSubmit = function handleForgotSubmit(values: any) {
         props.loginStore.forgot(values);
@@ -382,11 +410,24 @@ function LoginForm(props: LoginProps) {
                                         </a>
                                     </div>
                                 </div>
+                                {captchaEnabled && <BetterCaptcha
+                                    key={`${captchaConfig.provider}:${captchaConfig.siteKey}`}
+                                    ref={captchaController}
+                                    provider={captchaConfig.provider}
+                                    sitekey={captchaConfig.siteKey}
+                                    options={captchaOptions}
+                                    scriptOptions={captchaScriptOptions}
+                                    onReady={() => setCaptchaReady(true)}
+                                    onSolve={() => setCaptchaPassed(true)}
+                                    onError={() => {setCaptchaPassed(false); message.error('验证码加载或校验失败，请重试');}}
+                                />}
                                 <Button
                                     block
                                     type="primary"
                                     htmlType="submit"
                                     className="login-form-button"
+                                    disabled={Boolean(captchaEnabled && (!captchaReady || (captchaConfig.provider === 'turnstile' && !captchaPassed)))}
+                                    style={{display: captchaEnabled && captchaConfig.provider === 'turnstile' && captchaConfig.hideSubmit && !captchaPassed ? 'none' : undefined}}
                                     loading={props.loginStore.loading}
                                 >
                                     登录
