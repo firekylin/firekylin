@@ -1,0 +1,30 @@
+{
+  "defaultProvider": "none",
+  "fields": {
+    "siteKey": {"label": "Site Key", "type": "string", "control": "input", "default": "", "required": true},
+    "secret": {"label": "私钥", "type": "string", "control": "input", "default": ""},
+    "language": {
+      "label": "语言", "type": "string", "control": "select", "default": "auto",
+      "options": [{"value": "auto", "label": "自动"}, {"value": "zh-CN", "label": "简体中文"}, {"value": "zh-TW", "label": "繁体中文"}, {"value": "en", "label": "English"}]
+    },
+    "theme": {
+      "label": "主题", "type": "string", "control": "select", "default": "auto",
+      "extra": "仅用于登录页；评论由 Waline 客户端按其默认行为展示验证码。",
+      "options": [{"value": "auto", "label": "自动"}, {"value": "light", "label": "浅色"}, {"value": "dark", "label": "深色"}]
+    },
+    "hideSubmit": {"label": "验证通过前隐藏提交按钮", "type": "boolean", "control": "switch", "default": false},
+    "areas": {
+      "label": "生效区域", "type": "array", "control": "checkboxGroup", "default": ["login", "comment"],
+      "options": [{"value": "login", "label": "登录"}, {"value": "comment", "label": "评论"}]
+    }
+  },
+  "commonFields": ["areas"],
+  "providers": [
+    {"value": "none", "label": "不使用", "fields": []},
+    {"value": "turnstile", "label": "Cloudflare Turnstile", "fields": ["siteKey", "secret", "language", "theme", "hideSubmit"]},
+    {
+      "value": "recaptcha", "label": "Google reCAPTCHA v3", "fields": ["siteKey", "secret", "language"],
+      "description": "reCAPTCHA v3 使用无交互评分，提交时自动验证，最低分数为 0.5，不支持主题与提交按钮显隐。"
+    }
+  ]
+}

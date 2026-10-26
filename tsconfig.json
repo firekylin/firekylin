@@ -8,6 +8,7 @@
     "allowJs": true,
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     "paths": { "@admin/*": ["./www/static/src/*"] },
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
