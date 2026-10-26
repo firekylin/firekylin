@@ -1,3 +1,4 @@
+const captcha = require('../../../service/captcha');
 const speakeasy = require('speakeasy');
 const PushToFirekylin = require('../../../service/push-to-firekylin');
 const Base = require('./base');
@@ -68,6 +69,22 @@ module.exports = class extends Base {
     }
 
     const model = this.model('options');
+    if (Object.prototype.hasOwnProperty.call(data, 'captcha')) {
+      let config;
+      try {
+        config = typeof data.captcha === 'string' ? JSON.parse(data.captcha) : data.captcha;
+        if (!config || !['none', 'turnstile', 'recaptcha'].includes(config.provider) ||
+          !Array.isArray(config.areas) || config.areas.some(area => !['login', 'comment'].includes(area)) ||
+          !['auto', 'light', 'dark'].includes(config.theme) ||
+          typeof config.language !== 'string' || !/^[a-zA-Z-]{2,20}$/.test(config.language) ||
+          typeof config.siteKey !== 'string' || typeof config.secret !== 'string') throw new Error();
+        const previous = captcha.settings(await model.getOptions(true));
+        const secret = config.clearSecret ? '' : config.secret || (config.provider === previous.provider ? previous.secret : '') || '';
+        config = {...captcha.publicSettings(config), secret};
+        if (config.provider !== 'none' && config.areas.length && (!config.siteKey || !config.secret)) throw new Error();
+      } catch { return this.fail('验证码配置不完整或格式错误') }
+      data.captcha = JSON.stringify(config);
+    }
     for (const key of ['post_permalink', 'page_permalink']) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
         try {

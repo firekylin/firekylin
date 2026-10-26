@@ -1,3 +1,4 @@
+const captcha = require('../../service/captcha');
 const adminAuth = require('../../service/admin-auth');
 const nodemailer = require('nodemailer');
 const speakeasy = require('speakeasy');
@@ -14,6 +15,10 @@ module.exports = class extends Base {
     const model = this.model('options');
     const options = await model.getOptions(true);
     this.ctx.state.jwtSecret = options.jwt_secret || options.comment_jwt_secret;
+
+    if (!await captcha.verify(captcha.settings(options), this.post('captcha'), this.ctx.ip, 'login')) {
+      return this.fail('验证码校验失败，请重试');
+    }
 
     // 二步验证
     if (options.two_factor_auth) {

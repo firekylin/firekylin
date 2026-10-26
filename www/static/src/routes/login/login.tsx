@@ -6,6 +6,7 @@ import {
     SafetyOutlined,
     UserOutlined,
 } from '@ant-design/icons';
+import {message} from 'antd';
 import { Form, FormInstance } from 'antd';
 import { Input, Button, Checkbox } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
@@ -22,6 +23,24 @@ function LoginForm(props: LoginProps) {
     const [state, setState] = React.useState(() => ({
         forgot: false,
     }));
+    const captchaConfig = window.SysConfig.options.captcha;
+    const captchaEnabled = captchaConfig && captchaConfig.provider !== 'none' && captchaConfig.areas?.includes('login');
+    const captchaElement = React.useRef<HTMLDivElement>(null);
+    const captchaController = React.useRef<any>(null);
+    const [captchaPassed, setCaptchaPassed] = React.useState(false);
+    const [captchaReady, setCaptchaReady] = React.useState(false);
+    React.useEffect(() => {
+        if (!captchaEnabled || state.forgot || !captchaElement.current) return;
+        let cancelled = false;
+        let controller: any;
+        const runtimeURL = '/static/js/captcha.js';
+        import(/* @vite-ignore */ runtimeURL).then(runtime => runtime.mount(captchaConfig, captchaElement.current, setCaptchaPassed)).then(value => {
+            controller = value;
+            if (cancelled) value.destroy();
+            else {captchaController.current = value; setCaptchaReady(true);}
+        }).catch(() => {if (!cancelled) message.error('验证码加载失败，请刷新重试');});
+        return () => {cancelled = true; controller?.destroy(); captchaController.current = null; setCaptchaReady(false); setCaptchaPassed(false);};
+    }, [captchaEnabled, captchaConfig, state.forgot]);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
     legacy.state = state;
@@ -88,8 +107,15 @@ function LoginForm(props: LoginProps) {
         }
         return null;
     };
-    legacy.handleSubmit = function handleSubmit(values: any) {
-        props.loginStore.login(values);
+    legacy.handleSubmit = async function handleSubmit(values: any) {
+        if (captchaEnabled) {
+            try {
+                if (!captchaController.current) throw new Error();
+                values.captcha = await captchaController.current.getToken();
+                if (!values.captcha) throw new Error();
+            } catch {message.error('请先完成验证码验证'); return;}
+        }
+        props.loginStore.login(values, () => captchaController.current?.reset());
     };
     legacy.handleForgotSubmit = function handleForgotSubmit(values: any) {
         props.loginStore.forgot(values);
@@ -382,11 +408,14 @@ function LoginForm(props: LoginProps) {
                                         </a>
                                     </div>
                                 </div>
+                                {captchaEnabled && <div ref={captchaElement} aria-label="登录验证码" />}
                                 <Button
                                     block
                                     type="primary"
                                     htmlType="submit"
                                     className="login-form-button"
+                                    disabled={Boolean(captchaEnabled && (!captchaReady || (captchaConfig.provider === 'turnstile' && !captchaPassed)))}
+                                    style={{display: captchaEnabled && captchaConfig.provider === 'turnstile' && captchaConfig.hideSubmit && !captchaPassed ? 'none' : undefined}}
                                     loading={props.loginStore.loading}
                                 >
                                     登录

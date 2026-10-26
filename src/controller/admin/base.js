@@ -1,3 +1,4 @@
+const captcha = require('../../service/captcha');
 const adminAuth = require('../../service/admin-auth');
 const {CREDENTIAL_PREFIX} = require('../../ai/store');
 const {getAdminAssets} = require('../../service/admin-assets');
@@ -38,6 +39,9 @@ module.exports = class extends think.Controller {
     for (const key of Object.keys(options)) {
       if (key.startsWith(CREDENTIAL_PREFIX)) delete options[key];
     }
+    options.captcha = captcha.publicSettings(captcha.settings(options));
+    options.comment = {...options.comment};
+    delete options.comment.smtpPass;
     // 不显示具体的密钥
     options.two_factor_auth = !!options.two_factor_auth;
     options.analyze_code = escape(options.analyze_code);
@@ -57,6 +61,7 @@ module.exports = class extends think.Controller {
 
     if (think.isEmpty(this.userInfo)) {
       options = {
+        captcha: options.captcha,
         title: options.title,
         favicon_url: options.favicon_url,
         two_factor_auth: options.two_factor_auth,

@@ -1,3 +1,4 @@
+const captcha = require('../service/captcha');
 const {CREDENTIAL_PREFIX} = require('../ai/store');
 
 function isDuplicateKey(error) {
@@ -67,6 +68,8 @@ module.exports = class extends think.Model {
       avatarProxy: '',
       ...comment
     };
+    ret.captcha = captcha.settings(ret);
+    if (!includePrivate) ret.captcha = captcha.publicSettings(ret.captcha);
     // upload settings
     if (ret.upload && think.isString(ret.upload)) {
       ret.upload = JSON.parse(ret.upload);

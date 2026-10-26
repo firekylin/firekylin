@@ -14,7 +14,7 @@ class LoginStore {
 
   setLoading = data => this.loading = data
 
-  login(values: {username: string, password: string}): void {
+  login(values: {username: string, password: string, captcha?: string}, resetCaptcha?: () => void): void {
     this.setLoading(true);
     values.password = md5(window.SysConfig.options.password_salt + values.password);
     http.post<''>('/admin/user/login', values)
@@ -34,10 +34,12 @@ class LoginStore {
               location.reload();
             }, 1000);
           } else {
+            resetCaptcha?.();
             this.setLoading(false);
           }
         },
         err => {
+          resetCaptcha?.();
           message.error(err);
           this.setLoading(false);
         }
