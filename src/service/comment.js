@@ -11,7 +11,7 @@ const permalink = require('./permalink');
 
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
-function notificationServices(config, options, env = process.env, mailer) {
+function smtpSettings(config, options, env = process.env, mailer) {
   env = {
     ...env,
     SMTP_HOST: config.smtpHost || env.SMTP_HOST,
@@ -22,15 +22,22 @@ function notificationServices(config, options, env = process.env, mailer) {
     SMTP_FROM: config.smtpFrom || env.SMTP_FROM,
     AUTHOR_EMAIL: config.authorEmail || env.AUTHOR_EMAIL
   };
+  return env;
+}
+
+function mailTransport(env, mailer) {
+  return env.SMTP_HOST && (mailer || require('nodemailer')).createTransport({
+    host: env.SMTP_HOST, port: Number(env.SMTP_PORT) || 465, secure: env.SMTP_SECURE !== 'false',
+    auth: env.SMTP_USER ? {user: env.SMTP_USER, pass: env.SMTP_PASS} : undefined,
+    connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 10000
+  });
+}
+
+function notificationServices(config, options, env = process.env, mailer) {
+  env = smtpSettings(config, options, env);
   const services = {};
   if (config.mailNotify) {
-    const transport = env.SMTP_HOST && (mailer || require('nodemailer')).createTransport({
-      host: env.SMTP_HOST,
-      port: Number(env.SMTP_PORT) || 465,
-      secure: env.SMTP_SECURE !== 'false',
-      auth: env.SMTP_USER ? {user: env.SMTP_USER, pass: env.SMTP_PASS} : undefined,
-      connectionTimeout: 10000, socketTimeout: 10000
-    });
+    const transport = mailTransport(env, mailer);
     services.notification = {
       async send(comment, parent, approvedReply = false) {
         if (!transport || !env.SMTP_FROM) {
@@ -325,3 +332,25 @@ module.exports.pathnameFromUrl = pathnameFromUrl;
 module.exports.resolveCommentPostId = resolveCommentPostId;
 
 module.exports.notificationServices = notificationServices;
+
+module.exports.sendTestEmail = async function(config, recipient, options, env = process.env, mailer) {
+  if (typeof recipient !== 'string' || !/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(recipient)) {
+    throw new Error('请填写有效的测试收件邮箱');
+  }
+  env = smtpSettings(config, options, env);
+  if (!env.SMTP_HOST || !env.SMTP_FROM) throw new Error('请填写 SMTP 服务器和发件人邮箱');
+  const transport = mailTransport(env, mailer);
+  try {
+    const result = await transport.sendMail({
+      from: env.SMTP_FROM, to: recipient, subject: `[${options.title || 'Firekylin'}] 邮件通知测试`,
+      text: '这是一封 Firekylin 邮件通知测试邮件，收到此邮件说明 SMTP 配置已生效。'
+    });
+    if (result.rejected && result.rejected.length) throw new Error('SMTP 服务器拒绝了测试收件邮箱');
+  } catch (error) {
+    let detail = [error.code, error.command, error.message, error.response].filter(Boolean).join(' | ');
+    for (const secret of [env.SMTP_PASS, env.SMTP_PASS && Buffer.from(env.SMTP_PASS).toString('base64')]) {
+      if (secret) detail = detail.split(secret).join('[隐藏]');
+    }
+    throw new Error(detail.slice(0, 1500) || '邮件发送失败');
+  } finally { transport.close?.() }
+};

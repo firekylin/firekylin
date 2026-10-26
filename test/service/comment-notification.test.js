@@ -41,3 +41,39 @@ test('moderation notifies only when a waiting comment is approved', async() => {
   await service.moderate({id: 1, operation: 'approved'}, {type: 1});
   assert.equal(notified.length, 1);
 });
+
+test('test email uses unsaved settings and returns a diagnosable sanitized error', async() => {
+  const {sendTestEmail} = require('../../src/service/comment');
+  const config = {smtpHost: 'new.example.com', smtpPort: 587, smtpSecure: false, smtpFrom: 'from@example.com', smtpPass: 'secret-password'};
+  let mail;
+  let closed = 0;
+  const mailer = {createTransport: options => {
+    assert.equal(options.host, 'new.example.com');
+    assert.equal(options.secure, false);
+    return {sendMail: async value => {mail = value; return {accepted: [value.to]};}, close: () => closed++};
+  }};
+  await sendTestEmail(config, 'target@example.com', {title: 'Blog'}, {}, mailer);
+  assert.equal(mail.to, 'target@example.com');
+  assert.ok(mail.subject.includes('测试'));
+  assert.equal(closed, 1);
+  await assert.rejects(sendTestEmail(config, 'invalid', {}, {}, mailer), /有效的测试收件邮箱/);
+  const failing = {createTransport: () => ({sendMail: async() => {
+    const error = new Error('Authentication failed: secret-password');
+    error.code = 'EAUTH'; error.response = '535 authentication rejected';
+    throw error;
+  }, close: () => closed++})};
+  await assert.rejects(sendTestEmail(config, 'target@example.com', {}, {}, failing), error => {
+    assert.ok(error.message.includes('EAUTH'));
+    assert.ok(error.message.includes('535'));
+    assert.equal(error.message.includes('secret-password'), false);
+    return true;
+  });
+  assert.equal(closed, 2);
+});
+
+test('test email reports SMTP recipient rejection as failure', async() => {
+  const {sendTestEmail} = require('../../src/service/comment');
+  await assert.rejects(sendTestEmail({smtpHost: 'smtp.example.com', smtpFrom: 'from@example.com'}, 'to@example.com', {}, {}, {
+    createTransport: () => ({sendMail: async() => ({rejected: ['to@example.com']})})
+  }), /拒绝/);
+});

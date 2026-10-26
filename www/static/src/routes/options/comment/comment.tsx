@@ -1,7 +1,9 @@
 import React from 'react';
 import {
     Button,
-    Divider,
+    Alert,
+    Tabs,
+    message,
     Form,
     FormInstance,
     Input,
@@ -12,6 +14,7 @@ import {
 import { inject, observer } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
 import './comment.less';
+import {http} from '../../../utils/http';
 import { CommentProps, CommentState } from './comment.model';
 
 const { TextArea } = Input;
@@ -71,7 +74,16 @@ function createCommentState() {
         },
     };
 }
+const SECTION_KEYS: Record<string, string[]> = {"basic": ["audit", "forceLogin", "pageSize", "locale", "ipQps"], "display": ["commentSorting", "dark", "meta", "requiredMeta", "wordLimit", "emoji", "reaction", "imageUploader", "highlighter", "texRenderer", "search", "noCopyright", "noRss"], "mail": ["mailNotify", "smtpHost", "smtpPort", "smtpSecure", "smtpUser", "smtpPass", "smtpFrom", "authorEmail"], "security": ["forbiddenWords", "disallowIPList", "likeIncMax", "levels", "avatarProxy"]};
+
 function CommentForm(props: CommentProps) {
+    const [activeTab, setActiveTab] = React.useState('basic');
+    const activeTabRef = React.useRef(activeTab);
+    activeTabRef.current = activeTab;
+    const [testRecipient, setTestRecipient] = React.useState('');
+    const [testing, setTesting] = React.useState(false);
+    const [testResult, setTestResult] = React.useState<{ok: boolean; text: string} | null>(null);
+
     const [state, setState] = React.useState(createCommentState);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -97,7 +109,7 @@ function CommentForm(props: CommentProps) {
             const emojiPresets = lines(values.emojiPresets);
             const reactionImages = lines(values.reactionImages).slice(0, 6);
             const meta = values.meta || [];
-            props.commentStore.commentSave({
+            const config: Record<string, any> = {
                 smtpPass: values.smtpPass || '',
                 smtpHost: values.smtpHost, smtpPort: values.smtpPort, smtpSecure: values.smtpSecure,
                 smtpUser: values.smtpUser, smtpFrom: values.smtpFrom, authorEmail: values.authorEmail,
@@ -135,7 +147,8 @@ function CommentForm(props: CommentProps) {
                 likeIncMax: values.likeIncMax,
                 levels: lines(values.levels).map(Number).filter(Number.isFinite),
                 avatarProxy: String(values.avatarProxy || '').trim(),
-            });
+            };
+            props.commentStore.commentSave(Object.fromEntries(SECTION_KEYS[activeTabRef.current].map(key => [key, config[key]])));
         };
     }
     legacy.render = function render() {
@@ -151,6 +164,8 @@ function CommentForm(props: CommentProps) {
                             onFinish={legacy.handleSubmit}
                             layout="vertical"
                         >
+                            <Tabs activeKey={activeTab} onChange={setActiveTab} items={[
+                                {key: 'basic', label: '基本设置', forceRender: true, children: <>
                             <Form.Item
                                 label="评论需要审核"
                                 name="audit"
@@ -200,7 +215,10 @@ function CommentForm(props: CommentProps) {
                             >
                                 <InputNumber min={1} max={3600} />
                             </Form.Item>
-                            <Divider orientation="start">展示与交互</Divider>
+
+                                </>},
+                                {key: 'display', label: '展示与交互', forceRender: true, children: <>
+
                             <Form.Item
                                 label="默认排序"
                                 name="commentSorting"
@@ -338,7 +356,10 @@ function CommentForm(props: CommentProps) {
                             >
                                 <Switch />
                             </Form.Item>
-                            <Divider orientation="start">邮件通知</Divider>
+
+                                </>},
+                                {key: 'mail', label: '邮件通知', forceRender: true, children: <>
+
                             <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="新评论通知站长邮箱，已通过审核的回复通知被回复者">
                                 <Switch />
                             </Form.Item>
@@ -349,7 +370,25 @@ function CommentForm(props: CommentProps) {
                             <Form.Item label="SMTP 端口" name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} /></Form.Item>
                             <Form.Item label="直接 TLS" name="smtpSecure" valuePropName="checked" initialValue={comment.smtpSecure} extra="465 端口开启；587/STARTTLS 关闭"><Switch /></Form.Item>
                             <Form.Item label="SMTP 密码" name="smtpPass" extra="留空保留已保存的密码；输入新值可替换"><Input.Password autoComplete="new-password" /></Form.Item>
-                            <Divider orientation="start">安全与用户</Divider>
+
+                            <Form.Item label="测试收件邮箱" extra="使用当前填写的配置发送；密码留空时使用已保存的密码，无需先保存。">
+                                <Input value={testRecipient} onChange={event => setTestRecipient(event.target.value)} />
+                            </Form.Item>
+                            <Button loading={testing} disabled={testing} onClick={() => {
+                                if (!testRecipient.trim()) {message.error('请填写测试收件邮箱'); return;}
+                                setTesting(true); setTestResult(null);
+                                const values = legacy.formRef.current.getFieldsValue(true);
+                                const config = Object.fromEntries(SECTION_KEYS.mail.map(key => [key, values[key]]));
+                                http.post<{message: string}>('/admin/api/options?type=testCommentMail', {config, recipient: testRecipient.trim()}, {timeout: 40000}).subscribe({
+                                    next: result => {setTesting(false); setTestResult({ok: result.errno === 0, text: result.errno === 0 ? result.data.message : String(result.errmsg || '发送失败')});},
+                                    error: () => {setTesting(false); setTestResult({ok: false, text: '请求失败或超时，请检查邮件服务和网络后重试'});},
+                                });
+                            }}>发送测试邮件</Button>
+                            {testResult && <Alert style={{marginTop: 16}} type={testResult.ok ? 'success' : 'error'} showIcon title={testResult.ok ? '测试邮件已发送' : '测试发送失败'} description={testResult.text} />}
+
+                                </>},
+                                {key: 'security', label: '安全与用户', forceRender: true, children: <>
+
                             <Form.Item
                                 label="敏感词"
                                 name="forbiddenWords"
@@ -389,13 +428,16 @@ function CommentForm(props: CommentProps) {
                             >
                                 <Input placeholder="https://example.com/avatar-proxy" />
                             </Form.Item>
+
+                                </>},
+                            ]} />
                             <Form.Item>
                                 <Button
                                     type="primary"
-                                    htmlType="submit"
+                                    onClick={() => legacy.formRef.current.validateFields(SECTION_KEYS[activeTab]).then(() => legacy.handleSubmit(legacy.formRef.current.getFieldsValue(true)))}
                                     loading={submitting}
                                 >
-                                    提交
+                                    保存当前标签页
                                 </Button>
                             </Form.Item>
                         </Form>

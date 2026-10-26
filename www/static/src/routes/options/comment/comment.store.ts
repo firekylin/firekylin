@@ -10,7 +10,9 @@ class CommentStore {
             res => {
                 if (res.errno === 0) {
                     message.success('评论设置更新成功');
-                    const publicSettings = {...data};
+                    let previous = window.SysConfig.options.comment || {};
+                    if (typeof previous === 'string') previous = JSON.parse(previous);
+                    const publicSettings = {...previous, ...data};
                     delete publicSettings.smtpPass;
                     window.SysConfig.options.comment = JSON.stringify(publicSettings);
                 }
