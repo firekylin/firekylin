@@ -55,3 +55,22 @@ test('public options hide captcha secrets while retaining private values', async
   const privateValue = await model.getOptions(true);
   assert.equal(privateValue.captcha.secret, 'private');
 });
+
+test('login template bootstraps public captcha settings without a secret', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const vm = require('node:vm');
+  const template = fs.readFileSync(path.resolve(__dirname, '../../view/admin.eta'), 'utf8');
+  const expression = template.match(/options: <%~ ([\s\S]*?) %>,/)[1];
+  for (const provider of ['none', 'turnstile', 'recaptcha-v3']) {
+    const config = {provider, siteKey: 'public-key', secret: 'private-key', areas: ['login', 'comment']};
+    const bootstrap = JSON.parse(vm.runInNewContext(expression, {
+      firekylin: {options: {captcha: config}, publicCaptcha: publicSettings(config)}
+    }));
+    assert.equal(bootstrap.captcha.provider, provider);
+    assert.equal(bootstrap.captcha.siteKey, 'public-key');
+    assert.deepEqual(bootstrap.captcha.areas, ['login', 'comment']);
+    assert.equal(bootstrap.captcha.secret, undefined);
+    assert.equal(JSON.stringify(bootstrap).includes('private-key'), false);
+  }
+});

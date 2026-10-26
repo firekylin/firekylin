@@ -73,6 +73,7 @@ module.exports = class extends think.Controller {
       };
     }
 
+    this.assign('publicCaptcha', captcha.publicSettings(options.captcha));
     this.assign('options', options);
     this.assign('think', think);
     adminAssets = adminAssets || getAdminAssets(think.ROOT_PATH);

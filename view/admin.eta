@@ -18,6 +18,7 @@ window.SysConfig = {
   pluginAdmin: <%~ JSON.stringify(firekylin.pluginAdmin || []) %>,
   userInfo: <%~ JSON.stringify(firekylin.userInfo) %>,
   options: <%~ JSON.stringify({
+    captcha: firekylin.publicCaptcha,
     title: firekylin.options.title,
     two_factor_auth: firekylin.options.two_factor_auth,
     ldap_on: firekylin.options.ldap_on,
