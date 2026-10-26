@@ -215,4 +215,4 @@ declare namespace Firekylin {
 
 ### 验证码
 
-系统设置 → 验证码设置支持 Turnstile 和 reCAPTCHA v3。填写 Site Key 与私钥，勾选登录、评论生效区域；配置独立保存在 captcha 选项中。私钥不回显，留空保留当前供应商私钥。登录支持语言、Turnstile 主题及验证前隐藏提交按钮。评论仅传入 Waline 客户端原生 site key，由其渲染挑战；Waline Core 调用注入的验证码服务完成校验。reCAPTCHA v3 要求评分至少 0.5。第三方 OAuth 与域单点登录使用身份提供方认证。
+系统设置 → 验证码设置支持 Turnstile 和 reCAPTCHA v3。填写 Site Key 与私钥，勾选登录、评论生效区域；配置独立保存在 captcha 选项中。私钥在管理员后台直接保存和回填；公开页面不下发私钥。生效区域默认勾选登录与评论。登录支持语言、Turnstile 主题及验证前隐藏提交按钮。评论仅传入 Waline 客户端原生 site key，由其渲染挑战；Waline Core 调用注入的验证码服务完成校验。reCAPTCHA v3 要求评分至少 0.5。第三方 OAuth 与域单点登录使用身份提供方认证。

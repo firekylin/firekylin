@@ -5,6 +5,9 @@ const {settings, enabled, publicSettings, verify} = require('../../src/service/c
 
 test('captcha defaults to disabled and exposes only public settings', () => {
   assert.equal(enabled(settings({}), 'login'), false);
+  assert.deepEqual(settings({}).areas, ['login', 'comment']);
+  assert.deepEqual(publicSettings({}).areas, ['login', 'comment']);
+  assert.deepEqual(settings({captcha: {areas: []}}).areas, []);
   assert.equal(publicSettings({secret: 'private'}).secret, undefined);
 });
 test('captcha enforces selected areas and fails closed on missing keys or network errors', async() => {

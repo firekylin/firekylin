@@ -2,13 +2,13 @@
 
 function settings(options) {
   if (options.captcha) return typeof options.captcha === 'string' ? JSON.parse(options.captcha) : options.captcha;
-  return {provider: 'none', siteKey: '', secret: '', areas: []};
+  return {provider: 'none', siteKey: '', secret: '', areas: ['login', 'comment']};
 }
 function enabled(config, area) {
   return ['turnstile', 'recaptcha'].includes(config.provider) && Array.isArray(config.areas) && config.areas.includes(area);
 }
 function publicSettings(config) {
-  const {provider = 'none', siteKey = '', areas = [], theme = 'auto', language = 'auto', hideSubmit = false} = config;
+  const {provider = 'none', siteKey = '', areas = ['login', 'comment'], theme = 'auto', language = 'auto', hideSubmit = false} = config;
   return {provider, siteKey, areas, theme, language, hideSubmit};
 }
 async function verify(config, token, ip, area, env = process.env) {

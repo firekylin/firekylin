@@ -39,7 +39,8 @@ module.exports = class extends think.Controller {
     for (const key of Object.keys(options)) {
       if (key.startsWith(CREDENTIAL_PREFIX)) delete options[key];
     }
-    options.captcha = captcha.publicSettings(captcha.settings(options));
+    options.captcha = Number(this.userInfo.type) === 1
+      ? captcha.settings(options) : captcha.publicSettings(captcha.settings(options));
     options.comment = {...options.comment};
     delete options.comment.smtpPass;
     // 不显示具体的密钥
@@ -61,7 +62,7 @@ module.exports = class extends think.Controller {
 
     if (think.isEmpty(this.userInfo)) {
       options = {
-        captcha: options.captcha,
+        captcha: captcha.publicSettings(options.captcha),
         title: options.title,
         favicon_url: options.favicon_url,
         two_factor_auth: options.two_factor_auth,

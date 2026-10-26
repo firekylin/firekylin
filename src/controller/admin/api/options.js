@@ -13,6 +13,7 @@ module.exports = class extends Base {
     const type = this.get('type');
     const model = this.model('options');
     const options = await model.getOptions();
+    if (Number(this.userInfo.type) === 1) options.captcha = captcha.settings(await model.getOptions(true));
 
     if (type === '2fa') {
       if (options.two_factor_auth.length === 32) {
@@ -78,9 +79,7 @@ module.exports = class extends Base {
           !['auto', 'light', 'dark'].includes(config.theme) ||
           typeof config.language !== 'string' || !/^[a-zA-Z-]{2,20}$/.test(config.language) ||
           typeof config.siteKey !== 'string' || typeof config.secret !== 'string') throw new Error();
-        const previous = captcha.settings(await model.getOptions(true));
-        const secret = config.clearSecret ? '' : config.secret || (config.provider === previous.provider ? previous.secret : '') || '';
-        config = {...captcha.publicSettings(config), secret};
+        config = {...captcha.publicSettings(config), secret: config.secret};
         if (config.provider !== 'none' && config.areas.length && (!config.siteKey || !config.secret)) throw new Error();
       } catch { return this.fail('验证码配置不完整或格式错误') }
       data.captcha = JSON.stringify(config);
