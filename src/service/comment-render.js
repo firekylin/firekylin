@@ -80,8 +80,9 @@ module.exports = class extends think.Service {
     return `<section id="comments" class="${className}">${titleHtml}<div class="fk-comment-container" data-comment-config="${configJson}">${escapeHtml(loadingText)}</div><script>(function(c){
 var start=function(){if(c.dataset.loaded)return;c.dataset.loaded='1';var o=JSON.parse(c.dataset.commentConfig),resources=o.resources;delete o.resources;o.el=c;o.path=location.pathname;
 if(!window.__FK_COMMENT_CLIENT__){window.__FK_COMMENT_CLIENT__=(function(){var l=document.createElement('link');l.rel='stylesheet';l.href=resources.style;document.head.appendChild(l);return import(resources.script)})()}
-var session=fetch(o.serverURL+'/api/token',{credentials:'same-origin'}).then(function(r){return r.json()}).then(function(r){return r.errno===0?r.data:null}).catch(function(){return null});
-Promise.all([window.__FK_COMMENT_CLIENT__,session]).then(function(r){var u=r[1];if(u&&u.objectId){u.remember=true;localStorage.setItem('WALINE_USER',JSON.stringify(u))}else{localStorage.removeItem('WALINE_USER')}c.textContent='';r[0].init(o)}).catch(function(){c.textContent='评论组件加载失败，请稍后重试。'})};
+var stored=localStorage.getItem('WALINE_USER'),user=null;try{user=stored?JSON.parse(stored):null}catch(e){}
+var session=stored!==null&&(!user||!user.token)?Promise.resolve(null):fetch(o.serverURL+'/api/token',{credentials:'same-origin',headers:user&&user.token?{Authorization:'Bearer '+user.token}:{}}).then(function(r){return r.json()}).then(function(r){return r.errno===0?r.data:null}).catch(function(){return null});
+Promise.all([window.__FK_COMMENT_CLIENT__,session]).then(function(r){var u=r[1];if(u&&u.objectId){u.remember=true;localStorage.setItem('WALINE_USER',JSON.stringify(u))}else{localStorage.setItem('WALINE_USER','{}')}c.textContent='';r[0].init(o)}).catch(function(){c.textContent='评论组件加载失败，请稍后重试。'})};
 if('IntersectionObserver'in window){var observer=new IntersectionObserver(function(entries){if(entries[0].isIntersecting){observer.disconnect();start()}},{rootMargin:'1000px'});observer.observe(c)}else{start()}
 })(document.currentScript.previousElementSibling)</script></section>`;
   }

@@ -84,3 +84,27 @@ test('comment helper forwards supported client options', () => {
   assert.match(output, /&quot;imageUploader&quot;:false/);
   assert.match(output, /&quot;noCopyright&quot;:true/);
 });
+
+test('comment startup preserves logout and validates explicit tokens', async() => {
+  const vm = require('node:vm');
+  for (const stored of ['{}', JSON.stringify({token: 'comment-token'}), null]) {
+    const requests = [];
+    const storage = new Map(stored === null ? [] : [['WALINE_USER', stored]]);
+    const element = {dataset: {commentConfig: JSON.stringify({serverURL: '/api/comment', resources: {}})}};
+    let initialized;
+    const ready = new Promise(resolve => { initialized = resolve });
+    const output = new CommentRender().render(controller());
+    const script = output.match(/<script>([\s\S]*)<\/script>/)[1];
+    vm.runInNewContext(script, {
+      document: {currentScript: {previousElementSibling: element}},
+      window: {__FK_COMMENT_CLIENT__: Promise.resolve({init: initialized})},
+      location: {pathname: '/test.html'},
+      localStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value)},
+      fetch: async(url, options) => {requests.push(options); return {json: async() => ({errno: 0, data: null})};}
+    });
+    await ready;
+    assert.equal(requests.length, stored === '{}' ? 0 : 1);
+    if (stored && stored !== '{}') assert.equal(requests[0].headers.Authorization, 'Bearer comment-token');
+    assert.equal(storage.get('WALINE_USER'), '{}');
+  }
+});

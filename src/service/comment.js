@@ -163,7 +163,7 @@ module.exports = class extends think.Service {
     return {core, users, options, config, tokenService, avatarService};
   }
 
-  async context(controller, users, core, tokenService, avatarService) {
+  async context(controller, users, core, tokenService, avatarService, bootstrapAdmin = false) {
     const authorization = controller.ctx.get('authorization') || '';
     const token = authorization.replace(/^Bearer\s+/i, '') || controller.get('token');
     const ctx = {
@@ -179,9 +179,9 @@ module.exports = class extends think.Service {
     if (token) {
       ctx.state.userInfo = await core.auth.resolveSession({token}, ctx);
     }
-    // A Firekylin administrator JWT also authenticates the comment administrator.
+    // Only explicit session bootstrap may exchange the administrator Cookie for a comment token.
     const sessionUser = adminAuth.currentUser(controller.ctx) || {};
-    if (!think.isEmpty(sessionUser)) {
+    if (bootstrapAdmin && !token && !think.isEmpty(sessionUser)) {
       const found = await users.select({objectId: String(sessionUser.id), type: ['!=', 'banned']});
       if (found[0]) {
         ctx.state.userInfo = {

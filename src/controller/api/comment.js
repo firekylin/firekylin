@@ -24,7 +24,7 @@ module.exports = class extends Base {
     const service = this.service('comment');
     try {
       const {core, users, config, tokenService, avatarService} = await service.create(this);
-      const ctx = await service.context(this, users, core, tokenService, avatarService);
+      const ctx = await service.context(this, users, core, tokenService, avatarService, resource === 'token' && method === 'GET');
       const input = method === 'GET' ? this.get() : this.post();
       let result;
       if (resource === 'comment') {
@@ -96,7 +96,7 @@ module.exports = class extends Base {
       const adminCallback = encodeURIComponent(this.ctx.url);
       return this.redirect(`/admin/login?redirect=${adminCallback}`);
     }
-    const ctx = await service.context(this, users, core, tokenService, avatarService);
+    const ctx = await service.context(this, users, core, tokenService, avatarService, true);
     const user = ctx.state.userInfo;
     if (!user) return this.redirect('/admin/login');
     return this.completeLogin(user.token);
