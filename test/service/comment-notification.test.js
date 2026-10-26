@@ -77,3 +77,27 @@ test('test email reports SMTP recipient rejection as failure', async() => {
     createTransport: () => ({sendMail: async() => ({rejected: ['to@example.com']})})
   }), /拒绝/);
 });
+
+test('custom templates render consistently for live and test messages without evaluating content', async() => {
+  const {sendTestEmail, renderNotificationMail} = require('../../src/service/comment');
+  const config = {
+    mailNotify: true, smtpHost: 'smtp.example.com', smtpFrom: 'from@example.com', authorEmail: 'owner@example.com',
+    mailSubjectTemplate: '{{siteName}} / {{type}} / {{nick}}',
+    mailBodyTemplate: 'To {{recipient}}\n{{comment}}\n{{url}}\n{{parentNick}}: {{parentComment}}\n{{unknown}}'
+  };
+  const options = {title: 'Blog', site_url: 'https://example.com'};
+  const sent = [];
+  const mailer = {createTransport: () => ({sendMail: async mail => {sent.push(mail); return {};}})};
+  await notificationServices(config, options, {}, mailer).notification.send({url: '/post/test', status: 'approved', nick: 'Alice', rawComment: 'Hello {{recipient}}'});
+  assert.equal(sent[0].subject, 'Blog / 收到新评论 / Alice');
+  assert.ok(sent[0].text.includes('To owner@example.com'));
+  assert.ok(sent[0].text.includes('Hello {{recipient}}'));
+  assert.ok(sent[0].text.includes('https://example.com/post/test'));
+  await sendTestEmail(config, 'preview@example.com', options, {}, mailer);
+  assert.equal(sent[1].subject, 'Blog / 邮件通知测试 / 测试用户');
+  assert.ok(sent[1].text.includes('To preview@example.com'));
+  assert.ok(sent[1].text.includes('原评论用户'));
+  const rendered = renderNotificationMail({mailSubjectTemplate: '{{nick}}'}, {}, {nick: 'first\r\nsecond'}, null, '', 'test');
+  assert.equal(rendered.subject, 'first second');
+  assert.throws(() => renderNotificationMail({mailBodyTemplate: 'x'.repeat(20001)}, {}, {}, null, '', ''), /20000/);
+});

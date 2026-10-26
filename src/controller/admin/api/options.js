@@ -93,6 +93,11 @@ module.exports = class extends Base {
         if (comment[key] !== undefined && typeof comment[key] !== 'string') return this.fail('PARAMS_ERROR');
         if (!comment[key]) comment[key] = previous[key] || '';
       }
+      for (const [key, max] of [['mailSubjectTemplate', 500], ['mailBodyTemplate', 20000]]) {
+        if (comment[key] !== undefined && (typeof comment[key] !== 'string' || comment[key].length > max)) {
+          return this.fail('邮件模板格式错误或长度超出限制');
+        }
+      }
       const port = Number(comment.smtpPort);
       if (comment.smtpPort && (!Number.isInteger(port) || port < 1 || port > 65535)) {
         return this.fail('PARAMS_ERROR');

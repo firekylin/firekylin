@@ -71,10 +71,12 @@ function createCommentState() {
             smtpSecure: comment.smtpSecure !== false, smtpUser: comment.smtpUser || '',
             smtpFrom: comment.smtpFrom || '', authorEmail: comment.authorEmail || '',
             mailNotify: Boolean(comment.mailNotify),
+            mailSubjectTemplate: comment.mailSubjectTemplate || '',
+            mailBodyTemplate: comment.mailBodyTemplate || '',
         },
     };
 }
-const SECTION_KEYS: Record<string, string[]> = {"basic": ["audit", "forceLogin", "pageSize", "locale", "ipQps"], "display": ["commentSorting", "dark", "meta", "requiredMeta", "wordLimit", "emoji", "reaction", "imageUploader", "highlighter", "texRenderer", "search", "noCopyright", "noRss"], "mail": ["mailNotify", "smtpHost", "smtpPort", "smtpSecure", "smtpUser", "smtpPass", "smtpFrom", "authorEmail"], "security": ["forbiddenWords", "disallowIPList", "likeIncMax", "levels", "avatarProxy"]};
+const SECTION_KEYS: Record<string, string[]> = {"basic": ["audit", "forceLogin", "pageSize", "locale", "ipQps"], "display": ["commentSorting", "dark", "meta", "requiredMeta", "wordLimit", "emoji", "reaction", "imageUploader", "highlighter", "texRenderer", "search", "noCopyright", "noRss"], "mail": ["mailNotify", "smtpHost", "smtpPort", "smtpSecure", "smtpUser", "smtpPass", "smtpFrom", "authorEmail", "mailSubjectTemplate", "mailBodyTemplate"], "security": ["forbiddenWords", "disallowIPList", "likeIncMax", "levels", "avatarProxy"]};
 
 function CommentForm(props: CommentProps) {
     const [activeTab, setActiveTab] = React.useState('basic');
@@ -114,6 +116,8 @@ function CommentForm(props: CommentProps) {
                 smtpHost: values.smtpHost, smtpPort: values.smtpPort, smtpSecure: values.smtpSecure,
                 smtpUser: values.smtpUser, smtpFrom: values.smtpFrom, authorEmail: values.authorEmail,
                 mailNotify: Boolean(values.mailNotify),
+                mailSubjectTemplate: values.mailSubjectTemplate || '',
+                mailBodyTemplate: values.mailBodyTemplate || '',
                 audit: Boolean(values.audit),
                 forceLogin: Boolean(values.forceLogin),
                 pageSize: values.pageSize,
@@ -371,6 +375,14 @@ function CommentForm(props: CommentProps) {
                             <Form.Item label="直接 TLS" name="smtpSecure" valuePropName="checked" initialValue={comment.smtpSecure} extra="465 端口开启；587/STARTTLS 关闭"><Switch /></Form.Item>
                             <Form.Item label="SMTP 密码" name="smtpPass" extra="留空保留已保存的密码；输入新值可替换"><Input.Password autoComplete="new-password" /></Form.Item>
 
+                            <Form.Item label="邮件标题模板" name="mailSubjectTemplate" initialValue={comment.mailSubjectTemplate}
+                                extra="留空使用默认标题：[{{siteName}}] {{type}}">
+                                <Input maxLength={500} placeholder="[{{siteName}}] {{type}}" />
+                            </Form.Item>
+                            <Form.Item label="邮件正文模板（纯文本）" name="mailBodyTemplate" initialValue={comment.mailBodyTemplate}
+                                extra="留空使用默认正文。支持 {{siteName}} 站点名称、{{siteUrl}} 站点地址、{{type}} 通知类型、{{nick}} 评论者、{{comment}} 评论内容、{{url}} 评论链接、{{parentNick}} 被回复者、{{parentComment}} 原评论、{{recipient}} 收件邮箱、{{status}} 状态。变量只替换文本，不执行代码。">
+                                <TextArea maxLength={20000} autoSize={{minRows: 5, maxRows: 15}} placeholder={'{{nick}}：\n{{comment}}\n\n{{url}}'} />
+                            </Form.Item>
                             <Form.Item label="测试收件邮箱" extra="使用当前填写的配置发送；密码留空时使用已保存的密码，无需先保存。">
                                 <Input value={testRecipient} onChange={event => setTestRecipient(event.target.value)} />
                             </Form.Item>

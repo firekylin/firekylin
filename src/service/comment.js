@@ -33,6 +33,26 @@ function mailTransport(env, mailer) {
   });
 }
 
+const DEFAULT_MAIL_SUBJECT = '[{{siteName}}] {{type}}';
+const DEFAULT_MAIL_BODY = '{{nick}}：\n{{comment}}\n\n{{url}}';
+
+function renderNotificationMail(config, options, comment, parent, recipient, type) {
+  const values = {
+    siteName: options.title || 'Firekylin', siteUrl: options.site_url || '', type,
+    nick: comment.nick || '访客', comment: comment.rawComment || comment.comment || '',
+    parentNick: parent && parent.nick || '', parentComment: parent && parent.comment || '',
+    url: comment.url || options.site_url || '', recipient, status: comment.status || ''
+  };
+  const render = template => template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match);
+  const subject = config.mailSubjectTemplate || DEFAULT_MAIL_SUBJECT;
+  const body = config.mailBodyTemplate || DEFAULT_MAIL_BODY;
+  if (typeof subject !== 'string' || subject.length > 500 || typeof body !== 'string' || body.length > 20000) {
+    throw new Error('邮件标题模板最多 500 字符，正文模板最多 20000 字符');
+  }
+  return {subject: render(subject).replace(/[\r\n]+/g, ' '), text: render(body)};
+}
+
 function notificationServices(config, options, env = process.env, mailer) {
   env = smtpSettings(config, options, env);
   const services = {};
@@ -44,7 +64,6 @@ function notificationServices(config, options, env = process.env, mailer) {
           think.logger.error('Comment mail requires SMTP_HOST and SMTP_FROM');
           return;
         }
-        const site = options.title || 'Firekylin';
         const recipients = new Set();
         if (!approvedReply && env.AUTHOR_EMAIL) recipients.add(env.AUTHOR_EMAIL);
         if (comment.status === 'approved' && parent && parent.mail && parent.mail !== comment.mail) {
@@ -59,8 +78,8 @@ function notificationServices(config, options, env = process.env, mailer) {
           try {
             await transport.sendMail({
               from: env.SMTP_FROM, to,
-              subject: `[${site}] ${parent ? '评论有新回复' : '收到新评论'}`,
-              text: `${comment.nick || '访客'}：\n${comment.rawComment || comment.comment}\n\n${url.href}`
+              ...renderNotificationMail(config, options, {...comment, url: url.href}, parent, to,
+                parent ? '评论有新回复' : '收到新评论')
             });
           } catch {
             think.logger.error('Comment notification delivery failed');
@@ -342,8 +361,11 @@ module.exports.sendTestEmail = async function(config, recipient, options, env = 
   const transport = mailTransport(env, mailer);
   try {
     const result = await transport.sendMail({
-      from: env.SMTP_FROM, to: recipient, subject: `[${options.title || 'Firekylin'}] 邮件通知测试`,
-      text: '这是一封 Firekylin 邮件通知测试邮件，收到此邮件说明 SMTP 配置已生效。'
+      from: env.SMTP_FROM, to: recipient,
+      ...renderNotificationMail(config, options, {
+        nick: '测试用户', rawComment: '这是一封测试邮件，收到此邮件说明 SMTP 配置已生效。',
+        url: options.site_url || '', status: 'approved'
+      }, {nick: '原评论用户', comment: '这是一条用于预览模板的原评论。'}, recipient, '邮件通知测试')
     });
     if (result.rejected && result.rejected.length) throw new Error('SMTP 服务器拒绝了测试收件邮箱');
   } catch (error) {
@@ -354,3 +376,5 @@ module.exports.sendTestEmail = async function(config, recipient, options, env = 
     throw new Error(detail.slice(0, 1500) || '邮件发送失败');
   } finally { transport.close?.() }
 };
+
+module.exports.renderNotificationMail = renderNotificationMail;
