@@ -67,8 +67,8 @@ function createCommentState() {
             disallowIPList: lines(comment.disallowIPList).join('\n'),
             likeIncMax: Number(comment.likeIncMax) || 1, levels: lines(comment.levels).join(', '),
             avatarProxy: comment.avatarProxy || '',
-            smtpHost: comment.smtpHost || '', smtpPort: comment.smtpPort || 465,
-            smtpSecure: comment.smtpSecure !== false, smtpUser: comment.smtpUser || '',
+            smtpHost: comment.smtpHost || '', smtpPort: comment.smtpPort || null,
+            smtpSecure: typeof comment.smtpSecure === 'boolean' ? comment.smtpSecure : 'inherit', smtpUser: comment.smtpUser || '',
             smtpFrom: comment.smtpFrom || '', authorEmail: comment.authorEmail || '',
             mailNotify: Boolean(comment.mailNotify),
             mailSubjectTemplate: comment.mailSubjectTemplate || '',
@@ -113,7 +113,7 @@ function CommentForm(props: CommentProps) {
             const meta = values.meta || [];
             const config: Record<string, any> = {
                 smtpPass: values.smtpPass || '',
-                smtpHost: values.smtpHost, smtpPort: values.smtpPort, smtpSecure: values.smtpSecure,
+                smtpHost: values.smtpHost, smtpPort: values.smtpPort || null, smtpSecure: values.smtpSecure === 'inherit' ? null : values.smtpSecure,
                 smtpUser: values.smtpUser, smtpFrom: values.smtpFrom, authorEmail: values.authorEmail,
                 mailNotify: Boolean(values.mailNotify),
                 mailSubjectTemplate: values.mailSubjectTemplate || '',
@@ -371,8 +371,8 @@ function CommentForm(props: CommentProps) {
                             <Form.Item label="SMTP 用户名" name="smtpUser" initialValue={comment.smtpUser}><Input /></Form.Item>
                             <Form.Item label="发件人邮箱" name="smtpFrom" initialValue={comment.smtpFrom}><Input /></Form.Item>
                             <Form.Item label="站长收件邮箱" name="authorEmail" initialValue={comment.authorEmail}><Input /></Form.Item>
-                            <Form.Item label="SMTP 端口" name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} /></Form.Item>
-                            <Form.Item label="直接 TLS" name="smtpSecure" valuePropName="checked" initialValue={comment.smtpSecure} extra="465 端口开启；587/STARTTLS 关闭"><Switch /></Form.Item>
+                            <Form.Item label="SMTP 端口" name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} placeholder="默认继承环境变量或 465" /></Form.Item>
+                            <Form.Item label="直接 TLS" name="smtpSecure" initialValue={comment.smtpSecure} extra="未设置时继承环境变量；465 开启直接 TLS，587/STARTTLS 关闭"><Select options={[{value: 'inherit', label: '继承环境变量（默认开启）'}, {value: true, label: '开启'}, {value: false, label: '关闭（STARTTLS）'}]} /></Form.Item>
                             <Form.Item label="SMTP 密码" name="smtpPass" extra="留空保留已保存的密码；输入新值可替换"><Input.Password autoComplete="new-password" /></Form.Item>
 
                             <Form.Item label="邮件标题模板" name="mailSubjectTemplate" initialValue={comment.mailSubjectTemplate}
@@ -391,6 +391,8 @@ function CommentForm(props: CommentProps) {
                                 setTesting(true); setTestResult(null);
                                 const values = legacy.formRef.current.getFieldsValue(true);
                                 const config = Object.fromEntries(SECTION_KEYS.mail.map(key => [key, values[key]]));
+                                if (config.smtpSecure === 'inherit') config.smtpSecure = null;
+                                if (!config.smtpPort) config.smtpPort = null;
                                 http.post<{message: string}>('/admin/api/options?type=testCommentMail', {config, recipient: testRecipient.trim()}, {timeout: 40000}).subscribe({
                                     next: result => {setTesting(false); setTestResult({ok: result.errno === 0, text: result.errno === 0 ? result.data.message : String(result.errmsg || '发送失败')});},
                                     error: () => {setTesting(false); setTestResult({ok: false, text: '请求失败或超时，请检查邮件服务和网络后重试'});},

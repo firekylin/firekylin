@@ -53,7 +53,7 @@ function renderNotificationMail(config, options, comment, parent, recipient, typ
   return {subject: render(subject).replace(/[\r\n]+/g, ' '), text: render(body)};
 }
 
-function notificationServices(config, options, env = process.env, mailer) {
+function notificationServices(config, options, env = process.env, mailer, resolveUser) {
   env = smtpSettings(config, options, env);
   const services = {};
   if (config.mailNotify) {
@@ -64,9 +64,21 @@ function notificationServices(config, options, env = process.env, mailer) {
           think.logger.error('Comment mail requires SMTP_HOST and SMTP_FROM');
           return;
         }
+        try {
+          const resolveAuthor = async value => {
+            if (!value || !value.user_id || !resolveUser) return value;
+            const user = await resolveUser(value.user_id);
+            return user && user.email ? {...value, mail: user.email, nick: user.display_name || user.name || value.nick} : value;
+          };
+          [comment, parent] = await Promise.all([resolveAuthor(comment), resolveAuthor(parent)]);
+        } catch {
+          think.logger.error('Comment notification author lookup failed');
+          return;
+        }
         const recipients = new Set();
         if (!approvedReply && env.AUTHOR_EMAIL) recipients.add(env.AUTHOR_EMAIL);
-        if (comment.status === 'approved' && parent && parent.mail && parent.mail !== comment.mail) {
+        if (comment.status === 'approved' && parent && parent.mail && parent.mail.toLowerCase() !== String(comment.mail || '').toLowerCase() &&
+          !(parent.user_id && comment.user_id && String(parent.user_id) === String(comment.user_id))) {
           recipients.add(parent.mail);
         }
         let url;
@@ -233,7 +245,8 @@ module.exports = class extends think.Service {
       logger: think.logger,
       services: {
         ...(captcha.enabled(captcha.settings(options), 'comment') ? {captcha: {verify: (token, ctx) => captcha.verify(captcha.settings(options), token, ctx.ip, 'comment')}} : {}),
-        ...notificationServices(config, options),
+        ...notificationServices(config, options, process.env, undefined,
+          id => controller.model('user').where({id}).field('email,name,display_name').find()),
         token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
@@ -321,7 +334,8 @@ module.exports = class extends think.Service {
   async notifyApprovedReply(controller, comment) {
     if (!comment.pid) return;
     const options = await controller.model('options').getOptions(true);
-    const notification = notificationServices(options.comment || {}, options).notification;
+    const notification = notificationServices(options.comment || {}, options, process.env, undefined,
+      id => controller.model('user').where({id}).field('email,name,display_name').find()).notification;
     if (!notification) return;
     const parent = await controller.model('comment').where({id: comment.pid}).find();
     if (!parent || !parent.id) return;

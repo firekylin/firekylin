@@ -101,3 +101,30 @@ test('custom templates render consistently for live and test messages without ev
   assert.equal(rendered.subject, 'first second');
   assert.throws(() => renderNotificationMail({mailBodyTemplate: 'x'.repeat(20001)}, {}, {}, null, '', ''), /20000/);
 });
+
+test('registered authors use account email for delivery and self-reply suppression', async() => {
+  const sent = [];
+  const accounts = {'1': {email: 'owner@example.com'}, '2': {email: 'reply@example.com'}};
+  const service = notificationServices({mailNotify: true, smtpHost: 'smtp.example.com', smtpFrom: 'sender@example.com'}, {site_url: 'https://example.com'}, {}, {
+    createTransport: () => ({sendMail: async mail => sent.push(mail)})
+  }, async id => accounts[id]).notification;
+  await service.send({url: '/post/test', status: 'approved', user_id: '2'}, {user_id: '1'}, true);
+  assert.deepEqual(sent.map(mail => mail.to), ['owner@example.com']);
+  sent.length = 0;
+  await service.send({url: '/post/test', status: 'approved', user_id: '1', mail: 'stale@example.com'}, {user_id: '1'}, true);
+  assert.equal(sent.length, 0);
+  await service.send({url: '/post/test', status: 'approved', user_id: '1'}, {mail: 'OWNER@example.com'}, true);
+  assert.equal(sent.length, 0);
+});
+
+test('unset SMTP port and TLS retain environment settings after a form save', () => {
+  let received;
+  const mailer = {createTransport: options => {received = options; return {};}};
+  const env = {SMTP_HOST: 'smtp.example.com', SMTP_PORT: '587', SMTP_SECURE: 'false'};
+  notificationServices({mailNotify: true, smtpPort: null, smtpSecure: null}, {}, env, mailer);
+  assert.equal(received.port, 587);
+  assert.equal(received.secure, false);
+  notificationServices({mailNotify: true, smtpPort: 465, smtpSecure: true}, {}, env, mailer);
+  assert.equal(received.port, 465);
+  assert.equal(received.secure, true);
+});
