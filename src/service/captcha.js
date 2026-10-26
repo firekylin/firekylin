@@ -5,10 +5,14 @@ function settings(options) {
   return {provider: 'none', siteKey: '', secret: '', areas: ['login', 'comment']};
 }
 function enabled(config, area) {
-  return ['turnstile', 'recaptcha-v3'].includes(config.provider) && Array.isArray(config.areas) && config.areas.includes(area);
+  return ['turnstile', 'recaptcha-v3'].includes(config.provider) &&
+    Array.isArray(config.areas) && config.areas.includes(area);
 }
 function publicSettings(config) {
-  const {provider = 'none', siteKey = '', areas = ['login', 'comment'], theme = 'auto', language = 'auto', hideSubmit = false} = config;
+  const {
+    provider = 'none', siteKey = '', areas = ['login', 'comment'],
+    theme = 'auto', language = 'auto', hideSubmit = false
+  } = config;
   return {provider, siteKey, areas, theme, language, hideSubmit};
 }
 async function verify(config, token, ip, area, env = process.env) {
@@ -25,7 +29,8 @@ async function verify(config, token, ip, area, env = process.env) {
     if (!response.ok) return false;
     const result = await response.json();
     return result.success === true && (config.provider !== 'recaptcha-v3' ||
-      (typeof result.score === 'number' && result.score >= 0.5 && result.action === (area === 'comment' ? 'social' : area)));
+      (typeof result.score === 'number' && result.score >= 0.5 &&
+        result.action === (area === 'comment' ? 'social' : area)));
   } catch { return false }
 }
 module.exports = {settings, enabled, publicSettings, verify};
