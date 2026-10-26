@@ -11,7 +11,7 @@ const permalink = require('./permalink');
 
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
-function smtpSettings(config, options, env = process.env, mailer) {
+function smtpSettings(config, options, env = process.env) {
   env = {
     ...env,
     SMTP_HOST: config.smtpHost || env.SMTP_HOST,
@@ -246,7 +246,8 @@ module.exports = class extends think.Service {
       services: {
         ...(captcha.enabled(captcha.settings(options), 'comment') ? {captcha: {verify: (token, ctx) => captcha.verify(captcha.settings(options), token, ctx.ip, 'comment')}} : {}),
         ...notificationServices(config, options, process.env, undefined,
-          id => controller.model('user').where({id}).field('email,name,display_name').find()),
+          id => controller.model('user').where({id}).field('email,name,display_name')
+            .find()),
         token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
@@ -335,7 +336,8 @@ module.exports = class extends think.Service {
     if (!comment.pid) return;
     const options = await controller.model('options').getOptions(true);
     const notification = notificationServices(options.comment || {}, options, process.env, undefined,
-      id => controller.model('user').where({id}).field('email,name,display_name').find()).notification;
+      id => controller.model('user').where({id}).field('email,name,display_name')
+        .find()).notification;
     if (!notification) return;
     const parent = await controller.model('comment').where({id: comment.pid}).find();
     if (!parent || !parent.id) return;
