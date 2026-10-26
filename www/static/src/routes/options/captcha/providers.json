@@ -23,7 +23,7 @@
     {"value": "none", "label": "不使用", "fields": []},
     {"value": "turnstile", "label": "Cloudflare Turnstile", "fields": ["siteKey", "secret", "language", "theme", "hideSubmit"]},
     {
-      "value": "recaptcha", "label": "Google reCAPTCHA v3", "fields": ["siteKey", "secret", "language"],
+      "value": "recaptcha-v3", "label": "Google reCAPTCHA v3", "fields": ["siteKey", "secret", "language"],
       "description": "reCAPTCHA v3 使用无交互评分，提交时自动验证，最低分数为 0.5，不支持主题与提交按钮显隐。"
     }
   ]

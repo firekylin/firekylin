@@ -24,7 +24,7 @@ test('captcha enforces selected areas and fails closed on missing keys or networ
       return {ok: true, json: async() => ({success: true})};
     };
     assert.equal(await verify(config, 'token', '', 'login'), true);
-    const recaptcha = {...config, provider: 'recaptcha'};
+    const recaptcha = {...config, provider: 'recaptcha-v3'};
     assert.equal(await verify(recaptcha, 'token', '', 'login'), false);
     global.fetch = async() => ({ok: true, json: async() => ({success: true, score: 0.9, action: 'social'})});
     assert.equal(await verify(recaptcha, 'token', '', 'login'), false);

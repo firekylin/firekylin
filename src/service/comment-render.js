@@ -53,7 +53,7 @@ module.exports = class extends think.Service {
     const config = {
       serverURL: `${controller.options.siteUrl}/api/comment`,
       turnstileKey: captchaEnabled && captchaConfig.provider === 'turnstile' ? captchaConfig.siteKey : '',
-      recaptchaV3Key: captchaEnabled && captchaConfig.provider === 'recaptcha' ? captchaConfig.siteKey : '',
+      recaptchaV3Key: captchaEnabled && captchaConfig.provider === 'recaptcha-v3' ? captchaConfig.siteKey : '',
       pageSize: Number(settings.pageSize) || 10,
       lang: settings.locale || 'zh-CN',
       login: settings.forceLogin ? 'force' : 'enable',

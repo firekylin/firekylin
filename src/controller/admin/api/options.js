@@ -74,7 +74,7 @@ module.exports = class extends Base {
       let config;
       try {
         config = typeof data.captcha === 'string' ? JSON.parse(data.captcha) : data.captcha;
-        if (!config || !['none', 'turnstile', 'recaptcha'].includes(config.provider) ||
+        if (!config || !['none', 'turnstile', 'recaptcha-v3'].includes(config.provider) ||
           !Array.isArray(config.areas) || config.areas.some(area => !['login', 'comment'].includes(area)) ||
           !['auto', 'light', 'dark'].includes(config.theme) ||
           typeof config.language !== 'string' || !/^[a-zA-Z-]{2,20}$/.test(config.language) ||

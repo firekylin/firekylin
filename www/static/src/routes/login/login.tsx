@@ -38,7 +38,7 @@ function LoginForm(props: LoginProps) {
         'expired-callback': () => setCaptchaPassed(false),
     } : {action: 'login'}, [captchaConfig]);
     const captchaScriptOptions = React.useMemo(() => {
-        if (captchaConfig?.provider !== 'recaptcha' || captchaConfig.language === 'auto' || !captchaConfig.language) return undefined;
+        if (captchaConfig?.provider !== 'recaptcha-v3' || captchaConfig.language === 'auto' || !captchaConfig.language) return undefined;
         const params = new URLSearchParams({render: captchaConfig.siteKey, hl: captchaConfig.language});
         return {overrideScriptUrl: `https://www.google.com/recaptcha/api.js?${params}`};
     }, [captchaConfig]);
@@ -112,7 +112,7 @@ function LoginForm(props: LoginProps) {
         if (captchaEnabled) {
             try {
                 if (!captchaController.current) throw new Error();
-                if (captchaConfig.provider === 'recaptcha') await captchaController.current.execute();
+                if (captchaConfig.provider === 'recaptcha-v3') await captchaController.current.execute();
                 values.captcha = captchaController.current.getResponse();
                 if (!values.captcha) throw new Error();
             } catch {message.error('请先完成验证码验证'); return;}
@@ -413,7 +413,7 @@ function LoginForm(props: LoginProps) {
                                 {captchaEnabled && <BetterCaptcha
                                     key={`${captchaConfig.provider}:${captchaConfig.siteKey}`}
                                     ref={captchaController}
-                                    provider={captchaConfig.provider === 'recaptcha' ? 'recaptcha-v3' : 'turnstile'}
+                                    provider={captchaConfig.provider}
                                     sitekey={captchaConfig.siteKey}
                                     options={captchaOptions}
                                     scriptOptions={captchaScriptOptions}
