@@ -10,7 +10,9 @@ class CommentStore {
             res => {
                 if (res.errno === 0) {
                     message.success('评论设置更新成功');
-                    window.SysConfig.options.comment = JSON.stringify(data);
+                    const publicSettings = {...data};
+                    delete publicSettings.smtpPass;
+                    window.SysConfig.options.comment = JSON.stringify(publicSettings);
                 }
             }
         );

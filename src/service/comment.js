@@ -11,6 +11,60 @@ const permalink = require('./permalink');
 
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
+function notificationServices(config, options, env = process.env, mailer) {
+  env = {
+    ...env,
+    SMTP_HOST: config.smtpHost || env.SMTP_HOST,
+    SMTP_PORT: config.smtpPort || env.SMTP_PORT,
+    SMTP_SECURE: typeof config.smtpSecure === 'boolean' ? String(config.smtpSecure) : env.SMTP_SECURE,
+    SMTP_USER: config.smtpUser || env.SMTP_USER,
+    SMTP_PASS: config.smtpPass || env.SMTP_PASS,
+    SMTP_FROM: config.smtpFrom || env.SMTP_FROM,
+    AUTHOR_EMAIL: config.authorEmail || env.AUTHOR_EMAIL
+  };
+  const services = {};
+  if (config.mailNotify) {
+    const transport = env.SMTP_HOST && (mailer || require('nodemailer')).createTransport({
+      host: env.SMTP_HOST,
+      port: Number(env.SMTP_PORT) || 465,
+      secure: env.SMTP_SECURE !== 'false',
+      auth: env.SMTP_USER ? {user: env.SMTP_USER, pass: env.SMTP_PASS} : undefined,
+      connectionTimeout: 10000, socketTimeout: 10000
+    });
+    services.notification = {
+      async send(comment, parent, approvedReply = false) {
+        if (!transport || !env.SMTP_FROM) {
+          think.logger.error('Comment mail requires SMTP_HOST and SMTP_FROM');
+          return;
+        }
+        const site = options.title || 'Firekylin';
+        const recipients = new Set();
+        if (!approvedReply && env.AUTHOR_EMAIL) recipients.add(env.AUTHOR_EMAIL);
+        if (comment.status === 'approved' && parent && parent.mail && parent.mail !== comment.mail) {
+          recipients.add(parent.mail);
+        }
+        let url;
+        try {
+          url = new URL(comment.url, options.site_url);
+          if (url.origin !== new URL(options.site_url).origin) return;
+        } catch { return }
+        for (const to of recipients) {
+          try {
+            await transport.sendMail({
+              from: env.SMTP_FROM, to,
+              subject: `[${site}] ${parent ? '评论有新回复' : '收到新评论'}`,
+              text: `${comment.nick || '访客'}：\n${comment.rawComment || comment.comment}\n\n${url.href}`
+            });
+          } catch {
+            think.logger.error('Comment notification delivery failed');
+          }
+        }
+      }
+    };
+  }
+  return services;
+}
+
 function signature(secret, value) {
   return crypto.createHmac('sha256', secret).update(value).digest('base64url');
 }
@@ -153,6 +207,7 @@ module.exports = class extends think.Service {
       logger: think.logger,
       services: {
         ...(captcha.enabled(captcha.settings(options), 'comment') ? {captcha: {verify: (token, ctx) => captcha.verify(captcha.settings(options), token, ctx.ip, 'comment')}} : {}),
+        ...notificationServices(config, options),
         token: tokenService,
         password: {
           hash: async value => controller.model('user').getEncryptPassword(think.md5(options.password_salt + value)),
@@ -237,6 +292,16 @@ module.exports = class extends think.Service {
     }
   }
 
+  async notifyApprovedReply(controller, comment) {
+    if (!comment.pid) return;
+    const options = await controller.model('options').getOptions(true);
+    const notification = notificationServices(options.comment || {}, options).notification;
+    if (!notification) return;
+    const parent = await controller.model('comment').where({id: comment.pid}).find();
+    if (!parent || !parent.id) return;
+    await notification.send({...comment, status: 'approved'}, parent, true);
+  }
+
   async syncCount(controller, target) {
     if (!target) return;
     let postId = Number(target.post_id || target.id || target);
@@ -258,3 +323,5 @@ module.exports = class extends think.Service {
 module.exports.renderMarkdown = renderMarkdown;
 module.exports.pathnameFromUrl = pathnameFromUrl;
 module.exports.resolveCommentPostId = resolveCommentPostId;
+
+module.exports.notificationServices = notificationServices;

@@ -5,13 +5,14 @@
  * No HTTP or session details are accepted here.
  */
 class CommentModerationService {
-  constructor({getModel, now, syncCount}) {
+  constructor({getModel, now, syncCount, notifyApprovedReply}) {
     if (typeof getModel !== 'function' || typeof now !== 'function' || typeof syncCount !== 'function') {
       throw new TypeError('Moderation dependencies are required');
     }
     this.getModel = getModel;
     this.now = now;
     this.syncCount = syncCount;
+    this.notifyApprovedReply = notifyApprovedReply;
   }
 
   async moderate({id, operation, comment, onlyWaiting = false, allowCommenter = false}, principal) {
@@ -39,6 +40,9 @@ class CommentModerationService {
       await model.update({status: operation, updated_at: this.now()});
     }
     await this.syncCount(existing.post_id);
+    if (existing.status === 'waiting' && operation === 'approved' && this.notifyApprovedReply) {
+      await this.notifyApprovedReply(existing);
+    }
     return {id, status: operation};
   }
 }

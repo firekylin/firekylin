@@ -64,6 +64,10 @@ function createCommentState() {
             disallowIPList: lines(comment.disallowIPList).join('\n'),
             likeIncMax: Number(comment.likeIncMax) || 1, levels: lines(comment.levels).join(', '),
             avatarProxy: comment.avatarProxy || '',
+            smtpHost: comment.smtpHost || '', smtpPort: comment.smtpPort || 465,
+            smtpSecure: comment.smtpSecure !== false, smtpUser: comment.smtpUser || '',
+            smtpFrom: comment.smtpFrom || '', authorEmail: comment.authorEmail || '',
+            mailNotify: Boolean(comment.mailNotify),
         },
     };
 }
@@ -94,6 +98,10 @@ function CommentForm(props: CommentProps) {
             const reactionImages = lines(values.reactionImages).slice(0, 6);
             const meta = values.meta || [];
             props.commentStore.commentSave({
+                smtpPass: values.smtpPass || '',
+                smtpHost: values.smtpHost, smtpPort: values.smtpPort, smtpSecure: values.smtpSecure,
+                smtpUser: values.smtpUser, smtpFrom: values.smtpFrom, authorEmail: values.authorEmail,
+                mailNotify: Boolean(values.mailNotify),
                 audit: Boolean(values.audit),
                 forceLogin: Boolean(values.forceLogin),
                 pageSize: values.pageSize,
@@ -330,6 +338,17 @@ function CommentForm(props: CommentProps) {
                             >
                                 <Switch />
                             </Form.Item>
+                            <Divider orientation="start">邮件通知</Divider>
+                            <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="新评论通知站长邮箱，已通过审核的回复通知被回复者">
+                                <Switch />
+                            </Form.Item>
+                            <Form.Item label="SMTP 服务器" name="smtpHost" initialValue={comment.smtpHost}><Input /></Form.Item>
+                            <Form.Item label="SMTP 用户名" name="smtpUser" initialValue={comment.smtpUser}><Input /></Form.Item>
+                            <Form.Item label="发件人邮箱" name="smtpFrom" initialValue={comment.smtpFrom}><Input /></Form.Item>
+                            <Form.Item label="站长收件邮箱" name="authorEmail" initialValue={comment.authorEmail}><Input /></Form.Item>
+                            <Form.Item label="SMTP 端口" name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} /></Form.Item>
+                            <Form.Item label="直接 TLS" name="smtpSecure" valuePropName="checked" initialValue={comment.smtpSecure} extra="465 端口开启；587/STARTTLS 关闭"><Switch /></Form.Item>
+                            <Form.Item label="SMTP 密码" name="smtpPass" extra="留空保留已保存的密码；输入新值可替换"><Input.Password autoComplete="new-password" /></Form.Item>
                             <Divider orientation="start">安全与用户</Divider>
                             <Form.Item
                                 label="敏感词"
