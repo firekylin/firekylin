@@ -124,7 +124,8 @@ module.exports = class extends Base {
           .filter(item => item.type === 'plugin' && item.name === name && item.version === version);
         if (entries.length !== 1) throw new Error('PLUGIN_NOT_IN_REGISTRY');
         const manifest = entries[0];
-        const check = this.catalog().check({...manifest, firekylin: {type: 'plugin'}, engines: manifest.engines || {}});
+        const check = this.catalog().check({...manifest,
+          firekylin: {...manifest.firekylin, type: 'plugin'}, engines: manifest.engines || {}});
         if (!check.compatible) throw new Error(check.reasons.join(', '));
         if (this.catalog().plugins().some(item => item.name === name)) throw new Error('PLUGIN_ALREADY_INSTALLED');
         return this.success(await this.pluginInstaller().install(name, version));
