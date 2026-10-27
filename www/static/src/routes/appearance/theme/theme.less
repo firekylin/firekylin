@@ -3,9 +3,15 @@
     .appearance-theme-wrapper {
         padding: 0 20px;
     }
-    .theme-title {
+    .theme-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
         margin: 20px 0;
     }
+    .theme-title { margin: 0; }
+    .theme-search { width: 200px; max-width: 100%; }
 }
 .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin: 20px 0; }
 .theme-card { border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden; }

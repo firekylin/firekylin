@@ -114,9 +114,11 @@ export function ThemeForm(props: ThemeProps) {
                         <Link to="/appearance/theme">返回主题管理</Link>
                         {legacy.renderThemeConfig() || <p>当前主题没有可配置的选项。</p>}
                     </> : <>
-                    <h3 className="theme-title">主题管理</h3>
-                    <Input.Search placeholder="搜索主题" value={state.search}
-                        onChange={event => legacy.setState({search: event.target.value})} />
+                    <div className="theme-header">
+                        <h3 className="theme-title">主题管理</h3>
+                        <Input.Search className="theme-search" placeholder="搜索主题" value={state.search}
+                            onChange={event => legacy.setState({search: event.target.value})} />
+                    </div>
                     <div className="theme-grid">
                         {filtered.map(theme => <div className="theme-card" key={theme.id}>
                             <div className="theme-preview">
