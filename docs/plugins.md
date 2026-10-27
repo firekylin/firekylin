@@ -650,8 +650,9 @@ installing without replacing an existing theme. GitHub update configuration is s
 
 ## GitHub repository connection
 
-Under **系统设置 → 扩展设置**, an administrator can connect a GitHub repository using its HTTPS URL and an
-access token. Firekylin checks the repository metadata and reported write access before saving the connection.
+Under **系统设置 → 扩展设置 → 网站管理方式**, an administrator can select local management or
+connect a GitHub repository using its HTTPS URL and an access token. Selecting local management and saving
+removes the stored GitHub connection. Firekylin checks the repository metadata and reported write access before saving the connection.
 The token is encrypted at rest and is never returned to the browser. Set `FIREKYLIN_EXTENSION_CREDENTIAL_KEY`
 to a stable secret of at least 16 characters, or the configured AI credential key or JWT secret will be used.
 Changing or losing that key requires reconnecting. Leaving the token blank keeps the existing token only when
