@@ -1,7 +1,7 @@
 const adminAuth = require('../../../service/admin-auth');
 const {parse} = require('url');
 const BaseRest = require('../rest');
-const {isLocalReferrer} = require('./referrer');
+const {isLocalReferrer, sameSiteHost} = require('./referrer');
 
 module.exports = class extends BaseRest {
   constructor(...args) {
@@ -43,14 +43,9 @@ module.exports = class extends BaseRest {
           return this.fail('REFERRER_ERROR');
         }
 
-        if (siteUrlHost.length < referrerHost.length) {
-          if (referrerHost.slice(-siteUrlHost.length) !== siteUrlHost) {
-            return this.fail('REFERRER_ERROR');
-          }
-        } else {
-          if (siteUrlHost.slice(-referrerHost.length) !== referrerHost) {
-            return this.fail('REFERRER_ERROR');
-          }
+        // 按 '.' 边界比较 host，避免 evil-example.com 通过 example.com 的校验。
+        if (!sameSiteHost(referrerHost, siteUrlHost)) {
+          return this.fail('REFERRER_ERROR');
         }
       }
     }

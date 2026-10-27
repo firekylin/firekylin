@@ -16,20 +16,39 @@ let msc = {
   ssl: process.env.FK_DB_SSL,
 };
 let type = process.env.FK_DB_MODE || 'mysql';
-try {
-  const context = getContext();
-  if (!context.legacy) {
-    type = context.config.database.type;
-    msc = context.config.database;
-  } else {
-    let dbConfig = require('../db'); // eslint-disable-line import/extensions
-    dbConfig = dbConfig.default || dbConfig;
-    if (!dbConfig.type) throw new Error();
-    type = dbConfig.type;
-    msc = dbConfig.adapter[type];
+
+/**
+ * 读取 legacy 项目里的 src/config/db.js。
+ * 返回 null 表示“没有本地 db.js 或它是空文件”（Docker entrypoint 会 touch 一个
+ * 空文件），此时回落到 FK_DB_* 环境变量；其余错误（语法错误、缺少 adapter）
+ * 必须抛出，不能被静默吞掉后降级成 mysql。
+ */
+function legacyDatabase() {
+  let dbConfig;
+  try {
+    // src/config/db.js 由安装流程生成、不进版本库，因此这里不带扩展名。
+    dbConfig = require('../db'); // eslint-disable-line import/extensions
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') return null;
+    throw error;
   }
-} catch (e) {
-  //eslint-disable-line
+  dbConfig = dbConfig && (dbConfig.default || dbConfig);
+  if (!dbConfig || !dbConfig.type) return null;
+  const adapterConfig = (dbConfig.adapter || {})[dbConfig.type];
+  if (!adapterConfig) throw new Error(`src/config/db.js 缺少 adapter.${dbConfig.type} 配置`);
+  return {type: dbConfig.type, config: adapterConfig};
+}
+
+const context = getContext();
+if (!context.legacy) {
+  type = context.config.database.type;
+  msc = context.config.database;
+} else {
+  const legacy = legacyDatabase();
+  if (legacy) {
+    type = legacy.type;
+    msc = legacy.config;
+  }
 }
 const mysqlEncoding = msc.encoding || 'utf8mb4';
 

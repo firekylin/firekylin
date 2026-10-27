@@ -114,8 +114,9 @@ module.exports = class extends Base {
       status: 3 // 已经发布
     };
     if (user_id) { where.user_id = user_id }
-    return this.order('id DESC')
-      .where(where)
+    // 只需要一个 order：think-model 的 order 会整体覆盖，之前连写两次时
+    // 前一条 'id DESC' 是死代码。
+    return this.where(where)
       .limit(nums)
       .setRelation(false)
       .order('create_time DESC')
@@ -223,8 +224,9 @@ module.exports = class extends Base {
 
     if (hasMoreTag || summary_length === 0) {
       summary = markdown_content.split('<!--more-->')[0];
+      // <!--more--> 之前的摘要按 HTML 输出（主题用 <%~ %> 渲染），
+      // 这里不做标签剥离，与下面按字数截断的分支保持各自的语义。
       summary = await this.markdownToHtml(summary, { toc: false, highlight: true });
-      summary.replace(/<[>]*>/g, '');
     } else {
       summary = await this.markdownToHtml(markdown_content, { toc: false, highlight: true });
       // 过滤掉 HTML 标签 及换行等 并截取所需的长度

@@ -2,7 +2,9 @@ module.exports = class extends think.Controller {
   constructor(...args) {
     super(...args);
 
-    this.model = {
+    // 注意不能命名为 this.model：那会覆盖 think.Controller 注入的
+    // this.model(name) 工厂方法，之后任何 this.model('x') 都会报错。
+    this.modelInstances = {
       option: this.model('options'),
       user: this.model('user'),
       post: this.model('post')
@@ -14,7 +16,7 @@ module.exports = class extends think.Controller {
       option: optionModel,
       post: postModel,
       user: userModel
-    } = this.model;
+    } = this.modelInstances;
     const feedParser = this.service('feed', {
       normalize: true,
       addmeta: false

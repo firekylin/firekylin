@@ -28,7 +28,8 @@ module.exports = class extends Base {
   generateKey(userId, app_key, app_secret, status) {
     const data = { app_key, app_secret };
     if (status) { data.status = status }
-    this.where({ id: userId }).update(data);
+    // 必须把更新结果返回给调用方，否则控制器拿不到受影响行数。
+    return this.where({ id: userId }).update(data);
   }
 
   /**
@@ -83,7 +84,7 @@ module.exports = class extends Base {
   async saveUser(data, ip) {
     const info = await this.where({ id: data.id }).find();
     if (think.isEmpty(info)) {
-      return Promise.reject(new Error('UESR_NOT_EXIST'));
+      return Promise.reject(new Error('USER_NOT_EXIST'));
     }
     let password = data.password;
     if (password) {

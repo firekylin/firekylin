@@ -61,7 +61,8 @@ module.exports = class extends Base {
         console.log(e); // eslint-disable-line no-console
       }
     });
-    Promise.all(postsPromise);
+    // 必须 await：否则导入接口会在数据真正落库前就返回“导入 N 篇”。
+    await Promise.all(postsPromise);
 
     return posts.length;
   }

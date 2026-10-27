@@ -52,6 +52,7 @@ function PushCreateForm(props: PushProps) {
     legacy.afterUpdate = function afterUpdate(prevProps: any) {
         if (prevProps.match.params.id !== props.match.params.id) {
             legacy.id = props.match.params.id;
+            legacy.formTouched = false;
             if (legacy.id) {
                 legacy.pushStore.getPushInfo(legacy.id);
             } else {
@@ -59,13 +60,18 @@ function PushCreateForm(props: PushProps) {
             }
             return;
         }
+        const form = legacy.formRef.current;
+        // 只在用户还没开始编辑时回填，否则每次重渲染都会用 store 里的旧值
+        // 覆盖用户已经在输入框里写的内容。
+        if (!form || legacy.formTouched) return;
         const { pushInfo } = legacy.pushStore.pushCreateParam;
-        legacy.formRef.current?.setFieldsValue({
+        form.setFieldsValue({
             title: pushInfo.title,
             url: pushInfo.url,
             appKey: pushInfo.appKey,
             appSecret: pushInfo.appSecret,
         });
+        legacy.formTouched = true;
     };
     legacy.render = function render() {
         const formItemLayout = {
@@ -86,14 +92,11 @@ function PushCreateForm(props: PushProps) {
                 },
             },
         };
-        let props = {};
-        if (legacy.pushStore.pushCreateParam.submitting) {
-            props.disabled = true;
-        }
+        const submitting = legacy.pushStore.pushCreateParam.submitting;
 
         return (
             <div className="fk-content-wrap">
-                <BreadCrumb {...props} />
+                <BreadCrumb />
                 <div className="manage-container">
                     <Form
                         ref={legacy.formRef}
@@ -164,10 +167,8 @@ function PushCreateForm(props: PushProps) {
                             <Input placeholder="请填写推送秘钥" />
                         </Form.Item>
                         <Form.Item {...tailFormItemLayout}>
-                            <button type="submit" {...props} className="btn btn-primary">
-                                {legacy.pushStore.pushCreateParam.submitting
-                                    ? '提交中...'
-                                    : '提交'}
+                            <button type="submit" disabled={submitting} className="btn btn-primary">
+                                {submitting ? '提交中...' : '提交'}
                             </button>
                         </Form.Item>
                     </Form>

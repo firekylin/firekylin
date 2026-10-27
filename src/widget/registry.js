@@ -27,6 +27,22 @@ function validateParams(params) {
   }
 }
 
+const CACHE_KEY_SEPARATOR = '\u0000';
+
+/**
+ * 生成一次请求内的实例缓存键。
+ * 只按 Widget 名字缓存会让同名但参数不同的调用复用同一个实例，
+ * 因此键里必须带上规范化后的参数；参数无法稳定序列化时返回 null（不缓存）。
+ */
+function cacheKeyFor(fullName, params) {
+  const keys = Object.keys(params).sort();
+  try {
+    return fullName + CACHE_KEY_SEPARATOR + JSON.stringify(keys.map(key => [key, params[key]]));
+  } catch (error) {
+    return null;
+  }
+}
+
 function registrationError(name, source, existing) {
   return new Error(
     `Widget "${name}" from ${source} is already registered by ${existing.source}; ` +
@@ -253,16 +269,20 @@ class WidgetFactory {
 
   async widget(name, params = {}) {
     let parsed;
+    let cacheKey;
     try {
       parsed = splitName(name);
       validateParams(params);
+      cacheKey = cacheKeyFor(parsed.fullName, params);
     } catch (error) {
       throw new Error(`Unable to create widget "${String(name)}": ${error.message}`, {cause: error});
     }
     const registration = registrationFor(parsed.className, this.themeLayer);
     if (!registration) throw new Error(`Widget "${parsed.className}" is not registered`);
 
-    const cacheKey = parsed.fullName;
+    // 参数无法稳定序列化时退化为不缓存，避免不同参数拿到同一个实例。
+    if (!cacheKey) return this.create(parsed.fullName, registration.WidgetClass, params);
+
     if (!this.pool.has(cacheKey)) {
       const promise = this.create(parsed.fullName, registration.WidgetClass, params)
         .catch((error) => {
@@ -279,7 +299,11 @@ class WidgetFactory {
       this.pool.clear();
       return;
     }
-    this.pool.delete(splitName(name).fullName);
+    const {fullName} = splitName(name);
+    this.pool.delete(fullName);
+    for (const key of this.pool.keys()) {
+      if (key.startsWith(fullName + CACHE_KEY_SEPARATOR)) this.pool.delete(key);
+    }
   }
 
   async create(name, WidgetClass, params) {

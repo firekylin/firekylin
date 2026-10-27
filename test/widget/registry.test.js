@@ -47,7 +47,7 @@ test('registry idempotently ensures widgets from the same source', () => {
   );
 });
 
-test('factory awaits lifecycle and caches by request and complete widget name', async() => {
+test('factory awaits lifecycle and caches per request, widget name and parameters', async() => {
   const name = uniqueName();
   const calls = [];
   class Example extends Widget {
@@ -61,18 +61,42 @@ test('factory awaits lifecycle and caches by request and complete widget name', 
   const controller = {ctx: {}, model() {}};
   const firstFactory = new WidgetFactory(controller);
 
-  const first = await firstFactory.widget(name, {value: 1});
-  const cached = await firstFactory.widget(name, {value: 1});
-  const differentParams = await firstFactory.widget(name, {value: 2});
-  const alias = await firstFactory.widget(`${name}@sidebar`, {value: 1});
-  const otherRequest = await new WidgetFactory(controller).widget(name, {value: 1});
+  const first = await firstFactory.widget(name, {value: 1, type: 'a'});
+  const cached = await firstFactory.widget(name, {value: 1, type: 'a'});
+  // 参数对象的键顺序不影响缓存键。
+  const sameParamsDifferentOrder = await firstFactory.widget(name, {type: 'a', value: 1});
+  const differentParams = await firstFactory.widget(name, {value: 2, type: 'a'});
+  const alias = await firstFactory.widget(`${name}@sidebar`, {value: 1, type: 'a'});
+  const otherRequest = await new WidgetFactory(controller).widget(name, {value: 1, type: 'a'});
 
   assert.equal(first, cached);
-  assert.equal(first, differentParams);
-  assert.equal(differentParams.value, 1);
+  assert.equal(first, sameParamsDifferentOrder);
+  // 参数不同的调用必须是不同实例，否则第二个调用会读到第一个调用的数据。
+  assert.notEqual(first, differentParams);
+  assert.equal(first.value, 1);
+  assert.equal(differentParams.value, 2);
   assert.notEqual(first, alias);
   assert.notEqual(first, otherRequest);
-  assert.deepEqual(calls, ['init', 'execute', 'init', 'execute', 'init', 'execute']);
+  assert.deepEqual(calls, ['init', 'execute', 'init', 'execute', 'init', 'execute', 'init', 'execute']);
+});
+
+test('factory keys cached parameters independently', async() => {
+  const name = uniqueName();
+  class Example extends Widget {
+    async execute() { this.push({value: this.parameter.value}) }
+  }
+  registerWidget(name, Example);
+  const factory = new WidgetFactory({ctx: {}, model() {}});
+
+  const one = await factory.widget(name, {value: 1});
+  const two = await factory.widget(name, {value: 2});
+  const nested = await factory.widget(name, {value: 1, extra: {a: 2}});
+
+  assert.equal(one.value, 1);
+  assert.equal(two.value, 2);
+  assert.notEqual(one, two);
+  assert.notEqual(one, nested);
+  assert.equal(factory.pool.size, 3);
 });
 
 test('factory aliases and destroy create fresh widget instances', async() => {

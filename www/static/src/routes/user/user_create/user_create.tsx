@@ -95,6 +95,7 @@ export function UserCreateForm(props: UserCreateProps) {
     legacy.afterUpdate = function afterUpdate(prevProps: any) {
         if (prevProps.match.params.id !== props.match.params.id) {
             legacy.id = props.match.params.id;
+            legacy.formTouched = false;
             if (legacy.id) {
                 legacy.userStore.getUserInfo(legacy.id);
             } else {
@@ -102,14 +103,19 @@ export function UserCreateForm(props: UserCreateProps) {
             }
             return;
         }
+        const form = legacy.formRef.current;
+        // 只在用户还没开始编辑时回填，否则每次重渲染都会用 store 里的旧值
+        // 覆盖用户已经在输入框里写的内容。
+        if (!form || legacy.formTouched) return;
         const { userInfo } = props.userStore;
-        legacy.formRef.current?.setFieldsValue({
+        form.setFieldsValue({
             username: userInfo.name,
             email: userInfo.email,
             display_name: userInfo.display_name,
             type: userInfo.type ? userInfo.type.toString() : '',
             status: userInfo.status ? userInfo.status.toString() : '',
         });
+        legacy.formTouched = true;
     };
     legacy.generateKey = function generateKey() {
         if (legacy.id) {

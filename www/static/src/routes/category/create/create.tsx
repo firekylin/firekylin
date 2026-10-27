@@ -48,6 +48,7 @@ function CategoryCreate(props: CategoryCreateProps) {
         prevProps: CategoryCreateProps,
     ) {
         if (prevProps.match.params.id !== props.match.params.id) {
+            legacy.formTouched = false;
             props.categoryStore.getRootCategory();
             if (props.match.params.id) {
                 props.categoryStore.getCategoryInfoById(props.match.params.id);
@@ -56,13 +57,18 @@ function CategoryCreate(props: CategoryCreateProps) {
             }
             return;
         }
+        const form = legacy.formRef.current;
+        // 只在用户还没开始编辑时回填，否则每次重渲染都会用 store 里的旧值
+        // 覆盖用户已经在输入框里写的内容。
+        if (!form || legacy.formTouched) return;
         const { categoryInfo } = props.categoryStore;
-        legacy.formRef.current?.setFieldsValue({
+        form.setFieldsValue({
             name: categoryInfo.name,
             pathname: categoryInfo.pathname,
             description: categoryInfo.description,
             pid: categoryInfo.pid,
         });
+        legacy.formTouched = true;
     };
     legacy.setCategoryEmpty = function setCategoryEmpty() {
         props.categoryStore.setCurrentCatInfo({

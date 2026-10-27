@@ -36,7 +36,8 @@ module.exports = class extends Base {
   }
 
   async deleteCate(cate_id) {
-    this.model('post_cate').where({cate_id}).delete();
+    // 关联表删除必须等主表删除之前完成，否则会和主表删除产生竞态。
+    await this.model('post_cate').where({cate_id}).delete();
     return this.where({id: cate_id}).delete();
   }
   /**

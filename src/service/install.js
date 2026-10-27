@@ -50,6 +50,26 @@ module.exports = class extends think.Service {
     }
   }
 
+  /**
+   * 重置 SQL 种子里的示例值。
+   * 敏感项（会话密钥、凭据）必须保留，否则重跑安装会让所有登录态失效。
+   */
+  async resetSeededOptions(optionsModel) {
+    const protectedKeys = new Set(['jwt_secret', 'comment_jwt_secret', 'ai_credentials']);
+    const credentialPrefix = require('../ai/store').CREDENTIAL_PREFIX || '';
+    const isProtected = key => protectedKeys.has(key) ||
+      (credentialPrefix && key.startsWith(credentialPrefix));
+
+    const rows = await optionsModel.select();
+    const resetValues = {};
+    for (const row of rows) {
+      if (isProtected(row.key)) continue;
+      resetValues[row.key] = '';
+    }
+    if (!Object.keys(resetValues).length) return;
+    await optionsModel.updateOptions(resetValues);
+  }
+
   getModel(name) {
     let dbConfig;
     if (name === true) {
@@ -188,7 +208,10 @@ module.exports = class extends think.Service {
     }
 
     const optionsModel = this.getModel('options');
-    await optionsModel.where('1=1').update({value: ''});
+    // 清空 SQL 种子里的示例值（关键词、备案号等），但绝不能连会话密钥和
+    // 已保存的凭据一起清掉：在已初始化的站点上重跑安装会因此把所有登录态
+    // 与 AI / 上传凭据一起废掉。
+    await this.resetSeededOptions(optionsModel);
     const salt = think.uuid(10) + '!@#$%^&*';
     this.password_salt = salt;
 
