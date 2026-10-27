@@ -3,7 +3,7 @@
 const pack = require('../../../../package.json');
 const Base = require('./base');
 const adminAuth = require('../../../service/admin-auth');
-const {PackageCatalog} = require('../../../service/package-catalog');
+const {PackageCatalog, installedPluginId} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
 const {PluginInstaller} = require('../../../service/plugin-installer');
 const path = require('path');
@@ -101,9 +101,7 @@ module.exports = class extends Base {
         if (process.env.VERCEL) throw new Error('PACKAGE_INSTALLATION_READ_ONLY');
         const manager = global.firekylin.plugins;
         const id = this.post('id');
-        const matches = manager.discover().filter(root => {
-          try { return readManifest(root).id === id } catch { return false }
-        });
+        const matches = manager.discover().filter(root => installedPluginId(root) === id);
         if (matches.length !== 1) throw new Error('PLUGIN_NOT_FOUND_OR_DUPLICATE');
         const root = matches[0];
         const base = await fs.realpath(manager.pluginRoot());
@@ -112,6 +110,8 @@ module.exports = class extends Base {
         if (record?.status === 'active') throw new Error('PLUGIN_MUST_BE_DISABLED');
         await manager.stateStore.set(id, false);
         await fs.rm(root, {recursive: true});
+        if (record?.root === root) manager.plugins.delete(id);
+        manager.states?.delete(id);
         return this.success({restartRequired: false});
       }
       if (operation === 'plugin.install') {

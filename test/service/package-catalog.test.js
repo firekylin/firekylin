@@ -14,8 +14,10 @@ test('lists safe installed plugin and theme metadata', t => {
   fs.writeFileSync(path.join(themesPath, 'paper/package.json'), JSON.stringify({
     name: 'Paper', version: '1.2.0', description: 'A theme', secret: 'hidden'
   }));
+  const pluginRoot = path.join(themesPath, 'node_modules', '@firekylin', 'plugin-demo');
+  fs.mkdirSync(pluginRoot, {recursive: true});
   const pluginManager = {plugins: new Map([['demo', {
-    root: '/app/node_modules/@firekylin/plugin-demo', status: 'active',
+    root: pluginRoot, status: 'active',
     manifest: {id: 'demo', name: '@firekylin/plugin-demo', version: '2.0.0', permissions: ['content:read']}
   }]])};
   const catalog = new PackageCatalog({pluginManager, themesPath, firekylinVersion: '2.10.6', nodeVersion: '22.14.0'});
@@ -92,4 +94,19 @@ test('reads author names and URLs from npm person strings and objects', t => {
   assert.deepEqual(catalog.plugins().map(({author, authorUrl}) => ({author, authorUrl})), [
     {author: 'Alice', authorUrl: 'https://example.org/alice'}, {author: 'Bob', authorUrl: 'https://example.org/bob'}
   ]);
+});
+
+test('local plugins without a type remain compatible and deleted cached roots disappear', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-no-type-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({name: 'demo', version: '1.0.0',
+    firekylin: {id: 'demo', entry: 'plugin.js'}}));
+  fs.writeFileSync(path.join(root, 'plugin.js'), 'module.exports = {}');
+  const manager = {plugins: new Map(), states: new Map([['demo', {enabled: false}]]), discover: () => [root]};
+  const catalog = new PackageCatalog({pluginManager: manager, firekylinVersion: '2.16.0'});
+  assert.deepEqual(catalog.plugins()[0].reasons, []);
+  manager.plugins.set('demo', {root, status: 'error', manifest: {name: 'demo'}});
+  manager.discover = () => [];
+  fs.rmSync(root, {recursive: true});
+  assert.deepEqual(catalog.plugins(), []);
 });

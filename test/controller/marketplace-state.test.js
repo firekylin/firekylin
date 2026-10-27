@@ -92,3 +92,25 @@ test('preserves ThinkJS response control flow after successful state changes', a
   await assert.rejects(controller.mutate('plugin.disable'), {message: 'PREVENT_NEXT_PROCESS'});
   assert.deepEqual(states, [['demo', false]]);
 });
+
+test('deletes a malformed local plugin and clears its cached record', async t => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-invalid-'));
+  t.after(() => fs.rmSync(base, {recursive: true, force: true}));
+  const root = path.join(fs.realpathSync(base), 'broken');
+  fs.mkdirSync(root);
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({name: 'broken', version: 'invalid'}));
+  const previous = global.firekylin;
+  t.after(() => { global.firekylin = previous });
+  const manager = {discover: () => fs.existsSync(root) ? [root] : [], pluginRoot: () => base,
+    plugins: new Map([['broken', {root, status: 'error'}]]), states: new Map([['broken', {}]]),
+    stateStore: {set: async() => {}}};
+  global.firekylin = {plugins: manager};
+  const controller = new Controller();
+  controller.post = key => key === 'id' ? 'broken' : undefined;
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  assert.equal((await controller.mutate('plugin.delete-local')).errno, 0);
+  assert.equal(fs.existsSync(root), false);
+  assert.equal(manager.plugins.has('broken'), false);
+  assert.equal(manager.states.has('broken'), false);
+});

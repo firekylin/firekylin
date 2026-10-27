@@ -40,6 +40,10 @@ function pluginMetadata(root, manifest, status = 'error') {
   };
 }
 
+function installedPluginId(root) {
+  return pluginMetadata(root, readJson(path.join(root, 'package.json'))).id;
+}
+
 function compatibility(manifest, runtime) {
   if (!manifest || typeof manifest !== 'object') return {compatible: false, reasons: ['INVALID_MANIFEST']};
   const engines = manifest.engines || {};
@@ -71,13 +75,14 @@ class PackageCatalog {
     } catch (error) {
       this.pluginManager.logger?.error?.(`[marketplace] Unable to discover installed plugins: ${error.message}`);
     }
-    return [...new Set([...roots, ...records.keys()])].map(root => {
+    return [...new Set([...roots, ...[...records.keys()].filter(root => fs.existsSync(root))])].map(root => {
       const record = records.get(root);
       const manifest = record ? record.manifest : readJson(path.join(root, 'package.json'));
       const state = this.pluginManager.states?.get(manifestId(manifest));
       const inactive = state?.enabled === false || (this.pluginManager.stateStore && !state);
       const item = pluginMetadata(root, manifest, record ? record.status : inactive ? 'inactive' : 'error');
-      const result = compatibility(manifest, this.runtime);
+      const result = compatibility(manifest && {...manifest,
+        firekylin: {...manifest.firekylin, type: 'plugin'}}, this.runtime);
       item.reasons = result.reasons;
       try {
         const validated = readManifest(root);
@@ -128,4 +133,4 @@ class PackageCatalog {
   }
 }
 
-module.exports = {PackageCatalog, compatibility};
+module.exports = {PackageCatalog, compatibility, installedPluginId};

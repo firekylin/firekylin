@@ -81,7 +81,11 @@ const pluginManager = existingPluginManager || new PluginManager({
   version: pack.version,
   logger: console,
   packageApi,
-  stateStore: new PluginStateStore(think.model('options')),
+  stateStore: new PluginStateStore({
+    ensureOption: (key, value) => think.model('options').ensureOption(key, value),
+    getCredentialValue: key => think.model('options').getCredentialValue(key),
+    setCredentialValue: (key, value) => think.model('options').setCredentialValue(key, value)
+  }),
   aiAudit: new Audit({model: () => think.model('ai_audit_log')}),
   aiStore: new AIStore({
     getOptions: includePrivate => think.model('options').getOptions(includePrivate),
