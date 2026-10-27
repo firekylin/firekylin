@@ -1,6 +1,7 @@
 'use strict';
 
-const DEFAULT_REGISTRY = 'https://raw.githubusercontent.com/firekylin/plugins/main/registry.json';
+const DEFAULT_PLUGIN_REGISTRY = 'https://raw.githubusercontent.com/firekylin/plugins/main/registry.json';
+const DEFAULT_THEME_REGISTRY = 'https://raw.githubusercontent.com/firekylin/themes/main/registry.json';
 const SETTINGS_KEY = 'extension_registry_settings';
 const MAX_BYTES = 1024 * 1024;
 
@@ -10,7 +11,7 @@ function trustedUrl(value) {
   if (url.protocol !== 'https:' || url.username || url.password || url.port || url.hash ||
       /%2f|%5c/i.test(url.pathname) ||
       !['raw.githubusercontent.com', 'firekylin.lithub.cc'].includes(url.hostname) ||
-      (url.hostname === 'raw.githubusercontent.com' && !url.pathname.startsWith('/firekylin/plugins/')) ||
+      (url.hostname === 'raw.githubusercontent.com' && !/^\/firekylin\/(plugins|themes)\//.test(url.pathname)) ||
       (url.hostname === 'firekylin.lithub.cc' && url.pathname !== '/plugins' &&
         !url.pathname.startsWith('/plugins/'))) {
     throw new Error('UNTRUSTED_REGISTRY_URL');
@@ -20,8 +21,8 @@ function trustedUrl(value) {
 
 function normalizeSettings(value = {}) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('INVALID_EXTENSION_SETTINGS');
-  const pluginRegistry = value.pluginRegistry || DEFAULT_REGISTRY;
-  const themeRegistry = value.themeRegistry || DEFAULT_REGISTRY;
+  const pluginRegistry = value.pluginRegistry || DEFAULT_PLUGIN_REGISTRY;
+  const themeRegistry = value.themeRegistry || DEFAULT_THEME_REGISTRY;
   if (typeof pluginRegistry !== 'string' || typeof themeRegistry !== 'string') throw new Error('INVALID_REGISTRY_URL');
   return {pluginRegistry: trustedUrl(pluginRegistry).href, themeRegistry: trustedUrl(themeRegistry).href};
 }
@@ -72,5 +73,6 @@ async function fetchRegistry(url, {fetcher = fetch, signal = AbortSignal.timeout
 }
 
 module.exports = {
-  DEFAULT_REGISTRY, SETTINGS_KEY, MAX_BYTES, trustedUrl, normalizeSettings, readSettings, fetchRegistry
+  DEFAULT_PLUGIN_REGISTRY, DEFAULT_THEME_REGISTRY, SETTINGS_KEY, MAX_BYTES,
+  trustedUrl, normalizeSettings, readSettings, fetchRegistry
 };

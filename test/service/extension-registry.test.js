@@ -9,6 +9,7 @@ function response(body, options = {}) {
 test('accepts only trusted HTTPS registry locations and rejects unsafe redirects', async() => {
   for (const url of ['http://firekylin.lithub.cc/plugins/r', 'https://127.0.0.1/r',
     'https://raw.githubusercontent.com/other/repo/main/registry.json',
+    'https://raw.githubusercontent.com/firekylin/themes-other/main/registry.json',
     'https://user@firekylin.lithub.cc/plugins/r', 'https://firekylin.lithub.cc:444/plugins/r',
     'https://firekylin.lithub.cc/plugins-other', 'https://firekylin.lithub.cc/plugins/../private',
     'https://firekylin.lithub.cc/plugins/%2fprivate', 'https://plugins.firekylin.com/r']) {
@@ -44,4 +45,14 @@ test('keeps plugin and theme URLs independently configurable', () => {
   assert.equal(value.pluginRegistry, 'https://firekylin.lithub.cc/plugins/p');
   assert.equal(value.themeRegistry, 'https://firekylin.lithub.cc/plugins/t');
   assert.deepEqual(readSettings({extension_registry_settings: JSON.stringify(value)}), value);
+});
+
+
+test('uses separate default plugin and theme registries and preserves saved settings', () => {
+  const plugin = 'https://raw.githubusercontent.com/firekylin/plugins/main/registry.json';
+  const theme = 'https://raw.githubusercontent.com/firekylin/themes/main/registry.json';
+  assert.deepEqual(readSettings({}), {pluginRegistry: plugin, themeRegistry: theme});
+  assert.deepEqual(normalizeSettings({pluginRegistry: 'https://firekylin.lithub.cc/plugins/custom'}),
+    {pluginRegistry: 'https://firekylin.lithub.cc/plugins/custom', themeRegistry: theme});
+  assert.equal(trustedUrl(theme).href, theme);
 });

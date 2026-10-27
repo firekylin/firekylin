@@ -633,9 +633,11 @@ The list shows runtime compatibility problems and links to an active plugin's se
 
 The administrator can configure separate plugin and theme Registry URLs under **系统设置 → 扩展设置**.
 Registry documents use schema version 1 and a `packages` array. Registry fetching permits HTTPS URLs on
-`firekylin.lithub.cc/plugins` and `raw.githubusercontent.com/firekylin/plugins/` only, including redirects;
-responses are limited to 1 MiB and a 10-second timeout. The default URL points to
-`https://raw.githubusercontent.com/firekylin/plugins/main/registry.json`, which must exist before the
+`firekylin.lithub.cc/plugins`, `raw.githubusercontent.com/firekylin/plugins/` and
+`raw.githubusercontent.com/firekylin/themes/` only, including redirects;
+responses are limited to 1 MiB and a 10-second timeout. The default plugin and theme URLs are respectively
+`https://raw.githubusercontent.com/firekylin/plugins/main/registry.json` and
+`https://raw.githubusercontent.com/firekylin/themes/main/registry.json`. Each file must exist before its
 default registry can be read. Under **插件管理 → 安装插件**, administrators can browse and install plugins
 from the configured Registry. Installation rechecks the selected package and version against the current Registry
 and compatibility before running the local package manager. Only official `firekylin-plugin-*` and
