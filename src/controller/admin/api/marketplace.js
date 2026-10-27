@@ -5,7 +5,8 @@ const Base = require('./base');
 const adminAuth = require('../../../service/admin-auth');
 const {PackageCatalog, installedPluginId} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
-const {PluginInstaller} = require('../../../service/plugin-installer');
+const {PluginInstaller, validatePackage} = require('../../../service/plugin-installer');
+const {readSettings, fetchRegistry} = require('../../../service/extension-registry');
 const path = require('path');
 const fs = require('fs/promises');
 const cluster = require('cluster');
@@ -113,6 +114,21 @@ module.exports = class extends Base {
         if (record?.root === root) manager.plugins.delete(id);
         manager.states?.delete(id);
         return this.success({restartRequired: false});
+      }
+      if (operation === 'plugin.install-registry') {
+        const name = this.post('name');
+        const version = this.post('version');
+        validatePackage(name, version);
+        const settings = readSettings(await this.model('options').getOptions(true));
+        const entries = (await fetchRegistry(settings.pluginRegistry))
+          .filter(item => item.type === 'plugin' && item.name === name && item.version === version);
+        if (entries.length !== 1) throw new Error('PLUGIN_NOT_IN_REGISTRY');
+        const manifest = entries[0];
+        const check = this.catalog().check({...manifest,
+          firekylin: {...manifest.firekylin, type: 'plugin'}, engines: manifest.engines || {}});
+        if (!check.compatible) throw new Error(check.reasons.join(', '));
+        if (this.catalog().plugins().some(item => item.name === name)) throw new Error('PLUGIN_ALREADY_INSTALLED');
+        return this.success(await this.pluginInstaller().install(name, version));
       }
       if (operation === 'plugin.install') {
         return this.success(await this.pluginInstaller().install(this.post('name'), this.post('version')));

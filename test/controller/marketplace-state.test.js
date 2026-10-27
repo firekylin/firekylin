@@ -114,3 +114,52 @@ test('deletes a malformed local plugin and clears its cached record', async t =>
   assert.equal(manager.plugins.has('broken'), false);
   assert.equal(manager.states.has('broken'), false);
 });
+
+test('marketplace installation rechecks registry, compatibility and installed packages', async t => {
+  const previous = global.fetch;
+  t.after(() => { global.fetch = previous });
+  const controller = new Controller();
+  const item = {type: 'plugin', name: 'firekylin-plugin-demo', version: '1.0.0', engines: {firekylin: '>=2'}};
+  const registry = entries => { global.fetch = async() => new Response(JSON.stringify({schemaVersion: 1, packages: entries})) };
+  registry([item]);
+  controller.post = key => ({name: item.name, version: item.version})[key];
+  controller.model = () => ({getOptions: async() => ({})});
+  controller.catalog = () => ({check: () => ({compatible: true}), plugins: () => []});
+  const calls = [];
+  controller.pluginInstaller = () => ({install: async(...args) => { calls.push(args); return {restartRequired: true} }});
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  assert.equal((await controller.mutate('plugin.install-registry')).errno, 0);
+  assert.deepEqual(calls, [[item.name, item.version]]);
+  registry([]);
+  assert.equal((await controller.mutate('plugin.install-registry')).message, 'PLUGIN_NOT_IN_REGISTRY');
+  registry([item, item]);
+  assert.equal((await controller.mutate('plugin.install-registry')).message, 'PLUGIN_NOT_IN_REGISTRY');
+  registry([item]);
+  controller.catalog = () => ({check: () => ({compatible: false, reasons: ['NODE_VERSION']})});
+  assert.equal((await controller.mutate('plugin.install-registry')).message, 'NODE_VERSION');
+  controller.catalog = () => ({check: () => ({compatible: true}), plugins: () => [{name: item.name}]});
+  assert.equal((await controller.mutate('plugin.install-registry')).message, 'PLUGIN_ALREADY_INSTALLED');
+  assert.equal(calls.length, 1);
+});
+
+test('registry installation preserves firekylin.engine compatibility requirements', async t => {
+  const previous = global.fetch;
+  t.after(() => { global.fetch = previous });
+  const {compatibility} = require('../../src/service/package-catalog');
+  global.fetch = async() => new Response(JSON.stringify({schemaVersion: 1, packages: [{
+    type: 'plugin', name: 'firekylin-plugin-demo', version: '1.0.0',
+    firekylin: {engine: '>=99.0.0'}, engines: {firekylin: '>=1.0.0'}
+  }]}));
+  const controller = new Controller();
+  controller.post = key => ({name: 'firekylin-plugin-demo', version: '1.0.0'})[key];
+  controller.model = () => ({getOptions: async() => ({})});
+  controller.catalog = () => ({check: manifest => compatibility(manifest, {firekylin: '2.16.0', node: '22.0.0'}),
+    plugins: () => []});
+  let installed = false;
+  controller.pluginInstaller = () => ({install: async() => { installed = true }});
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  assert.equal((await controller.mutate('plugin.install-registry')).message, 'FIREKYLIN_VERSION');
+  assert.equal(installed, false);
+});

@@ -32,3 +32,9 @@ it('highlights tools with a tool icon and keeps appearance pages intact', () => 
     expect(screen.getAllByRole('link', {name: /管理工具/})).toHaveLength(1);
     expect(screen.getByRole('link', {name: '系统设置'})).not.toHaveClass('active');
 });
+
+it('highlights only the install page within plugin management', () => {
+    render(<MemoryRouter initialEntries={['/plugin-management/install']}><Sidebar history={{push: vi.fn()}} /></MemoryRouter>);
+    expect(screen.getByRole('link', {name: '安装插件'})).toHaveClass('active');
+    expect(screen.getByRole('link', {name: '已安装插件'})).not.toHaveClass('active');
+});
