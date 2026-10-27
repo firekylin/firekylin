@@ -54,7 +54,8 @@ test('lists discovered plugins that failed to load', t => {
   const catalog = new PackageCatalog({pluginManager, firekylinVersion: '2.10.6'});
   assert.deepEqual(catalog.plugins(), [{
     id: 'broken', name: '@firekylin/broken', version: '1.0.0',
-    description: 'Needs a newer Firekylin', permissions: ['content:read'], source: 'local', status: 'error'
+    description: 'Needs a newer Firekylin', author: '', authorUrl: '', permissions: ['content:read'],
+    source: 'local', status: 'error', reasons: ['INVALID_PLUGIN_MANIFEST']
   }]);
 });
 

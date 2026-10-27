@@ -1,4 +1,4 @@
-import {ToolOutlined} from '@ant-design/icons';
+import {ApiOutlined, ToolOutlined} from '@ant-design/icons';
 
 export const InitiateThemePages = [
     {
@@ -88,6 +88,10 @@ export const InitiateRoutes = (themePages) => [{
                 title: '新增推送'
             }
         ]
+    },
+    {
+        url: '/plugin-management', icon: ApiOutlined, title: '插件管理', type: 1,
+        children: [{url: '/plugin-management', title: '已安装插件'}]
     },
     {
         url: '/appearance',

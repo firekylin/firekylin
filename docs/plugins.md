@@ -606,3 +606,13 @@ module.exports = {
 - 管理员路由使用 `auth: 'admin'` 和 CSRF；
 - 不要把数据库连接、密钥或任意 Node 模块直接暴露给 Eta；
 - 插件属于可信服务端代码，安装前应审查其依赖和文件读写行为。
+
+## Installing and enabling plugins
+
+Installed plugins and enabled plugins are separate. On the first startup after upgrading to this feature,
+existing discovered plugins retain their previous automatic activation behavior. Plugins discovered later
+start disabled; an administrator can enable them in **插件管理 → 已安装插件**. Disabling a plugin keeps
+its files and configuration. Disable an active plugin before deleting it.
+
+State changes reload clustered workers. In a single-process deployment, restart Firekylin to apply them.
+The list shows runtime compatibility problems and links to an active plugin's settings when available.

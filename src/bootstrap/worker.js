@@ -8,6 +8,7 @@ const widget = require('../widget/registry');
 const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
+const {PluginStateStore} = require('../plugin/state-store');
 const {registerContentAbilities} = require('../ability/content');
 const {registerManagementAbilities} = require('../ability/management');
 const {registerMediaAbilities} = require('../ability/media/upload');
@@ -80,6 +81,7 @@ const pluginManager = existingPluginManager || new PluginManager({
   version: pack.version,
   logger: console,
   packageApi,
+  stateStore: new PluginStateStore(think.model('options')),
   aiAudit: new Audit({model: () => think.model('ai_audit_log')}),
   aiStore: new AIStore({
     getOptions: includePrivate => think.model('options').getOptions(includePrivate),
