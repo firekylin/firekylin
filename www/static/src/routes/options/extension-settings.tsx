@@ -41,7 +41,7 @@ export default function ExtensionSettings(props: any) {
                     <Form.Item label="主题市场" name="themeRegistry" rules={[{required: true, type: 'url'}]}>
                         <Input />
                     </Form.Item>
-                    <p>Registry 支持官方 firekylin/plugins 仓库和 plugins.firekylin.com 的 HTTPS 地址。</p>
+                    <p>Registry 支持官方 firekylin/plugins 仓库和 firekylin.lithub.cc/plugins 下的 HTTPS 地址。</p>
                     <Button type="primary" htmlType="submit" loading={saving}>保存</Button>
                 </Form>
             </Card>

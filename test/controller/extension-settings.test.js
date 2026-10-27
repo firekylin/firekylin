@@ -25,16 +25,16 @@ test('extension settings require administrator and CSRF and persist independent 
   const rows = {};
   controller.model = () => ({getOptions: async() => rows,
     updateOptions: async(key, value) => { rows[key] = value }});
-  controller.post = () => ({settings: {pluginRegistry: 'https://plugins.firekylin.com/plugins.json',
-    themeRegistry: 'https://plugins.firekylin.com/themes.json'}});
+  controller.post = () => ({settings: {pluginRegistry: 'https://firekylin.lithub.cc/plugins/plugins.json',
+    themeRegistry: 'https://firekylin.lithub.cc/plugins/themes.json'}});
   controller.success = data => data;
   await assert.rejects(controller.getAction(), {status: 403});
   controller.userInfo.type = 1;
   await assert.rejects(controller.postAction(), {status: 403});
   controller.ctx.headers['X-CSRF-Token'] = auth.csrfToken(controller.ctx);
   await controller.postAction();
-  assert.equal((await controller.getAction()).settings.themeRegistry, 'https://plugins.firekylin.com/themes.json');
-  controller.post = () => ({settings: {pluginRegistry: 'http://127.0.0.1/', themeRegistry: 'https://plugins.firekylin.com/t'}});
+  assert.equal((await controller.getAction()).settings.themeRegistry, 'https://firekylin.lithub.cc/plugins/themes.json');
+  controller.post = () => ({settings: {pluginRegistry: 'http://127.0.0.1/', themeRegistry: 'https://firekylin.lithub.cc/plugins/t'}});
   await assert.rejects(controller.postAction(), {status: 400});
 });
 

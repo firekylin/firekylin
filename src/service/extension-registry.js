@@ -8,8 +8,11 @@ function trustedUrl(value) {
   let url;
   try { url = new URL(value) } catch { throw new Error('INVALID_REGISTRY_URL') }
   if (url.protocol !== 'https:' || url.username || url.password || url.port || url.hash ||
-      !['raw.githubusercontent.com', 'plugins.firekylin.com'].includes(url.hostname) ||
-      (url.hostname === 'raw.githubusercontent.com' && !url.pathname.startsWith('/firekylin/plugins/'))) {
+      /%2f|%5c/i.test(url.pathname) ||
+      !['raw.githubusercontent.com', 'firekylin.lithub.cc'].includes(url.hostname) ||
+      (url.hostname === 'raw.githubusercontent.com' && !url.pathname.startsWith('/firekylin/plugins/')) ||
+      (url.hostname === 'firekylin.lithub.cc' && url.pathname !== '/plugins' &&
+        !url.pathname.startsWith('/plugins/'))) {
     throw new Error('UNTRUSTED_REGISTRY_URL');
   }
   return url;
