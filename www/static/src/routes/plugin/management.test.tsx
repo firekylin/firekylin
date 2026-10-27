@@ -79,3 +79,10 @@ it('links to an unmounted settings page without requiring a form', () => {
     const view = render(<MemoryRouter><PluginManagement /></MemoryRouter>);
     expect(view.getByRole('link', {name: '配置'})).toHaveAttribute('href', '/plugins/demo/settings');
 });
+
+it('opens the install plugins page from the list', () => {
+    const push = vi.fn();
+    const view = render(<MemoryRouter><PluginManagement history={{push}} /></MemoryRouter>);
+    fireEvent.click(view.getByRole('button', {name: '安装插件'}));
+    expect(push).toHaveBeenCalledWith('/plugin-management/install');
+});

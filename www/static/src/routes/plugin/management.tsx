@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {Subscription} from 'rxjs';
-import {Input, message, Modal, Select, Space, Table, Tag} from 'antd';
+import {Button, Input, message, Modal, Select, Space, Table, Tag} from 'antd';
 import {Link} from '../../utils/router';
 import {http} from '../../utils/http';
 import BreadCrumb from '../../components/breadcrumb';
@@ -84,7 +84,8 @@ export default function PluginManagement(props: any) {
                 <h3 style={{margin: 0}}>已安装插件</h3>
                 <Space wrap><Select aria-label="插件状态" value={status} onChange={setStatus} style={{width: 120}}
                     options={[{value: 'all', label: '全部状态'}, {value: 'active', label: '已启用'}, {value: 'inactive', label: '未启用'}]} />
-                    <Input.Search placeholder="搜索插件名称" value={search} onChange={e => setSearch(e.target.value)} style={{width: 200}} /></Space>
+                    <Input.Search placeholder="搜索插件名称" value={search} onChange={e => setSearch(e.target.value)} style={{width: 200}} />
+                    <Button type="primary" onClick={() => props.history.push('/plugin-management/install')}>安装插件</Button></Space>
             </div>
             <Table rowKey="id" dataSource={filtered} pagination={false} columns={[
                 {title: '名称', dataIndex: 'name', render: (name: string, item: Plugin) => <>{name} {item.status === 'active' && <Tag color="green">已启用</Tag>}</>},
