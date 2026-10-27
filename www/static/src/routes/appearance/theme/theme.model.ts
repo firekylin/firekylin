@@ -9,6 +9,7 @@ export interface Theme {
     id: string;
     name: string;
     version: string;
+    screenshot?: string | null;
     configElements: ConfigElement[];
     themeFields?: ConfigElement[];
 }
