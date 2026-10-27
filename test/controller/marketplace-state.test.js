@@ -163,3 +163,41 @@ test('registry installation preserves firekylin.engine compatibility requirement
   assert.equal((await controller.mutate('plugin.install-registry')).message, 'FIREKYLIN_VERSION');
   assert.equal(installed, false);
 });
+
+test('theme registry installation validates integrity and archive identity before writing', async t => {
+  const JSZip = require('jszip');
+  const crypto = require('crypto');
+  const {ThemeInstaller} = require('../../src/service/theme-installer');
+  const {compatibility} = require('../../src/service/package-catalog');
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'registry-theme-'));
+  t.after(() => fs.rmSync(base, {recursive: true, force: true}));
+  const previous = global.fetch;
+  t.after(() => { global.fetch = previous });
+  const zip = new JSZip();
+  zip.file('package.json', JSON.stringify({name: 'paper', version: '1.0.0', firekylin: {id: 'paper', type: 'theme'}}));
+  zip.file('index.eta', '<h1>Paper</h1>');
+  const archive = await zip.generateAsync({type: 'nodebuffer'});
+  const item = {type: 'theme', name: 'paper', id: 'paper', version: '1.0.0',
+    download: 'https://raw.githubusercontent.com/firekylin/themes/main/paper.zip',
+    integrity: `sha512-${crypto.createHash('sha512').update(archive).digest('base64')}`};
+  const entries = [item];
+  global.fetch = async url => url.pathname.endsWith('paper.zip') ? new Response(archive)
+    : new Response(JSON.stringify({schemaVersion: 1, packages: entries}));
+  const controller = new Controller();
+  controller.post = key => ({name: 'paper', version: '1.0.0'})[key];
+  controller.model = () => ({getOptions: async() => ({})});
+  controller.catalog = () => ({check: manifest => compatibility(manifest, {firekylin: '2.16.0', node: '22.0.0'})});
+  controller.installer = () => new ThemeInstaller({themesPath: path.join(base, 'themes'),
+    backupPath: path.join(base, 'backups'), firekylinVersion: '2.16.0'});
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  item.integrity = `sha512-${Buffer.alloc(64).toString('base64')}`;
+  assert.equal((await controller.mutate('theme.install-registry')).message, 'THEME_INTEGRITY_MISMATCH');
+  item.integrity = `sha512-${crypto.createHash('sha512').update(archive).digest('base64')}`;
+  item.id = 'different';
+  assert.equal((await controller.mutate('theme.install-registry')).message, 'THEME_ARCHIVE_METADATA_MISMATCH');
+  item.id = 'paper';
+  assert.equal((await controller.mutate('theme.install-registry')).errno, 0);
+  assert.equal(fs.readFileSync(path.join(base, 'themes/paper/index.eta'), 'utf8'), '<h1>Paper</h1>');
+  assert.equal((await controller.mutate('theme.install-registry')).message, 'THEME_ALREADY_INSTALLED');
+});

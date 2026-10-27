@@ -33,7 +33,7 @@ function readSettings(options) {
   return normalizeSettings(value);
 }
 
-async function fetchRegistry(url, {fetcher = fetch, signal = AbortSignal.timeout(10000)} = {}) {
+async function fetchBuffer(url, {fetcher = fetch, signal = AbortSignal.timeout(10000), maxBytes = MAX_BYTES} = {}) {
   let current = trustedUrl(url);
   for (let redirects = 0; redirects < 4; redirects++) {
     const response = await fetcher(current, {redirect: 'manual', signal,
@@ -47,7 +47,7 @@ async function fetchRegistry(url, {fetcher = fetch, signal = AbortSignal.timeout
     }
     if (!response.ok) throw new Error(`REGISTRY_HTTP_${response.status}`);
     const length = Number(response.headers.get('content-length'));
-    if (length > MAX_BYTES) { await response.body?.cancel(); throw new Error('REGISTRY_TOO_LARGE') }
+    if (length > maxBytes) { await response.body?.cancel(); throw new Error('REGISTRY_TOO_LARGE') }
     if (!response.body) throw new Error('INVALID_REGISTRY_RESPONSE');
     const chunks = [];
     let size = 0;
@@ -57,22 +57,27 @@ async function fetchRegistry(url, {fetcher = fetch, signal = AbortSignal.timeout
         const {done, value} = await reader.read();
         if (done) break;
         size += value.length;
-        if (size > MAX_BYTES) { await reader.cancel(); throw new Error('REGISTRY_TOO_LARGE') }
+        if (size > maxBytes) { await reader.cancel(); throw new Error('REGISTRY_TOO_LARGE') }
         chunks.push(Buffer.from(value));
       }
     } finally { reader.releaseLock() }
-    let registry;
-    try { registry = JSON.parse(Buffer.concat(chunks).toString('utf8')) } catch { throw new Error('INVALID_REGISTRY') }
-    if (!registry || registry.schemaVersion !== 1 || !Array.isArray(registry.packages)) {
-      throw new Error('INVALID_REGISTRY');
-    }
-    return registry.packages.filter(item => item && ['plugin', 'theme'].includes(item.type) &&
-      typeof item.name === 'string' && typeof item.version === 'string');
+    return Buffer.concat(chunks);
   }
   throw new Error('REGISTRY_TOO_MANY_REDIRECTS');
 }
 
+async function fetchRegistry(url, options) {
+  const buffer = await fetchBuffer(url, options);
+  let registry;
+  try { registry = JSON.parse(buffer.toString('utf8')) } catch { throw new Error('INVALID_REGISTRY') }
+  if (!registry || registry.schemaVersion !== 1 || !Array.isArray(registry.packages)) {
+    throw new Error('INVALID_REGISTRY');
+  }
+  return registry.packages.filter(item => item && ['plugin', 'theme'].includes(item.type) &&
+    typeof item.name === 'string' && typeof item.version === 'string');
+}
+
 module.exports = {
   DEFAULT_PLUGIN_REGISTRY, DEFAULT_THEME_REGISTRY, SETTINGS_KEY, MAX_BYTES,
-  trustedUrl, normalizeSettings, readSettings, fetchRegistry
+  trustedUrl, normalizeSettings, readSettings, fetchBuffer, fetchRegistry
 };
