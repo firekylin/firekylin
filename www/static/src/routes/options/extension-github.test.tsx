@@ -1,11 +1,13 @@
 import {cleanup, fireEvent, render, waitFor} from '@testing-library/react';
 import axios from 'axios';
+import {message} from 'antd';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import ExtensionGitHub from './extension-github';
 
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.restoreAllMocks() });
 beforeEach(() => {
+    vi.spyOn(message, 'success').mockImplementation(() => ({}) as any);
     window.SysConfig = {csrfToken: 'test-csrf'} as any;
     vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {connected: false}}} as any);
     vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {connected: true,
@@ -45,4 +47,27 @@ it('switches an existing connection to local and removes its credential', async(
     fireEvent.click(view.getByRole('button', {name: '保存管理方式'}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/extension-github',
         {disconnect: true}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
+});
+it('allows recovery with a new token when the saved connection cannot be read', async() => {
+    vi.mocked(axios.get).mockRejectedValue(new Error('unreadable credentials'));
+    const view = render(<ExtensionGitHub />);
+    expect(await view.findByText('读取网站管理方式失败')).toBeInTheDocument();
+    await waitFor(() => expect(view.getByRole('radio', {name: 'GitHub'})).not.toBeDisabled());
+    fireEvent.click(view.getByRole('radio', {name: 'GitHub'}));
+    fireEvent.change(await view.findByLabelText('Firekylin 网站仓库地址'), {target: {value: 'https://github.com/owner/site'}});
+    fireEvent.change(view.getByLabelText('GitHub Token'), {target: {value: 'private-token'}});
+    fireEvent.click(view.getByRole('button', {name: '保存管理方式'}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/extension-github',
+        {repository: 'https://github.com/owner/site', token: 'private-token'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
+    await waitFor(() => expect(view.queryByText('读取网站管理方式失败')).not.toBeInTheDocument());
+});
+it('allows clearing an unreadable connection by selecting local management', async() => {
+    vi.mocked(axios.get).mockRejectedValue(new Error('unreadable credentials'));
+    vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {connected: false}}} as any);
+    const view = render(<ExtensionGitHub />);
+    await view.findByText('读取网站管理方式失败');
+    fireEvent.click(view.getByRole('button', {name: '保存管理方式'}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/extension-github',
+        {disconnect: true}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
+    await waitFor(() => expect(view.queryByText('读取网站管理方式失败')).not.toBeInTheDocument());
 });

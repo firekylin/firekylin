@@ -46,3 +46,16 @@ test('rejects missing write access and remote errors without echoing credentials
   await assert.rejects(inspectRepository('owner/site', 'private-token', async() => ({ok: false, status: 401})),
     /GITHUB_REPOSITORY_ACCESS_FAILED/);
 });
+
+test('replaces credentials after an encryption key change without decrypting the old token', async() => {
+  const db = model();
+  let secret = 'original-key-at-least-16-characters';
+  db.getOptions = async() => ({jwt_secret: secret});
+  const client = new ExtensionGitHub(db, github());
+  await client.save('https://github.com/owner/site', 'private-token');
+  secret = 'replacement-key-at-least-16-characters';
+  await assert.rejects(client.status());
+  await assert.rejects(client.save('https://github.com/owner/site', ''));
+  await client.save('https://github.com/owner/site', 'private-token');
+  assert.deepEqual(await client.status(), {connected: true, repository: 'https://github.com/owner/site'});
+});

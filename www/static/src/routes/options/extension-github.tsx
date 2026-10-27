@@ -25,20 +25,23 @@ export default function ExtensionGitHub() {
     const submit = async(values: Connection) => {
         setSaving(true);
         try {
-            if (values.mode === 'local' && !connected) { message.success('已选择本地管理'); return }
+            if (values.mode === 'local' && !connected && !error) { message.success('已选择本地管理'); return }
             const payload = values.mode === 'local' ? {disconnect: true} :
                 {repository: values.repository, token: values.token};
             const response = await axios.post('/admin/api/extension-github', payload,
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
             if (response.data.errno !== 0) throw new Error(response.data.errmsg || '保存失败');
             setConnected(Boolean(response.data.data.connected));
+            setError('');
             form.setFieldsValue({mode: values.mode, repository: response.data.data.repository || '', token: ''});
             message.success(values.mode === 'local' ? '已选择本地管理' : 'GitHub 仓库连接已保存');
         } catch { message.error('保存失败，请检查仓库地址和令牌权限') }
         finally { setSaving(false) }
     };
     return <Card title="网站管理方式" style={{marginTop: 20}}>
-        {error ? <Alert type="error" showIcon title={error} /> : <Form form={form} layout="vertical"
+        {error && <Alert type="error" showIcon title="读取网站管理方式失败"
+            description="可以重新填写 GitHub 仓库和令牌，或选择本地管理并保存以移除原连接。" style={{marginBottom: 20}} />}
+        <Form form={form} layout="vertical"
             initialValues={{mode: 'local'}} onFinish={submit} disabled={loading || saving}>
             <Form.Item name="mode" label="网站管理方式">
                 <Radio.Group options={[{label: '本地管理', value: 'local'}, {label: 'GitHub', value: 'github'}]} />
@@ -56,6 +59,6 @@ export default function ExtensionGitHub() {
             </>}
             {mode === 'local' && connected && <p>保存后将移除已保存的 GitHub 仓库连接和令牌。</p>}
             <Button type="primary" htmlType="submit" loading={saving}>保存管理方式</Button>
-        </Form>}
+        </Form>
     </Card>;
 }

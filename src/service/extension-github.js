@@ -56,8 +56,11 @@ class ExtensionGitHub {
 
   async save(url, token) {
     const repository = repositoryName(url);
-    const previous = await this.connection();
-    const effectiveToken = token || (previous?.repository.toLowerCase() === repository.toLowerCase() && previous.token);
+    let effectiveToken = token;
+    if (!effectiveToken) {
+      const previous = await this.connection();
+      effectiveToken = previous?.repository.toLowerCase() === repository.toLowerCase() && previous.token;
+    }
     const canonical = await inspectRepository(repository, effectiveToken, this.fetcher);
     await this.store.setCredential(OWNER, CREDENTIAL, JSON.stringify({repository: canonical, token: effectiveToken}));
     return {repository: `https://github.com/${canonical}`, connected: true};
