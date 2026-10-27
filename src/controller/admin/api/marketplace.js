@@ -63,15 +63,17 @@ module.exports = class extends Base {
 
   async mutate(operation) {
     try {
-      const repositoryOperations = ['theme.install-registry', 'theme.install', 'theme.rollback',
-        'plugin.delete-local', 'plugin.install-registry', 'plugin.install', 'plugin.uninstall'];
+      const repositoryOperations = ['theme.install-registry', 'theme.update-registry', 'theme.install',
+        'theme.rollback', 'plugin.delete-local', 'plugin.install-registry', 'plugin.update-registry',
+        'plugin.install', 'plugin.uninstall'];
       const connection = repositoryOperations.includes(operation)
         ? await this.githubConnection() : null;
       const dispatch = change => new GitHubExtensionDispatch({connection}).dispatch(change);
       if (connection && ['theme.install', 'theme.rollback', 'plugin.install'].includes(operation)) {
         throw new Error('GITHUB_OPERATION_NOT_SUPPORTED');
       }
-      if (operation === 'theme.install-registry') {
+      if (operation === 'theme.install-registry' || operation === 'theme.update-registry') {
+        const updating = operation === 'theme.update-registry';
         const name = this.post('name');
         const version = this.post('version');
         if (typeof name !== 'string' || !name || !semver.valid(version)) throw new Error('INVALID_THEME_SELECTION');
@@ -84,6 +86,13 @@ module.exports = class extends Base {
         const item = entries[0];
         const id = item.id || item.name;
         if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/i.test(id)) throw new Error('INVALID_THEME_ID');
+        if (updating) {
+          const installed = this.catalog().themes(this.authOptions?.theme).find(theme => theme.id === id);
+          if (!installed || installed.name !== name) throw new Error('THEME_NOT_FOUND');
+          if (!semver.valid(installed.version) || !semver.gt(version, installed.version)) {
+            throw new Error('THEME_VERSION_NOT_NEWER');
+          }
+        }
         const check = this.catalog().check({...item, firekylin: {...item.firekylin, type: 'theme'}});
         if (!check.compatible) throw new Error(check.reasons.join(', '));
         const match = /^sha512-([A-Za-z0-9+/]{86}==)$/.exec(String(item.integrity || ''));
@@ -98,8 +107,11 @@ module.exports = class extends Base {
         if (inspected.id !== id || inspected.manifest.version !== version || inspected.manifest.name !== name) {
           throw new Error('THEME_ARCHIVE_METADATA_MISMATCH');
         }
-        if (connection) return this.success(await dispatch({operation: 'theme.install', inspected}));
-        const result = await installer.install(buffer, {replace: false});
+        if (connection) return this.success(await dispatch({
+          operation: updating ? 'theme.update' : 'theme.install', inspected
+        }));
+        const result = await installer.install(buffer, {replace: updating});
+        if (updating) this.reloadActiveTheme(result.id);
         return this.success(result);
       }
       if (operation === 'theme.install') {
@@ -164,7 +176,8 @@ module.exports = class extends Base {
         manager.states?.delete(id);
         return this.success({restartRequired: false});
       }
-      if (operation === 'plugin.install-registry') {
+      if (operation === 'plugin.install-registry' || operation === 'plugin.update-registry') {
+        const updating = operation === 'plugin.update-registry';
         const name = this.post('name');
         const version = this.post('version');
         validatePackage(name, version);
@@ -176,8 +189,17 @@ module.exports = class extends Base {
         const check = this.catalog().check({...manifest,
           firekylin: {...manifest.firekylin, type: 'plugin'}, engines: manifest.engines || {}});
         if (!check.compatible) throw new Error(check.reasons.join(', '));
-        if (this.catalog().plugins().some(item => item.name === name)) throw new Error('PLUGIN_ALREADY_INSTALLED');
-        if (connection) return this.success(await dispatch({operation: 'plugin.install', name, version}));
+        const installed = this.catalog().plugins().filter(item => item.name === name);
+        if (!updating && installed.length) throw new Error('PLUGIN_ALREADY_INSTALLED');
+        if (updating) {
+          if (installed.length !== 1 || installed[0].source !== 'npm') throw new Error('PLUGIN_NOT_FOUND');
+          if (!semver.valid(installed[0].version) || !semver.gt(version, installed[0].version)) {
+            throw new Error('PLUGIN_VERSION_NOT_NEWER');
+          }
+        }
+        if (connection) return this.success(await dispatch({
+          operation: updating ? 'plugin.update' : 'plugin.install', name, version
+        }));
         return this.success(await this.pluginInstaller().install(name, version));
       }
       if (operation === 'plugin.install') {

@@ -2,6 +2,7 @@
 
 const crypto = require('crypto');
 const path = require('path');
+const semver = require('semver');
 const {validatePackage} = require('./plugin-installer');
 
 class GitHubExtensionDispatch {
@@ -31,11 +32,12 @@ class GitHubExtensionDispatch {
   }
 
   async dispatch(change) {
-    const operations = ['plugin.install', 'plugin.uninstall', 'plugin.delete-local', 'theme.install'];
+    const operations = ['plugin.install', 'plugin.update', 'plugin.uninstall', 'plugin.delete-local',
+      'theme.install', 'theme.update'];
     if (!change || !operations.includes(change.operation)) {
       throw new Error('UNSUPPORTED_EXTENSION_CHANGE');
     }
-    if (change.operation === 'plugin.install') validatePackage(change.name, change.version);
+    if (['plugin.install', 'plugin.update'].includes(change.operation)) validatePackage(change.name, change.version);
     if (change.operation === 'plugin.uninstall') validatePackage(change.name, '1.0.0');
     const repository = await this.request('');
     const branch = repository.default_branch;
@@ -70,7 +72,15 @@ class GitHubExtensionDispatch {
         manifest.dependencies[change.name] = change.version;
       } else {
         if (!found.length) throw new Error('PLUGIN_NOT_FOUND');
-        for (const section of found) delete manifest[section][change.name];
+        if (change.operation === 'plugin.update') {
+          for (const section of found) {
+            const current = semver.minVersion(manifest[section][change.name]);
+            if (!current || !semver.gt(change.version, current)) throw new Error('PLUGIN_VERSION_NOT_NEWER');
+            manifest[section][change.name] = change.version;
+          }
+        } else {
+          for (const section of found) delete manifest[section][change.name];
+        }
       }
       const indent = /^([ \t]+)"/m.exec(data.toString('utf8'))?.[1] || '  ';
       entries.push({path: 'package.json', mode: '100644', type: 'blob',
@@ -102,8 +112,15 @@ class GitHubExtensionDispatch {
       const root = `themes/${inspected.id}`;
       const parent = files.find(item => item.path === 'themes');
       if (parent && parent.type !== 'tree') throw new Error('INVALID_THEMES_DIRECTORY');
-      if (files.some(item => item.path === root || item.path.startsWith(root + '/'))) {
-        throw new Error('THEME_ALREADY_INSTALLED');
+      const existing = files.filter(item => item.path === root || item.path.startsWith(root + '/'));
+      if (change.operation === 'theme.install' && existing.length) throw new Error('THEME_ALREADY_INSTALLED');
+      if (change.operation === 'theme.update') {
+        if (existing.find(item => item.path === root)?.type !== 'tree') throw new Error('THEME_NOT_FOUND');
+        const manifestBlob = await this.blob(existing.find(item => item.path === root + '/package.json'));
+        const current = JSON.parse(manifestBlob.toString('utf8'));
+        if (current.name !== inspected.manifest.name ||
+            (current.firekylin?.id || current.id || current.name) !== inspected.id || !semver.valid(current.version) ||
+            !semver.gt(inspected.manifest.version, current.version)) throw new Error('THEME_VERSION_NOT_NEWER');
       }
       const paths = new Set();
       for (const entry of inspected.entries) {
@@ -116,6 +133,12 @@ class GitHubExtensionDispatch {
         const content = await entry.async('nodebuffer');
         const blob = await this.request('/git/blobs', {content: content.toString('base64'), encoding: 'base64'});
         entries.push({path: `${root}/${relative}`, mode: '100644', type: 'blob', sha: blob.sha});
+      }
+      if (change.operation === 'theme.update') {
+        const obsolete = existing.filter(item => item.type !== 'tree' && !paths.has(item.path.slice(root.length + 1)));
+        for (const item of obsolete) {
+          entries.push({path: item.path, mode: item.mode, type: item.type, sha: null});
+        }
       }
     }
     const updated = await this.request('/git/trees', {base_tree: commit.tree.sha, tree: entries});

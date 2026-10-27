@@ -49,3 +49,17 @@ it('shows a placeholder when the preview is unavailable and the installed state'
     expect(within(card).getByText('已安装')).toBeInTheDocument();
     expect(within(card).queryByRole('button', {name: /安\s*装/})).not.toBeInTheDocument();
 });
+it('offers an update when a newer version of the installed theme is available', async() => {
+    vi.mocked(axios.get).mockImplementation(async url => ({data: {errno: 0, data: url.includes('extension-settings')
+        ? {items: [{id: 'paper', name: 'paper', title: 'Paper', version: '2.0.0'}]}
+        : {themes: [{id: 'paper', name: 'paper', version: '1.0.0'}]}}}) as any);
+    vi.spyOn(message, 'success').mockImplementation(() => ({}) as any);
+    vi.spyOn(Modal, 'confirm').mockImplementation((options: any) => { options.onOk(); return {} as any });
+    const view = render(<MemoryRouter><ThemeMarket /></MemoryRouter>);
+    fireEvent.click(await view.findByRole('button', {name: /更\s*新/}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/marketplace',
+        {operation: 'theme.update-registry', name: 'paper', version: '2.0.0'},
+        {headers: {'X-CSRF-Token': 'csrf'}}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('主题更新完成'));
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(4));
+});
