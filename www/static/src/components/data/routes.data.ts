@@ -114,6 +114,10 @@ export const InitiateRoutes = (themePages) => [{
                 title: '阅读设置'
             },
             {
+                url: '/options/extensions',
+                title: '扩展设置'
+            },
+            {
                 url: '/options/ai',
                 title: 'AI 连接'
             },

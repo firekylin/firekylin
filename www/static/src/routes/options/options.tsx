@@ -10,6 +10,7 @@ import Analysis from './analysis/analysis';
 import OptionsPush from './push/push';
 import OptionsUpload from './upload/upload';
 import SmartContentSettings from './smart-content/smart-content';
+import ExtensionSettings from './extension-settings';
 import AIConnections from '../plugin/ai-connections';
 
 export default function Options({ match }: OptionsProps) {
@@ -19,6 +20,7 @@ export default function Options({ match }: OptionsProps) {
                 <Route path={`${match.path}/general`} component={General} />
                 <Route path={`${match.path}/reading`} component={Reading} />
                 <Route path={`${match.path}/smart-content`} component={SmartContentSettings} />
+                <Route path={`${match.path}/extensions`} component={ExtensionSettings} />
                 <Route path={`${match.path}/ai`} component={AIConnections} />
                 <Route path={`${match.path}/two_factor_auth`} component={TwoFactorAuth} />
                 <Route path={`${match.path}/ldap`} component={LDAP} />

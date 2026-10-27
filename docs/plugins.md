@@ -628,3 +628,13 @@ its files and configuration. Disable an active plugin before deleting it.
 
 State changes reload clustered workers. In a single-process deployment, restart Firekylin to apply them.
 The list shows runtime compatibility problems and links to an active plugin's settings when available.
+
+## Extension registries
+
+The administrator can configure separate plugin and theme Registry URLs under **系统设置 → 扩展设置**.
+Registry documents use schema version 1 and a `packages` array. Registry fetching permits HTTPS URLs on
+`firekylin.lithub.cc/plugins` and `raw.githubusercontent.com/firekylin/plugins/` only, including redirects;
+responses are limited to 1 MiB and a 10-second timeout. The default URL points to
+`https://raw.githubusercontent.com/firekylin/plugins/main/registry.json`, which must exist before the
+default registry can be read. This stage provides registry configuration and retrieval; marketplace browsing,
+installation, and GitHub update configuration are separate work.
