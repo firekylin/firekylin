@@ -140,7 +140,11 @@ module.exports = class extends Base {
       try {
         /* let stat = */await statsAsync(infoFile);
         const infoData = JSON.parse(await readFileAsync(infoFile));
-        result.push(think.extend({id: theme}, infoData));
+        const preview = ['screenshot.png', 'screenshot.jpg', 'screenshot.webp']
+          .find(file => fs.existsSync(path.join(THEME_DIR, theme, file)));
+        const base = process.env.FIREKYLIN_PROJECT_PATH ? 'themes' : 'theme';
+        result.push({...infoData, id: theme, screenshot: preview
+          ? `/${base}/${encodeURIComponent(theme)}/${preview}` : null});
       } catch (e) {
         console.log(e); // eslint-disable-line no-console
       }

@@ -3,13 +3,16 @@ import { observer, inject } from '@admin/utils/mobx-react';
 import { ThemeProps } from './theme.model';
 import ConfigField from '../../../components/config-field';
 import BreadCrumb from '../../../components/breadcrumb';
-import { Form, FormInstance } from 'antd';
-import { Select, Button } from 'antd';
+import { Form } from 'antd';
+import { Link, useLocation } from '../../../utils/router';
+import { Button, Input } from 'antd';
 import './theme.less';
-function ThemeForm(props: ThemeProps) {
+export function ThemeForm(props: ThemeProps) {
     const [state, setState] = React.useState(() => ({
         themeConfig: {},
+        search: '',
     }));
+    const isSettings = useLocation().pathname.endsWith('/settings');
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
     legacy.state = state;
@@ -24,10 +27,6 @@ function ThemeForm(props: ThemeProps) {
         });
         if (callback) queueMicrotask(callback);
     };
-    if (!legacy.__initialized) {
-        legacy.__initialized = true;
-        legacy.formRef = React.createRef<FormInstance>();
-    }
     legacy.onMount = function onMount() {
         props.themeStore.getThemeList();
         props.themeStore.getOptions().subscribe((res) => {
@@ -47,7 +46,6 @@ function ThemeForm(props: ThemeProps) {
         }
         legacy.setState({ themeConfig: themeConfig || {} });
         props.themeStore.setData({ theme: options.theme || 'firekylin' });
-        legacy.formRef.current?.setFieldsValue({ theme: options.theme || 'firekylin' });
     };
     legacy.updateThemeConfig = function updateThemeConfig(name: string, value: any) {
         legacy.setState(({ themeConfig }: any) => ({
@@ -63,7 +61,7 @@ function ThemeForm(props: ThemeProps) {
         let theme = themeStore.themeList.filter(
             (themeItem) => themeItem.id === themeStore.data.theme,
         )[0];
-        if (!theme.configElements || !Array.isArray(theme.configElements)) {
+        if (!theme || !theme.configElements || !Array.isArray(theme.configElements)) {
             return null;
         }
 
@@ -104,57 +102,37 @@ function ThemeForm(props: ThemeProps) {
             themeConfig: JSON.stringify(legacy.state.themeConfig),
         });
     };
-    legacy.handleSubmit = function handleSubmit(values: any) {
-        props.themeStore.themeSelect(values);
-    };
-    legacy.handleThemeChanged = function handleThemeChanged(theme: string) {
-        props.themeStore.setData({ theme });
-        legacy.formRef.current?.setFieldsValue({ theme });
-    };
     legacy.render = function render() {
-        const Option = Select.Option;
         const { themeStore } = props;
         const { themeList } = themeStore;
+        const filtered = themeList.filter(theme => (theme.name || theme.id).toLowerCase().includes(state.search.trim().toLowerCase()));
         return (
             <div className="appearance-theme">
                 <BreadCrumb {...props} />
                 <div className="appearance-theme-wrapper">
-                    <h3 className="theme-title">主题设置</h3>
-                    <Form
-                        ref={legacy.formRef}
-                        onFinish={(values) => legacy.handleSubmit(values)}
-                        layout="vertical"
-                        scrollToFirstError
-                    >
-                        <Form.Item
-                            label="主题选择"
-                            name="theme"
-                            initialValue={window.SysConfig.options.theme}
-                        >
-                            <Select
-                                style={{ width: 600 }}
-                                placeholder="请选择主题"
-                                onChange={(theme: string) =>
-                                    legacy.handleThemeChanged(theme)
-                                }
-                            >
-                                {themeList.map((theme, key) => {
-                                    return (
-                                        <Option
-                                            key={key.toString()}
-                                            value={theme.id}
-                                        >{`${theme.name} - ${theme.version}`}</Option>
-                                    );
-                                })}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit">
-                                提交
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                    {legacy.renderThemeConfig()}
+                    {isSettings ? <>
+                        <Link to="/appearance/theme">返回主题管理</Link>
+                        {legacy.renderThemeConfig() || <p>当前主题没有可配置的选项。</p>}
+                    </> : <>
+                    <div className="theme-header">
+                        <h3 className="theme-title">主题管理</h3>
+                        <Input.Search className="theme-search" placeholder="搜索主题" value={state.search}
+                            onChange={event => legacy.setState({search: event.target.value})} />
+                    </div>
+                    <div className="theme-grid">
+                        {filtered.map(theme => <div className="theme-card" key={theme.id}>
+                            <div className="theme-preview">
+                                {theme.screenshot ? <img src={theme.screenshot} alt={`${theme.name} 预览`} /> : <span>暂无预览</span>}
+                            </div>
+                            <div className="theme-card-info">
+                                <div><strong>{theme.name}</strong><div>版本 {theme.version}</div></div>
+                                {theme.id === themeStore.data.theme
+                                    ? <Link to="/appearance/theme/settings"><Button>设置</Button></Link>
+                                    : <Button type="primary" onClick={() => themeStore.themeSelect({theme: theme.id})}>启用</Button>}
+                            </div>
+                        </div>)}
+                    </div>
+                    </>}
                 </div>
             </div>
         );
