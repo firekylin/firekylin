@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {Subscription} from 'rxjs';
-import {Dropdown, Input, message, Modal, Select, Space, Table, Tag} from 'antd';
+import {Input, message, Modal, Select, Space, Table, Tag} from 'antd';
 import {Link} from '../../utils/router';
 import {http} from '../../utils/http';
 import BreadCrumb from '../../components/breadcrumb';
@@ -94,16 +94,10 @@ export default function PluginManagement(props: any) {
                 </small></div>},
                 {title: '操作', render: (_: unknown, item: Plugin) => {
                     const extension = (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === item.id);
-                    const standalone = extension?.pages.filter(page => !page.panel) || [];
-                    const legacy = extension?.pages.find(page => page.id === 'settings' || extension.forms.some(form => form.page === page.id));
-                    const settings = standalone.length ? standalone : legacy ? [legacy] : [];
-                    const configLink = (page: any) => <Link style={{color: '#1677ff'}}
-                        to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(page.id)}`}>{page.title}</Link>;
+                    const settings = extension?.pages.find(page => page.id === 'settings' && !page.panel);
                     return <Space wrap separator={<span aria-hidden="true">|</span>}>{item.status === 'active' ? <>
-                        {settings.length === 1 && <Link style={{color: '#1677ff'}}
-                            to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(settings[0].id)}`}>配置</Link>}
-                        {settings.length > 1 && <Dropdown menu={{items: settings.map(page => ({key: page.id, label: configLink(page)}))}}
-                            trigger={['click']}><button className="plugin-action plugin-action-enable">配置</button></Dropdown>}
+                        {settings && <Link style={{color: '#1677ff'}}
+                            to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(settings.id)}`}>配置</Link>}
                         <button className="plugin-action plugin-action-disable" disabled={busy} onClick={() => action(item, 'plugin.disable')}>停用</button>
                     </> : <>
                         {item.reasons.length ? <span>{item.reasons.join(', ')}</span> : <button className="plugin-action plugin-action-enable" disabled={busy} onClick={() => action(item, 'plugin.enable')}>启用</button>}
