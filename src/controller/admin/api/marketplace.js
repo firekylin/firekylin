@@ -98,8 +98,7 @@ module.exports = class extends Base {
         if (inspected.id !== id || inspected.manifest.version !== version || inspected.manifest.name !== name) {
           throw new Error('THEME_ARCHIVE_METADATA_MISMATCH');
         }
-        if (connection) return this.success(await dispatch({operation: 'theme.install', name, id, version,
-          download: item.download, integrity: item.integrity}));
+        if (connection) return this.success(await dispatch({operation: 'theme.install', inspected}));
         const result = await installer.install(buffer, {replace: false});
         return this.success(result);
       }
@@ -196,6 +195,9 @@ module.exports = class extends Base {
       return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
     } catch (error) {
       if (error.message === 'PREVENT_NEXT_PROCESS') throw error;
+      if (error.message === 'GITHUB_LOCKFILE_NOT_SUPPORTED') {
+        return this.fail('网站仓库已跟踪依赖锁文件，请先移除锁文件后再管理插件');
+      }
       return this.fail(error.message);
     }
   }

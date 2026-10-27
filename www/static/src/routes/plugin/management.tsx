@@ -49,10 +49,10 @@ export default function PluginManagement(props: any) {
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}}).subscribe({
                 next: res => {
                     if (res.errno !== 0) { setBusy(false); return }
-                    if (res.data?.status === 'submitted') {
+                    if (res.data?.status === 'created') {
                         setBusy(false);
-                        Modal.info({title: '已提交 GitHub 更新请求', content: <span>请到 <a target="_blank" rel="noreferrer"
-                            href={`https://github.com/${res.data.repository}/actions`}>GitHub Actions</a> 查看执行结果；合并生成的 PR 后生效。</span>});
+                        Modal.info({title: '已创建 GitHub 更新 PR', content: <span>请查看 <a target="_blank" rel="noreferrer"
+                            href={res.data.url}>GitHub PR</a>；合并并部署后生效。</span>});
                         return;
                     }
                     const stateChange = operation === 'plugin.enable' || operation === 'plugin.disable';

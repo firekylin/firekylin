@@ -44,13 +44,13 @@ export default function ExtensionGitHub() {
                 <Radio.Group options={[{label: '本地管理', value: 'local'}, {label: 'GitHub', value: 'github'}]} />
             </Form.Item>
             {mode === 'github' && <>
-                <Alert type="info" showIcon title={<span>GitHub 更新需要在网站仓库默认分支配置 <a href="https://github.com/firekylin/firekylin/blob/master/docs/plugins.md#github-repository-connection" target="_blank" rel="noreferrer">扩展更新工作流</a>。安装或删除扩展会提交工作流请求，由工作流创建待审核的 PR。</span>} style={{marginBottom: 20}} />
+                <Alert type="info" showIcon title="安装或删除扩展时会在网站仓库创建待审核的 PR。仓库不应跟踪依赖锁文件。" style={{marginBottom: 20}} />
                 <Form.Item name="repository" label="Firekylin 网站仓库地址" rules={[{required: true, type: 'url'}]}>
                     <Input placeholder="https://github.com/owner/repository" />
                 </Form.Item>
                 <Form.Item name="token" label="GitHub Token" rules={[{required: !connected}]}
                     extra={<span>前往 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noreferrer">GitHub 申请令牌</a>，
-                        请确保令牌对该网站仓库有写入权限。{connected && '留空保留现有令牌；更换仓库时需提供新令牌。'}</span>}>
+                        请确保令牌对该网站仓库具有 Contents 和 Pull requests 的写入权限。{connected && '留空保留现有令牌；更换仓库时需提供新令牌。'}</span>}>
                     <Input.Password autoComplete="new-password" />
                 </Form.Item>
             </>}

@@ -25,7 +25,7 @@ it('shows the GitHub fields and token guidance, and saves the connection', async
     const repository = await view.findByLabelText('Firekylin 网站仓库地址');
     expect(view.getByRole('link', {name: 'GitHub 申请令牌'})).toHaveAttribute('href',
         'https://github.com/settings/personal-access-tokens/new');
-    expect(view.getByText(/请确保令牌对该网站仓库有写入权限/)).toBeInTheDocument();
+    expect(view.getByText(/请确保令牌对该网站仓库具有 Contents 和 Pull requests 的写入权限/)).toBeInTheDocument();
     fireEvent.change(repository, {target: {value: 'https://github.com/owner/site'}});
     const token = view.getByLabelText('GitHub Token') as HTMLInputElement;
     fireEvent.change(token, {target: {value: 'private-token'}});

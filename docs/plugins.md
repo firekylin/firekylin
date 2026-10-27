@@ -658,15 +658,10 @@ to a stable secret of at least 16 characters, or the configured AI credential ke
 Changing or losing that key requires reconnecting. Leaving the token blank keeps the existing token only when
 the repository is unchanged; removing the connection deletes the stored credential.
 
-With GitHub management selected, marketplace installations and plugin deletion submit a repository dispatch
-instead of changing local files. Copy `templates/firekylin-extensions.yml` from the installed Firekylin
-package to `.github/workflows/firekylin-extensions.yml` on the website repository’s default branch. The
-site project must depend on a Firekylin release containing `bin/github-extension-apply.js` and have exactly
-one supported lockfile (`pnpm-lock.yaml` or `package-lock.json`). The token must have repository Contents
-write access. The workflow needs Contents and Pull requests write permissions, and the repository must allow
-GitHub Actions to create pull requests. Review the generated PR and its lockfile before merging; deployment
-and plugin activation remain separate steps.
+With GitHub management selected, marketplace installations and plugin deletion create a branch and PR
+through the GitHub API instead of changing local files. The token needs repository Contents and Pull requests
+write permissions. Review and merge the PR, then deploy the site; plugin activation remains a separate step.
 
-A submitted request only means GitHub accepted the dispatch. Check the repository’s Actions page for
-workflow failures or its resulting PR. Direct package-management APIs and theme rollback are unavailable
-in GitHub mode; switch to local management if those operations are needed.
+GitHub plugin dependency changes require that the website repository does not track a lockfile. If it does,
+the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
+created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.

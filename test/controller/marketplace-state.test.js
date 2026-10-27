@@ -209,18 +209,25 @@ test('theme registry installation validates integrity and archive identity befor
   assert.equal((await controller.mutate('theme.install-registry')).message, 'THEME_ALREADY_INSTALLED');
 });
 
-test('GitHub mode dispatches plugin installation without running local installer', async t => {
+test('GitHub mode creates a PR without running local installer', async t => {
   const previous = global.fetch;
   t.after(() => { global.fetch = previous });
   const requests = [];
-  global.fetch = async(url, options) => {
+  global.fetch = async(url, options = {}) => {
     const address = String(url);
     requests.push(address);
-    if (address.includes('/contents/.github/workflows/')) return new Response(JSON.stringify({encoding: 'base64',
-      content: Buffer.from('firekylin-extension-update github-extension-apply.js').toString('base64')}));
-    if (address.endsWith('/dispatches')) return new Response(null, {status: 204});
-    return new Response(JSON.stringify({schemaVersion: 1, packages: [{type: 'plugin',
-      name: 'firekylin-plugin-demo', version: '1.0.0'}]}));
+    let data;
+    if (address.endsWith('/repos/owner/site')) data = {default_branch: 'main'};
+    else if (address.endsWith('/git/ref/heads/main')) data = {object: {sha: 'base'}};
+    else if (address.endsWith('/git/commits/base')) data = {tree: {sha: 'tree'}};
+    else if (address.endsWith('/git/trees/tree?recursive=1')) data = {tree: [{path: 'package.json', type: 'blob', mode: '100644', sha: 'package'}]};
+    else if (address.endsWith('/git/blobs/package')) data = {encoding: 'base64', content: Buffer.from('{}').toString('base64')};
+    else if (address.endsWith('/git/trees')) data = {sha: 'updated'};
+    else if (address.endsWith('/git/commits')) data = {sha: 'newcommit'};
+    else if (address.endsWith('/git/refs')) data = {};
+    else if (address.endsWith('/pulls')) data = {html_url: 'https://github.com/owner/site/pull/1'};
+    else data = {schemaVersion: 1, packages: [{type: 'plugin', name: 'firekylin-plugin-demo', version: '1.0.0'}]};
+    return new Response(JSON.stringify(data));
   };
   const controller = new Controller();
   controller.githubConnection = async() => ({repository: 'owner/site', token: 'secret'});
@@ -231,7 +238,7 @@ test('GitHub mode dispatches plugin installation without running local installer
   controller.success = data => ({errno: 0, data});
   controller.fail = message => ({errno: 1, message});
   const result = await controller.mutate('plugin.install-registry');
-  assert.equal(result.data.status, 'submitted');
-  assert.equal(requests.filter(url => url.endsWith('/dispatches')).length, 1);
+  assert.equal(result.data.status, 'created');
+  assert.equal(requests.filter(url => url.endsWith('/pulls')).length, 1);
   assert.equal(JSON.stringify(result).includes('secret'), false);
 });

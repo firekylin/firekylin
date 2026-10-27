@@ -1,79 +1,136 @@
 'use strict';
 
 const crypto = require('crypto');
-const semver = require('semver');
+const path = require('path');
 const {validatePackage} = require('./plugin-installer');
-const {trustedUrl} = require('./extension-registry');
-
-const EVENT_TYPE = 'firekylin-extension-update';
-const WORKFLOW_PATH = '.github/workflows/firekylin-extensions.yml';
-
-function validateChange(change) {
-  if (!change || typeof change !== 'object' || Array.isArray(change)) throw new Error('INVALID_EXTENSION_CHANGE');
-  if (change.operation === 'plugin.install') {
-    validatePackage(change.name, change.version);
-    return {operation: change.operation, name: change.name, version: change.version};
-  }
-  if (change.operation === 'plugin.uninstall') {
-    validatePackage(change.name, '1.0.0');
-    return {operation: change.operation, name: change.name};
-  }
-  if (change.operation === 'plugin.delete-local') {
-    if (typeof change.id !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/i.test(change.id) ||
-        typeof change.directory !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/i.test(change.directory)) {
-      throw new Error('INVALID_PLUGIN_ID');
-    }
-    return {operation: change.operation, id: change.id, directory: change.directory};
-  }
-  if (change.operation === 'theme.install') {
-    if (typeof change.name !== 'string' || !change.name || change.name.length > 214 ||
-        typeof change.id !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/i.test(change.id) || !semver.valid(change.version) ||
-        typeof change.download !== 'string' || !/^sha512-[A-Za-z0-9+/]{86}==$/.test(change.integrity || '')) {
-      throw new Error('INVALID_THEME_SELECTION');
-    }
-    return {operation: change.operation, name: change.name, id: change.id, version: change.version,
-      download: trustedUrl(change.download).href, integrity: change.integrity};
-  }
-  throw new Error('UNSUPPORTED_EXTENSION_CHANGE');
-}
 
 class GitHubExtensionDispatch {
-  constructor({connection, fetcher = fetch}) {
-    this.connection = connection;
-    this.fetcher = fetcher;
-  }
+  constructor({connection, fetcher = fetch}) { this.connection = connection; this.fetcher = fetcher }
 
-  async request(path, options = {}) {
+  async request(endpoint, body) {
     const {repository, token} = this.connection || {};
     if (!repository || !token || !/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(repository) || /\s/.test(token)) {
       throw new Error('GITHUB_CONNECTION_REQUIRED');
     }
-    return this.fetcher(`https://api.github.com/repos/${repository}/${path}`, {
-      ...options, redirect: 'error', signal: AbortSignal.timeout(10000),
+    const response = await this.fetcher(`https://api.github.com/repos/${repository}${endpoint}`, {
+      method: body ? 'POST' : 'GET', redirect: 'error', signal: AbortSignal.timeout(30000),
       headers: {authorization: `Bearer ${token}`, accept: 'application/vnd.github+json',
         'x-github-api-version': '2022-11-28', 'user-agent': 'Firekylin-Extensions',
-        ...(options.body ? {'content-type': 'application/json'} : {})}
+        ...(body ? {'content-type': 'application/json'} : {})},
+      ...(body ? {body: JSON.stringify(body)} : {})
     });
+    if (!response.ok) throw new Error('GITHUB_API_REQUEST_FAILED');
+    return response.json();
   }
 
-  async dispatch(input) {
-    const change = validateChange(input);
-    const workflow = await this.request(`contents/${WORKFLOW_PATH}`);
-    if (!workflow.ok) throw new Error('GITHUB_EXTENSION_WORKFLOW_MISSING');
-    const file = await workflow.json();
-    if (file.encoding !== 'base64' || typeof file.content !== 'string' || file.content.length > 128 * 1024) {
-      throw new Error('GITHUB_EXTENSION_WORKFLOW_INVALID');
+  async blob(entry) {
+    if (!entry || entry.type !== 'blob' || entry.mode !== '100644') throw new Error('GITHUB_INVALID_FILE');
+    const blob = await this.request(`/git/blobs/${entry.sha}`);
+    if (blob.encoding !== 'base64' || typeof blob.content !== 'string') throw new Error('GITHUB_INVALID_FILE');
+    return Buffer.from(blob.content, 'base64');
+  }
+
+  async dispatch(change) {
+    const operations = ['plugin.install', 'plugin.uninstall', 'plugin.delete-local', 'theme.install'];
+    if (!change || !operations.includes(change.operation)) {
+      throw new Error('UNSUPPORTED_EXTENSION_CHANGE');
     }
-    const content = Buffer.from(file.content, 'base64').toString('utf8');
-    if (!content.includes(EVENT_TYPE) || !content.includes('github-extension-apply.js')) {
-      throw new Error('GITHUB_EXTENSION_WORKFLOW_INVALID');
+    if (change.operation === 'plugin.install') validatePackage(change.name, change.version);
+    if (change.operation === 'plugin.uninstall') validatePackage(change.name, '1.0.0');
+    const repository = await this.request('');
+    const branch = repository.default_branch;
+    if (!branch || typeof branch !== 'string') throw new Error('GITHUB_DEFAULT_BRANCH_MISSING');
+    const ref = await this.request(`/git/ref/heads/${encodeURIComponent(branch)}`);
+    const commit = await this.request(`/git/commits/${ref.object.sha}`);
+    const tree = await this.request(`/git/trees/${commit.tree.sha}?recursive=1`);
+    if (tree.truncated || !Array.isArray(tree.tree)) throw new Error('GITHUB_TREE_TOO_LARGE');
+    const files = tree.tree;
+    const entries = [];
+    if (change.operation.startsWith('plugin.') && change.operation !== 'plugin.delete-local') {
+      const lockfiles = ['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'pnpm-lock.yml'];
+      if (files.some(item => lockfiles.includes(item.path))) {
+        throw new Error('GITHUB_LOCKFILE_NOT_SUPPORTED');
+      }
+      const data = await this.blob(files.find(item => item.path === 'package.json'));
+      if (data.length > 1024 * 1024) throw new Error('GITHUB_INVALID_FILE');
+      let manifest;
+      try { manifest = JSON.parse(data.toString('utf8')) } catch { throw new Error('GITHUB_INVALID_PACKAGE_JSON') }
+      if (!manifest || Array.isArray(manifest) || typeof manifest !== 'object') {
+        throw new Error('GITHUB_INVALID_PACKAGE_JSON');
+      }
+      const sections = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'];
+      if (sections.some(section => manifest[section] &&
+          (typeof manifest[section] !== 'object' || Array.isArray(manifest[section])))) {
+        throw new Error('GITHUB_INVALID_PACKAGE_JSON');
+      }
+      const found = sections.filter(section => Object.hasOwn(manifest[section] || {}, change.name));
+      if (change.operation === 'plugin.install') {
+        if (found.length) throw new Error('PLUGIN_ALREADY_INSTALLED');
+        manifest.dependencies ||= {};
+        manifest.dependencies[change.name] = change.version;
+      } else {
+        if (!found.length) throw new Error('PLUGIN_NOT_FOUND');
+        for (const section of found) delete manifest[section][change.name];
+      }
+      const indent = /^([ \t]+)"/m.exec(data.toString('utf8'))?.[1] || '  ';
+      entries.push({path: 'package.json', mode: '100644', type: 'blob',
+        content: JSON.stringify(manifest, null, indent) + '\n'});
+    } else if (change.operation === 'plugin.delete-local') {
+      if (![change.id, change.directory].every(value => typeof value === 'string' && /^[a-z0-9][a-z0-9._-]*$/i.test(value))) {
+        throw new Error('INVALID_PLUGIN_ID');
+      }
+      const prefix = `plugins/${change.directory}/`;
+      const parent = files.find(item => item.path === 'plugins');
+      const folder = files.find(item => item.path === `plugins/${change.directory}`);
+      if (parent?.type !== 'tree' || folder?.type !== 'tree') throw new Error('PLUGIN_NOT_FOUND');
+      const manifestEntry = files.find(item => item.path === prefix + 'package.json');
+      let manifest;
+      if (manifestEntry) {
+        const content = await this.blob(manifestEntry);
+        try { manifest = JSON.parse(content.toString('utf8')) } catch { manifest = null }
+      }
+      if ((manifest?.firekylin?.id || manifest?.name || change.directory) !== change.id) {
+        throw new Error('LOCAL_PLUGIN_ID_MISMATCH');
+      }
+      for (const item of files.filter(item => item.path.startsWith(prefix) && item.type !== 'tree')) {
+        entries.push({path: item.path, mode: item.mode, type: item.type, sha: null});
+      }
+      if (!entries.length) throw new Error('PLUGIN_NOT_FOUND');
+    } else {
+      const {inspected} = change;
+      if (!inspected || !/^[a-z0-9][a-z0-9._-]*$/i.test(inspected.id)) throw new Error('INVALID_THEME_ID');
+      const root = `themes/${inspected.id}`;
+      const parent = files.find(item => item.path === 'themes');
+      if (parent && parent.type !== 'tree') throw new Error('INVALID_THEMES_DIRECTORY');
+      if (files.some(item => item.path === root || item.path.startsWith(root + '/'))) {
+        throw new Error('THEME_ALREADY_INSTALLED');
+      }
+      const paths = new Set();
+      for (const entry of inspected.entries) {
+        const relative = entry.name.slice(inspected.prefix.length);
+        if (!relative || relative.includes('\\') || path.posix.isAbsolute(relative) ||
+            relative.split('/').some(part => !part || part === '.' || part === '..') || paths.has(relative)) {
+          throw new Error('THEME_ARCHIVE_PATH_TRAVERSAL');
+        }
+        paths.add(relative);
+        const content = await entry.async('nodebuffer');
+        const blob = await this.request('/git/blobs', {content: content.toString('base64'), encoding: 'base64'});
+        entries.push({path: `${root}/${relative}`, mode: '100644', type: 'blob', sha: blob.sha});
+      }
     }
-    const requestId = crypto.randomUUID();
-    const response = await this.request('dispatches', {method: 'POST',
-      body: JSON.stringify({event_type: EVENT_TYPE, client_payload: {requestId, change}})});
-    if (!response.ok) throw new Error('GITHUB_EXTENSION_DISPATCH_FAILED');
-    return {requestId, repository: this.connection.repository, status: 'submitted'};
+    const updated = await this.request('/git/trees', {base_tree: commit.tree.sha, tree: entries});
+    const newCommit = await this.request('/git/commits', {message: 'Update Firekylin extension', tree: updated.sha,
+      parents: [ref.object.sha]});
+    const head = `firekylin/extension-${crypto.randomUUID()}`;
+    await this.request('/git/refs', {ref: `refs/heads/${head}`, sha: newCommit.sha});
+    const pr = await this.request('/pulls', {title: 'Update Firekylin extension', head, base: branch,
+      body: 'Review this extension change before merging.'});
+    const expected = `https://github.com/${this.connection.repository}/pull/`;
+    if (typeof pr.html_url !== 'string' || !pr.html_url.startsWith(expected) || !/^\d+$/.test(pr.html_url.slice(expected.length))) {
+      throw new Error('GITHUB_INVALID_PULL_REQUEST');
+    }
+    return {status: 'created', url: pr.html_url};
   }
 }
 
-module.exports = {GitHubExtensionDispatch, validateChange, EVENT_TYPE, WORKFLOW_PATH};
+module.exports = {GitHubExtensionDispatch};

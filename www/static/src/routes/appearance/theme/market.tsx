@@ -51,9 +51,9 @@ export default function ThemeMarket(props: any) {
                     operation: 'theme.install-registry', name: item.name, version: item.version
                 }, {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
                 if (result.data.errno !== 0) throw new Error(result.data.errmsg || '安装失败');
-                if (result.data.data?.status === 'submitted') {
-                    Modal.info({title: '已提交 GitHub 更新请求', content: <span>请到 <a target="_blank" rel="noreferrer"
-                        href={`https://github.com/${result.data.data.repository}/actions`}>GitHub Actions</a> 查看执行结果；合并生成的 PR 后生效。</span>});
+                if (result.data.data?.status === 'created') {
+                    Modal.info({title: '已创建 GitHub 更新 PR', content: <span>请查看 <a target="_blank" rel="noreferrer"
+                        href={result.data.data.url}>GitHub PR</a>；合并并部署后生效。</span>});
                 } else {
                     message.success('主题安装完成');
                     setReload(value => value + 1);
