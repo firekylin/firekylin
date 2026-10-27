@@ -1,9 +1,12 @@
 import {useEffect, useState} from 'react';
 import {Alert, Button, Empty, Input, message, Modal, Space, Spin, Tag} from 'antd';
 import axios from 'axios';
+import {gt, valid} from 'semver';
 import {Link} from '../../../utils/router';
 import BreadCrumb from '../../../components/breadcrumb';
 import './theme.less';
+
+type InstalledTheme = {id: string; name: string; version: string};
 
 type ThemeItem = {id?: string; name: string; title?: string; version: string; description?: string; screenshot?: string};
 
@@ -21,7 +24,7 @@ function ThemePreview({url, name}: {url?: string; name: string}) {
 
 export default function ThemeMarket(props: any) {
     const [items, setItems] = useState<ThemeItem[]>([]);
-    const [installed, setInstalled] = useState<string[]>([]);
+    const [installed, setInstalled] = useState<InstalledTheme[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,26 +39,27 @@ export default function ThemeMarket(props: any) {
         ]).then(([registry, catalog]) => {
             if (registry.data.errno !== 0 || catalog.data.errno !== 0) throw new Error('读取主题市场失败');
             setItems(registry.data.data.items);
-            setInstalled(catalog.data.data.themes.map(item => item.id));
+            setInstalled(catalog.data.data.themes);
         }).catch(reason => {
             if (!controller.signal.aborted) setError(reason.response?.data?.errmsg || reason.message || '读取主题市场失败');
         }).finally(() => { if (!controller.signal.aborted) setLoading(false) });
         return () => controller.abort();
     }, [reload]);
-    const install = (item: ThemeItem) => Modal.confirm({title: `安装 ${item.title || item.name}？`,
-        content: `版本 ${item.version}。本地安装后可在主题管理中启用；GitHub 管理需要等待仓库 PR 合并。`,
+    const install = (item: ThemeItem, updating = false) => Modal.confirm({title: `${updating ? '更新' : '安装'} ${item.title || item.name}？`,
+        content: updating ? `更新至 ${item.version}。本地主题文件将被替换并备份；GitHub 管理需要合并 PR。` :
+            `版本 ${item.version}。本地安装后可在主题管理中启用；GitHub 管理需要等待仓库 PR 合并。`,
         onOk: async() => {
             setBusy(true);
             try {
                 const result = await axios.post('/admin/api/marketplace', {
-                    operation: 'theme.install-registry', name: item.name, version: item.version
+                    operation: updating ? 'theme.update-registry' : 'theme.install-registry', name: item.name, version: item.version
                 }, {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
                 if (result.data.errno !== 0) throw new Error(result.data.errmsg || '安装失败');
                 if (result.data.data?.status === 'created') {
                     Modal.info({title: '已创建 GitHub 更新 PR', content: <span>请查看 <a target="_blank" rel="noreferrer"
                         href={result.data.data.url}>GitHub PR</a>；合并并部署后生效。</span>});
                 } else {
-                    message.success('主题安装完成');
+                    message.success(updating ? '主题更新完成' : '主题安装完成');
                     setReload(value => value + 1);
                 }
             } catch (reason: any) { message.error(reason.response?.data?.errmsg || reason.message || '安装失败') }
@@ -71,15 +75,19 @@ export default function ThemeMarket(props: any) {
             action={<Space><Link to="/options/extensions">市场设置</Link><Button onClick={() => setReload(value => value + 1)}>重试</Button></Space>} />
             : <Spin spinning={loading}>
                 {!loading && filtered.length === 0 ? <Empty description="没有找到主题" /> : <div className="theme-grid">
-                    {filtered.map(item => <div className="theme-card" key={`${item.name}@${item.version}`}>
+                    {filtered.map(item => {
+                        const current = installed.find(theme => theme.id === (item.id || item.name));
+                        const canUpdate = current && current.name === item.name && valid(item.version) &&
+                            valid(current.version) && gt(item.version, current.version);
+                        return <div className="theme-card" key={`${item.name}@${item.version}`}>
                         <ThemePreview key={item.screenshot || ''} url={item.screenshot} name={item.title || item.name} />
                         <div className="theme-card-info">
                             <div><strong>{item.title || item.name}</strong><div>版本 {item.version}</div></div>
-                            {installed.includes(item.id || item.name)
-                                ? <Tag>已安装</Tag> : <Button type="primary" disabled={busy} onClick={() => install(item)}>安装</Button>}
+                            {canUpdate ? <Button type="primary" disabled={busy} onClick={() => install(item, true)}>更新</Button> :
+                                current ? <Tag>已安装</Tag> : <Button type="primary" disabled={busy} onClick={() => install(item)}>安装</Button>}
                         </div>
                         {item.description && <div className="theme-market-description">{item.description}</div>}
-                    </div>)}
+                    </div>})}
                 </div>}
             </Spin>}
     </div></div>;

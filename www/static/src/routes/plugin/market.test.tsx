@@ -1,5 +1,5 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
-import {Modal} from 'antd';
+import {message, Modal} from 'antd';
 import axios from 'axios';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {MemoryRouter} from '../../utils/router';
@@ -32,4 +32,18 @@ it('shows a registry failure and links to settings', async() => {
     const view = render(<MemoryRouter><PluginMarket /></MemoryRouter>);
     expect(await view.findByText('插件市场暂不可用')).toBeInTheDocument();
     expect(view.getByRole('link', {name: '市场设置'})).toHaveAttribute('href', '/options/extensions');
+});
+it('offers an update only for a newer installed npm plugin', async() => {
+    vi.spyOn(message, 'success').mockImplementation(() => ({}) as any);
+    vi.mocked(axios.get).mockImplementation(async url => ({data: {errno: 0, data: url.includes('extension-settings')
+        ? {items: [{name: 'firekylin-plugin-demo', title: 'Demo', version: '2.0.0'}]}
+        : {plugins: [{name: 'firekylin-plugin-demo', version: '1.0.0', source: 'npm'}]}}}) as any);
+    vi.spyOn(Modal, 'confirm').mockImplementation((options: any) => { options.onOk(); return {} as any });
+    const view = render(<MemoryRouter><PluginMarket /></MemoryRouter>);
+    fireEvent.click(await view.findByRole('button', {name: '更新'}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/marketplace',
+        {operation: 'plugin.update-registry', name: 'firekylin-plugin-demo', version: '2.0.0'},
+        {headers: {'X-CSRF-Token': 'csrf'}}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('更新完成，请重启 Firekylin 后生效'));
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(4));
 });

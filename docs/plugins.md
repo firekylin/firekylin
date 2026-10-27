@@ -642,11 +642,12 @@ default registry can be read. Under **插件管理 → 安装插件**, administr
 from the configured Registry. Installation rechecks the selected package and version against the current Registry
 and compatibility before running the local package manager. Only official `firekylin-plugin-*` and
 `@firekylin/plugin-*` packages are supported. Restart Firekylin and enable the plugin after installation.
+The plugin market offers an update when a newer registered version of an installed npm plugin is available; restart Firekylin after a local update. Project-local plugins are not updated through the npm market.
 Under **外观设置 → 安装主题**, the theme market reads the configured theme Registry. Theme entries must
 include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
 `download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
 must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
-installing without replacing an existing theme.
+installing without replacing an existing theme. For a newer version of an installed theme, the market offers an update; local updates replace the theme directory after backing it up, so custom files inside that directory are replaced.
 
 ## GitHub repository connection
 
@@ -658,7 +659,7 @@ to a stable secret of at least 16 characters, or the configured AI credential ke
 Changing or losing that key requires reconnecting. Leaving the token blank keeps the existing token only when
 the repository is unchanged; removing the connection deletes the stored credential.
 
-With GitHub management selected, marketplace installations and plugin deletion create a branch and PR
+With GitHub management selected, marketplace installations, version updates and plugin deletion create a branch and PR
 through the GitHub API instead of changing local files. The token needs repository Contents and Pull requests
 write permissions. Review and merge the PR, then deploy the site; plugin activation remains a separate step.
 

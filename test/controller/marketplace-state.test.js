@@ -242,3 +242,71 @@ test('GitHub mode creates a PR without running local installer', async t => {
   assert.equal(requests.filter(url => url.endsWith('/pulls')).length, 1);
   assert.equal(JSON.stringify(result).includes('secret'), false);
 });
+
+test('plugin updates require a newer installed npm version and use the installer', async t => {
+  const previous = global.fetch;
+  t.after(() => { global.fetch = previous });
+  global.fetch = async() => new Response(JSON.stringify({schemaVersion: 1, packages: [
+    {type: 'plugin', name: 'firekylin-plugin-demo', version: '2.0.0'}]}));
+  const controller = new Controller();
+  controller.githubConnection = async() => null;
+  controller.post = key => ({name: 'firekylin-plugin-demo', version: '2.0.0'})[key];
+  controller.model = () => ({getOptions: async() => ({})});
+  const installed = {name: 'firekylin-plugin-demo', version: '1.0.0', source: 'npm', status: 'active'};
+  controller.catalog = () => ({check: () => ({compatible: true}), plugins: () => [installed]});
+  let calls = 0;
+  controller.pluginInstaller = () => ({install: async() => { calls++; return {restartRequired: true} }});
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  assert.equal((await controller.mutate('plugin.update-registry')).errno, 0);
+  assert.equal(calls, 1);
+  installed.version = '2.0.0';
+  assert.equal((await controller.mutate('plugin.update-registry')).message, 'PLUGIN_VERSION_NOT_NEWER');
+  installed.version = '1.0.0'; installed.source = 'local';
+  assert.equal((await controller.mutate('plugin.update-registry')).message, 'PLUGIN_NOT_FOUND');
+  assert.equal(calls, 1);
+});
+
+test('theme update checks versions and retains a backup before replacement', async t => {
+  const JSZip = require('jszip');
+  const crypto = require('crypto');
+  const {ThemeInstaller} = require('../../src/service/theme-installer');
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'theme-update-'));
+  t.after(() => fs.rmSync(base, {recursive: true, force: true}));
+  const previous = global.fetch;
+  t.after(() => { global.fetch = previous });
+  const archive = async(version, contents) => {
+    const zip = new JSZip();
+    zip.file('package.json', JSON.stringify({name: 'paper', version, firekylin: {id: 'paper', type: 'theme'}}));
+    zip.file('index.eta', contents);
+    return zip.generateAsync({type: 'nodebuffer'});
+  };
+  const installer = new ThemeInstaller({themesPath: path.join(base, 'themes'), backupPath: path.join(base, 'backups'),
+    firekylinVersion: '2.16.0'});
+  await installer.install(await archive('1.0.0', 'old'));
+  const latest = await archive('2.0.0', 'new');
+  const item = {type: 'theme', name: 'paper', id: 'paper', version: '2.0.0',
+    download: 'https://raw.githubusercontent.com/firekylin/themes/main/paper.zip',
+    integrity: 'sha512-' + crypto.createHash('sha512').update(latest).digest('base64')};
+  global.fetch = async url => url.pathname.endsWith('.zip') ? new Response(latest)
+    : new Response(JSON.stringify({schemaVersion: 1, packages: [item]}));
+  const controller = new Controller();
+  controller.githubConnection = async() => null;
+  controller.post = key => ({name: item.name, version: item.version})[key];
+  controller.model = () => ({getOptions: async() => ({})});
+  const installed = {id: 'paper', name: 'paper', version: '1.0.0'};
+  controller.catalog = () => ({check: () => ({compatible: true}), themes: () => [installed]});
+  controller.installer = () => installer;
+  controller.authOptions = {theme: 'paper'};
+  let reloaded = false;
+  controller.reloadActiveTheme = () => { reloaded = true };
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  const result = await controller.mutate('theme.update-registry');
+  assert.equal(result.errno, 0);
+  assert.equal(fs.readFileSync(path.join(base, 'themes/paper/index.eta'), 'utf8'), 'new');
+  assert.equal(fs.readFileSync(path.join(base, 'backups', result.data.backup, 'index.eta'), 'utf8'), 'old');
+  assert.equal(reloaded, true);
+  installed.version = '2.0.0';
+  assert.equal((await controller.mutate('theme.update-registry')).message, 'THEME_VERSION_NOT_NEWER');
+});

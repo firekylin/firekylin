@@ -74,3 +74,32 @@ test('deletes only the matching local plugin files', async() => {
   assert.equal(entries.length, 2);
   assert.ok(entries.every(entry => entry.path.startsWith('plugins/demo/') && entry.sha === null));
 });
+
+test('updates the existing dependency without moving its section', async() => {
+  const {client, calls} = fixture();
+  client.blob = async() => Buffer.from(JSON.stringify({devDependencies: {'firekylin-plugin-demo': '1.0.0'}}));
+  await client.dispatch({operation: 'plugin.update', name: 'firekylin-plugin-demo', version: '2.0.0'});
+  const manifest = JSON.parse(calls.find(call => call.endpoint === '/git/trees').body.tree[0].content);
+  assert.equal(manifest.devDependencies['firekylin-plugin-demo'], '2.0.0');
+  assert.equal(manifest.dependencies, undefined);
+  await assert.rejects(client.dispatch({operation: 'plugin.update', name: 'firekylin-plugin-demo', version: '0.9.0'}),
+    /PLUGIN_VERSION_NOT_NEWER/);
+});
+
+test('theme update replaces changed files and removes obsolete files', async() => {
+  const zip = new JSZip();
+  zip.file('package.json', JSON.stringify({name: 'paper', version: '2.0.0', firekylin: {id: 'paper', type: 'theme'}}));
+  zip.file('index.eta', 'new');
+  const inspected = await new ThemeInstaller({themesPath: '/tmp/themes', backupPath: '/tmp/backups',
+    firekylinVersion: '2.16.0'}).inspect(await zip.generateAsync({type: 'nodebuffer'}));
+  const {client, calls} = fixture([{path: 'themes', type: 'tree'}, {path: 'themes/paper', type: 'tree'},
+    {path: 'themes/paper/package.json', type: 'blob', mode: '100644', sha: 'old-manifest'},
+    {path: 'themes/paper/index.eta', type: 'blob', mode: '100644', sha: 'old-index'},
+    {path: 'themes/paper/obsolete.css', type: 'blob', mode: '100644', sha: 'old-css'}]);
+  client.blob = async() => Buffer.from(JSON.stringify({name: 'paper', version: '1.0.0'}));
+  await client.dispatch({operation: 'theme.update', inspected});
+  const entries = calls.find(call => call.endpoint === '/git/trees').body.tree;
+  assert.equal(entries.find(entry => entry.path.endsWith('/obsolete.css')).sha, null);
+  assert.equal(entries.filter(entry => entry.path.endsWith('/index.eta')).length, 1);
+  assert.equal(entries.find(entry => entry.path.endsWith('/index.eta')).sha, 'new-blob');
+});
