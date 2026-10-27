@@ -9,6 +9,7 @@ const widgets = require('../widget');
 const {getContext} = require('../../lib/project-context');
 const {PluginManager} = require('../plugin/manager');
 const {PluginStateStore} = require('../plugin/state-store');
+const {ExtensionGitHub} = require('../service/extension-github');
 const {registerContentAbilities} = require('../ability/content');
 const {registerManagementAbilities} = require('../ability/management');
 const {registerMediaAbilities} = require('../ability/media/upload');
@@ -59,6 +60,11 @@ const packageRuntime = {
     readOnly: Boolean(process.env.VERCEL)
   })
 };
+async function requireLocalPackageManagement() {
+  if (await new ExtensionGitHub(think.model('options')).connection()) {
+    throw new Error('GITHUB_OPERATION_NOT_SUPPORTED');
+  }
+}
 const packageApi = {
   list: async() => {
     const options = await think.model('options').getOptions();
@@ -69,11 +75,23 @@ const packageApi = {
   check: manifest => new PackageCatalog({pluginManager: global.firekylin.plugins,
     themesPath: projectContext.themesPath || path.join(projectContext.projectPath, 'themes'),
     firekylinVersion: pack.version}).check(manifest),
-  installPlugin: (name, version) => packageRuntime.pluginInstaller.install(name, version),
-  uninstallPlugin: name => packageRuntime.pluginInstaller.uninstall(name),
-  installTheme: (archive, options) => packageRuntime.themeInstaller.install(archive, options),
+  installPlugin: async(name, version) => {
+    await requireLocalPackageManagement();
+    return packageRuntime.pluginInstaller.install(name, version);
+  },
+  uninstallPlugin: async name => {
+    await requireLocalPackageManagement();
+    return packageRuntime.pluginInstaller.uninstall(name);
+  },
+  installTheme: async(archive, options) => {
+    await requireLocalPackageManagement();
+    return packageRuntime.themeInstaller.install(archive, options);
+  },
   themeBackups: () => packageRuntime.themeInstaller.backups(),
-  rollbackTheme: backup => packageRuntime.themeInstaller.rollback(backup)
+  rollbackTheme: async backup => {
+    await requireLocalPackageManagement();
+    return packageRuntime.themeInstaller.rollback(backup);
+  }
 };
 const pluginManager = existingPluginManager || new PluginManager({
   projectPath: projectContext.projectPath,

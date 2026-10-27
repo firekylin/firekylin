@@ -27,6 +27,7 @@ test('plugin state mutations require an administrator and CSRF, then persist the
   const values = [];
   global.firekylin = {plugins: {discover: () => [root], stateStore: {set: async(...args) => values.push(args)}}};
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   const secret = 'marketplace-controller-test-secret-32-bytes';
   const cookie = auth.sign({id: 1, type: 1, name: 'admin'}, secret);
   controller.ctx = {state: {jwtSecret: secret}, cookie: () => cookie, headers: {},
@@ -61,6 +62,7 @@ test('local deletion rejects active plugins and paths outside the plugin directo
     plugins: new Map([['demo', {status: 'active'}]]), stateStore: {set: async(...args) => states.push(args)}};
   global.firekylin = {plugins: manager};
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   controller.post = key => key === 'id' ? 'demo' : undefined;
   controller.success = data => ({errno: 0, data});
   controller.fail = message => ({errno: 1, message});
@@ -86,6 +88,7 @@ test('preserves ThinkJS response control flow after successful state changes', a
   const states = [];
   global.firekylin = {plugins: {discover: () => [root], stateStore: {set: async(...args) => states.push(args)}}};
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   controller.post = key => key === 'id' ? 'demo' : undefined;
   controller.success = () => { throw new Error('PREVENT_NEXT_PROCESS') };
   controller.fail = () => { throw new Error('unexpected failure response') };
@@ -106,6 +109,7 @@ test('deletes a malformed local plugin and clears its cached record', async t =>
     stateStore: {set: async() => {}}};
   global.firekylin = {plugins: manager};
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   controller.post = key => key === 'id' ? 'broken' : undefined;
   controller.success = data => ({errno: 0, data});
   controller.fail = message => ({errno: 1, message});
@@ -119,6 +123,7 @@ test('marketplace installation rechecks registry, compatibility and installed pa
   const previous = global.fetch;
   t.after(() => { global.fetch = previous });
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   const item = {type: 'plugin', name: 'firekylin-plugin-demo', version: '1.0.0', engines: {firekylin: '>=2'}};
   const registry = entries => { global.fetch = async() => new Response(JSON.stringify({schemaVersion: 1, packages: entries})) };
   registry([item]);
@@ -152,6 +157,7 @@ test('registry installation preserves firekylin.engine compatibility requirement
     firekylin: {engine: '>=99.0.0'}, engines: {firekylin: '>=1.0.0'}
   }]}));
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   controller.post = key => ({name: 'firekylin-plugin-demo', version: '1.0.0'})[key];
   controller.model = () => ({getOptions: async() => ({})});
   controller.catalog = () => ({check: manifest => compatibility(manifest, {firekylin: '2.16.0', node: '22.0.0'}),
@@ -184,6 +190,7 @@ test('theme registry installation validates integrity and archive identity befor
   global.fetch = async url => url.pathname.endsWith('paper.zip') ? new Response(archive)
     : new Response(JSON.stringify({schemaVersion: 1, packages: entries}));
   const controller = new Controller();
+  controller.githubConnection = async() => null;
   controller.post = key => ({name: 'paper', version: '1.0.0'})[key];
   controller.model = () => ({getOptions: async() => ({})});
   controller.catalog = () => ({check: manifest => compatibility(manifest, {firekylin: '2.16.0', node: '22.0.0'})});
@@ -200,4 +207,38 @@ test('theme registry installation validates integrity and archive identity befor
   assert.equal((await controller.mutate('theme.install-registry')).errno, 0);
   assert.equal(fs.readFileSync(path.join(base, 'themes/paper/index.eta'), 'utf8'), '<h1>Paper</h1>');
   assert.equal((await controller.mutate('theme.install-registry')).message, 'THEME_ALREADY_INSTALLED');
+});
+
+test('GitHub mode creates a PR without running local installer', async t => {
+  const previous = global.fetch;
+  t.after(() => { global.fetch = previous });
+  const requests = [];
+  global.fetch = async(url, options = {}) => {
+    const address = String(url);
+    requests.push(address);
+    let data;
+    if (address.endsWith('/repos/owner/site')) data = {default_branch: 'main'};
+    else if (address.endsWith('/git/ref/heads/main')) data = {object: {sha: 'base'}};
+    else if (address.endsWith('/git/commits/base')) data = {tree: {sha: 'tree'}};
+    else if (address.endsWith('/git/trees/tree?recursive=1')) data = {tree: [{path: 'package.json', type: 'blob', mode: '100644', sha: 'package'}]};
+    else if (address.endsWith('/git/blobs/package')) data = {encoding: 'base64', content: Buffer.from('{}').toString('base64')};
+    else if (address.endsWith('/git/trees')) data = {sha: 'updated'};
+    else if (address.endsWith('/git/commits')) data = {sha: 'newcommit'};
+    else if (address.endsWith('/git/refs')) data = {};
+    else if (address.endsWith('/pulls')) data = {html_url: 'https://github.com/owner/site/pull/1'};
+    else data = {schemaVersion: 1, packages: [{type: 'plugin', name: 'firekylin-plugin-demo', version: '1.0.0'}]};
+    return new Response(JSON.stringify(data));
+  };
+  const controller = new Controller();
+  controller.githubConnection = async() => ({repository: 'owner/site', token: 'secret'});
+  controller.post = key => ({name: 'firekylin-plugin-demo', version: '1.0.0'})[key];
+  controller.model = () => ({getOptions: async() => ({})});
+  controller.catalog = () => ({check: () => ({compatible: true}), plugins: () => []});
+  controller.pluginInstaller = () => { throw new Error('LOCAL_INSTALLER_CALLED') };
+  controller.success = data => ({errno: 0, data});
+  controller.fail = message => ({errno: 1, message});
+  const result = await controller.mutate('plugin.install-registry');
+  assert.equal(result.data.status, 'created');
+  assert.equal(requests.filter(url => url.endsWith('/pulls')).length, 1);
+  assert.equal(JSON.stringify(result).includes('secret'), false);
 });

@@ -1,5 +1,5 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
-import {Modal} from 'antd';
+import {message, Modal} from 'antd';
 import axios from 'axios';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {MemoryRouter} from '../../../utils/router';
@@ -16,6 +16,7 @@ beforeEach(() => {
     vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {id: 'paper'}}} as any);
 });
 it('searches themes and requests installation of the selected version', async() => {
+    vi.spyOn(message, 'success').mockImplementation(() => ({}) as any);
     vi.spyOn(Modal, 'confirm').mockImplementation((options: any) => { options.onOk(); return {} as any });
     const view = render(<MemoryRouter><ThemeMarket /></MemoryRouter>);
     const card = (await view.findByText('Paper')).closest('.theme-card') as HTMLElement;
@@ -25,6 +26,8 @@ it('searches themes and requests installation of the selected version', async() 
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/marketplace',
         {operation: 'theme.install-registry', name: 'paper', version: '1.0.0'},
         {headers: {'X-CSRF-Token': 'csrf'}}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('主题安装完成'));
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(4));
     fireEvent.change(view.getByPlaceholderText('搜索主题'), {target: {value: 'missing'}});
     expect(view.queryByText('Paper')).not.toBeInTheDocument();
 });

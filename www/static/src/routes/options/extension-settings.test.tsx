@@ -19,7 +19,7 @@ it('loads and saves separate plugin and theme registries', async() => {
     const plugin = await view.findByLabelText('插件市场') as HTMLInputElement;
     await waitFor(() => expect(plugin.value).toBe('https://firekylin.lithub.cc/plugins/plugin'));
     fireEvent.change(plugin, {target: {value: 'https://firekylin.lithub.cc/plugins/other'}});
-    fireEvent.click(view.getByRole('button', {name: /保\s*存/}));
+    fireEvent.click(view.getByRole('button', {name: /^保\s*存$/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/extension-settings',
         {settings: {pluginRegistry: 'https://firekylin.lithub.cc/plugins/other', themeRegistry: 'https://firekylin.lithub.cc/plugins/theme'}},
         {headers: {'X-CSRF-Token': 'test-token'}}));

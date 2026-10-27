@@ -646,4 +646,22 @@ Under **外观设置 → 安装主题**, the theme market reads the configured t
 include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
 `download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
 must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
-installing without replacing an existing theme. GitHub update configuration is separate work.
+installing without replacing an existing theme.
+
+## GitHub repository connection
+
+Under **系统设置 → 扩展设置 → 网站管理方式**, an administrator can select local management or
+connect a GitHub repository using its HTTPS URL and an access token. Selecting local management and saving
+removes the stored GitHub connection. Firekylin checks the repository metadata and reported write access before saving the connection.
+The token is encrypted at rest and is never returned to the browser. Set `FIREKYLIN_EXTENSION_CREDENTIAL_KEY`
+to a stable secret of at least 16 characters, or the configured AI credential key or JWT secret will be used.
+Changing or losing that key requires reconnecting. Leaving the token blank keeps the existing token only when
+the repository is unchanged; removing the connection deletes the stored credential.
+
+With GitHub management selected, marketplace installations and plugin deletion create a branch and PR
+through the GitHub API instead of changing local files. The token needs repository Contents and Pull requests
+write permissions. Review and merge the PR, then deploy the site; plugin activation remains a separate step.
+
+GitHub plugin dependency changes require that the website repository does not track a lockfile. If it does,
+the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
+created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.
