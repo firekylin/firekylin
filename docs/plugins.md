@@ -642,4 +642,8 @@ default registry can be read. Under **插件管理 → 安装插件**, administr
 from the configured Registry. Installation rechecks the selected package and version against the current Registry
 and compatibility before running the local package manager. Only official `firekylin-plugin-*` and
 `@firekylin/plugin-*` packages are supported. Restart Firekylin and enable the plugin after installation.
-Theme marketplace installation and GitHub update configuration are separate work.
+Under **外观设置 → 安装主题**, the theme market reads the configured theme Registry. Theme entries must
+include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
+`download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. The archive manifest
+must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
+installing without replacing an existing theme. GitHub update configuration is separate work.

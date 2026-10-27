@@ -116,8 +116,11 @@ export function ThemeForm(props: ThemeProps) {
                     </> : <>
                     <div className="theme-header">
                         <h3 className="theme-title">主题管理</h3>
-                        <Input.Search className="theme-search" placeholder="搜索主题" value={state.search}
-                            onChange={event => legacy.setState({search: event.target.value})} />
+                        <div className="theme-header-actions">
+                            <Input.Search className="theme-search" placeholder="搜索主题" value={state.search}
+                                onChange={event => legacy.setState({search: event.target.value})} />
+                            <Link to="/appearance/install-theme" className="ant-btn ant-btn-primary">安装主题</Link>
+                        </div>
                     </div>
                     <div className="theme-grid">
                         {filtered.map(theme => <div className="theme-card" key={theme.id}>

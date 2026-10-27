@@ -6,7 +6,9 @@ const adminAuth = require('../../../service/admin-auth');
 const {PackageCatalog, installedPluginId} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
 const {PluginInstaller, validatePackage} = require('../../../service/plugin-installer');
-const {readSettings, fetchRegistry} = require('../../../service/extension-registry');
+const {readSettings, fetchBuffer, fetchRegistry} = require('../../../service/extension-registry');
+const crypto = require('crypto');
+const semver = require('semver');
 const path = require('path');
 const fs = require('fs/promises');
 const cluster = require('cluster');
@@ -55,6 +57,36 @@ module.exports = class extends Base {
 
   async mutate(operation) {
     try {
+      if (operation === 'theme.install-registry') {
+        const name = this.post('name');
+        const version = this.post('version');
+        if (typeof name !== 'string' || !name || !semver.valid(version)) throw new Error('INVALID_THEME_SELECTION');
+        const installer = this.installer();
+        installer.assertWritable();
+        const settings = readSettings(await this.model('options').getOptions(true));
+        const entries = (await fetchRegistry(settings.themeRegistry))
+          .filter(item => item.type === 'theme' && item.name === name && item.version === version);
+        if (entries.length !== 1) throw new Error('THEME_NOT_IN_REGISTRY');
+        const item = entries[0];
+        const id = item.id || item.name;
+        if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9._-]*$/i.test(id)) throw new Error('INVALID_THEME_ID');
+        const check = this.catalog().check({...item, firekylin: {...item.firekylin, type: 'theme'}});
+        if (!check.compatible) throw new Error(check.reasons.join(', '));
+        const match = /^sha512-([A-Za-z0-9+/]{86}==)$/.exec(String(item.integrity || ''));
+        if (!match || typeof item.download !== 'string') throw new Error('THEME_INTEGRITY_REQUIRED');
+        const buffer = await fetchBuffer(item.download, {maxBytes: 20 * 1024 * 1024});
+        const digest = crypto.createHash('sha512').update(buffer).digest();
+        const expected = Buffer.from(match[1], 'base64');
+        if (expected.length !== digest.length || !crypto.timingSafeEqual(expected, digest)) {
+          throw new Error('THEME_INTEGRITY_MISMATCH');
+        }
+        const inspected = await installer.inspect(buffer);
+        if (inspected.id !== id || inspected.manifest.version !== version || inspected.manifest.name !== name) {
+          throw new Error('THEME_ARCHIVE_METADATA_MISMATCH');
+        }
+        const result = await installer.install(buffer, {replace: false});
+        return this.success(result);
+      }
       if (operation === 'theme.install') {
         const encoded = String(this.post('archive') || '');
         if (encoded.length > 28 * 1024 * 1024) return this.fail('INVALID_THEME_ARCHIVE_SIZE');

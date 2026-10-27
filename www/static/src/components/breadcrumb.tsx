@@ -34,6 +34,7 @@ function BreadCrumb(props: any) {
 
         const themePages = [
             { url: '/appearance/theme', title: '主题管理' },
+            { url: '/appearance/install-theme', title: '安装主题' },
             { url: '/appearance/navigation', title: '菜单管理' },
         ];
 
