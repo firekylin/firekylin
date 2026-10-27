@@ -22,7 +22,8 @@ module.exports = class extends Base {
 
   getAction() {
     if (Number(this.userInfo.type) !== 1) return this.fail('USER_NO_PERMISSION');
-    return this.success(this.catalog().installed(this.authOptions.theme));
+    return this.success({...this.catalog().installed(this.authOptions.theme),
+      pluginAdmin: global.firekylin?.plugins?.admin?.manifest() || []});
   }
 
   postAction() {

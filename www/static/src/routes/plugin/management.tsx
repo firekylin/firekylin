@@ -1,8 +1,10 @@
-import {useEffect, useState} from 'react';
-import {Button, Input, message, Modal, Select, Space, Table, Tag} from 'antd';
+import {useEffect, useRef, useState} from 'react';
+import {Subscription} from 'rxjs';
+import {Input, message, Modal, Select, Space, Table, Tag} from 'antd';
 import {Link} from '../../utils/router';
 import {http} from '../../utils/http';
 import BreadCrumb from '../../components/breadcrumb';
+import './management.less';
 
 type Plugin = {id: string; name: string; version: string; description: string; author: string;
     authorUrl: string; source: string; status: string; reasons: string[]};
@@ -22,22 +24,53 @@ export default function PluginManagement(props: any) {
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('all');
     const [busy, setBusy] = useState(false);
-    const load = () => http.get<{plugins: Plugin[]}>('/admin/api/marketplace').subscribe(res => {
-        if (res.errno === 0) setPlugins(res.data.plugins);
-    });
-    useEffect(() => { const subscription = load(); return () => subscription.unsubscribe() }, []);
+    const requests = useRef(new Subscription());
+    const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const load = (done?: (items: Plugin[]) => void) => {
+        const subscription = http.get<{plugins: Plugin[]; pluginAdmin?: typeof window.SysConfig.pluginAdmin}>(
+            '/admin/api/marketplace').subscribe({next: res => {
+            if (res.errno === 0 && res.data) {
+                setPlugins(res.data.plugins);
+                if (res.data.pluginAdmin) window.SysConfig.pluginAdmin = res.data.pluginAdmin;
+                done?.(res.data.plugins);
+            } else done?.([]);
+        }, error: () => done?.([])});
+        requests.current.add(subscription);
+    };
+    useEffect(() => {
+        requests.current = new Subscription();
+        load();
+        return () => { requests.current.unsubscribe(); clearTimeout(retryTimer.current) };
+    }, []);
     const action = (plugin: Plugin, operation: string) => {
         const run = () => {
             setBusy(true);
-            http.post<any>('/admin/api/marketplace', {operation, id: plugin.id, name: plugin.name},
+            const subscription = http.post<any>('/admin/api/marketplace', {operation, id: plugin.id, name: plugin.name},
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}}).subscribe({
                 next: res => {
-                    setBusy(false);
-                    if (res.errno !== 0) return;
-                    message.success(res.data?.restartRequired ? '操作已保存，请重启 Firekylin 后生效' : '操作已保存，请刷新页面查看状态');
-                    load();
+                    if (res.errno !== 0) { setBusy(false); return }
+                    const stateChange = operation === 'plugin.enable' || operation === 'plugin.disable';
+                    if (!stateChange || res.data?.restartRequired) {
+                        load(() => setBusy(false));
+                        message.success(res.data?.restartRequired ? '操作已保存，请重启 Firekylin 后生效' : '操作成功');
+                        return;
+                    }
+                    let attempts = 0;
+                    const refresh = () => load(items => {
+                        const current = items.find(item => item.id === plugin.id);
+                        const updated = operation === 'plugin.enable' ? current?.status === 'active' : current?.status === 'inactive';
+                        if (updated) { setBusy(false); message.success('操作成功'); return }
+                        if (current?.status === 'error' || ++attempts >= 20) {
+                            setBusy(false);
+                            message.warning(current?.status === 'error' ? '插件启动失败，请查看错误信息' : '状态尚未更新，请稍后刷新');
+                            return;
+                        }
+                        retryTimer.current = setTimeout(refresh, 500);
+                    });
+                    refresh();
                 }, error: () => setBusy(false)
             });
+            requests.current.add(subscription);
         };
         if (operation.includes('delete') || operation.includes('uninstall')) Modal.confirm({title: `删除 ${plugin.name}？`, onOk: run});
         else run();
@@ -62,12 +95,12 @@ export default function PluginManagement(props: any) {
                 {title: '操作', render: (_: unknown, item: Plugin) => {
                     const extension = (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === item.id);
                     const settings = extension?.pages.find(page => page.id === 'settings' || extension.forms.some(form => form.page === page.id));
-                    return <Space wrap>{item.status === 'active' ? <>
-                        {settings && <Link to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(settings.id)}`}>设置</Link>}
-                        <Button disabled={busy} onClick={() => action(item, 'plugin.disable')}>停用</Button>
+                    return <Space wrap separator={<span aria-hidden="true">|</span>}>{item.status === 'active' ? <>
+                        {settings && <Link style={{color: '#1677ff'}} to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(settings.id)}`}>配置</Link>}
+                        <button className="plugin-action plugin-action-disable" disabled={busy} onClick={() => action(item, 'plugin.disable')}>停用</button>
                     </> : <>
-                        {item.reasons.length ? <span>{item.reasons.join(', ')}</span> : <Button disabled={busy} type="primary" onClick={() => action(item, 'plugin.enable')}>启用</Button>}
-                        <Button disabled={busy} danger onClick={() => action(item, item.source === 'npm' ? 'plugin.uninstall' : 'plugin.delete-local')}>删除</Button>
+                        {item.reasons.length ? <span>{item.reasons.join(', ')}</span> : <button className="plugin-action plugin-action-enable" disabled={busy} onClick={() => action(item, 'plugin.enable')}>启用</button>}
+                        <button className="plugin-action plugin-action-delete" disabled={busy} onClick={() => action(item, item.source === 'npm' ? 'plugin.uninstall' : 'plugin.delete-local')}>删除</button>
                     </>}</Space>;
                 }}
             ]} />
