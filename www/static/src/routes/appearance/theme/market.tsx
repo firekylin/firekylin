@@ -1,10 +1,23 @@
 import {useEffect, useState} from 'react';
-import {Alert, Button, Input, message, Modal, Space, Spin, Table, Tag} from 'antd';
+import {Alert, Button, Empty, Input, message, Modal, Space, Spin, Tag} from 'antd';
 import axios from 'axios';
 import {Link} from '../../../utils/router';
 import BreadCrumb from '../../../components/breadcrumb';
+import './theme.less';
 
-type ThemeItem = {id?: string; name: string; title?: string; version: string; description?: string};
+type ThemeItem = {id?: string; name: string; title?: string; version: string; description?: string; screenshot?: string};
+
+function ThemePreview({url, name}: {url?: string; name: string}) {
+    const [failed, setFailed] = useState(false);
+    let safeUrl = '';
+    try {
+        const parsed = new URL(url || '');
+        if (parsed.protocol === 'https:') safeUrl = parsed.href;
+    } catch { /* No valid preview URL. */ }
+    return <div className="theme-preview">
+        {safeUrl && !failed ? <img src={safeUrl} alt={`${name} 预览`} onError={() => setFailed(true)} /> : <span>暂无预览</span>}
+    </div>;
+}
 
 export default function ThemeMarket(props: any) {
     const [items, setItems] = useState<ThemeItem[]>([]);
@@ -51,11 +64,18 @@ export default function ThemeMarket(props: any) {
         </div>
         {error ? <Alert type="error" showIcon title="主题市场暂不可用" description={error}
             action={<Space><Link to="/options/extensions">市场设置</Link><Button onClick={() => setReload(value => value + 1)}>重试</Button></Space>} />
-            : <Spin spinning={loading}><Table rowKey={item => `${item.name}@${item.version}`} dataSource={filtered} pagination={false} columns={[
-                {title: '名称', render: (_: unknown, item: ThemeItem) => <>{item.title || item.name}<br /><small>{item.name}</small></>},
-                {title: '版本', dataIndex: 'version'}, {title: '描述', dataIndex: 'description'},
-                {title: '操作', render: (_: unknown, item: ThemeItem) => installed.includes(item.id || item.name)
-                    ? <Tag>已安装</Tag> : <Button type="link" disabled={busy} onClick={() => install(item)}>安装</Button>}
-            ]} /></Spin>}
+            : <Spin spinning={loading}>
+                {!loading && filtered.length === 0 ? <Empty description="没有找到主题" /> : <div className="theme-grid">
+                    {filtered.map(item => <div className="theme-card" key={`${item.name}@${item.version}`}>
+                        <ThemePreview key={item.screenshot || ''} url={item.screenshot} name={item.title || item.name} />
+                        <div className="theme-card-info">
+                            <div><strong>{item.title || item.name}</strong><div>版本 {item.version}</div></div>
+                            {installed.includes(item.id || item.name)
+                                ? <Tag>已安装</Tag> : <Button type="primary" disabled={busy} onClick={() => install(item)}>安装</Button>}
+                        </div>
+                        {item.description && <div className="theme-market-description">{item.description}</div>}
+                    </div>)}
+                </div>}
+            </Spin>}
     </div></div>;
 }

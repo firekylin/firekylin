@@ -644,6 +644,6 @@ and compatibility before running the local package manager. Only official `firek
 `@firekylin/plugin-*` packages are supported. Restart Firekylin and enable the plugin after installation.
 Under **外观设置 → 安装主题**, the theme market reads the configured theme Registry. Theme entries must
 include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
-`download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. The archive manifest
+`download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
 must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
 installing without replacing an existing theme. GitHub update configuration is separate work.

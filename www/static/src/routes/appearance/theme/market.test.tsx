@@ -11,15 +11,17 @@ afterEach(() => { cleanup(); vi.restoreAllMocks() });
 beforeEach(() => {
     window.SysConfig = {csrfToken: 'csrf'} as any;
     vi.mocked(axios.get).mockImplementation(async url => ({data: {errno: 0, data: url.includes('extension-settings')
-        ? {items: [{id: 'paper', name: 'paper', title: 'Paper', version: '1.0.0', description: 'Test'}]}
+        ? {items: [{id: 'paper', name: 'paper', title: 'Paper', version: '1.0.0', description: 'Test', screenshot: 'https://example.com/paper.png'}]}
         : {themes: []}}}) as any);
     vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {id: 'paper'}}} as any);
 });
 it('searches themes and requests installation of the selected version', async() => {
     vi.spyOn(Modal, 'confirm').mockImplementation((options: any) => { options.onOk(); return {} as any });
     const view = render(<MemoryRouter><ThemeMarket /></MemoryRouter>);
-    const row = (await view.findByText('Paper')).closest('tr') as HTMLElement;
-    fireEvent.click(within(row).getByRole('button', {name: /安\s*装/}));
+    const card = (await view.findByText('Paper')).closest('.theme-card') as HTMLElement;
+    expect(within(card).getByRole('img', {name: 'Paper 预览'})).toHaveAttribute('src', 'https://example.com/paper.png');
+    expect(within(card).getByText('版本 1.0.0')).toBeInTheDocument();
+    fireEvent.click(within(card).getByRole('button', {name: /安\s*装/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/marketplace',
         {operation: 'theme.install-registry', name: 'paper', version: '1.0.0'},
         {headers: {'X-CSRF-Token': 'csrf'}}));
@@ -31,4 +33,16 @@ it('shows a registry failure and links to settings', async() => {
     const view = render(<MemoryRouter><ThemeMarket /></MemoryRouter>);
     expect(await view.findByText('主题市场暂不可用')).toBeInTheDocument();
     expect(view.getByRole('link', {name: '市场设置'})).toHaveAttribute('href', '/options/extensions');
+});
+
+it('shows a placeholder when the preview is unavailable and the installed state', async() => {
+    vi.mocked(axios.get).mockImplementation(async url => ({data: {errno: 0, data: url.includes('extension-settings')
+        ? {items: [{id: 'paper', name: 'paper', title: 'Paper', version: '1.0.0', screenshot: 'https://example.com/paper.png'}]}
+        : {themes: [{id: 'paper'}]}}}) as any);
+    const view = render(<MemoryRouter><ThemeMarket /></MemoryRouter>);
+    const card = (await view.findByText('Paper')).closest('.theme-card') as HTMLElement;
+    fireEvent.error(within(card).getByRole('img', {name: 'Paper 预览'}));
+    expect(within(card).getByText('暂无预览')).toBeInTheDocument();
+    expect(within(card).getByText('已安装')).toBeInTheDocument();
+    expect(within(card).queryByRole('button', {name: /安\s*装/})).not.toBeInTheDocument();
 });
