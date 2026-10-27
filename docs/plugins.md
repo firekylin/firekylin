@@ -466,8 +466,19 @@ register(ctx) {
 ```
 
 一个面板可以包含多个页面，侧栏会自动生成二级导航。注册顺序要求为面板 → 页面 →
-表单/动作；同一插件内的 ID 必须唯一。页面 `load`、表单 `load/submit` 和动作 `handler`
+表单/动作；同一插件内的 ID 必须唯一。页面也可以省略 `panel`：此时无需注册面板，页面不会出现在侧栏，
+启用插件后可从插件管理列表的「配置」入口访问；多个独立页面会列在配置菜单中。页面 `load`、表单 `load/submit` 和动作 `handler`
 都会收到 `{ctx, user, pluginId}` 上下文。
+
+```js
+ctx.admin.registerPage({id: 'settings', title: '插件配置'});
+ctx.admin.registerForm({
+  id: 'settings', page: 'settings', title: '插件配置',
+  fields: [{name: 'label', type: 'text', label: '名称'}],
+  async load() { return {label: ''} },
+  async submit(values) { /* 保存配置 */ return {message: '已保存'} }
+});
+```
 
 编辑器、详情页或向导等不需要显示在侧栏中的页面可以设置 `menu: false`。页面仍属于指定
 Panel，并会正常注册 `/admin/plugins/<plugin-id>/<page-id>` 路由，可通过页面链接或后台

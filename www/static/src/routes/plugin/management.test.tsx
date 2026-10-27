@@ -10,6 +10,7 @@ vi.mock('../../utils/http', () => ({http: {get: vi.fn(), post: vi.fn()}}));
 vi.mock('../../components/breadcrumb', () => ({default: () => null}));
 afterEach(cleanup);
 beforeEach(() => {
+    globalThis.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} } as any;
     window.SysConfig = {csrfToken: 'token', pluginAdmin: []} as any;
     vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {plugins: [
         {id: 'one', name: 'One', version: '1', description: 'first', status: 'active', source: 'npm', reasons: []},
@@ -61,4 +62,21 @@ it('refreshes the list after deleting a plugin', async () => {
     fireEvent.click(view.getByRole('button', {name: '删除'}));
     confirm.mockRestore();
     await waitFor(() => expect(view.queryByText('Two')).not.toBeInTheDocument());
+});
+it('exposes all standalone pages through the configuration menu', async () => {
+    const descriptor = {id: 'demo', pages: [{id: 'general', title: '常规'}, {id: 'advanced', title: '高级'}], forms: []};
+    window.SysConfig.pluginAdmin = [descriptor] as any;
+    vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {plugins: [{id: 'demo', name: 'demo',
+        version: '1', description: '', status: 'active', source: 'local', reasons: []}]}}) as any);
+    const view = render(<MemoryRouter><PluginManagement /></MemoryRouter>);
+    fireEvent.click(view.getByRole('button', {name: '配置'}));
+    expect(await view.findByRole('link', {name: '常规'})).toHaveAttribute('href', '/plugins/demo/general');
+    expect(view.getByRole('link', {name: '高级'})).toHaveAttribute('href', '/plugins/demo/advanced');
+});
+it('links directly to a single standalone page even when it has no form', () => {
+    window.SysConfig.pluginAdmin = [{id: 'demo', pages: [{id: 'overview', title: '概览'}], forms: []}] as any;
+    vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {plugins: [{id: 'demo', name: 'demo',
+        version: '1', description: '', status: 'active', source: 'local', reasons: []}]}}) as any);
+    const view = render(<MemoryRouter><PluginManagement /></MemoryRouter>);
+    expect(view.getByRole('link', {name: '配置'})).toHaveAttribute('href', '/plugins/demo/overview');
 });
