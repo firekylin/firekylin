@@ -158,7 +158,10 @@ function SideBar(props: any) {
                                             <NavLink
                                                 to={child.url}
                                                 onClick={() => legacy.open(child.url)}
-                                                className={legacy.isRouteActive(child) ? 'active' : ''}
+                                                className={(child.url === route.url
+                                                    ? pathname.replace(/^\/admin(?=\/|$)/, '') === child.url
+                                                    : legacy.isRouteActive(child)) ? 'active' : ''}
+                                                end={child.url === route.url}
                                                 activeClassName="active"
                                             >
                                                 <span>{child.title}</span>

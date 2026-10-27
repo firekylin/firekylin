@@ -636,5 +636,8 @@ Registry documents use schema version 1 and a `packages` array. Registry fetchin
 `firekylin.lithub.cc/plugins` and `raw.githubusercontent.com/firekylin/plugins/` only, including redirects;
 responses are limited to 1 MiB and a 10-second timeout. The default URL points to
 `https://raw.githubusercontent.com/firekylin/plugins/main/registry.json`, which must exist before the
-default registry can be read. This stage provides registry configuration and retrieval; marketplace browsing,
-installation, and GitHub update configuration are separate work.
+default registry can be read. Under **插件管理 → 安装插件**, administrators can browse and install plugins
+from the configured Registry. Installation rechecks the selected package and version against the current Registry
+and compatibility before running the local package manager. Only official `firekylin-plugin-*` and
+`@firekylin/plugin-*` packages are supported. Restart Firekylin and enable the plugin after installation.
+Theme marketplace installation and GitHub update configuration are separate work.
