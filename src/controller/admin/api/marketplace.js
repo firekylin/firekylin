@@ -45,32 +45,44 @@ module.exports = class extends Base {
   }
 
   async mutate(operation) {
+    if (operation === 'theme.install') {
+      const encoded = String(this.post('archive') || '');
+      if (encoded.length > 28 * 1024 * 1024) return this.fail('INVALID_THEME_ARCHIVE_SIZE');
+      return this.respond(
+        () => this.installer().install(Buffer.from(encoded, 'base64'), { replace: this.post('replace') === true }),
+        result => this.reloadActiveTheme(result.id)
+      );
+    }
+    if (operation === 'theme.rollback') {
+      return this.respond(
+        () => this.installer().rollback(this.post('backup')),
+        result => this.reloadActiveTheme(result.id)
+      );
+    }
+    if (operation === 'theme.backups') return this.respond(() => this.installer().backups());
+    if (operation === 'plugin.install') {
+      return this.respond(() => this.pluginInstaller().install(this.post('name'), this.post('version')));
+    }
+    if (operation === 'plugin.uninstall') {
+      return this.respond(() => this.pluginInstaller().uninstall(this.post('name')));
+    }
+    return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
+  }
+
+  /**
+   * 统一处理「执行 → 回写响应」。
+   * success() 通过 think.prevent() 抛异常来中断后续流程，必须放在 try 之外，
+   * 否则会被 catch 当成错误转成 fail 响应。
+   */
+  async respond(run, onSuccess) {
+    let result;
     try {
-      if (operation === 'theme.install') {
-        const encoded = String(this.post('archive') || '');
-        if (encoded.length > 28 * 1024 * 1024) return this.fail('INVALID_THEME_ARCHIVE_SIZE');
-        const result = await this.installer().install(Buffer.from(encoded, 'base64'), {
-          replace: this.post('replace') === true
-        });
-        this.reloadActiveTheme(result.id);
-        return this.success(result);
-      }
-      if (operation === 'theme.rollback') {
-        const result = await this.installer().rollback(this.post('backup'));
-        this.reloadActiveTheme(result.id);
-        return this.success(result);
-      }
-      if (operation === 'theme.backups') return this.success(await this.installer().backups());
-      if (operation === 'plugin.install') {
-        return this.success(await this.pluginInstaller().install(this.post('name'), this.post('version')));
-      }
-      if (operation === 'plugin.uninstall') {
-        return this.success(await this.pluginInstaller().uninstall(this.post('name')));
-      }
-      return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
+      result = await run();
     } catch (error) {
       return this.fail(error.message);
     }
+    if (onSuccess) onSuccess(result);
+    return this.success(result);
   }
 
   reloadActiveTheme(theme) {

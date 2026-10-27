@@ -1,4 +1,16 @@
 ## Unreleased
+- 修复 APP_KEY 推送接口未 await 鉴权、导致鉴权被完全跳过的问题
+- 修复主题安装/回滚、插件安装/卸载、测试邮件因 `success()` 抛出的 `think.prevent()` 被 try/catch 捕获而恒返回失败的问题
+- 修复分类接口 `pid` 过滤被丢弃、父级自引用校验恒为 false 的问题
+- 修复导入器漏 await 导致「导入完成」先于数据落库返回的问题
+- 修复导入用户默认密码常量写在 prototype 上、实际取值为 undefined 的问题
+- 修复导出文章时把页面与附件一并导出的问题
+- 修复 Widget 同名不同参数复用同一实例的问题
+- 修复后台 referrer 校验使用后缀比较、可被 `evil-example.com` 绕过的问题
+- 修复重新安装时清空全部 options、连会话密钥与凭据一起清除的问题
+- 修复 legacy 数据库配置错误被静默吞掉并降级为 mysql 的问题
+- 修复后台分类/标签/用户编辑表单在重渲染时覆盖用户输入的问题
+- 修复 Cron 控制器覆盖 `this.model` 方法、标签与分类关联表删除未 await 的问题
 - 本地、AWS S3、阿里云 OSS 和腾讯云 COS 上传统一使用 files-sdk 服务
 - 新增 Cloudflare R2、MinIO、Backblaze B2、Wasabi、DigitalOcean Spaces 和 Vercel Blob 上传配置
 - 保留七牛和又拍云上传支持

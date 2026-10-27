@@ -81,5 +81,7 @@ class Base extends think.Service {
   }
 }
 
-Base.prototype.DEFAULT_USER_PWD = 'admin12345678';
+// 必须挂在构造函数上：子类（ghost/wordpress）通过 Base.DEFAULT_USER_PWD
+// 静态读取，写成 Base.prototype.DEFAULT_USER_PWD 时读到的是 undefined。
+Base.DEFAULT_USER_PWD = 'admin12345678';
 module.exports = Base;

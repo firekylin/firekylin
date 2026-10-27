@@ -3,18 +3,21 @@ const Base = require('./base');
 module.exports = class extends Base {
   async getAction() {
     let result;
-    if (this.get('pid')) {
-      this.modelInstance.where({ pid: this.get('pid') });
-    }
-    if (this.id) {
+    const pid = this.get('pid');
+    const withPostCount = item => {
+      item.post_cate = item.post_cate.length;
+      return item;
+    };
+    if (pid) {
+      // 之前这一分支没有接收查询结果，pid 过滤被静默丢弃。
+      result = await this.modelInstance.where({ pid }).select();
+      result = result.map(withPostCount);
+    } else if (this.id) {
       result = await this.modelInstance.where({ id: this.id }).find();
-      result.post_cate = result.post_cate.length;
+      result = withPostCount(result);
     } else {
       result = await this.modelInstance.select();
-      result = result.map(item => {
-        item.post_cate = item.post_cate.length;
-        return item;
-      });
+      result = result.map(withPostCount);
     }
     return this.success(result);
   }
@@ -35,7 +38,10 @@ module.exports = class extends Base {
     }
     const data = this.post();
     data.id = this.id;
-    if (data.id === parseInt(data.pid)) {
+    // data.id 来自 URL（字符串），data.pid 来自表单，两者需要统一成数字再比较，
+    // 否则严格相等永远为 false，自引用父级的校验形同虚设。
+    if (data.pid !== undefined && data.pid !== null && data.pid !== '' &&
+      Number(data.id) === Number(data.pid)) {
       return this.fail('CATE_PARENT_ERROR');
     }
     const rows = await this.modelInstance.saveCate(data);

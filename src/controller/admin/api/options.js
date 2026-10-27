@@ -48,12 +48,14 @@ module.exports = class extends Base {
       if (!config || typeof config !== 'object' || Array.isArray(config)) return this.fail('PARAMS_ERROR');
       const options = await this.model('options').getOptions(true);
       const saved = options.comment || {};
+      // success() 通过 think.prevent() 抛异常来中断后续流程，因此它不能写在 try
+      // 里面，否则会被下面的 catch 当成失败处理。
       try {
         await require('../../../service/comment').sendTestEmail({
           ...saved, ...config, smtpPass: config.smtpPass || saved.smtpPass || ''
         }, recipient, options);
-        return this.success({message: '测试邮件已提交给邮件服务器，请检查收件箱'});
       } catch (error) { return this.fail('MAIL_TEST_FAILED', error.message) }
+      return this.success({message: '测试邮件已提交给邮件服务器，请检查收件箱'});
     }
     if (type === '2faAuth') {
       const data = this.post();

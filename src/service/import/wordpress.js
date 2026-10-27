@@ -193,7 +193,8 @@ module.exports = class extends Base {
       page.markdown_content = this.toMarkdown(page.content);
       await this.pageModelInstance.addPost(page);
     });
-    Promise.all(pagesPromise);
+    // 必须 await：否则导入接口会在数据真正落库前就返回“导入 N 篇”。
+    await Promise.all(pagesPromise);
 
     return pages.length;
   }

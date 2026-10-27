@@ -51,7 +51,9 @@ module.exports = class extends Post {
 
   async postAction() {
     let post = this.post();
-    if (!this.checkAuth(post)) { return this.fail('POST_CONTENT_ERROR') }
+    // checkAuth 是异步的：漏掉 await 时返回值恒为 Promise（真值），
+    // app_key / auth_key 的校验会被完全跳过。
+    if (!await this.checkAuth(post)) { return this.fail('POST_CONTENT_ERROR') }
 
     // check pathname
     const exPost = await this.postModelInstance.where({pathname: post.pathname}).find();
