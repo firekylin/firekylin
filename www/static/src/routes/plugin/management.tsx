@@ -7,6 +7,11 @@ import BreadCrumb from '../../components/breadcrumb';
 type Plugin = {id: string; name: string; version: string; description: string; author: string;
     authorUrl: string; source: string; status: string; reasons: string[]};
 
+function npmUrl(name: string) {
+    return /^(?:@[a-z0-9][a-z0-9._~-]*\/)?[a-z0-9][a-z0-9._~-]*$/i.test(name)
+        ? `https://www.npmjs.com/package/${encodeURIComponent(name)}` : undefined;
+}
+
 function safeUrl(url: string) {
     try { const parsed = new URL(url); return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : undefined }
     catch { return undefined }
@@ -52,7 +57,7 @@ export default function PluginManagement(props: any) {
                 {title: '名称', dataIndex: 'name', render: (name: string, item: Plugin) => <>{name} {item.status === 'active' && <Tag color="green">已启用</Tag>}</>},
                 {title: '描述', render: (_: unknown, item: Plugin) => <div><div>{item.description}</div><small>
                     版本 {item.version} {item.author && <> | {safeUrl(item.authorUrl) ? <a href={safeUrl(item.authorUrl)} target="_blank" rel="noreferrer">@{item.author}</a> : `@${item.author}`}</>}
-                    {item.source === 'npm' && <> | <a href={`https://www.npmjs.com/package/${encodeURIComponent(item.name)}`} target="_blank" rel="noreferrer">详情</a></>}
+                    {npmUrl(item.name) && <> | <a href={npmUrl(item.name)} target="_blank" rel="noreferrer">查看详情</a></>}
                 </small></div>},
                 {title: '操作', render: (_: unknown, item: Plugin) => {
                     const extension = (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === item.id);

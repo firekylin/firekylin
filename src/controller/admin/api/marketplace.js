@@ -126,6 +126,7 @@ module.exports = class extends Base {
       }
       return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
     } catch (error) {
+      if (error.message === 'PREVENT_NEXT_PROCESS') throw error;
       return this.fail(error.message);
     }
   }

@@ -23,13 +23,17 @@ function pluginMetadata(root, manifest, status = 'error') {
   const manifestName = manifest && typeof manifest.name === 'string' ? manifest.name : '';
   const id = typeof metadata.id === 'string' && metadata.id || manifestName || path.basename(root);
   const permissions = metadata.permissions || manifest && manifest.permissions;
+  const author = manifest?.author;
+  const person = typeof author === 'string' ? /^\s*([^<(]*?)\s*(?:<[^>]*>)?\s*(?:\(([^)]+)\))?\s*$/.exec(author) : null;
+  const authorName = person ? person[1].trim() : typeof author?.name === 'string' ? author.name : '';
+  const authorUrl = person ? person[2] || '' : typeof author?.url === 'string' ? author.url : '';
   return {
     id,
     name: manifestName || id,
     version: manifest && typeof manifest.version === 'string' ? manifest.version : '0.0.0',
     description: manifest && typeof manifest.description === 'string' ? manifest.description : '',
-    author: typeof manifest?.author === 'string' ? manifest.author : manifest?.author?.name || '',
-    authorUrl: typeof manifest?.author?.url === 'string' ? manifest.author.url : '',
+    author: authorName,
+    authorUrl,
     permissions: Array.isArray(permissions) ? permissions : [],
     source: root.includes(`${path.sep}node_modules${path.sep}`) ? 'npm' : 'local',
     status

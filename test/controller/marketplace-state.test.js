@@ -75,3 +75,20 @@ test('local deletion rejects active plugins and paths outside the plugin directo
   assert.equal(fs.existsSync(root), false);
   assert.deepEqual(states, [['demo', false]]);
 });
+
+test('preserves ThinkJS response control flow after successful state changes', async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-response-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({name: 'demo', version: '1.0.0',
+    firekylin: {id: 'demo', entry: 'plugin.js', type: 'plugin'}}));
+  const previous = global.firekylin;
+  t.after(() => { global.firekylin = previous });
+  const states = [];
+  global.firekylin = {plugins: {discover: () => [root], stateStore: {set: async(...args) => states.push(args)}}};
+  const controller = new Controller();
+  controller.post = key => key === 'id' ? 'demo' : undefined;
+  controller.success = () => { throw new Error('PREVENT_NEXT_PROCESS') };
+  controller.fail = () => { throw new Error('unexpected failure response') };
+  await assert.rejects(controller.mutate('plugin.disable'), {message: 'PREVENT_NEXT_PROCESS'});
+  assert.deepEqual(states, [['demo', false]]);
+});

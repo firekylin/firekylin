@@ -75,3 +75,21 @@ test('lists symlinked themes only when their target stays inside the themes root
   assert.deepEqual(catalog.themes('linked').map(theme => theme.id), ['linked', 'targets']);
   assert.equal(catalog.themes('linked')[0].active, true);
 });
+
+test('reads author names and URLs from npm person strings and objects', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-authors-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  const roots = ['first', 'second'].map((id, index) => {
+    const directory = path.join(root, id);
+    fs.mkdirSync(directory);
+    fs.writeFileSync(path.join(directory, 'package.json'), JSON.stringify({name: id, version: '1.0.0',
+      author: index ? {name: 'Bob', url: 'https://example.org/bob'} : 'Alice <a@example.org> (https://example.org/alice)',
+      firekylin: {id, type: 'plugin', entry: 'plugin.js'}}));
+    return directory;
+  });
+  const catalog = new PackageCatalog({pluginManager: {plugins: new Map(), discover: () => roots},
+    firekylinVersion: '2.16.0'});
+  assert.deepEqual(catalog.plugins().map(({author, authorUrl}) => ({author, authorUrl})), [
+    {author: 'Alice', authorUrl: 'https://example.org/alice'}, {author: 'Bob', authorUrl: 'https://example.org/bob'}
+  ]);
+});

@@ -25,3 +25,12 @@ it('filters installed plugins and sends an enable request', async () => {
     await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/marketplace',
         {operation: 'plugin.enable', id: 'two', name: 'Two'}, {headers: {'X-CSRF-Token': 'token'}}));
 });
+it('shows author and npm links for locally installed packages', () => {
+    vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {plugins: [{id: 'demo', name: '@firekylin/plugin-demo',
+        version: '1', description: 'example', status: 'inactive', source: 'local', reasons: [],
+        author: 'Alice', authorUrl: 'https://example.org/alice'}]}}) as any);
+    const view = render(<MemoryRouter><PluginManagement /></MemoryRouter>);
+    expect(view.getByRole('link', {name: '@Alice'})).toHaveAttribute('href', 'https://example.org/alice');
+    expect(view.getByRole('link', {name: '查看详情'})).toHaveAttribute('href',
+        'https://www.npmjs.com/package/%40firekylin%2Fplugin-demo');
+});
