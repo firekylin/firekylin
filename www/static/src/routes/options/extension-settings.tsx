@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, Input, message, Spin} from 'antd';
 import axios from 'axios';
 import BreadCrumb from '../../components/breadcrumb';
+import ExtensionGitHub from './extension-github';
 
 type Settings = {pluginRegistry: string; themeRegistry: string};
 
@@ -45,6 +46,7 @@ export default function ExtensionSettings(props: any) {
                     <Button type="primary" htmlType="submit" loading={saving}>保存</Button>
                 </Form>
             </Card>
+            <ExtensionGitHub />
         </Spin>}
     </div></div>;
 }

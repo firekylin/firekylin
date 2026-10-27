@@ -647,3 +647,15 @@ include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `ve
 `download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
 must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
 installing without replacing an existing theme. GitHub update configuration is separate work.
+
+## GitHub repository connection
+
+Under **系统设置 → 扩展设置**, an administrator can connect a GitHub repository using its HTTPS URL and an
+access token. Firekylin checks the repository metadata and reported write access before saving the connection.
+The token is encrypted at rest and is never returned to the browser. Set `FIREKYLIN_EXTENSION_CREDENTIAL_KEY`
+to a stable secret of at least 16 characters, or the configured AI credential key or JWT secret will be used.
+Changing or losing that key requires reconnecting. Leaving the token blank keeps the existing token only when
+the repository is unchanged; removing the connection deletes the stored credential.
+
+The connection prepares for GitHub-based updates; it does not change the update mode or modify the repository.
+Local extension installation remains in effect until the GitHub update adapter is added.
