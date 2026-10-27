@@ -44,7 +44,7 @@ export default function ExtensionGitHub() {
                 <Radio.Group options={[{label: '本地管理', value: 'local'}, {label: 'GitHub', value: 'github'}]} />
             </Form.Item>
             {mode === 'github' && <>
-                <Alert type="info" showIcon title="GitHub 更新功能尚未启用，当前扩展安装仍使用本地管理。" style={{marginBottom: 20}} />
+                <Alert type="info" showIcon title={<span>GitHub 更新需要在网站仓库默认分支配置 <a href="https://github.com/firekylin/firekylin/blob/master/docs/plugins.md#github-repository-connection" target="_blank" rel="noreferrer">扩展更新工作流</a>。安装或删除扩展会提交工作流请求，由工作流创建待审核的 PR。</span>} style={{marginBottom: 20}} />
                 <Form.Item name="repository" label="Firekylin 网站仓库地址" rules={[{required: true, type: 'url'}]}>
                     <Input placeholder="https://github.com/owner/repository" />
                 </Form.Item>

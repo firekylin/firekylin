@@ -13,6 +13,8 @@ const path = require('path');
 const fs = require('fs/promises');
 const cluster = require('cluster');
 const {readManifest} = require('../../../plugin/manager');
+const {ExtensionGitHub} = require('../../../service/extension-github');
+const {GitHubExtensionDispatch} = require('../../../service/github-extension-dispatch');
 
 module.exports = class extends Base {
   catalog() {
@@ -55,14 +57,26 @@ module.exports = class extends Base {
     return new PluginInstaller({projectPath, readOnly: Boolean(process.env.VERCEL)});
   }
 
+  async githubConnection() {
+    return new ExtensionGitHub(this.model('options')).connection();
+  }
+
   async mutate(operation) {
     try {
+      const repositoryOperations = ['theme.install-registry', 'theme.install', 'theme.rollback',
+        'plugin.delete-local', 'plugin.install-registry', 'plugin.install', 'plugin.uninstall'];
+      const connection = repositoryOperations.includes(operation)
+        ? await this.githubConnection() : null;
+      const dispatch = change => new GitHubExtensionDispatch({connection}).dispatch(change);
+      if (connection && ['theme.install', 'theme.rollback', 'plugin.install'].includes(operation)) {
+        throw new Error('GITHUB_OPERATION_NOT_SUPPORTED');
+      }
       if (operation === 'theme.install-registry') {
         const name = this.post('name');
         const version = this.post('version');
         if (typeof name !== 'string' || !name || !semver.valid(version)) throw new Error('INVALID_THEME_SELECTION');
         const installer = this.installer();
-        installer.assertWritable();
+        if (!connection) installer.assertWritable();
         const settings = readSettings(await this.model('options').getOptions(true));
         const entries = (await fetchRegistry(settings.themeRegistry))
           .filter(item => item.type === 'theme' && item.name === name && item.version === version);
@@ -84,6 +98,8 @@ module.exports = class extends Base {
         if (inspected.id !== id || inspected.manifest.version !== version || inspected.manifest.name !== name) {
           throw new Error('THEME_ARCHIVE_METADATA_MISMATCH');
         }
+        if (connection) return this.success(await dispatch({operation: 'theme.install', name, id, version,
+          download: item.download, integrity: item.integrity}));
         const result = await installer.install(buffer, {replace: false});
         return this.success(result);
       }
@@ -131,7 +147,7 @@ module.exports = class extends Base {
         return this.success({restartRequired: !cluster.isWorker});
       }
       if (operation === 'plugin.delete-local') {
-        if (process.env.VERCEL) throw new Error('PACKAGE_INSTALLATION_READ_ONLY');
+        if (!connection && process.env.VERCEL) throw new Error('PACKAGE_INSTALLATION_READ_ONLY');
         const manager = global.firekylin.plugins;
         const id = this.post('id');
         const matches = manager.discover().filter(root => installedPluginId(root) === id);
@@ -141,6 +157,8 @@ module.exports = class extends Base {
         if (path.dirname(root) !== base) throw new Error('INVALID_LOCAL_PLUGIN_PATH');
         const record = manager.plugins.get(id);
         if (record?.status === 'active') throw new Error('PLUGIN_MUST_BE_DISABLED');
+        if (connection) return this.success(await dispatch({operation: 'plugin.delete-local',
+          id, directory: path.basename(root)}));
         await manager.stateStore.set(id, false);
         await fs.rm(root, {recursive: true});
         if (record?.root === root) manager.plugins.delete(id);
@@ -160,6 +178,7 @@ module.exports = class extends Base {
           firekylin: {...manifest.firekylin, type: 'plugin'}, engines: manifest.engines || {}});
         if (!check.compatible) throw new Error(check.reasons.join(', '));
         if (this.catalog().plugins().some(item => item.name === name)) throw new Error('PLUGIN_ALREADY_INSTALLED');
+        if (connection) return this.success(await dispatch({operation: 'plugin.install', name, version}));
         return this.success(await this.pluginInstaller().install(name, version));
       }
       if (operation === 'plugin.install') {
@@ -169,6 +188,7 @@ module.exports = class extends Base {
         const plugin = this.catalog().plugins().find(item => item.name === this.post('name'));
         if (!plugin || plugin.source !== 'npm') throw new Error('PLUGIN_NOT_FOUND');
         if (plugin.status === 'active') throw new Error('PLUGIN_MUST_BE_DISABLED');
+        if (connection) return this.success(await dispatch({operation: 'plugin.uninstall', name: plugin.name}));
         await global.firekylin.plugins.stateStore.set(plugin.id, false);
         const result = await this.pluginInstaller().uninstall(this.post('name'));
         return this.success(result);

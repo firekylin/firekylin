@@ -646,7 +646,7 @@ Under **外观设置 → 安装主题**, the theme market reads the configured t
 include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
 `download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
 must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
-installing without replacing an existing theme. GitHub update configuration is separate work.
+installing without replacing an existing theme.
 
 ## GitHub repository connection
 
@@ -658,5 +658,15 @@ to a stable secret of at least 16 characters, or the configured AI credential ke
 Changing or losing that key requires reconnecting. Leaving the token blank keeps the existing token only when
 the repository is unchanged; removing the connection deletes the stored credential.
 
-The connection prepares for GitHub-based updates; it does not change the update mode or modify the repository.
-Local extension installation remains in effect until the GitHub update adapter is added.
+With GitHub management selected, marketplace installations and plugin deletion submit a repository dispatch
+instead of changing local files. Copy `templates/firekylin-extensions.yml` from the installed Firekylin
+package to `.github/workflows/firekylin-extensions.yml` on the website repository’s default branch. The
+site project must depend on a Firekylin release containing `bin/github-extension-apply.js` and have exactly
+one supported lockfile (`pnpm-lock.yaml` or `package-lock.json`). The token must have repository Contents
+write access. The workflow needs Contents and Pull requests write permissions, and the repository must allow
+GitHub Actions to create pull requests. Review the generated PR and its lockfile before merging; deployment
+and plugin activation remain separate steps.
+
+A submitted request only means GitHub accepted the dispatch. Check the repository’s Actions page for
+workflow failures or its resulting PR. Direct package-management APIs and theme rollback are unavailable
+in GitHub mode; switch to local management if those operations are needed.

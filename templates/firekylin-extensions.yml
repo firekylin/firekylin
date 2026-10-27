@@ -1,0 +1,72 @@
+# Copy this file to .github/workflows/firekylin-extensions.yml on the default branch.
+name: Firekylin extension update
+on:
+  repository_dispatch:
+    types: [firekylin-extension-update]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare pnpm
+        if: ${{ hashFiles('pnpm-lock.yaml') != '' }}
+        run: |
+          corepack enable
+          if ! node -e "const p = require('./package.json').packageManager; if (p && !/^pnpm@[0-9]+\.[0-9]+\.[0-9]+(?:\+.*)?$/.test(p)) process.exit(1)"; then
+            echo 'Unsupported packageManager' >&2
+            exit 1
+          fi
+          if ! node -e "process.exit(require('./package.json').packageManager ? 0 : 1)"; then
+            corepack prepare pnpm@10.0.0 --activate
+          fi
+      - name: Install site dependencies without scripts
+        run: |
+          if [ -f pnpm-lock.yaml ] && [ ! -f package-lock.json ]; then
+            pnpm install --frozen-lockfile --ignore-scripts
+          elif [ -f package-lock.json ] && [ ! -f pnpm-lock.yaml ]; then
+            npm ci --ignore-scripts
+          else
+            echo 'Exactly one supported lockfile is required' >&2
+            exit 1
+          fi
+      - name: Apply extension update
+        id: apply
+        env:
+          FIREKYLIN_EXTENSION_CHANGE: ${{ toJSON(github.event.client_payload.change) }}
+        run: node node_modules/firekylin/bin/github-extension-apply.js
+      - name: Create branch and pull request
+        env:
+          REQUEST_ID: ${{ github.event.client_payload.requestId }}
+          GH_TOKEN: ${{ github.token }}
+          OPERATION: ${{ steps.apply.outputs.operation }}
+          THEME_ID: ${{ steps.apply.outputs.id }}
+          PLUGIN_DIRECTORY: ${{ steps.apply.outputs.directory }}
+        run: |
+          if ! [[ "$REQUEST_ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]]; then
+            echo 'Invalid request ID' >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "firekylin/extension-$REQUEST_ID"
+          case "$OPERATION" in
+            plugin.install|plugin.uninstall)
+              git add -- package.json
+              if [ -f pnpm-lock.yaml ]; then git add -- pnpm-lock.yaml; fi
+              if [ -f package-lock.json ]; then git add -- package-lock.json; fi
+              ;;
+            theme.install) git add -A -- "themes/$THEME_ID" ;;
+            plugin.delete-local) git add -A -- "plugins/$PLUGIN_DIRECTORY" ;;
+            *) echo 'Unsupported operation' >&2; exit 1 ;;
+          esac
+          git diff --cached --quiet && { echo 'No changes to submit' >&2; exit 1; }
+          git commit -m 'Update Firekylin extension'
+          git push origin "firekylin/extension-$REQUEST_ID"
+          gh pr create --head "firekylin/extension-$REQUEST_ID" --title 'Update Firekylin extension' \
+            --body 'Review this extension update and its generated lockfile before merging.'

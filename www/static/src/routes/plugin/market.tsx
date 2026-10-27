@@ -30,7 +30,7 @@ export default function PluginMarket(props: any) {
         return () => controller.abort();
     }, [reload]);
     const install = (item: MarketItem) => Modal.confirm({title: `安装 ${item.title || item.name}？`,
-        content: `版本 ${item.version}。安装后需要重启，再在插件管理中启用。`,
+        content: `版本 ${item.version}。本地安装后需要重启；GitHub 管理需要等待仓库 PR 合并。`,
         onOk: async() => {
             setBusy(true);
             try {
@@ -38,8 +38,13 @@ export default function PluginMarket(props: any) {
                     operation: 'plugin.install-registry', name: item.name, version: item.version
                 }, {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
                 if (result.data.errno !== 0) throw new Error(result.data.errmsg || '安装失败');
-                message.success('安装完成，请重启 Firekylin 后启用插件');
-                setReload(value => value + 1);
+                if (result.data.data?.status === 'submitted') {
+                    Modal.info({title: '已提交 GitHub 更新请求', content: <span>请到 <a target="_blank" rel="noreferrer"
+                        href={`https://github.com/${result.data.data.repository}/actions`}>GitHub Actions</a> 查看执行结果；合并生成的 PR 后生效。</span>});
+                } else {
+                    message.success('安装完成，请重启 Firekylin 后启用插件');
+                    setReload(value => value + 1);
+                }
             } catch (reason: any) { message.error(reason.response?.data?.errmsg || reason.message || '安装失败') }
             finally { setBusy(false) }
         }});
