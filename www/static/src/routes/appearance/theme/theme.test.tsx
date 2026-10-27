@@ -20,8 +20,10 @@ describe('theme management', () => {
             setData: vi.fn(), themeSelect: vi.fn()
         };
         window.SysConfig = {options: {theme: 'one'}} as any;
-        const view = render(<MemoryRouter><ThemeForm themeStore={store as any} {...({} as any)} /></MemoryRouter>);
-        expect(view.getByRole('link', {name: '安装主题'})).toHaveAttribute('href', '/appearance/install-theme');
+        const push = vi.fn();
+        const view = render(<MemoryRouter><ThemeForm themeStore={store as any} {...({history: {push}} as any)} /></MemoryRouter>);
+        fireEvent.click(view.getByRole('button', {name: '安装主题'}));
+        expect(push).toHaveBeenCalledWith('/appearance/install-theme');
         fireEvent.change(view.getByPlaceholderText('搜索主题'), {target: {value: 'two'}});
         expect(view.queryByText('One')).not.toBeInTheDocument();
         const card = view.getByText('Two').closest('.theme-card') as HTMLElement;

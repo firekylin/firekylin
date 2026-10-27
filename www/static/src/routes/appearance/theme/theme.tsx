@@ -119,7 +119,7 @@ export function ThemeForm(props: ThemeProps) {
                         <div className="theme-header-actions">
                             <Input.Search className="theme-search" placeholder="搜索主题" value={state.search}
                                 onChange={event => legacy.setState({search: event.target.value})} />
-                            <Link to="/appearance/install-theme" className="ant-btn ant-btn-primary">安装主题</Link>
+                            <Button type="primary" onClick={() => props.history.push('/appearance/install-theme')}>安装主题</Button>
                         </div>
                     </div>
                     <div className="theme-grid">
