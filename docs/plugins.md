@@ -466,8 +466,20 @@ register(ctx) {
 ```
 
 一个面板可以包含多个页面，侧栏会自动生成二级导航。注册顺序要求为面板 → 页面 →
-表单/动作；同一插件内的 ID 必须唯一。页面 `load`、表单 `load/submit` 和动作 `handler`
+表单/动作；同一插件内的 ID 必须唯一。页面也可以省略 `panel`：此时无需注册面板，页面不会出现在侧栏，
+其中 ID 为 `settings` 的页面可在插件启用后从插件管理列表的「配置」入口访问；其他独立页面可通过路由访问。
+页面 `load`、表单 `load/submit` 和动作 `handler`
 都会收到 `{ctx, user, pluginId}` 上下文。
+
+```js
+ctx.admin.registerPage({id: 'settings', title: '插件配置'});
+ctx.admin.registerForm({
+  id: 'settings', page: 'settings', title: '插件配置',
+  fields: [{name: 'label', type: 'text', label: '名称'}],
+  async load() { return {label: ''} },
+  async submit(values) { /* 保存配置 */ return {message: '已保存'} }
+});
+```
 
 编辑器、详情页或向导等不需要显示在侧栏中的页面可以设置 `menu: false`。页面仍属于指定
 Panel，并会正常注册 `/admin/plugins/<plugin-id>/<page-id>` 路由，可通过页面链接或后台
@@ -606,3 +618,13 @@ module.exports = {
 - 管理员路由使用 `auth: 'admin'` 和 CSRF；
 - 不要把数据库连接、密钥或任意 Node 模块直接暴露给 Eta；
 - 插件属于可信服务端代码，安装前应审查其依赖和文件读写行为。
+
+## Installing and enabling plugins
+
+Installed plugins and enabled plugins are separate. On the first startup after upgrading to this feature,
+existing discovered plugins retain their previous automatic activation behavior. Plugins discovered later
+start disabled; an administrator can enable them in **插件管理 → 已安装插件**. Disabling a plugin keeps
+its files and configuration. Disable an active plugin before deleting it.
+
+State changes reload clustered workers. In a single-process deployment, restart Firekylin to apply them.
+The list shows runtime compatibility problems and links to an active plugin's settings when available.

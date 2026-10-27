@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
+const {readManifest} = require('../plugin/manager');
 
 function readJson(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')) } catch { return null }
@@ -13,20 +14,34 @@ function isInside(root, target) {
   return relative === '' || (!relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative));
 }
 
+function manifestId(manifest) {
+  return manifest?.firekylin?.id || manifest?.name;
+}
+
 function pluginMetadata(root, manifest, status = 'error') {
   const metadata = manifest && manifest.firekylin || {};
   const manifestName = manifest && typeof manifest.name === 'string' ? manifest.name : '';
   const id = typeof metadata.id === 'string' && metadata.id || manifestName || path.basename(root);
   const permissions = metadata.permissions || manifest && manifest.permissions;
+  const author = manifest?.author;
+  const person = typeof author === 'string' ? /^\s*([^<(]*?)\s*(?:<[^>]*>)?\s*(?:\(([^)]+)\))?\s*$/.exec(author) : null;
+  const authorName = person ? person[1].trim() : typeof author?.name === 'string' ? author.name : '';
+  const authorUrl = person ? person[2] || '' : typeof author?.url === 'string' ? author.url : '';
   return {
     id,
     name: manifestName || id,
     version: manifest && typeof manifest.version === 'string' ? manifest.version : '0.0.0',
     description: manifest && typeof manifest.description === 'string' ? manifest.description : '',
+    author: authorName,
+    authorUrl,
     permissions: Array.isArray(permissions) ? permissions : [],
     source: root.includes(`${path.sep}node_modules${path.sep}`) ? 'npm' : 'local',
     status
   };
+}
+
+function installedPluginId(root) {
+  return pluginMetadata(root, readJson(path.join(root, 'package.json'))).id;
 }
 
 function compatibility(manifest, runtime) {
@@ -60,10 +75,24 @@ class PackageCatalog {
     } catch (error) {
       this.pluginManager.logger?.error?.(`[marketplace] Unable to discover installed plugins: ${error.message}`);
     }
-    return [...new Set([...roots, ...records.keys()])].map(root => {
+    return [...new Set([...roots, ...[...records.keys()].filter(root => fs.existsSync(root))])].map(root => {
       const record = records.get(root);
-      return pluginMetadata(root, record ? record.manifest : readJson(path.join(root, 'package.json')),
-        record ? record.status : 'error');
+      const manifest = record ? record.manifest : readJson(path.join(root, 'package.json'));
+      const state = this.pluginManager.states?.get(manifestId(manifest));
+      const inactive = state?.enabled === false || (this.pluginManager.stateStore && !state);
+      const item = pluginMetadata(root, manifest, record ? record.status : inactive ? 'inactive' : 'error');
+      const result = compatibility(manifest && {...manifest,
+        firekylin: {...manifest.firekylin, type: 'plugin'}}, this.runtime);
+      item.reasons = result.reasons;
+      try {
+        const validated = readManifest(root);
+        const entry = path.resolve(root, validated.entry);
+        if (!isInside(root, entry) || !fs.existsSync(entry) || !fs.statSync(entry).isFile()) {
+          item.reasons.push('PLUGIN_ENTRY_MISSING');
+        }
+      } catch { item.reasons.push('INVALID_PLUGIN_MANIFEST') }
+      if (record?.status === 'error') item.reasons.push('PLUGIN_ACTIVATION_FAILED');
+      return item;
     }).sort((a, b) => a.id.localeCompare(b.id));
   }
 
@@ -104,4 +133,4 @@ class PackageCatalog {
   }
 }
 
-module.exports = {PackageCatalog, compatibility};
+module.exports = {PackageCatalog, compatibility, installedPluginId};

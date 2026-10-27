@@ -17,6 +17,7 @@ const Appearance = lazy(() => import('./appearance/appearance'));
 const Tools = lazy(() => import('./tools/tools'));
 const Options = lazy(() => import('./options/options'));
 const Comment = lazy(() => import('./comment/comment'));
+const PluginManagement = lazy(() => import('./plugin/management'));
 const PluginAdmin = lazy(() => import('./plugin/plugin-admin'));
 const Media = lazy(() => import('./media/media'));
 
@@ -54,6 +55,7 @@ function Container(props: any) {
                         <Route path="/tools" component={Tools} />
                         <Route path="/options" component={Options} />
                         <Route path="/comment" component={Comment} />
+                        <Route path="/plugin-management" component={PluginManagement} />
                         <Route
                             path="/plugins/:pluginId/:pageId"
                             component={PluginAdmin}

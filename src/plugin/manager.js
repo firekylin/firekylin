@@ -83,7 +83,8 @@ function resolveInside(root, entry, label) {
 }
 
 class PluginManager {
-  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi, aiStore, aiAudit} = {}) {
+  constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi,
+    aiStore, aiAudit, stateStore} = {}) {
     this.projectPath = projectPath || process.cwd();
     this.config = config || {};
     this.logger = logger || console;
@@ -102,6 +103,7 @@ class PluginManager {
     this.plugins = new Map();
     this.states = new Map();
     this.packageApi = packageApi;
+    this.stateStore = stateStore;
   }
 
   logError(error, listener) {
@@ -176,10 +178,20 @@ class PluginManager {
   }
 
   async load() {
-    for (const pluginRoot of this.discover()) {
+    const roots = this.discover();
+    const manifests = new Map();
+    for (const root of roots) {
+      try { manifests.set(root, readManifest(root)) } catch (error) {
+        this.logger.error?.(`[plugin] Unable to inspect ${root}: ${error.message}`);
+      }
+    }
+    if (this.stateStore) await this.stateStore.initialize([...manifests.values()].map(manifest => manifest.id));
+    for (const [pluginRoot, manifest] of manifests) {
       try {
-        const record = this.loadManifest(pluginRoot);
-        this.states.set(record.manifest.id, {enabled: true, version: record.manifest.version});
+        const enabled = this.stateStore ? await this.stateStore.enabled(manifest.id) : true;
+        this.states.set(manifest.id, {enabled, version: manifest.version});
+        if (!enabled) continue;
+        this.loadManifest(pluginRoot);
       } catch (error) {
         this.logger.error?.(`[plugin] Unable to load ${pluginRoot}: ${error.message}`);
       }

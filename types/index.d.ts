@@ -64,7 +64,8 @@ declare namespace Firekylin {
 
   interface AdminPageDefinition {
     id: string;
-    panel: string;
+    /** Omit to expose this page through plugin configuration without adding a sidebar item. */
+    panel?: string;
     title: string;
     description?: string;
     order?: number;

@@ -185,8 +185,8 @@ class AdminRegistry {
   registerPage(definition, pluginId = 'core') {
     if (!definition || typeof definition !== 'object') throw new TypeError('Admin page must be an object');
     const id = identifier(definition.id, 'Admin page id');
-    const panel = identifier(definition.panel, `Admin page ${id} panel`);
-    if (!this.panels.has(this.key(pluginId, panel))) throw new Error(`Unknown admin panel: ${panel}`);
+    const panel = definition.panel === undefined ? undefined : identifier(definition.panel, `Admin page ${id} panel`);
+    if (panel && !this.panels.has(this.key(pluginId, panel))) throw new Error(`Unknown admin panel: ${panel}`);
     const key = this.key(pluginId, id);
     if (this.pages.has(key)) throw new Error(`Admin page already registered: ${id}`);
     const page = {
@@ -196,7 +196,7 @@ class AdminRegistry {
       title: requiredString(definition.title, `Admin page ${id} title`),
       description: typeof definition.description === 'string' ? definition.description : undefined,
       order: Number.isFinite(definition.order) ? definition.order : 100,
-      menu: definition.menu !== false,
+      menu: Boolean(panel) && definition.menu !== false,
       load: typeof definition.load === 'function' ? definition.load : async() => ({})
     };
     this.pages.set(key, page);

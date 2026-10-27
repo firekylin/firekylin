@@ -159,3 +159,16 @@ test('admin pages can be routable without appearing in the panel menu', async() 
     content: {sections: [{type: 'text', content: 'hidden page'}]}
   });
 });
+
+test('standalone pages are routable without a panel and can own forms', async() => {
+  const admin = new AdminRegistry();
+  admin.registerPage({id: 'preferences', title: 'Preferences'}, 'example');
+  admin.registerForm({id: 'form', page: 'preferences', title: 'Form',
+    fields: [{name: 'value', label: 'Value'}], submit: values => values}, 'example');
+  const descriptor = admin.manifest()[0];
+  assert.equal(descriptor.panels.length, 0);
+  assert.equal(descriptor.pages[0].panel, undefined);
+  assert.equal(descriptor.pages[0].menu, false);
+  assert.deepEqual((await admin.loadPage('example', 'preferences', {})).content, {});
+  assert.deepEqual(await admin.submitForm('example', 'form', {value: 'ok'}, {}), {value: 'ok'});
+});
