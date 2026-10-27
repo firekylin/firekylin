@@ -16,6 +16,7 @@
     "watch": "vite build --watch",
     "preview": "vite preview",
     "test:widget": "node --test test/widget/*.test.js",
+    "test:extensions": "node --test test/service/extension-registry.test.js test/controller/extension-settings.test.js && vitest run --config vitest.config.ts www/static/src/routes/options/extension-settings.test.tsx",
     "test:admin": "node --test test/service/admin-assets.test.js test/service/admin-router.test.js test/service/admin-hooks.test.js",
     "test:admin-ui": "vitest run --config vitest.config.ts",
     "test:ai-audit": "node --test test/service/ai-audit*.test.js test/controller/ai-logs.test.js",
