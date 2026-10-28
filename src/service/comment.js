@@ -204,7 +204,12 @@ module.exports = class extends think.Service {
     const postIds = new Map();
     const resolvePostId = async url => {
       if (postIds.has(url)) return postIds.get(url);
-      const id = await resolveCommentPostId(controller, url, options);
+      let id = await resolveCommentPostId(controller, url, options);
+      if (id) {
+        const post = await controller.model('post').where({id}).field('id,options')
+          .find();
+        if (!this.canAccessProtectedComments(controller, post)) id = null;
+      }
       postIds.set(url, id);
       return id;
     };
@@ -257,7 +262,17 @@ module.exports = class extends think.Service {
         avatar: avatarService
       }
     });
-    return {core, users, options, config, tokenService, avatarService};
+    return {core, users, options, config, tokenService, avatarService, resolvePostId};
+  }
+
+  canAccessProtectedComments(controller, post) {
+    if (!post || !post.id) return false;
+    let options = post.options || {};
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options) || {} } catch { return false }
+    }
+    if (!options.postPasswordHash) return true;
+    return controller.service('post-protection').hasCommentAccess(controller.ctx, {...post, options});
   }
 
   async context(controller, users, core, tokenService, avatarService) {
@@ -312,6 +327,7 @@ module.exports = class extends think.Service {
       }
     }
     if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
+    if (!this.canAccessProtectedComments(controller, post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
 

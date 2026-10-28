@@ -487,7 +487,7 @@ function Article(props: ArticleProps) {
                         <section className="category">
                             <h5>公开度</h5>
                             <ArticleControlPublic
-                                allowPassword={!legacy.isPage()}
+                                allowPassword={true}
                                 isPublic={legacy.state.passwordMode || (articleInfo.options.passwordProtected && !legacy.state.clearPostPassword) ? 'password' : articleInfo.is_public}
                                 handlePublicChange={(e) => legacy.handlePublicChange(e)}
                             />

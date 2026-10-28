@@ -31,6 +31,26 @@ test('unlock validates only the current request without persisting access state'
   assert.equal(await protection.unlock(post, 'secret'), true);
 });
 
+test('comment access is scoped to the content and revoked on password change', async() => {
+  const protection = new PostProtection();
+  const post = {id: 42, options: {postPasswordHash: await protection.hash('secret')}};
+  const values = new Map(); let attributes;
+  const ctx = {secure: true, cookies: {
+    set(name, value, options) { values.set(name, value); attributes = options },
+    get(name) { return values.get(name) }
+  }};
+  protection.grantCommentAccess(ctx, post);
+  assert.equal(attributes.httpOnly, true);
+  assert.equal(attributes.secure, true);
+  assert.equal(attributes.sameSite, 'lax');
+  assert.equal(protection.hasCommentAccess(ctx, post), true);
+  assert.equal(protection.hasCommentAccess(ctx, {...post, id: 43}), false);
+  const changed = {id: 42, options: {postPasswordHash: await protection.hash('new secret')}};
+  assert.equal(protection.hasCommentAccess(ctx, changed), false);
+  values.set('fk_comment_access_42', 'forged');
+  assert.equal(protection.hasCommentAccess(ctx, post), false);
+});
+
 test('password prompt escapes its action URL', () => {
   const protection = new PostProtection();
   const html = protection.form({...context(), path: '/post/"><script>alert(1)</script>'}, true);

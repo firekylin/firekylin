@@ -47,6 +47,27 @@ module.exports = class extends think.Service {
     return this.verify(password, post.options.postPasswordHash);
   }
 
+  commentAccessToken(post) {
+    const hash = post && post.options && post.options.postPasswordHash;
+    if (!Number.isSafeInteger(Number(post && post.id)) || Number(post.id) <= 0 ||
+      typeof hash !== 'string' || !hash) return '';
+    return crypto.createHmac('sha256', hash).update(`firekylin-comment-access:${post.id}`).digest('base64url');
+  }
+
+  grantCommentAccess(ctx, post) {
+    const token = this.commentAccessToken(post);
+    if (!token || !ctx.cookies) return;
+    ctx.cookies.set(`fk_comment_access_${post.id}`, token, {httpOnly: true, sameSite: 'lax', secure: ctx.secure, path: '/'});
+  }
+
+  hasCommentAccess(ctx, post) {
+    const expected = this.commentAccessToken(post);
+    if (!expected || !ctx.cookies) return false;
+    const actual = ctx.cookies.get(`fk_comment_access_${post.id}`) || '';
+    const left = Buffer.from(actual), right = Buffer.from(expected);
+    return left.length === right.length && crypto.timingSafeEqual(left, right);
+  }
+
   form(ctx, error = false) {
     const action = escapeHtml(ctx.state && ctx.state.originalPermalink || ctx.path || ctx.url);
     return `<form class="post-password-form" method="post" action="${action}">

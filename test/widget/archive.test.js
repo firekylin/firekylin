@@ -161,6 +161,29 @@ test('preview query without preview payload does not bypass stored post protecti
   assert.equal(archive.row.options.postPasswordHash, undefined);
 });
 
+test('password protected pages hide content and theme fields until unlocked', async() => {
+  const post = {setRelation() { return this }, where() { return this }, async find() {
+    return {id: 23, pathname: 'secret', title: 'Private title', content: 'Secret content',
+      markdown_content: 'Secret markdown', allow_comment: 1,
+      options: JSON.stringify({postPasswordHash: 'hash', template: 'photos.eta', fields: {cover: '/secret.jpg'}})};
+  }};
+  const protection = {unlock: async(_post, password) => password === 'correct', form: () => '<form>password</form>'};
+  const make = (method, body) => new Archive(createController({params: {pathname: 'secret'}, models: {post},
+    services: {'post-protection': protection}, method, body}), {type: 'page'});
+  const locked = make('GET', {}); await locked.execute(); locked.next();
+  assert.equal(locked.title(), '此内容被密码保护');
+  assert.equal(locked.content(), '<form>password</form>');
+  assert.equal(locked.row.markdown_content, '');
+  assert.deepEqual(locked.row.options, {});
+  assert.deepEqual(locked.row.fields, {});
+  assert.equal(locked.allow('comment'), false);
+  const unlocked = make('POST', {protectPassword: 'correct'}); await unlocked.execute(); unlocked.next();
+  assert.equal(unlocked.title(), 'Private title');
+  assert.equal(unlocked.content(), 'Secret content');
+  assert.equal(unlocked.row.options.template, 'photos.eta');
+  assert.equal(unlocked.row.options.postPasswordHash, undefined);
+});
+
 test('correct password unlocks only the current POST request', async() => {
   const post = {
     async getPostDetail() {

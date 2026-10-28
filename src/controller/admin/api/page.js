@@ -12,7 +12,19 @@ module.exports = class extends Post {
     });
   }
 
-  getAction(self) {
+  async getAction(self) {
+    if (this.id) {
+      const page = await this.modelInstance.where({id: this.id}).find();
+      if (think.isEmpty(page)) return this.fail('PAGE_NOT_EXIST');
+      let options = page.options || {};
+      if (typeof options === 'string') {
+        try { options = JSON.parse(options) || {} } catch { options = {} }
+      }
+      options.passwordProtected = Boolean(options.postPasswordHash);
+      delete options.postPasswordHash;
+      page.options = options;
+      return this.success(page);
+    }
     if (!this.id) {
       const field = [
         'id',
@@ -45,6 +57,7 @@ module.exports = class extends Post {
 
     data.type = 1;
     data.user_id = this.userInfo.id;
+    data = await this.prepareProtection(data);
     data = await this.postModel.getContentAndSummary(data);
     data = this.postModel.getPostTime(data);
 
@@ -57,14 +70,15 @@ module.exports = class extends Post {
       return this.fail('PARAMS_ERROR');
     }
 
+    const page = await this.modelInstance.where({id: this.id}).find();
+    if (think.isEmpty(page)) return this.fail('PAGE_NOT_EXIST');
     if (this.userInfo.type !== 1) {
-      const page = await this.modelInstance.where({id: this.id}).find();
       if (page.user_id !== this.userInfo.id) {
         return this.fail('USER_NO_PERMISSION');
       }
     }
 
-    let data = this.post();
+    let data = await this.prepareProtection(this.post(), page.options);
     data.id = this.id;
     data.type = 1;
     data = await this.postModel.getContentAndSummary(data);
