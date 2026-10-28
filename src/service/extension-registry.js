@@ -33,8 +33,32 @@ function readSettings(options) {
   return normalizeSettings(value);
 }
 
-async function fetchBuffer(url, {fetcher = fetch, signal = AbortSignal.timeout(10000), maxBytes = MAX_BYTES} = {}) {
-  let current = trustedUrl(url);
+function themeReleaseUrl(value) {
+  let url;
+  try { url = new URL(value) } catch { return null }
+  if (url.protocol !== 'https:' || url.hostname !== 'github.com' || url.username || url.password || url.port ||
+      url.search || url.hash) return null;
+  const match = /^\/firekylin\/themes\/releases\/download\/([^/]+)\/([^/]+)$/.exec(url.pathname);
+  if (!match) return null;
+  try {
+    const tag = decodeURIComponent(match[1]);
+    const filename = decodeURIComponent(match[2]);
+    if (!/^[a-z0-9][a-z0-9._+-]*$/i.test(tag) || !/^[a-z0-9][a-z0-9._+-]*\.zip$/i.test(filename)) return null;
+  } catch { return null }
+  return url;
+}
+
+function releaseAssetUrl(value) {
+  const url = new URL(value);
+  if (url.protocol !== 'https:' || url.hostname !== 'release-assets.githubusercontent.com' ||
+      url.username || url.password || url.port || url.hash) throw new Error('UNTRUSTED_REGISTRY_URL');
+  return url;
+}
+
+async function fetchBuffer(url, {fetcher = fetch, signal = AbortSignal.timeout(10000), maxBytes = MAX_BYTES,
+  allowThemeRelease = false} = {}) {
+  const release = allowThemeRelease && themeReleaseUrl(url);
+  let current = release || trustedUrl(url);
   for (let redirects = 0; redirects < 4; redirects++) {
     const response = await fetcher(current, {redirect: 'manual', signal,
       headers: {'user-agent': 'Firekylin-Extension-Registry/1'}});
@@ -42,7 +66,8 @@ async function fetchBuffer(url, {fetcher = fetch, signal = AbortSignal.timeout(1
       const location = response.headers.get('location');
       if (!location) throw new Error('INVALID_REGISTRY_REDIRECT');
       await response.body?.cancel();
-      current = trustedUrl(new URL(location, current).href);
+      const next = new URL(location, current).href;
+      current = release ? releaseAssetUrl(next) : trustedUrl(next);
       continue;
     }
     if (!response.ok) throw new Error(`REGISTRY_HTTP_${response.status}`);

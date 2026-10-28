@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const {trustedUrl, normalizeSettings, readSettings, fetchRegistry, MAX_BYTES} = require('../../src/service/extension-registry');
+const {trustedUrl, normalizeSettings, readSettings, fetchRegistry, fetchBuffer, MAX_BYTES} = require('../../src/service/extension-registry');
 
 function response(body, options = {}) {
   return new Response(body, {status: options.status || 200, headers: options.headers});
@@ -55,4 +55,27 @@ test('uses separate default plugin and theme registries and preserves saved sett
   assert.deepEqual(normalizeSettings({pluginRegistry: 'https://firekylin.lithub.cc/plugins/custom'}),
     {pluginRegistry: 'https://firekylin.lithub.cc/plugins/custom', themeRegistry: theme});
   assert.equal(trustedUrl(theme).href, theme);
+});
+
+
+test('theme archives allow only the official GitHub release and its asset redirect', async() => {
+  const release = 'https://github.com/firekylin/themes/releases/download/firekylin-v0.1.0/firekylin-0.1.0.zip';
+  const calls = [];
+  const data = await fetchBuffer(release, {allowThemeRelease: true, fetcher: async url => {
+    calls.push(url.href);
+    return calls.length === 1 ? response(null, {status: 302,
+      headers: {location: 'https://release-assets.githubusercontent.com/path?signature=test'}}) : response('archive');
+  }});
+  assert.equal(data.toString(), 'archive');
+  assert.equal(calls.length, 2);
+  await assert.rejects(fetchBuffer(release, {fetcher: async() => response('archive')}), /UNTRUSTED/);
+  for (const url of ['https://github.com/other/themes/releases/download/v1/a.zip',
+    'https://github.com/firekylin/themes/releases/download/v1/a.zip?redirect=1',
+    'https://github.com/firekylin/themes/releases/download/v1/a%2Fbad.zip',
+    'https://release-assets.githubusercontent.com/path']) {
+    await assert.rejects(fetchBuffer(url, {allowThemeRelease: true, fetcher: async() => response('x')}), /UNTRUSTED/);
+  }
+  await assert.rejects(fetchBuffer(release, {allowThemeRelease: true, fetcher: async() => response(null, {
+    status: 302, headers: {location: 'https://example.com/evil.zip'}
+  })}), /UNTRUSTED/);
 });
