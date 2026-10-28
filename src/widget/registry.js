@@ -289,6 +289,9 @@ class WidgetFactory {
       await instance.execute();
       return instance;
     } catch (error) {
+      // HTTP errors carry their response status and headers; wrapping them would turn
+      // an intentional 404 (or other client error) into a 500 in the trace middleware.
+      if (error && Number.isInteger(error.status) && error.status >= 400 && error.status <= 599) throw error;
       throw new Error(`Widget "${name}" execution failed: ${error.message}`, {cause: error});
     }
   }
