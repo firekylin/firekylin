@@ -7,6 +7,7 @@ const MarkdownIt = require('markdown-it');
 const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
+const userAgent = require('./comment-user-agent');
 const permalink = require('./permalink');
 
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
@@ -259,6 +260,7 @@ module.exports = class extends think.Service {
           verify: async(value, hash) => controller.model('user').checkPassword({password: hash}, think.md5(options.password_salt + value))
         },
         markdown: {render: renderMarkdown},
+        userAgent,
         avatar: avatarService
       }
     });

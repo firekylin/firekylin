@@ -68,6 +68,18 @@ test('vendored comment core keeps waiting comments private', async() => {
   assert.equal((await core.comment.list({path: '/post/a.html'}, ctx)).count, 0);
 });
 
+test('comment list includes parsed browser and operating system', async() => {
+  const core = createCommentCore({
+    models: {Comment: new MemoryModel(), Counter: new MemoryModel(), Users: new MemoryModel()},
+    services: {userAgent: require('../../src/service/comment-user-agent')}
+  });
+  const ctx = {headers: {}, state: {}, ip: '127.0.0.1'};
+  await core.comment.create({url: '/post/a.html', comment: 'Hello', nick: 'Tester', ua: 'Windows NT 10.0 Chrome/120.0 Safari/537.36'}, ctx);
+  const list = await core.comment.list({path: '/post/a.html'}, ctx);
+  assert.equal(list.data[0].browser, 'Chrome 120');
+  assert.equal(list.data[0].os, 'Windows');
+});
+
 test('vendored comment core rejects anonymous comments when login is required', async() => {
   const core = createCommentCore({
     models: {Comment: new MemoryModel(), Counter: new MemoryModel(), Users: new MemoryModel()},
