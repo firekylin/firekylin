@@ -91,15 +91,18 @@ module.exports = class extends ContentsWidget {
     let error = false;
     if (this.ctx.method === 'POST' && this.controller.post('protectPassword')) {
       if (await protection.unlock(detail, this.controller.post('protectPassword'))) {
+        protection.grantCommentAccess?.(this.ctx, detail);
         delete detail.options.postPasswordHash;
         return detail;
       }
       error = true;
     }
 
-    delete detail.options.postPasswordHash;
+    // Theme-specific options and Markdown may contain private metadata or content.
+    detail.options = {};
     detail.title = '此内容被密码保护';
     detail.content = protection.form(this.ctx, error);
+    detail.markdown_content = '';
     detail.summary = '这篇文章受密码保护。';
     detail.allow_comment = 0;
     detail.password_protected = true;
@@ -107,8 +110,8 @@ module.exports = class extends ContentsWidget {
   }
 
   async executePage() {
-    let detail = await this.getPreview();
-    detail = detail || await this.model('post')
+    const preview = await this.getPreview();
+    let detail = preview || await this.model('post')
       .setRelation(false)
       .where({
         pathname: this.controller.get('pathname'),
@@ -117,6 +120,7 @@ module.exports = class extends ContentsWidget {
         status: 3
       })
       .find();
+    detail = await this.protect(detail, Boolean(preview));
     if (!think.isEmpty(detail)) this.push(Object.assign({type: 1}, detail));
   }
 

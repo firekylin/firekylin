@@ -68,7 +68,7 @@ module.exports = class extends Base {
     this.archive = archive;
 
     let template = 'page';
-    if (archive.have()) {
+    if (archive.have() && !archive.stack[0].password_protected) {
       try {
         const options = archive.stack[0].options;
         if (options.template) {

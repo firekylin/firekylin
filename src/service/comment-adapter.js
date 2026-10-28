@@ -17,10 +17,11 @@ function apiRow(row) {
 }
 function dbWhere(where = {}) {
   const output = {};
+  const normalize = value => value instanceof Date ? think.datetime(value) : Array.isArray(value) ? value.map(normalize) : value;
   for (const [key, value] of Object.entries(where)) {
     if (key === '_complex') output._complex = dbWhere(value);
     else if (key === '_logic') output._logic = value;
-    else output[dbField(key)] = typeof value === 'undefined' ? null : value;
+    else output[dbField(key)] = typeof value === 'undefined' ? null : normalize(value);
   }
   return output;
 }

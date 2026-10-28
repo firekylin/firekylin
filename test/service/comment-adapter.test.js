@@ -6,6 +6,15 @@ test('comment adapter maps undefined query values to NULL database fields', () =
   assert.deepEqual(dbWhere({rid: undefined, objectId: '1'}), {rid: null, id: '1'});
 });
 
+test('comment adapter converts date operands before querying the database', () => {
+  const previous = global.think;
+  global.think = {datetime: value => value.toISOString()};
+  try {
+    assert.deepEqual(dbWhere({insertedAt: ['>', new Date('2026-01-02T03:04:05Z')]}),
+      {inserted_at: ['>', '2026-01-02T03:04:05.000Z']});
+  } finally { global.think = previous }
+});
+
 test('comment adapter supplies all required timestamps when inserting', async() => {
   const originalThink = global.think;
   global.think = {datetime: () => '2026-10-12 04:22:35'};

@@ -24,7 +24,7 @@ module.exports = class extends Base {
     }
     const service = this.service('comment');
     try {
-      const {core, users, options, config, tokenService, avatarService} = await service.create(this);
+      const {core, users, options, config, tokenService, avatarService, resolvePostId} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
       const input = method === 'GET' ? this.get() : this.post();
       let result;
@@ -33,8 +33,12 @@ module.exports = class extends Base {
           if (input.type === 'count') {
             const url = typeof input.url === 'string' && input.url.includes(',') ? input.url.split(',') : input.url;
             result = await core.comment.count({url}, ctx);
-          } else if (input.type === 'recent') result = await core.comment.listRecent(input, ctx);
-          else result = await core.comment.list(input, ctx);
+          } else if (input.type === 'recent') {
+            const requested = Math.min(Math.max(Number.parseInt(input.count, 10) || 10, 1), 50);
+            const recent = await core.comment.listRecent({...input, count: 50}, ctx);
+            const visible = await Promise.all(recent.map(item => resolvePostId(item.url)));
+            result = recent.filter((_item, index) => visible[index]).slice(0, requested);
+          } else result = await core.comment.list(input, ctx);
         } else if (method === 'POST') {
           const post = await service.validateCommentTarget(this, input.url);
           service.validateCommentInput(input, ctx, config);
@@ -43,11 +47,17 @@ module.exports = class extends Base {
           await service.syncCount(this, post.id);
         } else if (method === 'PUT') {
           const old = (await this.model('comment').where({id}).find());
+          if (old && old.id && ctx.state.userInfo?.type !== 'administrator' && !await resolvePostId(old.url)) {
+            this.ctx.throw(403, 'Comment is disabled');
+          }
           service.validateCommentInput(input, ctx, config, false);
           result = await core.comment.update({objectId: id, data: input}, ctx);
           await service.syncCount(this, old.post_id);
         } else {
           const old = (await this.model('comment').where({id}).find());
+          if (old && old.id && ctx.state.userInfo?.type !== 'administrator' && !await resolvePostId(old.url)) {
+            this.ctx.throw(403, 'Comment is disabled');
+          }
           result = await core.comment.remove({objectId: id}, ctx);
           await service.syncCount(this, old.post_id);
         }
