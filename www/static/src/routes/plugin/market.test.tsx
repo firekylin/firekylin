@@ -16,6 +16,7 @@ beforeEach(() => {
     vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {restartRequired: true}}} as any);
 });
 it('searches the registry and requests installation of the selected exact version', async() => {
+    vi.spyOn(message, 'success').mockImplementation(() => ({}) as any);
     vi.spyOn(Modal, 'confirm').mockImplementation((options: any) => { options.onOk(); return {} as any });
     const view = render(<MemoryRouter><PluginMarket /></MemoryRouter>);
     const name = await view.findByText('Demo');
@@ -24,6 +25,8 @@ it('searches the registry and requests installation of the selected exact versio
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/marketplace',
         {operation: 'plugin.install-registry', name: 'firekylin-plugin-demo', version: '1.0.0'},
         {headers: {'X-CSRF-Token': 'csrf'}}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('安装完成，请重启 Firekylin 后启用插件'));
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(4));
     fireEvent.change(view.getByPlaceholderText('搜索插件'), {target: {value: 'not-found'}});
     expect(view.queryByText('Demo')).not.toBeInTheDocument();
 });

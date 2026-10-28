@@ -645,7 +645,7 @@ and compatibility before running the local package manager. Only official `firek
 The plugin market offers an update when a newer registered version of an installed npm plugin is available; restart Firekylin after a local update. Project-local plugins are not updated through the npm market.
 Under **外观设置 → 安装主题**, the theme market reads the configured theme Registry. Theme entries must
 include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
-`download` URL for a ZIP archive, and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
+`download` URL for a ZIP archive (including official `firekylin/themes` GitHub Release assets), and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest
 must match the Registry name, ID and version. The server checks the digest, compatibility and archive before
 installing without replacing an existing theme. For a newer version of an installed theme, the market offers an update; local updates replace the theme directory after backing it up, so custom files inside that directory are replaced.
 

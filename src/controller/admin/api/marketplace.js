@@ -97,7 +97,7 @@ module.exports = class extends Base {
         if (!check.compatible) throw new Error(check.reasons.join(', '));
         const match = /^sha512-([A-Za-z0-9+/]{86}==)$/.exec(String(item.integrity || ''));
         if (!match || typeof item.download !== 'string') throw new Error('THEME_INTEGRITY_REQUIRED');
-        const buffer = await fetchBuffer(item.download, {maxBytes: 20 * 1024 * 1024});
+        const buffer = await fetchBuffer(item.download, {maxBytes: 20 * 1024 * 1024, allowThemeRelease: true});
         const digest = crypto.createHash('sha512').update(buffer).digest();
         const expected = Buffer.from(match[1], 'base64');
         if (expected.length !== digest.length || !crypto.timingSafeEqual(expected, digest)) {
