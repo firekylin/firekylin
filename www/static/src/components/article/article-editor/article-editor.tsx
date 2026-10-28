@@ -5,9 +5,15 @@ import { ArticleEditorState } from './article-editor.model';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { tools } from '../../../utils/tools';
 import { PostInfo } from '../../../routes/post/post.model';
+import { ArticleTypeEnum } from '../../../enums/article-type.enum';
 
 
 export function ArticleEditor(props: any) {
+    const active = React.useRef(true);
+    React.useEffect(() => {
+        active.current = true;
+        return () => { active.current = false };
+    }, []);
 
     const [state, setState] = React.useState(() => ({
         postSubmitting: false,
@@ -84,6 +90,13 @@ export function ArticleEditor(props: any) {
                     info={{ id: legacy.id, type: legacy.type }}
                     innerLinks={props.postStore.postList}
                     fetchData={(keyword) => legacy.handleFetchData(keyword)}
+                    onUploadChange={(id, pending) => props.articleStore.setUploadPending(id, pending)}
+                    onAttachment={props.type === ArticleTypeEnum.PAGE ? (id) => {
+                        if (!active.current || !Number.isSafeInteger(id) || id <= 0) return;
+                        const options = props.articleStore.articleInfo.options;
+                        const ids = Array.isArray(options.attachmentIds) ? options.attachmentIds : [];
+                        props.articleStore.setArticleInfo({options: {attachmentIds: [...new Set([...ids, id])]}});
+                    } : undefined}
                 />
                 <p style={{ lineHeight: '30px' }}>
                     <span className="pull-left">

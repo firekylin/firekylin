@@ -44,6 +44,7 @@ export interface ArticleInfo {
         push_sites: any[];
         passwordProtected: boolean;
         fields: Record<string, any>;
+        attachmentIds?: number[];
     };
     user_id: string;
     status: number;

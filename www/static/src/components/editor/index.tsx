@@ -24,6 +24,8 @@ interface MdEditorProps {
     onChange: any;
     innerLinks: any[];
     fetchData: (e: any) => void;
+    onAttachment?: (id: number) => void;
+    onUploadChange?: (id: symbol, pending: boolean) => void;
 }
 const createEditorState = () => ({
     panelClass: 'md-panel',
@@ -42,6 +44,18 @@ const createEditorState = () => ({
     imageTabKey: '0',
 });
 function MarkDownEditor(props: MdEditorProps) {
+    const mounted = React.useRef(true);
+    const uploads = React.useRef(new Set<symbol>());
+    const uploadChange = React.useRef(props.onUploadChange);
+    uploadChange.current = props.onUploadChange;
+    React.useEffect(() => {
+        mounted.current = true;
+        return () => {
+            mounted.current = false;
+            for (const id of uploads.current) uploadChange.current?.(id, false);
+            uploads.current.clear();
+        };
+    }, []);
     const [state, setState] = React.useState(createEditorState);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -347,8 +361,18 @@ function MarkDownEditor(props: MdEditorProps) {
     };
     legacy.upLoadImage = function upLoadImage(data: FormData, fileName: string = 'alt') {
         const start = legacy._getCursorPos() as number;
+        if (props.onAttachment) data.append('attachmentInfo', '1');
+        const uploadId = Symbol('editor-upload');
+        uploads.current.add(uploadId);
+        props.onUploadChange?.(uploadId, true);
         http.upload(data)
             .then((res) => {
+                if (!mounted.current) return;
+                if (res.errno !== 0) { message.error(res.errmsg); return; }
+                if (props.onAttachment && res.data && typeof res.data === 'object') {
+                    props.onAttachment(Number(res.data.id));
+                    res.data = res.data.url;
+                }
                 const reg = /^(https?:)?\/\/.+/i;
                 if (!reg.test(res.data)) {
                     res.data = location.origin + res.data;
@@ -367,6 +391,8 @@ function MarkDownEditor(props: MdEditorProps) {
             })
             .catch((res) => {
                 message.error(res.errmsg);
+            }).finally(() => {
+                if (uploads.current.delete(uploadId)) uploadChange.current?.(uploadId, false);
             });
     };
     legacy.getBase64 = function getBase64(img: any, callback: Function) {
@@ -379,6 +405,10 @@ function MarkDownEditor(props: MdEditorProps) {
             message.error(fileInfo.file.response.errmsg);
         } else {
             legacy.fileInfo = fileInfo;
+            if (props.onAttachment && fileInfo.file.response.data && typeof fileInfo.file.response.data === 'object') {
+                props.onAttachment(Number(fileInfo.file.response.data.id));
+                fileInfo.file.response.data = fileInfo.file.response.data.url;
+            }
             legacy.getBase64(fileInfo.file.originFileObj, (imageUrl) =>
                 legacy.setState({
                     imageUrl,
@@ -500,6 +530,8 @@ function MarkDownEditor(props: MdEditorProps) {
                     fileLink={legacy.state.fileLink}
                     tabChanged={(key) => legacy.setState({ imageTabKey: key })}
                     tabKey={legacy.state.imageTabKey}
+                    attachmentInfo={Boolean(props.onAttachment)}
+                    onUploadChange={props.onUploadChange}
                 />
             </div>
         );
