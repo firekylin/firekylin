@@ -34,3 +34,13 @@ it('tracks each upload once and clears it after success or failure', () => {
     expect(onUploadChange).toHaveBeenCalledWith(first, false);
     expect(onUploadChange).toHaveBeenCalledWith(second, false);
 });
+
+it('clears unfinished uploads when the editor is unmounted', () => {
+    const onUploadChange = vi.fn();
+    const view = render(<EditorImageModal open imageUrl="" fileLink="" tabKey="0" onOk={() => {}} onCancel={() => {}}
+        fileDone={() => {}} fileLinkChange={() => {}} tabChanged={() => {}} onUploadChange={onUploadChange} />);
+    act(() => { upload.onChange?.({file: {uid: 'pending', status: 'uploading'}}); });
+    const id = onUploadChange.mock.calls[0][0];
+    view.unmount();
+    expect(onUploadChange).toHaveBeenCalledWith(id, false);
+});

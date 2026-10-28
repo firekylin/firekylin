@@ -23,6 +23,12 @@ function EditorImageModalForm(props: EditorImageModalProps) {
     }));
     const legacyRef = React.useRef({});
     const uploads = React.useRef(new Map<string, symbol>());
+    const uploadChange = React.useRef(props.onUploadChange);
+    uploadChange.current = props.onUploadChange;
+    React.useEffect(() => () => {
+        for (const id of uploads.current.values()) uploadChange.current?.(id, false);
+        uploads.current.clear();
+    }, []);
     const legacy = legacyRef.current as any;
     legacy.state = state;
     legacy.setState = (update: any, callback?: () => void) => {

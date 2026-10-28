@@ -45,9 +45,16 @@ const createEditorState = () => ({
 });
 function MarkDownEditor(props: MdEditorProps) {
     const mounted = React.useRef(true);
+    const uploads = React.useRef(new Set<symbol>());
+    const uploadChange = React.useRef(props.onUploadChange);
+    uploadChange.current = props.onUploadChange;
     React.useEffect(() => {
         mounted.current = true;
-        return () => { mounted.current = false };
+        return () => {
+            mounted.current = false;
+            for (const id of uploads.current) uploadChange.current?.(id, false);
+            uploads.current.clear();
+        };
     }, []);
     const [state, setState] = React.useState(createEditorState);
     const legacyRef = React.useRef({});
@@ -356,6 +363,7 @@ function MarkDownEditor(props: MdEditorProps) {
         const start = legacy._getCursorPos() as number;
         if (props.onAttachment) data.append('attachmentInfo', '1');
         const uploadId = Symbol('editor-upload');
+        uploads.current.add(uploadId);
         props.onUploadChange?.(uploadId, true);
         http.upload(data)
             .then((res) => {
@@ -383,7 +391,9 @@ function MarkDownEditor(props: MdEditorProps) {
             })
             .catch((res) => {
                 message.error(res.errmsg);
-            }).finally(() => props.onUploadChange?.(uploadId, false));
+            }).finally(() => {
+                if (uploads.current.delete(uploadId)) uploadChange.current?.(uploadId, false);
+            });
     };
     legacy.getBase64 = function getBase64(img: any, callback: Function) {
         const reader = new FileReader();
