@@ -1,4 +1,4 @@
-import {cleanup, fireEvent, render, within} from '@testing-library/react';
+import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
 import {of} from 'rxjs';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {MemoryRouter} from '../../../utils/router';
@@ -9,6 +9,24 @@ vi.mock('../../../components/breadcrumb', () => ({default: () => null}));
 afterEach(cleanup);
 
 describe('theme management', () => {
+    it('shows theme defaults for unset settings and preserves explicit values', async () => {
+        const theme = {id: 'clarity', name: 'Clarity', version: '1.0.0', configElements: [
+            {name: 'enabled', type: 'checkbox', label: '开关', options: [{label: '启用', value: '1'}], default: ['1']},
+            {name: 'title', type: 'text', label: '标题', default: '默认标题'},
+            {name: 'disabled', type: 'checkbox', label: '已关闭', options: [{label: '关闭项', value: '1'}], default: ['1']}
+        ]};
+        const store = {themeList: [theme], data: {theme: 'clarity'}, getThemeList: vi.fn(),
+            getOptions: () => of({errno: 0, data: {theme: 'clarity', themeConfig: JSON.stringify({disabled: []})}}),
+            setData: vi.fn(), themeConfigSave: vi.fn()};
+        window.SysConfig = {options: {theme: 'clarity'}} as any;
+        const view = render(<MemoryRouter initialEntries={['/appearance/theme/settings']}><ThemeForm themeStore={store as any} {...({history: {push: vi.fn()}} as any)} /></MemoryRouter>);
+        expect(view.getByRole('checkbox', {name: '启用'})).toBeChecked();
+        expect(view.getByRole('checkbox', {name: '关闭项'})).not.toBeChecked();
+        expect(view.getByDisplayValue('默认标题')).toBeInTheDocument();
+        fireEvent.click(view.getByRole('checkbox', {name: '启用'}));
+        fireEvent.click(view.getByRole('button', {name: '保存配置'}));
+        await waitFor(() => expect(store.themeConfigSave).toHaveBeenCalledWith({themeConfig: JSON.stringify({disabled: [], enabled: []})}));
+    });
     it('filters themes and activates the selected theme', () => {
         const store = {
             themeList: [

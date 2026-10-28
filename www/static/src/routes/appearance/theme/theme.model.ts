@@ -20,4 +20,5 @@ export interface ConfigElement {
     name: string;
     type: string;
     options: any;
+    default?: any;
 }

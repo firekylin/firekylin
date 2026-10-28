@@ -81,7 +81,8 @@ export function ThemeForm(props: ThemeProps) {
                         >
                             <ConfigField
                                 field={element}
-                                value={legacy.state.themeConfig[element.name]}
+                                value={legacy.state.themeConfig[element.name] === undefined
+                                    ? element.default : legacy.state.themeConfig[element.name]}
                                 onChange={(value) =>
                                     legacy.updateThemeConfig(element.name, value)
                                 }
