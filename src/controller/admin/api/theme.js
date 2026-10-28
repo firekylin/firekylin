@@ -183,11 +183,13 @@ module.exports = class extends Base {
     const infoFile = path.join(THEME_DIR, theme, 'package.json');
     this.pathCheck(infoFile);
 
+    let fields = [];
     try {
       const info = JSON.parse(await readFileAsync(infoFile, {encoding: 'utf-8'}));
-      return this.success(Array.isArray(info.themeFields) ? info.themeFields : []);
+      fields = Array.isArray(info.themeFields) ? info.themeFields : [];
     } catch {
-      return this.success([]);
+      // A missing or invalid manifest has no declared fields.
     }
+    return this.success(fields);
   }
 };

@@ -119,3 +119,17 @@ test('factory validates parameters and reports execution errors', async() => {
     return true;
   });
 });
+
+test('factory preserves HTTP errors and their status', async() => {
+  const name = uniqueName();
+  const notFound = Object.assign(new Error('Not Found'), {status: 404, headers: {'X-Test': 'value'}});
+  class Missing extends Widget { async execute() { throw notFound } }
+  registerWidget(name, Missing);
+  const factory = new WidgetFactory({ctx: {}, model() {}});
+  await assert.rejects(factory.widget(name), error => {
+    assert.equal(error, notFound);
+    assert.equal(error.status, 404);
+    assert.equal(error.headers['X-Test'], 'value');
+    return true;
+  });
+});
