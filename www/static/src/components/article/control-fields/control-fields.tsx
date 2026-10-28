@@ -28,6 +28,12 @@ function fieldsToRows(fields: Record<string, string> = {}) {
     }));
 }
 
+function normalizeFields(fields: Record<string, string> = {}) {
+    return Object.fromEntries(Object.entries(fields)
+        .map(([name, value]) => [name.trim(), String(value ?? '')])
+        .filter(([name]) => name));
+}
+
 function duplicateFieldNames(rows: CustomFieldRow[]) {
     const counts = rows.reduce<Record<string, number>>((result, row) => {
         const name = row.name.trim();
@@ -68,7 +74,7 @@ export default function ArticleControlFields(props: ArticleControlFieldsProps) {
     ) {
         if (prevProps.fields !== props.fields) {
             const currentFields = legacy.toFields(legacy.state.rows);
-            if (JSON.stringify(currentFields) !== JSON.stringify(props.fields || {})) {
+            if (JSON.stringify(currentFields) !== JSON.stringify(normalizeFields(props.fields))) {
                 legacy.setState({ rows: fieldsToRows(props.fields) });
                 props.onValidityChange(true);
             }
