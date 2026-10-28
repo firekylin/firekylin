@@ -38,14 +38,13 @@ export default function ConfigField({field, value, onChange}: Props) {
 
     switch (type) {
         case 'color': {
-            const [, r, g, b, a] = (value || '').match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/i) || [];
             return <div className="react-color-picker">
                 <div className="swatch" onClick={() => setColorOpen(!colorOpen)}>
                     <div className="color" style={{backgroundColor: value}} />
                 </div>
                 {colorOpen && <div className="popover-color">
                     <div className="cover" onClick={() => setColorOpen(false)} />
-                    <SketchPicker color={{r, g, b, a: a || 1}} onChangeComplete={color => {
+                    <SketchPicker color={value || '#000000'} onChangeComplete={color => {
                         const {r, g, b, a} = color.rgb;
                         onChange(`rgba(${r},${g},${b},${a == null ? 1 : a})`);
                     }} />
