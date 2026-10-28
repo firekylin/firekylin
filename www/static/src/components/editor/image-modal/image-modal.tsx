@@ -14,12 +14,15 @@ interface EditorImageModalProps extends ModalProps {
     fileDone: (info: UploadChangeParam) => void;
     fileLinkChange: (fileLink: string) => void;
     tabChanged: (key: string) => void;
+    attachmentInfo?: boolean;
+    onUploadChange?: (id: symbol, pending: boolean) => void;
 }
 function EditorImageModalForm(props: EditorImageModalProps) {
     const [state, setState] = React.useState(() => ({
         loading: false,
     }));
     const legacyRef = React.useRef({});
+    const uploads = React.useRef(new Map<string, symbol>());
     const legacy = legacyRef.current as any;
     legacy.state = state;
     legacy.setState = (update: any, callback?: () => void) => {
@@ -37,12 +40,31 @@ function EditorImageModalForm(props: EditorImageModalProps) {
         legacy.__initialized = true;
         legacy.handleChange = (info: UploadChangeParam) => {
             if (info.file.status === 'uploading') {
+                if (!uploads.current.has(info.file.uid)) {
+                    const id = Symbol('modal-upload');
+                    uploads.current.set(info.file.uid, id);
+                    props.onUploadChange?.(id, true);
+                }
                 legacy.setState({ loading: true });
                 return;
             }
             if (info.file.status === 'done') {
-                props.fileDone(info);
-                legacy.setState({ loading: false });
+                try {
+                    props.fileDone(info);
+                } finally {
+                    const id = uploads.current.get(info.file.uid);
+                    if (id) props.onUploadChange?.(id, false);
+                    uploads.current.delete(info.file.uid);
+                    legacy.setState({ loading: false });
+                }
+                return;
+            }
+            if (info.file.status === 'error' || info.file.status === 'removed') {
+                const id = uploads.current.get(info.file.uid);
+                if (id) props.onUploadChange?.(id, false);
+                uploads.current.delete(info.file.uid);
+                legacy.setState({loading: false});
+                if (info.file.status === 'error') message.error('图片上传失败');
             }
         };
     }
@@ -97,6 +119,7 @@ function EditorImageModalForm(props: EditorImageModalProps) {
                                     showUploadList={false}
                                     style={{ width: 100, height: 100 }}
                                     action="/admin/api/file"
+                                    data={props.attachmentInfo ? {attachmentInfo: '1'} : undefined}
                                     beforeUpload={legacy.beforeUpload}
                                     onChange={legacy.handleChange}
                                 >

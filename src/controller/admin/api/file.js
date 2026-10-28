@@ -112,7 +112,12 @@ module.exports = class extends Base {
       const serviceName = sdkServices.includes(service) ? 'files-sdk' : service;
       const uploader = think.service(`upload/${serviceName}`);
       const result = await uploader.run(file, config);
-      await this.createAttachment(result, config.file, service);
+      const attachment = await this.createAttachment(result, config.file, service);
+      // Existing upload consumers expect a URL string. Editors may opt in to
+      // the attachment ID so a newly created page can retain its uploads.
+      if (this.post('attachmentInfo') === '1') {
+        return this.success({url: result, id: attachment.id});
+      }
       return this.success(result);
     } catch (e) {
       if (think.isPrevent(e)) {

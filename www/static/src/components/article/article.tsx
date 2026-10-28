@@ -29,6 +29,7 @@ import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import ArticleControlTemplate from './control-template/control-template';
 import { ArticleEnum } from './article.enum';
 import ArticleControlThemeFields from './control-theme-fields/control-theme-fields';
+import ArticleControlAttachments from './control-attachments/control-attachments';
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 function Article(props: ArticleProps) {
@@ -180,6 +181,11 @@ function Article(props: ArticleProps) {
     };
     legacy.handleSubmit = function handleSubmit(status: ArticleEnum) {
         const { articleInfo } = props.articleStore;
+
+        if (props.articleStore.pendingUploads.size) {
+            message.warning('图片正在上传，请等待上传完成后再保存');
+            return;
+        }
 
         if (!articleInfo.title) {
             legacy.setState({
@@ -409,7 +415,7 @@ function Article(props: ArticleProps) {
                             hasError={legacy.state.hasError}
                         />
 
-                        <ArticleEditor type={props.type} id={props.match.params.id} />
+                        <ArticleEditor key={`${props.type}:${props.match.params.id || 'new'}`} type={props.type} id={props.match.params.id} />
                     </Col>
                     <Col span={5} className="article-control-panel" ref={sidebarRef}>
                         <ArticleControlHeader
@@ -569,6 +575,10 @@ function Article(props: ArticleProps) {
                                 />
                             </section>
                         ) : null}
+                        {legacy.isPage() && <ArticleControlAttachments
+                            ids={articleInfo.options.attachmentIds || []}
+                            onChange={(attachmentIds) => articleStore.setArticleInfo({options: {attachmentIds}})}
+                        />}
                         {themeFields.length > 0 ? (
                             <section className="category theme-fields">
                                 <h5>主题字段</h5>

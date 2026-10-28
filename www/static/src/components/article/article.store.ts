@@ -6,6 +6,11 @@ import { ArticleTypeEnum } from '../../enums/article-type.enum';
 import { ArticleEnum } from './article.enum';
 
 class ArticleStore {
+  pendingUploads = new Set<symbol>();
+  setUploadPending(id: symbol, pending: boolean) {
+    if (pending) this.pendingUploads.add(id);
+    else this.pendingUploads.delete(id);
+  }
   articleInfo: ArticleInfo = {
     summary: '',
     title: '',
@@ -21,7 +26,8 @@ class ArticleStore {
       featuredImage: '',
       push_sites: [],
       passwordProtected: false,
-      fields: {}
+      fields: {},
+      attachmentIds: []
     },
     status: ArticleEnum.SAVE,
     user_id: '',
@@ -40,6 +46,7 @@ class ArticleStore {
 
   // 重置
   resetArticleInfo() {
+    this.pendingUploads.clear();
     this.setArticleInfo({
       summary: '',
       title: '',
@@ -55,7 +62,8 @@ class ArticleStore {
         featuredImage: '',
         push_sites: [],
         passwordProtected: false,
-        fields: {}
+        fields: {},
+        attachmentIds: []
       },
       status: ArticleEnum.DRAFT,
       user_id: '',
@@ -92,6 +100,8 @@ class ArticleStore {
                 }
                 res.data.options.fields = res.data.options.fields && typeof res.data.options.fields === 'object'
                     && !Array.isArray(res.data.options.fields) ? res.data.options.fields : {};
+                res.data.options.attachmentIds = Array.isArray(res.data.options.attachmentIds)
+                    ? [...new Set(res.data.options.attachmentIds.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))] : [];
                 res.data.summary = res.data.summary || '';
                 this.setArticleInfo({ ...res.data });
             }
