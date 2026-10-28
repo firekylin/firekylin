@@ -575,7 +575,7 @@ function Article(props: ArticleProps) {
                                 />
                             </section>
                         ) : null}
-                        {legacy.isPage() && <ArticleControlAttachments
+                        {!!legacy.isPage() && <ArticleControlAttachments
                             ids={articleInfo.options.attachmentIds || []}
                             onChange={(attachmentIds) => articleStore.setArticleInfo({options: {attachmentIds}})}
                         />}

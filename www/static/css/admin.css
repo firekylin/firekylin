@@ -263,12 +263,12 @@ textarea{resize:none;}
 	cursor: move;
 }
 
-.form-group.react-color-picker .color {
+.react-color-picker .color {
 	width: 36px;
 	height: 14px;
 	border-radius: 2px;
 }
-.form-group.react-color-picker .swatch {
+.react-color-picker .swatch {
 	padding: 5px;
 	background: #FFF;
 	border-radius: 4px;
@@ -277,13 +277,13 @@ textarea{resize:none;}
 	display: inline-block;
 	cursor: pointer;
 }
-.form-group.react-color-picker .popover-color {
+.react-color-picker .popover-color {
 	position: absolute;
 	z-index: 2;
 	margin-top: -340px;
 }
-.form-group.react-color-picker .cover {
-	position: 'fixed';
+.react-color-picker .cover {
+	position: fixed;
 	top: 0;
 	right: 0;
 	bottom: 0;
