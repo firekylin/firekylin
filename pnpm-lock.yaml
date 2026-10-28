@@ -169,9 +169,6 @@ importers:
 
   .:
     dependencies:
-      '@better-captcha/react':
-        specifier: 0.8.0
-        version: 0.8.0(react@19.3.0)
       '@aws-sdk/client-s3':
         specifier: ^3.1150.0
         version: 3.1150.0
@@ -181,6 +178,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1150.0
         version: 3.1150.0
+      '@better-captcha/react':
+        specifier: 0.8.0
+        version: 0.8.0(react@19.3.0)
       '@codemirror/autocomplete':
         specifier: ^6.20.3
         version: 6.20.3
@@ -322,6 +322,9 @@ importers:
       turndown:
         specifier: ^7.2.4
         version: 7.2.4
+      ua-parser-js:
+        specifier: ^2.0.10
+        version: 2.0.10
       upyun:
         specifier: ^3.4.6
         version: 3.4.6(debug@4.4.3)
@@ -451,14 +454,6 @@ importers:
         version: 5.0.5(@types/node@26.6.5)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.4(@types/node@26.6.5)(less@4.9.1))
 
 packages:
-
-  '@better-captcha/core@0.8.0':
-    resolution: {integrity: sha512-zNNVu2qP6sh0VXHtvHEaVy3nOs2d2R5+eUQIiQKUZIqle/rE3Yfjn4QQXlEmgc6hbAZNxLJIjBrP6N04qVQ28w==}
-
-  '@better-captcha/react@0.8.0':
-    resolution: {integrity: sha512-vgH/SRX+YFjJSh5oCrg670f07Qrd4gOZkN8+la4bIo13+Ma+kbSOoXQJNDmRMfxuBF2Ei1llUG7pl+cy9AGH3Q==}
-    peerDependencies:
-      react: ^18 || ^19
 
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
@@ -723,6 +718,14 @@ packages:
   '@babel/types@8.0.6':
     resolution: {integrity: sha512-c+xgSWboV2pdwXP67BUWDVRHi2BO5Q3KwxyFVs7taVTY+fsK47/L51ZXQoV9rozHJDNHvJ4v4WEsI/IlxV2l2A==}
     engines: {node: ^22.18.0 || >=24.11.0}
+
+  '@better-captcha/core@0.8.0':
+    resolution: {integrity: sha512-zNNVu2qP6sh0VXHtvHEaVy3nOs2d2R5+eUQIiQKUZIqle/rE3Yfjn4QQXlEmgc6hbAZNxLJIjBrP6N04qVQ28w==}
+
+  '@better-captcha/react@0.8.0':
+    resolution: {integrity: sha512-vgH/SRX+YFjJSh5oCrg670f07Qrd4gOZkN8+la4bIo13+Ma+kbSOoXQJNDmRMfxuBF2Ei1llUG7pl+cy9AGH3Q==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@bramus/specificity@2.4.3':
     resolution: {integrity: sha512-0GEz8qJWokkUVYQYRukmkSHIFNoBH8QTreeHrAFbvz1XFYc3Y+puhMs8PQ5x8GNugiC2l5jvDBXKLbBIByeSBw==}
@@ -2231,6 +2234,9 @@ packages:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
+  detect-europe-js@0.1.2:
+    resolution: {integrity: sha512-lgdERlL3u0aUdHocoouzT10d9I89VVhk0qNRmll7mXdGfJT1/wqZ2ZLA4oJAjeACPY5fT1wsbq2AT+GkuInsow==}
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -2884,6 +2890,9 @@ packages:
 
   is-property@1.0.2:
     resolution: {integrity: sha512-Ks/IoX00TtClbGQr4TWXemAnktAQvYB7HzcCxDGqEZU6oCmb2INHuOoKxbtR+HFkmYWBKv/dOZtGRiAjDhj92g==}
+
+  is-standalone-pwa@0.1.1:
+    resolution: {integrity: sha512-9Cbovsa52vNQCjdXOzeQq5CnCbAcRk05aU62K20WO372NrTv0NxibLFCK6lQ4/iZEFdEA3p3t2VNOn8AJ53F5g==}
 
   is-stream@2.0.1:
     resolution: {integrity: sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg==}
@@ -4140,6 +4149,13 @@ packages:
     engines: {node: '>=16.20.0'}
     hasBin: true
 
+  ua-is-frozen@0.1.2:
+    resolution: {integrity: sha512-RwKDW2p3iyWn4UbaxpP2+VxwqXh0jpvdxsYpZ5j/MLLiQOfbsV5shpgQiw93+KMYQPcteeMQ289MaAFzs3G9pw==}
+
+  ua-parser-js@2.0.10:
+    resolution: {integrity: sha512-t+3Ktbq0Ies2vaSezfOaWiolH4OigQIO1dk+1xDpOydB1COVPocVYOrEV5rqZ0kFY9XYG1v9LutCyMgYBpABcw==}
+    hasBin: true
+
   uc.micro@3.0.0:
     resolution: {integrity: sha512-U3PppEkleoTnIfi8BozMx3yju3qc/L6SwqWo2Sw+54PX+PX0q9I+r1Um5HCmqD7n9VDX5/v3vQH/AjA6deDdtw==}
 
@@ -4405,13 +4421,6 @@ packages:
     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
-
-  '@better-captcha/core@0.8.0': {}
-
-  '@better-captcha/react@0.8.0(react@19.3.0)':
-    dependencies:
-      '@better-captcha/core': 0.8.0
-      react: 19.3.0
 
   '@adobe/css-tools@4.5.0': {}
 
@@ -4852,6 +4861,13 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 8.0.6
       '@babel/helper-validator-identifier': 8.0.6
+
+  '@better-captcha/core@0.8.0': {}
+
+  '@better-captcha/react@0.8.0(react@19.3.0)':
+    dependencies:
+      '@better-captcha/core': 0.8.0
+      react: 19.3.0
 
   '@bramus/specificity@2.4.3':
     dependencies:
@@ -6343,6 +6359,8 @@ snapshots:
 
   destroy@1.2.0: {}
 
+  detect-europe-js@0.1.2: {}
+
   detect-libc@2.1.2: {}
 
   dezalgo@1.0.4:
@@ -6913,6 +6931,8 @@ snapshots:
   is-promise@4.0.0: {}
 
   is-property@1.0.2: {}
+
+  is-standalone-pwa@0.1.1: {}
 
   is-stream@2.0.1: {}
 
@@ -8309,6 +8329,14 @@ snapshots:
       '@typescript/typescript-sunos-x64': 7.0.2
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
+
+  ua-is-frozen@0.1.2: {}
+
+  ua-parser-js@2.0.10:
+    dependencies:
+      detect-europe-js: 0.1.2
+      is-standalone-pwa: 0.1.1
+      ua-is-frozen: 0.1.2
 
   uc.micro@3.0.0: {}
 
