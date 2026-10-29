@@ -5,6 +5,25 @@ const path = require('path');
 const semver = require('semver');
 const {validatePackage} = require('./plugin-installer');
 
+const PLUGIN_IMPORTS_START = '// Firekylin marketplace plugin imports (for Vercel bundling)';
+const PLUGIN_IMPORTS_END = '// End Firekylin marketplace plugin imports';
+
+function updatePluginImports(source, name, operation) {
+  const start = source.indexOf(PLUGIN_IMPORTS_START);
+  const end = source.indexOf(PLUGIN_IMPORTS_END);
+  if ((start === -1) !== (end === -1) || start !== -1 && end < start) {
+    throw new Error('GITHUB_INVALID_PLUGIN_IMPORTS');
+  }
+  const existing = start === -1 ? [] : [...source.slice(start, end).matchAll(/require\('((?:@firekylin\/plugin-|firekylin-plugin-)[a-z0-9][a-z0-9._-]*)'\)/g)]
+    .map(match => match[1]);
+  const names = new Set(existing);
+  if (operation === 'plugin.uninstall') names.delete(name);
+  else names.add(name);
+  const block = names.size ? `${PLUGIN_IMPORTS_START}\n${[...names].sort().map(item => `require('${item}');`).join('\n')}\n${PLUGIN_IMPORTS_END}\n` : '';
+  if (start !== -1) source = source.slice(0, start) + source.slice(end + PLUGIN_IMPORTS_END.length).replace(/^\n/, '');
+  return source.replace(/\s*$/, '\n') + (block ? `\n${block}` : '');
+}
+
 class GitHubExtensionDispatch {
   constructor({connection, fetcher = fetch}) { this.connection = connection; this.fetcher = fetcher }
 
@@ -85,6 +104,12 @@ class GitHubExtensionDispatch {
       const indent = /^([ \t]+)"/m.exec(data.toString('utf8'))?.[1] || '  ';
       entries.push({path: 'package.json', mode: '100644', type: 'blob',
         content: JSON.stringify(manifest, null, indent) + '\n'});
+      const configEntry = files.find(item => item.path === 'firekylin.config.js');
+      if (configEntry?.type !== 'blob') throw new Error('GITHUB_CONFIG_REQUIRED');
+      const config = await this.blob(configEntry);
+      if (config.length > 1024 * 1024) throw new Error('GITHUB_INVALID_FILE');
+      entries.push({path: 'firekylin.config.js', mode: '100644', type: 'blob',
+        content: updatePluginImports(config.toString('utf8'), change.name, change.operation)});
     } else if (change.operation === 'plugin.delete-local') {
       if (![change.id, change.directory].every(value => typeof value === 'string' && /^[a-z0-9][a-z0-9._-]*$/i.test(value))) {
         throw new Error('INVALID_PLUGIN_ID');
