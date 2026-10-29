@@ -68,17 +68,6 @@ test('vendored comment core keeps waiting comments private', async() => {
   assert.equal((await core.comment.list({path: '/post/a.html'}, ctx)).count, 0);
 });
 
-test('preUpdate changes the patch persisted by the comment core', async() => {
-  const Comment = new MemoryModel();
-  Comment.rows.push({objectId: '1', comment: 'old', user_id: '2'});
-  const core = createCommentCore({
-    models: {Comment, Counter: new MemoryModel(), Users: new MemoryModel()},
-    hooks: {preUpdate: patch => { patch.comment = 'sanitized' }}
-  });
-  await core.comment.update({objectId: '1', data: {comment: 'unsafe'}}, {state: {userInfo: {objectId: '2'}}});
-  assert.equal(Comment.rows[0].comment, 'sanitized');
-});
-
 test('vendored comment core rejects anonymous comments when login is required', async() => {
   const core = createCommentCore({
     models: {Comment: new MemoryModel(), Counter: new MemoryModel(), Users: new MemoryModel()},

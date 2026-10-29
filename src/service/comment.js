@@ -228,6 +228,15 @@ module.exports = class extends think.Service {
     const avatarService = {
       stringify: value => value.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(value.mail || value.email || '').toLowerCase())}?d=mp`
     };
+    let filteredUpdate;
+    const commentModel = new CommentAdapter(controller.model('comment'), resolvePostId);
+    const updateComment = commentModel.update.bind(commentModel);
+    commentModel.update = (data, where) => {
+      const patch = filteredUpdate;
+      filteredUpdate = undefined;
+      if (patch) Object.assign(data, patch);
+      return updateComment(data, where);
+    };
     const core = createCommentCore({
       hooks: {
         async preSave(data, _parent, ctx) {
@@ -238,14 +247,15 @@ module.exports = class extends think.Service {
         postSave: (comment, parent, ctx) => emit('comment.created', {comment, parent, ctx}),
         preUpdate: (data, _extra, ctx) => filterStrict('comment.beforeUpdate', data, {ctx}).then(next => {
           if (!next || typeof next !== 'object' || Array.isArray(next)) throw new TypeError('Invalid comment filter result');
-          Object.assign(data, next);
+          const {objectId, ...patch} = next;
+          filteredUpdate = patch;
         }),
         postUpdate: (data, _extra, ctx) => emit('comment.updated', {data, ctx}),
         preDelete: (id, _extra, ctx) => filterStrict('comment.beforeDelete', id, {ctx}).then(() => undefined),
         postDelete: (id, _extra, ctx) => emit('comment.deleted', {id, ctx})
       },
       models: {
-        Comment: new CommentAdapter(controller.model('comment'), resolvePostId),
+        Comment: commentModel,
         Counter: new ModelAdapter(controller.model('counter')),
         Users: users
       },

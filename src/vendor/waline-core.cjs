@@ -507,13 +507,10 @@ var createCommentHandler = (runtime) => {
           0
         );
       }
-      const patch = { ...data, objectId: id };
-      const rejected = await hook("preUpdate", patch, void 0, ctx);
+      const rejected = await hook("preUpdate", { ...data, objectId: id }, void 0, ctx);
       if (rejected) {
         throw new WalineError("HOOK_REJECTED", 400, void 0, rejected);
       }
-      delete patch.objectId;
-      Object.assign(data, patch);
       const [updated] = await models.Comment.update(data, { objectId: id });
       if (!updated) return;
       if (old.status === "waiting" && data.status === "approved" && old.pid && services.notification) {
