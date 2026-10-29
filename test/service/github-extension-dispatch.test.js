@@ -5,7 +5,7 @@ const JSZip = require('jszip');
 const {ThemeInstaller} = require('../../src/service/theme-installer');
 const {GitHubExtensionDispatch} = require('../../src/service/github-extension-dispatch');
 
-function fixture(extra = []) {
+function fixture(extra = [], manifest = {dependencies: {firekylin: '2.16.0'}}) {
   const calls = [];
   const tree = [{path: 'package.json', type: 'blob', mode: '100644', sha: 'package'},
     {path: 'firekylin.config.js', type: 'blob', mode: '100644', sha: 'config'}, ...extra];
@@ -20,7 +20,7 @@ function fixture(extra = []) {
       else if (endpoint === '/git/commits/base') result = {tree: {sha: 'base-tree'}};
       else if (endpoint === '/git/trees/base-tree?recursive=1') result = {tree};
       else if (endpoint === '/git/blobs/package') result = {encoding: 'base64',
-        content: Buffer.from(JSON.stringify({dependencies: {firekylin: '2.16.0'}})).toString('base64')};
+        content: Buffer.from(JSON.stringify(manifest)).toString('base64')};
       else if (endpoint === '/git/blobs/config') result = {encoding: 'base64',
         content: Buffer.from('module.exports = {widgets: []};\n').toString('base64')};
       else if (endpoint === '/git/blobs/plugin') result = {encoding: 'base64',
@@ -137,4 +137,13 @@ test('core update creates only a dependency change and rejects downgrades and lo
   const locked = fixture([{path: 'pnpm-lock.yaml', type: 'blob'}]);
   await assert.rejects(locked.client.dispatch({operation: 'core.update', version: '2.18.0'}), /LOCKFILE/);
   assert.equal(locked.calls.some(call => call.options.method === 'POST'), false);
+});
+
+test('core update rejects source repositories before any writes', async() => {
+  for (const manifest of [{dependencies: {thinkjs: '^4.0.0'}}, {}, {dependencies: {firekylin: ''}}]) {
+    const {client, calls} = fixture([], manifest);
+    await assert.rejects(client.dispatch({operation: 'core.update', version: '2.18.0'}),
+      /FIREKYLIN_DEPENDENCY_REQUIRED/);
+    assert.equal(calls.some(call => call.options.method === 'POST'), false);
+  }
 });

@@ -76,7 +76,10 @@ class GitHubExtensionDispatch {
       const data = await this.blob(files.find(item => item.path === 'package.json'));
       if (data.length > 1024 * 1024) throw new Error('GITHUB_INVALID_FILE');
       const manifest = JSON.parse(data.toString('utf8'));
-      const current = semver.minVersion(manifest.dependencies?.firekylin || '');
+      if (typeof manifest?.dependencies?.firekylin !== 'string' || !manifest.dependencies.firekylin.trim()) {
+        throw new Error('FIREKYLIN_DEPENDENCY_REQUIRED');
+      }
+      const current = semver.minVersion(manifest.dependencies.firekylin);
       if (!current || !semver.gt(change.version, current)) throw new Error('VERSION_NOT_NEWER');
       manifest.dependencies.firekylin = change.version;
       entries.push({path: 'package.json', mode: '100644', type: 'blob',

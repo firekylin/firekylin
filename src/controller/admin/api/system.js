@@ -84,12 +84,12 @@ module.exports = class extends Base {
         const result = await new GitHubExtensionDispatch({connection}).dispatch({operation: 'core.update', version});
         return this.success(result);
       }
-      const {PluginInstaller} = require('../../../service/plugin-installer');
+      const {CoreUpdater} = require('../../../service/core-updater');
       const projectPath = process.env.FIREKYLIN_PROJECT_PATH || think.ROOT_PATH;
       const manifest = JSON.parse(await fs.promises.readFile(path.join(projectPath, 'package.json'), 'utf8'));
       if (!manifest.dependencies?.firekylin) throw new Error('源码安装请使用手动更新');
-      const installer = new PluginInstaller({projectPath, readOnly: Boolean(process.env.VERCEL)});
-      await installer.mutate(['add', '--save-exact', 'firekylin@' + version]);
+      const installer = new CoreUpdater({projectPath, readOnly: Boolean(process.env.VERCEL)});
+      await installer.update(version, manifest);
       const restartRequired = typeof process.send !== 'function';
       this.success({restartRequired});
       if (!restartRequired) setTimeout(() => process.send('think-cluster-reload-workers'), 1000);
