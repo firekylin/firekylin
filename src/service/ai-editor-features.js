@@ -2,7 +2,7 @@
 
 const FEATURES_KEY = 'ai_content_features';
 const DEFAULTS = Object.freeze({title: true, summary: true, rewrite: true, translate: true,
-  slug: false, category: false, autocomplete: false});
+  slug: false, category: false, autocomplete: false, commentModeration: false, commentReply: false});
 function normalizeFeatures(raw) {
   let settings = {};
   try { settings = typeof raw === 'string' ? JSON.parse(raw) : raw || {} } catch { /* Use defaults. */ }

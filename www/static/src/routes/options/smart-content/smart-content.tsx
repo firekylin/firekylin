@@ -4,6 +4,8 @@ import axios from 'axios';
 import BreadCrumb from '../../../components/breadcrumb';
 
 export const CONTENT_FEATURES = [
+    {name: 'commentModeration', label: '评论审核', description: '将非管理员的新评论发送给 AI 识别垃圾评论；识别失败时保留待审核状态。'},
+    {name: 'commentReply', label: '建议回复', description: '根据文章和当前评论生成建议回复，支持亲切、专业和诙谐口吻，确认后手动发送。'},
     {name: 'summary', label: '生成摘要', description: '正文超过 250 个字时，概括全文生成摘要并填入内容摘要，可继续编辑。'},
     {name: 'title', label: '生成标题', description: '正文超过 250 个字时，生成标题建议，支持编辑、重新生成和确认使用。'},
     {name: 'rewrite', label: '智能审阅', description: '正文超过 100 个字时，检查表达和结构，逐处展示差异与修改建议，支持接受、拒绝或手动合并。'},
@@ -44,7 +46,7 @@ export default function SmartContentSettings(props) {
         <BreadCrumb {...props}/>
         <div className="page-list">
             <h3 className="page-title">智能内容</h3>
-            <p>文章内容会发送到“AI 连接”中配置的服务。生成结果只写入编辑器，请审阅后再保存或发布。</p>
+            <p>文章及启用功能所需的评论内容会发送到“AI 连接”中配置的服务。生成结果只写入编辑器，请审阅后再保存或发布。</p>
             {error ? <Alert type="error" showIcon title={error} action={<Button onClick={() => setReload(value => value + 1)}>重试</Button>} />
                 : <Spin spinning={loading}><Card title="功能开关">
                     <Form form={form} layout="vertical" onFinish={save} disabled={loading || saving}>
