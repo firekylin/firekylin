@@ -117,7 +117,7 @@ export default function AIConnections() {
                             {label: '添加更多 AI 服务商', value: MORE_PROVIDERS}]} />
                 </Card>
                 {provider && form && displayedFormValues ? <PageForm key={provider.id} item={form} values={displayedFormValues}
-                    submit={() => {}} form={providerForm} hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
+                    submit={() => {}} form={providerForm} clearOnDestroy hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
                 {provider && !form ? <Alert type="warning" showIcon style={{marginBottom: 16}}
                     message="该服务商没有提供连接配置表单" /> : null}
                 {provider ? <Card title="模型与连接测试">

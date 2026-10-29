@@ -111,4 +111,31 @@ describe('AI connections', () => {
         const key = await within(view.container).findByLabelText('API Key') as HTMLInputElement;
         expect(key.value).toBe('');
     });
+    it('replaces provider settings when switching providers', async() => {
+        const fields = [{name: 'apiKey', type: 'password', label: 'API Key'},
+            {name: 'baseUrl', type: 'url', label: 'API Base URL'}];
+        window.SysConfig.pluginAdmin = ['first', 'second'].map(id => ({id,
+            forms: [{id: 'settings', title: 'Provider 设置', fields}]})) as any;
+        vi.mocked(http.get).mockImplementation((url: string) => of(url.includes('/forms/')
+            ? {errno: 0, data: url.includes('/first/')
+                ? {apiKey: 'first-key', baseUrl: 'https://first.example.com'}
+                : {baseUrl: 'https://second.example.com'}}
+            : {errno: 0, data: {providers: ['first', 'second'].map((id, index) => ({
+                id, label: id, configured: false,
+                admin: {pluginId: id, formId: 'settings', testActionId: 'test'},
+                models: [{id: 'model', label: 'Model', selected: index === 0}]
+            }))}}) as any);
+        const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
+        await waitFor(() => expect(view.getByLabelText('API Key')).toHaveValue('first-key'));
+        fireEvent.change(view.getByLabelText('API Base URL'), {target: {value: 'https://edited.example.com'}});
+        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
+        fireEvent.click(view.getByText('second', {selector: '.ant-select-item-option-content'}));
+        await waitFor(() => expect(view.getByLabelText('API Base URL')).toHaveValue('https://second.example.com'));
+        expect(view.getByLabelText('API Key')).toHaveValue('');
+        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
+        fireEvent.click(view.getByText('first', {selector: '.ant-select-item-option-content'}));
+        await waitFor(() => expect(view.getByLabelText('API Key')).toHaveValue('first-key'));
+        expect(view.getByLabelText('API Base URL')).toHaveValue('https://first.example.com');
+    });
+
 });
