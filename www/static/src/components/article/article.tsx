@@ -1,3 +1,4 @@
+import {CoverAI} from '../ai-image';
 import React from 'react';
 import {AIContext, AIButton, useEditorAI} from './ai-editor';
 import { Row, Col, Input, message } from 'antd';
@@ -462,7 +463,7 @@ function Article(props: ArticleProps) {
                             </section>
                         )}
                         <section className="category">
-                            <h5>封面图片</h5>
+                            <h5>封面图片 <CoverAI article={articleInfo} onChange={value => legacy.handleImageChange({target: {value}})} /></h5>
                             <ArticleControlImage
                                 imageUrl={articleInfo.options.featuredImage}
                                 handleImageChange={(e) => legacy.handleImageChange(e)}

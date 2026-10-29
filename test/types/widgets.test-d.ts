@@ -50,3 +50,8 @@ async function checkWidgetTypes(dynamicName: string) {
   // @ts-expect-error Options does not expose content formatting APIs
   options.excerpt();
 }
+
+declare const imageContext: Firekylin.AIProviderContext;
+const validatedImage: Firekylin.AIImage = imageContext.images.image({mimeType: 'image/png', data: 'YWJj'});
+const imageDataUri: string = imageContext.images.uri(validatedImage);
+const referenceImages: Firekylin.AIImage[] = imageContext.images.inputs({images: [validatedImage]}, 1);

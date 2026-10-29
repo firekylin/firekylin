@@ -11,6 +11,11 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
         query = 'params';
     }
     try {
+        if (query === 'data' && config.data instanceof FormData) {
+            config.data.set('_r', String(Math.random()));
+            if (auth.token) config.data.set('web_token', auth.token);
+            return config;
+        }
         config[query] = Object.assign({}, config[query]);
         config[query]._r = Math.random();
         if (auth.token) {
