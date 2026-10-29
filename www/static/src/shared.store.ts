@@ -189,8 +189,8 @@ class SharedStore {
   }
 
   // 更新系统
-  updateSystem(step: number) {
-    return http.post<any>('/admin/api/system?method=update&step=' + step);
+  updateSystem(_step: number) {
+    return http.post<any>('/admin/api/system?method=update', {}, {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
   }
 }
 

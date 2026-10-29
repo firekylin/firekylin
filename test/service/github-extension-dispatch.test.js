@@ -125,3 +125,16 @@ test('theme update replaces changed files and removes obsolete files', async() =
   assert.equal(entries.filter(entry => entry.path.endsWith('/index.eta')).length, 1);
   assert.equal(entries.find(entry => entry.path.endsWith('/index.eta')).sha, 'new-blob');
 });
+
+test('core update creates only a dependency change and rejects downgrades and locks', async() => {
+  const {client, calls} = fixture();
+  await client.dispatch({operation: 'core.update', version: '2.18.0'});
+  const entries = calls.find(call => call.endpoint === '/git/trees').body.tree;
+  assert.equal(entries.length, 1);
+  assert.equal(JSON.parse(entries[0].content).dependencies.firekylin, '2.18.0');
+  assert.match(calls.find(call => call.endpoint === '/pulls').body.title, /2.18.0/);
+  await assert.rejects(fixture().client.dispatch({operation: 'core.update', version: '2.15.0'}), /VERSION_NOT_NEWER/);
+  const locked = fixture([{path: 'pnpm-lock.yaml', type: 'blob'}]);
+  await assert.rejects(locked.client.dispatch({operation: 'core.update', version: '2.18.0'}), /LOCKFILE/);
+  assert.equal(locked.calls.some(call => call.options.method === 'POST'), false);
+});

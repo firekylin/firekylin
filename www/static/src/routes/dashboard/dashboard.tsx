@@ -6,7 +6,6 @@ import BreadCrumb from '../../components/breadcrumb';
 import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
-import { Subscription } from 'rxjs';
 const confirm = Modal.confirm;
 
 const UPDATE_STEPS = [
@@ -119,35 +118,26 @@ function DashBoard(props: DashBoardProps) {
     };
     legacy.renderUpdateConfirm = function renderUpdateConfirm() {
         confirm({
-            title: '在线更新警告!',
-            content:
-                '在线更新会覆盖文件，请确认你已经备份好对程序的修改，如果没有修改请忽略该警告。',
-            onOk: () => {
-                legacy.setState({ showUpdate: true });
-                legacy.updateSystem();
-            },
+            title: '更新 Firekylin',
+            content: '使用扩展设置中的安装方式：本地更新依赖并重启服务；连接 GitHub 时创建升级 PR。更新前请备份数据。',
+            onOk: () => new Promise<void>((resolve, reject) => {
+                props.sharedStore.updateSystem(1).subscribe({
+                    next: (res: any) => {
+                        if (res.errno !== 0) { reject(new Error(res.errmsg || '更新失败')); return; }
+                        const result = res.data;
+                        if (result.url) {
+                            Modal.success({ title: '升级 PR 已创建', content: <a href={result.url} target="_blank" rel="noreferrer">查看 PR</a> });
+                        } else if (result.restartRequired) {
+                            Modal.info({ title: '依赖已更新，请手动重启服务' });
+                        } else {
+                            Modal.success({ title: '依赖已更新，服务正在重启', onOk: () => location.reload() });
+                        }
+                        resolve();
+                    },
+                    error: (error: any) => { Modal.error({ title: '更新失败', content: String(error.message || error) }); reject(error); },
+                });
+            }),
         });
-    };
-    legacy.updateSystem = function updateSystem() {
-        legacy.updateSubscription$ = props.sharedStore
-            .updateSystem(legacy.state.step)
-            .subscribe((res) => {
-                if (legacy.state.step <= UPDATE_STEPS.length) {
-                    legacy.setState({ step: legacy.state.step + 1 }, () =>
-                        legacy.updateSystem(),
-                    );
-                }
-                if (legacy.state.step > UPDATE_STEPS.length) {
-                    setTimeout(location.reload.bind(location), COUNT_DOWN * 1000);
-                    setInterval(
-                        () =>
-                            legacy.setState({
-                                downCount: Math.max(0, --legacy.state.downCount),
-                            }),
-                        1000,
-                    );
-                }
-            });
     };
     legacy.render = function render() {
         const links = [
