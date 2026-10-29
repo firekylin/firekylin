@@ -1,6 +1,6 @@
 'use strict';
 
-const images = require('./images');
+const images = require('../service/ai-images');
 
 function nonEmpty(value, label) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string`);

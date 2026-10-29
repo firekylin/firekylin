@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const images = require('../../src/ai/images');
+const images = require('../../src/service/ai-images');
 const AIClient = require('../../src/ai/client');
 const Registry = require('../../src/ai/registry');
 const image = {mimeType: 'image/png', data: 'YWJj'};
