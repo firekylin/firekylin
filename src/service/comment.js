@@ -8,6 +8,7 @@ const {createCommentCore, CommentError} = require('../vendor/comment-core.cjs');
 const adminAuth = require('./admin-auth');
 const {ModelAdapter, CommentAdapter, UserAdapter} = require('./comment-adapter');
 const permalink = require('./permalink');
+const {emit, filterStrict} = require('../plugin/runtime');
 
 const tasklistPlugin = import('@mdit/plugin-tasklist').then(module => module.tasklist);
 
@@ -228,6 +229,21 @@ module.exports = class extends think.Service {
       stringify: value => value.avatar || `https://seccdn.libravatar.org/avatar/${think.md5(String(value.mail || value.email || '').toLowerCase())}?d=mp`
     };
     const core = createCommentCore({
+      hooks: {
+        async preSave(data, _parent, ctx) {
+          const next = await filterStrict('comment.beforeCreate', data, {ctx});
+          if (!next || typeof next !== 'object' || Array.isArray(next)) throw new TypeError('Invalid comment filter result');
+          Object.assign(data, next);
+        },
+        postSave: (comment, parent, ctx) => emit('comment.created', {comment, parent, ctx}),
+        preUpdate: (data, _extra, ctx) => filterStrict('comment.beforeUpdate', data, {ctx}).then(next => {
+          if (!next || typeof next !== 'object' || Array.isArray(next)) throw new TypeError('Invalid comment filter result');
+          Object.assign(data, next);
+        }),
+        postUpdate: (data, _extra, ctx) => emit('comment.updated', {data, ctx}),
+        preDelete: (id, _extra, ctx) => filterStrict('comment.beforeDelete', id, {ctx}).then(() => undefined),
+        postDelete: (id, _extra, ctx) => emit('comment.deleted', {id, ctx})
+      },
       models: {
         Comment: new CommentAdapter(controller.model('comment'), resolvePostId),
         Counter: new ModelAdapter(controller.model('counter')),

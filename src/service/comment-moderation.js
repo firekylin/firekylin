@@ -1,4 +1,5 @@
 'use strict';
+const {emit, filterStrict} = require('../plugin/runtime');
 
 /**
  * Shared moderation operations used by the admin API and AI tools.
@@ -32,17 +33,25 @@ class CommentModerationService {
     if (!existing || !existing.id) throw new Error('COMMENT_NOT_FOUND');
     if (onlyWaiting && existing.status !== 'waiting') throw new Error('Only waiting comments can be approved');
     const model = this.getModel('comment').where(where);
+    const event = operation === 'delete' ? 'comment.beforeDelete' : 'comment.beforeUpdate';
+    const change = operation === 'delete' ? {id, comment: existing, operation} : {
+      id, comment: existing, operation,
+      data: operation === 'edit' ? {comment: String(comment || '')} : {status: operation}
+    };
+    await filterStrict(event, change, {source: 'moderation', principal});
     if (operation === 'delete') {
       await model.delete();
     } else if (operation === 'edit') {
-      await model.update({comment: String(comment || ''), updated_at: this.now()});
+      await model.update({...change.data, updated_at: this.now()});
     } else {
-      await model.update({status: operation, updated_at: this.now()});
+      await model.update({...change.data, updated_at: this.now()});
     }
     await this.syncCount(existing.post_id);
     if (existing.status === 'waiting' && operation === 'approved' && this.notifyApprovedReply) {
       await this.notifyApprovedReply(existing);
     }
+    await emit(operation === 'delete' ? 'comment.deleted' : 'comment.updated',
+      {id, previous: existing, operation, data: change.data, source: 'moderation', principal});
     return {id, status: operation};
   }
 }

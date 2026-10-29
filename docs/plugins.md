@@ -11,7 +11,7 @@ Firekylin 插件用于在不修改核心代码和主题文件的情况下，为�
 - 增加公开 API、Webhook 和管理员 API；
 - 集成对象存储、搜索、通知、SEO 和统计服务。
 
-Firekylin 内置评论持久化和后台管理能力。评论 Hook、Feed、XML-RPC 等扩展点暂未纳入当前插件 API。
+Firekylin 内置评论持久化和后台管理能力，提供评论生命周期 Hook。Feed、XML-RPC 等扩展点暂未纳入当前插件 API。
 
 ## 创建和使用插件
 
@@ -104,6 +104,9 @@ archive.index
 archive.search
 theme.beforeRender
 theme.afterRender
+comment.created
+comment.updated
+comment.deleted
 ```
 
 ### 过滤型事件
@@ -117,6 +120,9 @@ content.markdown
 content.html
 content.excerpt
 content.render
+comment.beforeCreate
+comment.beforeUpdate
+comment.beforeDelete
 ```
 
 `markdown.configure` 接收正文渲染使用的 `markdown-it` 实例，可直接安装任意兼容插件：
