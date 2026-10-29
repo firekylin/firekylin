@@ -55,6 +55,8 @@ Firekylin 会检查项目 `package.json` 中的 `dependencies` 和 `optionalDepe
 `@example/firekylin-plugin-reading-stats`）同样支持。插件开发者应保留上例中的 `firekylin.type`，并确保
 `main` 或 `firekylin.entry` 指向随 npm 包发布的 CommonJS 入口文件。
 
+插件需要在后台插件管理中手动启用。没有保存启停状态的插件（包括升级前已安装的插件）默认停用；已明确保存的启用或停用状态不变。旧版本保存的迁移快照不再生效。
+
 `main` 是默认入口，`firekylin.entry` 可以覆盖它。`firekylin.id` 是稳定的插件 ID，用于路由和日志，建议不要随显示名称改变。Firekylin 版本约束可以写在 `engines.firekylin` 或 `firekylin.engine`。
 
 入口模块必须导出 `register(ctx)`，`activate(ctx)` 和 `deactivate(ctx)` 可选：

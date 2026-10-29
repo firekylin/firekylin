@@ -100,7 +100,6 @@ const pluginManager = existingPluginManager || new PluginManager({
   logger: console,
   packageApi,
   stateStore: new PluginStateStore({
-    ensureOption: (key, value) => think.model('options').ensureOption(key, value),
     getCredentialValue: key => think.model('options').getCredentialValue(key),
     setCredentialValue: (key, value) => think.model('options').setCredentialValue(key, value)
   }),

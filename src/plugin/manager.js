@@ -185,7 +185,6 @@ class PluginManager {
         this.logger.error?.(`[plugin] Unable to inspect ${root}: ${error.message}`);
       }
     }
-    if (this.stateStore) await this.stateStore.initialize([...manifests.values()].map(manifest => manifest.id));
     for (const [pluginRoot, manifest] of manifests) {
       try {
         const enabled = this.stateStore ? await this.stateStore.enabled(manifest.id) : true;
