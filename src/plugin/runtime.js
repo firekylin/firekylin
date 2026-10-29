@@ -14,4 +14,9 @@ async function filter(event, value, context) {
   return events ? events.filter(event, value, context) : value;
 }
 
-module.exports = {emit, filter};
+async function filterStrict(event, value, context) {
+  const events = pluginEvents();
+  return events ? events.filter(event, value, context, {failFast: true}) : value;
+}
+
+module.exports = {emit, filter, filterStrict};

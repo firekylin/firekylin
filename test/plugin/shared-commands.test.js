@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const PostCommandService = require('../../src/service/post-command');
 const CommentModerationService = require('../../src/service/comment-moderation');
+const EventBus = require('../../src/plugin/events');
 
 function fixture() {
   const operations = [];
@@ -150,4 +151,24 @@ test('shared moderation preserves commenter own edit/delete without granting app
   existing = {...existing, user_id: '5'};
   await assert.rejects(service.moderate({id: 7, operation: 'delete', allowCommenter: true}, {id: 4, type: 4}), /USER_NO_PERMISSION/);
   await assert.rejects(service.moderate({id: 7, operation: 'edit'}, {id: 4, type: 4}), /Administrator/);
+});
+
+test('moderation persists replacement values returned by comment filters', async() => {
+  const previous = global.firekylin;
+  const events = new EventBus();
+  events.on('comment.beforeUpdate', change => ({...change, data: {comment: 'sanitized'}}));
+  global.firekylin = {...previous, plugins: {events}};
+  let saved;
+  try {
+    const service = new CommentModerationService({
+      getModel: () => ({where() {return this}, setRelation() {return this},
+        async find() {return {id: 7, post_id: 9, status: 'approved'}},
+        async update(data) {saved = data}}),
+      now: () => 'now', syncCount: async() => {}
+    });
+    await service.moderate({id: 7, operation: 'edit', comment: 'unsafe'}, {type: 1});
+    assert.equal(saved.comment, 'sanitized');
+  } finally {
+    global.firekylin = previous;
+  }
 });
