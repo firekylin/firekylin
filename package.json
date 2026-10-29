@@ -85,6 +85,7 @@
     "think-view-eta": "^1.0.0",
     "thinkjs": "^4.0.0",
     "turndown": "^7.2.4",
+    "ua-parser-js": "^2.0.10",
     "upyun": "^3.4.6",
     "wxr": "^0.1.2",
     "xml2js": "^0.6.2"
