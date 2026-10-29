@@ -38,9 +38,13 @@ const BaseController = require('../../src/controller/base');
 
 registerWidgetMap(widgets);
 
-test('base controller reuses options widget data for the installation check', async() => {
+test('base controller reuses options widget data and checks installation separately', async() => {
   const queriedModels = [];
   const controller = new BaseController();
+  controller.service = name => {
+    assert.equal(name, 'install');
+    return {checkInstalled: async() => true};
+  };
   controller.model = name => {
     queriedModels.push(name);
     if (name !== 'options') throw new Error(`Unexpected eager model: ${name}`);
@@ -69,4 +73,19 @@ test('base controller reuses options widget data for the installation check', as
   assert.equal(controller.ctx.body.tags, undefined);
   assert.equal(controller.ctx.body.lastPostList, undefined);
   assert.equal(controller.ctx.body.widget, undefined);
+});
+
+
+test('default site_url without users redirects to the installer and permits recovery', async() => {
+  for (const action of ['index', 'install']) {
+    const controller = new BaseController();
+    controller.ctx.action = action;
+    controller.getWidget = async() => ({row: {site_url: 'http://127.0.0.1:8360'}});
+    controller.service = () => ({checkInstalled: async() => false});
+    let redirected;
+    controller.redirect = url => {redirected = url};
+    await controller.__before();
+    assert.equal(global.firekylin.isInstalled, false);
+    assert.equal(redirected, action === 'index' ? '/index/install' : undefined);
+  }
 });
