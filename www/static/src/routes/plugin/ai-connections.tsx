@@ -5,9 +5,10 @@ import BreadCrumb from '../../components/breadcrumb';
 import {SAVED_SECRET_MASK} from '../../components/protocol/form-field';
 import {PageForm, PAGE_SECTION_CONTENT_INSET} from '../../components/protocol/page-section';
 import {http} from '../../utils/http';
+import {useRouteComponentProps} from '../../utils/router';
 
 const MORE_PROVIDERS = '__more_providers__';
-const NPM_SEARCH = 'https://www.npmjs.com/search?q=firekylin-plugin-ai-provider-';
+const PROVIDER_SEARCH = '/plugin-management/install?q=firekylin-plugin-ai-provider-';
 
 interface Provider {
     id: string;
@@ -18,6 +19,7 @@ interface Provider {
 }
 
 export default function AIConnections() {
+    const {history} = useRouteComponentProps();
     const [providers, setProviders] = useState<Provider[]>([]);
     const [providerId, setProviderId] = useState<string>();
     const [modelId, setModelId] = useState<string>();
@@ -63,7 +65,7 @@ export default function AIConnections() {
 
     const changeProvider = (value: string | undefined) => {
         if (value === MORE_PROVIDERS) {
-            window.open(NPM_SEARCH, '_blank', 'noopener,noreferrer');
+            history.push(PROVIDER_SEARCH);
             return;
         }
         setProviderId(value);
