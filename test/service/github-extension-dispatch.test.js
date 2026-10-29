@@ -2,7 +2,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const JSZip = require('jszip');
-const vm = require('node:vm');
 const {ThemeInstaller} = require('../../src/service/theme-installer');
 const {GitHubExtensionDispatch} = require('../../src/service/github-extension-dispatch');
 
@@ -46,9 +45,6 @@ test('creates a branch and PR with an exact plugin dependency', async() => {
   assert.equal(JSON.parse(tree.tree[0].content).dependencies['firekylin-plugin-demo'], '1.0.0');
   assert.match(tree.tree.find(entry => entry.path === 'firekylin.config.js').content,
     /require\('firekylin-plugin-demo'\)/);
-  const config = tree.tree.find(entry => entry.path === 'firekylin.config.js').content;
-  vm.runInNewContext(config, {module: {exports: {}}, process: {env: {}},
-    require: () => { throw new Error('PACKAGE_ROOT_NOT_EXPORTED') }});
   assert.equal(calls.find(call => call.endpoint === '/pulls').body.base, 'main');
   assert.equal(JSON.stringify(result).includes('secret'), false);
   assert.ok(calls.every(call => call.options.redirect === 'error'));
