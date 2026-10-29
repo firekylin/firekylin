@@ -4,6 +4,7 @@ import axios from 'axios';
 import BreadCrumb from '../../../components/breadcrumb';
 
 export const CONTENT_FEATURES = [
+    {name: 'image', label: '图片生成和编辑', description: '根据文章生成 16:9 封面，或在媒体管理中通过提示词生成、优化图片，确认后上传到媒体库。'},
     {name: 'commentModeration', label: '评论审核', description: '将非管理员的新评论发送给 AI 识别垃圾评论；识别失败时保留待审核状态。'},
     {name: 'commentReply', label: '建议回复', description: '根据文章和当前评论生成建议回复，支持亲切、专业和诙谐口吻，确认后手动发送。'},
     {name: 'summary', label: '生成摘要', description: '正文超过 250 个字时，概括全文生成摘要并填入内容摘要，可继续编辑。'},

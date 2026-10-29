@@ -1,5 +1,7 @@
+import axios from 'axios';
+import AIImage, {saveImage} from '../../components/ai-image';
 import * as React from 'react';
-import { Card, Empty, Input, Modal, Pagination, Space, Upload, message } from 'antd';
+import { Button, Tabs, Card, Empty, Input, Modal, Pagination, Space, Upload, message } from 'antd';
 import {
     CopyOutlined,
     DeleteOutlined,
@@ -23,6 +25,10 @@ interface Attachment {
     };
 }
 export default function Media(props: any) {
+    const [open, setOpen] = React.useState(false), [tab, setTab] = React.useState('local');
+    const [enabled, setEnabled] = React.useState(false), [busy, setBusy] = React.useState(false);
+    const [link, setLink] = React.useState(''), [selected, setSelected] = React.useState<any>(null);
+    React.useEffect(() => {axios.get('/admin/api/ai-editor').then(r => setEnabled(!!r.data.data?.features?.image)).catch(() => {})}, []);
     const [state, setState] = React.useState(() => ({
         loading: false,
         data: [] as Attachment[],
@@ -55,6 +61,7 @@ export default function Media(props: any) {
         http.get<any>('/admin/api/attachment', {
             page,
             pageSize: 24,
+            images: '1',
             keyword: legacy.state.keyword,
         }).subscribe((res) => {
             if (res.errno === 0) {
@@ -140,9 +147,35 @@ export default function Media(props: any) {
             <>
                 <BreadCrumb {...props} />
                 <div className="media-page">
-                    <Space className="media-toolbar" wrap>
-                        <Upload.Dragger
-                            name="file"
+                    <Space className="media-toolbar" wrap style={{display: 'flex', justifyContent: 'flex-end'}}>
+                        <Input.Search
+                            placeholder="按文件名搜索"
+                            allowClear
+                            enterButton
+                            value={legacy.state.keyword}
+                            onChange={(event) =>
+                                legacy.setState({ keyword: event.target.value })
+                            }
+                            onSearch={() =>
+                                legacy.setState({ page: 1 }, () => legacy.load(1))
+                            }
+                        />
+                        <Button type="primary" onClick={() => {setSelected(null); setLink(''); setTab('local'); setOpen(true)}}>新增媒体</Button>
+                    </Space>
+                    <Modal title="新增媒体" open={open} destroyOnHidden confirmLoading={busy} closable={!busy} mask={{closable: !busy}} keyboard={!busy} onCancel={() => {if (!busy) setOpen(false)}} okButtonProps={{disabled: busy || (tab === 'ai' && !selected)}} onOk={async() => {
+                        setBusy(true);
+                        try {
+                            if (tab === 'ai') await saveImage(selected);
+                            if (tab === 'network') {
+                                if (!link.trim()) throw new Error('请输入图片地址');
+                                const res = await axios.post('/admin/api/file', {fileUrl: link});
+                                if (res.data.errno !== 0) throw new Error(res.data.errmsg || '抓取失败');
+                            }
+                            setOpen(false); legacy.load(1);
+                        } catch(e: any) {message.error(e.message)} finally {setBusy(false)}
+                    }}><Tabs activeKey={tab} onChange={key => {if (!busy) setTab(key)}} items={[
+                        {key: 'local', label: '本地上传', children: <Upload.Dragger
+                            accept="image/*" name="file"
                             action="/admin/api/file"
                             showUploadList={false}
                             multiple={true}
@@ -156,20 +189,10 @@ export default function Media(props: any) {
                             }}
                         >
                             <InboxOutlined /> 点击或拖放文件到这里上传
-                        </Upload.Dragger>
-                        <Input.Search
-                            placeholder="按文件名搜索"
-                            allowClear
-                            enterButton
-                            value={legacy.state.keyword}
-                            onChange={(event) =>
-                                legacy.setState({ keyword: event.target.value })
-                            }
-                            onSearch={() =>
-                                legacy.setState({ page: 1 }, () => legacy.load(1))
-                            }
-                        />
-                    </Space>
+                        </Upload.Dragger>},
+                        {key: 'network', label: '从网络上抓取', children: <><p>链接地址：</p><Input value={link} onChange={e => setLink(e.target.value)}/></>},
+                        ...(enabled ? [{key: 'ai', label: 'AI 生成', children: <AIImage onSelect={setSelected} onBusy={setBusy}/>}]: [])
+                    ]}/></Modal>
                     {legacy.state.data.length ? (
                         <div className="media-grid">
                             {legacy.state.data.map((item) => legacy.renderCard(item))}

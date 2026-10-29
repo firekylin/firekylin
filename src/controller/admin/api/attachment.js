@@ -29,6 +29,7 @@ module.exports = class extends Base {
     }
 
     const where = {};
+    if (this.get('images') === '1') where.options = ['like', '%image/%'];
     if (this.userInfo.type !== 1) where.user_id = this.userInfo.id;
     const keyword = String(this.get('keyword') || '').trim();
     if (keyword) where.title = ['like', `%${keyword}%`];
