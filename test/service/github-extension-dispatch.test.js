@@ -7,7 +7,8 @@ const {GitHubExtensionDispatch} = require('../../src/service/github-extension-di
 
 function fixture(extra = []) {
   const calls = [];
-  const tree = [{path: 'package.json', type: 'blob', mode: '100644', sha: 'package'}, ...extra];
+  const tree = [{path: 'package.json', type: 'blob', mode: '100644', sha: 'package'},
+    {path: 'firekylin.config.js', type: 'blob', mode: '100644', sha: 'config'}, ...extra];
   const client = new GitHubExtensionDispatch({connection: {repository: 'owner/site', token: 'secret'},
     fetcher: async(url, options) => {
       const endpoint = url.split('/repos/owner/site')[1];
@@ -20,6 +21,8 @@ function fixture(extra = []) {
       else if (endpoint === '/git/trees/base-tree?recursive=1') result = {tree};
       else if (endpoint === '/git/blobs/package') result = {encoding: 'base64',
         content: Buffer.from(JSON.stringify({dependencies: {firekylin: '2.16.0'}})).toString('base64')};
+      else if (endpoint === '/git/blobs/config') result = {encoding: 'base64',
+        content: Buffer.from('module.exports = {widgets: []};\n').toString('base64')};
       else if (endpoint === '/git/blobs/plugin') result = {encoding: 'base64',
         content: Buffer.from(JSON.stringify({name: 'demo'})).toString('base64')};
       else if (endpoint === '/git/blobs') result = {sha: 'new-blob'};
@@ -40,6 +43,8 @@ test('creates a branch and PR with an exact plugin dependency', async() => {
   const tree = calls.find(call => call.endpoint === '/git/trees').body;
   assert.equal(tree.base_tree, 'base-tree');
   assert.equal(JSON.parse(tree.tree[0].content).dependencies['firekylin-plugin-demo'], '1.0.0');
+  assert.match(tree.tree.find(entry => entry.path === 'firekylin.config.js').content,
+    /require\('firekylin-plugin-demo'\)/);
   assert.equal(calls.find(call => call.endpoint === '/pulls').body.base, 'main');
   assert.equal(JSON.stringify(result).includes('secret'), false);
   assert.ok(calls.every(call => call.options.redirect === 'error'));
@@ -49,7 +54,8 @@ test('rejects locked repositories and invalid plugin versions before writing', a
   const {client, calls} = fixture([{path: 'pnpm-lock.yaml', type: 'blob'}]);
   await assert.rejects(client.dispatch({operation: 'plugin.install', name: 'firekylin-plugin-demo', version: '1.0.0'}), /GITHUB_LOCKFILE_NOT_SUPPORTED/);
   assert.equal(calls.some(call => call.options.method === 'POST'), false);
-  await assert.rejects(client.dispatch({operation: 'plugin.install', name: 'firekylin-plugin-demo', version: '^1.0.0'}));
+  await assert.rejects(client.dispatch({operation: 'plugin.install',
+    name: 'firekylin-plugin-demo', version: '^1.0.0'}));
 });
 
 test('uploads verified theme files without changing local project files', async() => {
@@ -57,7 +63,8 @@ test('uploads verified theme files without changing local project files', async(
   zip.file('package.json', JSON.stringify({name: 'paper', version: '1.0.0', firekylin: {id: 'paper', type: 'theme'}}));
   zip.file('index.eta', 'hello');
   const archive = await zip.generateAsync({type: 'nodebuffer'});
-  const inspected = await new ThemeInstaller({themesPath: '/tmp/themes', backupPath: '/tmp/backups', firekylinVersion: '2.16.0'}).inspect(archive);
+  const inspected = await new ThemeInstaller({themesPath: '/tmp/themes',
+    backupPath: '/tmp/backups', firekylinVersion: '2.16.0'}).inspect(archive);
   const {client, calls} = fixture();
   await client.dispatch({operation: 'theme.install', inspected});
   const entries = calls.find(call => call.endpoint === '/git/trees').body.tree;
@@ -84,6 +91,21 @@ test('updates the existing dependency without moving its section', async() => {
   assert.equal(manifest.dependencies, undefined);
   await assert.rejects(client.dispatch({operation: 'plugin.update', name: 'firekylin-plugin-demo', version: '0.9.0'}),
     /PLUGIN_VERSION_NOT_NEWER/);
+});
+
+test('removes the managed import when uninstalling a plugin', async() => {
+  const {client, calls} = fixture();
+  client.blob = async entry => Buffer.from(entry.sha === 'package'
+    ? JSON.stringify({dependencies: {'firekylin-plugin-demo': '1.0.0'}})
+    : ['module.exports = {widgets: []};', '',
+      '// Firekylin marketplace plugin imports (for Vercel bundling)',
+      "require('firekylin-plugin-demo');", // eslint-disable-line quotes
+      '// End Firekylin marketplace plugin imports', ''].join('\n'));
+  await client.dispatch({operation: 'plugin.uninstall', name: 'firekylin-plugin-demo'});
+  const entries = calls.find(call => call.endpoint === '/git/trees').body.tree;
+  assert.doesNotMatch(entries.find(entry => entry.path === 'firekylin.config.js').content, /firekylin-plugin-demo/);
+  const manifest = JSON.parse(entries.find(entry => entry.path === 'package.json').content);
+  assert.equal(manifest.dependencies['firekylin-plugin-demo'], undefined);
 });
 
 test('theme update replaces changed files and removes obsolete files', async() => {

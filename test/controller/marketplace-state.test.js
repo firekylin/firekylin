@@ -220,8 +220,12 @@ test('GitHub mode creates a PR without running local installer', async t => {
     if (address.endsWith('/repos/owner/site')) data = {default_branch: 'main'};
     else if (address.endsWith('/git/ref/heads/main')) data = {object: {sha: 'base'}};
     else if (address.endsWith('/git/commits/base')) data = {tree: {sha: 'tree'}};
-    else if (address.endsWith('/git/trees/tree?recursive=1')) data = {tree: [{path: 'package.json', type: 'blob', mode: '100644', sha: 'package'}]};
+    else if (address.endsWith('/git/trees/tree?recursive=1')) data = {tree: [
+      {path: 'package.json', type: 'blob', mode: '100644', sha: 'package'},
+      {path: 'firekylin.config.js', type: 'blob', mode: '100644', sha: 'config'}]};
     else if (address.endsWith('/git/blobs/package')) data = {encoding: 'base64', content: Buffer.from('{}').toString('base64')};
+    else if (address.endsWith('/git/blobs/config')) data = {encoding: 'base64',
+      content: Buffer.from('module.exports = {};\n').toString('base64')};
     else if (address.endsWith('/git/trees')) data = {sha: 'updated'};
     else if (address.endsWith('/git/commits')) data = {sha: 'newcommit'};
     else if (address.endsWith('/git/refs')) data = {};
