@@ -174,3 +174,24 @@ provider throws, times out or is cancelled later. Original provider errors remai
 after completion or cancellation are ignored; full response objects and headers are never stored.
 Existing providers without declarations keep their previous return values and legacy usage support.
 No additional utility npm package is required.
+
+### Shared image helpers
+
+Core passes a frozen `images` helper object in the provider generation context, alongside
+`signal` and `reportUsage`. Provider adapters should forward this object to their native
+clients rather than bundle copies or import core implementation paths:
+
+```js
+generate: async(request, {signal, reportUsage, images}) => nativeClient({request, signal, reportUsage, images})
+```
+
+- `images.image(value)` validates and normalizes `{mimeType, data}` (PNG, JPEG or WebP;
+  nonempty base64 up to 28,000,000 characters).
+- `images.inputs(request, max = 1)` validates the reference image list and provider-specific limit.
+- `images.uri(value)` creates a validated base64 data URI.
+- `images.prompt(request)` joins message text into an image prompt and rejects empty prompts.
+- `images.output(payload, mimeType)` converts native `data[].b64_json` results and rejects missing output.
+
+The provider remains responsible for its native protocol, MIME type and model-specific limits.
+These helpers do not upload files. Install a core release containing this API before updating
+image provider plugins. Text-only calls do not require the helpers.

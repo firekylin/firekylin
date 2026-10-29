@@ -145,7 +145,20 @@ declare namespace Firekylin {
     fields?: Partial<Record<keyof AIUsageDetails, AIUsageSelector>>;
     requestIdHeaders?: string[];
   }
+  interface AIImage {
+    mimeType: 'image/png' | 'image/jpeg' | 'image/webp';
+    data: string;
+  }
+  interface AIImageHelpers {
+    image(value: unknown): AIImage;
+    inputs(request: {images?: AIImage[]}, max?: number): AIImage[];
+    uri(value: AIImage): string;
+    prompt(request: {messages: Array<{content: string}>}): string;
+    output(payload: {data?: Array<{b64_json: string}>}, mimeType: AIImage['mimeType']): AIImage[];
+  }
   interface AIProviderContext {
+    /** Core-owned image validation and conversion for native provider adapters. */
+    images: AIImageHelpers;
     signal?: AbortSignal;
     /** Report native counters as soon as available, including before rejecting empty output. */
     reportUsage(rawUsage?: unknown, response?: {headers?: {get(name: string): string | null}}): void;

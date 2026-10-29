@@ -1,5 +1,7 @@
 'use strict';
 
+const images = require('./images');
+
 function nonEmpty(value, label) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string`);
   return value.trim();
@@ -100,7 +102,7 @@ class AIClient {
       });
       if (signal.aborted) return await aborted;
       const result = await Promise.race([Promise.resolve().then(() => provider.generate(
-        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage})), aborted]);
+        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images})), aborted]);
       return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
     } finally {
       active = false;
