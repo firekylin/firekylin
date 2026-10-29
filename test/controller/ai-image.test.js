@@ -29,3 +29,36 @@ test('image generation selects image capable model and preserves output', async(
   }}};
   try { assert.deepEqual((await setup(true).postAction()).data, image) } finally { delete global.firekylin }
 });
+
+test('successful response termination is not converted into an error response', async() => {
+  const image = {mimeType: 'image/png', data: 'YWJj'};
+  global.firekylin = {plugins: {ai: {
+    models: async() => [{id: 'openai', models: [{id: 'image', capabilities: ['image']}]}],
+    generate: async() => ({images: [image]})
+  }}};
+  const controller = setup(true);
+  const prevent = new Error('PREVENT_NEXT_PROCESS');
+  let sent;
+  controller.success = data => {sent = data; throw prevent};
+  controller.fail = () => assert.fail('success must not become a failure');
+  try {
+    await assert.rejects(controller.postAction(), error => error === prevent);
+    assert.deepEqual(sent, image);
+  } finally {delete global.firekylin}
+});
+test('missing image provider sends only one failure response', async() => {
+  const controller = setup(true);
+  const prevent = new Error('PREVENT_NEXT_PROCESS');
+  let failures = 0;
+  controller.fail = message => {failures++; assert.match(message, /请先配置/); throw prevent};
+  try {await assert.rejects(controller.postAction(), error => error === prevent); assert.equal(failures, 1)}
+  finally {delete global.firekylin}
+});
+test('provider failures retain their original message', async() => {
+  global.firekylin = {plugins: {ai: {
+    models: async() => [{id: 'openai', models: [{id: 'image', capabilities: ['image']}]}],
+    generate: async() => {throw new Error('provider unavailable')}
+  }}};
+  try {assert.deepEqual(await setup(true).postAction(), {error: 'provider unavailable'})}
+  finally {delete global.firekylin}
+});
