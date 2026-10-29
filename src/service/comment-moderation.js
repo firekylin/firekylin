@@ -38,20 +38,27 @@ class CommentModerationService {
       id, comment: existing, operation,
       data: operation === 'edit' ? {comment: String(comment || '')} : {status: operation}
     };
-    await filterStrict(event, change, {source: 'moderation', principal});
+    const filtered = await filterStrict(event, change, {source: 'moderation', principal});
+    if (!filtered || typeof filtered !== 'object' || Array.isArray(filtered)) {
+      throw new TypeError('Invalid comment filter result');
+    }
+    if (operation !== 'delete' &&
+      (!filtered.data || typeof filtered.data !== 'object' || Array.isArray(filtered.data))) {
+      throw new TypeError('Invalid comment update filter result');
+    }
     if (operation === 'delete') {
       await model.delete();
     } else if (operation === 'edit') {
-      await model.update({...change.data, updated_at: this.now()});
+      await model.update({...filtered.data, updated_at: this.now()});
     } else {
-      await model.update({...change.data, updated_at: this.now()});
+      await model.update({...filtered.data, updated_at: this.now()});
     }
     await this.syncCount(existing.post_id);
     if (existing.status === 'waiting' && operation === 'approved' && this.notifyApprovedReply) {
       await this.notifyApprovedReply(existing);
     }
     await emit(operation === 'delete' ? 'comment.deleted' : 'comment.updated',
-      {id, previous: existing, operation, data: change.data, source: 'moderation', principal});
+      {id, previous: existing, operation, data: filtered.data, source: 'moderation', principal});
     return {id, status: operation};
   }
 }
