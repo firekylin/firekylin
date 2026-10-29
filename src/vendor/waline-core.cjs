@@ -212,7 +212,7 @@ var createCommentFormatter = (runtime) => {
     }
     const parsed = services.userAgent?.parse(uaText);
     if (!config.disableUserAgent && parsed) {
-      result.browser = [parsed.browser?.name, (parsed.browser?.version ?? "").split(".").slice(0, 2).join(".")].filter(Boolean).join(" ");
+      result.browser = `${parsed.browser?.name ?? ""}${(parsed.browser?.version ?? "").split(".").slice(0, 2).join(".")}`;
       result.os = [parsed.os?.name, parsed.os?.version].filter(Boolean).join(" ");
     }
     result.avatar = await avatar(author ?? source);

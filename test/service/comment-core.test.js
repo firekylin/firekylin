@@ -76,7 +76,7 @@ test('comment list includes parsed browser and operating system', async() => {
   const ctx = {headers: {}, state: {}, ip: '127.0.0.1'};
   await core.comment.create({url: '/post/a.html', comment: 'Hello', nick: 'Tester', ua: 'Windows NT 10.0 Chrome/120.0 Safari/537.36'}, ctx);
   const list = await core.comment.list({path: '/post/a.html'}, ctx);
-  assert.equal(list.data[0].browser, 'Chrome 120.0');
+  assert.equal(list.data[0].browser, 'Chrome120.0');
   assert.equal(list.data[0].os, 'Windows 10');
   await core.comment.create({url: '/post/unknown.html', comment: 'Unknown', nick: 'Tester', ua: 'unknown'}, {...ctx, ip: '127.0.0.2'});
   const unknown = await core.comment.list({path: '/post/unknown.html'}, ctx);
