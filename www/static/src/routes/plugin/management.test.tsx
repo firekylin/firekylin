@@ -1,6 +1,6 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
 import {of} from 'rxjs';
-import {Modal} from 'antd';
+import {message, Modal} from 'antd';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {MemoryRouter} from '../../utils/router';
 import {http} from '../../utils/http';
@@ -8,8 +8,15 @@ import PluginManagement from './management';
 
 vi.mock('../../utils/http', () => ({http: {get: vi.fn(), post: vi.fn()}}));
 vi.mock('../../components/breadcrumb', () => ({default: () => null}));
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+});
 beforeEach(() => {
+    // Static messages mount independent React roots asynchronously. These tests
+    // exercise plugin operations, so keep notifications out of jsdom teardown.
+    vi.spyOn(message, 'success').mockImplementation(() => undefined as any);
+    vi.spyOn(message, 'warning').mockImplementation(() => undefined as any);
     globalThis.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} } as any;
     window.SysConfig = {csrfToken: 'token', pluginAdmin: []} as any;
     vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {plugins: [
