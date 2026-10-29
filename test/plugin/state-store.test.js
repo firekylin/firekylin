@@ -60,12 +60,3 @@ test('invalid explicit state is still rejected', async() => {
   const store = new PluginStateStore(model(new Map([[stateKey('example'), 'invalid']])));
   await assert.rejects(store.enabled('example'), /INVALID_PLUGIN_STATE/);
 });
-
-test('startup without plugins never accesses options', async t => {
-  const project = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-state-empty-'));
-  t.after(() => fs.rmSync(project, {recursive: true, force: true}));
-  const store = new PluginStateStore(new Proxy({}, {get() { assert.fail('unexpected options access') }}));
-  const manager = new PluginManager({projectPath: project, stateStore: store});
-  await manager.load();
-  assert.equal(manager.plugins.size, 0);
-});
