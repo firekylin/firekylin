@@ -42,3 +42,36 @@ test('suggested replies preserve successful responses with real controller helpe
     assert.equal(responses[0].errno, 1);
   }
 });
+
+test('admin replies resolve current permalinks by parent post ID, never historical URLs', async() => {
+  const instance = new Controller();
+  instance.userInfo = {id: 1, type: 1};
+  instance.post = key => ({id: 2, operation: 'reply', comment: '谢谢！'})[key];
+  instance.ctx = {state: {jwtSecret: 'comment-reply-test-secret-at-least-32-bytes'},
+    cookie: () => '', get: () => auth.csrfToken(instance.ctx)};
+  instance.success = () => ({errno: 0});
+  instance.fail = errmsg => ({errno: 1, errmsg});
+  const parent = {id: 2, post_id: 3, url: '/post/old.html', rid: 1};
+  let post = {id: 3, type: 0, pathname: 'renamed', create_time: '2026-10-29 12:00:00'};
+  const created = [], synced = [];
+  const options = {};
+  instance.model = name => ({where(where) {
+    assert.deepEqual(where, {id: name === 'comment' ? 2 : 3});
+    return this;
+  }, find: async() => name === 'comment' ? parent : post});
+  instance.service = () => ({
+    create: async() => ({options, core: {comment: {create: async input => created.push(input)}}}),
+    context: async() => ({}), syncCount: async(_controller, id) => synced.push(id)
+  });
+  // Renaming a slug, including reusing its old value for another post, must not
+  // make the historical URL determine the article receiving the reply.
+  assert.equal((await instance.postAction()).errno, 0);
+  assert.deepEqual(created[0], {url: '/post/renamed.html', pid: '2', rid: '1', comment: '谢谢！'});
+  options.post_permalink = '/articles/{id}/{slug}';
+  assert.equal((await instance.postAction()).errno, 0);
+  assert.equal(created[1].url, '/articles/3/renamed');
+  assert.deepEqual(synced, [3, 3]);
+  post = {};
+  assert.equal((await instance.postAction()).errmsg, '评论所属文章不存在');
+  assert.equal(created.length, 2);
+});

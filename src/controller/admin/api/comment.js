@@ -98,10 +98,12 @@ module.exports = class extends Base {
       }
       const comment = this.post('comment');
       if (typeof comment !== 'string' || !comment.trim() || comment.length > 20000) return this.fail('请输入有效回复');
+      const post = await this.model('post').where({id: parent.post_id}).find();
+      if (!post?.id) return this.fail('评论所属文章不存在');
       const service = this.service('comment');
-      const {core, users, tokenService, avatarService} = await service.create(this);
+      const {core, users, tokenService, avatarService, options} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
-      await core.comment.create({url: parent.url, pid: String(parent.id),
+      await core.comment.create({url: permalink.generate(post.type, post, options), pid: String(parent.id),
         rid: String(parent.rid || parent.id), comment}, ctx);
       await service.syncCount(this, parent.post_id);
       return this.success();
