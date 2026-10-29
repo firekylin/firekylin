@@ -4,6 +4,9 @@ import BreadCrumb from '../../components/breadcrumb';
 import { http } from '../../utils/http';
 import firekylin from '../../utils/firekylin';
 import './comment.less';
+import axios from 'axios';
+import {Dropdown} from 'antd';
+import AiSparkleIcon from '../../components/ai-sparkle-icon';
 
 const COMMENT_STATUS: Record<string, { color: string; text: string }> = {
     approved: { color: 'green', text: '已通过' },
@@ -22,6 +25,22 @@ export default function Comment(props: any) {
         editing: null,
         content: '',
     }));
+    const [replyId, setReplyId] = React.useState<number | null>(null);
+    const [reply, setReply] = React.useState('');
+    const [tone, setTone] = React.useState('亲切口吻');
+    const [busy, setBusy] = React.useState(false);
+    const [suggestEnabled, setSuggestEnabled] = React.useState(false);
+    const replyAction = async(operation: string) => {
+        setBusy(true);
+        try {
+            const {data} = await axios.post('/admin/api/comment', {id: replyId, operation, comment: reply, tone},
+                {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
+            if (data.errno !== 0) throw new Error(data.errmsg || '操作失败');
+            if (operation === 'suggestReply') setReply(data.data.text);
+            else {setReplyId(null); setReply(''); legacy.load(); message.success('回复成功')}
+        } catch (error: any) {message.error(error.response?.data?.errmsg || error.message || '操作失败')}
+        finally {setBusy(false)}
+    };
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
     legacy.state = state;
@@ -57,8 +76,10 @@ export default function Comment(props: any) {
             keyword,
             author,
         }).subscribe((res) => {
-            if (res.errno === 0)
+            if (res.errno === 0) {
+                setSuggestEnabled(Boolean((res.data as any).features?.commentReply));
                 legacy.setState({ ...(res.data as any), status, loading: false });
+            }
             else legacy.setState({ loading: false });
         });
     };
@@ -174,6 +195,7 @@ export default function Comment(props: any) {
                                 垃圾
                             </Button>
                         )}
+                        {!isCommenter && <Button size="small" disabled={busy} onClick={() => {setReplyId(row.id); setReply('')}}>回复</Button>}
                         <Button
                             size="small"
                             onClick={() =>
@@ -205,6 +227,20 @@ export default function Comment(props: any) {
                 columns={columns}
                 dataSource={legacy.state.data}
                 loading={legacy.state.loading}
+                expandable={{
+                    expandedRowKeys: replyId === null ? [] : [replyId],
+                    showExpandColumn: false,
+                    expandedRowRender: () => <Space orientation="vertical" style={{width: '100%'}}>
+                        <Input.TextArea aria-label="回复内容" rows={4} disabled={busy} value={reply} onChange={event => setReply(event.target.value)} />
+                        <Space>
+                            <Button type="primary" disabled={busy || !reply.trim()} onClick={() => replyAction('reply')}>回复</Button>
+                            <Button disabled={busy} onClick={() => setReplyId(null)}>取消</Button>
+                            {suggestEnabled && <Dropdown.Button disabled={busy} icon={<span>▾</span>}
+                                menu={{selectedKeys: [tone], items: ['亲切口吻', '专业口吻', '诙谐口吻'].map(key => ({key, label: key})), onClick: ({key}) => setTone(key)}}
+                                onClick={() => replyAction('suggestReply')}><AiSparkleIcon />建议回复</Dropdown.Button>}
+                        </Space>
+                    </Space>
+                }}
                 pagination={{
                     current: legacy.state.page,
                     pageSize: 20,
