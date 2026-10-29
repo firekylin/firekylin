@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Alert, Button, Input, message, Modal, Space, Spin, Table, Tag} from 'antd';
 import axios from 'axios';
 import {gt, valid} from 'semver';
-import {Link} from '../../utils/router';
+import {Link, useLocation} from '../../utils/router';
 import BreadCrumb from '../../components/breadcrumb';
 
 type InstalledPlugin = {name: string; version: string; source: string};
@@ -10,9 +10,12 @@ type InstalledPlugin = {name: string; version: string; source: string};
 type MarketItem = {name: string; version: string; title?: string; description?: string};
 
 export default function PluginMarket(props: any) {
+    const location = useLocation();
+    const query = new URLSearchParams(location.search).get('q') || '';
     const [items, setItems] = useState<MarketItem[]>([]);
     const [installed, setInstalled] = useState<InstalledPlugin[]>([]);
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(query);
+    useEffect(() => setSearch(query), [query]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [reload, setReload] = useState(0);

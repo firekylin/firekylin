@@ -50,3 +50,12 @@ it('offers an update only for a newer installed npm plugin', async() => {
     await waitFor(() => expect(message.success).toHaveBeenCalledWith('更新完成，请重启 Firekylin 后生效'));
     await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(4));
 });
+
+it('filters plugins using the URL search term and allows editing it', async() => {
+    const view = render(<MemoryRouter initialEntries={['/plugin-management/install?q=ai-provider-']}><PluginMarket /></MemoryRouter>);
+    await waitFor(() => expect(axios.get).toHaveBeenCalled());
+    expect(view.getByPlaceholderText('搜索插件')).toHaveValue('ai-provider-');
+    expect(view.queryByText('Demo')).not.toBeInTheDocument();
+    fireEvent.change(view.getByPlaceholderText('搜索插件'), {target: {value: 'demo'}});
+    expect(await view.findByText('Demo')).toBeInTheDocument();
+});
