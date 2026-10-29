@@ -40,7 +40,7 @@ VALUES
   ('password_salt','firekylin','密码 salt，网站安装的时候随机生成一个'),
   ('push','0','是否允许推送'),
   ('push_sites','','推送网站列表'),
-  ('site_url','http://127.0.0.1:8360','网站地址'),
+  ('site_url','','网站地址'),
   ('theme','firekylin','主题名称'),
   ('title','Firekylin 系统','网站标题'),
   ('twitter_url','','微博地址'),

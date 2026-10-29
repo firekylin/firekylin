@@ -24,7 +24,7 @@ module.exports = class extends think.Controller {
     try {
       const optionsWidget = await this.getWidget('Widget_Options');
       options = optionsWidget.row;
-      firekylin.isInstalled = Boolean(options.site_url);
+      firekylin.isInstalled = await this.service('install').checkInstalled();
     } catch (e) {
       firekylin.isInstalled = false;
     }

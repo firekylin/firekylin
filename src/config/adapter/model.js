@@ -1,6 +1,6 @@
 const mysql = require('think-model-mysql2');
-const pgsql = require('think-model-postgresql');
-const sqlite = require('think-model-sqlite');
+const pgsql = require('../../adapter/postgresql');
+const sqlite = require('../../adapter/sqlite');
 const {getContext} = require('../../../lib/project-context');
 
 const isDev = think.env === 'development';

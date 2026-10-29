@@ -19,6 +19,33 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: firekylin_test
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: firekylin_test
+        ports:
+          - 3306/tcp
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -40,6 +67,12 @@ jobs:
 
       - name: Linter test
         run: pnpm run lint
+
+      - name: Installation regression tests
+        env:
+          FK_TEST_POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+          FK_TEST_MYSQL_PORT: ${{ job.services.mysql.ports[3306] }}
+        run: pnpm run test:install
 
       - name: Unit test
         run: pnpm run test:widget && pnpm run test:extensions && pnpm run test:admin && pnpm run test:auth && pnpm run test:plugin && pnpm run test:ai-audit && pnpm run test:cli && pnpm run test:types
