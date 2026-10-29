@@ -19,7 +19,9 @@ function updatePluginImports(source, name, operation) {
   const names = new Set(existing);
   if (operation === 'plugin.uninstall') names.delete(name);
   else names.add(name);
-  const block = names.size ? `${PLUGIN_IMPORTS_START}\n${[...names].sort().map(item => `require('${item}');`).join('\n')}\n${PLUGIN_IMPORTS_END}\n` : '';
+  const block = names.size ? `${PLUGIN_IMPORTS_START}\n` +
+    `if (process.env.FIREKYLIN_TRACE_PLUGIN_IMPORTS) {\n` +
+    `${[...names].sort().map(item => `  require('${item}');`).join('\n')}\n}\n${PLUGIN_IMPORTS_END}\n` : '';
   if (start !== -1) source = source.slice(0, start) + source.slice(end + PLUGIN_IMPORTS_END.length).replace(/^\n/, '');
   return source.replace(/\s*$/, '\n') + (block ? `\n${block}` : '');
 }
