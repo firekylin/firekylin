@@ -33,6 +33,10 @@
 
 Firekylin（火麒麟）是一个开源免费的 Node.js 博客系统。通过浏览器管理文章、页面和评论，使用主题和插件扩展站点，支持 AI 辅助创作及 MCP 博客管理。
 
+![默认主题的示例博客首页，展示文章摘要与导航](docs/images/readme/overview.jpg)
+
+默认主题的博客首页。以下截图均来自真实运行的本地实例，使用示例内容。
+
 ## 特性
 
 ### AI 创作与管理
@@ -42,25 +46,49 @@ Firekylin（火麒麟）是一个开源免费的 Node.js 博客系统。通过�
 - **MCP 管理**：连接支持远程 MCP 和 OAuth 的 AI 客户端，通过对话查找文章、管理草稿、分类标签和评论。操作遵循账号权限，发布、删除等操作需要确认。
 - **服务商配置**：在后台选择 AI 服务商和模型；AI 调用费用按服务商规则计算。
 
+![AI 连接页展示 OpenAI 服务商、空 API Key 字段与模型选择](docs/images/readme/ai-connection.jpg)
+
+AI 服务商与模型配置示例；未填写密钥，未调用生成服务。
+
 ### 主题市场
 
 在后台搜索、预览、安装和更新主题，切换博客外观并调整主题配置。[查看官方主题](https://github.com/firekylin/themes)。
+
+![主题市场展示官方主题预览、版本、简介及安装按钮](docs/images/readme/theme-market.jpg)
+
+浏览官方主题，查看预览与版本信息。
 
 ### 插件市场
 
 在后台搜索、安装和更新插件，管理启用状态与配置，包括 AI 服务商等扩展。[查看官方插件](https://github.com/firekylin/plugins)。
 
+![插件市场展示多个 AI 服务商插件的版本、简介与安装入口](docs/images/readme/plugin-market.jpg)
+
+从官方插件目录查找并安装扩展。
+
 ### 评论管理
 
 内置 Waline 评论，无需另建评论服务。支持评论回复与审核、社交账号登录、邮件通知，以及 Turnstile、reCAPTCHA 验证码。
+
+![评论管理页展示示例评论的已通过和待审核状态，以及回复和审核操作](docs/images/readme/comments.jpg)
+
+集中查看、回复和审核评论。
 
 ### 内容管理
 
 使用 Markdown 写作，管理文章、草稿、独立页面、分类、标签和上传文件，支持从其他博客系统导入内容。
 
+![文章列表展示示例文章、草稿状态与编辑入口](docs/images/readme/content.jpg)
+
+按发布状态管理文章和草稿。
+
 ### Vercel 部署
 
 支持本地、服务器和 Vercel 部署，可使用 SQLite、MySQL、TiDB 或 PostgreSQL。Vercel 需使用外部数据库，持久保存上传文件需配置对象存储。[查看部署指南](https://github.com/firekylin/firekylin/wiki/快速部署)。
+
+![上传设置页选中 Vercel Blob，显示空令牌字段和路径前缀](docs/images/readme/vercel-blob.jpg)
+
+Vercel Blob 持久化上传配置示例；未填写令牌，未执行线上部署。
 
 主题和插件在本地安装后按提示启用或重启；GitHub 管理模式通过 PR 合并和重新部署生效。
 
