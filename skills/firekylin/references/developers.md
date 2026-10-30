@@ -1,5 +1,7 @@
 # Theme and plugin developers
 
+For natural-language plugin requests, follow [Plugin generation](plugin-generation.md) first. Plugin guidance below was rechecked against `e10a576` (2.17.1); verify the deployed implementation.
+
 Prefer extending an independent site through Widgets, plugins, and shared services. node_modules edits disappear on upgrade; intentional core changes follow the maintainer workflow.
 
 ## Layout and development modes
@@ -97,6 +99,8 @@ module.exports = ({ContentsWidget}) => ({
 
 Use visibility-filtered queries such as getPostList for public Widgets. Raw select() does not exclude drafts/private posts. Merge entries with existingWidgets; preserve database/server and other configuration.
 
+**Full-plugin caveat at e10a576:** project/theme initializers receive ContentsWidget and MetasWidget, but src/widget/registry.js exports only Widget to PluginManager. Therefore ctx.widgets.ContentsWidget and ctx.widgets.MetasWidget are undefined in this snapshot despite the manager listing them. Check runtime constructors before extending them. Use ctx.widgets.Widget and explicit row fields, or choose a project/theme Widget entry when content helpers are needed; do not silently import undocumented internal classes or claim permalink/title helpers exist on the base Widget.
+
 Active themes may declare firekylin.widgets in package.json. Conflicts fail unless widgetOverrides explicitly allows an override; themes cannot override Widget_Options. Restart workers after server-code changes.
 
 Widget_Custom_Recent@sidebar creates a separately cached instance; aliases are not query parameters. firekylin.widget.destroy(name?) clears instance caches. Project firekylin.d.ts references `/// <reference types="firekylin" />`; augment Firekylin.WidgetRegistry for custom instances/parameters. Types in types/index.d.ts do not replace runtime registration.
@@ -110,18 +114,18 @@ Example plugins/example/package.json, with CommonJS plugin.js:
   "name": "firekylin-plugin-example",
   "version": "1.0.0",
   "main": "plugin.js",
-  "engines": {"firekylin": ">=2.8.0"},
+  "engines": {"firekylin": "2.17.1"},
   "firekylin": {"type": "plugin", "id": "example", "entry": "plugin.js"}
 }
 ```
 
 Engine constraints do not prove unpublished master features exist in a released package. Verify compatibility before release.
 
-Startup scans pluginsPath and direct project dependencies/optionalDependencies marked firekylin.type=plugin. Ordinary packages and devDependencies are not automatically plugins. Lifecycle: validate manifest, register(ctx), optional activate(ctx).
+Startup scans pluginsPath and direct project dependencies/optionalDependencies marked firekylin.type=plugin. Ordinary packages and devDependencies are not automatically plugins. With the production state store, discovered plugins without saved state default disabled; enable them in **插件管理 → 已安装插件**. Enabled lifecycle: validate manifest, load entry, register(ctx), optional activate(ctx). A bare PluginManager without a stateStore auto-activates and is not evidence of production enablement.
 
-Context provides id, manifest, root, events, routes, templates, tools, widgets, logger, config. config comes from pluginConfig[pluginId]. Deactivation cleans registered resources; deactivate must clean plugin-owned timers/connections/external resources.
+Context provides id, manifest, root, events, routes, templates, tools (AbilityRegistry compatibility alias), admin, widgets, logger, config. ai is optional and requires the host AI store; packages requires the host package API and packages:manage permission. config comes from pluginConfig[pluginId]. Deactivation cleans registered resources; deactivate must clean plugin-owned timers/connections/external resources.
 
-Do not invent a generic plugin enable/disable UI, guaranteed configuration switch, dependency topology, or management API. permissions metadata is not a Node.js sandbox.
+The current admin supports install/enable/disable/delete and a configuration link for an active plugin with a settings page. State changes reload clustered workers; restart single-process sites. File installation, enablement, npm publication and official Registry inclusion are separate operations. Do not invent dependency topology or configuration setters. permissions metadata is not a Node.js sandbox.
 
 ## Events and filters
 
@@ -136,6 +140,7 @@ Do not invent a generic plugin enable/disable UI, guaranteed configuration switc
 | content.created / content.updated | post/type; inspect emitting location |
 | archive.beforeQuery / archive.index / archive.search | controller, type or keyword |
 | theme.beforeRender / theme.afterRender | controller, name, theme, response, etc. |
+| comment.created / comment.updated / comment.deleted | Public comment service and moderation emit different shapes; inspect src/service/comment.js and comment-moderation.js |
 
 | Filter | Input/purpose |
 | --- | --- |
@@ -146,8 +151,9 @@ Do not invent a generic plugin enable/disable UI, guaranteed configuration switc
 | content.html | Generated body HTML |
 | content.excerpt | Generated excerpt |
 | content.render | Body/excerpt HTML, context.type distinguishes content/summary |
+| comment.beforeCreate / comment.beforeUpdate / comment.beforeDelete | Strict filters; payloads depend on public-comment versus moderation source |
 
-Notification return values do not replace data. Filters return a replacement; undefined preserves the previous value. Default priority=100, lower runs first. events.on returns an unsubscribe callback. Exceptions are generally logged/isolated; listener failure does not guarantee transaction rollback.
+Notification return values do not replace data. Filters return a replacement; undefined preserves the previous value. Default priority=100, lower runs first. events.on returns an unsubscribe callback. Exceptions are generally logged/isolated; listener failure does not guarantee transaction rollback. Comment before-hooks use filterStrict (failFast) and can reject the operation. For moderation, beforeUpdate receives {id, comment, operation, data} and context.source=moderation; public-comment updates receive data and {ctx}. Do not assume a uniform payload or that returning false vetoes a write.
 
 ```js
 module.exports = {
@@ -162,7 +168,7 @@ module.exports = {
 };
 ```
 
-Enable external messaging/synchronization only when requested. Add timeouts/idempotency; do not recursively create posts in post.created. No dedicated comment, Feed, or XML-RPC plugin hook is currently exposed; do not invent events.
+Enable external messaging/synchronization only when requested. Add timeouts/idempotency; do not recursively create posts in post.created. Comment hooks are available as listed above; Feed and XML-RPC hooks are not established by this API. Verify emission sites rather than inventing events.
 
 ## Routes
 
@@ -183,7 +189,7 @@ Default URL: /api/plugins/example/refresh/<id>. scope=site registers absolute pa
 
 Default auth=public and csrf=true. Admin writes should explicitly use auth=admin and csrf=true; send X-CSRF-Token from window.SysConfig.csrfToken. Public webhooks need signature/replay/permission checks; csrf=false alone is not sufficient.
 
-Routes execute before payload/router middleware: do not assume ctx.request.body is parsed. Bound reads of request streams; protocol bridges may use bounded raw readers. Duplicate registrations fail; test dynamic-route ordering and site-scope collisions too.
+Current src/config/middleware.js runs payload before pluginRoutes and router after it. The plugin middleware passes parsed body (unwrapping body.post when present), or {}. Validate the actual content type/shape and impose suitable limits; do not reread an already consumed stream. For signature verification requiring raw bytes, verify raw-body availability in the target payload adapter before implementing it. Duplicate registrations fail; test dynamic-route ordering and site-scope collisions too.
 
 ## Template functions, filters, slots
 
@@ -198,12 +204,16 @@ module.exports = {
 ```
 
 ```eta
-<%= await plugin.example.badge({count: 5}) %>
-<%= await filters['example.compact'](5) %>
-<%~ await slots.render('post.after') %>
+<%= await firekylin.plugin.example.badge({count: 5}) %>
+<%= await firekylin.filters['example.compact'](5) %>
+<%~ await firekylin.slots.render('post.after') %>
 ```
 
-Dot-separated functions become nested plugin properties. Functions/filters can return Promises; slots appear only when a theme renders them. Emit raw slot HTML only when trusted. registerPartial exists in the Registry but the default template context exposes no matching partial invocation interface; do not invent partials.render().
+The configured Eta varName is `firekylin`; access extensions through `firekylin.plugin`, `firekylin.filters` and `firekylin.slots` (not bare globals). Use exactly two name segments, e.g. example.badge, for template functions: templateContext maps the first two segments to plugin[namespace][function]. Hyphenated IDs require bracket notation. Functions/filters can return Promises; slots appear only when a theme renders them. Resolve awaited values at template top level before using them in synchronous `block(...)` callbacks, or use the verified adapter's `await blockAsync(name, async () => {...})`; `await` inside a synchronous block is invalid. Emit raw slot HTML only when trusted. registerPartial exists in the Registry but the default template context exposes no matching partial invocation interface; do not invent partials.render().
+
+## Admin UI
+
+Use `ctx.admin.registerPanel`, `registerPage`, `registerForm`, `registerAction` in that order as needed. An independent `settings` page (without panel) provides the plugin-management configuration entry; hidden pages can use `menu: false`. Read current `src/plugin/admin.js`, `middleware.js` and `docs/plugins.md` for accepted sections/fields and tests. UI definitions are data, not arbitrary React/script injection. Host endpoints enforce admin identity and CSRF for writes; validate business inputs and persist through verified services. Form load/submit and action handlers receive `{ctx, user, pluginId}`. A form declaration alone does not persist configuration.
 
 ## AI tools
 

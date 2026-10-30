@@ -1,13 +1,13 @@
 ---
 name: firekylin
-description: Use, extend, and maintain Firekylin blogs. Apply when working with posts, drafts, media, comments, site administration, MCP/OAuth connections, Eta themes, Widgets, plugins, hooks, routes, AI tools, installation, deployment, databases, backups, upgrades, troubleshooting, testing, or releases. Select guidance for site users, theme/plugin developers, or system maintainers.
+description: Use, extend, and maintain Firekylin blogs. Generate complete, tested Firekylin plugins from natural-language requirements with a Skill-capable client and file access. Apply when working with posts, drafts, media, comments, site administration, MCP/OAuth connections, Eta themes, Widgets, plugins, hooks, routes, AI tools, installation, deployment, databases, backups, upgrades, troubleshooting, testing, or releases. Select guidance for site users, theme/plugin developers, or system maintainers.
 ---
 
 # Firekylin
 
 Turn the user's goal into verified Firekylin operations. Identify the working role, target site/project, and available capabilities before acting.
 
-Baseline: master `d3d00ec`, 2026-10-13, after the MCP/OAuth series merged. Its package.json says 2.8.0; this does **not** establish that published npm 2.8.0 packages or Docker images contain the same features. Check deployed code and live tool discovery. Current implementation and runtime schemas take precedence over this snapshot.
+Baseline: master `d3d00ec`, 2026-10-13, after the MCP/OAuth series merged. Its package.json says 2.8.0; this does **not** establish that published npm 2.8.0 packages or Docker images contain the same features. Check deployed code and live tool discovery. Current implementation and runtime schemas take precedence over this snapshot. Plugin generation and plugin developer guidance were rechecked against `e10a576` (2.17.1), 2026-10-30.
 
 ## Select a role
 
@@ -15,6 +15,7 @@ Baseline: master `d3d00ec`, 2026-10-13, after the MCP/OAuth series merged. Its p
 | --- | --- |
 | Read/write content, manage drafts, comments, media, pages, taxonomy, settings, import/export | [Site users](references/users.md) |
 | Build Eta themes, Widgets, plugins, hooks, routes, template extensions, tools | [Theme/plugin developers](references/developers.md) |
+| Generate a usable plugin from a description; scaffold, test, or package a plugin | [Plugin generation workflow](references/plugin-generation.md), then relevant [developer APIs](references/developers.md) |
 | Install, deploy, upgrade, back up, migrate databases, diagnose authentication, test, release | [System maintainers](references/maintainers.md) |
 | Connect MCP, choose scopes, construct arguments, interpret availability | [MCP reference](references/mcp-tools.md), [tool declarations](references/tools.json) |
 | Locate implementation or update this skill | [Source map](references/source-map.md) |

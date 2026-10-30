@@ -13,6 +13,14 @@ Firekylin 插件用于在不修改核心代码和主题文件的情况下，为�
 
 Firekylin 内置评论持久化和后台管理能力，提供评论生命周期 Hook。Feed、XML-RPC 等扩展点暂未纳入当前插件 API。
 
+## 使用 AI Skill 生成插件
+
+支持 Skill 和文件操作的 AI 客户端可加载仓库的 [Firekylin Skill](../skills/firekylin/SKILL.md)，
+然后提出需求，例如：“生成一个可配置的站点公告插件，附带完整源码、配置、说明和测试；只生成和测试，不安装。”
+[插件生成工作流](../skills/firekylin/references/plugin-generation.md) 会引导核实版本、选择扩展点、生成文件并验证注册及实际运行。
+MCP 连接不等于文件写入或部署权限；生成、安装、启用、npm 发布和市场收录是不同步骤。
+注意 `firekylin plugin <name>` 只生成 Widget 入口并配置 `widgets`，不是这里的完整生命周期插件。
+
 ## 创建和使用插件
 
 插件放置在项目的 `plugins/<plugin-id>/` 目录：
@@ -34,7 +42,7 @@ Firekylin 启动时扫描插件目录并加载插件。插件元数据直接使�
   "description": "文章阅读统计插件",
   "main": "plugin.js",
   "license": "MIT",
-  "engines": { "firekylin": ">=2.5.5" },
+  "engines": { "firekylin": "2.17.1" },
   "firekylin": {
     "type": "plugin",
     "id": "reading-stats",
@@ -56,6 +64,8 @@ Firekylin 会检查项目 `package.json` 中的 `dependencies` 和 `optionalDepe
 `main` 或 `firekylin.entry` 指向随 npm 包发布的 CommonJS 入口文件。
 
 插件需要在后台插件管理中手动启用。没有保存启停状态的插件（包括升级前已安装的插件）默认停用；已明确保存的启用或停用状态不变。旧版本保存的迁移快照不再生效。
+
+示例约束为当前核实的 2.17.1；请按实际验证版本调整，不能据此声称旧版本或同版本的未核实分发包兼容。
 
 `main` 是默认入口，`firekylin.entry` 可以覆盖它。`firekylin.id` 是稳定的插件 ID，用于路由和日志，建议不要随显示名称改变。Firekylin 版本约束可以写在 `engines.firekylin` 或 `firekylin.engine`。
 
@@ -260,22 +270,27 @@ const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10
 
 ```js
 register(ctx) {
-  class RelatedPosts extends ctx.widgets.ContentsWidget {
+  class RelatedPosts extends ctx.widgets.Widget {
     async execute() {
-      const posts = await this.model('post').getLatest(null, this.parameter.limit || 5);
-      this.pushAll(posts);
+      const requested = Number(this.parameter.limit);
+      const pageSize = Number.isFinite(requested) ? Math.min(5, Math.max(1, Math.floor(requested))) : 5;
+      const result = await this.model('post').getPostList(1, {pageSize});
+      this.pushAll(result.data || []);
     }
   }
   ctx.widgets.register('Widget_Plugin_Related_Posts', RelatedPosts);
 }
 ```
 
-可用基类为 `ctx.widgets.Widget`、`ctx.widgets.ContentsWidget` 和 `ctx.widgets.MetasWidget`。主题中调用：
+在当前 `e10a576` 源码中，PluginManager 实际可用的基类为 `ctx.widgets.Widget`。
+虽然管理器声明了 ContentsWidget/MetasWidget，但 registry 尚未导出它们，不能直接继承；
+项目/主题 Widget 初始化函数仍能收到这两个基类。基础 Widget 不提供 permalink 或 title()，
+这里通过转义的 row.title 输出。主题中调用：
 
 ```eta
 <% const related = await firekylin.widget('Widget_Plugin_Related_Posts', {limit: 5}); %>
 <% while (related.next()) { %>
-  <a href="<%= related.url() %>"><%= related.title %></a>
+  <span><%= related.row.title %></span>
 <% } %>
 ```
 
@@ -292,7 +307,7 @@ ctx.templates.registerFunction('readingStats.badge', async ({post}) => {
 ```
 
 ```eta
-<%= await plugin.readingStats.badge({post}) %>
+<%= await firekylin.plugin.readingStats.badge({post}) %>
 ```
 
 ### 模板过滤器
@@ -305,7 +320,7 @@ ctx.templates.registerFilter('readingStats.compactNumber', value => {
 ```
 
 ```eta
-<%= await filters['readingStats.compactNumber'](post.view_count) %>
+<%= await firekylin.filters['readingStats.compactNumber'](post.view_count) %>
 ```
 
 ### 主题 Slots
@@ -317,10 +332,12 @@ ctx.templates.registerSlot('post.after', () => '<aside>推荐阅读</aside>');
 主题需要显式渲染 Slot：
 
 ```eta
-<%~ await slots.render('post.after') %>
+<%~ await firekylin.slots.render('post.after') %>
 ```
 
 模板扩展支持 Promise，可以在函数或过滤器中查询数据库、调用外部服务或使用 Widget。
+当前 Eta 配置使用 `firekylin` 作为数据变量名，不能省略上述前缀。若主题使用同步 `block(...)`，
+请在模板顶层先 `await` 得到值，再在区块中输出；不要在同步回调内直接 `await`。
 
 ## 路由和 Action
 
@@ -547,7 +564,7 @@ Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持
   "name": "firekylin-plugin-reading-stats",
   "version": "1.0.0",
   "main": "plugin.js",
-  "engines": { "firekylin": ">=2.5.5" },
+  "engines": { "firekylin": "2.17.1" },
   "firekylin": { "type": "plugin", "id": "readingStats" }
 }
 ```
@@ -565,10 +582,10 @@ module.exports = {
       return `${html}<div class="reading-stats">欢迎阅读</div>`;
     });
 
-    class RelatedPosts extends ctx.widgets.ContentsWidget {
+    class RelatedPosts extends ctx.widgets.Widget {
       async execute() {
-        const posts = await this.model('post').getLatest(null, 3);
-        this.pushAll(posts);
+        const result = await this.model('post').getPostList(1, {pageSize: 3});
+        this.pushAll(result.data || []);
       }
     }
     ctx.widgets.register('Widget_Plugin_Related_Posts', RelatedPosts);
@@ -608,12 +625,12 @@ module.exports = {
 <article>
   <h1><%= post.title %></h1>
   <div class="post-content"><%~ post.content %></div>
-  <%= await plugin.readingStats.badge({post}) %>
+  <%= await firekylin.plugin.readingStats.badge({post}) %>
 </article>
 <% while (related.next()) { %>
-  <a href="<%= related.url() %>"><%= related.title %></a>
+  <span><%= related.row.title %></span>
 <% } %>
-<%~ await slots.render('post.after') %>
+<%~ await firekylin.slots.render('post.after') %>
 ```
 
 ## 开发建议
@@ -629,9 +646,9 @@ module.exports = {
 
 ## Installing and enabling plugins
 
-Installed plugins and enabled plugins are separate. On the first startup after upgrading to this feature,
-existing discovered plugins retain their previous automatic activation behavior. Plugins discovered later
-start disabled; an administrator can enable them in **插件管理 → 已安装插件**. Disabling a plugin keeps
+Installed plugins and enabled plugins are separate. Plugins without an explicitly saved enabled/disabled
+state start disabled; legacy migration snapshots do not enable them. Explicitly saved states are preserved.
+An administrator can enable them in **插件管理 → 已安装插件**. Disabling a plugin keeps
 its files and configuration. Disable an active plugin before deleting it.
 
 State changes reload clustered workers. In a single-process deployment, restart Firekylin to apply them.
