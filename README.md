@@ -8,7 +8,7 @@
 
   <div>
     <a href="https://github.com/firekylin/firekylin">
-      <img src="https://img.shields.io/badge/node-%3E%3D8.9.4-red.svg?style=flat-square" alt="node version required" />
+      <img src="https://img.shields.io/badge/node-%5E22.13.0%20%7C%7C%20%3E%3D24-red.svg?style=flat-square" alt="node version required" />
     </a>
     <a href="https://github.com/firekylin/firekylin/releases">
       <img src="https://img.shields.io/github/release/firekylin/firekylin.svg?style=flat-square" alt="GitHub release" />
@@ -24,22 +24,73 @@
     <a href="https://github.com/firekylin/firekylin/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/firekylin/firekylin.svg?colorB=f48041&style=flat-square" alt="license" />
     </a>
-    <a href="https://gitter.im/firekylin/firekylin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge">
-      <img src="https://img.shields.io/gitter/room/firekylin/Lobby.svg?style=flat-square&colorB=96c312" alt="Gitter" />
-    </a>
   </div>
 
-  <p>A Simple & Fast Node Blogging Platform Base On ThinkJS 3 & ReactJS & ES2015+.</p>
+  <p>AI friendly Node.js blog platform.</p>
 </div>
 
+## 概览
 
-## AI 使用指南
+Firekylin（火麒麟）是一个开源免费的 Node.js 博客系统。通过浏览器管理文章、页面和评论，使用主题和插件扩展站点，支持 AI 辅助创作及 MCP 博客管理。
 
-[Firekylin Agent Skill](skills/firekylin/SKILL.md) 按系统使用者、主题/插件开发者、系统维护者三类角色说明能力和操作流程，包含 MCP/OAuth 与工具参数参考。复制整个技能目录即可交给支持 Skill 的 AI 客户端；安装和调用方法见 [技能说明](skills/firekylin/README.md)。
+![默认主题的示例博客首页，展示文章摘要与导航](docs/images/readme/overview.jpg)
+
+默认主题的博客首页。以下截图均来自真实运行的本地实例，使用示例内容。
+
+## 特性
+
+### AI 创作与管理
+
+- **内容生成**：生成标题、摘要和封面，审校、翻译文章，提供分类标签建议、文章链接生成和写作补全。
+- **图片生成**：通过文字生成配图，并继续调整图片；需要支持图片能力的服务商和模型。
+- **MCP 管理**：连接支持远程 MCP 和 OAuth 的 AI 客户端，通过对话查找文章、管理草稿、分类标签和评论。操作遵循账号权限，发布、删除等操作需要确认。
+- **服务商配置**：在后台选择 AI 服务商和模型；AI 调用费用按服务商规则计算。
+
+![AI 连接页展示 OpenAI 服务商、空 API Key 字段与模型选择](docs/images/readme/ai-connection.jpg)
+
+AI 服务商与模型配置示例；未填写密钥，未调用生成服务。
+
+### 主题市场
+
+在后台搜索、预览、安装和更新主题，切换博客外观并调整主题配置。[查看官方主题](https://github.com/firekylin/themes)。
+
+![主题市场展示官方主题预览、版本、简介及安装按钮](docs/images/readme/theme-market.jpg)
+
+浏览官方主题，查看预览与版本信息。
+
+### 插件市场
+
+在后台搜索、安装和更新插件，管理启用状态与配置，包括 AI 服务商等扩展。[查看官方插件](https://github.com/firekylin/plugins)。
+
+![插件市场展示多个 AI 服务商插件的版本、简介与安装入口](docs/images/readme/plugin-market.jpg)
+
+从官方插件目录查找并安装扩展。
+
+### 评论管理
+
+内置 Waline 评论，无需另建评论服务。支持评论回复与审核、社交账号登录、邮件通知，以及 Turnstile、reCAPTCHA 验证码。
+
+![评论管理页展示示例评论的已通过和待审核状态，以及回复和审核操作](docs/images/readme/comments.jpg)
+
+集中查看、回复和审核评论。
+
+### 内容管理
+
+使用 Markdown 写作，管理文章、草稿、独立页面、分类、标签和上传文件，支持从其他博客系统导入内容。
+
+![文章列表展示示例文章、草稿状态与编辑入口](docs/images/readme/content.jpg)
+
+按发布状态管理文章和草稿。
+
+### Vercel 部署
+
+支持本地、服务器和 Vercel 部署，可使用 SQLite、MySQL、TiDB 或 PostgreSQL。Vercel 需使用外部数据库，持久保存上传文件需配置对象存储。[查看部署指南](https://github.com/firekylin/firekylin/wiki/快速部署)。
+
+主题和插件在本地安装后按提示启用或重启；GitHub 管理模式通过 PR 合并和重新部署生效。
 
 ## 安装
 
-推荐通过 CLI 创建独立的 Firekylin 项目。核心程序安装在 `node_modules`，项目目录只保存配置、主题、上传文件和数据，升级时不会覆盖用户文件：
+需要 Node.js 24+，或 Node.js 22.13.0 及以上的 22.x 版本。
 
 ```sh
 npx firekylin new my-blog
@@ -47,161 +98,24 @@ cd my-blog
 npm start
 ```
 
-初始化命令会交互式选择 SQLite、MySQL、TiDB 或 PostgreSQL，建立数据表并创建管理员账号。TiDB 复用 MySQL 协议，并自动启用 TLS 1.2 及证书校验。默认主题会复制到 `themes/firekylin`，后续升级不会覆盖这份主题。
+按提示选择数据库、填写站点信息并创建管理员账号。本地体验可选 SQLite，无需单独安装数据库服务。
 
-开发模式使用 `npm run dev`（等价于 `firekylin -D`）。升级核心程序时在项目中更新 `firekylin` 依赖即可。
-
-### 非交互安装
-
-CI 或容器中可通过参数完成初始化：
-
-```sh
-npx firekylin new my-blog --non-interactive --skip-install \
-  --db-type sqlite --db-path data/firekylin.sqlite --db-prefix fk_ \
-  --site-title "My Blog" --site-url "https://example.com" \
-  --admin-user admin --admin-password 'change-me' --admin-email admin@example.com \
-  --package-manager npm
-```
-
-MySQL/TiDB/PostgreSQL 另使用 `--db-host`、`--db-port`、`--db-name`、`--db-user` 和 `--db-password`。命令行密码可能进入 shell history；交互安装更适合人工部署。使用 `--skip-install` 时需在初始化后自行执行包管理器的安装命令。
-
-如果数据库和表已经存在，或准备稍后手工填写 `firekylin.config.js`，可以使用 `--skip-initialize`。该选项只创建项目骨架并标记为已安装，不会进入交互配置，也不会连接数据库、建库、建表或创建管理员。可通过 `--db-type` 指定配置骨架的数据库类型，未指定时默认为 SQLite。
-
-旧版“源码目录即站点目录”的 `production.js`、`development.js` 和网页安装流程仍保留，供已有部署继续使用。
-
-### 多实例 / Serverless 后台登录
-
-后台认证使用无状态 JWT Cookie，签名密钥由数据库中的 `jwt_secret` 统一保存，旧版 `comment_jwt_secret` 会自动迁移，无需额外环境变量。首次升级需要重新登录。详细说明参见 [JWT 认证和迁移文档](docs/admin-jwt.md)。
-
-### 评论社交登录
-
-评论登录支持 Waline OAuth 服务提供的 GitHub、微博、QQ、OIDC 等社交账号。默认使用 `https://oauth.lithub.cc`，也可以通过 `OAUTH_URL` 环境变量指向[自行部署的 Waline Auth 服务](https://github.com/walinejs/auth)。首次社交登录会自动创建“评论者”用户；已登录的后台用户可以在自己的用户编辑页绑定或解绑社交账号，管理员可在用户列表查看绑定情况。
+保留默认地址时，打开 [博客首页](http://127.0.0.1:8360) 或 [管理后台](http://127.0.0.1:8360/admin)，使用创建的管理员账号登录。
 
 ## 如何使用
 
-- [添加和管理文章](https://github.com/firekylin/firekylin/wiki/%E6%96%87%E7%AB%A0)
-- [添加和管理页面](https://github.com/firekylin/firekylin/wiki/%E9%A1%B5%E9%9D%A2)
-- [添加和管理推送](https://github.com/firekylin/firekylin/wiki/%E6%8E%A8%E9%80%81)
-- [调整网站外观](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%A4%96%E8%A7%82)
-- [系统设置](https://github.com/firekylin/firekylin/wiki/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E7%BD%AE)
-- [如何优化博客主题](https://welefen.com/post/how-to-optimize-firekylin-theme.html)
+- [文章管理](https://github.com/firekylin/firekylin/wiki/文章) · [页面管理](https://github.com/firekylin/firekylin/wiki/页面) · [主题配置](https://github.com/firekylin/firekylin/wiki/主题外观) · [系统设置](https://github.com/firekylin/firekylin/wiki/系统设置)
+- [连接 AI 助手（MCP）](https://github.com/firekylin/firekylin/blob/master/docs/mcp.md)
+- [安装 Firekylin Agent Skill](https://github.com/firekylin/firekylin/blob/master/skills/firekylin/README.md)
+- [AI 服务配置与内容辅助](https://github.com/firekylin/firekylin/blob/master/docs/ai-providers.md)
 
-## 常见问题
+## 文档
 
-如果您在使用过程中遇到问题，请查看 [问题解答](https://github.com/firekylin/firekylin/wiki/问题解答) 中的解答，或者在 [GitHub](https://github.com/firekylin/firekylin/wiki/issues) 上提问。
+[完整文档（Wiki）](https://github.com/firekylin/firekylin/wiki) · [使用交流](https://github.com/firekylin/firekylin/discussions) · [问题反馈](https://github.com/firekylin/firekylin/issues)
 
-## 用户列表
-
-如果你的博客也是用 FireKylin 构建的，请到 https://github.com/firekylin/firekylin/issues/34 提交网址。
-
-
-## 内置 MCP Server
-
-Firekylin 自带 MCP HTTP 服务，无需安装额外插件，也不需要手工创建 Token 或配置用户 ID。默认地址为 `/mcp`，客户端通过 OAuth 2.1 跳转到 Firekylin 登录并确认授权，自动获取与当前用户绑定的访问令牌。可以让 Codex、Claude Code 等 MCP 客户端在授权范围内读取文章、管理草稿（高风险发布、删除操作仍需要单次审批支持）。使用和安全说明见 [MCP Server 文档](docs/mcp.md)。
-
-## 开发者文档
-
-- [主题开发](https://github.com/firekylin/firekylin/wiki/%E4%B8%BB%E9%A2%98%E5%BC%80%E5%8F%91)
-- [主题文章字段](docs/theme-fields.md)
-- [贡献代码](https://github.com/firekylin/firekylin/wiki/%E8%B4%A1%E7%8C%AE%E4%BB%A3%E7%A0%81)
-
-### 扩展 Widget
-
-在 Firekylin 项目目录中可以用 CLI 快速创建并登记一个 Widget 插件：
-
-```sh
-firekylin plugin recent-posts
-```
-
-命令会生成 `plugins/recent-posts/`（包含实现、类型声明和使用说明），并把入口写入 `firekylin.config.js` 的 `widgets` 数组。插件名使用字母、数字和连字符；生成后重启 worker 即可加载。
-
-项目可以在 `firekylin.config.js` 中声明 Widget 入口。入口相对项目根目录解析，并在 worker 启动时加载：
-
-```js
-module.exports = {
-  database: {/* ... */},
-  widgets: ['./widgets/index.js']
-};
-```
-
-入口导出一个同步初始化函数。函数会收到稳定的 `Widget`、`ContentsWidget` 和 `MetasWidget` 基类，并返回“名称 → Widget 类”的映射。内容类 Widget 推荐继承 `ContentsWidget`，以复用 permalink、摘要、分类标签、作者和权限等处理：
-
-```js
-module.exports = ({ContentsWidget}) => ({
-  Widget_Custom_Posts: class extends ContentsWidget {
-    async execute() {
-      const limit = Number(this.parameter.limit) || 5;
-      const rows = await this.model('post').limit(limit).select();
-      this.pushAll(rows);
-    }
-  }
-});
-```
-
-主题也可以在自身的 `package.json` 中声明入口。只有当前启用主题的服务端代码会被加载：
-
-```json
-{
-  "firekylin": {
-    "widgets": "./widgets/index.js",
-    "widgetOverrides": ["Widget_Contents_Post_Recent"]
-  }
-}
-```
-
-模板调用方式与内置 Widget 相同：
-
-```eta
-<% const posts = await firekylin.widget('Widget_Custom_Posts', {limit: 8}); %>
-<% while (posts.next()) { %><a href="<%= posts.permalink %>"><%= posts.title %></a><% } %>
-```
-
-Widget 重名默认会阻止启动或渲染，并同时报告两个来源。需要替换已有 Widget 时，必须在项目配置或主题的 `firekylin` 配置中通过 `widgetOverrides` 显式列出名称。主题不能覆盖用于确定当前主题的 `Widget_Options`。扩展代码运行在 Firekylin 服务端进程中，应只安装可信扩展；修改后需重启 worker。
-
-文章或页面模板可以通过一行输出内置评论区：
-
-```eta
-<%~ firekylin.comment() %>
-```
-
-`comment()` 会自动判断当前内容是否允许评论，并读取后台的分页、语言及强制登录设置。主题无需自行引入评论客户端或编写初始化脚本。可选参数包括 `className`、`title`、`loadingText` 和 Waline `dist` 目录地址 `resourceURL`：
-
-```eta
-<%~ firekylin.comment({className: 'article-comments', title: '评论'}) %>
-```
-
-如需升级 Waline 客户端或使用自建 CDN，可以指定资源目录，Firekylin 会在其下加载 `waline.js` 和 `waline.css`：
-
-```eta
-<%~ firekylin.comment({resourceURL: 'https://cdn.jsdelivr.net/npm/@waline/client@3.17.0/dist'}) %>
-```
-
-通过 `firekylin new` 创建的项目会在根目录包含 `firekylin.d.ts`。支持 TypeScript 类型服务的编辑器或 Eta 插件可据此补全内置 Widget 名称、参数、数据字段和实例方法；声明只提供编辑期提示，不会改变 Widget 的注册和运行行为。类型主体由 `firekylin` 依赖提供，因此升级依赖即可同步最新定义。已有项目也可以手动添加：
-
-```ts
-/// <reference types="firekylin" />
-```
-
-自定义 Widget 可以在项目中的任意 `.d.ts` 文件里扩展注册表：
-
-```ts
-declare namespace Firekylin {
-  interface CustomPostsParameters {
-    limit?: number;
-  }
-
-  class CustomPostsWidget extends ContentsWidget<ContentRow, CustomPostsParameters> {
-    featured(): boolean;
-  }
-
-  interface WidgetRegistry {
-    Widget_Custom_Posts: WidgetDefinition<CustomPostsParameters, CustomPostsWidget>;
-  }
-}
-```
-
-之后调用 `firekylin.widget('Widget_Custom_Posts', {limit: 8})` 时，参数和返回实例都会按扩展声明进行推导。带缓存标识的名称（如 `Widget_Custom_Posts@sidebar`）也会使用同一份 Widget 类型。
-
+- [安装、配置与升级](docs/installation.md)
+- [Widget 与主题模板扩展](docs/widgets.md) · [主题文章字段](docs/theme-fields.md) · [插件开发](docs/plugins.md)
+- [评论、验证码与邮件通知](docs/comments.md) · [后台 JWT 认证与迁移](docs/admin-jwt.md)
 
 ## 捐赠支持
 
@@ -212,17 +126,3 @@ declare namespace Firekylin {
 <div class="donate-qrcode">
 <img width="300" src="https://p5.ssl.qhimg.com/t013f422b5b319becbb.png" alt="donate by alipay" /> <img width="300" src="https://p4.ssl.qhimg.com/t0142965a40989b8d7a.png" alt="donate by wechat" />
 </div>
-
-### 验证码
-
-系统设置 → 验证码设置支持 Turnstile 和 reCAPTCHA v3。填写 Site Key 与私钥，勾选登录、评论生效区域；配置独立保存在 captcha 选项中。私钥在管理员后台直接保存和回填；公开页面不下发私钥。生效区域默认勾选登录与评论。登录支持语言、Turnstile 主题及验证前隐藏提交按钮。评论仅传入 Waline 客户端原生 site key，由其渲染挑战；Waline Core 调用注入的验证码服务完成校验。reCAPTCHA v3 要求评分至少 0.5。第三方 OAuth 与域单点登录使用身份提供方认证。
-
-### 评论邮件通知
-
-在后台「评论设置」开启邮件通知，填写 SMTP 服务器、端口、用户名、密码、发件人及站长收件邮箱。465 端口开启直接 TLS；587/STARTTLS 关闭直接 TLS。SMTP 密码不回显，留空保存保留原值。
-
-新评论通知站长，已审核回复通知被回复者；自回复不发送给本人。待审核回复在通过审核后发送，投递失败不影响评论保存。此功能不包含账号验证或密码找回邮件。未填写项兼容 SMTP_HOST、SMTP_PORT、SMTP_SECURE、SMTP_USER、SMTP_PASS、SMTP_FROM、AUTHOR_EMAIL 环境变量。
-
-评论设置按基本设置、展示与交互、邮件通知、安全与用户分为四个标签页，每页独立保存，保留其他页的配置。邮件通知页可填写测试收件邮箱，用当前未保存的 SMTP 参数发送测试邮件；密码留空时复用已保存密码。发送结果直接显示在页面，失败时展示经过密码隐藏的 SMTP 错误，便于检查连接、认证和收件人问题。
-
-邮件通知页支持自定义标题和纯文本正文模板，留空恢复默认。使用 `{{siteName}}`、`{{siteUrl}}`、`{{type}}`、`{{nick}}`、`{{comment}}`、`{{url}}`、`{{parentNick}}`、`{{parentComment}}`、`{{recipient}}`、`{{status}}` 插入通知数据。模板只做文本变量替换，不执行代码。发送测试邮件时会使用当前模板和示例评论数据，便于确认效果。
