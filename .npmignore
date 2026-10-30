@@ -6,6 +6,9 @@
 .vscode/
 coverage/
 test/
+# The Skill scaffold needs its bundled plugin test source.
+!skills/firekylin/assets/plugin/test/
+!skills/firekylin/assets/plugin/test/**
 www/static/src/
 
 # Local and generated state

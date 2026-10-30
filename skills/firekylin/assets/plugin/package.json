@@ -1,0 +1,11 @@
+{
+  "name": "firekylin-plugin-__PLUGIN_ID__",
+  "version": "1.0.0",
+  "description": "A configurable public site message for Firekylin",
+  "type": "commonjs",
+  "main": "plugin.js",
+  "files": ["plugin.js", "config.example.cjs", "README.md", "test"],
+  "scripts": {"test": "node --test test/*.test.cjs"},
+  "engines": {"firekylin": "__FIREKYLIN_VERSION__"},
+  "firekylin": {"type": "plugin", "id": "__PLUGIN_ID__", "entry": "plugin.js"}
+}

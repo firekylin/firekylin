@@ -12,7 +12,8 @@ Paths are relative to the core repository. A copied skill needs separately obtai
 | Import/export/RSS/push | src/service/import/, src/service/export/, src/controller/admin/cron.js, relevant admin APIs |
 | Upload/storage | src/controller/admin/api/file.js, src/service/upload/, src/plugin/media-tools.js |
 | Themes/public pages | src/controller/index.js, post.js, base.js, src/widget/, www/theme/firekylin/; test/widget/ |
-| Plugin lifecycle/discovery | src/plugin/manager.js, runtime.js; docs/plugins.md, test/plugin/ |
+| Plugin generation | skills/firekylin/references/plugin-generation.md, scripts/scaffold-plugin.cjs, scripts/verify-plugin.cjs, assets/plugin/; test/plugin/skill-generation.test.js |
+| Plugin lifecycle/discovery | src/plugin/manager.js, runtime.js, state-store.js, src/bootstrap/worker.js; docs/plugins.md, test/plugin/ |
 | Hooks/routes/templates | src/plugin/events.js, routes.js, middleware.js, templates.js; types/ |
 | Tools/ownership | src/plugin/tools.js, content-tools.js, management-tools.js, media-tools.js |
 | MCP bridge/filtering | src/mcp/server.js, middleware.js, config.js; MCP tests in test/plugin/ |
