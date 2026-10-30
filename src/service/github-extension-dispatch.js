@@ -52,12 +52,13 @@ class GitHubExtensionDispatch {
 
   async dispatch(change) {
     const operations = ['plugin.install', 'plugin.update', 'plugin.uninstall', 'plugin.delete-local',
-      'theme.install', 'theme.update'];
+      'theme.install', 'theme.update', 'core.update'];
     if (!change || !operations.includes(change.operation)) {
       throw new Error('UNSUPPORTED_EXTENSION_CHANGE');
     }
     if (['plugin.install', 'plugin.update'].includes(change.operation)) validatePackage(change.name, change.version);
     if (change.operation === 'plugin.uninstall') validatePackage(change.name, '1.0.0');
+    if (change.operation === 'core.update' && !semver.valid(change.version)) throw new Error('INVALID_VERSION');
     const repository = await this.request('');
     const branch = repository.default_branch;
     if (!branch || typeof branch !== 'string') throw new Error('GITHUB_DEFAULT_BRANCH_MISSING');
@@ -67,7 +68,23 @@ class GitHubExtensionDispatch {
     if (tree.truncated || !Array.isArray(tree.tree)) throw new Error('GITHUB_TREE_TOO_LARGE');
     const files = tree.tree;
     const entries = [];
-    if (change.operation.startsWith('plugin.') && change.operation !== 'plugin.delete-local') {
+    if (change.operation === 'core.update') {
+      const locks = ['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'pnpm-lock.yml'];
+      if (files.some(item => locks.includes(item.path))) {
+        throw new Error('GITHUB_LOCKFILE_NOT_SUPPORTED');
+      }
+      const data = await this.blob(files.find(item => item.path === 'package.json'));
+      if (data.length > 1024 * 1024) throw new Error('GITHUB_INVALID_FILE');
+      const manifest = JSON.parse(data.toString('utf8'));
+      if (typeof manifest?.dependencies?.firekylin !== 'string' || !manifest.dependencies.firekylin.trim()) {
+        throw new Error('FIREKYLIN_DEPENDENCY_REQUIRED');
+      }
+      const current = semver.minVersion(manifest.dependencies.firekylin);
+      if (!current || !semver.gt(change.version, current)) throw new Error('VERSION_NOT_NEWER');
+      manifest.dependencies.firekylin = change.version;
+      entries.push({path: 'package.json', mode: '100644', type: 'blob',
+        content: JSON.stringify(manifest, null, 2) + '\n'});
+    } else if (change.operation.startsWith('plugin.') && change.operation !== 'plugin.delete-local') {
       const lockfiles = ['package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'pnpm-lock.yml'];
       if (files.some(item => lockfiles.includes(item.path))) {
         throw new Error('GITHUB_LOCKFILE_NOT_SUPPORTED');
@@ -166,12 +183,14 @@ class GitHubExtensionDispatch {
         }
       }
     }
+    const title = change.operation === 'core.update'
+      ? 'Update Firekylin to ' + change.version : 'Update Firekylin extension';
     const updated = await this.request('/git/trees', {base_tree: commit.tree.sha, tree: entries});
-    const newCommit = await this.request('/git/commits', {message: 'Update Firekylin extension', tree: updated.sha,
+    const newCommit = await this.request('/git/commits', {message: title, tree: updated.sha,
       parents: [ref.object.sha]});
     const head = `firekylin/extension-${crypto.randomUUID()}`;
     await this.request('/git/refs', {ref: `refs/heads/${head}`, sha: newCommit.sha});
-    const pr = await this.request('/pulls', {title: 'Update Firekylin extension', head, base: branch,
+    const pr = await this.request('/pulls', {title: title, head, base: branch,
       body: 'Review this extension change before merging.'});
     const expected = `https://github.com/${this.connection.repository}/pull/`;
     if (typeof pr.html_url !== 'string' || !pr.html_url.startsWith(expected) || !/^\d+$/.test(pr.html_url.slice(expected.length))) {
