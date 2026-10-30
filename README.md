@@ -86,10 +86,6 @@ AI 服务商与模型配置示例；未填写密钥，未调用生成服务。
 
 支持本地、服务器和 Vercel 部署，可使用 SQLite、MySQL、TiDB 或 PostgreSQL。Vercel 需使用外部数据库，持久保存上传文件需配置对象存储。[查看部署指南](https://github.com/firekylin/firekylin/wiki/快速部署)。
 
-![上传设置页选中 Vercel Blob，显示空令牌字段和路径前缀](docs/images/readme/vercel-blob.jpg)
-
-Vercel Blob 持久化上传配置示例；未填写令牌，未执行线上部署。
-
 主题和插件在本地安装后按提示启用或重启；GitHub 管理模式通过 PR 合并和重新部署生效。
 
 ## 安装
