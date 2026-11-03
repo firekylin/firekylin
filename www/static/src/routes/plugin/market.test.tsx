@@ -59,3 +59,14 @@ it('filters plugins using the URL search term and allows editing it', async() =>
     fireEvent.change(view.getByPlaceholderText('搜索插件'), {target: {value: 'demo'}});
     expect(await view.findByText('Demo')).toBeInTheDocument();
 });
+
+it('reports a scheduled reload without claiming the plugin activated', async() => {
+    vi.spyOn(message, 'info').mockImplementation(() => ({}) as any);
+    vi.spyOn(message, 'success').mockImplementation(() => ({}) as any);
+    vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {restartRequired: false, restartScheduled: true}}} as any);
+    vi.spyOn(Modal, 'confirm').mockImplementation((options: any) => { options.onOk(); return {} as any });
+    const view = render(<MemoryRouter><PluginMarket /></MemoryRouter>);
+    fireEvent.click(await view.findByRole('button', {name: /安\s*装/}));
+    await waitFor(() => expect(message.info).toHaveBeenCalledWith(expect.stringContaining('正在请求自动重载')));
+    expect(message.success).not.toHaveBeenCalled();
+});

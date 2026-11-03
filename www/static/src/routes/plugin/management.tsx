@@ -58,7 +58,11 @@ export default function PluginManagement(props: any) {
                     const stateChange = operation === 'plugin.enable' || operation === 'plugin.disable';
                     if (!stateChange || res.data?.restartRequired) {
                         load(() => setBusy(false));
-                        message.success(res.data?.restartRequired ? '操作已保存，请重启 Firekylin 后生效' : '操作成功');
+                        if (res.data?.restartScheduled) {
+                            message.info('操作已保存，正在请求自动重载；请稍后刷新检查，未生效时请手动重启');
+                        } else {
+                            message.success(res.data?.restartRequired ? '操作已保存，请重启 Firekylin 后生效（serverless 请重新部署）' : '操作成功');
+                        }
                         return;
                     }
                     let attempts = 0;
@@ -68,7 +72,7 @@ export default function PluginManagement(props: any) {
                         if (updated) { setBusy(false); message.success('操作成功'); return }
                         if (current?.status === 'error' || ++attempts >= 20) {
                             setBusy(false);
-                            message.warning(current?.status === 'error' ? '插件启动失败，请查看错误信息' : '状态尚未更新，请稍后刷新');
+                            message.warning(current?.status === 'error' ? '插件启动失败，请查看错误信息' : '状态尚未更新，请稍后刷新；仍未生效时请手动重启 Firekylin（serverless 请重新部署）');
                             return;
                         }
                         retryTimer.current = setTimeout(refresh, 500);

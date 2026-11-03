@@ -243,6 +243,7 @@ test('GitHub mode creates a PR without running local installer', async t => {
   controller.fail = message => ({errno: 1, message});
   const result = await controller.mutate('plugin.install-registry');
   assert.equal(result.data.status, 'created');
+  assert.equal(result.data.restartScheduled, undefined);
   assert.equal(requests.filter(url => url.endsWith('/pulls')).length, 1);
   assert.equal(JSON.stringify(result).includes('secret'), false);
 });
@@ -313,4 +314,65 @@ test('theme update checks versions and retains a backup before replacement', asy
   assert.equal(reloaded, true);
   installed.version = '2.0.0';
   assert.equal((await controller.mutate('theme.update-registry')).message, 'THEME_VERSION_NOT_NEWER');
+});
+
+test('local plugin mutations reload after response without implicitly enabling installed plugins', async t => {
+  const cluster = require('node:cluster');
+  const {EventEmitter} = require('node:events');
+  const originals = [cluster.isWorker, process.connected, process.send, process.env.THINK_WORKERS, process.env.VERCEL];
+  t.after(() => {
+    cluster.isWorker = originals[0];
+    for (const [key, value] of [['connected', originals[1]], ['send', originals[2]]]) {
+      if (value === undefined) delete process[key]; else process[key] = value;
+    }
+    for (const [key, value] of [['THINK_WORKERS', originals[3]], ['VERCEL', originals[4]]]) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  });
+  cluster.isWorker = true;
+  process.connected = true;
+  process.env.THINK_WORKERS = '1';
+  process.env.VERCEL = '';
+  const sends = [];
+  process.send = (...args) => sends.push(args);
+  const previous = global.firekylin;
+  t.after(() => { global.firekylin = previous });
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-reload-controller-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({name: 'firekylin-plugin-demo', version: '1.0.0',
+    firekylin: {id: 'demo', entry: 'plugin.js', type: 'plugin'}}));
+  fs.writeFileSync(path.join(root, 'plugin.js'), 'module.exports = {}');
+  const states = [];
+  global.firekylin = {plugins: {discover: () => [root], stateStore: {set: async(...args) => states.push(args)}}};
+  const oldFetch = global.fetch;
+  t.after(() => { global.fetch = oldFetch });
+  global.fetch = async() => new Response(JSON.stringify({schemaVersion: 1, packages: [
+    {type: 'plugin', name: 'firekylin-plugin-demo', version: '2.0.0'}]}));
+  for (const operation of ['plugin.install', 'plugin.install-registry', 'plugin.update-registry',
+    'plugin.uninstall', 'plugin.enable', 'plugin.disable']) {
+    const controller = new Controller();
+    controller.ctx = {res: new EventEmitter()};
+    controller.githubConnection = async() => null;
+    controller.post = key => ({id: 'demo', name: 'firekylin-plugin-demo', version: '2.0.0'})[key];
+    controller.model = () => ({getOptions: async() => ({})});
+    controller.catalog = () => ({check: () => ({compatible: true}), plugins: () => operation === 'plugin.install-registry' ? []
+      : [{id: 'demo', name: 'firekylin-plugin-demo', version: '1.0.0', source: 'npm', status: 'inactive'}]});
+    controller.pluginInstaller = () => ({install: async() => ({output: 'done'}), uninstall: async() => ({output: 'done'})});
+    controller.success = data => { assert.equal(data.restartScheduled, true); throw new Error('PREVENT_NEXT_PROCESS') };
+    controller.fail = message => ({message});
+    const before = sends.length;
+    await assert.rejects(controller.mutate(operation), /PREVENT_NEXT_PROCESS/);
+    assert.equal(sends.length, before);
+    controller.ctx.res.emit('finish');
+    assert.equal(sends.length, before + 1);
+    if (operation === 'plugin.enable' || operation === 'plugin.disable') continue;
+    if (operation !== 'plugin.uninstall') assert.equal(states.length, 0, 'install/update must not change enabled state');
+    controller.ctx.res = new EventEmitter();
+    controller.pluginInstaller = () => ({install: async() => { throw new Error('failed') },
+      uninstall: async() => { throw new Error('failed') }});
+    assert.equal((await controller.mutate(operation)).message, 'failed');
+    controller.ctx.res.emit('finish');
+    assert.equal(sends.length, before + 1);
+  }
+  assert.deepEqual(states.slice(-2), [['demo', true], ['demo', false]]);
 });

@@ -36,7 +36,7 @@ export default function PluginMarket(props: any) {
         return () => controller.abort();
     }, [reload]);
     const install = (item: MarketItem, updating = false) => Modal.confirm({title: `${updating ? '更新' : '安装'} ${item.title || item.name}？`,
-        content: `版本 ${item.version}。本地安装后需要重启；GitHub 管理需要等待仓库 PR 合并。`,
+        content: `版本 ${item.version}。本地安装后将尝试自动重载，不支持时需手动重启；GitHub 管理需要等待仓库 PR 合并并部署。`,
         onOk: async() => {
             setBusy(true);
             try {
@@ -48,7 +48,11 @@ export default function PluginMarket(props: any) {
                     Modal.info({title: '已创建 GitHub 更新 PR', content: <span>请查看 <a target="_blank" rel="noreferrer"
                         href={result.data.data.url}>GitHub PR</a>；合并并部署后生效。</span>});
                 } else {
-                    message.success(updating ? '更新完成，请重启 Firekylin 后生效' : '安装完成，请重启 Firekylin 后启用插件');
+                    if (result.data.data?.restartScheduled) {
+                        message.info('操作已保存，正在请求自动重载；请稍后到已安装插件检查状态，未生效时请手动重启');
+                    } else {
+                        message.success(updating ? '更新完成，请重启 Firekylin 后生效' : '安装完成，请重启 Firekylin 后启用插件');
+                    }
                     setReload(value => value + 1);
                 }
             } catch (reason: any) { message.error(reason.response?.data?.errmsg || reason.message || '安装失败') }
