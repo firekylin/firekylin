@@ -1,11 +1,14 @@
 import React from 'react';
-import {render, screen, cleanup} from '@testing-library/react';
+import {render, screen, cleanup, fireEvent} from '@testing-library/react';
 import {afterEach, expect, it, vi} from 'vitest';
 import {DashBoard} from './dashboard';
 import {MemoryRouter} from '../../utils/router';
 import {InitiateRoutes} from '../../components/data/routes.data';
 vi.mock('../../components/breadcrumb', () => ({default: () => <nav>后台导航</nav>}));
-vi.mock('./chat', () => ({default: () => <section aria-label="聊天">聊天模块</section>}));
+vi.mock('./chat', () => ({default: ({children, onConversationChange}: any) => {
+    const [active, setActive] = React.useState(false);
+    return <section aria-label="聊天"><button onClick={() => {setActive(true); onConversationChange?.(true)}}>开始聊天</button>{!active && children}</section>;
+}}));
 afterEach(cleanup);
 function overview(type: number) {
     window.SysConfig = {userInfo: {type}} as any;
@@ -23,6 +26,9 @@ it('administrator sees embedded chat instead of website summary, with existing l
         expect(screen.getByText(text)).toBeInTheDocument();
     }
     expect(screen.getByRole('link', {name: '在线更新'})).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name: '开始聊天'}));
+    expect(screen.queryByText('系统概况')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', {name: '在线更新'})).not.toBeInTheDocument();
 });
 it('non-administrator retains original summary, counts and permitted quick links without chat', () => {
     overview(2);

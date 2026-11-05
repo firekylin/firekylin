@@ -1,11 +1,5 @@
 .chat-workspace {
     display: flex;
-    height: 560px;
-    max-height: 75vh;
-    min-height: 420px;
-    margin: 10px 0 20px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
     background: #fff;
     color: inherit;
     font-size: 14px;
@@ -51,8 +45,7 @@
     .chat-footnote { display: block; text-align: center; margin-top: 8px; }
     .chat-connect { padding: 5px 0; }
     .chat-connect h3 { font-size: 16px; margin: 5px 0 10px; }
-    .chat-history { width: 220px; flex-shrink: 0; background: #fafafa; border-left: 1px solid #eee; }
-    .chat-mobile-history { display: none; }
+    .chat-history { flex-shrink: 0; background: #fafafa; border-left: 1px solid #eee; }
 }
 .chat-history-content {
     padding: 15px; display: flex; height: 100%; flex-direction: column; gap: 15px;
@@ -64,7 +57,6 @@
     small { color: #777; }
 }
 .chat-markdown { overflow-wrap: anywhere; line-height: 1.6; img { max-width: 100%; } table { display: block; overflow: auto; } pre { padding: 10px; background: #f5f5f5; overflow: auto; } }
-@media (max-width: 1100px) { .chat-workspace { .chat-history { display: none; } .chat-mobile-history { display: inline-flex; } } }
 @media (max-width: 700px) {
     .chat-workspace {
         .chat-scroll, .chat-header, .chat-composer-area { padding: 10px; }
@@ -74,3 +66,46 @@
         .chat-welcome h4 { font-size: 16px; }
     }
 }
+
+// Overview and conversation share the same left content area and right history rail.
+.chat-workspace {
+    position: relative;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    max-height: none;
+    min-height: calc(100dvh - 80px);
+    height: auto;
+    .chat-header-actions { flex-wrap: wrap; }
+    .chat-history { display: block; width: 240px; }
+    .chat-history[hidden] { display: none; }
+    .chat-history-rail { position: relative; flex: 0 0 20px; border-left: 1px solid #eee; margin-left: 15px; }
+    .chat-history-toggle { position: absolute; top: min(45vh, 50%); left: -10px; z-index: 4; width: 20px; height: 48px; padding: 0; border: 1px solid #ddd; border-radius: 3px; background: #fff; color: #777; cursor: pointer; }
+    .chat-history-toggle:hover, .chat-history-toggle:focus-visible { color: #337ab7; border-color: #66afe9; }
+    .chat-history-content { position: sticky; top: 0; height: calc(100dvh - 80px); }
+    .chat-overview-details { margin-top: 30px; }
+    .chat-overview-details .row { margin-right: 0; }
+}
+.chat-home {
+    .chat-scroll { flex: 0 0 auto; padding: 60px 20px 25px; overflow: visible; }
+    .chat-welcome h1 { font-size: 30px; font-weight: 500; margin: 0 0 15px; }
+    .chat-welcome p { font-size: 14px; }
+    .chat-composer-area { border-top: 0; max-width: 780px; align-self: center; padding: 0 20px 15px; }
+    .chat-composer { padding: 15px; border-radius: 8px; }
+    .chat-suggestions { justify-content: center; gap: 10px 15px; margin-top: 15px; }
+}
+.chat-conversation {
+    height: calc(100dvh - 80px);
+    min-height: 420px;
+    .chat-scroll { overscroll-behavior: contain; }
+}
+@media (max-width: 900px) {
+    .chat-workspace {
+        .chat-history { width: 200px; }
+        .chat-history-content { padding: 10px; }
+        .chat-header { align-items: flex-start; }
+    }
+    .chat-home .chat-welcome h1 { font-size: 24px; }
+}
+
+.manage-container.overview-conversation { overflow: hidden; }

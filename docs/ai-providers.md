@@ -200,7 +200,12 @@ image provider plugins. Text-only calls do not require the helpers.
 
 The existing overview page (`/admin/dashboard`, or `/admin/dashboard/:sessionId`) embeds a private chat module
 in place of the website summary for administrators. Non-administrators retain the original summary and quick links.
-Recent posts, system information and upgrade notices remain on the same page for both roles.
+The administrator overview starts with a large chat composer and suggestions above the existing recent posts,
+system information and about sections. History is collapsed by default and can be toggled with the triangle handle
+on the divider. Sending the first message switches the entire main area into conversation mode, hides the overview
+sections and upgrade notice, and opens history once. Users can then collapse history again without subsequent
+replies reopening it. Opening an existing conversation also uses conversation mode; starting a new conversation
+restores the overview. Non-administrators retain the original overview.
 There is no separate chat page or navigation item; `/admin/overview` redirects to `/admin/dashboard`. Conversations are owned by the current backend
 user, persisted separately from AI audit logs, and cannot be read by other users. Deleting a conversation
 does not delete blog content or existing AI audit records. Startup and web installation create the four

@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, screen, fireEvent, waitFor, cleanup} from '@testing-library/react';
+import {render, screen, fireEvent, waitFor, cleanup, within} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import Chat from './chat';
 import {MemoryRouter} from '../../utils/router';
@@ -30,7 +30,7 @@ beforeEach(() => {
 });
 afterEach(() => {cleanup(); vi.unstubAllGlobals()});
 it('shows overview chat entry, sends first message, persists route and renders Markdown', async() => {
-    render(<MemoryRouter initialEntries={['/dashboard']}><Chat /></MemoryRouter>);
+    render(<MemoryRouter initialEntries={['/dashboard']}><Chat><div>概览下方三栏</div></Chat></MemoryRouter>);
     expect(screen.getByText('今天想写点什么？')).toBeInTheDocument();
     await screen.findByText('博客技能已启用');
     fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '你好'}});
@@ -38,6 +38,15 @@ it('shows overview chat entry, sends first message, persists route and renders M
     expect(await screen.findByText('已收到')).toBeInTheDocument();
     expect(requests.find(row => row.body?.operation === 'send').body).toMatchObject({session: 'one', content: '你好'});
     expect(screen.queryByText('今天想写点什么？')).not.toBeInTheDocument();
+    expect(screen.queryByText('概览下方三栏')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '收起会话列表'})).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(screen.getByRole('button', {name: '收起会话列表'}));
+    fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '继续聊'}});
+    expect(screen.getByRole('button', {name: '展开会话列表'})).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(within(screen.getByRole('main')).getByRole('button', {name: '新建对话'})).toBeEnabled());
+    fireEvent.click(within(screen.getByRole('main')).getByRole('button', {name: '新建对话'}));
+    expect(await screen.findByText('概览下方三栏')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '展开会话列表'})).toHaveAttribute('aria-expanded', 'false');
 });
 it('restores history and confirmation with both before and after values', async() => {
     sessions = [{id: 'one', title: '修改标题', provider: 'test', model: 'model', active_run: '', updated_at: Date.now()}];
@@ -65,4 +74,43 @@ it('does not render HTML from model messages', async() => {
     const {container} = render(<MemoryRouter initialEntries={['/dashboard/one']}><Chat /></MemoryRouter>);
     await screen.findByText('<img src=x onerror=alert(1)>');
     expect(container.querySelector('.chat-markdown img')).toBeNull();
+});
+
+it('home history starts collapsed and can be expanded and collapsed manually', async() => {
+    render(<MemoryRouter initialEntries={['/dashboard']}><Chat><div>下方概要</div></Chat></MemoryRouter>);
+    await screen.findByLabelText('聊天消息');
+    expect(screen.getByRole('button', {name: '展开会话列表'})).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('navigation', {name: '对话列表'})).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name: '展开会话列表'}));
+    expect(screen.getByRole('navigation', {name: '对话列表'})).toBeVisible();
+    expect(screen.getByText('下方概要')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', {name: '收起会话列表'}));
+    expect(screen.queryByRole('navigation', {name: '对话列表'})).not.toBeInTheDocument();
+});
+it('sending with history already expanded keeps it expanded', async() => {
+    render(<MemoryRouter initialEntries={['/dashboard']}><Chat><div>下方概要</div></Chat></MemoryRouter>);
+    await screen.findByLabelText('聊天消息');
+    fireEvent.click(screen.getByRole('button', {name: '展开会话列表'}));
+    fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '你好'}});
+    fireEvent.click(screen.getByLabelText('发送消息'));
+    await screen.findByText('已收到');
+    expect(screen.getByRole('button', {name: '收起会话列表'})).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByText('下方概要')).not.toBeInTheDocument();
+});
+it('restored real conversation uses the full main area and opens history', async() => {
+    sessions = [{id: 'one', title: '旧对话', provider: 'test', model: 'model', active_run: '', updated_at: Date.now()}];
+    messages = [{id: 'old', role: 'assistant', content: '之前的回复'}];
+    render(<MemoryRouter initialEntries={['/dashboard/one']}><Chat><div>下方概要</div></Chat></MemoryRouter>);
+    await screen.findByText('之前的回复');
+    expect(screen.queryByText('下方概要')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', {name: '收起会话列表'})).toHaveAttribute('aria-expanded', 'true');
+});
+it('empty session with only a model selection event remains in overview mode', async() => {
+    sessions = [{id: 'one', title: '新对话', provider: 'test', model: 'model', active_run: '', updated_at: Date.now()}];
+    messages = [{id: 'event', role: 'event', content: '模型已切换'}];
+    render(<MemoryRouter initialEntries={['/dashboard/one']}><Chat><div>下方概要</div></Chat></MemoryRouter>);
+    await screen.findByLabelText('聊天消息');
+    expect(screen.getByText('今天想写点什么？')).toBeVisible();
+    expect(screen.getByText('下方概要')).toBeVisible();
+    expect(screen.getByRole('button', {name: '展开会话列表'})).toHaveAttribute('aria-expanded', 'false');
 });
