@@ -295,6 +295,8 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
     } catch {
       think.logger.error('[ai-audit] installation schema migration failed');
     }
+    await require('./chat-schema').migrate({model: this.getModel('user'),
+      config: {type: this.type, [this.type]: this.dbConfig}});
     await this.createAccount(username, password, email);
     await this.addStartPost();
 

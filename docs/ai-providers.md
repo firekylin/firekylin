@@ -195,3 +195,61 @@ generate: async(request, {signal, reportUsage, images}) => nativeClient({request
 The provider remains responsible for its native protocol, MIME type and model-specific limits.
 These helpers do not upload files. Install a core release containing this API before updating
 image provider plugins. Text-only calls do not require the helpers.
+
+## Admin chat
+
+The admin homepage (`/admin/dashboard`, or `/admin/dashboard/:sessionId`) is a private chat workspace.
+The former dashboard remains at `/admin/overview`. Conversations are owned by the current backend
+user, persisted separately from AI audit logs, and cannot be read by other users. Deleting a conversation
+does not delete blog content or existing AI audit records. Startup and web installation create the four
+prefixed `chat_session`, `chat_message`, `chat_run`, and `chat_action` tables.
+
+### Provider contract
+
+Existing providers with `text` capability continue to support ordinary chat. To support blog operations,
+models must also declare `tools`. The normalized generation request may include:
+
+```js
+{
+  messages: [
+    {role: 'user', content: 'Find my drafts'},
+    {role: 'assistant', content: '', toolCalls: [
+      {id: 'call-1', name: 'posts.list_managed', input: {status: 0}}
+    ]},
+    {role: 'tool', toolCallId: 'call-1', name: 'posts.list_managed', content: '{"data":[]}'}
+  ],
+  tools: [{name: 'posts.list_managed', description: 'List articles', inputSchema: {type: 'object'}}]
+}
+```
+
+Return `{text, toolCalls?: [{id, name, input}], providerData?}`. Translate both tool definitions and
+history messages to the provider's native protocol. `providerData` is optional opaque continuation
+state (for example encrypted reasoning), persisted with assistant tool calls and sent back to the provider;
+it is never rendered as reasoning in the chat. Keep tool call IDs stable and unique. Do not return
+unparsed argument strings as `input`. Dotted ability names may require reversible vendor-specific encoding.
+
+Providers implementing incremental text can call the optional `context.onText(delta)` callback, and should
+advertise `stream` capability. They must still return complete final text and usage, reject incomplete streams,
+and propagate `context.signal`. Core never converts plain model text into an executable tool call.
+The companion OpenAI and DeepSeek plugin source packages include adapters for this protocol; installed
+older plugin versions require updating before they expose the new capabilities.
+
+The chat endpoint uses POST event streams for send/confirm/retry, with `run`, `status`, `delta`, `message`,
+`action`, `audit`, `heartbeat`, `error`, and `done` events. Disconnecting cancels the run; the browser
+reloads persisted messages and never resends writes automatically. A stale run lease is recovered after
+150 seconds without heartbeat. An uncertain action remains visible for manual verification, without replay.
+
+### Tool policy
+
+Only abilities explicitly exposed to `admin-chat` are discoverable. Core management abilities use the same
+business services and model lifecycle as the regular admin UI. Authors are limited to their existing article
+permissions; comment, taxonomy mutation and settings tools require an administrator. The server loads the
+bundled Firekylin skill as guidance, independently checks schemas and permissions, and treats blog text and
+tool output as data. It does not grant shell or arbitrary filesystem access.
+
+Read tools and private draft creation/editing run directly. Other mutations require a persisted preview and
+confirmation, including publishing, permanent deletion, published article edits, comment changes and settings.
+Confirmation expires after 15 minutes, checks the current role and object fingerprint again, and atomically
+claims the stored operation. Clients submit only the action ID and decision, never replacement arguments.
+Each conversation has one active run, at most eight model turns and a two-minute overall generation budget;
+each individual AI call retains the shared client's timeout. A stop cannot undo a mutation already committed.

@@ -1,11 +1,14 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Route, Redirect, Switch, useRouteComponentProps } from '../utils/router';
 import Loading from './loading';
+import {Button} from 'antd';
+import {MenuOutlined} from '@ant-design/icons';
 import './container.less';
 import Sidebar from '../components/sidebar';
 import { http } from '../utils/http';
 // Components
 import DashBoard from './dashboard/dashboard';
+const Chat = lazy(() => import('./dashboard/chat'));
 
 const User = lazy(() => import('./user/user'));
 const Post = lazy(() => import('./post/post'));
@@ -33,9 +36,16 @@ function Container(props: any) {
         return () => subscription.unsubscribe();
     }, []);
 
+    const [navigationOpen, setNavigationOpen] = useState(false);
+    const isChat = props.location.pathname.replace(/^\/admin/, '').startsWith('/dashboard');
+    useEffect(() => { setNavigationOpen(false); }, [props.location.pathname]);
     const isCommenter = window.SysConfig.userInfo.type === 4;
     return (
-        <>
+        <div className={`admin-shell${isChat ? ' chat-shell' : ''}${navigationOpen ? ' chat-nav-open' : ''}`}>
+            {isChat && <Button className="chat-navigation-toggle" aria-label="打开后台导航" icon={<MenuOutlined />}
+                onClick={() => setNavigationOpen(open => !open)} />}
+            {isChat && navigationOpen && <button className="chat-navigation-backdrop" aria-label="关闭后台导航"
+                onClick={() => setNavigationOpen(false)} />}
             <Sidebar {...props} />
             <div className="content">
                 <Suspense fallback={<Loading />}>
@@ -45,7 +55,8 @@ function Container(props: any) {
                         ) : null}
                         {isCommenter ? <Route path={`/user`} component={User} /> : null}
                         {isCommenter ? <Redirect to="/comment" /> : null}
-                        <Route exact={true} path="/dashboard" component={DashBoard} />
+                        <Route path="/dashboard" component={Chat} />
+                        <Route exact={true} path="/overview" component={DashBoard} />
                         <Route path="/post" component={Post} />
                         <Route path="/page" component={Page} />
                         <Route path="/cate" component={Category} />
@@ -67,7 +78,7 @@ function Container(props: any) {
                     </Switch>
                 </Suspense>
             </div>
-        </>
+        </div>
     );
 }
 

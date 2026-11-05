@@ -43,6 +43,7 @@ class AIClient {
 
   async generate(request, context = {}) {
     const entry = await this.audit?.start(request, context);
+    context.onRequestId?.(entry?.request_id);
     const state = {request, entry};
     try {
       const result = await this.perform(request, context, state);
@@ -102,7 +103,9 @@ class AIClient {
       });
       if (signal.aborted) return await aborted;
       const result = await Promise.race([Promise.resolve().then(() => provider.generate(
-        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images})), aborted]);
+        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images, ...(context.onText ? {
+          onText: delta => { if (active && !signal.aborted) context.onText(delta) }
+        } : {})})), aborted]);
       return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
     } finally {
       active = false;

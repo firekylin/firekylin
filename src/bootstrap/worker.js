@@ -214,3 +214,18 @@ if (!global[auditMigrationKey]) {
     }
   });
 }
+
+const chatMigrationKey = Symbol.for('firekylin.chatMigration');
+if (!global[chatMigrationKey]) {
+  global[chatMigrationKey] = true;
+  think.beforeStartServer(async() => {
+    try {
+      const options = await think.model('options').getOptions(true);
+      if (!options.site_url) return;
+      await require('../service/chat-schema').migrate({model: think.model('user'), config: think.config('model')});
+    } catch (error) {
+      if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
+      throw error;
+    }
+  });
+}

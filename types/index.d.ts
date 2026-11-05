@@ -156,10 +156,25 @@ declare namespace Firekylin {
     prompt(request: {messages: Array<{content: string}>}): string;
     output(payload: {data?: Array<{b64_json: string}>}, mimeType: AIImage['mimeType']): AIImage[];
   }
+
+  interface AIChatToolCall {id: string; name: string; input: Record<string, unknown>}
+  interface AIChatMessage {
+    role: string;
+    content: string;
+    toolCalls?: AIChatToolCall[];
+    /** Opaque provider state, never displayed as assistant reasoning. */
+    providerData?: Record<string, unknown>;
+    toolCallId?: string;
+    name?: string;
+  }
+  interface AIChatTool {name: string; description: string; inputSchema: Record<string, unknown>}
+  interface AIChatResult {text: string; toolCalls?: AIChatToolCall[]; providerData?: Record<string, unknown>; usage?: unknown}
   interface AIProviderContext {
     /** Core-owned image validation and conversion for native provider adapters. */
     images: AIImageHelpers;
     signal?: AbortSignal;
+    /** Optional chat text deltas; return the complete text in the final result as well. */
+    onText?(delta: string): void;
     /** Report native counters as soon as available, including before rejecting empty output. */
     reportUsage(rawUsage?: unknown, response?: {headers?: {get(name: string): string | null}}): void;
     [key: string]: unknown;
@@ -169,7 +184,7 @@ declare namespace Firekylin {
     label?: string;
     models: AIModelDefinition[];
     usageAdapter?: AIUsageAdapter;
-    generate(request: {provider: string; model: string; messages: Array<{role: string; content: string}>;
+    generate(request: {provider: string; model: string; messages: AIChatMessage[];
       [key: string]: unknown}, context: AIProviderContext): unknown | Promise<unknown>;
   }
 
@@ -202,7 +217,7 @@ declare namespace Firekylin {
     configured?(): boolean | Promise<boolean>;
     admin?: {formId: string; testActionId: string};
     generate(request: {provider: string; model: string; capability?: string;
-      messages: Array<{role: string; content: string}>;
+      messages: AIChatMessage[];
       [key: string]: unknown}, context: AIProviderContext): unknown | Promise<unknown>;
   }
 
