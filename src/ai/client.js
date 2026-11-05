@@ -103,7 +103,8 @@ class AIClient {
       });
       if (signal.aborted) return await aborted;
       const result = await Promise.race([Promise.resolve().then(() => provider.generate(
-        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images, ...(context.onText ? {
+        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images,
+          ...(context.onText ? {
           onText: delta => { if (active && !signal.aborted) context.onText(delta) }
         } : {})})), aborted]);
       return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;

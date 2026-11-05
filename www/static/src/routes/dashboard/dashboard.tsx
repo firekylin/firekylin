@@ -7,6 +7,7 @@ import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
 const confirm = Modal.confirm;
+const Chat = React.lazy(() => import('./chat'));
 
 const UPDATE_STEPS = [
     [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
@@ -16,7 +17,7 @@ const UPDATE_STEPS = [
 ];
 
 const COUNT_DOWN = 3;
-function DashBoard(props: DashBoardProps) {
+export function DashBoard(props: DashBoardProps) {
     const [state, setState] = React.useState(() => ({
         posts: [],
         step: 1,
@@ -176,19 +177,27 @@ function DashBoard(props: DashBoardProps) {
                             ！
                         </p>
                     ) : null}
-                    <h3 style={{ marginBottom: '30px' }}>网站概要</h3>
-                    <p>
-                        目前有 {count.posts} 篇文章, 并有 {count.comments}{' '}
-                        条关于你的评论在 {count.cates} 个分类中.{' '}
-                    </p>
-                    <p>点击下面的链接快速开始:</p>
-                    <div className="quick-link">
-                        {links.map((link) => (
-                            <NavLink key={link.url} to={link.url}>
-                                {link.title}
-                            </NavLink>
-                        ))}
-                    </div>
+                    {Number(window.SysConfig.userInfo.type) === 1 ? (
+                        <React.Suspense fallback={<p>正在加载聊天模块…</p>}>
+                            <Chat />
+                        </React.Suspense>
+                    ) : (
+                        <>
+                            <h3 style={{ marginBottom: '30px' }}>网站概要</h3>
+                            <p>
+                                目前有 {count.posts} 篇文章, 并有 {count.comments}{' '}
+                                条关于你的评论在 {count.cates} 个分类中.{' '}
+                            </p>
+                            <p>点击下面的链接快速开始:</p>
+                            <div className="quick-link">
+                                {links.map((link) => (
+                                    <NavLink key={link.url} to={link.url}>
+                                        {link.title}
+                                    </NavLink>
+                                ))}
+                            </div>
+                        </>
+                    )}
                     <hr />
                     <div className="row">
                         <div className="col-md-5">
