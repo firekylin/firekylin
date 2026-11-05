@@ -37,14 +37,19 @@ seven days to avoid outliving the JWT, which expires after seven days.
 Logout clears the browser cookie but does not revoke copies of the JWT already
 issued. Password changes, account disablement and role changes likewise do not
 revoke outstanding JWTs until expiry. Rotate the secret to invalidate all tokens.
+A valid JWT does not guarantee access to every endpoint: the admin chat API also
+loads the user's current role and status from the database and rejects disabled
+accounts or users without an administrator or author role.
 Future OAuth/MCP tokens must use their own audience and scopes; administrator
 cookies are not MCP access tokens.
 
 ## CSRF and cookies
 
 Cookie authentication still requires protection against cross-site requests.
-Built-in admin API mutations retain their existing Referrer checks. Plugin
-mutations with `csrf: true` require the `X-CSRF-Token` header. The administrator
+Built-in admin API mutations retain their existing Referrer checks. The admin
+chat API additionally requires the `X-CSRF-Token` header for every POST operation,
+including sending messages and confirming actions. Plugin mutations with
+`csrf: true` also require the `X-CSRF-Token` header. The administrator
 page exposes a deterministic token in `window.SysConfig.csrfToken`, tied to the
 current signed login cookie. Example:
 
