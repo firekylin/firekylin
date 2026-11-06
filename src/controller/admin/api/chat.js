@@ -1,5 +1,6 @@
 'use strict';
 const Base = require('./base');
+const {normalizeAttachments} = require('../../../service/chat-attachments');
 const {ChatAgent} = require('../../../service/chat-agent');
 
 const controllers = new Map();
@@ -91,9 +92,13 @@ module.exports = class extends Base {
     }
     if (!['send', 'confirm', 'retry'].includes(body.operation)) return this.fail('无效操作');
     if (body.operation !== 'confirm' && pending.length) return this.fail('请先确认或取消待处理操作');
+    let attachments = [];
+    if (body.operation === 'send') {
+      try { attachments = normalizeAttachments(body.attachments) } catch (error) { return this.fail(error.message) }
+    }
     if (body.operation === 'send'
         && (typeof body.content !== 'string'
-        || !body.content.trim()
+        || (!body.content.trim() && !attachments.length)
         || body.content.length > 50000)) {
       return this.fail('请输入 1–50000 字的消息');
     }
@@ -121,8 +126,11 @@ module.exports = class extends Base {
       await store.reconcile(session.id);
       if (body.operation === 'send') {
         userMessage = await store.model('chat/message')
-          .append(session.id, {role: 'user', content: body.content.trim()});
-        if (session.title === '新对话') await store.updateSession(session.id, {title: body.content.trim().slice(0, 40)});
+          .append(session.id, {role: 'user', content: body.content.trim(),
+            ...(attachments.length ? {attachments} : {})});
+        if (session.title === '新对话') {
+          await store.updateSession(session.id, {title: (body.content.trim() || attachments[0].name).slice(0, 40)});
+        }
       }
     } catch (error) {
       await store.finish(session.id, run, 'failed');

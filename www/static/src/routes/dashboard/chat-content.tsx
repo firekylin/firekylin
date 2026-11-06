@@ -1,3 +1,4 @@
+import {ChatAttachments} from './chat-attachments';
 import React from 'react';
 import {Actions, Bubble, Sources, Think, ThoughtChain} from '@ant-design/x';
 import {XMarkdown, type ComponentProps} from '@ant-design/x-markdown';
@@ -95,7 +96,7 @@ export function ChatMessage({entry, actions, messages, running, preview, retry, 
     const isUser = entry.role === 'user';
     return <Bubble placement={isUser ? 'end' : 'start'} variant={isUser ? 'filled' : 'borderless'}
         streaming={streaming} avatar={isUser ? <UserOutlined /> : <RobotOutlined />} header={isUser ? '你' : 'Firekylin'}
-        content={<>{entry.content && <Markdown text={entry.content} streaming={streaming} />}
+        content={<>{isUser && entry.attachments?.length > 0 && <ChatAttachments files={entry.attachments} />}{entry.content && <Markdown text={entry.content} streaming={streaming} />}
             {entry.toolCalls && <ExecutionChain entry={entry} actions={actions} messages={messages} running={running} />}</>}
         footer={!isUser && entry.content && !streaming ? <Actions items={[{key: 'copy', label: '复制',
             actionRender: <Actions.Copy text={entry.content} />}]} /> : undefined} />;

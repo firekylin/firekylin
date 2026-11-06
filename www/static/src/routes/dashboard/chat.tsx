@@ -9,6 +9,7 @@ import {ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOu
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
+import {ChatAttachments, ChatAttachment, readChatFiles, attachmentAccept} from './chat-attachments';
 import {http} from '../../utils/http';
 import {openArticlePreview} from '../../components/article/preview';
 const ChatInput = React.forwardRef<any, any>((props, ref) => <Input.TextArea {...props} ref={ref} aria-label="聊天消息" />);
@@ -52,6 +53,11 @@ function Chat({children, onConversationChange}: {
     const router = useRouteComponentProps();
     const id = router.location.pathname.match(/\/dashboard\/([^/]+)/)?.[1];
     const [input, setInput] = useState('');
+    const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+    const [readingFiles, setReadingFiles] = useState(false);
+    const fileInput = useRef<HTMLInputElement>(null);
+    const attachmentGeneration = useRef(0);
+    useEffect(() => { attachmentGeneration.current++; setAttachments([]); }, [id]);
     const [search, setSearch] = useState('');
     const [historyOpen, setHistoryOpen] = useState(false);
     const [started, setStarted] = useState(false);
@@ -80,7 +86,7 @@ function Chat({children, onConversationChange}: {
         store.messages.some(entry => ['user', 'assistant', 'tool'].includes(entry.role));
     useEffect(() => { if (inConversation) setHistoryOpen(true); }, [inConversation]);
     useEffect(() => { onConversationChange?.(inConversation); }, [inConversation, onConversationChange]);
-    const locked = sending || store.loading || store.busy || Boolean(store.session?.active_run);
+    const locked = readingFiles || sending || store.loading || store.busy || Boolean(store.session?.active_run);
     const pending = store.actions.find(action => action.status === 'pending');
     const models = store.providers.filter(provider => provider.configured !== false).flatMap(provider =>
         provider.models.filter((model: any) => model.capabilities.includes('text')).map((model: any) => ({
@@ -90,9 +96,9 @@ function Chat({children, onConversationChange}: {
     const sessionModel = JSON.stringify([store.session?.provider, store.session?.model]);
     const selected = models.find(model => model.value === sessionModel)?.value || models.find(model => model.selected)?.value || models[0]?.value;
     const send = async(content = input) => {
-        if (!content.trim() || locked || pending || !selected) return;
+        if ((!content.trim() && !attachments.length) || locked || pending || !selected) return;
         setStarted(true);
-        store.pendingMessage = {id: crypto.randomUUID(), role: 'user', content: content.trim()};
+        store.pendingMessage = {id: crypto.randomUUID(), role: 'user', content: content.trim(), attachments};
         setInput('');
         setSending(true);
         try {
@@ -104,8 +110,10 @@ function Chat({children, onConversationChange}: {
             }
             const [provider, model] = JSON.parse(selected);
             if (store.session.provider !== provider || store.session.model !== model) await store.mutate('select', {provider, model});
-            await store.stream('send', {content});
-        } catch (error) { setInput(content); throw error; }
+            const accepted = await store.stream('send', {content, ...(attachments.length ? {attachments} : {})});
+            if (accepted) setAttachments([]);
+            else {setInput(content); setAttachments(attachments);}
+        } catch (error) { setInput(content); setAttachments(attachments); throw error; }
         finally { store.pendingMessage = null; setSending(false); setStarted(false); }
     };
     const newChat = () => {
@@ -113,6 +121,7 @@ function Chat({children, onConversationChange}: {
         setStarted(false);
         setHistoryOpen(false);
         setInput('');
+        setAttachments([]);
         router.history.push('/dashboard');
     };
     const rename = (session: any) => { if (!locked) {setTitle(session.title); setRenaming(session.id)} };
@@ -201,6 +210,20 @@ function Chat({children, onConversationChange}: {
             <footer className="chat-composer-area">
                 {store.error && <Alert type="warning" title={store.error} closable onClose={() => {store.error = ''}} />}
                 {!models.length ? <div className="chat-connect"><h3>连接你的 AI 服务商</h3><p>配置完成后，即可开始聊天和管理博客。</p><Link to="/options/ai">前往 AI 连接设置 →</Link></div> : <>
+                    <div className="chat-file-picker">
+                        <input ref={fileInput} type="file" multiple accept={attachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
+                            onChange={event => {
+                                const files = Array.from(event.target.files || []); event.target.value = '';
+                                const generation = attachmentGeneration.current;
+                                setReadingFiles(true);
+                                safe(readChatFiles(files, attachments).then(value => {
+                                    if (generation === attachmentGeneration.current) setAttachments(value);
+                                }).finally(() => setReadingFiles(false)));
+                            }} />
+                        <Button disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()}>添加文本文件</Button>
+                        <small>UTF-8 TXT / Markdown / CSV / JSON / LOG；最多 5 个，每个 32 KiB，共 64 KiB。暂不支持图片、PDF、Office。发送时正文将交给所选 AI 服务商，并随私有会话保存。</small>
+                    </div>
+                    <ChatAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
                     <Suggestion items={commands.map(command => ({label: command.label, value: command.description}))}
                         onSelect={value => setInput(value)}>
                         {({onTrigger, onKeyDown, open}) => <Sender className="chat-composer" value={input} components={senderComponents}
@@ -216,7 +239,7 @@ function Chat({children, onConversationChange}: {
                                     onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
                                         const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
                                 {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
-                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={!input.trim() || Boolean(pending) || !selected || locked} />}
+                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={(!input.trim() && !attachments.length) || Boolean(pending) || !selected || locked} />}
                             </div>} />}
                     </Suggestion>
                     {!inConversation && <Prompts className="chat-suggestions" wrap

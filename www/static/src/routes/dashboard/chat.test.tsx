@@ -20,7 +20,7 @@ beforeEach(() => {
         if (body?.operation === 'create') {sessions = [{id: 'one', title: '新对话', provider: 'test', model: 'model', active_run: '', updated_at: Date.now()}]; data = sessions[0]}
         if (String(url).includes('?session=')) data = {session: sessions[0], messages, actions, providers: [provider]};
         if (body?.operation === 'send') {
-            messages = [{id: 'm1', role: 'user', content: body.content}, {id: 'm2', role: 'assistant', content: '**已收到**'}];
+            messages = [{id: 'm1', role: 'user', content: body.content, attachments: body.attachments}, {id: 'm2', role: 'assistant', content: '**已收到**'}];
             const stream = new ReadableStream({start(controller) {
                 controller.enqueue(new TextEncoder().encode('event: done\ndata: {"status":"completed"}\n\n')); controller.close();
             }});
@@ -206,4 +206,40 @@ it('shows first reply deltas in an existing empty conversation before completion
     expect(await screen.findByText('回复正在流入')).toBeVisible();
     expect(screen.queryByText('今天想写点什么？')).not.toBeInTheDocument();
     await act(async() => streamController.close());
+});
+
+it('selects, previews, removes and sends text attachments without an additional prompt', async() => {
+    render(<MemoryRouter initialEntries={['/dashboard']}><Chat /></MemoryRouter>);
+    await screen.findByLabelText('选择聊天附件');
+    const file = new File(['附件正文'], 'notes.md', {type: 'text/markdown'});
+    fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
+    await screen.findByText('notes.md · 12 B · 文本附件');
+    expect(screen.getByText('附件正文')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('移除附件 notes.md'));
+    expect(screen.queryByText('附件正文')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
+    await screen.findByLabelText('移除附件 notes.md');
+    fireEvent.click(screen.getByLabelText('发送消息'));
+    await screen.findByText('已收到');
+    expect(requests.find(row => row.body?.operation === 'send').body.attachments).toEqual([{name: 'notes.md', content: '附件正文', size: 12}]);
+    expect(screen.queryByLabelText('移除附件 notes.md')).not.toBeInTheDocument();
+    expect(screen.getByText('notes.md · 12 B · 文本附件')).toBeInTheDocument();
+});
+it('keeps files and prompt when the server rejects a send', async() => {
+    const original = global.fetch;
+    vi.stubGlobal('fetch', vi.fn(async(url, options) => {
+        if (options?.body && JSON.parse(options.body as string).operation === 'send') {
+            return {ok: false, json: async() => ({errno: 1, errmsg: '模型不可用'})};
+        }
+        return original(url, options);
+    }));
+    render(<MemoryRouter initialEntries={['/dashboard']}><Chat /></MemoryRouter>);
+    await screen.findByLabelText('选择聊天附件');
+    fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [new File(['text'], 'notes.txt')]}});
+    await screen.findByLabelText('移除附件 notes.txt');
+    fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '阅读文件'}});
+    fireEvent.click(screen.getByLabelText('发送消息'));
+    await screen.findByText('模型不可用');
+    await waitFor(() => expect(screen.getByLabelText('聊天消息')).toHaveValue('阅读文件'));
+    expect(screen.getByLabelText('移除附件 notes.txt')).toBeInTheDocument();
 });

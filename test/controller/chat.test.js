@@ -65,7 +65,7 @@ test('controller streams a complete persistent conversation and confirmation wit
   const createModels = require('../helpers/chat-model');
   const Registry = require('../../src/ability/registry');
   const {EventEmitter} = require('node:events');
-  const {instance} = controller(t);
+  const {instance, user: setUser} = controller(t);
   const config = {handle, path: ':memory:', database: 'chat-controller-flow', prefix: 'test_', logConnect: false, debounce: false};
   const model = createModels(config);
   t.after(() => model('chat/session').db().query.socket().close());
@@ -79,7 +79,13 @@ test('controller streams a complete persistent conversation and confirmation wit
     requiredPermissions: [], execute: async() => {writes++; return {saved: true}}}, 'test');
   global.firekylin.plugins = {abilities: registry, ai: {
     models: async() => [{id: 'demo', models: [{id: 'demo', selected: true, capabilities: ['text', 'tools']}]}],
-    generate: async() => turn++ ? {text: '已完成'} : {toolCalls: [{id: 'call', name: 'demo.write', input: {}}]}
+    generate: async(request, context) => {
+      assert.equal(context.recordContent, false);
+      const attached = request.messages.find(message => message.role === 'user');
+      assert.match(attached.content, /文件中的实际内容/);
+      assert.equal(attached.attachments, undefined);
+      return turn++ ? {text: '已完成'} : {toolCalls: [{id: 'call', name: 'demo.write', input: {}}]};
+    }
   }};
   const oldThink = global.think;
   global.think = {datetime: () => '2026-11-06 00:00:00'};
@@ -95,7 +101,7 @@ test('controller streams a complete persistent conversation and confirmation wit
     return res;
   };
   instance.ctx.res = response();
-  instance.post = () => ({session: session.id, operation: 'send', content: '保存操作', requestKey: 'first'});
+  instance.post = () => ({session: session.id, operation: 'send', content: '', attachments: [{name: 'test.md', content: '文件中的实际内容'}], requestKey: 'first'});
   await instance.postAction();
   assert.equal(writes, 0);
   const userFrame = streamed.findIndex(frame => frame.includes('event: message') && frame.includes('\"role\":\"user\"'));
@@ -111,5 +117,16 @@ test('controller streams a complete persistent conversation and confirmation wit
   assert.equal((await store.session(session.id, {id: 2})).active_run, '');
   assert.equal((await store.model('chat/action').listForSession(session.id))[0].status, 'completed');
   instance.get = () => session.id;
-  assert.equal((await instance.getAction()).data.messages.at(-1).content, '已完成');
+  const restored = (await instance.getAction()).data.messages;
+  assert.equal(restored.at(-1).content, '已完成');
+  assert.deepEqual(restored[0].attachments, [{name: 'test.md', content: '文件中的实际内容', size: 24}]);
+  instance.post = () => ({session: session.id, operation: 'send', content: 'hello', attachments: [{name: 'a.pdf', content: 'no'}]});
+  assert.match((await instance.postAction()).errmsg, /仅支持/);
+  assert.equal((await store.model('chat/message').listForSession(session.id)).length, restored.length);
+  setUser({id: 99, type: 2, status: 1});
+  instance.userInfo = {id: 99, type: 2};
+  await assert.rejects(instance.getAction(), /无权/);
+  await assert.rejects(instance.postAction(), /无权/);
+  await store.remove(session.id);
+  assert.equal((await store.model('chat/message').listForSession(session.id)).length, 0);
 });

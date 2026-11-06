@@ -158,3 +158,19 @@ test('context JSON remains valid under truncation and cyclic or image values', (
   assert.ok(cleaned.text.endsWith('[TRUNCATED]'));
   assert.ok(!JSON.stringify(cleaned).includes('do-not-save'));
 });
+
+test('attachment conversations can suppress all audit body copies while retaining usage', async() => {
+  const secret = 'private-file-body';
+  const {client, rows} = setup(request => {
+    assert.equal(request.messages[0].content, secret);
+    return {text: secret, usage: {prompt_tokens: 4, completion_tokens: 2}};
+  });
+  await context.run({source: 'admin', request: () => ({url: '/admin/api/chat?text=' + secret,
+    parameters: {content: secret, attachments: [{name: 'private.txt', content: secret}]}})}, () =>
+    client.generate({messages: [{role: 'user', content: secret}]}, {scenario: 'chat.reply', recordContent: false}));
+  assert.equal(rows[0].content_recorded, 0);
+  assert.equal(rows[0].request_text, null);
+  assert.equal(rows[0].response_text, null);
+  assert.equal(rows[0].total_tokens, 6);
+  assert.ok(!JSON.stringify(rows).includes(secret));
+});
