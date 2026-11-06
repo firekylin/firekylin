@@ -1,4 +1,4 @@
-import {cleanup, render, screen, waitFor} from '@testing-library/react';
+import {act, cleanup, render, screen, waitFor} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {ChatMessage, ExecutionChain, Markdown, ToolResult} from './chat-content';
 import {MemoryRouter} from '../../utils/router';
@@ -15,7 +15,11 @@ it('renders fenced code with Ant Design X highlighter without executing it', asy
     // Load the real lazy dependency before starting Testing Library's render deadline.
     await import('@ant-design/x/es/code-highlighter');
     const {container} = render(<Markdown text={'```javascript\nconst answer = 42;\n```'} />);
-    expect(await screen.findByText('javascript')).toBeInTheDocument();
+    // Wait for the lazy component import and commit before starting DOM query timers.
+    await act(async() => { await vi.dynamicImportSettled() });
+    expect(screen.getByText('javascript')).toBeInTheDocument();
+    // CodeHighlighter also lazily imports its full Prism renderer.
+    await act(async() => { await vi.dynamicImportSettled() });
     await waitFor(() => expect(container.querySelector('code .token')?.textContent).toBe('const'));
     expect(container.querySelector('code')?.textContent).toContain('const answer = 42;');
     expect(container.querySelector('script')).toBeNull();

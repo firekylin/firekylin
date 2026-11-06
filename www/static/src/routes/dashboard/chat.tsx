@@ -5,10 +5,11 @@ import {Conversations, Prompts, Sender, Suggestion, Welcome, XProvider, notifica
 import zhCN from '@ant-design/x/es/locale/zh_CN';
 import antdZhCN from 'antd/es/locale/zh_CN';
 import {ChatMessage, GenerationStatus, commands, toolLabels} from './chat-content';
-import {ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOutlined, StopOutlined, BellOutlined, MessageOutlined, SearchOutlined, LockOutlined, MoreOutlined} from '@ant-design/icons';
+import {PaperClipOutlined, ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOutlined, StopOutlined, BellOutlined, MessageOutlined, SearchOutlined, LockOutlined, MoreOutlined} from '@ant-design/icons';
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
+import {DraftAttachments, ChatAttachment, readChatFiles, attachmentAccept, textAttachmentAccept} from './chat-attachments';
 import {http} from '../../utils/http';
 import {openArticlePreview} from '../../components/article/preview';
 const ChatInput = React.forwardRef<any, any>((props, ref) => <Input.TextArea {...props} ref={ref} aria-label="聊天消息" />);
@@ -52,6 +53,21 @@ function Chat({children, onConversationChange}: {
     const router = useRouteComponentProps();
     const id = router.location.pathname.match(/\/dashboard\/([^/]+)/)?.[1];
     const [input, setInput] = useState('');
+    const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+    const [readingFiles, setReadingFiles] = useState(false);
+    const fileInput = useRef<HTMLInputElement>(null);
+    const attachmentGeneration = useRef(0);
+    const readingFilesRef = useRef(false);
+    const draftSession = useRef<string | null>(null);
+    useEffect(() => {
+        const assigningDraft = Boolean(id && draftSession.current === id);
+        draftSession.current = null;
+        if (!assigningDraft) { attachmentGeneration.current++; setAttachments([]); }
+    }, [id]);
+    const assignDraftSession = (sessionId: string) => {
+        draftSession.current = sessionId;
+        router.history.replace(`/dashboard/${sessionId}`);
+    };
     const [search, setSearch] = useState('');
     const [historyOpen, setHistoryOpen] = useState(false);
     const [started, setStarted] = useState(false);
@@ -78,21 +94,58 @@ function Chat({children, onConversationChange}: {
     }, [id, store, store.busy, store.session?.active_run]);
     const inConversation = started || store.busy || Boolean(store.session?.active_run) ||
         store.messages.some(entry => ['user', 'assistant', 'tool'].includes(entry.role));
-    useEffect(() => { if (inConversation) setHistoryOpen(true); }, [inConversation]);
+    useEffect(() => {
+        if (inConversation) setHistoryOpen(!window.matchMedia('(max-width: 700px)').matches);
+    }, [inConversation]);
+    useEffect(() => {
+        const media = window.matchMedia('(max-width: 700px)');
+        const collapse = () => {if (media.matches) setHistoryOpen(false)};
+        media.addEventListener?.('change', collapse);
+        return () => media.removeEventListener?.('change', collapse);
+    }, []);
     useEffect(() => { onConversationChange?.(inConversation); }, [inConversation, onConversationChange]);
-    const locked = sending || store.loading || store.busy || Boolean(store.session?.active_run);
+    const locked = readingFiles || sending || store.loading || store.busy || Boolean(store.session?.active_run);
     const pending = store.actions.find(action => action.status === 'pending');
+    const needsVision = attachments.some(file => file.kind === 'image') || store.messages.some(entry => entry.attachments?.some((file: any) => file.kind === 'image'));
     const models = store.providers.filter(provider => provider.configured !== false).flatMap(provider =>
         provider.models.filter((model: any) => model.capabilities.includes('text')).map((model: any) => ({
             value: JSON.stringify([provider.id, model.id]), label: `${provider.label} / ${model.label || model.id}`,
-            selected: model.selected, tools: model.capabilities.includes('tools')
+            selected: model.selected, tools: model.capabilities.includes('tools'), vision: model.capabilities.includes('vision'),
+            disabled: needsVision && !model.capabilities.includes('vision')
         })));
     const sessionModel = JSON.stringify([store.session?.provider, store.session?.model]);
     const selected = models.find(model => model.value === sessionModel)?.value || models.find(model => model.selected)?.value || models[0]?.value;
+    const canReadImages = models.find(model => model.value === selected)?.vision;
+    const addFiles = async(files: File[]) => {
+        if (!files.length) return;
+        if (locked || pending || readingFilesRef.current) throw new Error('请等待当前操作完成后再添加附件');
+        const generation = attachmentGeneration.current;
+        readingFilesRef.current = true;
+        setReadingFiles(true);
+        try {
+            const value = await readChatFiles(files, attachments, canReadImages);
+            if (generation === attachmentGeneration.current) setAttachments(value);
+        } finally {
+            readingFilesRef.current = false;
+            setReadingFiles(false);
+        }
+    };
+    const pasteImages: React.ClipboardEventHandler<HTMLElement> = event => {
+        const clipboard = event.clipboardData;
+        const files = Array.from(clipboard.files || []);
+        const images = (files.length ? files : Array.from(clipboard.items || [])
+            .filter(item => item.kind === 'file').map(item => item.getAsFile()).filter((file): file is File => Boolean(file)))
+            .filter(file => file.type.startsWith('image/'));
+        if (!images.length) return;
+        // A mixed clipboard can still insert its plain text through the browser.
+        if (!clipboard.getData('text/plain')) event.preventDefault();
+        safe(addFiles(images));
+    };
     const send = async(content = input) => {
-        if (!content.trim() || locked || pending || !selected) return;
+        if ((!content.trim() && !attachments.length) || locked || pending || !selected) return;
+        if (needsVision && !canReadImages) throw new Error('请先选择支持视觉能力的模型');
         setStarted(true);
-        store.pendingMessage = {id: crypto.randomUUID(), role: 'user', content: content.trim()};
+        store.setPendingMessage({id: crypto.randomUUID(), role: 'user', content: content.trim(), attachments});
         setInput('');
         setSending(true);
         try {
@@ -100,19 +153,22 @@ function Chat({children, onConversationChange}: {
             if (!sessionId) {
                 sessionId = await store.create();
                 await store.open(sessionId);
-                router.history.replace(`/dashboard/${sessionId}`);
+                assignDraftSession(sessionId);
             }
             const [provider, model] = JSON.parse(selected);
             if (store.session.provider !== provider || store.session.model !== model) await store.mutate('select', {provider, model});
-            await store.stream('send', {content});
-        } catch (error) { setInput(content); throw error; }
-        finally { store.pendingMessage = null; setSending(false); setStarted(false); }
+            const accepted = await store.stream('send', {content, ...(attachments.length ? {attachments} : {})});
+            if (accepted) setAttachments([]);
+            else {setInput(content); setAttachments(attachments);}
+        } catch (error) { setInput(content); setAttachments(attachments); throw error; }
+        finally { store.setPendingMessage(null); setSending(false); setStarted(false); }
     };
     const newChat = () => {
         if (locked) return;
         setStarted(false);
         setHistoryOpen(false);
         setInput('');
+        setAttachments([]);
         router.history.push('/dashboard');
     };
     const rename = (session: any) => { if (!locked) {setTitle(session.title); setRenaming(session.id)} };
@@ -201,22 +257,42 @@ function Chat({children, onConversationChange}: {
             <footer className="chat-composer-area">
                 {store.error && <Alert type="warning" title={store.error} closable onClose={() => {store.error = ''}} />}
                 {!models.length ? <div className="chat-connect"><h3>连接你的 AI 服务商</h3><p>配置完成后，即可开始聊天和管理博客。</p><Link to="/options/ai">前往 AI 连接设置 →</Link></div> : <>
+                    <input ref={fileInput} type="file" multiple accept={canReadImages ? attachmentAccept : textAttachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
+                        onChange={event => {
+                            const files = Array.from(event.target.files || []); event.target.value = '';
+                            safe(addFiles(files));
+                        }} />
                     <Suggestion items={commands.map(command => ({label: command.label, value: command.description}))}
                         onSelect={value => setInput(value)}>
                         {({onTrigger, onKeyDown, open}) => <Sender className="chat-composer" value={input} components={senderComponents}
                             placeholder={pending ? '请先确认或取消上方操作' : '帮我写文章、整理内容或管理博客… 输入 / 查看快捷指令'}
-                            autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} disabled={Boolean(pending)}
+                            autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} disabled={pending ? true : undefined} allowSpeech
+                            header={attachments.length > 0 && <div className="chat-draft-header">
+                                <DraftAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
+                            </div>}
                             loading={sending || store.busy || Boolean(store.session?.active_run)}
                             onChange={value => {setInput(value); onTrigger(value === '/' ? {} : false)}}
                             onKeyDown={event => {onKeyDown(event); if (open && event.key === 'Enter') return false; return undefined}}
+                            onPaste={canReadImages ? pasteImages : undefined}
                             onSubmit={() => safe(send())} onCancel={() => safe(store.stop())} suffix={false}
-                            footer={(_, {components: {SendButton, LoadingButton}}) => <div className="chat-composer-toolbar">
-                                <span className="chat-muted">{models.find(model => model.value === selected)?.tools ? '博客技能已启用' : '普通问答 · 当前模型不支持博客操作'}</span>
-                                <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
-                                    onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
-                                        const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
-                                {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
-                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={!input.trim() || Boolean(pending) || !selected || locked} />}
+                            footer={(_, {components: {SendButton, LoadingButton, SpeechButton}}) => <div className="chat-composer-toolbar">
+                                <Tooltip title={canReadImages
+                                    ? '添加图片或文件：最多 5 个附件；PNG/JPEG/WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。'
+                                    : '添加文本文件：最多 5 个，每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。'}>
+                                    <Button type="text" aria-label={canReadImages ? '添加图片或文件' : '添加文件'} icon={<PaperClipOutlined />} loading={readingFiles}
+                                        disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()} />
+                                </Tooltip>
+                                {models.find(model => model.value === selected)?.tools && <small className="chat-skill-status chat-muted">博客技能已启动</small>}
+                                <div className="chat-composer-actions">
+                                    <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
+                                        onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); assignDraftSession(created)}
+                                            const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
+                                    <Tooltip title="语音输入（需浏览器支持并允许麦克风权限）">
+                                        <SpeechButton aria-label="语音输入" disabled={locked || pending ? true : undefined} />
+                                    </Tooltip>
+                                    {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
+                                        <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={(!input.trim() && !attachments.length) || Boolean(pending) || !selected || locked || (needsVision && !canReadImages)} />}
+                                </div>
                             </div>} />}
                     </Suggestion>
                     {!inConversation && <Prompts className="chat-suggestions" wrap

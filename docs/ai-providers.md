@@ -376,3 +376,11 @@ require a package version change; merging this implementation alone does not pub
 it. The provider PR already bumps minor versions, and merging it to `main` triggers
 automatic npm publication. Runtime feature detection avoids claiming support for
 an unreleased core version. This change does not publish or merge either repository.
+
+### Image understanding (vision)
+
+`vision` is an additional capability of a text model; `image` remains image generation/editing. A vision adapter must preserve every user message's `images?: Array<{mimeType, data}>` and translate those base64 inputs to its native image blocks. Do not flatten images into text, fetch arbitrary URLs, or advertise vision for an unverified custom model ID.
+
+Core validates static PNG/JPEG/WebP inputs, fully decodes/re-encodes them using sharp, strips metadata, enforces 2 MiB/4096 px per image and 12 images/8 MiB per request, and rejects image inputs on models without `vision`. `context.vision.inputs(message)` returns the checked `{mimeType, data}` pairs for conversion; new adapters should fail before network I/O if image messages are present but this helper is absent on an old core. Only user messages may carry images. Legacy string `content` remains unchanged, including tool-call state and streaming.
+
+Image input calls automatically suppress audit request/response content and HTTP body copies while retaining usage and status metadata. See [chat attachment limits and privacy](chat-attachments.md) for the UI/storage contract.
