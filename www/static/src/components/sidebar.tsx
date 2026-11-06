@@ -161,13 +161,13 @@ function SideBar(_props: any) {
             <div className="sidebar-scroll">
                 <div className="mod"><div className="mod-logo"><h1>
                     <a href="/" aria-label={window.SysConfig.options.title}>
-                        <img src={window.SysConfig.options.logo_url || DEFAULT_LOGO} alt=""
+                        <img hidden={!collapsed} src={window.SysConfig.options.logo_url || DEFAULT_LOGO} alt=""
                             onError={event => {
                                 if (event.currentTarget.getAttribute('src') !== DEFAULT_LOGO) {
                                     event.currentTarget.src = DEFAULT_LOGO;
                                 }
                             }} />
-                        <span className="sidebar-site-title">{window.SysConfig.options.title}</span>
+                        <span hidden={collapsed} className="sidebar-site-title">{window.SysConfig.options.title}</span>
                     </a>
                 </h1></div></div>
                 <ul className="mod-bar" id="sidebar-menu">

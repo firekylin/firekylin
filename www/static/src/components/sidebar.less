@@ -7,15 +7,18 @@
 
   .sidebar-scroll { flex: 1; min-height: 0; overflow: auto; }
   .mod-logo {
-    height: auto;
-    padding: 16px 8px;
-    h1 { float: none; padding: 0; width: 100%; font-size: 18px; line-height: 24px; }
-    a { display: flex; flex-direction: column; align-items: center; color: #fff; }
-    img { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; }
+    box-sizing: border-box;
+    height: 55px;
+    padding: 10px 10px 10px 25px;
+    transition: height 200ms ease, padding 200ms ease;
+    h1 { float: none; padding-left: 10px; width: 100%; font-size: 22px; line-height: 40px; }
+    a { display: block; color: #fff; }
+    img { width: 48px; height: 48px; object-fit: cover; object-position: center; border-radius: 50%; }
+    [hidden] { display: none; }
     .sidebar-site-title {
       display: block;
       max-width: 100%;
-      margin-top: 8px;
+
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -46,7 +49,12 @@
   }
   &.is-collapsed {
     width: 64px;
-    .mod-logo .sidebar-site-title { display: none; }
+    .mod-logo {
+      height: 64px;
+      padding: 8px;
+      h1 { padding: 0; line-height: 48px; }
+      .sidebar-site-title { display: none; }
+    }
     ul { width: 64px; }
     .mod-bar > li > a { padding-left: 0; justify-content: center; border-left: 0; border-right: 0; }
     .sidebar-label { opacity: 0; position: absolute; pointer-events: none; }

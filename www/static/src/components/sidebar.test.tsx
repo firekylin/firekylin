@@ -154,7 +154,7 @@ it('keeps long plugin flyouts keyboard accessible and returns Tab to navigation'
 });
 
 
-it('keeps the configured site logo and accessible home link when toggled', () => {
+it('shows only the title expanded and only the logo collapsed, retaining the home link', () => {
     window.SysConfig.options.logo_url = '/uploads/site-logo.png';
     renderSidebar();
     const home = screen.getByRole('link', {name: 'Blog'});
@@ -162,10 +162,16 @@ it('keeps the configured site logo and accessible home link when toggled', () =>
     expect(logo).toHaveAttribute('src', '/uploads/site-logo.png');
     expect(logo).toHaveAttribute('alt', '');
     expect(home).toHaveAttribute('href', '/');
+    expect(logo).not.toBeVisible();
+    expect(home.querySelector('.sidebar-site-title')).toBeVisible();
     fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
     expect(screen.getByRole('link', {name: 'Blog'})).toContainElement(logo);
+    expect(logo).toBeVisible();
+    expect(home.querySelector('.sidebar-site-title')).not.toBeVisible();
     fireEvent.click(screen.getByRole('button', {name: '展开侧边栏'}));
     expect(home.querySelector('.sidebar-site-title')).toHaveTextContent('Blog');
+    expect(home.querySelector('.sidebar-site-title')).toBeVisible();
+    expect(logo).not.toBeVisible();
 });
 
 it('uses the bundled logo if no site logo is configured or loading fails', () => {
