@@ -59,3 +59,14 @@ const referenceImages: Firekylin.AIImage[] = imageContext.images.inputs({images:
 const rawStream: Firekylin.AIStreamResult = imageContext.streamResponse(new Response(''), 'chat-completions');
 // @ts-expect-error only declared native streaming protocols are supported
 imageContext.streamResponse(new Response(''), 'unknown');
+
+const customStream: Firekylin.AIStreamResult = imageContext.streamResponse(new Response(''), {
+  format: 'sse', parse(data) {return {text: data, done: true, usage: {tokens: 1}, resultUsage: {total_tokens: 1}};},
+  end() {return {done: true};}
+});
+const customParserSupport: true = imageContext.streamResponse.supportsCustomParser;
+imageContext.streamResponse(new Response(''));
+// @ts-expect-error protocol-specific names belong to plugins, not core
+imageContext.streamResponse(new Response(''), 'anthropic');
+// @ts-expect-error async parsers do not own the stream lifecycle
+imageContext.streamResponse(new Response(''), {format: 'sse', parse: async () => ({done: true})});

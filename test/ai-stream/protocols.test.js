@@ -1,2 +1,2 @@
 'use strict';
-for (const id of ['kimi', 'anthropic', 'google-gemini', 'ollama']) require('../helpers/ai-stream')(id);
+for (const id of ['kimi', 'ollama']) require('../helpers/ai-stream')(id);

@@ -169,10 +169,37 @@ declare namespace Firekylin {
   }
   interface AIChatTool {name: string; description: string; inputSchema: Record<string, unknown>}
   interface AIChatResult {text: string; toolCalls?: AIChatToolCall[]; providerData?: Record<string, unknown>; usage?: unknown}
-  type AIStreamProtocol = 'chat-completions' | 'responses' | 'anthropic' | 'gemini' | 'ollama';
+  type AIStreamProtocol = 'chat-completions' | 'responses' | 'ollama';
+  interface AIStreamEvent {
+    text?: string;
+    /** Native cumulative counters for the provider's usage adapter. */
+    usage?: unknown;
+    /** Optional legacy result shape; defaults to usage. */
+    resultUsage?: unknown;
+    toolCalls?: AIChatToolCall[];
+    providerData?: Record<string, unknown>;
+    /** Mark protocol completion; keep reading trailing usage frames until EOF. */
+    done?: boolean;
+    /** Stop reading immediately; requires done. */
+    stop?: boolean;
+    /** A safe error message, never an upstream error body. Usage is recorded first. */
+    error?: string;
+  }
+  interface AIStreamParser {
+    format: 'sse' | 'ndjson';
+    /** One decoded data record; create a fresh parser for each request. No I/O. */
+    parse(data: string): AIStreamEvent | undefined | null;
+    /** Runs on clean EOF/explicit stop, never on transport or parsing failures. */
+    end?(): AIStreamEvent | undefined | null;
+  }
+  interface AIStreamResponseFactory {
+    (response: Response, protocolOrParser?: AIStreamProtocol | AIStreamParser): AIStreamResult;
+    readonly supportsCustomParser: true;
+  }
   interface AIStreamResult {
     stream: Response;
-    protocol: AIStreamProtocol;
+    protocol: AIStreamProtocol | 'custom';
+    parser?: AIStreamParser;
     provider?: string;
     model?: string;
   }
@@ -180,7 +207,7 @@ declare namespace Firekylin {
     /** Core-owned image validation and conversion for native provider adapters. */
     images: AIImageHelpers;
     /** Return this descriptor to let core consume the raw provider response. */
-    streamResponse(response: Response, protocol: AIStreamProtocol): AIStreamResult;
+    streamResponse: AIStreamResponseFactory;
     signal?: AbortSignal;
     /** Optional chat text deltas; return the complete text in the final result as well. */
     onText?(delta: string): void;

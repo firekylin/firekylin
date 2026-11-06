@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 
 module.exports = function streamTests(id) {
   const {consumeStream, streamResponse} = require('../../src/ai/stream');
-  const protocol = {'google-gemini': 'gemini', anthropic: 'anthropic', ollama: 'ollama'}[id] || 'chat-completions';
+  const protocol = id === 'ollama' ? 'ollama' : 'chat-completions';
   const generate = async options => {
     const response = await options.fetchImpl('test:streamGenerateContent?alt=sse', {
       signal: options.signal, body: JSON.stringify({stream: true, stream_options: {include_usage: true}})});
@@ -12,27 +12,10 @@ module.exports = function streamTests(id) {
     return consumeStream({...streamResponse(response, protocol), provider: id, model: options.request.model}, options);
   };
   const ndjson = id === 'ollama';
-  const native = ['anthropic', 'google-gemini', 'ollama'].includes(id);
+  const native = ndjson;
   const usage = {prompt_tokens: 3, completion_tokens: 2, total_tokens: 5};
   let events, expectedUsage = usage;
-  if (id === 'anthropic') {
-    expectedUsage = {input_tokens: 3, output_tokens: 2, cache_read_input_tokens: 1};
-    events = [
-      {type: 'message_start', message: {usage: {...expectedUsage, output_tokens: 0}}},
-      {type: 'ping'},
-      {type: 'content_block_start', content_block: {type: 'text', text: ''}},
-      {type: 'content_block_delta', delta: {type: 'thinking_delta', thinking: 'hidden'}},
-      {type: 'content_block_delta', delta: {type: 'text_delta', text: '你'}},
-      {type: 'content_block_delta', delta: {type: 'text_delta', text: '好'}},
-      {type: 'message_delta', usage: {output_tokens: 2}}, {type: 'message_stop'}
-    ];
-  } else if (id === 'google-gemini') {
-    events = [
-      {candidates: [{index: 0, content: {parts: [{text: 'hidden', thought: true}, {text: '你'}]}}]},
-      {candidates: [{index: 0, content: {parts: [{text: '好'}]}, finishReason: 'STOP'}]},
-      {usageMetadata: {promptTokenCount: 3, candidatesTokenCount: 2, totalTokenCount: 5}}
-    ];
-  } else if (ndjson) {
+  if (ndjson) {
     events = [{message: {thinking: 'hidden', content: '你'}, done: false},
       {message: {content: '好'}, done: false},
       {message: {content: ''}, done: true, prompt_eval_count: 3, eval_count: 2}];
@@ -65,8 +48,7 @@ module.exports = function streamTests(id) {
       fetchImpl: async(url, init) => {
         assert.equal(init.signal, controller.signal);
         const body = JSON.parse(init.body);
-        if (id === 'google-gemini') assert.match(url, /:streamGenerateContent\?alt=sse$/);
-        else assert.equal(body.stream, true);
+        assert.equal(body.stream, true);
         if (!native) assert.deepEqual(body.stream_options, {include_usage: true});
         const result = response(wire(events), true), source = result.body;
         result.body = (async function*() {
@@ -79,12 +61,11 @@ module.exports = function streamTests(id) {
     assert.equal(result.text, '你好');
     assert.deepEqual(result.usage, expectedUsage);
     assert.ok(reports.length >= 2);
-    if (id === 'google-gemini') assert.equal(reports.at(-1).totalTokenCount, 5);
-    else if (ndjson) assert.equal(reports.at(-1).eval_count, 2);
+    if (ndjson) assert.equal(reports.at(-1).eval_count, 2);
     else assert.deepEqual(reports.at(-1), expectedUsage);
   });
   test(`${id}: rejects truncated streams even after partial text or a chat finish_reason`, async() => {
-    const partial = id === 'google-gemini' ? events.slice(0, 1) : events.slice(0, -1);
+    const partial = events.slice(0, -1);
     await assert.rejects(generate(options({fetchImpl: async() => response(wire(partial))})), /interrupted/i);
   });
   test(`${id}: rejects provider error events without exposing their payload`, async() => {
@@ -115,7 +96,7 @@ module.exports = function streamTests(id) {
     assert.equal(closed, true);
   });
   test(`${id}: rejects empty output and excessive text`, async() => {
-    const terminal = id === 'google-gemini' ? {candidates: [{finishReason: 'STOP'}]} : events.at(-1);
+    const terminal = events.at(-1);
     await assert.rejects(generate(options({fetchImpl: async() => response(wire([terminal]))})), /no text output/);
     const large = wire(events).replace('你', 'x'.repeat(200001));
     await assert.rejects(generate(options({fetchImpl: async() => response(large)})), /too large/);
@@ -124,16 +105,12 @@ module.exports = function streamTests(id) {
   test(`${id}: retains native usage when the stream errors or is incomplete`, async() => {
     const reports = [];
     let incomplete = structuredClone(events);
-    if (id === 'anthropic') incomplete.at(-2).delta = {stop_reason: 'max_tokens'};
-    else if (id === 'google-gemini') incomplete[1].candidates[0].finishReason = 'MAX_TOKENS';
-    else if (ndjson) incomplete.at(-1).done_reason = 'length';
+    if (ndjson) incomplete.at(-1).done_reason = 'length';
     else incomplete[2].choices[0].finish_reason = 'length';
     await assert.rejects(generate(options({reportUsage: raw => reports.push(raw),
       fetchImpl: async() => response(wire(incomplete))})), /incomplete/);
     assert.ok(reports.at(-1));
-    const usageEvent = id === 'anthropic' ? events.at(-2) : ndjson ? events.at(-1) : events.at(-2);
-    // Gemini's usage-only frame follows its finish frame.
-    const first = id === 'google-gemini' ? events.at(-1) : usageEvent;
+    const first = ndjson ? events.at(-1) : events.at(-2);
     await assert.rejects(generate(options({reportUsage: raw => reports.push(raw),
       fetchImpl: async() => response(wire([{...first, ...(ndjson ? {done: false} : {})},
         {error: {message: 'provider failed'}}]))})), /stream failed/);

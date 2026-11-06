@@ -297,14 +297,58 @@ async generate(request, {signal, onText, streamResponse}) {
 }
 ```
 
-Supported protocols: `chat-completions` (SSE), `responses` (OpenAI SSE), `anthropic`
-(Messages SSE), `gemini` (`streamGenerateContent?alt=sse`), and `ollama` (NDJSON).
-Core handles UTF-8 and event boundaries, limits, termination, incomplete responses,
-and native usage reporting even on failure. Chat Completions and Responses also
-assemble Firekylin tool calls; Responses preserves encrypted reasoning continuation.
-The response and headers never become part of the public generation result.
+Built-in protocols: `chat-completions` (the default when omitted), `responses`
+(OpenAI SSE), and `ollama` (NDJSON). Chat Completions and Responses assemble
+Firekylin tool calls; Responses preserves encrypted reasoning continuation.
 
-Existing providers returning ordinary results or invoking `onText` continue to work.
-Providers returning raw streams require a core with `streamResponse`; feature-detect
-it before sending a streaming request. Non-streaming and image paths are unchanged.
-Install the core change before enabling the corresponding provider updates.
+For other protocols, return `streamResponse(response, parser)`. Anthropic and Gemini
+ship their own event adapters in their plugin packages, including native usage and
+legacy result normalization. Core knows nothing about those providers' event schemas.
+
+```js
+if (!streamResponse?.supportsCustomParser) throw new Error('Streaming requires updated Firekylin core');
+// Create a new stateful adapter for every request. Only core reads the response body.
+return streamResponse(response, {
+  format: 'sse', // or 'ndjson'
+  parse(data) {
+    const event = JSON.parse(data);
+    return {text: event.delta, usage: event.usage, done: event.finished};
+  },
+  end() { /* optional clean-EOF/explicit-stop validation; may return an event */ }
+});
+```
+
+`parse` is synchronous and receives a decoded SSE data payload or NDJSON record.
+It returns a normalized `AIStreamEvent` or nothing for ignored frames. Fields:
+
+- `text`: text delta; core accumulates it and invokes `onText`.
+- `usage`: native cumulative counters, reported through the provider's usage adapter
+  immediately, even when the same event has an error. Never sum cumulative updates.
+- `resultUsage`: optional legacy result shape, independent of native audit counters;
+  otherwise the most recent `usage` becomes the result usage.
+- `toolCalls`: complete normalized calls appended to the result; `providerData`:
+  opaque continuation state replacing the previous state. Core bounds both.
+- `done`: protocol completion observed. Continue reading until EOF, allowing later
+  usage-only frames. `stop` also ends reading immediately and requires completion.
+- `error`: a safe failure message. Return it with usage rather than throwing before
+  core can report counters. Do not copy upstream error bodies.
+
+`end` runs on clean EOF or explicit stop, never after transport/parse/callback errors.
+It may validate deferred finish reasons or return final counters. EOF without `done`
+is truncation. Core owns UTF-8/CRLF decoding, frame/text/tool/state limits, callbacks,
+reader cleanup, cancellation and timeout for default and custom parsers alike.
+The response, parser and headers never become part of the public generation result.
+
+Existing ordinary-result and callback providers continue to work. Feature-detect
+`streamResponse` (built-ins) or `streamResponse.supportsCustomParser` (custom adapters)
+before a streaming network request; older cores receive an explicit upgrade error.
+Non-streaming and image paths are unchanged.
+
+### Release order
+
+First merge and **publish a new core version** containing this API, then verify its
+published package/release, then merge the provider PR. Core npm/release workflows
+require a package version change; merging this implementation alone does not publish
+it. The provider PR already bumps minor versions, and merging it to `main` triggers
+automatic npm publication. Runtime feature detection avoids claiming support for
+an unreleased core version. This change does not publish or merge either repository.
