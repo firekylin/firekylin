@@ -273,7 +273,7 @@ it('sends actual image bytes, restores previews on refresh and removes draft ima
 
 it('places upload and model actions inside Sender and disables unsupported speech', async() => {
     render(<MemoryRouter><Chat /></MemoryRouter>);
-    const upload = await screen.findByRole('button', {name: '添加图片或文件'});
+    const upload = await screen.findByRole('button', {name: '添加文件'});
     const sender = upload.closest('.chat-composer')!;
     expect(sender).toContainElement(screen.getByLabelText('聊天消息'));
     expect(sender).toContainElement(screen.getByLabelText('聊天模型'));
@@ -321,13 +321,14 @@ it('pastes clipboard images as draft attachments and sends actual bytes', async(
         expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);
     } finally {provider.models[0].capabilities = ['text', 'tools']}
 });
-it('preserves text paste and applies model and size checks to clipboard images', async() => {
+it('preserves text paste and disables image selection and paste for text models', async() => {
     render(<MemoryRouter><Chat /></MemoryRouter>);
     const input = await screen.findByLabelText('聊天消息');
     expect(fireEvent.paste(input, {clipboardData: {files: [], getData: () => '普通文字'}})).toBe(true);
     const file = new File(['image'], 'clipboard.png', {type: 'image/png'});
     expect(fireEvent.paste(input, {clipboardData: {files: [], items: [{kind: 'file', getAsFile: () => file}], getData: () => '图片说明'}})).toBe(true);
-    expect(await screen.findByText(/当前模型不支持图片/)).toBeInTheDocument();
+    expect(screen.getByLabelText('选择聊天附件')).not.toHaveAttribute('accept', expect.stringContaining('.png'));
+    expect(screen.queryByText(/当前模型不支持图片/)).not.toBeInTheDocument();
     expect(screen.queryByLabelText('预览图片 clipboard.png')).not.toBeInTheDocument();
 });
 it('rejects oversized pasted images without replacing existing attachments', async() => {
@@ -342,4 +343,28 @@ it('rejects oversized pasted images without replacing existing attachments', asy
         expect(screen.getByLabelText('移除附件 notes.txt')).toBeInTheDocument();
         expect(screen.queryByLabelText('预览图片 big.png')).not.toBeInTheDocument();
     } finally {provider.models[0].capabilities = ['text', 'tools']}
+});
+
+it('hides capability annotations and prevents selecting text models while draft images exist', async() => {
+    provider.models[0].capabilities.push('vision');
+    provider.models.push({id: 'text-only', label: '文本模型', selected: false, capabilities: ['text']});
+    try {
+        render(<MemoryRouter><Chat /></MemoryRouter>);
+        const picker = await screen.findByLabelText('选择聊天附件');
+        expect(picker).toHaveAttribute('accept', expect.stringContaining('.png'));
+        expect(screen.queryByText(/可读图片/)).not.toBeInTheDocument();
+        const png = 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAE0lEQVQImWP4z8DwnwGM/zMwAAAf7gP9qS/A4gAAAABJRU5ErkJggg==';
+        fireEvent.change(picker, {target: {files: [new File([Uint8Array.from(atob(png), c => c.charCodeAt(0))], 'red.png', {type: 'image/png'})]}});
+        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+        fireEvent.mouseDown(screen.getByLabelText('聊天模型'));
+        const option = await screen.findByText('测试服务商 / 文本模型');
+        expect(option.closest('.ant-select-item-option')).toHaveClass('ant-select-item-option-disabled');
+        fireEvent.click(option);
+        expect(requests.some(row => row.body?.operation === 'select')).toBe(false);
+        fireEvent.click(screen.getByLabelText('移除附件 red.png'));
+        await waitFor(() => expect(option.closest('.ant-select-item-option')).not.toHaveClass('ant-select-item-option-disabled'));
+    } finally {
+        provider.models.pop();
+        provider.models[0].capabilities = ['text', 'tools'];
+    }
 });

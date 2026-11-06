@@ -9,7 +9,7 @@ import {PaperClipOutlined, ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, Edi
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
-import {DraftAttachments, ChatAttachment, readChatFiles, attachmentAccept} from './chat-attachments';
+import {DraftAttachments, ChatAttachment, readChatFiles, attachmentAccept, textAttachmentAccept} from './chat-attachments';
 import {http} from '../../utils/http';
 import {openArticlePreview} from '../../components/article/preview';
 const ChatInput = React.forwardRef<any, any>((props, ref) => <Input.TextArea {...props} ref={ref} aria-label="聊天消息" />);
@@ -100,7 +100,7 @@ function Chat({children, onConversationChange}: {
     const needsVision = attachments.some(file => file.kind === 'image') || store.messages.some(entry => entry.attachments?.some((file: any) => file.kind === 'image'));
     const models = store.providers.filter(provider => provider.configured !== false).flatMap(provider =>
         provider.models.filter((model: any) => model.capabilities.includes('text')).map((model: any) => ({
-            value: JSON.stringify([provider.id, model.id]), label: `${provider.label} / ${model.label || model.id}${model.capabilities.includes('vision') ? ' · 可读图片' : ''}`,
+            value: JSON.stringify([provider.id, model.id]), label: `${provider.label} / ${model.label || model.id}`,
             selected: model.selected, tools: model.capabilities.includes('tools'), vision: model.capabilities.includes('vision'),
             disabled: needsVision && !model.capabilities.includes('vision')
         })));
@@ -134,7 +134,7 @@ function Chat({children, onConversationChange}: {
     };
     const send = async(content = input) => {
         if ((!content.trim() && !attachments.length) || locked || pending || !selected) return;
-        if (needsVision && !canReadImages) throw new Error('请先选择标记为“可读图片”的模型');
+        if (needsVision && !canReadImages) throw new Error('请先选择支持视觉能力的模型');
         setStarted(true);
         store.setPendingMessage({id: crypto.randomUUID(), role: 'user', content: content.trim(), attachments});
         setInput('');
@@ -248,7 +248,7 @@ function Chat({children, onConversationChange}: {
             <footer className="chat-composer-area">
                 {store.error && <Alert type="warning" title={store.error} closable onClose={() => {store.error = ''}} />}
                 {!models.length ? <div className="chat-connect"><h3>连接你的 AI 服务商</h3><p>配置完成后，即可开始聊天和管理博客。</p><Link to="/options/ai">前往 AI 连接设置 →</Link></div> : <>
-                    <input ref={fileInput} type="file" multiple accept={attachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
+                    <input ref={fileInput} type="file" multiple accept={canReadImages ? attachmentAccept : textAttachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
                         onChange={event => {
                             const files = Array.from(event.target.files || []); event.target.value = '';
                             safe(addFiles(files));
@@ -264,11 +264,13 @@ function Chat({children, onConversationChange}: {
                             loading={sending || store.busy || Boolean(store.session?.active_run)}
                             onChange={value => {setInput(value); onTrigger(value === '/' ? {} : false)}}
                             onKeyDown={event => {onKeyDown(event); if (open && event.key === 'Enter') return false; return undefined}}
-                            onPaste={pasteImages}
+                            onPaste={canReadImages ? pasteImages : undefined}
                             onSubmit={() => safe(send())} onCancel={() => safe(store.stop())} suffix={false}
                             footer={(_, {components: {SendButton, LoadingButton, SpeechButton}}) => <div className="chat-composer-toolbar">
-                                <Tooltip title="添加图片或文件：最多 5 个附件；PNG/JPEG/WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。">
-                                    <Button type="text" aria-label="添加图片或文件" icon={<PaperClipOutlined />} loading={readingFiles}
+                                <Tooltip title={canReadImages
+                                    ? '添加图片或文件：最多 5 个附件；PNG/JPEG/WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。'
+                                    : '添加文本文件：最多 5 个，每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。'}>
+                                    <Button type="text" aria-label={canReadImages ? '添加图片或文件' : '添加文件'} icon={<PaperClipOutlined />} loading={readingFiles}
                                         disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()} />
                                 </Tooltip>
                                 {models.find(model => model.value === selected)?.tools && <small className="chat-skill-status chat-muted">博客技能已启动</small>}

@@ -4,13 +4,14 @@ import {CloseOutlined, FileOutlined} from '@ant-design/icons';
 export type ChatAttachment = {name: string; size: number} & (
     {kind?: 'text'; content: string} | {kind: 'image'; mimeType: string; data: string; width?: number; height?: number}
 );
-export const attachmentAccept = '.png,.jpg,.jpeg,.webp,.txt,.md,.markdown,.csv,.json,.log';
+export const textAttachmentAccept = '.txt,.md,.markdown,.csv,.json,.log';
+export const attachmentAccept = `.png,.jpg,.jpeg,.webp,${textAttachmentAccept}`;
 export async function readChatFiles(files: File[], existing: ChatAttachment[], allowImages = false): Promise<ChatAttachment[]> {
     if (existing.length + files.length > 5) throw new Error('每条消息最多添加 5 个附件');
     const result = [...existing];
     for (const file of files) {
         const isImage = /\.(png|jpe?g|webp)$/i.test(file.name);
-        if (isImage && !allowImages) throw new Error('当前模型不支持图片理解，请先选择标记为“可读图片”的模型');
+        if (isImage && !allowImages) throw new Error('当前模型不支持图片理解，请切换至支持视觉能力的模型');
         if (!/\.(png|jpe?g|webp|txt|md|markdown|csv|json|log)$/i.test(file.name) || /[\\/\x00-\x1f\x7f]/.test(file.name) || file.name.length > 120) {
             throw new Error('仅支持 PNG、JPEG、WebP 图片及 TXT、Markdown、CSV、JSON、LOG 文本文件');
         }
