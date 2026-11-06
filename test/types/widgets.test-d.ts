@@ -55,3 +55,7 @@ declare const imageContext: Firekylin.AIProviderContext;
 const validatedImage: Firekylin.AIImage = imageContext.images.image({mimeType: 'image/png', data: 'YWJj'});
 const imageDataUri: string = imageContext.images.uri(validatedImage);
 const referenceImages: Firekylin.AIImage[] = imageContext.images.inputs({images: [validatedImage]}, 1);
+
+const rawStream: Firekylin.AIStreamResult = imageContext.streamResponse(new Response(''), 'chat-completions');
+// @ts-expect-error only declared native streaming protocols are supported
+imageContext.streamResponse(new Response(''), 'unknown');

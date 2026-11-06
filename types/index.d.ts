@@ -169,9 +169,18 @@ declare namespace Firekylin {
   }
   interface AIChatTool {name: string; description: string; inputSchema: Record<string, unknown>}
   interface AIChatResult {text: string; toolCalls?: AIChatToolCall[]; providerData?: Record<string, unknown>; usage?: unknown}
+  type AIStreamProtocol = 'chat-completions' | 'responses' | 'anthropic' | 'gemini' | 'ollama';
+  interface AIStreamResult {
+    stream: Response;
+    protocol: AIStreamProtocol;
+    provider?: string;
+    model?: string;
+  }
   interface AIProviderContext {
     /** Core-owned image validation and conversion for native provider adapters. */
     images: AIImageHelpers;
+    /** Return this descriptor to let core consume the raw provider response. */
+    streamResponse(response: Response, protocol: AIStreamProtocol): AIStreamResult;
     signal?: AbortSignal;
     /** Optional chat text deltas; return the complete text in the final result as well. */
     onText?(delta: string): void;

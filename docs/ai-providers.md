@@ -274,3 +274,37 @@ Confirmation expires after 15 minutes, checks the current role and object finger
 claims the stored operation. Clients submit only the action ID and decision, never replacement arguments.
 Each conversation has one active run, at most eight model turns and a two-minute overall generation budget;
 each individual AI call retains the shared client's timeout. A stop cannot undo a mutation already committed.
+
+
+## Core-owned streaming
+
+For text streaming, providers send their native streaming request and return the raw
+HTTP response using `context.streamResponse(response, protocol)`. Core consumes the
+response inside the same timeout, cancellation and audit scope as generation. It
+invokes `onText(delta)` and returns the assembled text, usage and supported tool calls.
+Providers must not read the body or invoke the callback themselves on this path.
+
+```js
+async generate(request, {signal, onText, streamResponse}) {
+  if (onText && !streamResponse) throw new Error('Streaming requires updated Firekylin core');
+  const response = await fetch(endpoint, {
+    method: 'POST', signal, headers,
+    body: JSON.stringify({...nativeRequest(request), stream: Boolean(onText)})
+  });
+  if (!response.ok) throw new Error(`Provider request failed (HTTP ${response.status})`);
+  if (onText) return {...streamResponse(response, 'chat-completions'), provider: 'example', model: request.model};
+  return normalize(await response.json());
+}
+```
+
+Supported protocols: `chat-completions` (SSE), `responses` (OpenAI SSE), `anthropic`
+(Messages SSE), `gemini` (`streamGenerateContent?alt=sse`), and `ollama` (NDJSON).
+Core handles UTF-8 and event boundaries, limits, termination, incomplete responses,
+and native usage reporting even on failure. Chat Completions and Responses also
+assemble Firekylin tool calls; Responses preserves encrypted reasoning continuation.
+The response and headers never become part of the public generation result.
+
+Existing providers returning ordinary results or invoking `onText` continue to work.
+Providers returning raw streams require a core with `streamResponse`; feature-detect
+it before sending a streaming request. Non-streaming and image paths are unchanged.
+Install the core change before enabling the corresponding provider updates.
