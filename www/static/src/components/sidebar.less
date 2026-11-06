@@ -1,0 +1,56 @@
+.fk-side {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+
+  .sidebar-scroll { flex: 1; min-height: 0; overflow: auto; }
+  .mod-bar { margin: 10px 0 0; }
+  .sidebar-children[hidden] { display: none; }
+  a:focus-visible, button:focus-visible { outline: 2px solid #91caff; outline-offset: -3px; }
+  .sidebar-footer {
+    flex-shrink: 0;
+    border-top: 1px solid #434343;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #323232;
+    button {
+      display: block;
+      width: 100%;
+      height: 44px;
+      border: 0;
+      color: #ccc;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+      &:hover { color: #fff; background: #3f3f3f; }
+    }
+  }
+  &.is-collapsed {
+    width: 64px;
+    .mod-logo { display: none; }
+    ul { width: 64px; }
+    .mod-bar > li > a { padding-left: 0; text-align: center; }
+    .sidebar-label { display: none; }
+    + .content { margin-left: 64px; }
+  }
+}
+.sidebar-popover {
+  max-width: calc(100vw - 80px);
+  .ant-popover-container { padding: 0; overflow: hidden; }
+  .ant-popover-content { max-height: calc(100dvh - 24px); overflow: auto; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  a {
+    display: block;
+    padding: 12px 20px;
+    min-width: 160px;
+    color: #444;
+    overflow-wrap: anywhere;
+    &:hover, &:focus-visible { background: #f0f5ff; }
+    &.active { color: #1677ff; background: #e6f4ff; }
+  }
+  .sidebar-popup-title { font-weight: 600; border-bottom: 1px solid #eee; }
+}
+@media (max-width: 767px) {
+  .fk-side:not(.is-collapsed) { width: min(235px, 100vw); box-shadow: 4px 0 12px #0003; }
+  .fk-side + .content { margin-left: 64px; }
+}
