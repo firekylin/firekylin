@@ -44,10 +44,14 @@ export class ChatStore {
         }
     }
     async create() { const session = await chatApi({operation: 'create'}); await this.list(); return session.id }
-    async mutate(operation: string, values: any = {}) {
-        await chatApi({operation, session: this.session.id, ...values});
-        await Promise.all([this.list(), this.open(this.session.id)]);
+    async manage(id: string, operation: string, values: any = {}) {
+        await chatApi({operation, session: id, ...values});
+        if (this.session?.id === id && operation === 'delete') {
+            runInAction(() => { this.session = null; this.messages = []; this.actions = [] });
+        } else if (this.session?.id === id) await this.open(id);
+        await this.list();
     }
+    async mutate(operation: string, values: any = {}) { return this.manage(this.session.id, operation, values) }
     async stop() {
         if (!this.session) return;
         await chatApi({operation: 'stop', session: this.session.id});
@@ -83,7 +87,22 @@ export class ChatStore {
                     runInAction(() => {
                         if (event === 'delta') this.streaming += data;
                         if (event === 'status') this.status = data;
-                        if (event === 'message') { this.messages.push(data); this.streaming = '' }
+                        if (event === 'action') {
+                            const index = this.actions.findIndex(action => action.id === data.id);
+                            if (index === -1) this.actions.push(data); else this.actions[index] = data;
+                        }
+                        if (event === 'message') {
+                            this.messages.push(data); this.streaming = '';
+                            if (data.role === 'tool') {
+                                const action = this.actions.find(item => item.payload.callId === data.toolCallId);
+                                if (action) {
+                                    try {
+                                        const result = JSON.parse(data.content);
+                                        action.status = result.error ? 'failed' : result.cancelled ? 'cancelled' : 'completed';
+                                    } catch { /* Final persistence refresh remains authoritative. */ }
+                                }
+                            }
+                        }
                         if (event === 'error') this.error = data;
                         if (event === 'done') completed = true;
                     });

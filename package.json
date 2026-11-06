@@ -23,7 +23,7 @@
     "test:auth": "node --test test/service/admin-auth.test.js test/service/hugo-import.test.js test/plugin/jwt-route.test.js",
     "test:plugin": "node --test test/plugin/*.test.js",
     "test:cli": "node --test test/cli/*.test.js",
-    "test:chat": "node --test test/service/chat.test.js test/controller/chat.test.js && vitest run --config vitest.config.ts www/static/src/routes/dashboard/chat.test.tsx www/static/src/routes/dashboard/dashboard.test.tsx",
+    "test:chat": "node --test test/service/chat.test.js test/controller/chat.test.js && vitest run --config vitest.config.ts www/static/src/routes/dashboard/chat.test.tsx www/static/src/routes/dashboard/dashboard.test.tsx www/static/src/routes/dashboard/chat-content.test.tsx www/static/src/routes/dashboard/chat.store.test.ts",
     "test:types": "tsc -p test/types/tsconfig.json --noEmit",
     "lint": "eslint ./src ./*.js ./www/theme/firekylin --cache",
     "lint-fix": "eslint ./src ./*.js ./www/theme/firekylin --fix",
@@ -93,6 +93,8 @@
   },
   "devDependencies": {
     "@ant-design/icons": "^6.3.4",
+    "@ant-design/x": "^2.10.0",
+    "@ant-design/x-markdown": "^2.10.0",
     "@babel/eslint-parser": "^8.0.7",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^7.0.1",

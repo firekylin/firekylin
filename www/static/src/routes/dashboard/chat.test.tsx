@@ -114,3 +114,32 @@ it('empty session with only a model selection event remains in overview mode', a
     expect(screen.getByText('下方概要')).toBeVisible();
     expect(screen.getByRole('button', {name: '展开会话列表'})).toHaveAttribute('aria-expanded', 'false');
 });
+
+it('recommended prompts fill the Sender without submitting automatically', async() => {
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    await screen.findByLabelText('聊天消息');
+    fireEvent.click(screen.getByText('查找草稿'));
+    expect(screen.getByLabelText('聊天消息')).toHaveValue('查找最近的草稿');
+    expect(requests.filter(row => row.body?.operation === 'send')).toHaveLength(0);
+});
+it('conversation menu can rename a selected conversation', async() => {
+    sessions = [{id: 'one', title: '旧名称', provider: 'test', model: 'model', active_run: '', updated_at: Date.now()}];
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    await screen.findByLabelText('聊天消息');
+    fireEvent.click(screen.getByRole('button', {name: '展开会话列表'}));
+    fireEvent.click(await screen.findByRole('button', {name: '管理会话：旧名称'}));
+    fireEvent.click(await screen.findByText('重命名'));
+    fireEvent.change(await screen.findByLabelText('对话标题'), {target: {value: '新名称'}});
+    fireEvent.click(await screen.findByRole('button', {name: /保\s*存/}));
+    await waitFor(() => expect(requests.some(row => row.body?.operation === 'rename' && row.body?.session === 'one' && row.body?.title === '新名称')).toBe(true));
+});
+it('slash commands use Suggestion and fill the Sender without sending', async() => {
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    await screen.findByLabelText('聊天消息');
+    fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '/'}});
+    await waitFor(() => expect(screen.getAllByText('查找草稿').length).toBeGreaterThan(1));
+    const options = screen.getAllByText('查找草稿');
+    fireEvent.click(options[options.length - 1]);
+    expect(screen.getByLabelText('聊天消息')).toHaveValue('查找最近的草稿');
+    expect(requests.filter(row => row.body?.operation === 'send')).toHaveLength(0);
+});

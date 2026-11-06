@@ -206,7 +206,21 @@ on the divider. Sending the first message switches the entire main area into con
 sections and upgrade notice, and opens history once. Users can then collapse history again without subsequent
 replies reopening it. Opening an existing conversation also uses conversation mode; starting a new conversation
 restores the overview. Non-administrators retain the original overview.
-There is no separate chat page or navigation item; `/admin/overview` redirects to `/admin/dashboard`. Conversations are owned by the current backend
+There is no separate chat page or navigation item; `/admin/overview` redirects to `/admin/dashboard`.
+
+The chat view uses Ant Design X 2.10 (`Bubble`, `Conversations`, `Welcome`, `Prompts`, `Sender`,
+`Suggestion`, `Think`, `ThoughtChain`, `Actions`, `Sources`) and X Markdown. The right history panel is
+flush with the overview edges, with a single divider and an overlaid handle. Width, content opacity
+and handle rotation animate together; reduced-motion preferences disable these transitions. Collapsed
+history is inert and excluded from the accessibility tree.
+
+ThoughtChain displays actual tool-call proposals, confirmations and execution results, not hidden model
+reasoning. Proposals alone are never marked successful. Think shows public generation/execution status.
+Sources link only to blog records returned by tools; no generated source list is invented. Markdown escapes
+raw HTML, prevents remote image loads, and renders fenced code using the lazily loaded CodeHighlighter.
+Completion notifications use X Notification only after the user opts in and grants browser permission;
+they are emitted when the page is hidden and contain generic completion text, never conversation content.
+ Conversations are owned by the current backend
 user, persisted separately from AI audit logs, and cannot be read by other users. Deleting a conversation
 does not delete blog content or existing AI audit records. Startup and web installation create the four
 prefixed `chat_session`, `chat_message`, `chat_run`, and `chat_action` tables.

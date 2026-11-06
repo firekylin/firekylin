@@ -1,22 +1,17 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {observer} from '@admin/utils/mobx-react';
-import {Alert, Button, Drawer, Input, Modal, Select, message as toast} from 'antd';
-import {ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, CaretRightOutlined, CopyOutlined, EditOutlined, DeleteOutlined, StopOutlined} from '@ant-design/icons';
-import MarkdownIt from 'markdown-it';
+import {Alert, Button, Card, Drawer, Empty, Input, Modal, Select, Tag, Tooltip, message as toast} from 'antd';
+import {Conversations, Prompts, Sender, Suggestion, Welcome, XProvider, notification} from '@ant-design/x';
+import zhCN from '@ant-design/x/es/locale/zh_CN';
+import antdZhCN from 'antd/es/locale/zh_CN';
+import {ChatMessage, GenerationStatus, Markdown, commands, toolLabels} from './chat-content';
+import {ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOutlined, StopOutlined, BellOutlined, MessageOutlined, SearchOutlined, LockOutlined, MoreOutlined} from '@ant-design/icons';
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
-const markdown = new MarkdownIt({html: false, linkify: true, breaks: true});
-markdown.renderer.rules.image = (tokens, index) => markdown.utils.escapeHtml(tokens[index].content || '图片');
-function Markdown({text}: {text: string}) {
-    return <div className="chat-markdown" dangerouslySetInnerHTML={{__html: markdown.render(text || '')}} />;
-}
-const toolLabels: Record<string, string> = {
-    'posts.publish': '发布文章', 'posts.delete': '永久删除文章', 'posts.update': '修改文章',
-    'posts.create_draft': '创建草稿', 'posts.update_draft': '修改草稿',
-    'comments.moderate': '处理评论', 'comments.approve': '批准评论', 'comments.update': '修改评论',
-    'comments.create': '发表评论', 'settings.update': '修改站点设置'
-};
+const ChatInput = React.forwardRef<any, any>((props, ref) => <Input.TextArea {...props} ref={ref} aria-label="聊天消息" />);
+const chatLocale = {...antdZhCN, ...zhCN};
+const senderComponents = {input: ChatInput};
 const fieldLabels: Record<string, string> = {
     title: '标题', description: '站点描述', pathname: '文章路径', markdown_content: '正文',
     name: '名称', pid: '父分类', comment: '评论内容', status: '状态', is_public: '可见性',
@@ -47,27 +42,6 @@ function OperationPreview({action}: any) {
         <details><summary>查看操作详情</summary><pre>{JSON.stringify(input, null, 2)}</pre></details>
     </>;
 }
-function Result({entry, preview}: any) {
-    let result: any;
-    try { result = JSON.parse(entry.content) } catch { return null }
-    if (result.error) return <Alert type="error" title={result.error} />;
-    if (result.cancelled) return <span className="chat-muted">操作已取消</span>;
-    const rows = Array.isArray(result) ? result : Array.isArray(result.data) ? result.data : result.post ? [result.post] : result.id ? [result] : [];
-    return <div className="chat-result">
-        <strong>{toolLabels[entry.name] || entry.name} · 已完成</strong>
-        {rows.slice(0, 20).map((row: any, index: number) => <div className="chat-result-row" key={row.id || index}>
-            <div><b>{row.title || row.name || row.nick || `#${row.id}`}</b>
-                {row.status !== undefined && <span className="chat-badge">{({0: '草稿', 1: '待审核', 2: '已拒绝', 3: '已发布', 4: '回收站'} as any)[row.status] || row.status}</span>}
-                {row.comment && <p>{String(row.comment).replace(/<[^>]*>/g, '').slice(0, 160)}</p>}
-            </div>
-            {(row.markdown_content || row.summary) && <Button size="small" onClick={() => preview(row)}>预览</Button>}
-            {row.url?.startsWith('/') && !row.url.startsWith('//') && <a href={row.url} target="_blank" rel="noreferrer">查看文章</a>}
-            {entry.name?.startsWith('posts.') && row.id && entry.name !== 'posts.delete' && <Link to={`/post/edit/${row.id}`}>打开编辑器</Link>}
-        </div>)}
-        {!rows.length && <details><summary>查看结果</summary><pre>{JSON.stringify(result, null, 2)}</pre></details>}
-        {rows.length > 20 && <p>仅展示前 20 条，请在管理页面查看全部结果。</p>}
-    </div>;
-}
 function Chat({children, onConversationChange}: {
     children?: React.ReactNode;
     onConversationChange?: (active: boolean) => void;
@@ -81,10 +55,11 @@ function Chat({children, onConversationChange}: {
     const [started, setStarted] = useState(false);
     const [sending, setSending] = useState(false);
     const [preview, setPreview] = useState<any>(null);
-    const [renaming, setRenaming] = useState(false);
+    const [renaming, setRenaming] = useState('');
+    const [desktopNotices, setDesktopNotices] = useState(false);
+    const previousBusy = useRef(false);
     const [title, setTitle] = useState('');
     const bottom = useRef<HTMLDivElement>(null);
-    const composing = useRef(false);
     const safe = (promise: Promise<any>) => promise.catch(error => toast.error(error.message));
     useEffect(() => { safe(store.list()); }, [store]);
     useEffect(() => { safe(store.open(id)); }, [store, id]);
@@ -129,45 +104,80 @@ function Chat({children, onConversationChange}: {
         setInput('');
         router.history.push('/dashboard');
     };
-    const conversations = <aside className="chat-history-content">
-        <Button block aria-label="新建对话" icon={<PlusOutlined />} disabled={locked} onClick={newChat}>新建对话</Button>
-        <Input.Search aria-label="搜索对话" placeholder="搜索对话" value={search} onChange={event => setSearch(event.target.value)} />
-        <nav aria-label="对话列表">{['今天', '昨天', '更早'].map(group => {
-            const start = new Date(); start.setHours(0, 0, 0, 0);
-            const rows = store.sessions.filter(session => {
-                const days = Math.floor((start.getTime() - Number(session.updated_at)) / 86400000);
-                return (days < 0 ? '今天' : days === 0 ? '昨天' : '更早') === group && session.title.toLowerCase().includes(search.toLowerCase());
-            });
-            return rows.length ? <section key={group}><h4>{group}</h4>{rows.map(session => <button className={session.id === id ? 'selected' : ''}
-                key={session.id} disabled={locked} onClick={() => {router.history.push(`/dashboard/${session.id}`)}}>{session.title}</button>)}</section> : null;
-        })}</nav>
-        <small>对话仅自己可见</small>
-    </aside>;
-    return <section className={`chat-workspace ${inConversation ? 'chat-conversation' : 'chat-home'}`} aria-label="聊天">
+    const rename = (session: any) => { if (!locked) {setTitle(session.title); setRenaming(session.id)} };
+    const remove = (session: any) => {
+        if (locked) return;
+        Modal.confirm({title: `删除「${session.title}」？`,
+            content: '聊天记录将被清除。博客内容不会删除，AI 调用日志仍按原策略保留。',
+            okText: '删除', cancelText: '取消', okButtonProps: {danger: true},
+            onOk: async() => {
+                await store.manage(session.id, 'delete');
+                if (session.id === id) {setStarted(false); router.history.replace('/dashboard')}
+            }});
+    };
+    const enableNotices = async() => {
+        if (desktopNotices) {setDesktopNotices(false); return}
+        if (await notification.requestPermission() === 'granted') setDesktopNotices(true);
+        else toast.info('浏览器未开启通知，执行结果仍会保留在对话中');
+    };
+    useEffect(() => {
+        if (previousBusy.current && !store.busy && desktopNotices && document.hidden && notification.permission === 'granted') {
+            try { notification.open({title: 'Firekylin 任务已结束', body: '请返回后台查看回复或待确认操作。',
+                tag: `firekylin-chat-${store.session?.id}`, duration: 8}) } catch { /* In-page results remain available. */ }
+        }
+        previousBusy.current = store.busy;
+    }, [store.busy, desktopNotices, store]);
+    const historyItems = store.sessions.filter(session => session.title.toLowerCase().includes(search.toLowerCase())).map(session => {
+        const start = new Date(); start.setHours(0, 0, 0, 0);
+        const days = Math.floor((start.getTime() - Number(session.updated_at)) / 86400000);
+        return {key: session.id, group: days < 0 ? '今天' : days === 0 ? '昨天' : '更早', disabled: locked,
+            icon: <MessageOutlined />, label: <div className="chat-session-label"><span>{session.title}</span>
+                <small>{new Date(Number(session.updated_at)).toLocaleString('zh-CN', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</small></div>};
+    });
+    const conversations = <div className="chat-history-content">
+        <header className="chat-history-heading"><strong>会话记录</strong><Tag>{store.sessions.length}</Tag></header>
+        <div className="chat-history-tools">
+            <Button block aria-label="新建对话" icon={<PlusOutlined />} disabled={locked} onClick={newChat}>新建对话</Button>
+            <Input aria-label="搜索对话" prefix={<SearchOutlined />} placeholder="搜索对话" allowClear value={search} onChange={event => setSearch(event.target.value)} />
+        </div>
+        <nav aria-label="对话列表">
+            <Conversations items={historyItems} activeKey={id} groupable
+                onActiveChange={key => {if (!locked) router.history.push(`/dashboard/${key}`)}}
+                menu={item => ({trigger: <Button type="text" size="small" aria-label={`管理会话：${store.sessions.find(session => session.id === item.key)?.title || ''}`} icon={<MoreOutlined />} disabled={locked} />, items: [
+                    {key: 'rename', label: '重命名', icon: <EditOutlined />, disabled: locked},
+                    {key: 'delete', label: '删除', icon: <DeleteOutlined />, danger: true, disabled: locked}
+                ], onClick: ({key}) => {
+                    const session = store.sessions.find(session => session.id === item.key);
+                    if (session) {if (key === 'rename') rename(session); else remove(session)}
+                }})} />
+            {!historyItems.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={search ? '没有匹配的会话' : '开始一次新的对话'} />}
+        </nav>
+        <footer><LockOutlined /> 对话仅自己可见</footer>
+    </div>;
+    return <XProvider locale={chatLocale} theme={{token: {colorPrimary: '#3695d5', borderRadius: 6, fontSize: 14}}}>
+        <section className={`chat-workspace ${inConversation ? 'chat-conversation' : 'chat-home'}`} aria-label="聊天">
         <main className="chat-main">
             {inConversation && <header className="chat-header"><h4>{store.session?.title || '聊天'}</h4>
                 <div className="chat-header-actions">
                     <Button type="text" aria-label="新建对话" icon={<PlusOutlined />} disabled={locked} onClick={newChat}>新建对话</Button>
-                    {id && <><Button type="text" aria-label="重命名对话" disabled={locked} icon={<EditOutlined />} onClick={() => {setTitle(store.session?.title || ''); setRenaming(true)}} />
-                        <Button type="text" aria-label="删除对话" disabled={locked} icon={<DeleteOutlined />} onClick={() => Modal.confirm({title: '删除这段对话？',
-                            content: '聊天记录将被清除。博客内容不会删除，AI 调用日志仍按原策略保留。', okText: '删除', cancelText: '取消', okButtonProps: {danger: true},
-                            onOk: async() => {await store.mutate('delete'); router.history.replace('/dashboard')}})} /></>}
+                    {typeof window.Notification !== 'undefined' && <Tooltip title="仅在离开页面时通知任务结束，不包含聊天内容">
+                        <Button type="text" icon={<BellOutlined />} aria-label="任务完成通知" aria-pressed={desktopNotices} onClick={() => safe(enableNotices())} />
+                    </Tooltip>}
+                    {id && <><Button type="text" aria-label="重命名对话" disabled={locked} icon={<EditOutlined />} onClick={() => rename(store.session)} />
+                        <Button type="text" aria-label="删除对话" disabled={locked} icon={<DeleteOutlined />} onClick={() => remove(store.session)} /></>}
                 </div>
             </header>}
             <div className={'chat-scroll' + (!inConversation ? ' chat-empty' : '')}>
-                {!inConversation ? <div className="chat-welcome"><h1>今天想写点什么？</h1><p>从一个想法，到一篇值得发布的文章。</p></div> :
-                    <div className="chat-messages">{store.messages.map(entry => <article key={entry.id} className={`chat-message chat-message-${entry.role}`}>
-                        {entry.role === 'tool' ? <Result entry={entry} preview={setPreview} /> : entry.role === 'error' ?
-                            <Alert type="error" title={entry.content} action={<Button size="small" disabled={locked} onClick={() => safe(store.stream('retry'))}>重试回复</Button>} /> :
-                            entry.role === 'event' ? <p className="chat-event">{entry.content}</p> : <>
-                                {entry.content && <Markdown text={entry.content} />}
-                                {entry.toolCalls && <details><summary>博客操作 · {entry.toolCalls.map((call: any) => toolLabels[call.name] || call.name).join('、')}</summary><pre>{JSON.stringify(entry.toolCalls, null, 2)}</pre></details>}
-                                {entry.role === 'assistant' && entry.content && <Button type="text" size="small" icon={<CopyOutlined />} onClick={() => safe(navigator.clipboard.writeText(entry.content))}>复制</Button>}
-                            </>}
-                    </article>)}
-                    {store.streaming && <article className="chat-message"><Markdown text={store.streaming} /></article>}
-                    {locked && <p role="status" className="chat-status">{store.status || '正在执行，请稍候…'}</p>}
-                    {store.actions.filter(action => ['pending', 'executing', 'interrupted', 'failed', 'cancelled'].includes(action.status)).map(action => <section className="chat-approval" key={action.id}>
+                {!inConversation ? <Welcome className="chat-welcome" variant="borderless"
+                    title="今天想写点什么？" classNames={{title: 'chat-welcome-title'}} description="从一个想法，到一篇值得发布的文章。" /> :
+                    <div className="chat-messages">{store.messages.map(entry => <div key={entry.id} className="chat-message">
+                        <ChatMessage entry={entry} actions={store.actions} messages={store.messages} running={locked} locked={locked}
+                            preview={setPreview} retry={() => safe(store.stream('retry'))} />
+                    </div>)}
+                    {store.streaming && <div className="chat-message"><ChatMessage entry={{role: 'assistant', content: store.streaming}}
+                        actions={[]} messages={[]} streaming running={true} locked={true} preview={setPreview} /></div>}
+                    {locked && <GenerationStatus status={store.status} />}
+                    {store.actions.filter(action => ['pending', 'executing', 'interrupted', 'failed', 'cancelled'].includes(action.status)).map(action => <Card size="small" className="chat-approval" key={action.id}>
                         <span className="chat-badge">{({expired: '确认已过期', pending: '等待确认', executing: '执行中', interrupted: '操作中断，请核对实际状态', failed: '执行失败，请核对实际状态', cancelled: '已取消'} as any)[action.status]}</span>
                         <h3>{toolLabels[action.payload.name] || action.payload.name}</h3>
                         {action.payload.before?.title && <b>{action.payload.before.title}</b>}
@@ -175,38 +185,48 @@ function Chat({children, onConversationChange}: {
                         {action.status === 'pending' && <><p className="chat-muted">确认在 15 分钟内有效；对象发生变化时需要重新预览。</p>
                             <Button disabled={locked} onClick={() => safe(store.stream('confirm', {action: action.id, approve: false}))}>取消操作</Button>
                             <Button type="primary" danger={action.payload.name.endsWith('.delete')} disabled={locked} onClick={() => safe(store.stream('confirm', {action: action.id, approve: true}))}>确认执行</Button></>}
-                    </section>)}<div ref={bottom} /></div>}
+                    </Card>)}<div ref={bottom} /></div>}
             </div>
             <footer className="chat-composer-area">
                 {store.error && <Alert type="warning" title={store.error} closable onClose={() => {store.error = ''}} />}
                 {!models.length ? <div className="chat-connect"><h3>连接你的 AI 服务商</h3><p>配置完成后，即可开始聊天和管理博客。</p><Link to="/options/ai">前往 AI 连接设置 →</Link></div> : <>
-                    <div className="chat-composer">
-                        <Input.TextArea aria-label="聊天消息" placeholder={pending ? '请先确认或取消上方操作' : '帮我写文章、整理内容或管理博客…'} autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} value={input}
-                            disabled={Boolean(pending)} onChange={event => setInput(event.target.value)}
-                            onCompositionStart={() => {composing.current = true}} onCompositionEnd={() => {composing.current = false}}
-                            onKeyDown={event => {if (event.key === 'Enter' && !event.shiftKey && !composing.current && !event.nativeEvent.isComposing) {event.preventDefault(); safe(send())}}} />
-                        <div className="chat-composer-toolbar"><span className="chat-muted">{models.find(model => model.value === selected)?.tools ? '博客技能已启用' : '普通问答 · 当前模型不支持博客操作'}</span>
-                            <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
-                                onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
-                                    const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
-                            {locked ? <Button aria-label="停止生成" icon={<StopOutlined />} onClick={() => safe(store.stop())} /> : <Button type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={!input.trim() || Boolean(pending) || !selected} onClick={() => safe(send())}>发送</Button>}
-                        </div>
-                    </div>
-                    {!inConversation && <div className="chat-suggestions">{['帮我写一篇新文章，先讨论选题', '查找最近的草稿', '查看博客分类和标签', '查看待审核的评论'].map(text => <button key={text} disabled={locked} onClick={() => setInput(text)}>{text}</button>)}</div>}
+                    <Suggestion items={commands.map(command => ({label: command.label, value: command.description}))}
+                        onSelect={value => setInput(value)}>
+                        {({onTrigger, onKeyDown, open}) => <Sender className="chat-composer" value={input} components={senderComponents}
+                            placeholder={pending ? '请先确认或取消上方操作' : '帮我写文章、整理内容或管理博客… 输入 / 查看快捷指令'}
+                            autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} disabled={Boolean(pending)}
+                            loading={sending || store.busy || Boolean(store.session?.active_run)}
+                            onChange={value => {setInput(value); onTrigger(value === '/' ? {} : false)}}
+                            onKeyDown={event => {onKeyDown(event); if (open && event.key === 'Enter') return false; return undefined}}
+                            onSubmit={() => safe(send())} onCancel={() => safe(store.stop())} suffix={false}
+                            footer={(_, {components: {SendButton, LoadingButton}}) => <div className="chat-composer-toolbar">
+                                <span className="chat-muted">{models.find(model => model.value === selected)?.tools ? '博客技能已启用' : '普通问答 · 当前模型不支持博客操作'}</span>
+                                <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
+                                    onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
+                                        const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
+                                {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
+                                    <SendButton type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={!input.trim() || Boolean(pending) || !selected || locked}>发送</SendButton>}
+                            </div>} />}
+                    </Suggestion>
+                    {!inConversation && <Prompts className="chat-suggestions" wrap
+                        items={commands.map(command => ({...command, disabled: locked, description: undefined}))}
+                        onItemClick={({data}) => setInput(commands.find(command => command.key === data.key)!.description)} />}
                     <small className="chat-footnote">AI 可能出错，请核对文章内容和操作结果。</small>
                 </>}
             </footer>
             {!inConversation && children && <div className="chat-overview-details">{children}</div>}
         </main>
-        <div className="chat-history-rail">
+        <aside className={`chat-history-shell${historyOpen ? ' is-open' : ''}`}>
             <button type="button" className="chat-history-toggle" aria-label={historyOpen ? '收起会话列表' : '展开会话列表'}
                 aria-expanded={historyOpen} aria-controls="overview-chat-history" onClick={() => setHistoryOpen(open => !open)}>
-                {historyOpen ? <CaretRightOutlined /> : <CaretLeftOutlined />}
+                <CaretLeftOutlined className="chat-history-toggle-icon" />
             </button>
-        </div>
-        <aside id="overview-chat-history" className="chat-history" hidden={!historyOpen}>{historyOpen && conversations}</aside>
+            <div id="overview-chat-history" className="chat-history-panel" aria-hidden={!historyOpen} inert={!historyOpen}>
+                {conversations}
+            </div>
+        </aside>
         <Drawer title={preview?.title || '文章预览'} size="large" open={Boolean(preview)} onClose={() => setPreview(null)}>{preview && <Markdown text={preview.markdown_content || preview.summary || ''} />}</Drawer>
-        <Modal title="重命名对话" open={renaming} onCancel={() => setRenaming(false)} onOk={() => safe(store.mutate('rename', {title}).then(() => setRenaming(false)))}><Input aria-label="对话标题" value={title} maxLength={100} onChange={event => setTitle(event.target.value)} /></Modal>
-    </section>;
+        <Modal title="重命名对话" okText="保存" cancelText="取消" open={Boolean(renaming)} onCancel={() => setRenaming('')} onOk={() => safe(store.manage(renaming, 'rename', {title}).then(() => setRenaming('')))}><Input aria-label="对话标题" value={title} maxLength={100} onChange={event => setTitle(event.target.value)} /></Modal>
+    </section></XProvider>;
 }
 export default observer(Chat);

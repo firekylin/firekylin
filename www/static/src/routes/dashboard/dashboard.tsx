@@ -251,7 +251,7 @@ export function DashBoard(props: DashBoardProps) {
         return (
             <div className="fk-content-wrap">
                 <BreadCrumb className="breadcrumb" {...props} />
-                <div className={`manage-container${chatting ? ' overview-conversation' : ''}`}>
+                <div className={`manage-container${Number(window.SysConfig.userInfo.type) === 1 ? ' overview-chat-container' : ''}${chatting ? ' overview-conversation' : ''}`}>
                     {versions.needUpdate && !chatting ? (
                         <p className="bg-info update-message">
                             Firekylin{' '}
