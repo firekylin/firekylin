@@ -12,6 +12,8 @@ it('Markdown escapes raw HTML, strips unsafe links and does not load remote imag
     expect(screen.getByText('示例')).toBeInTheDocument();
 });
 it('renders fenced code with Ant Design X highlighter without executing it', async() => {
+    // Load the real lazy dependency before starting Testing Library's render deadline.
+    await import('@ant-design/x/es/code-highlighter');
     const {container} = render(<Markdown text={'```javascript\nconst answer = 42;\n```'} />);
     expect(await screen.findByText('javascript')).toBeInTheDocument();
     await waitFor(() => expect(container.querySelector('code .token')?.textContent).toBe('const'));
