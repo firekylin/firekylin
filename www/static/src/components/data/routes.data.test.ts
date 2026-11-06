@@ -11,11 +11,15 @@ describe('smart content settings navigation', () => {
     });
 });
 
-it('groups article, category and tag lists and keeps creation routes out of menus', () => {
+it('places article creation after the article list while keeping category and tag creation hidden', () => {
     const routes = InitiateRoutes([]);
     const posts = routes.find(route => route.url === '/post')!;
     expect(posts.children.filter(child => child.menu !== false).map(child => child.url))
-        .toEqual(['/post/list', '/cate/list', '/tag/list']);
+        .toEqual(['/post/list', '/post/create', '/cate/list', '/tag/list']);
+    expect(posts.children.find(child => child.url === '/post/create')?.title).toBe('添加文章');
+    for (const url of ['/cate/create', '/tag/create']) {
+        expect(posts.children.find(child => child.url === url)?.menu).toBe(false);
+    }
     expect(routes.some(route => ['/cate', '/tag'].includes(route.url))).toBe(false);
 });
 it('places tools after system settings and removes tool pages from settings', () => {

@@ -6,7 +6,7 @@
     --chat-history-width: 280px;
     display: flex;
     position: relative;
-    min-height: calc(100dvh - 60px);
+    min-height: calc(100dvh - 50px);
     background: #fff;
     color: inherit;
     font-size: 14px;
@@ -59,7 +59,7 @@
     .is-open > .chat-history-toggle .chat-history-toggle-icon { transform: rotate(180deg); }
     .chat-history-panel { width: 100%; height: 100%; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .18s ease, visibility 0s .26s; }
     .is-open > .chat-history-panel { opacity: 1; visibility: visible; transition: opacity .2s .04s ease, visibility 0s; }
-    .chat-history-content { display: flex; flex-direction: column; width: var(--chat-history-width); height: calc(100dvh - 60px); }
+    .chat-history-content { display: flex; flex-direction: column; width: var(--chat-history-width); height: calc(100dvh - 50px); }
     .chat-history-heading { display: flex; align-items: center; justify-content: space-between; padding: 20px 18px 14px; border-bottom: 1px solid #edf0f3; }
     .chat-history-heading .ant-tag { margin: 0; color: #8c8c8c; }
     .chat-history-tools { padding: 16px 14px 8px; display: grid; gap: 12px; }
@@ -79,7 +79,7 @@
     .chat-suggestions .ant-prompts-list { justify-content: center; gap: 8px; }
     .chat-suggestions .ant-prompts-item { padding: 8px 12px; font-size: 12px; }
 }
-.chat-conversation { height: calc(100dvh - 60px); min-height: 420px; }
+.chat-conversation { height: calc(100dvh - 50px); min-height: 420px; }
 .chat-markdown { font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; img { max-width: 100%; } table { display: block; overflow: auto; } }
 @media (max-width: 1200px) { .chat-workspace { --chat-history-width: 240px; } }
 @media (max-width: 900px) {

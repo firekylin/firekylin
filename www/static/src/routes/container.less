@@ -1,5 +1,15 @@
+@import '../components/sidebar.less';
+
 .content {
-  margin: 0 0 0 235px;
+  --sidebar-offset: 235px;
+  margin: 0 0 0 var(--sidebar-offset);
+  transition: margin-left 200ms ease;
   min-height: 100vh;
   background-color: #fff;
+
+  // Legacy route wrappers are positioned against the viewport, not .content.
+  .fk-content-wrap {
+    left: var(--sidebar-offset);
+    transition: left 200ms ease;
+  }
 }
