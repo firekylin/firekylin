@@ -7,8 +7,15 @@ import ExtensionSettings from './extension-settings';
 
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
 vi.mock('../../components/breadcrumb', () => ({default: () => null}));
-afterEach(() => {cleanup(); vi.restoreAllMocks()});
+afterEach(() => {
+    cleanup();
+    // Ant Design's delayed form validation retains timers after unmount.
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+});
 beforeEach(() => {
+    vi.useFakeTimers({shouldAdvanceTime: true});
     vi.spyOn(message, 'success').mockReturnValue(vi.fn() as any);
     window.SysConfig = {csrfToken: 'test-token'} as any;
     vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {settings: {
@@ -22,6 +29,7 @@ it('loads and saves separate plugin and theme registries', async() => {
     await waitFor(() => expect(plugin.value).toBe('https://firekylin.lithub.cc/plugins/plugin'));
     fireEvent.change(plugin, {target: {value: 'https://firekylin.lithub.cc/plugins/other'}});
     fireEvent.click(view.getByRole('button', {name: /^保\s*存$/}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('扩展设置已保存'));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/extension-settings',
         {settings: {pluginRegistry: 'https://firekylin.lithub.cc/plugins/other', themeRegistry: 'https://firekylin.lithub.cc/plugins/theme'}},
         {headers: {'X-CSRF-Token': 'test-token'}}));
