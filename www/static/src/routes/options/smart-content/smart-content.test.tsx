@@ -1,11 +1,14 @@
 import {cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import axios from 'axios';
+import {message} from 'antd';
 import {MemoryRouter} from '../../../utils/router';
 import SmartContentSettings from './smart-content';
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
 afterEach(cleanup);
 beforeEach(() => {
+    globalThis.ResizeObserver = class {observe() {} unobserve() {} disconnect() {}} as any;
+    vi.spyOn(message, 'success').mockImplementation(() => (() => {}) as any);
     window.SysConfig = {pluginAdmin: [], config: {}, csrfToken: 'token', userInfo: {id: 1, name: 'Admin', type: 1}} as any;
     vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {features: {
         summary: true, title: false, rewrite: true, translate: true, slug: false, category: false, autocomplete: false,
@@ -21,9 +24,42 @@ it('shows all described switches without a plugin or language setting and saves 
     }
     expect(title).not.toBeChecked();
     expect(screen.getByText(/正文超过 250 个字时，生成标题建议/)).toBeInTheDocument();
-    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.getAllByRole('combobox')).toHaveLength(10);
     fireEvent.click(title);
     fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
-        {features: expect.objectContaining({title: true})}, {headers: {'X-CSRF-Token': 'token'}}));
+        {features: expect.objectContaining({title: true}), models: {}}, {headers: {'X-CSRF-Token': 'token'}}));
+});
+it('loads per-capability models, filters incompatible and unconfigured providers, and saves bindings', async() => {
+    vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {features: {title: true, image: true},
+        models: {title: {provider: 'deepseek', model: 'chat'}}, providers: [
+            {id: 'deepseek', label: 'DeepSeek', configured: true, models: [{id: 'chat', label: 'Chat', capabilities: ['text']}]},
+            {id: 'openai', label: 'OpenAI', configured: true, models: [{id: 'draw', label: 'Draw', capabilities: ['image']}]},
+            {id: 'disabled', label: 'Disabled', configured: false, models: [{id: 'draw', label: 'Hidden', capabilities: ['image']}]}
+        ]}}});
+    render(<MemoryRouter initialEntries={['/options/smart-content']}><SmartContentSettings /></MemoryRouter>);
+    await waitFor(() => expect(screen.getByRole('switch', {name: '生成标题'})).not.toBeDisabled());
+    fireEvent.mouseDown(screen.getByRole('combobox', {name: '图片生成和编辑使用的模型'}));
+    expect(screen.queryByText('Disabled / Hidden')).toBeNull();
+    expect(screen.queryByText('DeepSeek / Chat', {selector: '.ant-select-item-option-content'})).toBeNull();
+    fireEvent.click(screen.getByText('OpenAI / Draw', {selector: '.ant-select-item-option-content'}));
+    fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
+        {features: expect.objectContaining({title: true, image: true}), models: {
+            title: {provider: 'deepseek', model: 'chat'}, image: {provider: 'openai', model: 'draw'}
+        }}, {headers: {'X-CSRF-Token': 'token'}}));
+});
+it('keeps stale model bindings visible and requires an explicit replacement', async() => {
+    vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {features: {title: true},
+        models: {title: {provider: 'removed', model: 'old'}}, providers: []}}});
+    render(<MemoryRouter initialEntries={['/options/smart-content']}><SmartContentSettings /></MemoryRouter>);
+    await screen.findByText('removed / old（不可用，请重新选择）');
+    fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
+    await screen.findByText('请选择可用模型或恢复默认');
+    expect(axios.post).not.toHaveBeenCalled();
+    fireEvent.mouseDown(screen.getByRole('combobox', {name: '生成标题使用的模型'}));
+    fireEvent.click(screen.getByText('使用全局默认模型', {selector: '.ant-select-item-option-content'}));
+    fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
+        {features: expect.objectContaining({title: true}), models: {}}, expect.anything()));
 });

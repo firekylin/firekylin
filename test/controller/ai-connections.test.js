@@ -81,3 +81,20 @@ test('AI connections controller requires an administrator', async t => {
   await assert.rejects(instance.getAction(), {status: 403});
   await assert.rejects(instance.postAction(), {status: 403});
 });
+
+test('connection removal requires administrator and CSRF and only targets the requested provider', async t => {
+  const previous = global.firekylin;
+  t.after(() => {global.firekylin = previous});
+  const removed = [];
+  global.firekylin = {plugins: {ai: {}, disconnectAI: async id => removed.push(id)}};
+  const instance = controller();
+  instance.post = () => ({action: 'remove', provider: 'deepseek'});
+  await assert.rejects(instance.postAction(), {status: 403});
+  instance.ctx.headers['X-CSRF-Token'] = adminAuth.csrfToken(instance.ctx);
+  instance.userInfo.type = 2;
+  await assert.rejects(instance.postAction(), {status: 403});
+  assert.deepEqual(removed, []);
+  instance.userInfo.type = 1;
+  await instance.postAction();
+  assert.deepEqual(removed, ['deepseek']);
+});

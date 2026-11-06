@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Alert, Button, Card, Form, message, Select, Space, Spin, Typography} from 'antd';
+import {Alert, Button, Card, Form, message, Popconfirm, Select, Space, Spin, Tabs, Typography} from 'antd';
 import {firstValueFrom} from 'rxjs';
 import BreadCrumb from '../../components/breadcrumb';
 import {SAVED_SECRET_MASK} from '../../components/protocol/form-field';
@@ -14,6 +14,7 @@ interface Provider {
     id: string;
     label: string;
     configured?: boolean;
+    removable?: boolean;
     models: Array<{id: string; label: string; selected: boolean}>;
     admin?: {pluginId: string; formId: string; testActionId: string};
 }
@@ -22,6 +23,8 @@ export default function AIConnections() {
     const {history} = useRouteComponentProps();
     const [providers, setProviders] = useState<Provider[]>([]);
     const [providerId, setProviderId] = useState<string>();
+    const [adding, setAdding] = useState(false);
+    const [makeDefault, setMakeDefault] = useState(false);
     const [modelId, setModelId] = useState<string>();
     const [formValues, setFormValues] = useState<Record<string, any>>();
     const [loading, setLoading] = useState(true);
@@ -44,7 +47,9 @@ export default function AIConnections() {
             if (res.errno === 0) {
                 const items = (res.data as any).providers || [];
                 setProviders(items);
-                setProviderId(items.find((item: Provider) => item.models.some(model => model.selected))?.id);
+                setProviderId(current => items.some((item: Provider) => item.id === current && item.configured !== false)
+                    ? current : items.find((item: Provider) => item.models.some(model => model.selected))?.id ||
+                        items.find((item: Provider) => item.configured !== false)?.id);
             }
             setLoading(false);
         });
@@ -55,6 +60,7 @@ export default function AIConnections() {
         setModelId(provider?.models.find(item => item.selected)?.id || provider?.models[0]?.id);
         setFormValues(undefined);
         setSettingsDirty(false);
+        setMakeDefault(Boolean(provider?.models.some(item => item.selected)));
         if (!provider?.admin) return;
         const {pluginId, formId} = provider.admin;
         const subscription = http.get<any>(`/admin/api/plugins/${pluginId}/forms/${formId}`).subscribe(res => {
@@ -69,6 +75,7 @@ export default function AIConnections() {
             return;
         }
         setProviderId(value);
+        setAdding(false);
     };
     const testConnection = () => {
         if (!provider?.admin || !modelId) return;
@@ -81,7 +88,21 @@ export default function AIConnections() {
     };
     const savedProvider = providers.find(item => item.models.some(model => model.selected));
     const savedModel = savedProvider?.models.find(item => item.selected)?.id;
-    const dirty = providerId !== savedProvider?.id || (providerId && modelId !== savedModel) || settingsDirty;
+    const dirty = settingsDirty || (makeDefault && (providerId !== savedProvider?.id || modelId !== savedModel));
+    const connections = providers.filter(item => item.configured !== false || item.id === providerId || item.models.some(model => model.selected));
+    const removeConnection = async() => {
+        if (!provider) return;
+        setWorking(true);
+        try {
+            const res = await firstValueFrom(http.post<any>('/admin/api/ai-connections',
+                {action: 'remove', provider: provider.id}, csrf));
+            if (res.errno === 0) {
+                setProviderId(undefined);
+                setReloadKey(key => key + 1);
+                message.success('AI 连接已删除');
+            }
+        } finally { setWorking(false) }
+    };
     const saveConnection = async () => {
         if (!dirty || (provider && !modelId)) return;
         setWorking(true);
@@ -93,8 +114,8 @@ export default function AIConnections() {
                     `/admin/api/plugins/${provider.admin.pluginId}/forms/${provider.admin.formId}`, values, csrf));
                 if (configured.errno !== 0) return;
             }
-            const res = await firstValueFrom(http.post<any>('/admin/api/ai-connections',
-                {provider: provider?.id || null, model: modelId}, csrf));
+            const res = makeDefault ? await firstValueFrom(http.post<any>('/admin/api/ai-connections',
+                {provider: provider?.id || null, model: modelId}, csrf)) : {errno: 0};
             if (res.errno === 0) {
                 message.success('AI 连接已保存');
                 setSettingsDirty(false);
@@ -112,11 +133,16 @@ export default function AIConnections() {
         <div className="page-list">
             <h3 className="page-title">AI 连接</h3>
             <Spin spinning={loading || working}>
-                <Card title="AI 服务商" style={{marginBottom: 16}}>
-                    <Select aria-label="选择 AI 服务商" value={providerId} onChange={changeProvider} allowClear
-                        placeholder="请选择" style={{width: '100%', maxWidth: 420}}
-                        options={[...providers.map(item => ({label: item.label, value: item.id})),
-                            {label: '添加更多 AI 服务商', value: MORE_PROVIDERS}]} />
+                <Card title="AI 服务商" style={{marginBottom: 16}} extra={<Button disabled={working}
+                    onClick={() => setAdding(value => !value)}>增加服务商</Button>}>
+                    {connections.length ? <Tabs activeKey={providerId} onChange={value => {setProviderId(value); setAdding(false)}}
+                        items={connections.map(item => ({key: item.id, label: item.label, disabled: working}))} />
+                        : <Typography.Paragraph type="secondary">尚未配置 AI 连接，请增加服务商。</Typography.Paragraph>}
+                    {adding || !connections.length ? <Select aria-label="选择 AI 服务商" value={undefined} onChange={changeProvider}
+                        placeholder="选择要增加的服务商" style={{width: '100%', maxWidth: 420}}
+                        options={[...providers.filter(item => item.configured === false && item.id !== providerId)
+                            .map(item => ({label: item.label, value: item.id})),
+                            {label: '安装更多 AI 服务商', value: MORE_PROVIDERS}]} /> : null}
                 </Card>
                 {provider && form && displayedFormValues ? <PageForm key={provider.id} item={form} values={displayedFormValues}
                     submit={() => {}} form={providerForm} clearOnDestroy hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
@@ -127,10 +153,20 @@ export default function AIConnections() {
                         <Select aria-label="选择 AI 模型" value={modelId} onChange={setModelId}
                             style={{width: '100%', maxWidth: 420}}
                             options={provider.models.map(item => ({label: item.label, value: item.id}))} />
-                        <Button onClick={testConnection} disabled={!provider.admin || !modelId}>测试连接</Button>
+                        <Button onClick={testConnection} disabled={!provider.admin || !modelId || settingsDirty || provider.configured === false}>测试连接</Button>
                         <Typography.Text type="secondary">
-                            {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : '切换下拉框不会改变当前默认服务商。'}
+                            {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : '保存连接不会改变默认服务商。'}
+                            修改连接配置后，请先保存再测试。
                         </Typography.Text>
+                        <Button onClick={() => setMakeDefault(true)} disabled={makeDefault || !modelId}>
+                            {providerId === savedProvider?.id && modelId === savedModel ? '当前默认模型'
+                                : makeDefault ? '保存时设为默认模型' : '设为默认模型'}
+                        </Button>
+                        {provider.removable ? <Popconfirm title="删除此 AI 连接？"
+                            description="将删除连接密钥。使用此服务商的能力需要重新选择模型；插件仍会保留。"
+                            okText="删除" cancelText="取消" onConfirm={removeConnection}>
+                            <Button danger disabled={working}>删除服务商</Button>
+                        </Popconfirm> : null}
                     </Space>
                 </Card> : null}
                 <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={!dirty || Boolean(provider && !modelId)}

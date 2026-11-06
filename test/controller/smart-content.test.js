@@ -53,3 +53,28 @@ test('non-administrators cannot read or change core smart content settings', asy
   await assert.rejects(instance.getAction(), {status: 403});
   await assert.rejects(instance.postAction(), {status: 403});
 });
+
+test('smart content returns model choices and validates bindings before saving feature switches', async t => {
+  const {instance, rows} = setup(t);
+  const {PluginManager} = require('../../src/plugin/manager');
+  const {AIStore} = require('../../src/ai/store');
+  const manager = new PluginManager({aiStore: new AIStore({getOptions: async() => rows, getCredentialValue: async() => undefined,
+    updateOptions: async(key, value) => {rows[key] = value}})});
+  manager.aiProviders.register({id: 'provider', models: [{id: 'text'}], generate() {}});
+  global.firekylin = {plugins: manager};
+  instance.ctx.headers['X-CSRF-Token'] = auth.csrfToken(instance.ctx);
+  instance.post = () => ({features: {summary: true}, models: {summary: {provider: 'provider', model: 'text'}}});
+  await instance.postAction();
+  const loaded = (await instance.getAction()).data;
+  assert.deepEqual(loaded.models, {summary: {provider: 'provider', model: 'text'}});
+  assert.equal(loaded.providers[0].id, 'provider');
+  instance.post = () => ({features: {summary: false}, models: {summary: {provider: 'missing', model: 'text'}}});
+  await assert.rejects(instance.postAction(), {status: 400});
+  assert.equal(JSON.parse(rows[FEATURES_KEY]).summary, true);
+  instance.post = () => ({features: {summary: false}});
+  await instance.postAction();
+  assert.deepEqual((await instance.getAction()).data.models, loaded.models, 'old clients preserve bindings');
+  instance.post = () => ({features: {summary: false}, models: {}});
+  await instance.postAction();
+  assert.deepEqual((await instance.getAction()).data.models, {});
+});

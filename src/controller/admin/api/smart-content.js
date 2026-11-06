@@ -10,13 +10,14 @@ module.exports = class extends Base {
   async getAction() {
     this.requireAdministrator();
     const features = await editorFeatures(global.firekylin?.plugins, this.model('options'));
-    return this.success({features});
+    return this.success({features, models: await global.firekylin?.plugins?.ai?.getFeatureModels() || {},
+      providers: await global.firekylin?.plugins?.ai?.models() || []});
   }
   async postAction() {
     this.requireAdministrator();
     const csrf = this.ctx.get('X-CSRF-Token');
     if (!csrf || csrf !== adminAuth.csrfToken(this.ctx)) return this.ctx.throw(403, 'CSRF validation failed');
-    const {features} = this.post() || {};
+    const {features, models} = this.post() || {};
     if (!features || typeof features !== 'object' || Array.isArray(features) ||
         Object.keys(features).some(key => !Object.hasOwn(DEFAULTS, key) || typeof features[key] !== 'boolean')) {
       return this.ctx.throw(400, 'Invalid feature settings');
@@ -24,7 +25,13 @@ module.exports = class extends Base {
     const model = this.model('options');
     const current = await editorFeatures(global.firekylin?.plugins, model);
     const next = normalizeFeatures({...current, ...features});
+    if (models !== undefined) {
+      const ai = global.firekylin?.plugins?.ai;
+      if (!ai) return this.ctx.throw(400, 'AI service unavailable');
+      await ai.setFeatureModels(models);
+    }
     await model.updateOptions(FEATURES_KEY, JSON.stringify(next));
-    return this.success({features: next, message: '智能内容设置已保存。'});
+    return this.success({features: next, models: await global.firekylin?.plugins?.ai?.getFeatureModels() || {},
+      message: '智能内容设置已保存。'});
   }
 };

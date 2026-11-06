@@ -32,16 +32,25 @@ request's `capability` defaults to `text`. Feature plugins requesting image gene
 `capability: 'image'`; the client checks the chosen model's `capabilities` before calling the provider and
 returns `AI_UNSUPPORTED_CAPABILITY` (HTTP 400) when the model does not support it. Capability metadata
 does not by itself implement image generation: a provider must also handle that request and response format.
-The model picker can use the same metadata to filter incompatible models in future feature-specific UI.
-administrator's **系统设置 → AI 连接** page lists installed providers and their optional `configured` status. Users select
-a provider there, fill its plugin-supplied form and test the connection without leaving the page. The AI connection
-endpoint is a ThinkJS admin controller; provider form and test-action endpoints remain plugin-scoped. The provider's
-`admin` metadata names a plugin-scoped form and test action registered through `ctx.admin`; providers do not
-need their own panel or page. **AI 连接** is also the only place users select the
-global default provider and model. Saving connection settings should not call `ctx.ai.select()`.
-Clearing the provider choice and saving removes the global default, so feature plugins that rely on the
-default cannot generate until a provider is selected again. Explicit provider/model requests, such as a
-connection test, remain available.
+The administrator's **系统设置 → AI 连接** page displays configured providers as separate tabs. Use
+**增加服务商** to configure another installed provider, or **安装更多 AI 服务商** to open the plugin search.
+Each provider has one connection; configuring another provider retains existing connections. Saving a
+connection alone does not change the global default. Select a model and click **设为默认模型**, then
+save, to change the default explicitly. Editing the model on the current default tab updates that default
+when saved. Test connections after saving configuration changes.
+
+**删除服务商** removes the connection's API key without uninstalling the plugin or deleting chat history.
+If that provider was the global default, the default is cleared. Feature-specific bindings are retained
+and become unavailable; they never silently fall back to another provider. Reconfigure the connection or
+explicitly select a replacement in **智能内容**. For compatibility, core removes the standard plugin-scoped
+`apiKey` credential for single-provider plugins implementing `configured()`. Non-secret endpoint settings
+are retained. Providers with custom credential storage or multiple providers in one plugin should implement
+`disconnect()` to remove their connection credentials and make `configured()` return false. Core exposes
+removal only when a supported deletion path exists; it does not guess custom credential names.
+
+The AI connection endpoint is a ThinkJS admin controller; provider form and test-action endpoints remain
+plugin-scoped. The provider's `admin` metadata names a plugin-scoped form and test action registered through
+`ctx.admin`. Saving a provider form should not call `ctx.ai.select()`.
 Connection tests should explicitly pass both provider and model so they work even when
 another provider is the default. Provider plugins persist secrets with `ctx.ai.credentials`. Credentials are
 encrypted with AES-256-GCM, scoped to the owning plugin, persisted in separate option rows so concurrent
@@ -50,7 +59,7 @@ password forms. Set `FIREKYLIN_AI_CREDENTIAL_KEY` to a stable secret in producti
 the site's JWT secret for compatibility. Rotating the active encryption key requires providers to save their
 credentials again.
 
-The provider picker includes **添加更多 AI 服务商**, which opens an npm search for packages with the
+The provider picker includes **安装更多 AI 服务商**, which opens an npm search for packages with the
 `firekylin-plugin-ai-provider` prefix. Installing a package still requires the normal plugin installation
 workflow; the search link does not install third-party code automatically.
 
@@ -60,8 +69,8 @@ unknown providers and models and applies a 60-second timeout.
 ## Article editor
 
 The article editor provides title suggestions, summaries, article review and translation through
-`/admin/api/ai-editor`. These controls are visible only when the selected model supports `text` and its
-provider is not explicitly unconfigured. The endpoint uses the shared AI client and requires an authenticated
+`/admin/api/ai-editor`. Each control is visible only when its effective model supports `text` and its
+provider is not explicitly unconfigured. Per-feature selections work without a global default. The endpoint uses the shared AI client and requires an authenticated
 administrator or author plus CSRF validation. It generates suggestions without saving the article.
 
 Title and summary generation require more than 250 Unicode characters of body content; review requires
@@ -76,9 +85,19 @@ unlocked. No database migration is required.
 
 ### Optional content assistance
 
-All seven feature switches are built into **系统设置 → 智能内容** (`/admin/options/smart-content`).
+All ten feature switches are built into **系统设置 → 智能内容** (`/admin/options/smart-content`).
 The core settings API `/admin/api/smart-content` requires administrator access and CSRF validation for writes.
 Settings are stored in the existing `ai_content_features` option row; no AI Content plugin is needed.
+Each capability can select a provider/model independently. The picker lists only configured providers and
+compatible models (image for image generation/editing, text for the other capabilities). Bindings are stored
+in the `ai_content_models` option row, separately from switches and the global default. Title, summary,
+review, translation, slug, classification (including tags), autocomplete, comment moderation and comment
+reply each have a separate binding; cover generation and media image generation/editing share the image
+binding. With no binding, text capabilities use the global default and images retain the existing automatic
+selection of a configured image-capable model. Missing, removed or incompatible bindings must be explicitly
+replaced; no content is sent to an alternative provider automatically. Explicit provider/model calls such
+as chat conversations and connection tests keep their own selections.
+
 Slug generation, classification and autocomplete are opt-in. All switches are checked on every generation request.
 
 If the core option is absent, existing encrypted `ai-content/settings` credentials are imported automatically,

@@ -153,3 +153,93 @@ test('AI credentials are encrypted, scoped and never returned with public option
   assert.equal(decrypt(payload, rows.jwt_secret), 'value');
   assert.throws(() => decrypt(payload, 'different-secret-value'), /auth|authenticate/i);
 });
+
+test('content model bindings route each scenario, preserve explicit calls and reject stale or incompatible models', async() => {
+  const registry = new AIProviderRegistry();
+  let configured = true, bindings = {};
+  for (const id of ['default', 'other']) registry.register({id,
+    models: [{id: 'text', capabilities: ['text']}, {id: 'image', capabilities: ['image']}],
+    configured: () => id === 'default' || configured,
+    generate: request => ({provider: request.provider, model: request.model})});
+  let selected = {provider: 'default', model: 'text'};
+  const client = new AIClient({providers: registry,
+    preferences: {get: async() => selected, set: async value => {selected = value}},
+    featureModels: {get: async() => bindings, set: async value => {bindings = value}}});
+  const features = ['title', 'summary', 'rewrite', 'translate', 'slug', 'category', 'autocomplete',
+    'commentModeration', 'commentReply', 'image'];
+  await client.setFeatureModels(Object.fromEntries(features.map(feature =>
+    [feature, {provider: 'other', model: feature === 'image' ? 'image' : 'text'}])));
+  const request = {messages: [{role: 'user', content: 'hello'}]};
+  for (const scenario of ['editor.title', 'editor.summary', 'editor.review', 'editor.translate', 'editor.slug',
+    'editor.category', 'editor.tags', 'editor.complete', 'comment.moderation', 'comment.reply']) {
+    assert.deepEqual(await client.generate(request, {scenario}), {provider: 'other', model: 'text'}, scenario);
+  }
+  for (const scenario of ['editor.cover', 'media.image']) {
+    assert.deepEqual(await client.generate({...request, capability: 'image'}, {scenario}),
+      {provider: 'other', model: 'image'});
+  }
+  assert.deepEqual(await client.generate({...request, provider: 'default', model: 'text'}, {scenario: 'editor.title'}),
+    {provider: 'default', model: 'text'});
+  assert.deepEqual(await client.generate(request, {scenario: 'chat.reply'}), {provider: 'default', model: 'text'});
+  await client.clear();
+  assert.equal(await client.availableFeature('title'), true);
+  assert.deepEqual(await client.generate(request, {scenario: 'editor.title'}), {provider: 'other', model: 'text'});
+  await client.select('default', 'text');
+  assert.equal(Object.keys(bindings).length, features.length);
+  for (const invalid of [[], {unknown: {provider: 'other', model: 'text'}}, {title: null},
+    {title: {provider: 'missing', model: 'text'}}, {title: {provider: 'other', model: 'missing'}},
+    {image: {provider: 'other', model: 'text'}}, {summary: {provider: 'other', model: 'image'}}]) {
+    await assert.rejects(client.setFeatureModels(invalid), {status: 400});
+  }
+  configured = false;
+  assert.equal(await client.availableFeature('title'), false);
+  await assert.rejects(client.generate(request, {scenario: 'editor.title'}), /not configured/);
+  await assert.rejects(client.select('other', 'text'), {status: 400});
+  await assert.rejects(client.setFeatureModels({title: {provider: 'other', model: 'text'}}), {status: 400});
+  await client.setFeatureModels({});
+  assert.deepEqual(await client.generate(request, {scenario: 'editor.title'}), {provider: 'default', model: 'text'});
+});
+
+test('removing a connection deletes only its key, clears its default and retains feature bindings across reloads', async() => {
+  const {PluginManager} = require('../../src/plugin/manager');
+  const rows = {jwt_secret: 'connection-test-secret-at-least-32-characters'};
+  const store = new AIStore({getOptions: async() => ({...rows}),
+    updateOptions: async(key, value) => {rows[key] = value},
+    getCredentialValue: async key => rows[key], setCredentialValue: async(key, value) => {rows[key] = value},
+    deleteCredentialValue: async key => {delete rows[key]}});
+  const manager = new PluginManager({aiStore: store});
+  for (const id of ['first', 'second']) {
+    await store.setCredential(id, 'apiKey', `${id}-secret`);
+    manager.aiProviders.register({id, models: [{id: 'text'}],
+      configured: () => store.hasCredential(id, 'apiKey'), generate: () => ({text: id})}, id);
+  }
+  await manager.ai.select('first', 'text');
+  await manager.ai.setFeatureModels({summary: {provider: 'first', model: 'text'}});
+  await assert.rejects(manager.disconnectAI('missing'), {status: 400});
+  await manager.disconnectAI('first');
+  assert.equal(await store.hasCredential('first', 'apiKey'), false);
+  assert.equal(await store.getCredential('second', 'apiKey'), 'second-secret');
+  assert.deepEqual(await store.getPreferences(), {});
+  assert.equal(manager.aiProviders.has('first'), true);
+  assert.deepEqual(await store.getFeatureModels(), {summary: {provider: 'first', model: 'text'}});
+  assert.equal((await manager.ai.models()).find(p => p.id === 'first').configured, false);
+  await manager.ai.select('second', 'text');
+  await assert.rejects(manager.ai.generate({messages: [{role: 'user', content: 'hello'}]},
+    {scenario: 'editor.summary'}), /not configured/);
+  await store.setCredential('first', 'apiKey', 'replacement');
+  await manager.disconnectAI('first');
+  assert.deepEqual(await store.getPreferences(), {provider: 'second', model: 'text'});
+  const restarted = new PluginManager({aiStore: store});
+  assert.deepEqual(await restarted.ai.getFeatureModels(), {summary: {provider: 'first', model: 'text'}});
+});
+
+test('providers with custom credential storage can implement disconnect', async() => {
+  const {PluginManager} = require('../../src/plugin/manager');
+  let configured = true;
+  const manager = new PluginManager({aiStore: {getPreferences: async() => ({}), hasCredential: async() => false}});
+  manager.aiProviders.register({id: 'custom', models: [{id: 'text'}], configured: () => configured,
+    disconnect: async() => {configured = false}, generate() {}});
+  assert.equal(await manager.canDisconnectAI(manager.aiProviders.get('custom')), true);
+  await manager.disconnectAI('custom');
+  assert.equal((await manager.ai.models())[0].configured, false);
+});

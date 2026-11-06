@@ -16,7 +16,14 @@ module.exports = class extends Base {
 
   async getAction() {
     this.requireAdministrator();
-    return this.success({providers: await this.ai().models()});
+    const manager = global.firekylin.plugins;
+    const providers = await this.ai().models();
+    if (manager.canDisconnectAI) {
+      for (const provider of providers) {
+        provider.removable = await manager.canDisconnectAI(manager.aiProviders.get(provider.id));
+      }
+    }
+    return this.success({providers});
   }
 
   async postAction() {
@@ -26,7 +33,9 @@ module.exports = class extends Base {
     const body = this.post() || {};
     if (!Object.prototype.hasOwnProperty.call(body, 'provider')) return this.ctx.throw(400, 'Provider required');
     const ai = this.ai();
-    if (body.provider === null || body.provider === '') {
+    if (body.action === 'remove') {
+      await global.firekylin.plugins.disconnectAI(body.provider);
+    } else if (body.provider === null || body.provider === '') {
       await ai.clear();
     } else {
       await ai.select(body.provider, body.model);

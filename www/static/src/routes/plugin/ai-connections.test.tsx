@@ -1,4 +1,5 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
+import {message} from 'antd';
 import {of, Subject} from 'rxjs';
 import {MemoryRouter} from '../../utils/router';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
@@ -19,6 +20,7 @@ describe('AI connections', () => {
     });
 
     beforeEach(() => {
+        vi.spyOn(message, 'success').mockImplementation(() => (() => {}) as any);
         globalThis.ResizeObserver = class {
             observe() {}
             unobserve() {}
@@ -37,11 +39,12 @@ describe('AI connections', () => {
         const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
         expect(view.getByText('系统设置')).toBeInTheDocument();
         expect(view.container.querySelector('h3.page-title')).toHaveTextContent('AI 连接');
-        await waitFor(() => expect(view.getByText('请选择')).toBeInTheDocument());
+        await waitFor(() => expect(view.getByText('选择要增加的服务商')).toBeInTheDocument());
         expect(view.queryByText('未配置')).not.toBeInTheDocument();
         expect(view.getByRole('button', {name: '保存'})).toBeDisabled();
         fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
         fireEvent.click(view.getByText('DeepSeek'));
+        fireEvent.click(view.getByRole('button', {name: '设为默认模型'}));
         await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeEnabled());
         fireEvent.click(within(view.container).getByRole('button', {name: '保存'}));
         await waitFor(() => expect(http.post).toHaveBeenCalledWith(
@@ -128,14 +131,53 @@ describe('AI connections', () => {
         const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
         await waitFor(() => expect(view.getByLabelText('API Key')).toHaveValue('first-key'));
         fireEvent.change(view.getByLabelText('API Base URL'), {target: {value: 'https://edited.example.com'}});
+        fireEvent.click(view.getByRole('button', {name: '增加服务商'}));
         fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
         fireEvent.click(view.getByText('second', {selector: '.ant-select-item-option-content'}));
         await waitFor(() => expect(view.getByLabelText('API Base URL')).toHaveValue('https://second.example.com'));
         expect(view.getByLabelText('API Key')).toHaveValue('');
-        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
-        fireEvent.click(view.getByText('first', {selector: '.ant-select-item-option-content'}));
+        fireEvent.click(view.getByRole('tab', {name: 'first'}));
         await waitFor(() => expect(view.getByLabelText('API Key')).toHaveValue('first-key'));
         expect(view.getByLabelText('API Base URL')).toHaveValue('https://first.example.com');
     });
 
+});
+
+it('manages independent provider tabs, saves without replacing the default and removes a connection', async() => {
+    window.SysConfig = {csrfToken: 'test-csrf', config: {}, userInfo: {id: 1, name: 'Admin', type: 1},
+        pluginAdmin: ['first', 'second'].map(id => ({id, forms: [{id: 'settings', title: '连接配置',
+            fields: [{name: 'apiKey', type: 'password', label: 'API Key'}]}]}))} as any;
+    vi.spyOn(message, 'success').mockImplementation(() => (() => {}) as any);
+    let secondConfigured = false;
+    vi.mocked(http.get).mockImplementation((url: string) => of(url.includes('/forms/') ? {errno: 0, data: {}}
+        : {errno: 0, data: {providers: ['first', 'second'].map(id => ({id, label: id,
+            configured: id === 'first' || secondConfigured, removable: id === 'first' || secondConfigured,
+            admin: {pluginId: id, formId: 'settings', testActionId: 'test'},
+            models: [{id: 'text', label: 'Text', selected: id === 'first'}]}))}}) as any);
+    vi.mocked(http.post).mockImplementation((url: string, data: any) => {
+        if (url.includes('/second/forms/')) secondConfigured = true;
+        if (data.action === 'remove') secondConfigured = false;
+        return of({errno: 0, data: {}}) as any;
+    });
+    const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
+    await view.findByRole('tab', {name: 'first'});
+    expect(view.queryByRole('tab', {name: 'second'})).toBeNull();
+    fireEvent.click(view.getByRole('button', {name: '增加服务商'}));
+    fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
+    fireEvent.click(view.getByText('second', {selector: '.ant-select-item-option-content'}));
+    const key = await view.findByLabelText('API Key');
+    fireEvent.change(key, {target: {value: 'new-test-key'}});
+    expect(view.getByRole('button', {name: '测试连接'})).toBeDisabled();
+    fireEvent.click(view.getByRole('button', {name: '保存'}));
+    await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/plugins/second/forms/settings',
+        {apiKey: 'new-test-key'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
+    await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeDisabled());
+    expect(http.post).not.toHaveBeenCalledWith('/admin/api/ai-connections', expect.anything(), expect.anything());
+    expect(view.getByRole('tab', {name: 'second'})).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(view.getByRole('button', {name: '删除服务商'}));
+    fireEvent.click(await view.findByRole('button', {name: /^删\s*除$/}));
+    await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/ai-connections',
+        {action: 'remove', provider: 'second'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
+    await waitFor(() => expect(view.queryByRole('tab', {name: 'second'})).toBeNull());
+    expect(view.getByRole('tab', {name: 'first'})).toHaveAttribute('aria-selected', 'true');
 });
