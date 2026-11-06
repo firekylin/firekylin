@@ -34,6 +34,8 @@ returns `AI_UNSUPPORTED_CAPABILITY` (HTTP 400) when the model does not support i
 does not by itself implement image generation: a provider must also handle that request and response format.
 The administrator's **系统设置 → AI 连接** page displays configured providers as separate tabs. Use
 **增加服务商** to configure another installed provider, or **安装更多 AI 服务商** to open the plugin search.
+The add-provider button sits beside the standalone tabs and opens a provider menu.
+Each tab contains provider settings, model/testing controls and a save button.
 Each provider has one connection; configuring another provider retains existing connections. Saving a
 connection alone does not change the global default. Select a model and click **设为默认模型**, then
 save, to change the default explicitly. Editing the model on the current default tab updates that default
@@ -88,6 +90,9 @@ unlocked. No database migration is required.
 All ten feature switches are built into **系统设置 → 智能内容** (`/admin/options/smart-content`).
 The core settings API `/admin/api/smart-content` requires administrator access and CSRF validation for writes.
 Settings are stored in the existing `ai_content_features` option row; no AI Content plugin is needed.
+Each capability uses a description/control row, with its model picker shown below the switch only when enabled.
+On narrow screens these columns stack. Disabling a feature hides the picker but preserves its binding,
+including an unchanged unavailable binding; enabling it again requires a valid model.
 Each capability can select a provider/model independently. The picker lists only configured providers and
 compatible models (image for image generation/editing, text for the other capabilities). Bindings are stored
 in the `ai_content_models` option row, separately from switches and the global default. Title, summary,

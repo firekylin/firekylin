@@ -34,16 +34,19 @@ class AIClient {
     return await this.featureModels?.get() || {};
   }
 
-  async setFeatureModels(bindings) {
+  async setFeatureModels(bindings, {disabledFeatures = []} = {}) {
     if (!bindings || typeof bindings !== 'object' || Array.isArray(bindings)) {
       throw Object.assign(new Error('Invalid feature models'), {status: 400});
     }
+    const current = await this.getFeatureModels();
     for (const [feature, selection] of Object.entries(bindings)) {
       if (!Object.hasOwn(DEFAULTS, feature) || !selection || typeof selection !== 'object' ||
           typeof selection.provider !== 'string' || typeof selection.model !== 'string') {
         throw Object.assign(new Error('Invalid feature model'), {status: 400});
       }
-      if (!await this.availableSelection(selection, feature === 'image' ? 'image' : 'text')) {
+      const retainedWhileDisabled = disabledFeatures.includes(feature) &&
+        current[feature]?.provider === selection.provider && current[feature]?.model === selection.model;
+      if (!retainedWhileDisabled && !await this.availableSelection(selection, feature === 'image' ? 'image' : 'text')) {
         throw Object.assign(new Error(`AI model is unavailable or incompatible: ${feature}`), {status: 400});
       }
     }

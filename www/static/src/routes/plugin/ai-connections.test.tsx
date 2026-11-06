@@ -39,11 +39,11 @@ describe('AI connections', () => {
         const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
         expect(view.getByText('系统设置')).toBeInTheDocument();
         expect(view.container.querySelector('h3.page-title')).toHaveTextContent('AI 连接');
-        await waitFor(() => expect(view.getByText('选择要增加的服务商')).toBeInTheDocument());
+        await waitFor(() => expect(view.getByText('尚未配置 AI 连接，请点击“增加服务商”。')).toBeInTheDocument());
         expect(view.queryByText('未配置')).not.toBeInTheDocument();
-        expect(view.getByRole('button', {name: '保存'})).toBeDisabled();
-        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
-        fireEvent.click(view.getByText('DeepSeek'));
+        expect(view.queryByRole('button', {name: '保存'})).toBeNull();
+        fireEvent.click(view.getByRole('button', {name: '增加服务商'}));
+        fireEvent.click(view.getByRole('menuitem', {name: 'DeepSeek'}));
         fireEvent.click(view.getByRole('button', {name: '设为默认模型'}));
         await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeEnabled());
         fireEvent.click(within(view.container).getByRole('button', {name: '保存'}));
@@ -136,8 +136,7 @@ describe('AI connections', () => {
         await waitFor(() => expect(view.getByLabelText('API Key')).toHaveValue('first-key'));
         fireEvent.change(view.getByLabelText('API Base URL'), {target: {value: 'https://edited.example.com'}});
         fireEvent.click(view.getByRole('button', {name: '增加服务商'}));
-        fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
-        fireEvent.click(view.getByText('second', {selector: '.ant-select-item-option-content'}));
+        fireEvent.click(view.getByRole('menuitem', {name: 'second'}));
         await waitFor(() => expect(view.getByLabelText('API Base URL')).toHaveValue('https://second.example.com'));
         expect(view.getByLabelText('API Key')).toHaveValue('');
         fireEvent.click(view.getByRole('tab', {name: 'first'}));
@@ -167,8 +166,7 @@ it('manages independent provider tabs, saves without replacing the default and r
     await view.findByRole('tab', {name: 'first'});
     expect(view.queryByRole('tab', {name: 'second'})).toBeNull();
     fireEvent.click(view.getByRole('button', {name: '增加服务商'}));
-    fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 服务商'}));
-    fireEvent.click(view.getByText('second', {selector: '.ant-select-item-option-content'}));
+    fireEvent.click(view.getByRole('menuitem', {name: 'second'}));
     const key = await view.findByLabelText('API Key');
     fireEvent.change(key, {target: {value: 'new-test-key'}});
     expect(view.getByRole('button', {name: '测试连接'})).toBeDisabled();
@@ -184,4 +182,42 @@ it('manages independent provider tabs, saves without replacing the default and r
         {action: 'remove', provider: 'second'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
     await waitFor(() => expect(view.queryByRole('tab', {name: 'second'})).toBeNull());
     expect(view.getByRole('tab', {name: 'first'})).toHaveAttribute('aria-selected', 'true');
+});
+
+it('shows standalone tabs and returns keyboard focus to the add button on Escape', async() => {
+    window.SysConfig = {pluginAdmin: [], config: {}, csrfToken: 'token', userInfo: {id: 1, name: 'Admin', type: 1}} as any;
+    vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {providers: [{id: 'first', label: 'First', configured: true,
+        models: [{id: 'text', label: 'Text', selected: true}]}]}}) as any);
+    const view = render(<MemoryRouter><AIConnections /></MemoryRouter>);
+    const tab = await view.findByRole('tab', {name: 'First'});
+    expect(tab.closest('.ant-card')).toBeNull();
+    expect(view.getByRole('tabpanel')).toContainElement(view.getByRole('button', {name: '保存'}));
+    const add = view.getByRole('button', {name: '增加服务商'});
+    fireEvent.click(add);
+    const menu = await view.findByRole('menu');
+    expect(add).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(menu, {key: 'Escape'});
+    expect(add).toHaveAttribute('aria-expanded', 'false');
+    expect(add).toHaveFocus();
+});
+it('retries connection and provider form failures and disables edits while loading', async() => {
+    window.SysConfig = {config: {}, csrfToken: 'token', userInfo: {id: 1, name: 'Admin', type: 1},
+        pluginAdmin: [{id: 'first', forms: [{id: 'settings', title: 'Provider 设置', fields: [{name: 'apiKey', label: 'API Key', type: 'password'}]}]}]} as any;
+    const pending = new Subject<any>();
+    vi.mocked(http.get).mockReturnValueOnce(of({errno: 1, errmsg: '列表读取失败'}) as any)
+        .mockReturnValueOnce(of({errno: 0, data: {providers: [{id: 'first', label: 'First', configured: true,
+            admin: {pluginId: 'first', formId: 'settings', testActionId: 'test'}, models: [{id: 'text', label: 'Text', selected: true}]}]}}) as any)
+        .mockReturnValueOnce(of({errno: 1, errmsg: '配置读取失败'}) as any)
+        .mockReturnValueOnce(pending as any);
+    const view = render(<MemoryRouter><AIConnections /></MemoryRouter>);
+    await view.findByText('列表读取失败');
+    fireEvent.click(view.getByRole('button', {name: /^重\s*试$/}));
+    await view.findByText('配置读取失败');
+    expect(view.getByRole('button', {name: '保存'})).toBeDisabled();
+    fireEvent.click(view.getByRole('button', {name: /^重\s*试$/}));
+    expect(view.getByRole('button', {name: '增加服务商'})).toBeDisabled();
+    pending.next({errno: 0, data: {}});
+    await view.findByLabelText('API Key');
+    expect(view.getByRole('button', {name: '增加服务商'})).toBeEnabled();
+    expect(view.queryByText('配置读取失败')).toBeNull();
 });

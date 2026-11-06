@@ -2,6 +2,8 @@ import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, message, Select, Spin, Switch} from 'antd';
 import axios from 'axios';
 import BreadCrumb from '../../../components/breadcrumb';
+import '../ai-settings.less';
+import './smart-content.less';
 
 export const CONTENT_FEATURES = [
     {name: 'image', label: '图片生成和编辑', description: '根据文章生成 16:9 封面，或在媒体管理中通过提示词生成、优化图片，确认后上传到媒体库。'},
@@ -18,6 +20,7 @@ export const CONTENT_FEATURES = [
 
 export default function SmartContentSettings(props) {
     const [form] = Form.useForm();
+    const enabledFeatures = Form.useWatch('features', form) || {};
     const [providers, setProviders] = useState<Array<{id: string; label: string; configured?: boolean;
         models: Array<{id: string; label: string; capabilities: string[]}>}>>([]);
     const [bindings, setBindings] = useState<Record<string, {provider: string; model: string}>>({});
@@ -62,7 +65,7 @@ export default function SmartContentSettings(props) {
         } catch (error: any) { message.error(error.response?.data?.errmsg || error.message || '保存设置失败') }
         finally { setSaving(false) }
     };
-    return <div className="fk-content-wrap">
+    return <div className="fk-content-wrap ai-settings-page">
         <BreadCrumb {...props}/>
         <div className="page-list">
             <h3 className="page-title">智能内容</h3>
@@ -81,18 +84,29 @@ export default function SmartContentSettings(props) {
                             const saved = bindings[field.name];
                             const savedValue = saved && JSON.stringify([saved.provider, saved.model]);
                             const unavailable = savedValue && !groups.some(group => group.options.some(option => option.value === savedValue));
-                            return <div key={field.name}>
-                                <Form.Item name={['features', field.name]} label={field.label}
-                                    valuePropName="checked" extra={field.description}><Switch /></Form.Item>
-                                <Form.Item name={['models', field.name]} label={`${field.label}使用的模型`}
-                                    rules={[{validator: (_, value) => value && !groups.some(group => group.options.some(option => option.value === value))
-                                        ? Promise.reject(new Error('请选择可用模型或恢复默认')) : Promise.resolve()}]}>
-                                    <Select aria-label={`${field.label}使用的模型`} options={[
-                                        {label: field.name === 'image' ? '自动选择已配置的图片模型' : '使用全局默认模型', value: ''},
-                                        ...(unavailable ? [{label: `${saved.provider} / ${saved.model}（不可用，请重新选择）`, value: savedValue}] : []),
-                                        ...groups
-                                    ]} />
-                                </Form.Item>
+                            return <div key={field.name} className="smart-content-feature">
+                                <div className="smart-content-description">
+                                    <h4 id={`feature-${field.name}`}>{field.label}</h4>
+                                    <p id={`description-${field.name}`}>{field.description}</p>
+                                </div>
+                                <div className="smart-content-controls">
+                                    <Form.Item name={['features', field.name]}
+                                        valuePropName="checked"><Switch aria-labelledby={`feature-${field.name}`}
+                                            aria-describedby={`description-${field.name}`} /></Form.Item>
+                                    <Form.Item name={['models', field.name]} hidden={!enabledFeatures[field.name]}
+                                        rules={[{validator: (_, value) => {
+                                            const retainedWhileDisabled = !form.getFieldValue(['features', field.name]) && value === savedValue;
+                                            const available = groups.some(group => group.options.some(option => option.value === value));
+                                            return !value || retainedWhileDisabled || available ? Promise.resolve()
+                                                : Promise.reject(new Error('请选择可用模型或恢复默认'));
+                                        }}]}>
+                                        <Select aria-label={`${field.label}使用的模型`} options={[
+                                            {label: field.name === 'image' ? '自动选择已配置的图片模型' : '使用全局默认模型', value: ''},
+                                            ...(unavailable ? [{label: `${saved.provider} / ${saved.model}（不可用，请重新选择）`, value: savedValue}] : []),
+                                            ...groups
+                                        ]} />
+                                    </Form.Item>
+                                </div>
                             </div>;
                         })}
                         <Button type="primary" htmlType="submit" disabled={loading} loading={saving}>保存</Button>

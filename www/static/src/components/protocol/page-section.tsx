@@ -118,8 +118,8 @@ function TableSection({node, context}: {node: PageSection; context: PageSectionC
         }))} dataSource={rows} />, controls);
 }
 
-function PluginForm({item, values, submit, form, hideSubmit, onValuesChange, clearOnDestroy}: {item: any; values: any;
-    submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void; clearOnDestroy?: boolean}) {
+function PluginForm({item, values, submit, form, hideSubmit, onValuesChange, clearOnDestroy, disabled}: {item: any; values: any;
+    submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void; clearOnDestroy?: boolean; disabled?: boolean}) {
     const renderField = (field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
         hidden={field.type === 'hidden'} preserve={false}
         valuePropName={field.type === 'switch' ? 'checked' : 'value'}
@@ -127,7 +127,7 @@ function PluginForm({item, values, submit, form, hideSubmit, onValuesChange, cle
         <FormField field={field} />
     </Form.Item>;
     return <Card title={item.title} style={{marginBottom: 16}}>
-        <Form form={form} clearOnDestroy={clearOnDestroy} layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
+        <Form form={form} disabled={disabled} clearOnDestroy={clearOnDestroy} layout="vertical" initialValues={values} key={JSON.stringify(values || {})}
             onValuesChange={onValuesChange}
             onFinish={formValues => submit(item.id, formValues)}>
             {item.fields.map((field: FormFieldSchema) => field.visibleWhen
@@ -207,9 +207,9 @@ export function PageSections({sections, context}: {sections: PageSection[]; cont
     return <ProtocolList nodes={sections} context={context} renderers={pageSectionRenderers} />;
 }
 
-export function PageForm({item, values, submit, form, hideSubmit, onValuesChange, clearOnDestroy}: {item: any; values: any;
-    submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void; clearOnDestroy?: boolean}) {
-    return <PluginForm item={item} values={values} submit={submit} form={form}
+export function PageForm({item, values, submit, form, hideSubmit, onValuesChange, clearOnDestroy, disabled}: {item: any; values: any;
+    submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void; clearOnDestroy?: boolean; disabled?: boolean}) {
+    return <PluginForm item={item} values={values} submit={submit} form={form} disabled={disabled}
         hideSubmit={hideSubmit} onValuesChange={onValuesChange} clearOnDestroy={clearOnDestroy} />;
 }
 

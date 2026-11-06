@@ -24,7 +24,8 @@ it('shows all described switches without a plugin or language setting and saves 
     }
     expect(title).not.toBeChecked();
     expect(screen.getByText(/正文超过 250 个字时，生成标题建议/)).toBeInTheDocument();
-    expect(screen.getAllByRole('combobox')).toHaveLength(10);
+    expect(screen.getAllByRole('combobox')).toHaveLength(3);
+    expect(screen.queryByRole('combobox', {name: '生成标题使用的模型'})).toBeNull();
     fireEvent.click(title);
     fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
@@ -62,4 +63,20 @@ it('keeps stale model bindings visible and requires an explicit replacement', as
     fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
         {features: expect.objectContaining({title: true}), models: {}}, expect.anything()));
+});
+it('hides disabled model pickers without losing saved bindings and restores them on enabling', async() => {
+    vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {features: {title: false},
+        models: {title: {provider: 'removed', model: 'old'}}, providers: []}}});
+    render(<MemoryRouter initialEntries={['/options/smart-content']}><SmartContentSettings /></MemoryRouter>);
+    const toggle = screen.getByRole('switch', {name: '生成标题'});
+    await waitFor(() => expect(toggle).not.toBeDisabled());
+    expect(screen.queryByRole('combobox', {name: '生成标题使用的模型'})).toBeNull();
+    fireEvent.click(toggle);
+    expect(await screen.findByRole('combobox', {name: '生成标题使用的模型'})).toBeInTheDocument();
+    expect(screen.getByText('removed / old（不可用，请重新选择）')).toBeVisible();
+    fireEvent.click(screen.getByRole('switch', {name: '生成标题'}));
+    await waitFor(() => expect(screen.getByRole('switch', {name: '生成标题'})).not.toBeChecked());
+    fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
+    await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
+        {features: expect.objectContaining({title: false}), models: {title: {provider: 'removed', model: 'old'}}}, expect.anything()));
 });

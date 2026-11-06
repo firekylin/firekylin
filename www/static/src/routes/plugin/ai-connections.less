@@ -1,0 +1,27 @@
+.ai-connections {
+  min-width: 0;
+  .ai-provider-tabs {
+    min-width: 0;
+    > .ant-tabs-nav {
+      margin-bottom: 24px;
+      .ant-tabs-nav-wrap { min-width: 0; }
+      .ant-tabs-extra-content { flex-shrink: 0; }
+      .ant-tabs-tab-btn { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+    }
+  }
+  .ai-provider-add {
+    height: auto;
+    padding: 12px 8px;
+    margin-left: 8px;
+    border-radius: 0;
+    &:focus-visible { outline: 2px solid #1677ff; outline-offset: -2px; }
+  }
+  .ai-connection-panel { min-width: 0; }
+  .ant-select { min-width: 0; }
+  .ant-alert { margin-bottom: 16px; }
+}
+.ai-provider-menu {
+  max-width: calc(100vw - 24px);
+  .ant-dropdown-menu { max-height: calc(100dvh - 100px); overflow-y: auto; }
+  .ant-dropdown-menu-item { white-space: normal; overflow-wrap: anywhere; }
+}

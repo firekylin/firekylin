@@ -28,7 +28,7 @@ module.exports = class extends Base {
     if (models !== undefined) {
       const ai = global.firekylin?.plugins?.ai;
       if (!ai) return this.ctx.throw(400, 'AI service unavailable');
-      await ai.setFeatureModels(models);
+      await ai.setFeatureModels(models, {disabledFeatures: Object.keys(next).filter(key => !next[key])});
     }
     await model.updateOptions(FEATURES_KEY, JSON.stringify(next));
     return this.success({features: next, models: await global.firekylin?.plugins?.ai?.getFeatureModels() || {},

@@ -78,3 +78,22 @@ test('smart content returns model choices and validates bindings before saving f
   await instance.postAction();
   assert.deepEqual((await instance.getAction()).data.models, {});
 });
+
+test('disabled features retain unavailable bindings but cannot introduce new invalid selections', async t => {
+  const {instance, rows} = setup(t);
+  const {PluginManager} = require('../../src/plugin/manager');
+  const {AIStore} = require('../../src/ai/store');
+  rows.ai_content_models = JSON.stringify({summary: {provider: 'removed', model: 'old'}});
+  const manager = new PluginManager({aiStore: new AIStore({getOptions: async() => rows,
+    getCredentialValue: async() => undefined, updateOptions: async(key, value) => {rows[key] = value}})});
+  global.firekylin = {plugins: manager};
+  instance.ctx.headers['X-CSRF-Token'] = auth.csrfToken(instance.ctx);
+  const models = {summary: {provider: 'removed', model: 'old'}};
+  instance.post = () => ({features: {summary: false}, models});
+  await instance.postAction();
+  assert.deepEqual(JSON.parse(rows.ai_content_models), models);
+  instance.post = () => ({features: {summary: true}, models});
+  await assert.rejects(instance.postAction(), {status: 400});
+  instance.post = () => ({features: {summary: false}, models: {summary: {provider: 'removed', model: 'new'}}});
+  await assert.rejects(instance.postAction(), {status: 400});
+});

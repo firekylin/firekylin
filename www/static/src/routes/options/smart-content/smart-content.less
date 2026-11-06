@@ -1,0 +1,23 @@
+.smart-content-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 34%);
+  gap: 16px 32px;
+  padding: 24px 0;
+  border-bottom: 1px solid #f0f0f0;
+  &:first-child { padding-top: 0; }
+  &:last-of-type { margin-bottom: 24px; }
+  .smart-content-description {
+    min-width: 0;
+    h4 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+    p { margin: 0; color: #666; line-height: 1.7; overflow-wrap: anywhere; }
+  }
+  .smart-content-controls {
+    min-width: 0;
+    .ant-form-item { margin-bottom: 12px; }
+    .ant-form-item:last-child { margin-bottom: 0; }
+    .ant-select { width: 100%; min-width: 0; }
+  }
+}
+@media (max-width: 640px) {
+  .smart-content-feature { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+}
