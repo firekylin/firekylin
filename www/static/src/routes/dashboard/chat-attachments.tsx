@@ -1,4 +1,6 @@
-import {Button} from 'antd';
+import {useState} from 'react';
+import {Button, Image} from 'antd';
+import {CloseOutlined, FileOutlined} from '@ant-design/icons';
 export type ChatAttachment = {name: string; size: number} & (
     {kind?: 'text'; content: string} | {kind: 'image'; mimeType: string; data: string; width?: number; height?: number}
 );
@@ -52,4 +54,28 @@ export function ChatAttachments({files, remove, disabled}: {
         </details>
         {remove && <Button size="small" disabled={disabled} aria-label={`移除附件 ${file.name}`} onClick={() => remove(index)}>移除</Button>}
     </div>)}</div>;
+}
+
+export function DraftAttachments({files, remove, disabled}: {
+    files: ChatAttachment[]; remove: (index: number) => void; disabled?: boolean;
+}) {
+    const [preview, setPreview] = useState({open: false, current: 0});
+    const images = files.filter(file => file.kind === 'image');
+    return <>{preview.open && <Image.PreviewGroup items={images.map(file => ({src: `data:${file.mimeType};base64,${file.data}`, alt: file.name}))}
+        preview={{...preview, onOpenChange: open => setPreview(value => ({...value, open})),
+            onChange: current => setPreview(value => ({...value, current}))}} />}
+        <div className="chat-draft-attachments" aria-label="待发送附件">
+            {files.map((file, index) => <div className="chat-draft-card" key={index}>
+                {file.kind === 'image' ? <button type="button" className="chat-draft-image" aria-label={`预览图片 ${file.name}`}
+                    onClick={() => setPreview({open: true, current: images.indexOf(file)})}>
+                    <img src={`data:${file.mimeType};base64,${file.data}`} alt={file.name} />
+                </button> : <div className="chat-draft-file" title={file.name}>
+                    <FileOutlined className="chat-draft-file-icon" />
+                    <span className="chat-draft-file-name"><FileOutlined /><span>{file.name}</span></span>
+                </div>}
+                <button type="button" className="chat-draft-remove" disabled={disabled} aria-label={`移除附件 ${file.name}`}
+                    onClick={() => {setPreview(value => ({...value, open: false})); remove(index)}}><CloseOutlined /></button>
+            </div>)}
+        </div>
+    </>;
 }

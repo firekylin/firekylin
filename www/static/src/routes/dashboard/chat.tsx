@@ -9,7 +9,7 @@ import {PaperClipOutlined, ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, Edi
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
-import {ChatAttachments, ChatAttachment, readChatFiles, attachmentAccept} from './chat-attachments';
+import {DraftAttachments, ChatAttachment, readChatFiles, attachmentAccept} from './chat-attachments';
 import {http} from '../../utils/http';
 import {openArticlePreview} from '../../components/article/preview';
 const ChatInput = React.forwardRef<any, any>((props, ref) => <Input.TextArea {...props} ref={ref} aria-label="聊天消息" />);
@@ -236,9 +236,9 @@ function Chat({children, onConversationChange}: {
                         {({onTrigger, onKeyDown, open}) => <Sender className="chat-composer" value={input} components={senderComponents}
                             placeholder={pending ? '请先确认或取消上方操作' : '帮我写文章、整理内容或管理博客… 输入 / 查看快捷指令'}
                             autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} disabled={pending ? true : undefined} allowSpeech
-                            header={attachments.length > 0 && <Sender.Header title="附件" open closable={false}>
-                                <ChatAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
-                            </Sender.Header>}
+                            header={attachments.length > 0 && <div className="chat-draft-header">
+                                <DraftAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
+                            </div>}
                             loading={sending || store.busy || Boolean(store.session?.active_run)}
                             onChange={value => {setInput(value); onTrigger(value === '/' ? {} : false)}}
                             onKeyDown={event => {onKeyDown(event); if (open && event.key === 'Enter') return false; return undefined}}

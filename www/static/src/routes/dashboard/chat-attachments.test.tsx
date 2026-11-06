@@ -1,6 +1,6 @@
-import {render, screen, cleanup} from '@testing-library/react';
-import {it, expect, afterEach} from 'vitest';
-import {readChatFiles, ChatAttachments} from './chat-attachments';
+import {render, screen, cleanup, fireEvent} from '@testing-library/react';
+import {it, expect, afterEach, vi} from 'vitest';
+import {readChatFiles, ChatAttachments, DraftAttachments} from './chat-attachments';
 afterEach(cleanup);
 it('rejects binary, non-UTF8, unsupported, empty, oversized and excessive files', async() => {
     for (const files of [
@@ -30,4 +30,20 @@ it('reads image bytes for preview and rejects unsupported model, format and size
     expect(screen.getByRole('img', {name: 'red.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
     await expect(readChatFiles([new File(['<svg></svg>'], 'fake.png', {type: 'image/png'})], [], true)).rejects.toThrow('格式');
     await expect(readChatFiles([new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'big.png')], [], true)).rejects.toThrow('2 MiB');
+});
+
+it('shows draft cards, opens the selected image in a lightbox and removes the correct file', async() => {
+    const remove = vi.fn();
+    const files = [{name: 'notes.md', content: 'private text', size: 12},
+        {kind: 'image' as const, name: 'red.png', mimeType: 'image/png', data: png, size: 92}];
+    const {rerender} = render(<DraftAttachments files={files} remove={remove} />);
+    expect(screen.getByText('notes.md')).toBeInTheDocument();
+    expect(screen.queryByText('private text')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', {name: '预览图片 red.png'}));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(document, {key: 'Escape', keyCode: 27});
+    fireEvent.click(screen.getByRole('button', {name: '移除附件 red.png'}));
+    expect(remove).toHaveBeenCalledWith(1);
+    rerender(<DraftAttachments files={files} remove={remove} disabled />);
+    expect(screen.getByRole('button', {name: '移除附件 notes.md'})).toBeDisabled();
 });

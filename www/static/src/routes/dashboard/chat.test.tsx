@@ -35,6 +35,7 @@ it('shows overview chat entry, sends first message, persists route and renders M
     expect(screen.getByText('今天想写点什么？')).toBeInTheDocument();
     await screen.findByText('博客技能已启动');
     fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '你好'}});
+    await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
     fireEvent.click(screen.getByLabelText('发送消息'));
     expect(await screen.findByText('已收到')).toBeInTheDocument();
     expect(requests.find(row => row.body?.operation === 'send').body).toMatchObject({session: 'one', content: '你好'});
@@ -93,6 +94,7 @@ it('sending with history already expanded keeps it expanded', async() => {
     await screen.findByLabelText('聊天消息');
     fireEvent.click(screen.getByRole('button', {name: '展开会话列表'}));
     fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '你好'}});
+    await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
     fireEvent.click(screen.getByLabelText('发送消息'));
     await screen.findByText('已收到');
     expect(screen.getByRole('button', {name: '收起会话列表'})).toHaveAttribute('aria-expanded', 'true');
@@ -213,12 +215,13 @@ it('selects, previews, removes and sends text attachments without an additional 
     await screen.findByLabelText('选择聊天附件');
     const file = new File(['附件正文'], 'notes.md', {type: 'text/markdown'});
     fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
-    await screen.findByText('notes.md · 12 B · 文本附件');
-    expect(screen.getByText('附件正文')).toBeInTheDocument();
+    await screen.findByText('notes.md');
+    expect(screen.queryByText('附件正文')).not.toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('移除附件 notes.md'));
     expect(screen.queryByText('附件正文')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
     await screen.findByLabelText('移除附件 notes.md');
+    await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
     fireEvent.click(screen.getByLabelText('发送消息'));
     await screen.findByText('已收到');
     expect(requests.find(row => row.body?.operation === 'send').body.attachments).toEqual([{name: 'notes.md', content: '附件正文', size: 12}]);
@@ -238,6 +241,7 @@ it('keeps files and prompt when the server rejects a send', async() => {
     fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [new File(['text'], 'notes.txt')]}});
     await screen.findByLabelText('移除附件 notes.txt');
     fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '阅读文件'}});
+    await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
     fireEvent.click(screen.getByLabelText('发送消息'));
     await screen.findByText('模型不可用');
     await waitFor(() => expect(screen.getByLabelText('聊天消息')).toHaveValue('阅读文件'));
@@ -256,7 +260,8 @@ it('sends actual image bytes, restores previews on refresh and removes draft ima
         expect(screen.queryByRole('img', {name: 'red.png'})).not.toBeInTheDocument();
         fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
         await screen.findByRole('img', {name: 'red.png'});
-        fireEvent.click(screen.getByLabelText('发送消息'));
+        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+    fireEvent.click(screen.getByLabelText('发送消息'));
         await screen.findByText('已收到');
         expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);
         expect(screen.queryByLabelText('移除附件 red.png')).not.toBeInTheDocument();

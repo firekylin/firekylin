@@ -44,8 +44,6 @@
     .chat-composer-actions .ant-select { width: 240px; min-width: 0; max-width: 100%; }
     .chat-composer-actions > button { flex-shrink: 0; }
     .chat-skill-status { flex-shrink: 0; font-size: 12px; }
-    .chat-composer .chat-image-preview { max-height: 140px; }
-    .chat-composer .chat-attachments { max-height: 220px; overflow: auto; }
     .chat-composer-toolbar .ant-select-selection-item { font-size: 12px; }
     .chat-footnote { display: block; text-align: center; margin: 10px 0 0; }
     .chat-connect { border: 1px solid #eee; border-radius: 8px; padding: 16px; }
@@ -112,3 +110,19 @@
     .chat-workspace .chat-history-shell { position: absolute; top: 0; bottom: 0; right: 0; width: 0; z-index: 5; }
     .chat-workspace .chat-history-shell.is-open { width: var(--chat-history-width); box-shadow: -4px 0 16px #00000012; }
 }
+
+.chat-draft-header { padding: 12px 12px 0; }
+.chat-draft-attachments { display: flex; gap: 12px; overflow-x: auto; padding: 6px; }
+.chat-draft-card { position: relative; flex: 0 0 112px; width: 112px; height: 112px; }
+.chat-draft-image, .chat-draft-file { width: 100%; height: 100%; border-radius: 10px; overflow: hidden; border: 1px solid #e5e5e5; background: #f0f0f0; }
+.chat-draft-image { display: block; padding: 0; cursor: zoom-in; }
+.chat-draft-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chat-draft-file { display: flex; flex-direction: column; justify-content: flex-end; }
+.chat-draft-file-icon { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #777; }
+.chat-draft-file-name { display: flex; align-items: center; gap: 6px; background: #fafafa; padding: 8px; font-size: 12px; }
+.chat-draft-file-name > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-draft-remove { position: absolute; top: -5px; right: -5px; width: 24px; height: 24px; padding: 0; border: 2px solid white; border-radius: 50%; background: #222; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity .15s; }
+.chat-draft-card:hover .chat-draft-remove, .chat-draft-card:focus-within .chat-draft-remove { opacity: 1; }
+.chat-draft-remove:disabled { cursor: not-allowed; background: #999; }
+.chat-draft-image:focus-visible, .chat-draft-remove:focus-visible { outline: 2px solid #1677ff; outline-offset: 2px; }
+@media (hover: none), (pointer: coarse) { .chat-draft-remove { opacity: 1; } }
