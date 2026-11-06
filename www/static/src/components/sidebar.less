@@ -6,7 +6,21 @@
   transition: width 200ms ease;
 
   .sidebar-scroll { flex: 1; min-height: 0; overflow: auto; }
-  .mod-logo { transition: opacity 200ms ease; white-space: nowrap; }
+  .mod-logo {
+    height: auto;
+    padding: 16px 8px;
+    h1 { float: none; padding: 0; width: 100%; font-size: 18px; line-height: 24px; }
+    a { display: flex; flex-direction: column; align-items: center; color: #fff; }
+    img { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; }
+    .sidebar-site-title {
+      display: block;
+      max-width: 100%;
+      margin-top: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
   .sidebar-label { transition: opacity 200ms ease; }
   .mod-bar { margin: 10px 0 0; }
   .mod-bar > li > a { display: flex; align-items: center; white-space: nowrap; }
@@ -32,9 +46,9 @@
   }
   &.is-collapsed {
     width: 64px;
-    .mod-logo { opacity: 0; visibility: hidden; }
+    .mod-logo .sidebar-site-title { display: none; }
     ul { width: 64px; }
-    .mod-bar > li > a { padding-left: 0; justify-content: center; }
+    .mod-bar > li > a { padding-left: 0; justify-content: center; border-left: 0; border-right: 0; }
     .sidebar-label { opacity: 0; position: absolute; pointer-events: none; }
     + .content { --sidebar-offset: 64px; }
   }
@@ -61,7 +75,7 @@
     display: block;
     box-sizing: border-box;
     height: 48px;
-    padding: 0 8px 0 1px;
+    padding: 0 16px;
     color: #999;
     background: #3f3f3f;
     font-size: 14px;

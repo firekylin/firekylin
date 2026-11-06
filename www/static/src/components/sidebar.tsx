@@ -30,6 +30,7 @@ function createSidebarState() {
     return {routes: [...InitiateRoutes(themePages), ...pluginRoutes], isActive: {}};
 }
 const STORAGE_KEY = 'firekylin.sidebar.collapsed';
+const DEFAULT_LOGO = '/static/img/firekylin.jpg';
 
 function SidebarEntry({route, collapsed, pathname}: any) {
     const [open, setOpen] = React.useState(false);
@@ -159,7 +160,15 @@ function SideBar(_props: any) {
         <nav className={`fk-side ps-container${collapsed ? ' is-collapsed' : ''}`} id="fk-side" aria-label="后台导航">
             <div className="sidebar-scroll">
                 <div className="mod"><div className="mod-logo"><h1>
-                    <a href="/" aria-label={window.SysConfig.options.title}>{window.SysConfig.options.title}</a>
+                    <a href="/" aria-label={window.SysConfig.options.title}>
+                        <img src={window.SysConfig.options.logo_url || DEFAULT_LOGO} alt=""
+                            onError={event => {
+                                if (event.currentTarget.getAttribute('src') !== DEFAULT_LOGO) {
+                                    event.currentTarget.src = DEFAULT_LOGO;
+                                }
+                            }} />
+                        <span className="sidebar-site-title">{window.SysConfig.options.title}</span>
+                    </a>
                 </h1></div></div>
                 <ul className="mod-bar" id="sidebar-menu">
                     {routes.map(route => <SidebarEntry key={route.url} route={route} collapsed={collapsed} pathname={pathname} />)}

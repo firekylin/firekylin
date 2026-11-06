@@ -152,3 +152,31 @@ it('keeps long plugin flyouts keyboard accessible and returns Tab to navigation'
     expect(screen.getByRole('button', {name: '展开侧边栏'})).toHaveFocus();
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
 });
+
+
+it('keeps the configured site logo and accessible home link when toggled', () => {
+    window.SysConfig.options.logo_url = '/uploads/site-logo.png';
+    renderSidebar();
+    const home = screen.getByRole('link', {name: 'Blog'});
+    const logo = home.querySelector('img')!;
+    expect(logo).toHaveAttribute('src', '/uploads/site-logo.png');
+    expect(logo).toHaveAttribute('alt', '');
+    expect(home).toHaveAttribute('href', '/');
+    fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
+    expect(screen.getByRole('link', {name: 'Blog'})).toContainElement(logo);
+    fireEvent.click(screen.getByRole('button', {name: '展开侧边栏'}));
+    expect(home.querySelector('.sidebar-site-title')).toHaveTextContent('Blog');
+});
+
+it('uses the bundled logo if no site logo is configured or loading fails', () => {
+    const view = renderSidebar();
+    expect(screen.getByRole('link', {name: 'Blog'}).querySelector('img')).toHaveAttribute('src', '/static/img/firekylin.jpg');
+    view.unmount();
+    window.SysConfig.options.logo_url = '/missing.png';
+    renderSidebar();
+    const logo = screen.getByRole('link', {name: 'Blog'}).querySelector('img')!;
+    fireEvent.error(logo);
+    expect(logo).toHaveAttribute('src', '/static/img/firekylin.jpg');
+    fireEvent.error(logo);
+    expect(logo).toHaveAttribute('src', '/static/img/firekylin.jpg');
+});
