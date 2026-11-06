@@ -1,5 +1,6 @@
 'use strict';
 
+const {streamResponse, consumeStream} = require('./stream');
 const images = require('../service/ai-images');
 const {DEFAULTS, featureFor} = require('../service/ai-editor-features');
 
@@ -150,11 +151,13 @@ class AIClient {
         if (signal.aborted) onAbort();
       });
       if (signal.aborted) return await aborted;
-      const result = await Promise.race([Promise.resolve().then(() => provider.generate(
-        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images,
-          ...(context.onText ? {
-          onText: delta => { if (active && !signal.aborted) context.onText(delta) }
-        } : {})})), aborted]);
+      const providerContext = {...context, signal, reportUsage, images, streamResponse,
+        ...(context.onText ? {onText: delta => {if (active && !signal.aborted) context.onText(delta)}} : {})};
+      // Keep the timeout/audit scope alive until the raw provider stream is consumed.
+      const result = await Promise.race([Promise.resolve().then(async() => {
+        const output = await provider.generate({...request, provider: providerId, model: modelId}, providerContext);
+        return output?.stream ? consumeStream(output, providerContext) : output;
+      }), aborted]);
       return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
     } finally {
       active = false;
