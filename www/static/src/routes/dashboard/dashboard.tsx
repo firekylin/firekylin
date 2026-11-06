@@ -7,7 +7,7 @@ import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
 const confirm = Modal.confirm;
-const Chat = React.lazy(() => import('./chat'));
+import Chat from './chat';
 
 const UPDATE_STEPS = [
     [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
@@ -275,9 +275,7 @@ export function DashBoard(props: DashBoardProps) {
                         </p>
                     ) : null}
                     {Number(window.SysConfig.userInfo.type) === 1 ? (
-                        <React.Suspense fallback={<p>正在加载聊天模块…</p>}>
                             <Chat onConversationChange={setChatting}>{overviewDetails}</Chat>
-                        </React.Suspense>
                     ) : (
                         <>
                             <h3 style={{ marginBottom: '30px' }}>网站概要</h3>

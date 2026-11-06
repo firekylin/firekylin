@@ -1,13 +1,15 @@
 import {cleanup, fireEvent, render, waitFor} from '@testing-library/react';
 import axios from 'axios';
+import {message} from 'antd';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {MemoryRouter} from '../../utils/router';
 import ExtensionSettings from './extension-settings';
 
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
 vi.mock('../../components/breadcrumb', () => ({default: () => null}));
-afterEach(cleanup);
+afterEach(() => {cleanup(); vi.restoreAllMocks()});
 beforeEach(() => {
+    vi.spyOn(message, 'success').mockReturnValue(vi.fn() as any);
     window.SysConfig = {csrfToken: 'test-token'} as any;
     vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {settings: {
         pluginRegistry: 'https://firekylin.lithub.cc/plugins/plugin', themeRegistry: 'https://firekylin.lithub.cc/plugins/theme'

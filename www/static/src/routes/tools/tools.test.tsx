@@ -3,9 +3,9 @@ import {afterEach, expect, it, vi} from 'vitest';
 import {MemoryRouter, Route, Switch, useLocation} from '../../utils/router';
 import Tools from './tools';
 import Options from '../options/options';
-vi.mock('../options/ai-logs/ai-logs', () => ({default: () => <p>审计页面</p>}));
-vi.mock('../options/import/import', () => ({default: () => <p>导入页面</p>}));
-vi.mock('../options/export/export', () => ({default: () => <p>导出页面</p>}));
+vi.mock('./ai-logs/ai-logs', () => ({default: () => <p>审计页面</p>}));
+vi.mock('./import/import', () => ({default: () => <p>导入页面</p>}));
+vi.mock('./export/export', () => ({default: () => <p>导出页面</p>}));
 vi.mock('../../utils/auth', () => ({auth: {token: ''}}));
 afterEach(cleanup);
 function Location() {const location = useLocation(); return <output>{location.pathname + location.search + location.hash}</output>}

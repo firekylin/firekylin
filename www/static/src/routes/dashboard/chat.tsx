@@ -1,14 +1,16 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {observer} from '@admin/utils/mobx-react';
-import {Alert, Button, Card, Drawer, Empty, Input, Modal, Select, Tag, Tooltip, message as toast} from 'antd';
+import {Alert, Button, Card, Empty, Input, Modal, Select, Tag, Tooltip, message as toast} from 'antd';
 import {Conversations, Prompts, Sender, Suggestion, Welcome, XProvider, notification} from '@ant-design/x';
 import zhCN from '@ant-design/x/es/locale/zh_CN';
 import antdZhCN from 'antd/es/locale/zh_CN';
-import {ChatMessage, GenerationStatus, Markdown, commands, toolLabels} from './chat-content';
+import {ChatMessage, GenerationStatus, commands, toolLabels} from './chat-content';
 import {ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOutlined, StopOutlined, BellOutlined, MessageOutlined, SearchOutlined, LockOutlined, MoreOutlined} from '@ant-design/icons';
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
+import {http} from '../../utils/http';
+import {openArticlePreview} from '../../components/article/preview';
 const ChatInput = React.forwardRef<any, any>((props, ref) => <Input.TextArea {...props} ref={ref} aria-label="聊天消息" />);
 const chatLocale = {...antdZhCN, ...zhCN};
 const senderComponents = {input: ChatInput};
@@ -54,7 +56,11 @@ function Chat({children, onConversationChange}: {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [started, setStarted] = useState(false);
     const [sending, setSending] = useState(false);
-    const [preview, setPreview] = useState<any>(null);
+    const previewArticle = (row: any) => {
+        http.get<any>(`/admin/api/post/${Number(row.id)}`).subscribe(res => {
+            if (res.errno === 0) openArticlePreview(res.data, Number(res.data.type) || 0);
+        });
+    };
     const [renaming, setRenaming] = useState('');
     const [desktopNotices, setDesktopNotices] = useState(false);
     const previousBusy = useRef(false);
@@ -177,10 +183,10 @@ function Chat({children, onConversationChange}: {
                     title="今天想写点什么？" classNames={{title: 'chat-welcome-title'}} description="从一个想法，到一篇值得发布的文章。" /> :
                     <div className="chat-messages">{[...store.messages, ...(store.pendingMessage ? [store.pendingMessage] : [])].map(entry => <div key={entry.id} className="chat-message">
                         <ChatMessage entry={entry} actions={store.actions} messages={store.messages} running={locked} locked={locked}
-                            preview={setPreview} retry={() => safe(store.stream('retry'))} />
+                            preview={previewArticle} retry={() => safe(store.stream('retry'))} />
                     </div>)}
                     {store.streaming && <div className="chat-message"><ChatMessage entry={{role: 'assistant', content: store.streaming}}
-                        actions={[]} messages={[]} streaming running={true} locked={true} preview={setPreview} /></div>}
+                        actions={[]} messages={[]} streaming running={true} locked={true} preview={previewArticle} /></div>}
                     {locked && <GenerationStatus status={store.status} />}
                     {store.actions.filter(action => ['pending', 'executing', 'interrupted', 'failed', 'cancelled'].includes(action.status)).map(action => <Card size="small" className="chat-approval" key={action.id}>
                         <span className="chat-badge">{({expired: '确认已过期', pending: '等待确认', executing: '执行中', interrupted: '操作中断，请核对实际状态', failed: '执行失败，请核对实际状态', cancelled: '已取消'} as any)[action.status]}</span>
@@ -230,7 +236,6 @@ function Chat({children, onConversationChange}: {
                 {conversations}
             </div>
         </aside>
-        <Drawer title={preview?.title || '文章预览'} size="large" open={Boolean(preview)} onClose={() => setPreview(null)}>{preview && <Markdown text={preview.markdown_content || preview.summary || ''} />}</Drawer>
         <Modal title="重命名对话" okText="保存" cancelText="取消" open={Boolean(renaming)} onCancel={() => setRenaming('')} onOk={() => safe(store.manage(renaming, 'rename', {title}).then(() => setRenaming('')))}><Input aria-label="对话标题" value={title} maxLength={100} onChange={event => setTitle(event.target.value)} /></Modal>
     </section></XProvider>;
 }

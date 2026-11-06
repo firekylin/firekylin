@@ -1,8 +1,9 @@
 import React from 'react';
-import {render, screen, fireEvent, waitFor, cleanup, within} from '@testing-library/react';
+import {render, screen, fireEvent, waitFor, cleanup, within, act} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import Chat from './chat';
 import {MemoryRouter} from '../../utils/router';
+vi.mock('../../utils/http', () => ({http: {get: vi.fn()}}));
 const provider = {id: 'test', label: '测试服务商', models: [{id: 'model', label: '测试模型', selected: true, capabilities: ['text', 'tools']}]};
 let sessions: any[];
 let messages: any[];
@@ -179,4 +180,30 @@ it('uses the configured provider model list returned by the backend', async() =>
     render(<MemoryRouter><Chat /></MemoryRouter>);
     expect(await screen.findByText('我的连接 / 自定义模型')).toBeVisible();
     expect(screen.queryByText('测试服务商 / 测试模型')).not.toBeInTheDocument();
+});
+
+it('shows first reply deltas in an existing empty conversation before completion', async() => {
+    sessions = [{id: 'one', title: '新对话', provider: 'test', model: 'model', active_run: ''}];
+    const original = globalThis.fetch;
+    let streamController: ReadableStreamDefaultController;
+    vi.stubGlobal('fetch', vi.fn((url, options) => {
+        if (options?.body && JSON.parse(String(options.body)).operation === 'send') {
+            return Promise.resolve({ok: true, headers: new Headers({'content-type': 'text/event-stream'}),
+                body: new ReadableStream({start(controller) {streamController = controller}})});
+        }
+        return original(url, options);
+    }));
+    render(<MemoryRouter initialEntries={['/dashboard/one']}><Chat /></MemoryRouter>);
+    const input = await screen.findByLabelText('聊天消息');
+    await waitFor(() => expect(input).not.toBeDisabled());
+    fireEvent.change(input, {target: {value: '第一条消息'}});
+    fireEvent.click(screen.getByRole('button', {name: '发送消息'}));
+    expect(await screen.findByText('第一条消息')).toBeVisible();
+    await waitFor(() => expect(streamController).toBeDefined());
+    await act(async() => {
+        streamController.enqueue(new TextEncoder().encode('event: delta\ndata: "回复正在流入"\n\n'));
+    });
+    expect(await screen.findByText('回复正在流入')).toBeVisible();
+    expect(screen.queryByText('今天想写点什么？')).not.toBeInTheDocument();
+    await act(async() => streamController.close());
 });

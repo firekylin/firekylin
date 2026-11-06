@@ -40,10 +40,17 @@ it('tool result shows related blog sources from returned records only', () => {
         summary: '摘要', status: 3, url: '/post/example.html'})}} preview={vi.fn()} /></MemoryRouter>);
     expect(screen.getByText('相关博客资料')).toBeInTheDocument();
     expect(screen.getAllByText('真实返回的文章').length).toBeGreaterThan(0);
-    expect(screen.getByRole('link', {name: '打开编辑器'})).toHaveAttribute('href', '/post/edit/3');
+    expect(screen.getByRole('link', {name: '修改内容'})).toHaveAttribute('href', '/post/edit/3');
 });
 it('model switch notices use a system bubble, not an assistant reply', () => {
     const {container} = render(<ChatMessage entry={{role: 'event', content: '模型已切换'}} />);
     expect(screen.getByText('模型已切换')).toBeInTheDocument();
     expect(container.querySelector('.ant-bubble-system')).toBeInTheDocument();
+});
+it('keeps every returned article visible instead of silently truncating at twenty', () => {
+    const rows = Array.from({length: 21}, (_, i) => ({id: i + 1, title: `文章 ${i + 1}`}));
+    render(<MemoryRouter><ToolResult entry={{name: 'posts.list_managed', content: JSON.stringify({data: rows})}} preview={vi.fn()} /></MemoryRouter>);
+    expect(screen.getAllByRole('link', {name: '修改内容'})).toHaveLength(21);
+    expect(screen.getAllByText('文章 21').length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', {name: /预\s*览/})).toHaveLength(21);
 });

@@ -13,7 +13,6 @@ const {ExtensionGitHub} = require('../service/extension-github');
 const {registerContentAbilities} = require('../ability/content');
 const {registerManagementAbilities} = require('../ability/management');
 const {registerMediaAbilities} = require('../ability/media/upload');
-const {migrateOAuthModels} = require('../mcp/oauth-schema');
 const pack = require('../../package.json');
 const {PackageCatalog} = require('../service/package-catalog');
 const {ThemeInstaller} = require('../service/theme-installer');
@@ -163,69 +162,8 @@ firekylin.require = name => {
   }
 };
 
-const commentMigrationKey = Symbol.for('firekylin.commentSchemaMigration');
-if (!global[commentMigrationKey]) {
-  global[commentMigrationKey] = true;
-  think.beforeStartServer(async() => {
-    const migrated = await think.service('comment-schema').migrate({skipIfUninstalled: true});
-    if (migrated) think.logger.info('[comment] database schema migrated');
-  });
-}
-
-const categoryMigrationKey = Symbol.for('firekylin.categorySchemaMigration');
-if (!global[categoryMigrationKey]) {
-  global[categoryMigrationKey] = true;
-  think.beforeStartServer(async() => {
-    const migrated = await think.service('category-schema').migrate({skipIfUninstalled: true});
-    if (migrated) think.logger.info('[category] database schema migrated');
-  });
-}
-
-const oauthMigrationKey = Symbol.for('firekylin.mcp.oauthMigration');
-if (!global[oauthMigrationKey]) {
-  global[oauthMigrationKey] = true;
-  think.beforeStartServer(async() => {
-    try {
-      // Do not attempt migration before the site has been installed.
-      const options = await think.model('options').getOptions(true);
-      if (!options.site_url) return;
-      await migrateOAuthModels({
-        model: think.model('user'), config: think.config('model')
-      });
-    } catch (error) {
-      if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
-      throw error;
-    }
-  });
-}
-
-const auditMigrationKey = Symbol.for('firekylin.aiAuditMigration');
-if (!global[auditMigrationKey]) {
-  global[auditMigrationKey] = true;
-  think.beforeStartServer(async() => {
-    try {
-      const options = await think.model('options').getOptions(true);
-      if (!options.site_url) return;
-      await require('../service/ai-audit-schema').migrate({model: think.model('user'), config: think.config('model')});
-    } catch (error) {
-      if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
-      // Audit infrastructure must not prevent otherwise valid AI calls or site startup.
-      think.logger.error('[ai-audit] schema migration failed');
-    }
-  });
-}
-
-const chatMigrationKey = Symbol.for('firekylin.chatMigration');
-if (!global[chatMigrationKey]) {
-  global[chatMigrationKey] = true;
-  think.beforeStartServer(async() => {
-    try {
-      const options = await think.model('options').getOptions(true);
-      if (!options.site_url) return;
-      await require('../service/chat-schema').migrate({model: think.model('user'), config: think.config('model')});
-    } catch (error) {
-      if (/no such table.*options|relation .*options.*does not exist|table .*options.*doesn't exist|ER_NO_SUCH_TABLE/i.test(error.message)) return;
-      throw error;
-    }
-  });
+const migrationKey = Symbol.for('firekylin.schemaMigrations');
+if (!global[migrationKey]) {
+  global[migrationKey] = true;
+  think.beforeStartServer(() => require('../service/migration-runner').migrate());
 }

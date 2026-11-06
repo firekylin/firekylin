@@ -1,6 +1,5 @@
 'use strict';
 const Base = require('./base');
-const auth = require('../../../service/admin-auth');
 const ChatStore = require('../../../service/chat-store');
 const {ChatAgent} = require('../../../service/chat-agent');
 
@@ -43,8 +42,6 @@ module.exports = class extends Base {
   }
   async postAction() {
     const user = await this.identity();
-    const token = this.ctx.get('X-CSRF-Token');
-    if (!token || token !== auth.csrfToken(this.ctx)) return this.ctx.throw(403);
     const body = this.post() || {};
     const store = this.store();
     if (body.operation === 'create') {

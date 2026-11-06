@@ -40,6 +40,8 @@ Record database type/version/prefix/encoding/schema before migration. TiDB uses 
 
 OAuth adds persistent tables. Inspect src/mcp/oauth-schema.js schema initialization/ensure logic and verify on a backup copy or test database before the deployment's supported migration process. Distinguish SQL generation checks from real database validation. Do not guess production ALTER/DELETE statements to suppress errors.
 
+Core startup discovers `src/service/migration/*.js` in filename order. Each module exports a positive `version` and `async migrate({model, config})`; only successful versions are recorded in the options table under `migration_<filename>`. Add a numbered module for a new migration, or increment its version when changing an existing migration. Keep SQL idempotent for retries and concurrent workers. An `optional: true` module may fail without blocking startup and is retried next startup; use this only for nonessential infrastructure such as AI auditing. Uninstalled sites skip migrations. No bootstrap edit is needed.
+
 ## Backup, upgrade, rollback
 
 Business exports do not replace complete backups. Include:
@@ -101,11 +103,7 @@ Install a trusted checkout using its pinned tools, without committing secrets:
 pnpm install --frozen-lockfile
 pnpm build
 pnpm lint
-pnpm test:plugin
-pnpm test:widget
-pnpm test:auth
-pnpm test:cli
-pnpm test:types
+pnpm test
 ```
 
 Choose checks appropriate to changes; this full checklist does not require rerunning everything for small documentation edits. Database/model changes may also need `node --test test/service/*.test.js` and target-database integration. pre-commit runs lint; do not bypass it to hide errors.

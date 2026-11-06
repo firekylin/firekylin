@@ -244,4 +244,4 @@ Registry callers supply trusted authorize and, for requiresApproval, approve cal
 
 Themes: homepage/detail/pages/search/taxonomy/archives/pagination, 404/500, mobile, resource URLs, comments, private-content exclusion. Plugins: duplicate registration, load failures, cleanup, authentication/CSRF, inputs, event idempotency, external failures.
 
-Use relevant test:widget, test:plugin, test:types and rendering/HTTP checks; build frontend changes. Startup logs/screenshots supplement actual requests. Report files, configuration, invocation, compatibility, and validation.
+Use `pnpm test` and relevant rendering/HTTP checks; build frontend changes. Startup logs/screenshots supplement actual requests. Report files, configuration, invocation, compatibility, and validation.

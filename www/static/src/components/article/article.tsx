@@ -1,3 +1,4 @@
+import {openArticlePreview} from './preview';
 import {CoverAI} from '../ai-image';
 import React from 'react';
 import {AIContext, AIButton, useEditorAI} from './ai-editor';
@@ -371,24 +372,7 @@ function Article(props: ArticleProps) {
             previewData.cate = articleInfo.cate;
         }
 
-        const previewUrl = `/${['post', 'page'][legacy.type]}/${
-            previewData.pathname
-        }.html?preview=true`;
-
-        let form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', previewUrl);
-        form.setAttribute('target', '_blank');
-
-        let hiddenField = document.createElement('input');
-        hiddenField.setAttribute('type', 'hidden');
-        hiddenField.setAttribute('name', 'previewData');
-        hiddenField.setAttribute('value', JSON.stringify(previewData));
-        form.appendChild(hiddenField);
-
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+        openArticlePreview(previewData, legacy.type);
     };
     legacy.render = function render() {
         const sharedStore = props.sharedStore;

@@ -28,7 +28,7 @@ function controller(t) {
   t.after(() => {global.firekylin = previous});
   return {instance, user: value => {user = value}};
 }
-test('chat rejects commenters, disabled users, stale administrator claims and missing CSRF', async t => {
+test('chat rejects commenters, disabled users, stale administrator claims', async t => {
   const {instance, user} = controller(t);
   user({id: 2, type: 4});
   await assert.rejects(instance.identity(), {status: 403});
@@ -37,8 +37,6 @@ test('chat rejects commenters, disabled users, stale administrator claims and mi
   user({id: 2, type: 2, status: 1});
   instance.userInfo.type = 1;
   assert.equal((await instance.identity()).type, 2);
-  instance.ctx.get = () => '';
-  await assert.rejects(instance.postAction(), {status: 403});
 });
 test('every session operation checks ownership before proceeding', async t => {
   const {instance} = controller(t);

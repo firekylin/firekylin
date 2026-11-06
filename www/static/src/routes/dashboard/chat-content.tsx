@@ -69,15 +69,15 @@ export function ToolResult({entry, preview}: any) {
     const postRows = entry.name?.startsWith('posts.') && entry.name !== 'posts.delete'
         ? rows.filter((row: any) => Number.isSafeInteger(Number(row.id)) && Number(row.id) > 0) : [];
     return <Card size="small" className="chat-result" title={`${toolLabels[entry.name] || entry.name} · 已完成`}>
-        {rows.slice(0, 20).map((row: any, index: number) => <div className="chat-result-row" key={row.id || index}>
+        {rows.map((row: any, index: number) => <div className="chat-result-row" key={row.id || index}>
             <div><b>{row.title || row.name || row.nick || `#${row.id}`}</b>
                 {row.status !== undefined && <Tag>{({0: '草稿', 1: '待审核', 2: '已拒绝', 3: '已发布', 4: '回收站'} as any)[row.status] || row.status}</Tag>}
                 {row.comment && <p>{String(row.comment).replace(/<[^>]*>/g, '').slice(0, 160)}</p>}
             </div>
-            {(row.markdown_content || row.summary) && <Button size="small" onClick={() => preview(row)}>预览</Button>}
-            {entry.name?.startsWith('posts.') && row.id && entry.name !== 'posts.delete' && <Link to={`/post/edit/${row.id}`}>打开编辑器</Link>}
+            {postRows.includes(row) && <Button size="small" onClick={() => preview(row)}>预览</Button>}
+            {entry.name?.startsWith('posts.') && row.id && entry.name !== 'posts.delete' && <Link to={`/post/edit/${row.id}`}>修改内容</Link>}
         </div>)}
-        {postRows.length > 0 && <Sources title="相关博客资料" items={postRows.slice(0, 20).map((row: any) => ({
+        {postRows.length > 0 && <Sources title="相关博客资料" items={postRows.map((row: any) => ({
             key: String(row.id), title: row.title || `文章 #${row.id}`,
             url: typeof row.url === 'string' && /^\/(?![\/\\])/.test(row.url) ? row.url : `/admin/post/edit/${Number(row.id)}`,
             description: row.summary || '来自本次博客工具返回的文章记录'
@@ -85,7 +85,6 @@ export function ToolResult({entry, preview}: any) {
         {!rows.length && <Think title="查看操作结果" defaultExpanded={false}>
             <ChatCode lang="json">{JSON.stringify(result, null, 2)}</ChatCode>
         </Think>}
-        {rows.length > 20 && <p>仅展示前 20 条，请在管理页面查看全部结果。</p>}
     </Card>;
 }
 export function ChatMessage({entry, actions, messages, running, preview, retry, locked, streaming = false}: any) {
