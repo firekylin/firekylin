@@ -10,11 +10,11 @@ beforeEach(() => {
     window.SysConfig = {config: {disallow_file_edit: true}, pluginAdmin: [], options: {title: 'Blog'},
         userInfo: {id: 1, name: 'Admin', type: 1}} as any;
 });
-it('shows three article lists, hides create entries and highlights category pages under articles', () => {
+it('shows article navigation, hides category/tag create entries and highlights category pages', () => {
     render(<MemoryRouter initialEntries={['/cate/edit/2']}><Sidebar history={{push: vi.fn()}} /></MemoryRouter>);
     expect(screen.getByRole('link', {name: '文章管理'})).toHaveClass('active');
     expect(screen.getByRole('link', {name: '分类列表'})).toHaveClass('active');
-    for (const label of ['分类管理', '标签管理', '添加文章', '添加分类', '添加标签']) {
+    for (const label of ['分类管理', '标签管理', '添加分类', '添加标签']) {
         expect(screen.queryByRole('link', {name: label})).toBeNull();
     }
     expect(screen.getByRole('link', {name: '标签列表'})).toBeInTheDocument();
@@ -185,4 +185,37 @@ it('uses the bundled logo if no site logo is configured or loading fails', () =>
     expect(logo).toHaveAttribute('src', '/static/img/firekylin.jpg');
     fireEvent.error(logo);
     expect(logo).toHaveAttribute('src', '/static/img/firekylin.jpg');
+});
+
+
+it.each([1, 2, 3])('shows the existing article creation route immediately after the list for role %s', type => {
+    window.SysConfig.userInfo.type = type;
+    renderSidebar('/post/create');
+    const create = screen.getByRole('link', {name: '添加文章'});
+    const list = screen.getByRole('link', {name: '文章列表'});
+    expect(create).toHaveAttribute('href', '/post/create');
+    expect(create).toHaveClass('active');
+    expect(list).not.toHaveClass('active');
+    expect(list.closest('li')!.nextElementSibling).toContainElement(create);
+    expect(screen.getByRole('link', {name: '文章管理'})).toHaveClass('active');
+});
+
+it('keeps editing under the list and exposes creation in the collapsed flyout', async() => {
+    renderSidebar('/post/edit/8');
+    expect(screen.getByRole('link', {name: '文章列表'})).toHaveClass('active');
+    expect(screen.getByRole('link', {name: '添加文章'})).not.toHaveClass('active');
+    fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
+    fireEvent.focus(screen.getByRole('link', {name: '文章管理'}));
+    fireEvent.click(await screen.findByRole('link', {name: '添加文章'}));
+    fireEvent.focus(screen.getByLabelText('文章管理'));
+    await waitFor(() => expect(screen.getByRole('link', {name: '添加文章'})).toHaveClass('active'));
+    expect(screen.getByRole('link', {name: '文章列表'})).not.toHaveClass('active');
+});
+
+it('does not expose article creation to commenters', () => {
+    window.SysConfig.userInfo.type = 4;
+    renderSidebar('/comment');
+    expect(screen.queryByRole('link', {name: '添加文章'})).toBeNull();
+    fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
+    expect(screen.queryByRole('link', {name: '文章管理'})).toBeNull();
 });
