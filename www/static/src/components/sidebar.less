@@ -3,9 +3,14 @@
   flex-direction: column;
   height: 100dvh;
   overflow: hidden;
+  transition: width 200ms ease;
 
   .sidebar-scroll { flex: 1; min-height: 0; overflow: auto; }
+  .mod-logo { transition: opacity 200ms ease; white-space: nowrap; }
+  .sidebar-label { transition: opacity 200ms ease; }
   .mod-bar { margin: 10px 0 0; }
+  .mod-bar > li > a { display: flex; align-items: center; white-space: nowrap; }
+  .mod-bar > li > a > .anticon, .mod-bar > li > a::before { flex-shrink: 0; }
   .sidebar-children[hidden] { display: none; }
   a:focus-visible, button:focus-visible { outline: 2px solid #91caff; outline-offset: -3px; }
   .sidebar-footer {
@@ -27,30 +32,62 @@
   }
   &.is-collapsed {
     width: 64px;
-    .mod-logo { display: none; }
+    .mod-logo { opacity: 0; visibility: hidden; }
     ul { width: 64px; }
-    .mod-bar > li > a { padding-left: 0; text-align: center; }
-    .sidebar-label { display: none; }
-    + .content { margin-left: 64px; }
+    .mod-bar > li > a { padding-left: 0; justify-content: center; }
+    .sidebar-label { opacity: 0; position: absolute; pointer-events: none; }
+    + .content { --sidebar-offset: 64px; }
   }
 }
 .sidebar-popover {
-  max-width: calc(100vw - 80px);
-  .ant-popover-container { padding: 0; overflow: hidden; }
-  .ant-popover-content { max-height: calc(100dvh - 24px); overflow: auto; }
+  width: 171px;
+  max-width: calc(100vw - 64px);
+  padding: 0;
+  .ant-popover-container {
+    padding: 0;
+    border-radius: 0;
+    background: #323232;
+    overflow: hidden;
+  }
+  .sidebar-flyout {
+    // Override this variable to cap long plugin menus at a different height.
+    max-height: min(var(--sidebar-flyout-max-height, 480px), calc(100dvh - 16px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
   ul { margin: 0; padding: 0; list-style: none; }
+  li { border-bottom: 1px solid #434343; }
   a {
     display: block;
-    padding: 12px 20px;
-    min-width: 160px;
-    color: #444;
-    overflow-wrap: anywhere;
-    &:hover, &:focus-visible { background: #f0f5ff; }
-    &.active { color: #1677ff; background: #e6f4ff; }
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 8px 0 1px;
+    color: #999;
+    background: #3f3f3f;
+    font-size: 14px;
+    line-height: 48px;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    &:hover, &:focus-visible, &.active { background: #323232; color: #fff; }
+    &:focus-visible { outline: 2px solid #91caff; outline-offset: -3px; }
   }
-  .sidebar-popup-title { font-weight: 600; border-bottom: 1px solid #eee; }
+  .sidebar-popup-title {
+    height: 49px;
+    border-bottom: 1px solid #434343;
+    &.active { background: #3695d5; color: #fff; }
+  }
 }
 @media (max-width: 767px) {
   .fk-side:not(.is-collapsed) { width: min(235px, 100vw); box-shadow: 4px 0 12px #0003; }
-  .fk-side + .content { margin-left: 64px; }
+  .fk-side + .content { --sidebar-offset: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fk-side, .fk-side .mod-logo, .fk-side .sidebar-label,
+  .fk-side + .content, .fk-side + .content .fk-content-wrap,
+  .sidebar-popover {
+    transition: none !important;
+    animation: none !important;
+  }
 }

@@ -1,4 +1,4 @@
-import {ApiOutlined, ToolOutlined} from '@ant-design/icons';
+import {ApiOutlined, FileTextOutlined, ToolOutlined} from '@ant-design/icons';
 
 export const InitiateThemePages = [
     {
@@ -22,7 +22,7 @@ export const InitiateRoutes = (themePages) => [{
     },
     {
         url: '/post',
-        icon: 'topic',
+        icon: FileTextOutlined,
         title: '文章管理',
         children: [
             {url: '/post/list', title: '文章列表', activePaths: ['/post']},

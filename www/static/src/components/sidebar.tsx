@@ -117,11 +117,11 @@ function SidebarEntry({route, collapsed, pathname}: any) {
     );
     return (
         <li onKeyDown={dismiss} onBlur={blur}>
-            {collapsed ? <Popover placement="rightTop" trigger={['hover']}
+            {collapsed ? <Popover placement="rightTop" arrow={false} align={{offset: [0, 0], overflow: {adjustX: false, adjustY: false, shiftY: true}}} trigger={['hover']}
                 open={open} onOpenChange={setOpen} mouseLeaveDelay={0.15}
                 classNames={{root: 'sidebar-popover'}}
-                content={<div id={id} ref={popup} onKeyDown={event => { dismiss(event); navigatePopup(event); }}>
-                    <NavLink className="sidebar-popup-title" to={route.url} onClick={() => setOpen(false)}>{route.title}</NavLink>
+                content={<div className="sidebar-flyout" id={id} ref={popup} onKeyDown={event => { dismiss(event); navigatePopup(event); }}>
+                    <NavLink className={`sidebar-popup-title${active ? ' active' : ''}`} to={route.url} onClick={() => setOpen(false)}>{route.title}</NavLink>
                     {children}
                 </div>}>
                 {link}

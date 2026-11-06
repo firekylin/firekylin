@@ -128,3 +128,27 @@ it('works when browser storage is unavailable', () => {
     read.mockRestore();
     write.mockRestore();
 });
+
+it('uses a document icon for articles, distinct from comments', () => {
+    renderSidebar();
+    expect(screen.getByRole('link', {name: '文章管理'}).querySelector('[data-icon="file-text"]')).not.toBeNull();
+    expect(screen.getByRole('link', {name: '评论管理'})).toHaveClass('icon-topic');
+});
+
+it('keeps long plugin flyouts keyboard accessible and returns Tab to navigation', async() => {
+    window.SysConfig.pluginAdmin = [{id: 'long', panels: [{id: 'main', title: '长菜单'}], pages:
+        Array.from({length: 30}, (_, i) => ({id: String(i), panel: 'main', title: `页面 ${i}`}))}] as any;
+    localStorage.setItem('firekylin.sidebar.collapsed', 'true');
+    renderSidebar('/plugins/long/29');
+    const trigger = screen.getByRole('link', {name: '长菜单'});
+    fireEvent.focus(trigger);
+    const last = await screen.findByRole('link', {name: '页面 29'});
+    expect(last).toHaveClass('active');
+    fireEvent.keyDown(trigger, {key: 'Tab'});
+    expect(document.activeElement).toHaveClass('sidebar-popup-title', 'active');
+    fireEvent.keyDown(document.activeElement!, {key: 'Tab', shiftKey: true});
+    expect(trigger).toHaveFocus();
+    fireEvent.keyDown(last, {key: 'Tab'});
+    expect(screen.getByRole('button', {name: '展开侧边栏'})).toHaveFocus();
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+});
