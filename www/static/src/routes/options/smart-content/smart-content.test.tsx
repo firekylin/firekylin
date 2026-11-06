@@ -1,10 +1,14 @@
-import {cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import axios from 'axios';
+import {message} from 'antd';
 import {MemoryRouter} from '../../../utils/router';
 import SmartContentSettings from './smart-content';
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
-afterEach(cleanup);
+afterEach(async() => {
+    // Static Ant Design messages own a React root outside Testing Library.
+    await act(async() => { cleanup(); message.destroy() });
+});
 beforeEach(() => {
     window.SysConfig = {pluginAdmin: [], config: {}, csrfToken: 'token', userInfo: {id: 1, name: 'Admin', type: 1}} as any;
     vi.mocked(axios.get).mockResolvedValue({data: {errno: 0, data: {features: {
@@ -26,4 +30,6 @@ it('shows all described switches without a plugin or language setting and saves 
     fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/smart-content',
         {features: expect.objectContaining({title: true})}, {headers: {'X-CSRF-Token': 'token'}}));
+    expect(await screen.findByText('智能内容设置已保存。')).toBeInTheDocument();
+    await waitFor(() => expect(title).not.toBeDisabled());
 });
