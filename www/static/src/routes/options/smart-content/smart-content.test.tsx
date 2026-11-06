@@ -12,11 +12,13 @@ beforeEach(() => {
     }}}});
     vi.mocked(axios.post).mockResolvedValue({data: {errno: 0, data: {features: {title: true}}}});
 });
-it('shows seven described switches without a plugin or language setting and saves to core', async() => {
+it('shows all described switches without a plugin or language setting and saves to core', async() => {
     render(<MemoryRouter initialEntries={['/options/smart-content']}><SmartContentSettings /></MemoryRouter>);
     const title = await screen.findByRole('switch', {name: '生成标题'});
     await waitFor(() => expect(title).not.toBeDisabled());
-    expect(screen.getAllByRole('switch')).toHaveLength(7);
+    for (const name of ['图片生成和编辑', '评论审核', '建议回复', '生成摘要', '生成标题', '智能审阅', '翻译文章', '生成 Slug', '智能分类', '内容自动建议']) {
+        expect(screen.getByRole('switch', {name})).toBeInTheDocument();
+    }
     expect(title).not.toBeChecked();
     expect(screen.getByText(/正文超过 250 个字时，生成标题建议/)).toBeInTheDocument();
     expect(screen.queryByRole('textbox')).toBeNull();

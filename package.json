@@ -15,20 +15,12 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "preview": "vite preview",
-    "test:widget": "node --test test/widget/*.test.js",
-    "test:extensions": "node --test test/service/extension-registry.test.js test/service/extension-github.test.js test/service/github-extension-dispatch.test.js test/service/theme-installer.test.js test/controller/extension-settings.test.js test/controller/extension-github.test.js test/controller/marketplace-state.test.js && vitest run --config vitest.config.ts www/static/src/routes/options/extension-settings.test.tsx www/static/src/routes/options/extension-github.test.tsx www/static/src/routes/appearance/theme/theme.test.tsx www/static/src/routes/appearance/theme/market.test.tsx www/static/src/routes/plugin/market.test.tsx www/static/src/routes/plugin/management.test.tsx www/static/src/components/sidebar.test.tsx",
-    "test:admin": "node --test test/service/admin-assets.test.js test/service/admin-router.test.js test/service/admin-hooks.test.js test/controller/ai-image.test.js test/controller/ai-image-permissions.test.js",
-    "test:admin-ui": "vitest run --config vitest.config.ts",
-    "test:ai-audit": "node --test test/service/ai-audit*.test.js test/controller/ai-logs.test.js",
-    "test:auth": "node --test test/service/admin-auth.test.js test/service/hugo-import.test.js test/plugin/jwt-route.test.js",
-    "test:plugin": "node --test test/plugin/*.test.js",
-    "test:cli": "node --test test/cli/*.test.js",
-    "test:types": "tsc -p test/types/tsconfig.json --noEmit",
     "lint": "eslint ./src ./*.js ./www/theme/firekylin --cache",
     "lint-fix": "eslint ./src ./*.js ./www/theme/firekylin --fix",
     "lint-break-on-errors": "npm run lint",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
-    "cron:rss": "npm start -- \"admin/cron/rss\""
+    "cron:rss": "npm start -- \"admin/cron/rss\"",
+    "test": "node --test \"test/**/*.test.js\" && vitest run --config vitest.config.ts && tsc -p test/types/tsconfig.json --noEmit"
   },
   "pre-commit": [
     "lint-break-on-errors"
@@ -92,6 +84,8 @@
   },
   "devDependencies": {
     "@ant-design/icons": "^6.3.4",
+    "@ant-design/x": "^2.10.0",
+    "@ant-design/x-markdown": "^2.10.0",
     "@babel/eslint-parser": "^8.0.7",
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^7.0.1",

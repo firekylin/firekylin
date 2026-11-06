@@ -21,4 +21,4 @@ async function migrateOAuthModels({model, config}) {
   for (const sql of sqlFor(type, prefix)) await model.query(sql);
 }
 
-module.exports = {sqlFor, migrateOAuthModels};
+module.exports = {version: 1, sqlFor, migrate: migrateOAuthModels, migrateOAuthModels};

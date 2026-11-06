@@ -9,7 +9,7 @@ const {
   publicOrigin, escapeHtml
 } = require('../../src/mcp/oauth-utils');
 const {buildOAuthHandler, authorizable, registrationAllowed} = require('../../src/mcp/oauth');
-const {sqlFor, migrateOAuthModels} = require('../../src/mcp/oauth-schema');
+const {sqlFor, migrateOAuthModels} = require('../../src/service/migration/030-oauth');
 const adminAuth = require('../../src/service/admin-auth');
 const jwtSecret = 'test-secret-for-oauth-jwt-login-32-bytes';
 

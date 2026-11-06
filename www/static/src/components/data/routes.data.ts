@@ -18,7 +18,7 @@ export const InitiateThemePages = [
 export const InitiateRoutes = (themePages) => [{
         url: '/dashboard',
         icon: 'home',
-        title: '概述'
+        title: '站点概览'
     },
     {
         url: '/post',

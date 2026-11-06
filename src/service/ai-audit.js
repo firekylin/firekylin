@@ -63,7 +63,7 @@ class Audit {
         content_recorded: 1, request_context: JSON.stringify(requestContext),
         request_text: input.text, request_truncated: input.truncated};
       const id = await this.model().add(row);
-      return {id, started: row.started_at, recorded: true, context: requestContext};
+      return {id, request_id: row.request_id, started: row.started_at, recorded: true, context: requestContext};
     });
   }
   async resolve(entry, request) {

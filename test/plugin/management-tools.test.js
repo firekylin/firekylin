@@ -219,3 +219,12 @@ test('managed list ability keeps admin pagination contract', async() => {
   });
   assert.deepEqual(result, {count: 0, data: []});
 });
+
+test('publication can explicitly make a private draft public, with existing approval policy', async() => {
+  const {run, calls, setExisting, admin} = fixture();
+  setExisting({id: 9, type: 0, user_id: admin.id, status: 0, is_public: 0});
+  await assert.rejects(run('posts.publish', {id: 9, is_public: 1}, admin, () => false), /approval/i);
+  await run('posts.publish', {id: 9, is_public: 1});
+  assert.deepEqual(calls.find(call => call[0] === 'save')[1], {id: 9, status: 3, is_public: 1});
+  await assert.rejects(run('posts.publish', {id: 9, is_public: 2}), /visibility/);
+});

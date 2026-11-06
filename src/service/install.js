@@ -288,13 +288,11 @@ exports.default = ${JSON.stringify(data, undefined, 4)}
 
   async saveSiteInfo({title, site_url, username, password, email}) {
     await this.insertData(title, site_url);
-    await think.service('comment-schema').migrate();
-    try {
-      await require('./ai-audit-schema').migrate({model: this.getModel('user'),
-        config: {type: this.type, [this.type]: this.dbConfig}});
-    } catch {
-      think.logger.error('[ai-audit] installation schema migration failed');
-    }
+    await require('./migration-runner').migrate({skipIfUninstalled: false, runtime: {
+      model: name => this.getModel(name),
+      config: () => ({type: this.type, [this.type]: this.dbConfig}),
+      logger: think.logger
+    }});
     await this.createAccount(username, password, email);
     await this.addStartPost();
 

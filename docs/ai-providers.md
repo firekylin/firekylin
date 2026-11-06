@@ -195,3 +195,82 @@ generate: async(request, {signal, reportUsage, images}) => nativeClient({request
 The provider remains responsible for its native protocol, MIME type and model-specific limits.
 These helpers do not upload files. Install a core release containing this API before updating
 image provider plugins. Text-only calls do not require the helpers.
+
+## Admin chat
+
+The existing overview page (`/admin/dashboard`, or `/admin/dashboard/:sessionId`) embeds a private chat module
+in place of the website summary for administrators. Non-administrators retain the original summary and quick links.
+The administrator overview starts with a large chat composer and suggestions above the existing recent posts,
+system information and about sections. History is collapsed by default and can be toggled with the triangle handle
+on the divider. Sending the first message switches the entire main area into conversation mode, hides the overview
+sections and upgrade notice, and opens history once. Users can then collapse history again without subsequent
+replies reopening it. Opening an existing conversation also uses conversation mode; starting a new conversation
+restores the overview. Non-administrators retain the original overview.
+There is no separate chat page or navigation item; `/admin/overview` redirects to `/admin/dashboard`.
+
+The chat view uses Ant Design X 2.10 (`Bubble`, `Conversations`, `Welcome`, `Prompts`, `Sender`,
+`Suggestion`, `Think`, `ThoughtChain`, `Actions`, `Sources`) and X Markdown. The right history panel is
+flush with the overview edges, with a single divider and an overlaid handle. Width, content opacity
+and handle rotation animate together; reduced-motion preferences disable these transitions. Collapsed
+history is inert and excluded from the accessibility tree.
+
+ThoughtChain displays actual tool-call proposals, confirmations and execution results, not hidden model
+reasoning. Proposals alone are never marked successful. Think shows public generation/execution status.
+Sources link only to blog records returned by tools; no generated source list is invented. Markdown escapes
+raw HTML, prevents remote image loads, and renders fenced code using the lazily loaded CodeHighlighter.
+Completion notifications use X Notification only after the user opts in and grants browser permission;
+they are emitted when the page is hidden and contain generic completion text, never conversation content.
+ Conversations are owned by the current backend
+user, persisted separately from AI audit logs, and cannot be read by other users. Deleting a conversation
+does not delete blog content or existing AI audit records. Startup and web installation create the four
+prefixed `chat_session`, `chat_message`, `chat_run`, and `chat_action` tables.
+
+### Provider contract
+
+Existing providers with `text` capability continue to support ordinary chat. To support blog operations,
+models must also declare `tools`. The normalized generation request may include:
+
+```js
+{
+  messages: [
+    {role: 'user', content: 'Find my drafts'},
+    {role: 'assistant', content: '', toolCalls: [
+      {id: 'call-1', name: 'posts.list_managed', input: {status: 0}}
+    ]},
+    {role: 'tool', toolCallId: 'call-1', name: 'posts.list_managed', content: '{"data":[]}'}
+  ],
+  tools: [{name: 'posts.list_managed', description: 'List articles', inputSchema: {type: 'object'}}]
+}
+```
+
+Return `{text, toolCalls?: [{id, name, input}], providerData?}`. Translate both tool definitions and
+history messages to the provider's native protocol. `providerData` is optional opaque continuation
+state (for example encrypted reasoning), persisted with assistant tool calls and sent back to the provider;
+it is never rendered as reasoning in the chat. Keep tool call IDs stable and unique. Do not return
+unparsed argument strings as `input`. Dotted ability names may require reversible vendor-specific encoding.
+
+Providers implementing incremental text can call the optional `context.onText(delta)` callback, and should
+advertise `stream` capability. They must still return complete final text and usage, reject incomplete streams,
+and propagate `context.signal`. Core never converts plain model text into an executable tool call.
+The companion OpenAI and DeepSeek plugin source packages include adapters for this protocol; installed
+older plugin versions require updating before they expose the new capabilities.
+
+The chat endpoint uses POST event streams for send/confirm/retry, with `run`, `status`, `delta`, `message`,
+`action`, `audit`, `heartbeat`, `error`, and `done` events. Disconnecting cancels the run; the browser
+reloads persisted messages and never resends writes automatically. A stale run lease is recovered after
+150 seconds without heartbeat. An uncertain action remains visible for manual verification, without replay.
+
+### Tool policy
+
+Only abilities explicitly exposed to `admin-chat` are discoverable. Core management abilities use the same
+business services and model lifecycle as the regular admin UI. Authors are limited to their existing article
+permissions; comment, taxonomy mutation and settings tools require an administrator. The server loads the
+bundled Firekylin skill as guidance, independently checks schemas and permissions, and treats blog text and
+tool output as data. It does not grant shell or arbitrary filesystem access.
+
+Read tools and private draft creation/editing run directly. Other mutations require a persisted preview and
+confirmation, including publishing, permanent deletion, published article edits, comment changes and settings.
+Confirmation expires after 15 minutes, checks the current role and object fingerprint again, and atomically
+claims the stored operation. Clients submit only the action ID and decision, never replacement arguments.
+Each conversation has one active run, at most eight model turns and a two-minute overall generation budget;
+each individual AI call retains the shared client's timeout. A stop cannot undo a mutation already committed.

@@ -1,4 +1,4 @@
-import { Redirect, Route, Switch } from '@admin/utils/router';
+import { Redirect, Route, Switch, useLocation } from '@admin/utils/router';
 import { OptionsProps } from './options.model';
 import General from './general/general';
 import Reading from './reading/reading';
@@ -14,6 +14,9 @@ import ExtensionSettings from './extension-settings';
 import AIConnections from '../plugin/ai-connections';
 
 export default function Options({ match }: OptionsProps) {
+    const location = useLocation();
+    const legacyTool = location.pathname.match(/^\/options\/(ai-logs|import|export)\/?$/);
+    if (legacyTool) return <Redirect to={`/tools/${legacyTool[1]}${location.search}${location.hash}`} />;
     return (
         <>
             <Switch>

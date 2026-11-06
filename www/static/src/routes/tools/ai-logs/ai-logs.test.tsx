@@ -1,11 +1,13 @@
 import {cleanup, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import axios from 'axios';
+import {message} from 'antd';
 import {MemoryRouter} from '../../../utils/router';
 import AIAuditLogs, {tokenRate} from './ai-logs';
 vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
-afterEach(() => {cleanup(); vi.clearAllMocks(); vi.useRealTimers()});
+afterEach(() => {cleanup(); vi.clearAllMocks(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers()});
 beforeEach(() => {
+    vi.spyOn(message, 'success').mockReturnValue(vi.fn() as any);
     vi.stubGlobal('ResizeObserver', class {observe() {} unobserve() {} disconnect() {}});
     vi.setSystemTime(new Date('2026-10-24T12:00:00Z'));
     window.SysConfig = {pluginAdmin: [], config: {}, csrfToken: 'csrf-test', userInfo: {id: 1, name: 'Admin', type: 1}} as any;
@@ -79,6 +81,7 @@ it('manual cleanup requires confirmation', async() => {
     fireEvent.click(screen.getByRole('button', {name: '清理选中日志'}));
     expect(axios.post).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole('button', {name: /永久删除/}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('已删除 1 条日志'));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/ai-logs', {action: 'cleanup', ids: [1]},
         {headers: {'X-CSRF-Token': 'csrf-test'}}));
 });
@@ -95,6 +98,7 @@ it('clears the applied filter across pages, ignoring unapplied edits', async() =
     expect(axios.post).not.toHaveBeenCalled();
     expect(await screen.findByText(/包含所有分页/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', {name: /永久删除/}));
+    await waitFor(() => expect(message.success).toHaveBeenCalledWith('已删除 1 条日志'));
     await waitFor(() => expect(axios.post).toHaveBeenCalledWith('/admin/api/ai-logs',
         {action: 'cleanup', scope: 'filtered', filters: {provider: 'deepseek'}}, {headers: {'X-CSRF-Token': 'csrf-test'}}));
 });

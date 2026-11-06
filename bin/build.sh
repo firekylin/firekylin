@@ -39,6 +39,7 @@ tar -cf - -C www/static --exclude=src --exclude=upload . | tar -xf - -C output/w
 npm run copy-package;
 
 cp -r src output;
+cp -r skills output;
 
 cp -r nginx.conf output/nginx_default.conf;
 cp -r pm2.json output/pm2_default.json;
