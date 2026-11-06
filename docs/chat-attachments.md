@@ -19,7 +19,11 @@
 | Anthropic | claude-sonnet-4-6 | Messages base64 `image` block |
 | Google Gemini | gemini-3-flash-preview | generateContent / streamGenerateContent `inlineData` |
 
-自定义模型 ID、其他 9 个 provider、仅生成图片的模型暂不声明 `vision`。是否有账号访问权限、端点是否兼容以及上游模型是否仍可用，仍由服务商决定；本次没有真实服务商调用验证。
+新增支持：Kimi kimi-k3.1-pro、豆包 doubao-seed-2-1-pro-260628、Grok grok-4.6、小米 mimo-v2.6-pro、DeepSeek deepseek-flash、Vercel Gateway 的 anthropic/claude-sonnet-4.6 与 openai/gpt-5.4、通义千问 qwen3-vl-plus、Cloudflare @cf/meta/llama-4-scout-17b-16e-instruct，均使用 Chat Completions 的内联 image_url 数据块传递当前和历史图片。Ollama 新增 local-vision，通过 /api/show 确认模型含 vision 能力后才发送 /api/chat images base64。
+
+Kimi 旧 K2.5 已弃用，请切换 K3.1 Pro；Ollama 原 local 仍为文本模式，视觉模式每次含图片请求均重新检测实际模型，检测失败不上传图片；Grok 仅支持 PNG/JPEG，WebP 需先转换；豆包还要求宽高均大于 14px、宽高比不超过 150。
+
+自定义模型 ID、未确认视觉能力的文本模型及仅生成图片的模型不声明 `vision`。是否有账号访问权限、端点是否兼容以及上游模型是否仍可用，仍由服务商决定；本次没有真实服务商调用验证。
 
 ## 私密存储和校验
 
