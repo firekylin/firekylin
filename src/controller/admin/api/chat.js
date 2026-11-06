@@ -1,13 +1,11 @@
 'use strict';
 const Base = require('./base');
-const ChatStore = require('../../../service/chat-store');
 const {ChatAgent} = require('../../../service/chat-agent');
 
 const controllers = new Map();
 module.exports = class extends Base {
   putAction() { return this.ctx.throw(405, 'Use authenticated chat POST operations') }
   deleteAction() { return this.ctx.throw(405, 'Use authenticated chat POST operations') }
-  store() { return new ChatStore(name => this.model(name)) }
   async identity() {
     if (![1, 2].includes(Number(this.userInfo?.type))) return this.ctx.throw(403);
     // Read current role, not a stale role embedded in the login cookie.
@@ -17,13 +15,13 @@ module.exports = class extends Base {
   }
   async getAction() {
     const user = await this.identity();
-    const store = this.store();
+    const store = this.model('chat/session');
     const providers = await global.firekylin.plugins.ai.models();
     const id = this.get('session');
     if (!id) return this.success({sessions: await store.list(user), providers});
     const session = await store.session(id, user);
     await store.recover(session);
-    const actions = await store.actions(id);
+    const actions = await store.model('chat/action').listForSession(id);
     const agent = new ChatAgent({store, registry: global.firekylin.plugins.abilities,
       ai: global.firekylin.plugins.ai, getModel: name => this.model(name)});
     for (const action of actions.filter(item => item.status === 'interrupted')) {
@@ -33,7 +31,7 @@ module.exports = class extends Base {
         action.payload.observed = {status: '无法读取，请在管理页面核对'};
       }
     }
-    const messages = (await store.messages(id)).map(message => {
+    const messages = (await store.model('chat/message').listForSession(id)).map(message => {
       const visible = {...message};
       delete visible.providerData;
       return visible;
@@ -43,7 +41,7 @@ module.exports = class extends Base {
   async postAction() {
     const user = await this.identity();
     const body = this.post() || {};
-    const store = this.store();
+    const store = this.model('chat/session');
     if (body.operation === 'create') {
       const providers = await global.firekylin.plugins.ai.models();
       const models = providers.filter(provider => provider.configured !== false)
@@ -56,7 +54,7 @@ module.exports = class extends Base {
     await store.recover(session);
     if (body.operation === 'stop') {
       if (session.active_run) {
-        await store.model('chat_run').where({id: session.active_run, status: 'running'}).update({status: 'cancelled'});
+        await store.model('chat/run').where({id: session.active_run, status: 'running'}).update({status: 'cancelled'});
         controllers.get(session.active_run)?.abort();
       }
       return this.success();
@@ -68,14 +66,15 @@ module.exports = class extends Base {
           || body.title.length > 100) {
         return this.fail('标题长度应为 1–100 字');
       }
-      await store.withIdle(session, () => store.update(session.id, {title: body.title.trim()}));
+      await store.withIdle(session, () => store.updateSession(session.id, {title: body.title.trim()}));
       return this.success();
     }
     if (body.operation === 'delete') {
       await store.withIdle(session, () => store.remove(session.id));
       return this.success();
     }
-    const pending = (await store.actions(session.id)).filter(action => action.status === 'pending');
+    const pending = (await store.model('chat/action').listForSession(session.id))
+      .filter(action => action.status === 'pending');
     if (body.operation === 'select') {
       if (pending.length) return this.fail('请先确认或取消待处理操作');
       const providers = await global.firekylin.plugins.ai.models();
@@ -85,8 +84,8 @@ module.exports = class extends Base {
         return this.fail('模型不可用');
       }
       await store.withIdle(session, async() => {
-        await store.update(session.id, {provider: body.provider, model: body.model});
-        await store.append(session.id, {role: 'event', content: `模型已切换为 ${provider.label} / ${body.model}`});
+        await store.updateSession(session.id, {provider: body.provider, model: body.model});
+        await store.model('chat/message').append(session.id, {role: 'event', content: `模型已切换为 ${provider.label} / ${body.model}`});
       });
       return this.success();
     }
@@ -104,7 +103,7 @@ module.exports = class extends Base {
       return this.fail('待确认操作不存在');
     }
     if (body.operation === 'retry') {
-      const history = await store.messages(session.id);
+      const history = await store.model('chat/message').listForSession(session.id);
       if (history.at(-1)?.role !== 'error') return this.fail('只能重试失败的回复');
       // Never replay an unresolved tool call or an uncertain write.
       if (history.some(message => message.toolCalls?.length)) return this.fail('本对话包含博客操作，请先核对实际状态，再发送新消息');
@@ -113,15 +112,17 @@ module.exports = class extends Base {
     let userMessage;
     try {
       Object.assign(session, await store.session(session.id, user));
-      const waiting = (await store.actions(session.id)).filter(action => action.status === 'pending');
+      const waiting = (await store.model('chat/action').listForSession(session.id))
+        .filter(action => action.status === 'pending');
       if (body.operation !== 'confirm' && waiting.length) throw new Error('请先确认或取消待处理操作');
       if (body.operation === 'confirm' && !waiting.some(action => action.id === body.action)) {
         throw new Error('操作已处理');
       }
       await store.reconcile(session.id);
       if (body.operation === 'send') {
-        userMessage = await store.append(session.id, {role: 'user', content: body.content.trim()});
-        if (session.title === '新对话') await store.update(session.id, {title: body.content.trim().slice(0, 40)});
+        userMessage = await store.model('chat/message')
+          .append(session.id, {role: 'user', content: body.content.trim()});
+        if (session.title === '新对话') await store.updateSession(session.id, {title: body.content.trim().slice(0, 40)});
       }
     } catch (error) {
       await store.finish(session.id, run, 'failed');
@@ -142,9 +143,9 @@ module.exports = class extends Base {
       if (checking) return;
       checking = true;
       try {
-        const row = await store.model('chat_run').where({id: run}).find();
+        const row = await store.model('chat/run').where({id: run}).find();
         if (row.status !== 'running') controller.abort();
-        else await store.model('chat_run').where({id: run, status: 'running'})
+        else await store.model('chat/run').where({id: run, status: 'running'})
           .update({expires_at: Date.now() + 150000});
         emit('heartbeat', null);
       } catch { controller.abort() } finally { checking = false }
@@ -160,7 +161,7 @@ module.exports = class extends Base {
     } catch {
       status = signal.aborted ? 'cancelled' : 'failed';
       const content = signal.aborted ? '运行已停止。已完成的博客操作不会撤销，请查看操作结果。' : '回复或操作未完成，请检查 AI 连接及操作记录。写操作不会自动重试。';
-      await store.append(session.id, {role: 'error', content});
+      await store.model('chat/message').append(session.id, {role: 'error', content});
       emit('error', content);
     } finally {
       clearInterval(heartbeat);

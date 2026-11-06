@@ -41,7 +41,8 @@ test('chat rejects commenters, disabled users, stale administrator claims', asyn
 test('every session operation checks ownership before proceeding', async t => {
   const {instance} = controller(t);
   let checks = 0;
-  instance.store = () => ({session: async(id, principal) => {
+  const originalModel = instance.model;
+  instance.model = name => name !== 'chat/session' ? originalModel(name) : ({session: async(id, principal) => {
     assert.equal(principal.id, 2); checks++;
     throw new Error('对话不存在或无权访问');
   }});
@@ -60,18 +61,18 @@ test('inherited REST writes cannot bypass chat ownership and confirmation', t =>
   assert.throws(() => instance.deleteAction(), {status: 405});
 });
 test('controller streams a complete persistent conversation and confirmation with SQLite', async t => {
-  const Model = require('think-model/lib/model');
   const handle = require('think-model-sqlite');
-  const ChatStore = require('../../src/service/chat-store');
+  const createModels = require('../helpers/chat-model');
   const Registry = require('../../src/ability/registry');
   const {EventEmitter} = require('node:events');
   const {instance} = controller(t);
   const config = {handle, path: ':memory:', database: 'chat-controller-flow', prefix: 'test_', logConnect: false, debounce: false};
-  const model = name => new Model(name, config);
-  t.after(() => model('chat_session').db().query.socket().close());
-  await require('../../src/service/chat-schema').migrate({model: model('chat_session'), config: {type: 'sqlite', sqlite: config}});
-  const store = new ChatStore(model);
-  instance.store = () => store;
+  const model = createModels(config);
+  t.after(() => model('chat/session').db().query.socket().close());
+  await require('../../src/service/migration/050-chat').migrate({model: model('chat/session'), config: {type: 'sqlite', sqlite: config}});
+  const store = model('chat/session');
+  const originalModel = instance.model;
+  instance.model = name => name === 'chat/session' ? store : originalModel(name);
   const registry = new Registry();
   let writes = 0, turn = 0;
   registry.register({name: 'demo.write', description: 'Write', expose: {'admin-chat': true},
@@ -101,14 +102,14 @@ test('controller streams a complete persistent conversation and confirmation wit
   const statusFrame = streamed.findIndex(frame => frame.includes('event: status'));
   assert.ok(userFrame >= 0 && userFrame < statusFrame, 'user message is streamed before model execution');
   assert.ok(streamed.some(frame => frame.includes('event: done') && frame.includes('waiting')));
-  const action = (await store.actions(session.id))[0];
+  const action = (await store.model('chat/action').listForSession(session.id))[0];
   instance.ctx.res = response();
   instance.post = () => ({session: session.id, operation: 'confirm', action: action.id, approve: true, requestKey: 'confirm'});
   await instance.postAction();
   assert.equal(writes, 1);
-  assert.equal((await store.messages(session.id)).at(-1).content, '已完成');
+  assert.equal((await store.model('chat/message').listForSession(session.id)).at(-1).content, '已完成');
   assert.equal((await store.session(session.id, {id: 2})).active_run, '');
-  assert.equal((await store.actions(session.id))[0].status, 'completed');
+  assert.equal((await store.model('chat/action').listForSession(session.id))[0].status, 'completed');
   instance.get = () => session.id;
   assert.equal((await instance.getAction()).data.messages.at(-1).content, '已完成');
 });

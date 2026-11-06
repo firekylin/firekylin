@@ -2,7 +2,7 @@
 // Deliberately killed by the parent after the durable start record has been written.
 const Model = require('think-model/lib/model');
 const handle = require('think-model-sqlite');
-const {migrate} = require('../../src/service/ai-audit-schema');
+const {migrate} = require('../../src/service/migration/040-ai-audit');
 const {Audit} = require('../../src/service/ai-audit');
 const AIClient = require('../../src/ai/client');
 const Registry = require('../../src/ai/registry');

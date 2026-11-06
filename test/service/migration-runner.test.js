@@ -46,3 +46,10 @@ test('does not migrate uninstalled sites and propagates database outages', async
   f.runtime.model = () => ({getOptions: async() => {throw Error('connection refused')}});
   await assert.rejects(migrate(f), /connection refused/);
 });
+test('installation requires initialized options instead of silently skipping migrations', async t => {
+  const f = fixture(t);
+  f.current.site_url = '';
+  await assert.rejects(migrate({...f, skipIfUninstalled: false}), /initialized/);
+  f.runtime.model = () => ({getOptions: async() => {throw Error('no such table: fk_options')}});
+  await assert.rejects(migrate({...f, skipIfUninstalled: false}), /no such table/);
+});
