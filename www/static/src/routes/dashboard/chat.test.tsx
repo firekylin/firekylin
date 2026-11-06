@@ -143,3 +143,40 @@ it('slash commands use Suggestion and fill the Sender without sending', async() 
     expect(screen.getByLabelText('聊天消息')).toHaveValue('查找最近的草稿');
     expect(requests.filter(row => row.body?.operation === 'send')).toHaveLength(0);
 });
+
+it('shows the connection settings link when no provider is configured', async() => {
+    vi.stubGlobal('fetch', vi.fn(async() => ({ok: true, json: async() => ({errno: 0,
+        data: {sessions: [], providers: [{...provider, configured: false}]}})})));
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    expect(await screen.findByRole('link', {name: /前往 AI 连接设置/})).toHaveAttribute('href', '/options/ai');
+    expect(screen.queryByLabelText('聊天消息')).not.toBeInTheDocument();
+});
+it('immediately shows the outgoing message while session creation is pending', async() => {
+    const original = globalThis.fetch;
+    let resolveCreate: (value: any) => void;
+    vi.stubGlobal('fetch', vi.fn((url, options) => {
+        if (options?.body && JSON.parse(String(options.body)).operation === 'create') {
+            return new Promise(resolve => {resolveCreate = resolve});
+        }
+        return original(url, options);
+    }));
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    fireEvent.change(await screen.findByLabelText('聊天消息'), {target: {value: '立即显示我的消息'}});
+    const send = screen.getByRole('button', {name: '发送消息'});
+    expect(send).toHaveTextContent('');
+    fireEvent.click(send);
+    expect(await screen.findByText('立即显示我的消息')).toBeVisible();
+    expect(screen.queryByText('已收到')).not.toBeInTheDocument();
+    sessions = [{id: 'one', title: '新对话', provider: 'test', model: 'model', active_run: ''}];
+    resolveCreate!({ok: true, json: async() => ({errno: 0, data: sessions[0]})});
+    expect(await screen.findByText('已收到')).toBeVisible();
+    expect(screen.getAllByText('立即显示我的消息')).toHaveLength(1);
+});
+it('uses the configured provider model list returned by the backend', async() => {
+    vi.stubGlobal('fetch', vi.fn(async() => ({ok: true, json: async() => ({errno: 0,
+        data: {sessions: [], providers: [{...provider, configured: false}, {id: 'custom', label: '我的连接', configured: true,
+            models: [{id: 'custom-model', label: '自定义模型', selected: true, capabilities: ['text']}]}]}})})));
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    expect(await screen.findByText('我的连接 / 自定义模型')).toBeVisible();
+    expect(screen.queryByText('测试服务商 / 测试模型')).not.toBeInTheDocument();
+});

@@ -99,6 +99,9 @@ test('controller streams a complete persistent conversation and confirmation wit
   instance.post = () => ({session: session.id, operation: 'send', content: '保存操作', requestKey: 'first'});
   await instance.postAction();
   assert.equal(writes, 0);
+  const userFrame = streamed.findIndex(frame => frame.includes('event: message') && frame.includes('\"role\":\"user\"'));
+  const statusFrame = streamed.findIndex(frame => frame.includes('event: status'));
+  assert.ok(userFrame >= 0 && userFrame < statusFrame, 'user message is streamed before model execution');
   assert.ok(streamed.some(frame => frame.includes('event: done') && frame.includes('waiting')));
   const action = (await store.actions(session.id))[0];
   instance.ctx.res = response();

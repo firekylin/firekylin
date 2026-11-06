@@ -14,6 +14,7 @@ export class ChatStore {
     providers: any[] = [];
     session: any = null;
     messages: any[] = [];
+    pendingMessage: any = null;
     actions: any[] = [];
     busy = false;
     loading = false;
@@ -92,7 +93,9 @@ export class ChatStore {
                             if (index === -1) this.actions.push(data); else this.actions[index] = data;
                         }
                         if (event === 'message') {
-                            this.messages.push(data); this.streaming = '';
+                            if (!this.messages.some(message => message.id === data.id)) this.messages.push(data);
+                            if (data.role === 'user') this.pendingMessage = null;
+                            this.streaming = '';
                             if (data.role === 'tool') {
                                 const action = this.actions.find(item => item.payload.callId === data.toolCallId);
                                 if (action) {
@@ -114,7 +117,8 @@ export class ChatStore {
             runInAction(() => { this.error = error.name === 'AbortError' ? '已停止。正在同步操作结果。' : error.message });
         } finally {
             runInAction(() => { this.busy = false; this.streaming = ''; this.status = ''; this.abort = null });
-            await Promise.all([this.list(), this.open(id)]);
+            try { await Promise.all([this.list(), this.open(id)]); }
+            finally { runInAction(() => { this.pendingMessage = null }); }
         }
     }
 }

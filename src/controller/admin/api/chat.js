@@ -49,8 +49,10 @@ module.exports = class extends Base {
     const store = this.store();
     if (body.operation === 'create') {
       const providers = await global.firekylin.plugins.ai.models();
-      const selected = providers.flatMap(provider => provider.models.map(model => ({provider: provider.id, ...model})))
-        .find(model => model.selected);
+      const models = providers.filter(provider => provider.configured !== false)
+        .flatMap(provider => provider.models.filter(model => model.capabilities.includes('text'))
+          .map(model => ({provider: provider.id, ...model})));
+      const selected = models.find(model => model.selected) || models[0];
       return this.success(await store.create(user, {provider: selected?.provider || '', model: selected?.id || ''}));
     }
     const session = await store.session(body.session, user);
@@ -111,6 +113,7 @@ module.exports = class extends Base {
       if (history.some(message => message.toolCalls?.length)) return this.fail('本对话包含博客操作，请先核对实际状态，再发送新消息');
     }
     const run = await store.claim(session, body.requestKey);
+    let userMessage;
     try {
       Object.assign(session, await store.session(session.id, user));
       const waiting = (await store.actions(session.id)).filter(action => action.status === 'pending');
@@ -120,7 +123,7 @@ module.exports = class extends Base {
       }
       await store.reconcile(session.id);
       if (body.operation === 'send') {
-        await store.append(session.id, {role: 'user', content: body.content.trim()});
+        userMessage = await store.append(session.id, {role: 'user', content: body.content.trim()});
         if (session.title === '新对话') await store.update(session.id, {title: body.content.trim().slice(0, 40)});
       }
     } catch (error) {
@@ -152,6 +155,7 @@ module.exports = class extends Base {
     let status = 'failed';
     try {
       emit('run', {id: run});
+      if (userMessage) emit('message', userMessage);
       const agent = new ChatAgent({store, registry: global.firekylin.plugins.abilities,
         ai: global.firekylin.plugins.ai, getModel: name => this.model(name), now: () => think.datetime()});
       status = await agent.run({session, user, run, signal, emit,

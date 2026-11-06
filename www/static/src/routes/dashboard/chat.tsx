@@ -81,10 +81,13 @@ function Chat({children, onConversationChange}: {
             value: JSON.stringify([provider.id, model.id]), label: `${provider.label} / ${model.label || model.id}`,
             selected: model.selected, tools: model.capabilities.includes('tools')
         })));
-    const selected = store.session?.provider ? JSON.stringify([store.session.provider, store.session.model]) : models.find(model => model.selected)?.value;
+    const sessionModel = JSON.stringify([store.session?.provider, store.session?.model]);
+    const selected = models.find(model => model.value === sessionModel)?.value || models.find(model => model.selected)?.value || models[0]?.value;
     const send = async(content = input) => {
         if (!content.trim() || locked || pending || !selected) return;
         setStarted(true);
+        store.pendingMessage = {id: crypto.randomUUID(), role: 'user', content: content.trim()};
+        setInput('');
         setSending(true);
         try {
             let sessionId = id;
@@ -93,9 +96,11 @@ function Chat({children, onConversationChange}: {
                 await store.open(sessionId);
                 router.history.replace(`/dashboard/${sessionId}`);
             }
-            setInput('');
+            const [provider, model] = JSON.parse(selected);
+            if (store.session.provider !== provider || store.session.model !== model) await store.mutate('select', {provider, model});
             await store.stream('send', {content});
-        } finally { setSending(false); setStarted(false); }
+        } catch (error) { setInput(content); throw error; }
+        finally { store.pendingMessage = null; setSending(false); setStarted(false); }
     };
     const newChat = () => {
         if (locked) return;
@@ -170,7 +175,7 @@ function Chat({children, onConversationChange}: {
             <div className={'chat-scroll' + (!inConversation ? ' chat-empty' : '')}>
                 {!inConversation ? <Welcome className="chat-welcome" variant="borderless"
                     title="今天想写点什么？" classNames={{title: 'chat-welcome-title'}} description="从一个想法，到一篇值得发布的文章。" /> :
-                    <div className="chat-messages">{store.messages.map(entry => <div key={entry.id} className="chat-message">
+                    <div className="chat-messages">{[...store.messages, ...(store.pendingMessage ? [store.pendingMessage] : [])].map(entry => <div key={entry.id} className="chat-message">
                         <ChatMessage entry={entry} actions={store.actions} messages={store.messages} running={locked} locked={locked}
                             preview={setPreview} retry={() => safe(store.stream('retry'))} />
                     </div>)}
@@ -205,7 +210,7 @@ function Chat({children, onConversationChange}: {
                                     onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
                                         const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
                                 {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
-                                    <SendButton type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={!input.trim() || Boolean(pending) || !selected || locked}>发送</SendButton>}
+                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={!input.trim() || Boolean(pending) || !selected || locked} />}
                             </div>} />}
                     </Suggestion>
                     {!inConversation && <Prompts className="chat-suggestions" wrap
