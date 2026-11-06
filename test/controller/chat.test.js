@@ -187,3 +187,40 @@ test('image-only send survives a failed provider, refresh and retry; text-only m
   await store.remove(session.id);
   assert.deepEqual(await store.model('chat/message').listForSession(session.id), []);
 });
+
+for (const unavailable of ['removed', 'disabled']) test(`image action can be cancelled when its provider is ${unavailable}`, async t => {
+  const {instance} = controller(t);
+  const config = {handle: require('think-model-sqlite'), path: ':memory:', database: 'chat-cancel-' + unavailable, prefix: 'test_', debounce: false};
+  const store = require('../helpers/chat-model')(config)('chat/session');
+  t.after(() => store.db().query.socket().close());
+  await require('../../src/service/migration/050-chat').migrate({model: store, config: {type: 'sqlite', sqlite: config}});
+  const original = instance.model;
+  instance.model = name => name === 'chat/session' ? store : original(name);
+  const session = await store.create({id: 2}, {provider: 'old', model: 'vision'});
+  await store.model('chat/message').append(session.id, {role: 'user', content: '', attachments: [
+    {kind: 'image', name: 'red.png', mimeType: 'image/png', data: (await require('sharp')({create: {width: 2, height: 2, channels: 3, background: '#f00'}}).png().toBuffer()).toString('base64')}
+  ]});
+  await store.model('chat/action').add({id: 'pending-action', session_id: session.id, run_id: 'old-run',
+    status: 'pending', expires_at: Date.now() + 60000,
+    payload: JSON.stringify({callId: 'call-1', name: 'posts.publish'})});
+  global.firekylin.plugins = {abilities: new (require('../../src/ability/registry'))(), ai: {
+    models: async() => unavailable === 'removed' ? [] : [{id: 'old', configured: false, models: [{id: 'vision', capabilities: ['text', 'tools', 'vision']}]}],
+    generate: async() => assert.fail('must not generate with an unavailable provider')
+  }};
+  instance.post = () => ({operation: 'confirm', session: session.id, action: 'pending-action', approve: true, requestKey: 'approve'});
+  assert.match((await instance.postAction()).errmsg, /不支持图片/);
+  assert.equal((await store.model('chat/action').listForSession(session.id))[0].status, 'pending');
+  const res = new (require('node:events').EventEmitter)();
+  res.writeHead = () => {}; res.write = () => {}; res.end = () => {res.writableEnded = true};
+  instance.ctx.res = res;
+  instance.post = () => ({operation: 'confirm', session: session.id, action: 'pending-action', approve: false, requestKey: 'cancel'});
+  await instance.postAction();
+  assert.equal((await store.model('chat/action').listForSession(session.id))[0].status, 'cancelled');
+  const messages = await store.model('chat/message').listForSession(session.id);
+  assert.equal(messages.find(message => message.role === 'tool').content, '{"cancelled":true}');
+  assert.equal((await store.session(session.id, {id: 2})).active_run, '');
+  global.firekylin.plugins.ai.models = async() => [{id: 'replacement', models: [{id: 'vision', capabilities: ['text', 'vision']}]}];
+  instance.post = () => ({operation: 'select', session: session.id, provider: 'replacement', model: 'vision'});
+  await instance.postAction();
+  assert.equal((await store.session(session.id, {id: 2})).provider, 'replacement');
+});

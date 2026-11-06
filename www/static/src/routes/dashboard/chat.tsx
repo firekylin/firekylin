@@ -58,7 +58,16 @@ function Chat({children, onConversationChange}: {
     const fileInput = useRef<HTMLInputElement>(null);
     const attachmentGeneration = useRef(0);
     const readingFilesRef = useRef(false);
-    useEffect(() => { attachmentGeneration.current++; setAttachments([]); }, [id]);
+    const draftSession = useRef<string | null>(null);
+    useEffect(() => {
+        const assigningDraft = Boolean(id && draftSession.current === id);
+        draftSession.current = null;
+        if (!assigningDraft) { attachmentGeneration.current++; setAttachments([]); }
+    }, [id]);
+    const assignDraftSession = (sessionId: string) => {
+        draftSession.current = sessionId;
+        router.history.replace(`/dashboard/${sessionId}`);
+    };
     const [search, setSearch] = useState('');
     const [historyOpen, setHistoryOpen] = useState(false);
     const [started, setStarted] = useState(false);
@@ -144,7 +153,7 @@ function Chat({children, onConversationChange}: {
             if (!sessionId) {
                 sessionId = await store.create();
                 await store.open(sessionId);
-                router.history.replace(`/dashboard/${sessionId}`);
+                assignDraftSession(sessionId);
             }
             const [provider, model] = JSON.parse(selected);
             if (store.session.provider !== provider || store.session.model !== model) await store.mutate('select', {provider, model});
@@ -276,7 +285,7 @@ function Chat({children, onConversationChange}: {
                                 {models.find(model => model.value === selected)?.tools && <small className="chat-skill-status chat-muted">博客技能已启动</small>}
                                 <div className="chat-composer-actions">
                                     <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
-                                        onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
+                                        onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); assignDraftSession(created)}
                                             const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
                                     <Tooltip title="语音输入（需浏览器支持并允许麦克风权限）">
                                         <SpeechButton aria-label="语音输入" disabled={locked || pending ? true : undefined} />

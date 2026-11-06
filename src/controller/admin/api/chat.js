@@ -122,6 +122,9 @@ module.exports = class extends Base {
       if (history.some(message => message.toolCalls?.length)) return this.fail('本对话包含博客操作，请先核对实际状态，再发送新消息');
     }
     const validateImages = async() => {
+      // Cancelling a pending write must remain possible after its model disappears.
+      // ChatAgent still validates the model before any subsequent generation.
+      if (body.operation === 'confirm' && body.approve === false) return;
       const history = await store.model('chat/message').listForSession(session.id);
       const messages = [...history, {role: 'user', attachments}]
         .map(message => ({role: message.role, images: messageImages(message)}));

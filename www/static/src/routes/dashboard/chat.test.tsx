@@ -2,7 +2,7 @@ import React from 'react';
 import {render, screen, fireEvent, waitFor, cleanup, within, act} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import Chat from './chat';
-import {MemoryRouter} from '../../utils/router';
+import {MemoryRouter, Link} from '../../utils/router';
 vi.mock('../../utils/http', () => ({http: {get: vi.fn()}}));
 const provider = {id: 'test', label: '测试服务商', models: [{id: 'model', label: '测试模型', selected: true, capabilities: ['text', 'tools']}]};
 let sessions: any[];
@@ -363,6 +363,38 @@ it('hides capability annotations and prevents selecting text models while draft 
         expect(requests.some(row => row.body?.operation === 'select')).toBe(false);
         fireEvent.click(screen.getByLabelText('移除附件 red.png'));
         await waitFor(() => expect(option.closest('.ant-select-item-option')).not.toHaveClass('ant-select-item-option-disabled'));
+    } finally {
+        provider.models.pop();
+        provider.models[0].capabilities = ['text', 'tools'];
+    }
+});
+
+for (const image of [false, true]) it(`preserves ${image ? 'image' : 'text'} drafts when the first model selection assigns a session`, async() => {
+    provider.models[0].capabilities.push('vision');
+    provider.models.push({id: 'other-vision', label: '另一模型', selected: false, capabilities: ['text', 'vision']});
+    try {
+        render(<MemoryRouter><Chat /><Link to="/dashboard/another">切换另一会话</Link></MemoryRouter>);
+        const picker = await screen.findByLabelText('选择聊天附件');
+        const png = 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAE0lEQVQImWP4z8DwnwGM/zMwAAAf7gP9qS/A4gAAAABJRU5ErkJggg==';
+        const file = image ? new File([Uint8Array.from(atob(png), c => c.charCodeAt(0))], 'draft.png', {type: 'image/png'})
+            : new File(['draft text'], 'draft.txt');
+        fireEvent.change(picker, {target: {files: [file]}});
+        fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '保留草稿'}});
+        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+        fireEvent.mouseDown(screen.getByLabelText('聊天模型'));
+        fireEvent.click(await screen.findByText('测试服务商 / 另一模型'));
+        await waitFor(() => expect(requests.some(row => row.body?.operation === 'select')).toBe(true));
+        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+        expect(screen.getByLabelText(`移除附件 ${file.name}`)).toBeInTheDocument();
+        expect(screen.getByLabelText('聊天消息')).toHaveValue('保留草稿');
+        if (image) {
+            fireEvent.click(screen.getByText('切换另一会话'));
+            await waitFor(() => expect(screen.queryByLabelText('移除附件 draft.png')).not.toBeInTheDocument());
+        } else {
+            fireEvent.click(screen.getByLabelText('发送消息'));
+            await screen.findByText('已收到');
+            expect(requests.find(row => row.body?.operation === 'send').body.attachments[0]).toMatchObject({name: 'draft.txt', content: 'draft text'});
+        }
     } finally {
         provider.models.pop();
         provider.models[0].capabilities = ['text', 'tools'];
