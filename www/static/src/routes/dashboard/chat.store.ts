@@ -24,6 +24,7 @@ export class ChatStore {
     private generation = 0;
     private abort: AbortController | null = null;
     constructor() { makeAutoObservable(this, {}, {autoBind: true}) }
+    setPendingMessage(message: any) { this.pendingMessage = message }
     async list() {
         const result = await chatApi();
         runInAction(() => { this.sessions = result.sessions; this.providers = result.providers });

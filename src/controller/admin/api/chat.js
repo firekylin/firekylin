@@ -1,6 +1,7 @@
 'use strict';
 const Base = require('./base');
-const {normalizeAttachments} = require('../../../service/chat-attachments');
+const {normalizeChatAttachments, messageImages} = require('../../../service/chat-attachments');
+const vision = require('../../../ai/vision');
 const {ChatAgent} = require('../../../service/chat-agent');
 
 const controllers = new Map();
@@ -16,6 +17,7 @@ module.exports = class extends Base {
   }
   async getAction() {
     const user = await this.identity();
+    this.ctx.res?.setHeader?.('Cache-Control', 'no-store');
     const store = this.model('chat/session');
     const providers = await global.firekylin.plugins.ai.models();
     const id = this.get('session');
@@ -41,6 +43,7 @@ module.exports = class extends Base {
   }
   async postAction() {
     const user = await this.identity();
+    this.ctx.res?.setHeader?.('Cache-Control', 'no-store');
     const body = this.post() || {};
     const store = this.model('chat/session');
     if (body.operation === 'create') {
@@ -85,6 +88,9 @@ module.exports = class extends Base {
         return this.fail('模型不可用');
       }
       await store.withIdle(session, async() => {
+        const history = await store.model('chat/message').listForSession(session.id);
+        vision.assertModel(provider.models.find(model => model.id === body.model),
+          history.map(message => ({role: message.role, images: messageImages(message)})));
         await store.updateSession(session.id, {provider: body.provider, model: body.model});
         await store.model('chat/message').append(session.id, {role: 'event', content: `模型已切换为 ${provider.label} / ${body.model}`});
       });
@@ -94,7 +100,9 @@ module.exports = class extends Base {
     if (body.operation !== 'confirm' && pending.length) return this.fail('请先确认或取消待处理操作');
     let attachments = [];
     if (body.operation === 'send') {
-      try { attachments = normalizeAttachments(body.attachments) } catch (error) { return this.fail(error.message) }
+      try {
+        attachments = await normalizeChatAttachments(body.attachments);
+      } catch (error) { return this.fail(error.message) }
     }
     if (body.operation === 'send'
         && (typeof body.content !== 'string'
@@ -113,6 +121,18 @@ module.exports = class extends Base {
       // Never replay an unresolved tool call or an uncertain write.
       if (history.some(message => message.toolCalls?.length)) return this.fail('本对话包含博客操作，请先核对实际状态，再发送新消息');
     }
+    const validateImages = async() => {
+      const history = await store.model('chat/message').listForSession(session.id);
+      const messages = [...history, {role: 'user', attachments}]
+        .map(message => ({role: message.role, images: messageImages(message)}));
+      if (!vision.hasImages(messages)) return;
+      const providers = await global.firekylin.plugins.ai.models();
+      const model = providers.find(item => item.id === session.provider && item.configured !== false)
+        ?.models.find(item => item.id === session.model && item.capabilities.includes('text'));
+      vision.assertModel(model, messages);
+      vision.budget(messages);
+    };
+    try { await validateImages() } catch (error) { return this.fail(error.message) }
     const run = await store.claim(session, body.requestKey);
     let userMessage;
     try {
@@ -123,6 +143,7 @@ module.exports = class extends Base {
       if (body.operation === 'confirm' && !waiting.some(action => action.id === body.action)) {
         throw new Error('操作已处理');
       }
+      await validateImages();
       await store.reconcile(session.id);
       if (body.operation === 'send') {
         userMessage = await store.model('chat/message')
@@ -142,7 +163,7 @@ module.exports = class extends Base {
     const res = this.ctx.res;
     this.ctx.respond = false;
     res.writeHead(200, {'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no'});
+      'Cache-Control': 'no-store, no-transform', 'X-Accel-Buffering': 'no'});
     const emit = (event, data) => { if (!res.destroyed) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`) };
     const close = () => { if (!res.writableEnded) controller.abort() };
     res.once('close', close);

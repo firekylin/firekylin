@@ -226,7 +226,7 @@ it('selects, previews, removes and sends text attachments without an additional 
     expect(screen.getByText('notes.md · 12 B · 文本附件')).toBeInTheDocument();
 });
 it('keeps files and prompt when the server rejects a send', async() => {
-    const original = global.fetch;
+    const original = globalThis.fetch;
     vi.stubGlobal('fetch', vi.fn(async(url, options) => {
         if (options?.body && JSON.parse(options.body as string).operation === 'send') {
             return {ok: false, json: async() => ({errno: 1, errmsg: '模型不可用'})};
@@ -242,4 +242,26 @@ it('keeps files and prompt when the server rejects a send', async() => {
     await screen.findByText('模型不可用');
     await waitFor(() => expect(screen.getByLabelText('聊天消息')).toHaveValue('阅读文件'));
     expect(screen.getByLabelText('移除附件 notes.txt')).toBeInTheDocument();
+});
+it('sends actual image bytes, restores previews on refresh and removes draft images', async() => {
+    provider.models[0].capabilities.push('vision');
+    try {
+        const png = 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAE0lEQVQImWP4z8DwnwGM/zMwAAAf7gP9qS/A4gAAAABJRU5ErkJggg==';
+        const file = new File([Uint8Array.from(atob(png), c => c.charCodeAt(0))], 'red.png', {type: 'image/png'});
+        const {unmount} = render(<MemoryRouter initialEntries={['/dashboard']}><Chat /></MemoryRouter>);
+        await screen.findByLabelText('选择聊天附件');
+        fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
+        expect(await screen.findByRole('img', {name: 'red.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
+        fireEvent.click(screen.getByLabelText('移除附件 red.png'));
+        expect(screen.queryByRole('img', {name: 'red.png'})).not.toBeInTheDocument();
+        fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
+        await screen.findByRole('img', {name: 'red.png'});
+        fireEvent.click(screen.getByLabelText('发送消息'));
+        await screen.findByText('已收到');
+        expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);
+        expect(screen.queryByLabelText('移除附件 red.png')).not.toBeInTheDocument();
+        unmount();
+        render(<MemoryRouter initialEntries={['/dashboard/one']}><Chat /></MemoryRouter>);
+        expect(await screen.findByRole('img', {name: 'red.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
+    } finally { provider.models[0].capabilities = ['text', 'tools']; }
 });

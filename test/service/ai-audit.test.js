@@ -174,3 +174,16 @@ test('attachment conversations can suppress all audit body copies while retainin
   assert.equal(rows[0].total_tokens, 6);
   assert.ok(!JSON.stringify(rows).includes(secret));
 });
+test('native vision calls automatically omit image bytes, prompt and quoted output from audit', async() => {
+  const {client, rows} = setup(() => ({text: 'unused'}));
+  client.providers.register({id: 'vision', models: [{id: 'model', capabilities: ['text', 'vision']}],
+    generate: () => ({text: 'private-picture-description', usage: {prompt_tokens: 1, completion_tokens: 1}})});
+  const data = 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAE0lEQVQImWP4z8DwnwGM/zMwAAAf7gP9qS/A4gAAAABJRU5ErkJggg==';
+  await client.generate({provider: 'vision', model: 'model', messages: [{role: 'user', content: 'private-picture-prompt',
+    images: [{mimeType: 'image/png', data}]}]});
+  assert.equal(rows[0].content_recorded, 0);
+  assert.equal(rows[0].response_text, null);
+  assert.equal(rows[0].total_tokens, 2);
+  assert.ok(!JSON.stringify(rows).includes(data));
+  assert.ok(!JSON.stringify(rows).includes('private-picture'));
+});

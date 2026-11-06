@@ -3,7 +3,8 @@ const {randomUUID, createHash} = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const PostCommand = require('./post-command');
-const {messageContent} = require('./chat-attachments');
+const {messageContent, messageImages} = require('./chat-attachments');
+const vision = require('../ai/vision');
 
 const skill = fs.readFileSync(path.join(__dirname, '../../skills/firekylin/SKILL.md'), 'utf8');
 const AUTHOR = new Set(['posts:manage:read', 'posts:write', 'posts:delete', 'taxonomy:read']);
@@ -161,9 +162,13 @@ class ChatAgent {
         skill
       ].join('\n')}, ...history.map(({role, content, attachments, toolCalls, toolCallId, name, providerData}) =>
         ({role, content: messageContent({role, content, attachments}),
+          ...(attachments?.some(file => file.kind === 'image') ? {images: messageImages({attachments})} : {}),
           ...(providerData ? {providerData} : {}), ...(toolCalls ? {toolCalls} : {}),
           ...(toolCallId ? {toolCallId, name} : {})}))];
-      if (JSON.stringify(messages).length > 400000) throw new Error('对话内容过长，请新建对话');
+      vision.assertModel(model, messages);
+      vision.budget(messages);
+      const textMessages = messages.map(message => ({...message, images: undefined}));
+      if (JSON.stringify(textMessages).length > 400000) throw new Error('对话内容过长，请新建对话');
       emit('status', '正在思考');
       let text = '', auditRequestId;
       const result = await this.ai.generate({provider: session.provider, model: session.model, messages,

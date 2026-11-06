@@ -84,21 +84,33 @@ function Chat({children, onConversationChange}: {
     }, [id, store, store.busy, store.session?.active_run]);
     const inConversation = started || store.busy || Boolean(store.session?.active_run) ||
         store.messages.some(entry => ['user', 'assistant', 'tool'].includes(entry.role));
-    useEffect(() => { if (inConversation) setHistoryOpen(true); }, [inConversation]);
+    useEffect(() => {
+        if (inConversation) setHistoryOpen(!window.matchMedia('(max-width: 700px)').matches);
+    }, [inConversation]);
+    useEffect(() => {
+        const media = window.matchMedia('(max-width: 700px)');
+        const collapse = () => {if (media.matches) setHistoryOpen(false)};
+        media.addEventListener?.('change', collapse);
+        return () => media.removeEventListener?.('change', collapse);
+    }, []);
     useEffect(() => { onConversationChange?.(inConversation); }, [inConversation, onConversationChange]);
     const locked = readingFiles || sending || store.loading || store.busy || Boolean(store.session?.active_run);
     const pending = store.actions.find(action => action.status === 'pending');
+    const needsVision = attachments.some(file => file.kind === 'image') || store.messages.some(entry => entry.attachments?.some((file: any) => file.kind === 'image'));
     const models = store.providers.filter(provider => provider.configured !== false).flatMap(provider =>
         provider.models.filter((model: any) => model.capabilities.includes('text')).map((model: any) => ({
-            value: JSON.stringify([provider.id, model.id]), label: `${provider.label} / ${model.label || model.id}`,
-            selected: model.selected, tools: model.capabilities.includes('tools')
+            value: JSON.stringify([provider.id, model.id]), label: `${provider.label} / ${model.label || model.id}${model.capabilities.includes('vision') ? ' · 可读图片' : ''}`,
+            selected: model.selected, tools: model.capabilities.includes('tools'), vision: model.capabilities.includes('vision'),
+            disabled: needsVision && !model.capabilities.includes('vision')
         })));
     const sessionModel = JSON.stringify([store.session?.provider, store.session?.model]);
     const selected = models.find(model => model.value === sessionModel)?.value || models.find(model => model.selected)?.value || models[0]?.value;
+    const canReadImages = models.find(model => model.value === selected)?.vision;
     const send = async(content = input) => {
         if ((!content.trim() && !attachments.length) || locked || pending || !selected) return;
+        if (needsVision && !canReadImages) throw new Error('请先选择标记为“可读图片”的模型');
         setStarted(true);
-        store.pendingMessage = {id: crypto.randomUUID(), role: 'user', content: content.trim(), attachments};
+        store.setPendingMessage({id: crypto.randomUUID(), role: 'user', content: content.trim(), attachments});
         setInput('');
         setSending(true);
         try {
@@ -114,7 +126,7 @@ function Chat({children, onConversationChange}: {
             if (accepted) setAttachments([]);
             else {setInput(content); setAttachments(attachments);}
         } catch (error) { setInput(content); setAttachments(attachments); throw error; }
-        finally { store.pendingMessage = null; setSending(false); setStarted(false); }
+        finally { store.setPendingMessage(null); setSending(false); setStarted(false); }
     };
     const newChat = () => {
         if (locked) return;
@@ -216,13 +228,14 @@ function Chat({children, onConversationChange}: {
                                 const files = Array.from(event.target.files || []); event.target.value = '';
                                 const generation = attachmentGeneration.current;
                                 setReadingFiles(true);
-                                safe(readChatFiles(files, attachments).then(value => {
+                                safe(readChatFiles(files, attachments, canReadImages).then(value => {
                                     if (generation === attachmentGeneration.current) setAttachments(value);
-                                }).finally(() => setReadingFiles(false)));
+                                }).then(() => setReadingFiles(false), error => {setReadingFiles(false); throw error;}));
                             }} />
-                        <Button disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()}>添加文本文件</Button>
-                        <small>UTF-8 TXT / Markdown / CSV / JSON / LOG；最多 5 个，每个 32 KiB，共 64 KiB。暂不支持图片、PDF、Office。发送时正文将交给所选 AI 服务商，并随私有会话保存。</small>
+                        <Button disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()}>添加图片或文件</Button>
+                        <details className="chat-file-help"><summary>图片 2 MiB / 文本 32 KiB · 上传说明</summary><small>最多 5 个附件；PNG / JPEG / WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后图片和正文交给所选 AI 服务商，随私有会话保存。暂不支持 PDF、Office。</small></details>
                     </div>
+                    {!canReadImages && <small className="chat-muted">当前模型不可读图片，请选择标记为“可读图片”的模型；没有可选项时需升级对应 AI 插件。</small>}
                     <ChatAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
                     <Suggestion items={commands.map(command => ({label: command.label, value: command.description}))}
                         onSelect={value => setInput(value)}>
@@ -239,7 +252,7 @@ function Chat({children, onConversationChange}: {
                                     onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
                                         const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
                                 {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
-                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={(!input.trim() && !attachments.length) || Boolean(pending) || !selected || locked} />}
+                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={(!input.trim() && !attachments.length) || Boolean(pending) || !selected || locked || (needsVision && !canReadImages)} />}
                             </div>} />}
                     </Suggestion>
                     {!inConversation && <Prompts className="chat-suggestions" wrap
