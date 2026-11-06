@@ -5,7 +5,7 @@ import {Conversations, Prompts, Sender, Suggestion, Welcome, XProvider, notifica
 import zhCN from '@ant-design/x/es/locale/zh_CN';
 import antdZhCN from 'antd/es/locale/zh_CN';
 import {ChatMessage, GenerationStatus, commands, toolLabels} from './chat-content';
-import {ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOutlined, StopOutlined, BellOutlined, MessageOutlined, SearchOutlined, LockOutlined, MoreOutlined} from '@ant-design/icons';
+import {PaperClipOutlined, ArrowUpOutlined, PlusOutlined, CaretLeftOutlined, EditOutlined, DeleteOutlined, StopOutlined, BellOutlined, MessageOutlined, SearchOutlined, LockOutlined, MoreOutlined} from '@ant-design/icons';
 import {Link, useRouteComponentProps} from '../../utils/router';
 import {ChatStore} from './chat.store';
 import './chat.less';
@@ -222,39 +222,47 @@ function Chat({children, onConversationChange}: {
             <footer className="chat-composer-area">
                 {store.error && <Alert type="warning" title={store.error} closable onClose={() => {store.error = ''}} />}
                 {!models.length ? <div className="chat-connect"><h3>连接你的 AI 服务商</h3><p>配置完成后，即可开始聊天和管理博客。</p><Link to="/options/ai">前往 AI 连接设置 →</Link></div> : <>
-                    <div className="chat-file-picker">
-                        <input ref={fileInput} type="file" multiple accept={attachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
-                            onChange={event => {
-                                const files = Array.from(event.target.files || []); event.target.value = '';
-                                const generation = attachmentGeneration.current;
-                                setReadingFiles(true);
-                                safe(readChatFiles(files, attachments, canReadImages).then(value => {
-                                    if (generation === attachmentGeneration.current) setAttachments(value);
-                                }).then(() => setReadingFiles(false), error => {setReadingFiles(false); throw error;}));
-                            }} />
-                        <Button disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()}>添加图片或文件</Button>
-                        <details className="chat-file-help"><summary>图片 2 MiB / 文本 32 KiB · 上传说明</summary><small>最多 5 个附件；PNG / JPEG / WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后图片和正文交给所选 AI 服务商，随私有会话保存。暂不支持 PDF、Office。</small></details>
-                    </div>
-                    {!canReadImages && <small className="chat-muted">当前模型不可读图片，请选择标记为“可读图片”的模型；没有可选项时需升级对应 AI 插件。</small>}
-                    <ChatAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
+                    <input ref={fileInput} type="file" multiple accept={attachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
+                        onChange={event => {
+                            const files = Array.from(event.target.files || []); event.target.value = '';
+                            const generation = attachmentGeneration.current;
+                            setReadingFiles(true);
+                            safe(readChatFiles(files, attachments, canReadImages).then(value => {
+                                if (generation === attachmentGeneration.current) setAttachments(value);
+                            }).then(() => setReadingFiles(false), error => {setReadingFiles(false); throw error;}));
+                        }} />
                     <Suggestion items={commands.map(command => ({label: command.label, value: command.description}))}
                         onSelect={value => setInput(value)}>
                         {({onTrigger, onKeyDown, open}) => <Sender className="chat-composer" value={input} components={senderComponents}
                             placeholder={pending ? '请先确认或取消上方操作' : '帮我写文章、整理内容或管理博客… 输入 / 查看快捷指令'}
-                            autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} disabled={Boolean(pending)}
+                            autoSize={{minRows: inConversation ? 2 : 3, maxRows: 8}} disabled={pending ? true : undefined} allowSpeech
+                            header={attachments.length > 0 && <Sender.Header title="附件" open closable={false}>
+                                <ChatAttachments files={attachments} disabled={locked} remove={index => setAttachments(files => files.filter((_, i) => i !== index))} />
+                            </Sender.Header>}
                             loading={sending || store.busy || Boolean(store.session?.active_run)}
                             onChange={value => {setInput(value); onTrigger(value === '/' ? {} : false)}}
                             onKeyDown={event => {onKeyDown(event); if (open && event.key === 'Enter') return false; return undefined}}
                             onSubmit={() => safe(send())} onCancel={() => safe(store.stop())} suffix={false}
-                            footer={(_, {components: {SendButton, LoadingButton}}) => <div className="chat-composer-toolbar">
-                                <span className="chat-muted">{models.find(model => model.value === selected)?.tools ? '博客技能已启用' : '普通问答 · 当前模型不支持博客操作'}</span>
-                                <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
-                                    onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
-                                        const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
-                                {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
-                                    <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={(!input.trim() && !attachments.length) || Boolean(pending) || !selected || locked || (needsVision && !canReadImages)} />}
+                            footer={(_, {components: {SendButton, LoadingButton, SpeechButton}}) => <div className="chat-composer-toolbar">
+                                <Tooltip title="添加图片或文件：最多 5 个附件；PNG/JPEG/WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。">
+                                    <Button type="text" aria-label="添加图片或文件" icon={<PaperClipOutlined />} loading={readingFiles}
+                                        disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()} />
+                                </Tooltip>
+                                <div className="chat-composer-actions">
+                                    <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
+                                        onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
+                                            const [provider, model] = JSON.parse(value); await store.mutate('select', {provider, model});})())} />
+                                    <Tooltip title="语音输入（需浏览器支持并允许麦克风权限）">
+                                        <SpeechButton aria-label="语音输入" disabled={locked || pending ? true : undefined} />
+                                    </Tooltip>
+                                    {sending || store.busy || store.session?.active_run ? <LoadingButton disabled={false} aria-label="停止生成" icon={<StopOutlined />} /> :
+                                        <SendButton className="chat-send-button" type="primary" aria-label="发送消息" icon={<ArrowUpOutlined />} disabled={(!input.trim() && !attachments.length) || Boolean(pending) || !selected || locked || (needsVision && !canReadImages)} />}
+                                </div>
                             </div>} />}
                     </Suggestion>
+                    <small className="chat-model-hint chat-muted"><span>{models.find(model => model.value === selected)?.tools ? '博客技能已启用' : '普通问答 · 当前模型不支持博客操作'}</span>
+                        {!canReadImages && ' · 图片需选择标记为“可读图片”的模型；没有可选项时需升级 AI 插件。'}
+                    </small>
                     {!inConversation && <Prompts className="chat-suggestions" wrap
                         items={commands.map(command => ({...command, disabled: locked, description: undefined}))}
                         onItemClick={({data}) => setInput(commands.find(command => command.key === data.key)!.description)} />}

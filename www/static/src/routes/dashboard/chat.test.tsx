@@ -265,3 +265,37 @@ it('sends actual image bytes, restores previews on refresh and removes draft ima
         expect(await screen.findByRole('img', {name: 'red.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
     } finally { provider.models[0].capabilities = ['text', 'tools']; }
 });
+
+it('places upload and model actions inside Sender and disables unsupported speech', async() => {
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    const upload = await screen.findByRole('button', {name: '添加图片或文件'});
+    const sender = upload.closest('.chat-composer')!;
+    expect(sender).toContainElement(screen.getByLabelText('聊天消息'));
+    expect(sender).toContainElement(screen.getByLabelText('聊天模型'));
+    expect(sender).toContainElement(screen.getByLabelText('发送消息'));
+    expect(screen.getByRole('button', {name: '语音输入'})).toBeDisabled();
+    const picker = screen.getByLabelText('选择聊天附件');
+    const click = vi.spyOn(picker, 'click');
+    fireEvent.click(upload);
+    expect(click).toHaveBeenCalledOnce();
+});
+
+it('adds recognized speech to the draft without sending it', async() => {
+    let recognition: any;
+    vi.stubGlobal('SpeechRecognition', class {
+        onstart?: () => void;
+        onend?: () => void;
+        onresult?: (event: any) => void;
+        constructor() {recognition = this}
+        start() {this.onstart?.()}
+        stop() {this.onend?.()}
+    });
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    const speech = await screen.findByRole('button', {name: '语音输入'});
+    expect(speech).toBeEnabled();
+    fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '请帮我'}});
+    fireEvent.click(speech);
+    act(() => recognition.onresult({results: [[{transcript: '描述图片'}]]}));
+    expect(screen.getByLabelText('聊天消息')).toHaveValue('请帮我 描述图片');
+    expect(requests.some(row => row.body?.operation === 'send')).toBe(false);
+});
