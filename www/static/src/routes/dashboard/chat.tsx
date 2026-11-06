@@ -57,6 +57,7 @@ function Chat({children, onConversationChange}: {
     const [readingFiles, setReadingFiles] = useState(false);
     const fileInput = useRef<HTMLInputElement>(null);
     const attachmentGeneration = useRef(0);
+    const readingFilesRef = useRef(false);
     useEffect(() => { attachmentGeneration.current++; setAttachments([]); }, [id]);
     const [search, setSearch] = useState('');
     const [historyOpen, setHistoryOpen] = useState(false);
@@ -106,6 +107,31 @@ function Chat({children, onConversationChange}: {
     const sessionModel = JSON.stringify([store.session?.provider, store.session?.model]);
     const selected = models.find(model => model.value === sessionModel)?.value || models.find(model => model.selected)?.value || models[0]?.value;
     const canReadImages = models.find(model => model.value === selected)?.vision;
+    const addFiles = async(files: File[]) => {
+        if (!files.length) return;
+        if (locked || pending || readingFilesRef.current) throw new Error('请等待当前操作完成后再添加附件');
+        const generation = attachmentGeneration.current;
+        readingFilesRef.current = true;
+        setReadingFiles(true);
+        try {
+            const value = await readChatFiles(files, attachments, canReadImages);
+            if (generation === attachmentGeneration.current) setAttachments(value);
+        } finally {
+            readingFilesRef.current = false;
+            setReadingFiles(false);
+        }
+    };
+    const pasteImages: React.ClipboardEventHandler<HTMLElement> = event => {
+        const clipboard = event.clipboardData;
+        const files = Array.from(clipboard.files || []);
+        const images = (files.length ? files : Array.from(clipboard.items || [])
+            .filter(item => item.kind === 'file').map(item => item.getAsFile()).filter((file): file is File => Boolean(file)))
+            .filter(file => file.type.startsWith('image/'));
+        if (!images.length) return;
+        // A mixed clipboard can still insert its plain text through the browser.
+        if (!clipboard.getData('text/plain')) event.preventDefault();
+        safe(addFiles(images));
+    };
     const send = async(content = input) => {
         if ((!content.trim() && !attachments.length) || locked || pending || !selected) return;
         if (needsVision && !canReadImages) throw new Error('请先选择标记为“可读图片”的模型');
@@ -225,11 +251,7 @@ function Chat({children, onConversationChange}: {
                     <input ref={fileInput} type="file" multiple accept={attachmentAccept} hidden aria-label="选择聊天附件" disabled={locked || Boolean(pending)}
                         onChange={event => {
                             const files = Array.from(event.target.files || []); event.target.value = '';
-                            const generation = attachmentGeneration.current;
-                            setReadingFiles(true);
-                            safe(readChatFiles(files, attachments, canReadImages).then(value => {
-                                if (generation === attachmentGeneration.current) setAttachments(value);
-                            }).then(() => setReadingFiles(false), error => {setReadingFiles(false); throw error;}));
+                            safe(addFiles(files));
                         }} />
                     <Suggestion items={commands.map(command => ({label: command.label, value: command.description}))}
                         onSelect={value => setInput(value)}>
@@ -242,6 +264,7 @@ function Chat({children, onConversationChange}: {
                             loading={sending || store.busy || Boolean(store.session?.active_run)}
                             onChange={value => {setInput(value); onTrigger(value === '/' ? {} : false)}}
                             onKeyDown={event => {onKeyDown(event); if (open && event.key === 'Enter') return false; return undefined}}
+                            onPaste={pasteImages}
                             onSubmit={() => safe(send())} onCancel={() => safe(store.stop())} suffix={false}
                             footer={(_, {components: {SendButton, LoadingButton, SpeechButton}}) => <div className="chat-composer-toolbar">
                                 <Tooltip title="添加图片或文件：最多 5 个附件；PNG/JPEG/WebP 静态图片每张 2 MiB、共 4 MiB、最长边 4096；文本每个 32 KiB、共 64 KiB。发送后交给所选 AI 服务商，随私有会话保存。不支持 PDF、Office。">

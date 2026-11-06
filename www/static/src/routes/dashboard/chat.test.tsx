@@ -304,3 +304,42 @@ it('adds recognized speech to the draft without sending it', async() => {
     expect(screen.getByLabelText('聊天消息')).toHaveValue('请帮我 描述图片');
     expect(requests.some(row => row.body?.operation === 'send')).toBe(false);
 });
+
+it('pastes clipboard images as draft attachments and sends actual bytes', async() => {
+    provider.models[0].capabilities.push('vision');
+    try {
+        const png = 'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAE0lEQVQImWP4z8DwnwGM/zMwAAAf7gP9qS/A4gAAAABJRU5ErkJggg==';
+        const file = new File([Uint8Array.from(atob(png), c => c.charCodeAt(0))], 'clipboard.png', {type: 'image/png'});
+        render(<MemoryRouter><Chat /></MemoryRouter>);
+        const input = await screen.findByLabelText('聊天消息');
+        expect(fireEvent.paste(input, {clipboardData: {files: [file], getData: () => ''}})).toBe(false);
+        expect(await screen.findByRole('img', {name: 'clipboard.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
+        expect(requests.some(row => row.body?.operation === 'send')).toBe(false);
+        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+        fireEvent.click(screen.getByLabelText('发送消息'));
+        await screen.findByText('已收到');
+        expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);
+    } finally {provider.models[0].capabilities = ['text', 'tools']}
+});
+it('preserves text paste and applies model and size checks to clipboard images', async() => {
+    render(<MemoryRouter><Chat /></MemoryRouter>);
+    const input = await screen.findByLabelText('聊天消息');
+    expect(fireEvent.paste(input, {clipboardData: {files: [], getData: () => '普通文字'}})).toBe(true);
+    const file = new File(['image'], 'clipboard.png', {type: 'image/png'});
+    expect(fireEvent.paste(input, {clipboardData: {files: [], items: [{kind: 'file', getAsFile: () => file}], getData: () => '图片说明'}})).toBe(true);
+    expect(await screen.findByText(/当前模型不支持图片/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('预览图片 clipboard.png')).not.toBeInTheDocument();
+});
+it('rejects oversized pasted images without replacing existing attachments', async() => {
+    provider.models[0].capabilities.push('vision');
+    try {
+        render(<MemoryRouter><Chat /></MemoryRouter>);
+        const input = await screen.findByLabelText('聊天消息');
+        fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [new File(['notes'], 'notes.txt')]}});
+        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+        fireEvent.paste(input, {clipboardData: {files: [new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'big.png', {type: 'image/png'})], getData: () => ''}});
+        expect(await screen.findByText(/每张不能超过 2 MiB/)).toBeInTheDocument();
+        expect(screen.getByLabelText('移除附件 notes.txt')).toBeInTheDocument();
+        expect(screen.queryByLabelText('预览图片 big.png')).not.toBeInTheDocument();
+    } finally {provider.models[0].capabilities = ['text', 'tools']}
+});
