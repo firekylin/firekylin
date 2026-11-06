@@ -109,6 +109,11 @@ export default function AIConnections() {
         try {
             if (provider?.admin && form && settingsDirty) {
                 const values = await providerForm.validateFields();
+                if (!hasSavedApiKey && form.fields.some(field => field.name === 'apiKey' && field.type === 'password') &&
+                    (typeof values.apiKey !== 'string' || !values.apiKey.trim())) {
+                    providerForm.setFields([{name: 'apiKey', errors: ['请输入 API Key']}]);
+                    return;
+                }
                 if (hasSavedApiKey && values.apiKey === SAVED_SECRET_MASK) delete values.apiKey;
                 const configured = await firstValueFrom(http.post<any>(
                     `/admin/api/plugins/${provider.admin.pluginId}/forms/${provider.admin.formId}`, values, csrf));

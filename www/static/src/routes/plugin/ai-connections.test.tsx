@@ -113,6 +113,10 @@ describe('AI connections', () => {
         const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
         const key = await within(view.container).findByLabelText('API Key') as HTMLInputElement;
         expect(key.value).toBe('');
+        fireEvent.change(view.getByLabelText('API Base URL'), {target: {value: 'https://example.com'}});
+        fireEvent.click(view.getByRole('button', {name: '保存'}));
+        await view.findByText('请输入 API Key');
+        expect(http.post).not.toHaveBeenCalled();
     });
     it('replaces provider settings when switching providers', async() => {
         const fields = [{name: 'apiKey', type: 'password', label: 'API Key'},
