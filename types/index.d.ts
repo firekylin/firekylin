@@ -161,6 +161,8 @@ declare namespace Firekylin {
   interface AIChatMessage {
     role: string;
     content: string;
+    /** Private inline image inputs on user messages; requires the model's vision capability. */
+    images?: AIImage[];
     toolCalls?: AIChatToolCall[];
     /** Opaque provider state, never displayed as assistant reasoning. */
     providerData?: Record<string, unknown>;
@@ -206,6 +208,8 @@ declare namespace Firekylin {
   interface AIProviderContext {
     /** Core-owned image validation and conversion for native provider adapters. */
     images: AIImageHelpers;
+    /** Validated image inputs for native vision adapters, separate from image generation. */
+    vision: {inputs(message: AIChatMessage): AIImage[]};
     /** Return this descriptor to let core consume the raw provider response. */
     streamResponse: AIStreamResponseFactory;
     signal?: AbortSignal;
@@ -240,7 +244,7 @@ declare namespace Firekylin {
   interface AIModelDefinition {
     id: string;
     label?: string;
-    /** Defaults to ['text']; e.g. ['text', 'image'] for models supporting both. */
+    /** Defaults to ['text']; 'vision' means image input, 'image' means image generation/editing. */
     capabilities?: string[];
   }
 

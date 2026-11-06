@@ -43,3 +43,15 @@ it('deleting the current conversation does not try to reopen a deleted session',
     expect(store.messages).toHaveLength(0);
     expect(calls.some(url => url.includes('?session='))).toBe(false);
 });
+it('keeps persistence acknowledgement when the stream or history refresh fails', async() => {
+    window.SysConfig = {csrfToken: 'csrf'} as any;
+    const store = new ChatStore();
+    store.session = {id: 'one'};
+    vi.stubGlobal('fetch', vi.fn(async(_, options) => {
+        if (options?.method !== 'POST') throw new Error('offline');
+        return {ok: true, headers: new Headers({'content-type': 'text/event-stream'}),
+            body: new ReadableStream({start(controller) {controller.error(new Error('disconnected'))}})};
+    }));
+    expect(await store.stream('send', {content: '', attachments: [{name: 'a.txt', content: 'text'}]})).toBe(true);
+    expect(store.error).toBe('disconnected');
+});

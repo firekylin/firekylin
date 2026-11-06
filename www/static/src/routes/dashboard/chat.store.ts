@@ -24,6 +24,7 @@ export class ChatStore {
     private generation = 0;
     private abort: AbortController | null = null;
     constructor() { makeAutoObservable(this, {}, {autoBind: true}) }
+    setPendingMessage(message: any) { this.pendingMessage = message }
     async list() {
         const result = await chatApi();
         runInAction(() => { this.sessions = result.sessions; this.providers = result.providers });
@@ -64,6 +65,7 @@ export class ChatStore {
         this.busy = true; this.error = ''; this.streaming = ''; this.status = '正在连接';
         this.abort = new AbortController();
         let completed = false;
+        let accepted = false;
         try {
             const response = await fetch('/admin/api/chat', {method: 'POST', credentials: 'same-origin',
                 signal: this.abort.signal,
@@ -72,6 +74,7 @@ export class ChatStore {
             if (!response.ok || !response.headers.get('content-type')?.includes('text/event-stream')) {
                 const result = await response.json(); throw new Error(result.errmsg || '连接失败');
             }
+            accepted = true;
             const reader = response.body!.getReader();
             const decoder = new TextDecoder();
             let buffer = '';
@@ -118,7 +121,9 @@ export class ChatStore {
         } finally {
             runInAction(() => { this.busy = false; this.streaming = ''; this.status = ''; this.abort = null });
             try { await Promise.all([this.list(), this.open(id)]); }
+            catch { runInAction(() => { this.error = this.error || '消息状态同步失败，请刷新对话查看已保存的记录'; }); }
             finally { runInAction(() => { this.pendingMessage = null }); }
         }
+        return accepted;
     }
 }

@@ -2,6 +2,7 @@
 
 const {streamResponse, consumeStream} = require('./stream');
 const images = require('../service/ai-images');
+const vision = require('./vision');
 
 function nonEmpty(value, label) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string`);
@@ -43,6 +44,7 @@ class AIClient {
   }
 
   async generate(request, context = {}) {
+    if (vision.hasImages(request?.messages)) context = {...context, recordContent: false};
     const entry = await this.audit?.start(request, context);
     context.onRequestId?.(entry?.request_id);
     const state = {request, entry};
@@ -82,6 +84,7 @@ class AIClient {
     if (!Array.isArray(request.messages) || !request.messages.length) {
       throw new TypeError('AI request requires messages');
     }
+    vision.assertModel(model, request.messages);
     await this.audit?.resolve(state.entry, state.request);
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -103,11 +106,14 @@ class AIClient {
         if (signal.aborted) onAbort();
       });
       if (signal.aborted) return await aborted;
-      const providerContext = {...context, signal, reportUsage, images, streamResponse,
+      const providerContext = {...context, signal, reportUsage, images, vision: {inputs: vision.inputs}, streamResponse,
         ...(context.onText ? {onText: delta => {if (active && !signal.aborted) context.onText(delta)}} : {})};
       // Keep the timeout/audit scope alive until the raw provider stream is consumed.
       const result = await Promise.race([Promise.resolve().then(async() => {
-        const output = await provider.generate({...request, provider: providerId, model: modelId}, providerContext);
+        const messages = await vision.normalizeMessages(request.messages);
+        signal.throwIfAborted();
+        const output = await provider.generate(
+          {...request, messages, provider: providerId, model: modelId}, providerContext);
         return output?.stream ? consumeStream(output, providerContext) : output;
       }), aborted]);
       return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
