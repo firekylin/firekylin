@@ -248,6 +248,7 @@ function Chat({children, onConversationChange}: {
                                     <Button type="text" aria-label="添加图片或文件" icon={<PaperClipOutlined />} loading={readingFiles}
                                         disabled={locked || Boolean(pending)} onClick={() => fileInput.current?.click()} />
                                 </Tooltip>
+                                {models.find(model => model.value === selected)?.tools && <small className="chat-skill-status chat-muted">博客技能已启动</small>}
                                 <div className="chat-composer-actions">
                                     <Select aria-label="聊天模型" placeholder="选择模型" variant="borderless" value={selected} options={models} disabled={locked || Boolean(pending)}
                                         onChange={value => safe((async() => {if (!store.session) {const created = await store.create(); await store.open(created); router.history.replace(`/dashboard/${created}`)}
@@ -260,9 +261,6 @@ function Chat({children, onConversationChange}: {
                                 </div>
                             </div>} />}
                     </Suggestion>
-                    <small className="chat-model-hint chat-muted"><span>{models.find(model => model.value === selected)?.tools ? '博客技能已启用' : '普通问答 · 当前模型不支持博客操作'}</span>
-                        {!canReadImages && ' · 图片需选择标记为“可读图片”的模型；没有可选项时需升级 AI 插件。'}
-                    </small>
                     {!inConversation && <Prompts className="chat-suggestions" wrap
                         items={commands.map(command => ({...command, disabled: locked, description: undefined}))}
                         onItemClick={({data}) => setInput(commands.find(command => command.key === data.key)!.description)} />}

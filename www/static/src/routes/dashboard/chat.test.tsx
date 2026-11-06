@@ -33,7 +33,7 @@ afterEach(() => {cleanup(); vi.unstubAllGlobals()});
 it('shows overview chat entry, sends first message, persists route and renders Markdown', async() => {
     render(<MemoryRouter initialEntries={['/dashboard']}><Chat><div>概览下方三栏</div></Chat></MemoryRouter>);
     expect(screen.getByText('今天想写点什么？')).toBeInTheDocument();
-    await screen.findByText('博客技能已启用');
+    await screen.findByText('博客技能已启动');
     fireEvent.change(screen.getByLabelText('聊天消息'), {target: {value: '你好'}});
     fireEvent.click(screen.getByLabelText('发送消息'));
     expect(await screen.findByText('已收到')).toBeInTheDocument();
