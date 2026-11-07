@@ -8,6 +8,9 @@ vi.mock('axios', () => ({default: {get: vi.fn(), post: vi.fn()}}));
 afterEach(async() => {
     // Static Ant Design messages own a React root outside Testing Library.
     await act(async() => { cleanup(); message.destroy() });
+    // Ant Design Form's error-list debounce leaves 10 ms updates pending after
+    // unmount (useDelayState has no cleanup). Drain them before jsdom tears down.
+    await act(async() => { await new Promise(resolve => setTimeout(resolve, 20)) });
 });
 beforeEach(() => {
     globalThis.ResizeObserver = class {observe() {} unobserve() {} disconnect() {}} as any;
