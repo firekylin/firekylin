@@ -7,7 +7,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async indexAction() {
-    const {frontPage} = await this.model('options').getOptions();
+    const {frontPage} = this.options;
     if (frontPage) {
       this.get('pathname', frontPage);
       return this.action('post', 'page');
