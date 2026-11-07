@@ -3,13 +3,12 @@ import { Tooltip } from 'antd';
 
 export default function PostAccessIndicator({ post }: { post: {
     status: number;
-    is_scheduled: boolean;
     is_public: number;
     create_time: string;
     pathname: string;
 } }) {
     const hidden = !post.is_public;
-    const scheduled = post.status === 3 && post.is_scheduled;
+    const scheduled = post.status === 3 && new Date(post.create_time).getTime() > Date.now();
     return (
         <>
             {hidden && (

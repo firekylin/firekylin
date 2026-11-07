@@ -101,17 +101,10 @@ class PostQueryService {
       'title', 'user_id', 'create_time', 'update_time',
       'status', 'pathname', 'is_public'
     ];
-    const result = await model.where(where).field(fields)
+    return model.where(where).field(fields)
       .order('create_time DESC')
       .page(page, pageSize)
       .countSelect();
-    const now = new Date(this.now()).getTime();
-    result.data = result.data.map(post => ({
-      ...post,
-      // Interpret timezone-less database dates on the server, never in the browser.
-      is_scheduled: post.status === 3 && new Date(post.create_time).getTime() > now
-    }));
-    return result;
   }
 }
 

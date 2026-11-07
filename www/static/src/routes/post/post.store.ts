@@ -57,7 +57,7 @@ class PostStore {
     data.map((post, i) => {
       post.key = post.id;
       post.author = post.user.name;
-      post.statusText = post.status === 3 && post.is_scheduled ? '即将发布' : tools.getStatusText(post.status);
+      post.statusText = tools.getStatusText(post.status, post.create_time);
     });
     this.postList = data;
   }
@@ -90,7 +90,7 @@ class PostStore {
             res.data.data.forEach(post => {
               post.key = post.id;
               post.author = post.user?.name || '';
-              post.statusText = post.status === 3 && post.is_scheduled ? '即将发布' : tools.getStatusText(post.status);
+              post.statusText = tools.getStatusText(post.status, post.create_time);
             });
             return res;
           }
