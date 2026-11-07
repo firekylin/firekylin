@@ -19,8 +19,9 @@ function matchesSignature(buffer, format) {
   return false;
 }
 
-function registerMediaAbilities(registry, {getUploadConfig, getUploader}) {
-  if (typeof getUploadConfig !== 'function' || typeof getUploader !== 'function') {
+function registerMediaAbilities(registry, {getUploadConfig, getUploader, createAttachment}) {
+  if (typeof getUploadConfig !== 'function' || typeof getUploader !== 'function' ||
+      typeof createAttachment !== 'function') {
     throw new TypeError('Media dependencies required');
   }
   if (registry.has('media.upload', 'core:media')) return;
@@ -38,7 +39,8 @@ function registerMediaAbilities(registry, {getUploadConfig, getUploader}) {
       required: ['name', 'format', 'base64']
     },
     async execute(input, context) {
-      if (!context.principal || !Number.isSafeInteger(Number(context.principal.id))) {
+      if (!context.principal || !Number.isSafeInteger(Number(context.principal.id)) ||
+          Number(context.principal.id) <= 0) {
         throw new Error('Authenticated principal required');
       }
       if (!input || typeof input !== 'object' || Array.isArray(input) ||
@@ -72,7 +74,10 @@ function registerMediaAbilities(registry, {getUploadConfig, getUploader}) {
           name: input.name + format.extension, path: filename, size: bytes.length, type: format.mime
         }};
         const service = sdkServices.includes(config.type) ? 'files-sdk' : config.type;
-        return await getUploader(service).run(filename, uploadConfig);
+        const url = await getUploader(service).run(filename, uploadConfig);
+        await createAttachment({url, file: uploadConfig.file, storage: config.type,
+          userId: Number(context.principal.id)});
+        return url;
       } finally {
         await fs.rm(temporary, {recursive: true, force: true});
       }

@@ -134,30 +134,12 @@ module.exports = class extends Base {
    * 以兼容编辑器、站点图标等现有调用方。
    */
   async createAttachment(url, file, storage) {
-    const now = think.datetime();
-    const name = file.name || path.basename(url);
-    const attachment = {
-      name,
-      url,
-      size: Number(file.size) || 0,
-      mime: file.type || 'application/octet-stream',
-      storage
-    };
-    return this.model('post').addPost({
-      user_id: this.userInfo.id,
-      type: 2,
-      status: 3,
-      title: name,
-      pathname: think.uuid(20),
-      summary: '',
-      markdown_content: '',
-      content: '',
-      allow_comment: 0,
-      create_time: now,
-      update_time: now,
-      is_public: 1,
-      comment_num: 0,
-      options: JSON.stringify({attachment})
+    return require('../../../service/media-attachment').createAttachment({
+      url, file, storage, userId: this.userInfo.id
+    }, {
+      getModel: () => this.model('post'),
+      now: () => think.datetime(),
+      uuid: () => think.uuid(20)
     });
   }
 
