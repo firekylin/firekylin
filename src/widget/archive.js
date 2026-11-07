@@ -31,6 +31,7 @@ module.exports = class extends ContentsWidget {
 
   async executeList() {
     const where = {
+      pageSize: Number(this.controller.options && this.controller.options.postsListSize) || undefined,
       tag: this.controller.get('tag'),
       cate: this.controller.get('cate')
     };
