@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Alert, Button, Empty, Input, message, Modal, Space, Spin, Tag} from 'antd';
+import {Alert, Button, Empty, Image, Input, message, Modal, Space, Spin, Tag} from 'antd';
 import axios from 'axios';
 import {gt, valid} from 'semver';
 import {Link} from '../../../utils/router';
@@ -12,13 +12,19 @@ type ThemeItem = {id?: string; name: string; title?: string; version: string; de
 
 function ThemePreview({url, name}: {url?: string; name: string}) {
     const [failed, setFailed] = useState(false);
+    const [open, setOpen] = useState(false);
     let safeUrl = '';
     try {
         const parsed = new URL(url || '');
         if (parsed.protocol === 'https:') safeUrl = parsed.href;
     } catch { /* No valid preview URL. */ }
     return <div className="theme-preview">
-        {safeUrl && !failed ? <img src={safeUrl} alt={`${name} 预览`} onError={() => setFailed(true)} /> : <span>暂无预览</span>}
+        {safeUrl && !failed ? <>
+            <Image src={safeUrl} alt={`${name} 预览`} onError={() => setFailed(true)}
+                preview={{open, onOpenChange: setOpen}} />
+            <button type="button" className="theme-preview-trigger"
+                aria-label={`查看 ${name} 大图`} onClick={() => setOpen(true)} />
+        </> : <span>暂无预览</span>}
     </div>;
 }
 
