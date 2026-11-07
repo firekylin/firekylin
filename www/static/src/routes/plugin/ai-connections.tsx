@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {Alert, Button, Card, Dropdown, Form, message, Modal, Select, Space, Spin, Tabs, Typography} from 'antd';
+import {StarFilled, StarOutlined} from '@ant-design/icons';
 import {firstValueFrom} from 'rxjs';
 import BreadCrumb from '../../components/breadcrumb';
 import {SAVED_SECRET_MASK} from '../../components/protocol/form-field';
@@ -32,7 +33,6 @@ export default function AIConnections() {
     const [formError, setFormError] = useState('');
     const [formLoading, setFormLoading] = useState(false);
     const [formReload, setFormReload] = useState(0);
-    const [makeDefault, setMakeDefault] = useState(false);
     const [modelId, setModelId] = useState<string>();
     const [formValues, setFormValues] = useState<Record<string, any>>();
     const [loading, setLoading] = useState(true);
@@ -73,7 +73,6 @@ export default function AIConnections() {
         setFormError('');
         setFormLoading(Boolean(provider?.admin));
         setSettingsDirty(false);
-        setMakeDefault(Boolean(provider?.models.some(item => item.selected)));
         if (!provider?.admin) return;
         const {pluginId, formId} = provider.admin;
         const subscription = http.get<any>(`/admin/api/plugins/${pluginId}/forms/${formId}`).subscribe(res => {
@@ -105,7 +104,7 @@ export default function AIConnections() {
     const busy = loading || working || formLoading;
     const savedProvider = providers.find(item => item.models.some(model => model.selected));
     const savedModel = savedProvider?.models.find(item => item.selected)?.id;
-    const dirty = settingsDirty || (makeDefault && (providerId !== savedProvider?.id || modelId !== savedModel));
+    const dirty = settingsDirty || (providerId === savedProvider?.id && modelId !== savedModel);
     const connections = providers.filter(item => item.configured !== false || item.id === providerId || item.models.some(model => model.selected));
     const removeConnection = async(id: string) => {
         setWorking(true);
@@ -135,7 +134,7 @@ export default function AIConnections() {
                     `/admin/api/plugins/${provider.admin.pluginId}/forms/${provider.admin.formId}`, values, csrf));
                 if (configured.errno !== 0) return;
             }
-            const res = makeDefault ? await firstValueFrom(http.post<any>('/admin/api/ai-connections',
+            const res = provider?.configured === false || providerId === savedProvider?.id ? await firstValueFrom(http.post<any>('/admin/api/ai-connections',
                 {provider: provider?.id || null, model: modelId}, csrf)) : {errno: 0};
             if (res.errno === 0) {
                 message.success('AI 连接已保存');
@@ -147,6 +146,20 @@ export default function AIConnections() {
         } finally {
             setWorking(false);
         }
+    };
+
+    const selectDefault = async(item: Provider) => {
+        const model = item.id === providerId ? modelId : item.models.find(model => model.selected)?.id || item.models[0]?.id;
+        if (busy || item.configured === false || !model || item.id === savedProvider?.id) return;
+        setWorking(true);
+        try {
+            const res = await firstValueFrom(http.post<any>('/admin/api/ai-connections', {provider: item.id, model}, csrf));
+            if (res.errno === 0) {
+                setProviders(items => items.map(candidate => ({...candidate, models: candidate.models.map(entry =>
+                    ({...entry, selected: candidate.id === item.id && entry.id === model}))})));
+                message.success('默认模型已更新');
+            }
+        } finally {setWorking(false)}
     };
 
     const tabContent = <div className="ai-connection-panel" aria-busy={busy}>
@@ -163,13 +176,9 @@ export default function AIConnections() {
                     options={provider.models.map(item => ({label: item.label, value: item.id}))} />
                 <Button onClick={testConnection} disabled={busy || !provider.admin || !modelId || settingsDirty || provider.configured === false}>测试连接</Button>
                 <Typography.Text type="secondary">
-                    {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : '保存连接不会改变默认服务商。'}
+                    {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : provider.configured === false ? '新增连接保存后将成为默认服务商。' : '点击 Tab 左侧星标可设为默认模型。'}
                     修改连接配置后，请先保存再测试。
                 </Typography.Text>
-                <Button onClick={() => setMakeDefault(true)} disabled={busy || makeDefault || !modelId}>
-                    {providerId === savedProvider?.id && modelId === savedModel ? '当前默认模型'
-                        : makeDefault ? '保存时设为默认模型' : '设为默认模型'}
-                </Button>
             </Space>
         </Card> : null}
         <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={busy || Boolean(formError) || !dirty || Boolean(provider && !modelId)}
@@ -206,7 +215,16 @@ export default function AIConnections() {
                             onOk: () => removeConnection(target.id)});
                     }} className="ai-provider-tabs" activeKey={providerId} tabBarExtraContent={addProvider}
                     onChange={value => {setProviderId(value); setAdding(false)}}
-                    items={connections.map(item => ({key: item.id, label: item.label, disabled: busy, closable: Boolean(item.removable),
+                    items={connections.map(item => ({key: item.id, label: <span aria-label={item.label} className="ai-provider-label">
+                        <button type="button" className={`ai-provider-star${item.id === savedProvider?.id ? ' is-default' : ''}`}
+                            aria-label={item.id === savedProvider?.id ? `${item.label}是默认服务商` : `将${item.label}设为默认模型`}
+                            aria-pressed={item.id === savedProvider?.id}
+                            disabled={busy || item.configured === false || settingsDirty || item.id === savedProvider?.id}
+                            onKeyDown={event => event.stopPropagation()}
+                            onClick={event => {event.stopPropagation(); void selectDefault(item)}}>
+                            {item.id === savedProvider?.id ? <StarFilled /> : <StarOutlined />}
+                        </button><span>{item.label}</span>
+                    </span>, disabled: busy, closable: Boolean(item.removable),
                         children: item.id === providerId ? tabContent : null}))} />
                 {!loading && !loadError && !connections.length ? <Typography.Paragraph type="secondary">
                     尚未配置 AI 连接，请点击“增加服务商”。

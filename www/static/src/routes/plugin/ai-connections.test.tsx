@@ -35,7 +35,7 @@ describe('AI connections', () => {
         vi.mocked(http.post).mockReturnValue(of({errno: 0, data: {message: 'AI 连接已禁用。'}} as any));
     });
 
-    it('leaves the provider empty and enables save after a change', async() => {
+    it('does not allow an unconfigured provider to become default before saving credentials', async() => {
         const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
         expect(view.getByText('系统设置')).toBeInTheDocument();
         expect(view.container.querySelector('h3.page-title')).toHaveTextContent('AI 连接');
@@ -44,13 +44,9 @@ describe('AI connections', () => {
         expect(view.queryByRole('button', {name: '保存'})).toBeNull();
         fireEvent.click(view.getByRole('button', {name: '增加服务商'}));
         fireEvent.click(view.getByRole('menuitem', {name: 'DeepSeek'}));
-        fireEvent.click(view.getByRole('button', {name: '设为默认模型'}));
-        await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeEnabled());
-        fireEvent.click(within(view.container).getByRole('button', {name: '保存'}));
-        await waitFor(() => expect(http.post).toHaveBeenCalledWith(
-            '/admin/api/ai-connections', {provider: 'deepseek', model: 'deepseek-flash'},
-            {headers: {'X-CSRF-Token': 'test-csrf'}}
-        ));
+        expect(view.getByRole('button', {name: '将DeepSeek设为默认模型'})).toBeDisabled();
+        expect(view.queryByRole('button', {name: '设为默认模型'})).toBeNull();
+        expect(http.post).not.toHaveBeenCalled();
     });
 
     it('keeps the saved model selected after provider data refreshes', async() => {
@@ -146,20 +142,22 @@ describe('AI connections', () => {
 
 });
 
-it('manages independent provider tabs, saves without replacing the default and removes a connection', async() => {
+it('manages independent provider tabs, makes newly saved connections default and removes a connection', async() => {
     window.SysConfig = {csrfToken: 'test-csrf', config: {}, userInfo: {id: 1, name: 'Admin', type: 1},
         pluginAdmin: ['first', 'second'].map(id => ({id, forms: [{id: 'settings', title: '连接配置',
             fields: [{name: 'apiKey', type: 'password', label: 'API Key'}]}]}))} as any;
     vi.spyOn(message, 'success').mockImplementation(() => (() => {}) as any);
     let secondConfigured = false;
+    let selectedProvider = 'first';
     vi.mocked(http.get).mockImplementation((url: string) => of(url.includes('/forms/') ? {errno: 0, data: {}}
         : {errno: 0, data: {providers: ['first', 'second'].map(id => ({id, label: id,
             configured: id === 'first' || secondConfigured, removable: id === 'first' || secondConfigured,
             admin: {pluginId: id, formId: 'settings', testActionId: 'test'},
-            models: [{id: 'text', label: 'Text', selected: id === 'first'}]}))}}) as any);
+            models: [{id: 'text', label: 'Text', selected: id === selectedProvider}]}))}}) as any);
     vi.mocked(http.post).mockImplementation((url: string, data: any) => {
         if (url.includes('/second/forms/')) secondConfigured = true;
-        if (data.action === 'remove') secondConfigured = false;
+        if (data.action === 'remove') {secondConfigured = false; selectedProvider = 'first'}
+        else if (url === '/admin/api/ai-connections') selectedProvider = data.provider;
         return of({errno: 0, data: {}}) as any;
     });
     const view = render(<MemoryRouter initialEntries={['/options/ai']}><AIConnections /></MemoryRouter>);
@@ -174,7 +172,8 @@ it('manages independent provider tabs, saves without replacing the default and r
     await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/plugins/second/forms/settings',
         {apiKey: 'new-test-key'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
     await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeDisabled());
-    expect(http.post).not.toHaveBeenCalledWith('/admin/api/ai-connections', expect.anything(), expect.anything());
+    expect(http.post).toHaveBeenCalledWith('/admin/api/ai-connections', {provider: 'second', model: 'text'}, expect.anything());
+    expect(view.getByRole('button', {name: 'second是默认服务商'})).toHaveAttribute('aria-pressed', 'true');
     expect(view.getByRole('tab', {name: 'second'})).toHaveAttribute('aria-selected', 'true');
     fireEvent.click(within(view.getByRole('tab', {name: 'second'}).closest('.ant-tabs-tab') as HTMLElement).getByRole('button', {name: '删除服务商'}));
     fireEvent.click(await view.findByRole('button', {name: /^删\s*除$/}));
@@ -247,4 +246,29 @@ it('confirms the tab being closed without switching the active provider and leav
     await waitFor(() => expect(view.queryByRole('tab', {name: 'second'})).toBeNull());
     expect(view.getByRole('tab', {name: 'first'})).toHaveAttribute('aria-selected', 'true');
     expect(view.getByRole('tabpanel').querySelector('.ant-btn-dangerous')).toBeNull();
+});
+
+it('sets the selected model from a tab star immediately and never toggles the default off', async() => {
+    window.SysConfig = {pluginAdmin: [], config: {}, csrfToken: 'token', userInfo: {id: 1, name: 'Admin', type: 1}} as any;
+    vi.spyOn(message, 'success').mockImplementation(() => (() => {}) as any);
+    vi.mocked(http.get).mockReturnValue(of({errno: 0, data: {providers: ['first', 'second'].map(id => ({
+        id, label: id, configured: true, models: [
+            {id: 'one', label: 'One', selected: id === 'first'}, {id: 'two', label: 'Two', selected: false}
+        ]
+    }))}}) as any);
+    vi.mocked(http.post).mockReturnValue(of({errno: 0, data: {}}) as any);
+    const view = render(<MemoryRouter><AIConnections /></MemoryRouter>);
+    fireEvent.click(await view.findByRole('tab', {name: 'second'}));
+    fireEvent.mouseDown(view.getByRole('combobox', {name: '选择 AI 模型'}));
+    fireEvent.click(view.getByText('Two', {selector: '.ant-select-item-option-content'}));
+    fireEvent.click(view.getByRole('button', {name: '将second设为默认模型'}));
+    await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/ai-connections',
+        {provider: 'second', model: 'two'}, {headers: {'X-CSRF-Token': 'token'}}));
+    const star = await view.findByRole('button', {name: 'second是默认服务商'});
+    expect(star).toBeDisabled();
+    expect(star).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(star);
+    expect(http.post).toHaveBeenCalledTimes(1);
+    expect(view.getByRole('tab', {name: 'second'})).toHaveAttribute('aria-selected', 'true');
+    expect(view.queryByRole('button', {name: '设为默认模型'})).toBeNull();
 });

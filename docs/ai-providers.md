@@ -34,16 +34,20 @@ returns `AI_UNSUPPORTED_CAPABILITY` (HTTP 400) when the model does not support i
 does not by itself implement image generation: a provider must also handle that request and response format.
 The administrator's **系统设置 → AI 连接** page displays configured providers as separate tabs. Use
 **增加服务商** to configure another installed provider, or **安装更多 AI 服务商** to open the plugin search.
-The add-provider button sits beside the standalone tabs and opens a provider menu.
+The add-provider button follows the final tab and opens a provider menu.
 Each tab contains provider settings, model/testing controls and a save button.
-Each provider has one connection; configuring another provider retains existing connections. Saving a
-connection alone does not change the global default. Select a model and click **设为默认模型**, then
-save, to change the default explicitly. Editing the model on the current default tab updates that default
+Each provider has one connection; configuring another provider retains existing connections. A newly
+configured connection becomes the global default after saving successfully. Tab names are centered with
+a floating star on the left and a floating red × on the right. Hover or keyboard focus reveals an empty
+star; clicking it immediately selects that provider and its currently displayed model (or its first model
+if the tab is inactive). The current default has a persistent filled gold star and cannot be toggled off;
+select another provider to replace it. Editing the model on the current default tab updates that default
 when saved. Test connections after saving configuration changes.
 
 The × beside a provider tab appears on hover or keyboard focus (always visible on touch devices).
 It opens a confirmation naming the provider before removal. Confirming **删除服务商** removes the connection's API key without uninstalling the plugin or deleting chat history.
-If that provider was the global default, the default is cleared. Feature-specific bindings are retained
+If that provider was the global default, core randomly selects a model from the remaining configured
+providers. The default is cleared only when no configured models remain. Feature-specific bindings are retained
 and become unavailable; they never silently fall back to another provider. Reconfigure the connection or
 explicitly select a replacement in **智能内容**. For compatibility, core removes the standard plugin-scoped
 `apiKey` credential for single-provider plugins implementing `configured()`. Non-secret endpoint settings

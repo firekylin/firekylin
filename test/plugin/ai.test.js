@@ -200,7 +200,7 @@ test('content model bindings route each scenario, preserve explicit calls and re
   assert.deepEqual(await client.generate(request, {scenario: 'editor.title'}), {provider: 'default', model: 'text'});
 });
 
-test('removing a connection deletes only its key, clears its default and retains feature bindings across reloads', async() => {
+test('removing a connection deletes only its key, replaces its default and retains feature bindings across reloads', async() => {
   const {PluginManager} = require('../../src/plugin/manager');
   const rows = {jwt_secret: 'connection-test-secret-at-least-32-characters'};
   const store = new AIStore({getOptions: async() => ({...rows}),
@@ -213,13 +213,14 @@ test('removing a connection deletes only its key, clears its default and retains
     manager.aiProviders.register({id, models: [{id: 'text'}],
       configured: () => store.hasCredential(id, 'apiKey'), generate: () => ({text: id})}, id);
   }
+  manager.aiProviders.register({id: 'unconfigured', models: [{id: 'text'}], configured: () => false, generate() {}});
   await manager.ai.select('first', 'text');
   await manager.ai.setFeatureModels({summary: {provider: 'first', model: 'text'}});
   await assert.rejects(manager.disconnectAI('missing'), {status: 400});
   await manager.disconnectAI('first');
   assert.equal(await store.hasCredential('first', 'apiKey'), false);
   assert.equal(await store.getCredential('second', 'apiKey'), 'second-secret');
-  assert.deepEqual(await store.getPreferences(), {});
+  assert.deepEqual(await store.getPreferences(), {provider: 'second', model: 'text'});
   assert.equal(manager.aiProviders.has('first'), true);
   assert.deepEqual(await store.getFeatureModels(), {summary: {provider: 'first', model: 'text'}});
   assert.equal((await manager.ai.models()).find(p => p.id === 'first').configured, false);
@@ -231,6 +232,8 @@ test('removing a connection deletes only its key, clears its default and retains
   assert.deepEqual(await store.getPreferences(), {provider: 'second', model: 'text'});
   const restarted = new PluginManager({aiStore: store});
   assert.deepEqual(await restarted.ai.getFeatureModels(), {summary: {provider: 'first', model: 'text'}});
+  await manager.disconnectAI('second');
+  assert.deepEqual(await store.getPreferences(), {}, 'last configured connection leaves no default');
 });
 
 test('providers with custom credential storage can implement disconnect', async() => {

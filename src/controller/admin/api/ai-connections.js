@@ -36,7 +36,7 @@ module.exports = class extends Base {
     if (body.action === 'remove') {
       await global.firekylin.plugins.disconnectAI(body.provider);
     } else if (body.provider === null || body.provider === '') {
-      await ai.clear();
+      return this.ctx.throw(400, 'Select another model to replace the default');
     } else {
       await ai.select(body.provider, body.model);
     }

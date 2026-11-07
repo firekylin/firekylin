@@ -123,7 +123,13 @@ class PluginManager {
     if (provider.disconnect) await provider.disconnect();
     else await this.aiStore.deleteCredential(provider.owner, 'apiKey');
     const selected = await this.aiStore.getPreferences();
-    if (selected.provider === providerId) await this.ai.clear();
+    if (selected.provider === providerId) {
+      const alternatives = (await this.ai.models()).filter(item => item.id !== providerId && item.configured !== false)
+        .flatMap(item => item.models.map(model => ({provider: item.id, model: model.id})));
+      const next = alternatives[Math.floor(Math.random() * alternatives.length)];
+      if (next) await this.ai.select(next.provider, next.model);
+      else await this.ai.clear();
+    }
     // Keep feature bindings: silently falling back could send content to another vendor.
   }
 
