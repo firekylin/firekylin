@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons';
 import { Table, Button, Checkbox, Input, Radio, Select, Space, message } from 'antd';
 import './list-table.less';
+import PostAccessIndicator from './post-access-indicator';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { Link } from '../../../../utils/router';
 import { Modal } from 'antd';
@@ -241,16 +242,7 @@ function PostListTable(props: PostListProps) {
                         render={(post) => (
                             <>
                                 <Link to={`/post/edit/${post.id}`}>{post.title}</Link>
-                                {/* 当文章为公开且发布状态时渲染文章链接 */}
-                                {post.status === 3 && post.is_public ? (
-                                    <a
-                                        href={`/post/${post.pathname}.html`}
-                                        target="_blank"
-                                        className="admin-post-link"
-                                    >
-                                        <span className="glyphicon glyphicon-link" />
-                                    </a>
-                                ) : null}
+                                <PostAccessIndicator post={post} />
                             </>
                         )}
                     />
