@@ -1,5 +1,5 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
-import {message, Modal} from 'antd';
+import {ConfigProvider, message, Modal} from 'antd';
 import axios from 'axios';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {MemoryRouter} from '../../../utils/router';
@@ -62,4 +62,14 @@ it('offers an update when a newer version of the installed theme is available', 
         {headers: {'X-CSRF-Token': 'csrf'}}));
     await waitFor(() => expect(message.success).toHaveBeenCalledWith('主题更新完成'));
     await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(4));
+});
+
+it('opens the full theme image in a lightbox without installing the theme', async() => {
+    const view = render(<ConfigProvider theme={{token: {motion: false}}}><MemoryRouter><ThemeMarket /></MemoryRouter></ConfigProvider>);
+    fireEvent.click(await view.findByRole('button', {name: '查看 Paper 大图'}));
+    await waitFor(() => expect(document.querySelector('.ant-image-preview')).toBeInTheDocument());
+    expect(document.querySelector('.ant-image-preview img')).toHaveAttribute('src', 'https://example.com/paper.png');
+    expect(axios.post).not.toHaveBeenCalled();
+    fireEvent.click(document.querySelector('.ant-image-preview-close') as HTMLElement);
+    await waitFor(() => expect(view.queryByRole('dialog', {name: 'Paper 预览'})).not.toBeInTheDocument());
 });
