@@ -81,3 +81,16 @@ test('public reads redact password-protected article content', async() => {
   assert.equal(detail.markdown_content, undefined);
   assert.equal(detail.password_protected, true);
 });
+
+test('admin scheduling uses server dates and includes the exact publication boundary', async() => {
+  const {service} = harness([
+    {id: 1, status: 3, create_time: '2026-10-11 23:59:59'},
+    {id: 2, status: 3, create_time: '2026-10-12 00:00:00'},
+    {id: 3, status: 3, create_time: '2026-10-12 00:00:01'},
+    {id: 4, status: 0, create_time: '2026-10-13 00:00:00'},
+    {id: 5, status: 3, is_public: 0, create_time: '2026-10-13 00:00:00'}
+  ]);
+  const result = await service.listAdmin({userInfo: {id: 1, type: 1}});
+  assert.deepEqual(result.data.map(post => post.is_scheduled), [false, false, true, false, true]);
+  assert.equal(result.count, 5);
+});
