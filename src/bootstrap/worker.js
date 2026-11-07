@@ -124,7 +124,12 @@ registerManagementAbilities(pluginManager.abilities, {
 });
 registerMediaAbilities(pluginManager.abilities, {
   getUploadConfig: async() => (await think.model('options').getOptions()).upload,
-  getUploader: type => think.service('upload/' + type)
+  getUploader: type => think.service('upload/' + type),
+  createAttachment: input => require('../service/media-attachment').createAttachment(input, {
+    getModel: () => think.model('post'),
+    now: () => think.datetime(),
+    uuid: () => think.uuid(20)
+  })
 });
 if (!existingPluginManager) {
   pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
