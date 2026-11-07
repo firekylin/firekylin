@@ -30,7 +30,8 @@ it('shows all described switches without a plugin or language setting and saves 
     }
     expect(title).not.toBeChecked();
     expect(screen.getByText(/正文超过 250 个字时，生成标题建议/)).toBeInTheDocument();
-    expect(screen.getAllByRole('combobox')).toHaveLength(3);
+    // Form.useWatch updates conditional model pickers after loading is cleared.
+    await waitFor(() => expect(screen.getAllByRole('combobox')).toHaveLength(3));
     expect(screen.queryByRole('combobox', {name: '生成标题使用的模型'})).toBeNull();
     fireEvent.click(title);
     fireEvent.click(screen.getByRole('button', {name: /保\s*存/}));
