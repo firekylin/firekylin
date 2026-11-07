@@ -7,6 +7,7 @@ import { NavLink } from '../../utils/router';
 import dayjs from 'dayjs';
 import { Modal } from 'antd';
 const confirm = Modal.confirm;
+import Chat from './chat';
 
 const UPDATE_STEPS = [
     [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
@@ -16,7 +17,8 @@ const UPDATE_STEPS = [
 ];
 
 const COUNT_DOWN = 3;
-function DashBoard(props: DashBoardProps) {
+export function DashBoard(props: DashBoardProps) {
+    const [chatting, setChatting] = React.useState(false);
     const [state, setState] = React.useState(() => ({
         posts: [],
         step: 1,
@@ -149,46 +151,7 @@ function DashBoard(props: DashBoardProps) {
 
         const { versions, count } = props.dashBoardStore.systemInfo;
         const { posts } = props.dashBoardStore;
-
-        return (
-            <div className="fk-content-wrap">
-                <BreadCrumb className="breadcrumb" {...props} />
-                <div className="manage-container">
-                    {versions.needUpdate ? (
-                        <p className="bg-info update-message">
-                            Firekylin{' '}
-                            <a
-                                href={`https://github.com/firekylin/firekylin/releases/tag/${versions.needUpdate}`}
-                            >
-                                {versions.needUpdate}
-                            </a>{' '}
-                            已经发布，请更新依赖版本，如果是源码安装可{' '}
-                            <a href="http://firekylin.lithub.cc/release/v1/latest.tar.gz">
-                                下载更新
-                            </a>{' '}
-                            或者使用{' '}
-                            <a
-                                href="javascript:void(0)"
-                                onClick={() => legacy.renderUpdateConfirm()}
-                            >
-                                在线更新
-                            </a>
-                            ！
-                        </p>
-                    ) : null}
-                    <h3 style={{ marginBottom: '30px' }}>网站概要</h3>
-                    <p>
-                        目前有 {count.posts} 篇文章, 并有 {count.comments}{' '}
-                        条关于你的评论在 {count.cates} 个分类中.{' '}
-                    </p>
-                    <p>点击下面的链接快速开始:</p>
-                    <div className="quick-link">
-                        {links.map((link) => (
-                            <NavLink key={link.url} to={link.url}>
-                                {link.title}
-                            </NavLink>
-                        ))}
-                    </div>
+        const overviewDetails = (<>
                     <hr />
                     <div className="row">
                         <div className="col-md-5">
@@ -283,6 +246,54 @@ function DashBoard(props: DashBoardProps) {
                             </ul>
                         </div>
                     </div>
+        </>);
+
+        return (
+            <div className="fk-content-wrap">
+                <BreadCrumb className="breadcrumb" {...props} />
+                <div className={`manage-container${Number(window.SysConfig.userInfo.type) === 1 ? ' overview-chat-container' : ''}${chatting ? ' overview-conversation' : ''}`}>
+                    {versions.needUpdate && !chatting ? (
+                        <p className="bg-info update-message">
+                            Firekylin{' '}
+                            <a
+                                href={`https://github.com/firekylin/firekylin/releases/tag/${versions.needUpdate}`}
+                            >
+                                {versions.needUpdate}
+                            </a>{' '}
+                            已经发布，请更新依赖版本，如果是源码安装可{' '}
+                            <a href="http://firekylin.lithub.cc/release/v1/latest.tar.gz">
+                                下载更新
+                            </a>{' '}
+                            或者使用{' '}
+                            <a
+                                href="javascript:void(0)"
+                                onClick={() => legacy.renderUpdateConfirm()}
+                            >
+                                在线更新
+                            </a>
+                            ！
+                        </p>
+                    ) : null}
+                    {Number(window.SysConfig.userInfo.type) === 1 ? (
+                            <Chat onConversationChange={setChatting}>{overviewDetails}</Chat>
+                    ) : (
+                        <>
+                            <h3 style={{ marginBottom: '30px' }}>网站概要</h3>
+                            <p>
+                                目前有 {count.posts} 篇文章, 并有 {count.comments}{' '}
+                                条关于你的评论在 {count.cates} 个分类中.{' '}
+                            </p>
+                            <p>点击下面的链接快速开始:</p>
+                            <div className="quick-link">
+                                {links.map((link) => (
+                                    <NavLink key={link.url} to={link.url}>
+                                        {link.title}
+                                    </NavLink>
+                                ))}
+                            </div>
+                            {overviewDetails}
+                        </>
+                    )}
                 </div>
                 {legacy.renderUpdate()}
             </div>

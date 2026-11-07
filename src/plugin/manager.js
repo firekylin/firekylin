@@ -99,11 +99,38 @@ class PluginManager {
     this.aiStore = aiStore;
     this.ai = aiStore ? new AIClient({audit: aiAudit, providers: this.aiProviders, preferences: {
       get: () => aiStore.getPreferences(), set: value => aiStore.setPreferences(value)
-    }}) : null;
+    }, featureModels: {get: () => aiStore.getFeatureModels?.() || {},
+      set: value => aiStore.setFeatureModels(value)}}) : null;
     this.plugins = new Map();
     this.states = new Map();
     this.packageApi = packageApi;
     this.stateStore = stateStore;
+  }
+
+  async canDisconnectAI(provider) {
+    const siblings = [...this.aiProviders.providers.values()].filter(item => item.owner === provider.owner);
+    return Boolean(provider.disconnect || (siblings.length === 1 && provider.configured &&
+      await this.aiStore.hasCredential(provider.owner, 'apiKey')));
+  }
+
+  async disconnectAI(providerId) {
+    const provider = this.aiProviders.get(providerId);
+    if (!provider || !await this.canDisconnectAI(provider)) {
+      throw Object.assign(new Error('This provider does not support removing its connection'), {status: 400});
+    }
+    // Existing provider plugins use the standard apiKey credential. Custom stores
+    // can implement disconnect() without exposing their secrets to core or the UI.
+    if (provider.disconnect) await provider.disconnect();
+    else await this.aiStore.deleteCredential(provider.owner, 'apiKey');
+    const selected = await this.aiStore.getPreferences();
+    if (selected.provider === providerId) {
+      const alternatives = (await this.ai.models()).filter(item => item.id !== providerId && item.configured !== false)
+        .flatMap(item => item.models.map(model => ({provider: item.id, model: model.id})));
+      const next = alternatives[Math.floor(Math.random() * alternatives.length)];
+      if (next) await this.ai.select(next.provider, next.model);
+      else await this.ai.clear();
+    }
+    // Keep feature bindings: silently falling back could send content to another vendor.
   }
 
   logError(error, listener) {

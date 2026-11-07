@@ -41,7 +41,9 @@ function registerManagementAbilities(registry, {getModel, now, getCommentService
   const commands = new PostCommandService({getModel: () => getModel('post'), now});
   const postReadAbilities = createPostReadAbilities({getModel, now});
   const register = definition => {
-    if (!registry.has(definition.name, 'core:management')) registry.register(definition, 'core:management');
+    if (!registry.has(definition.name, 'core:management')) registry.register({
+      ...definition, expose: {...(definition.expose || {mcp: true}), 'admin-chat': true}
+    }, 'core:management');
   };
   const idSchema = {type: 'integer', minimum: 1};
   const objectSchema = (properties, required) => ({
@@ -249,14 +251,15 @@ function registerManagementAbilities(registry, {getModel, now, getCommentService
   });
 
   register({
-    name: 'posts.publish', description: 'Publish a draft or pending post (administrator only)',
+    name: 'posts.publish',
+    description: 'Publish an article; is_public=1 makes it public, 0 keeps it private (admin only)',
     requiredPermissions: ['posts:publish'],
     requiresApproval: true,
-    inputSchema: objectSchema({id: idSchema}, ['id']),
+    inputSchema: objectSchema({id: idSchema, is_public: {type: 'integer', enum: [0, 1]}}, ['id']),
     async execute(raw, context) {
       const input = object(raw);
-      keys(input, ['id']);
-      return commands.publish(id(input.id), actor(context));
+      keys(input, ['id', 'is_public']);
+      return commands.publish(id(input.id), actor(context), input.is_public);
     }
   });
 
@@ -315,8 +318,8 @@ function registerManagementAbilities(registry, {getModel, now, getCommentService
       const where = input.status ? {status: input.status} : {};
       const rows = await getModel('comment').where(where).order('inserted_at DESC')
         .page(page, limit)
-.setRelation(false)
-.select();
+      .setRelation(false)
+      .select();
       return rows.map(({id, post_id, nick, comment, status, inserted_at}) => ({
         id, post_id, nick, comment, status, inserted_at
       }));

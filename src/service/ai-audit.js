@@ -51,19 +51,22 @@ class Audit {
   }
   async start(request, call) {
     return this.safe('start', async() => {
-      const input = textContent(requestText(request));
+      const recorded = call.recordContent !== false;
+      const input = recorded ? textContent(requestText(request)) : {text: null, truncated: 0};
       const {request: httpRequest, ...identity} = context.current();
-      const metadata = httpRequest || {};
+      const metadata = recorded ? httpRequest || {} : {};
+      const generation = recorded ? request :
+        {provider: request?.provider, model: request?.model, capability: request?.capability};
       const requestContext = sanitizeContext({...metadata, url: safeUrl(metadata.url), method: metadata.method || null,
         source: identity.source,
-        generation: request});
+        generation});
       const row = {...identity, actor_name: safeLabel(identity.actor_name, 200), request_id: randomUUID(),
         plugin_id: safeLabel(call.pluginId), scenario: safeLabel(call.scenario || identity.scenario) || 'unspecified',
         started_at: Date.now(), status: 'unfinished', provider: null, model: null, capability: null,
-        content_recorded: 1, request_context: JSON.stringify(requestContext),
+        content_recorded: recorded ? 1 : 0, request_context: JSON.stringify(requestContext),
         request_text: input.text, request_truncated: input.truncated};
       const id = await this.model().add(row);
-      return {id, started: row.started_at, recorded: true, context: requestContext};
+      return {id, request_id: row.request_id, started: row.started_at, recorded, context: requestContext};
     });
   }
   async resolve(entry, request) {

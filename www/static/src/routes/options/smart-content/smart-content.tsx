@@ -1,7 +1,9 @@
 import {useEffect, useState} from 'react';
-import {Alert, Button, Card, Form, message, Spin, Switch} from 'antd';
+import {Alert, Button, Card, Form, message, Select, Spin, Switch} from 'antd';
 import axios from 'axios';
 import BreadCrumb from '../../../components/breadcrumb';
+import '../ai-settings.less';
+import './smart-content.less';
 
 export const CONTENT_FEATURES = [
     {name: 'image', label: '图片生成和编辑', description: '根据文章生成 16:9 封面，或在媒体管理中通过提示词生成、优化图片，确认后上传到媒体库。'},
@@ -18,6 +20,19 @@ export const CONTENT_FEATURES = [
 
 export default function SmartContentSettings(props) {
     const [form] = Form.useForm();
+    const enabledFeatures = Form.useWatch('features', form) || {};
+    const [providers, setProviders] = useState<Array<{id: string; label: string; configured?: boolean;
+        models: Array<{id: string; label: string; capabilities: string[]}>}>>([]);
+    const [bindings, setBindings] = useState<Record<string, {provider: string; model: string}>>({});
+    const applyValues = (data: any) => {
+        const models = data.models || {};
+        setBindings(models);
+        const modelValues: Record<string, string> = {};
+        for (const field of CONTENT_FEATURES) {
+            modelValues[field.name] = models[field.name] ? JSON.stringify([models[field.name].provider, models[field.name].model]) : '';
+        }
+        form.setFieldsValue({features: data.features, models: modelValues});
+    };
     const [loading, setLoading] = useState(true), [saving, setSaving] = useState(false);
     const [error, setError] = useState(''), [reload, setReload] = useState(0);
     useEffect(() => {
@@ -26,33 +41,74 @@ export default function SmartContentSettings(props) {
         axios.get('/admin/api/smart-content', {signal: controller.signal}).then(response => {
             if (controller.signal.aborted) return;
             if (response.data.errno !== 0) throw new Error(response.data.errmsg || '读取设置失败');
-            form.setFieldsValue(response.data.data.features);
+            applyValues(response.data.data);
+            setProviders(response.data.data.providers || []);
         }).catch(error => {
             if (!controller.signal.aborted) setError(error.response?.data?.errmsg || error.message || '读取设置失败');
         }).finally(() => {if (!controller.signal.aborted) setLoading(false)});
         return () => controller.abort();
     }, [form, reload]);
-    const save = async(features: Record<string, boolean>) => {
+    const save = async(values: {features: Record<string, boolean>; models: Record<string, string>}) => {
+        const models: Record<string, {provider: string; model: string}> = {};
+        for (const [key, value] of Object.entries(values.models || {})) {
+            if (!value) continue;
+            const [provider, model] = JSON.parse(value);
+            models[key] = {provider, model};
+        }
         setSaving(true);
         try {
-            const response = await axios.post('/admin/api/smart-content', {features},
+            const response = await axios.post('/admin/api/smart-content', {features: values.features, models},
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
             if (response.data.errno !== 0) throw new Error(response.data.errmsg || '保存设置失败');
-            form.setFieldsValue(response.data.data.features);
+            applyValues(response.data.data);
             message.success('智能内容设置已保存。');
         } catch (error: any) { message.error(error.response?.data?.errmsg || error.message || '保存设置失败') }
         finally { setSaving(false) }
     };
-    return <div className="fk-content-wrap">
+    return <div className="fk-content-wrap ai-settings-page">
         <BreadCrumb {...props}/>
         <div className="page-list">
             <h3 className="page-title">智能内容</h3>
             <p>文章及启用功能所需的评论内容会发送到“AI 连接”中配置的服务。生成结果只写入编辑器，请审阅后再保存或发布。</p>
             {error ? <Alert type="error" showIcon title={error} action={<Button onClick={() => setReload(value => value + 1)}>重试</Button>} />
-                : <Spin spinning={loading}><Card title="功能开关">
+                : <Spin spinning={loading}><Card title="功能与模型">
                     <Form form={form} layout="vertical" onFinish={save} disabled={loading || saving}>
-                        {CONTENT_FEATURES.map(field => <Form.Item key={field.name} name={field.name} label={field.label}
-                            valuePropName="checked" extra={field.description}><Switch /></Form.Item>)}
+                        {CONTENT_FEATURES.map(field => {
+                            const capability = field.name === 'image' ? 'image' : 'text';
+                            const groups = providers.filter(provider => provider.configured !== false).map(provider => ({
+                                label: provider.label,
+                                options: provider.models.filter(model => model.capabilities.includes(capability)).map(model => ({
+                                    label: `${provider.label} / ${model.label}`, value: JSON.stringify([provider.id, model.id])
+                                }))
+                            })).filter(group => group.options.length);
+                            const saved = bindings[field.name];
+                            const savedValue = saved && JSON.stringify([saved.provider, saved.model]);
+                            const unavailable = savedValue && !groups.some(group => group.options.some(option => option.value === savedValue));
+                            return <div key={field.name} className="smart-content-feature">
+                                <div className="smart-content-description">
+                                    <h4 id={`feature-${field.name}`}>{field.label}</h4>
+                                    <p id={`description-${field.name}`}>{field.description}</p>
+                                </div>
+                                <div className="smart-content-controls">
+                                    <Form.Item name={['features', field.name]}
+                                        valuePropName="checked"><Switch aria-labelledby={`feature-${field.name}`}
+                                            aria-describedby={`description-${field.name}`} /></Form.Item>
+                                    <Form.Item name={['models', field.name]} hidden={!enabledFeatures[field.name]}
+                                        rules={[{validator: (_, value) => {
+                                            const retainedWhileDisabled = !form.getFieldValue(['features', field.name]) && value === savedValue;
+                                            const available = groups.some(group => group.options.some(option => option.value === value));
+                                            return !value || retainedWhileDisabled || available ? Promise.resolve()
+                                                : Promise.reject(new Error('请选择可用模型或恢复默认'));
+                                        }}]}>
+                                        <Select aria-label={`${field.label}使用的模型`} options={[
+                                            {label: field.name === 'image' ? '自动选择已配置的图片模型' : '使用全局默认模型', value: ''},
+                                            ...(unavailable ? [{label: `${saved.provider} / ${saved.model}（不可用，请重新选择）`, value: savedValue}] : []),
+                                            ...groups
+                                        ]} />
+                                    </Form.Item>
+                                </div>
+                            </div>;
+                        })}
                         <Button type="primary" htmlType="submit" disabled={loading} loading={saving}>保存</Button>
                     </Form>
                 </Card></Spin>}

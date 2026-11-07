@@ -3,17 +3,8 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const originalThink = global.think;
-global.think = {
-  Service: class {},
-  config: key => key === 'model' ? {type: 'sqlite', sqlite: {prefix: ''}} : undefined
-};
-const CommentSchema = require('../../src/service/comment-schema');
-
-test.after(() => {
-  if (originalThink === undefined) delete global.think;
-  else global.think = originalThink;
-});
+const {migrate} = require('../../src/service/migration/010-comment');
+const config = {type: 'sqlite', sqlite: {prefix: ''}};
 
 test('comment schema migrates once and records its version', async() => {
   const state = {site_url: 'https://example.com'};
@@ -31,10 +22,9 @@ test('comment schema migrates once and records its version', async() => {
     async update() { return 0 }
   };
   const postModel = {field() { return this }, async select() { return [] }};
-  const service = new CommentSchema();
-  service.model = name => name === 'options' ? options : name === 'post' ? postModel : commentModel;
+  const getModel = name => name === 'options' ? options : name === 'post' ? postModel : commentModel;
 
-  assert.equal(await service.migrate({skipIfUninstalled: true}), true);
+  assert.equal(await migrate({getModel, config}), true);
   assert.equal(state.comment_schema_version, '3');
   assert.match(state.jwt_secret, /^[a-f0-9]{64}$/);
   assert.ok(queries.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS comment ')));
@@ -44,7 +34,7 @@ test('comment schema migrates once and records its version', async() => {
   assert.ok(updates.some(([key]) => key === 'jwt_secret'));
 
   const queryCount = queries.length;
-  assert.equal(await service.migrate({skipIfUninstalled: true}), false);
+  assert.equal(await migrate({getModel, config}), false);
   assert.equal(queries.length, queryCount);
 });
 
@@ -62,18 +52,8 @@ test('comment schema backfills post ids from legacy pathnames', async() => {
     async getOptions() { return {site_url: 'https://example.com', comment_schema_version: '1', comment_jwt_secret: 'legacy-secret-with-minimum-32-bytes-long'} },
     async updateOptions(key, value) { if (key === 'jwt_secret') assert.equal(value, 'legacy-secret-with-minimum-32-bytes-long') }
   };
-  const service = new CommentSchema();
-  service.model = name => name === 'options' ? options : name === 'post' ? postModel : commentModel;
+  const getModel = name => name === 'options' ? options : name === 'post' ? postModel : commentModel;
 
-  await service.migrate();
+  await migrate({getModel, config});
   assert.deepEqual(updates, [[{id: 3}, {post_id: 9}]]);
-});
-
-test('startup migration skips a database that has not been installed', async() => {
-  const service = new CommentSchema();
-  service.model = () => ({
-    async getOptions() { throw new Error('SQLITE_ERROR: no such table: fk_options') }
-  });
-
-  assert.equal(await service.migrate({skipIfUninstalled: true}), false);
 });

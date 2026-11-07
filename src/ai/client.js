@@ -1,6 +1,9 @@
 'use strict';
 
+const {streamResponse, consumeStream} = require('./stream');
 const images = require('../service/ai-images');
+const {DEFAULTS, featureFor} = require('../service/ai-editor-features');
+const vision = require('./vision');
 
 function nonEmpty(value, label) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${label} must be a non-empty string`);
@@ -8,11 +11,12 @@ function nonEmpty(value, label) {
 }
 
 class AIClient {
-  constructor({providers, preferences, timeout = 60000, audit}) {
+  constructor({providers, preferences, timeout = 60000, audit, featureModels}) {
     this.providers = providers;
     this.preferences = preferences;
     this.timeout = timeout;
     this.audit = audit;
+    this.featureModels = featureModels;
   }
 
   async models() {
@@ -27,9 +31,51 @@ class AIClient {
     })));
   }
 
+  async getFeatureModels() {
+    return await this.featureModels?.get() || {};
+  }
+
+  async setFeatureModels(bindings, {disabledFeatures = []} = {}) {
+    if (!bindings || typeof bindings !== 'object' || Array.isArray(bindings)) {
+      throw Object.assign(new Error('Invalid feature models'), {status: 400});
+    }
+    const current = await this.getFeatureModels();
+    for (const [feature, selection] of Object.entries(bindings)) {
+      if (!Object.hasOwn(DEFAULTS, feature) || !selection || typeof selection !== 'object' ||
+          typeof selection.provider !== 'string' || typeof selection.model !== 'string') {
+        throw Object.assign(new Error('Invalid feature model'), {status: 400});
+      }
+      const retainedWhileDisabled = disabledFeatures.includes(feature) &&
+        current[feature]?.provider === selection.provider && current[feature]?.model === selection.model;
+      if (!retainedWhileDisabled && !await this.availableSelection(selection, feature === 'image' ? 'image' : 'text')) {
+        throw Object.assign(new Error(`AI model is unavailable or incompatible: ${feature}`), {status: 400});
+      }
+    }
+    await this.featureModels.set(Object.fromEntries(Object.entries(bindings).map(([key, value]) =>
+      [key, {provider: value.provider, model: value.model}])));
+  }
+
+  async featureSelection(feature) {
+    return (await this.getFeatureModels())[feature];
+  }
+
+  async availableSelection(selection, capability = 'text') {
+    const provider = this.providers.get(selection?.provider);
+    return Boolean(provider && (!provider.configured || await provider.configured()) &&
+      provider.models.some(model => model.id === selection.model && model.capabilities.includes(capability)));
+  }
+
+  async availableFeature(feature) {
+    return this.availableSelection(await this.featureSelection(feature) || await this.preferences.get(),
+      feature === 'image' ? 'image' : 'text');
+  }
+
   async select(providerId, modelId) {
     const provider = this.providers.get(nonEmpty(providerId, 'Provider'));
     if (!provider) throw new Error(`AI provider is not available: ${providerId}`);
+    if (provider.configured && !await provider.configured()) {
+      throw Object.assign(new Error(`AI provider is not configured: ${providerId}`), {status: 400});
+    }
     if (!provider.models.some(model => model.id === modelId)) {
       throw new Error(`AI model is not available: ${providerId}/${modelId}`);
     }
@@ -42,7 +88,9 @@ class AIClient {
   }
 
   async generate(request, context = {}) {
+    if (vision.hasImages(request?.messages)) context = {...context, recordContent: false};
     const entry = await this.audit?.start(request, context);
+    context.onRequestId?.(entry?.request_id);
     const state = {request, entry};
     try {
       const result = await this.perform(request, context, state);
@@ -60,12 +108,19 @@ class AIClient {
     if (!request || typeof request !== 'object' || Array.isArray(request)) {
       throw new TypeError('AI request must be an object');
     }
-    const selected = await this.preferences.get();
+    const scenario = context.scenario;
+    const feature = scenario === 'comment.moderation' ? 'commentModeration'
+      : scenario === 'comment.reply' ? 'commentReply'
+        : scenario === 'editor.cover' || scenario === 'media.image' ? 'image'
+          : typeof scenario === 'string' && scenario.startsWith('editor.') ? featureFor(scenario.slice(7)) : undefined;
+    const selected = (!request.provider && !request.model && feature && await this.featureSelection(feature)) ||
+      await this.preferences.get();
     const providerId = request.provider || selected.provider;
     const modelId = request.model || selected.model;
     state.request = {...request, provider: providerId, model: modelId};
     const provider = this.providers.get(nonEmpty(providerId, 'Provider'));
     if (!provider) throw new Error(`AI provider is not available: ${providerId}`);
+    if (provider.configured && !await provider.configured()) throw new Error(`AI provider is not configured: ${providerId}`);
     const model = provider.models.find(item => item.id === modelId);
     if (!model) {
       throw new Error(`AI model is not available: ${providerId}/${modelId}`);
@@ -80,6 +135,7 @@ class AIClient {
     if (!Array.isArray(request.messages) || !request.messages.length) {
       throw new TypeError('AI request requires messages');
     }
+    vision.assertModel(model, request.messages);
     await this.audit?.resolve(state.entry, state.request);
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -101,8 +157,16 @@ class AIClient {
         if (signal.aborted) onAbort();
       });
       if (signal.aborted) return await aborted;
-      const result = await Promise.race([Promise.resolve().then(() => provider.generate(
-        {...request, provider: providerId, model: modelId}, {...context, signal, reportUsage, images})), aborted]);
+      const providerContext = {...context, signal, reportUsage, images, vision: {inputs: vision.inputs}, streamResponse,
+        ...(context.onText ? {onText: delta => {if (active && !signal.aborted) context.onText(delta)}} : {})};
+      // Keep the timeout/audit scope alive until the raw provider stream is consumed.
+      const result = await Promise.race([Promise.resolve().then(async() => {
+        const messages = await vision.normalizeMessages(request.messages);
+        signal.throwIfAborted();
+        const output = await provider.generate(
+          {...request, messages, provider: providerId, model: modelId}, providerContext);
+        return output?.stream ? consumeStream(output, providerContext) : output;
+      }), aborted]);
       return state.usageMetadata && result && typeof result === 'object' ? {...result, ...state.usageMetadata} : result;
     } finally {
       active = false;

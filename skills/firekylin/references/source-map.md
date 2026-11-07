@@ -17,7 +17,7 @@ Paths are relative to the core repository. A copied skill needs separately obtai
 | Hooks/routes/templates | src/plugin/events.js, routes.js, middleware.js, templates.js; types/ |
 | Tools/ownership | src/plugin/tools.js, content-tools.js, management-tools.js, media-tools.js |
 | MCP bridge/filtering | src/mcp/server.js, middleware.js, config.js; MCP tests in test/plugin/ |
-| OAuth authentication/schema/store/endpoints | src/mcp/oauth-auth.js, oauth-schema.js, oauth-store.js, oauth-utils.js, oauth.js, oauth-middleware.js |
+| OAuth authentication/store/endpoints | src/mcp/oauth-auth.js, oauth-store.js, oauth-utils.js, oauth.js, oauth-middleware.js |
 | Vercel/packaging/releases | lib/vercel-static.js, deployment configuration/entrypoints, Dockerfile, .github/workflows/, packaging scripts |
 | Engineering constraints | package.json, pnpm-lock.yaml, pnpm-workspace.yaml, ESLint configuration, test/types/ |
 
@@ -31,3 +31,5 @@ Paths are relative to the core repository. A copied skill needs separately obtai
 6. Verify package inclusion. Source updates do not imply npm/Docker publication.
 
 Export public structures and synthetic examples only, never real tokens, user content, or connection credentials.
+
+Database migrations live in `src/service/migration/` (including OAuth in `030-oauth.js`). Startup and web installation share `src/service/migration-runner.js`. Chat persistence lives in `src/model/chat/`; explicit table names preserve existing `chat_*` data.

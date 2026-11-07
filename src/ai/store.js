@@ -76,6 +76,15 @@ class AIStore {
     await this.deleteCredentialValue(credentialKey(owner, name));
   }
 
+  async getFeatureModels() {
+    const options = await this.getOptions(true);
+    return parse(options.ai_content_models);
+  }
+
+  async setFeatureModels(value) {
+    await this.updateOptions('ai_content_models', JSON.stringify(value));
+  }
+
   async getPreferences() {
     const options = await this.getOptions(true);
     return parse(options[PREFERENCES_KEY]);

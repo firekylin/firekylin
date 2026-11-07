@@ -45,7 +45,7 @@ function Container(props: any) {
                         ) : null}
                         {isCommenter ? <Route path={`/user`} component={User} /> : null}
                         {isCommenter ? <Redirect to="/comment" /> : null}
-                        <Route exact={true} path="/dashboard" component={DashBoard} />
+                        <Route path="/dashboard" component={DashBoard} />
                         <Route path="/post" component={Post} />
                         <Route path="/page" component={Page} />
                         <Route path="/cate" component={Category} />

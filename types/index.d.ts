@@ -156,10 +156,65 @@ declare namespace Firekylin {
     prompt(request: {messages: Array<{content: string}>}): string;
     output(payload: {data?: Array<{b64_json: string}>}, mimeType: AIImage['mimeType']): AIImage[];
   }
+
+  interface AIChatToolCall {id: string; name: string; input: Record<string, unknown>}
+  interface AIChatMessage {
+    role: string;
+    content: string;
+    /** Private inline image inputs on user messages; requires the model's vision capability. */
+    images?: AIImage[];
+    toolCalls?: AIChatToolCall[];
+    /** Opaque provider state, never displayed as assistant reasoning. */
+    providerData?: Record<string, unknown>;
+    toolCallId?: string;
+    name?: string;
+  }
+  interface AIChatTool {name: string; description: string; inputSchema: Record<string, unknown>}
+  interface AIChatResult {text: string; toolCalls?: AIChatToolCall[]; providerData?: Record<string, unknown>; usage?: unknown}
+  type AIStreamProtocol = 'chat-completions' | 'responses' | 'ollama';
+  interface AIStreamEvent {
+    text?: string;
+    /** Native cumulative counters for the provider's usage adapter. */
+    usage?: unknown;
+    /** Optional legacy result shape; defaults to usage. */
+    resultUsage?: unknown;
+    toolCalls?: AIChatToolCall[];
+    providerData?: Record<string, unknown>;
+    /** Mark protocol completion; keep reading trailing usage frames until EOF. */
+    done?: boolean;
+    /** Stop reading immediately; requires done. */
+    stop?: boolean;
+    /** A safe error message, never an upstream error body. Usage is recorded first. */
+    error?: string;
+  }
+  interface AIStreamParser {
+    format: 'sse' | 'ndjson';
+    /** One decoded data record; create a fresh parser for each request. No I/O. */
+    parse(data: string): AIStreamEvent | undefined | null;
+    /** Runs on clean EOF/explicit stop, never on transport or parsing failures. */
+    end?(): AIStreamEvent | undefined | null;
+  }
+  interface AIStreamResponseFactory {
+    (response: Response, protocolOrParser?: AIStreamProtocol | AIStreamParser): AIStreamResult;
+    readonly supportsCustomParser: true;
+  }
+  interface AIStreamResult {
+    stream: Response;
+    protocol: AIStreamProtocol | 'custom';
+    parser?: AIStreamParser;
+    provider?: string;
+    model?: string;
+  }
   interface AIProviderContext {
     /** Core-owned image validation and conversion for native provider adapters. */
     images: AIImageHelpers;
+    /** Validated image inputs for native vision adapters, separate from image generation. */
+    vision: {inputs(message: AIChatMessage): AIImage[]};
+    /** Return this descriptor to let core consume the raw provider response. */
+    streamResponse: AIStreamResponseFactory;
     signal?: AbortSignal;
+    /** Optional chat text deltas; return the complete text in the final result as well. */
+    onText?(delta: string): void;
     /** Report native counters as soon as available, including before rejecting empty output. */
     reportUsage(rawUsage?: unknown, response?: {headers?: {get(name: string): string | null}}): void;
     [key: string]: unknown;
@@ -169,7 +224,7 @@ declare namespace Firekylin {
     label?: string;
     models: AIModelDefinition[];
     usageAdapter?: AIUsageAdapter;
-    generate(request: {provider: string; model: string; messages: Array<{role: string; content: string}>;
+    generate(request: {provider: string; model: string; messages: AIChatMessage[];
       [key: string]: unknown}, context: AIProviderContext): unknown | Promise<unknown>;
   }
 
@@ -189,7 +244,7 @@ declare namespace Firekylin {
   interface AIModelDefinition {
     id: string;
     label?: string;
-    /** Defaults to ['text']; e.g. ['text', 'image'] for models supporting both. */
+    /** Defaults to ['text']; 'vision' means image input, 'image' means image generation/editing. */
     capabilities?: string[];
   }
 
@@ -200,9 +255,11 @@ declare namespace Firekylin {
     logo?: string;
     models: AIModelDefinition[];
     configured?(): boolean | Promise<boolean>;
+    /** Remove connection credentials; used for providers with a custom credential store. */
+    disconnect?(): void | Promise<void>;
     admin?: {formId: string; testActionId: string};
     generate(request: {provider: string; model: string; capability?: string;
-      messages: Array<{role: string; content: string}>;
+      messages: AIChatMessage[];
       [key: string]: unknown}, context: AIProviderContext): unknown | Promise<unknown>;
   }
 

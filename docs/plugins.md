@@ -193,7 +193,7 @@ ctx.events.on('post.created', async ({post}) => {
 
 ## AI / Agent Tool Registry（实验性）
 
-Firekylin 提供插件级 Tool Registry，供未来 MCP Server、后台 AI 助手和 Agent 共用。
+Firekylin 提供插件级 Tool Registry，供 MCP Server、后台 AI 助手和 Agent 共用。后台聊天工作台通过独立的 `admin-chat` 通道调用内置管理能力。
 此注册表**不会**自动创建 HTTP 路由，也不会默认赋予插件管理员权限。
 
 ```js
@@ -252,7 +252,7 @@ const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10
 | `posts.update` | `posts:write` | 更新已存在文章，需审批；编辑改动已发布文章进入审核 |
 | `posts.create_draft` | `posts:write` | 当前用户创建私密草稿 |
 | `posts.update_draft` | `posts:write` | 仅本人草稿 / 管理员 |
-| `posts.publish` | `posts:publish` | 仅管理员 + 显式审批 |
+| `posts.publish` | `posts:publish` | 仅管理员 + 显式审批；可选 `is_public` 为 `1`（公开）或 `0`（私密） |
 | `posts.delete` | `posts:delete` | 本人或管理员 + 显式审批；永久删除 |
 | `categories.list` | `taxonomy:read` | 查询分类 |
 | `tags.list` | `taxonomy:read` | 查询标签 |
@@ -263,6 +263,8 @@ const results = await tools.execute('posts.search', {query: 'Node.js', limit: 10
 写入工具通过原有 Post Model 的 `getContentAndSummary` / `addPost` / `savePost` / `deletePost`，触发正常文章生命周期。当前模型入口与 Admin Controller 的部分编排仍有差异，后续可以在稳定后进一步合并 PostCommandService 与后台写入服务。
 
 后台文章创建、更新、删除已经与 Tool 调用统一经过 `PostCommandService`；文章列表和详情经过 `PostQueryService`。评论审核通过 `CommentModerationService`，后台管理 API 和 Tool 都使用该服务，避免重复管理状态更新与评论计数同步。Tool 仍不通过内部 HTTP 调用后台路由：权限基于已认证身份传递给服务层，HTTP Controller 仅负责 Session、CSRF 和返回格式。上传与其他插件扩展的统一仍需单独验证。\n\n**重要：** `ToolRegistry.execute` 的 `authorize` 由受信任的调用方实现；高风险工具还要求额外的 `approve({name, input, principal})` 回调返回 `true`。不要把模型生成的“已批准”字段或请求体中的角色当作授权依据。Registry 不直接暴露 HTTP 接口或 MCP 服务；生产适配层必须补充 Token 认证、参数 Schema 校验、限流、审计与明确的审批交互。外部工具不得默认获得全站管理员权限。
+
+内置后台聊天适配层仅发现显式暴露给 `admin-chat` 的能力，不改变原有 MCP 暴露策略；它负责当前用户权限检查、参数 Schema 校验及 AI 调用审计关联。读取和私密草稿创建/编辑可直接执行；发布、永久删除、已发布文章修改、评论及设置变更等操作需要服务端保存的确认卡片。确认有效期为 15 分钟，执行前重新检查权限与对象指纹；客户端仅提交操作 ID 和确认决定，不提交替换参数。服务商模型必须声明 `tools` 能力才能执行博客操作，仅支持 `text` 的模型仍可普通问答。协议和工具策略详见 [AI 服务商文档](ai-providers.md#admin-chat)。
 
 ## Widget 扩展
 

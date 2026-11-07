@@ -160,13 +160,17 @@ class PostCommandService {
     return this.update(data, principal, {draftOnly: true});
   }
 
-  async publish(id, principal) {
+  async publish(id, principal, visibility) {
     const actor = this.actor(principal);
     if (actor.type !== 1) throw new Error('Only administrators can publish through a tool');
+    if (visibility !== undefined && ![0, 1].includes(visibility)) throw new Error('Invalid visibility');
     const post = await this.editable(id, principal);
     if (![0, 1, 2, 3].includes(Number(post.status))) throw new Error('Invalid post status');
-    if (Number(post.status) === 3) return {id, status: 3, unchanged: true};
-    const affectedRows = await this.getModel().savePost({id, status: 3});
+    if (Number(post.status) === 3 && (visibility === undefined || Number(post.is_public) === visibility)) {
+      return {id, status: 3, unchanged: true};
+    }
+    const affectedRows = await this.getModel().savePost({id, status: 3,
+      ...(visibility === undefined ? {} : {is_public: visibility})});
     return {id, status: 3, affectedRows};
   }
 

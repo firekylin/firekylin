@@ -45,4 +45,4 @@ async function migrate({model, config}) {
     }
   }
 }
-module.exports = {definition, migrate};
+module.exports = {version: 1, optional: true, definition, migrate};
