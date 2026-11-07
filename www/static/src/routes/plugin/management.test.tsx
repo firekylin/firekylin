@@ -93,3 +93,14 @@ it('opens the install plugins page from the list', () => {
     fireEvent.click(view.getByRole('button', {name: '安装插件'}));
     expect(push).toHaveBeenCalledWith('/plugin-management/install');
 });
+
+it('does not report success when the plugin fails to activate after reload', async () => {
+    const plugin = {id: 'demo', name: 'Demo', version: '1', description: '', source: 'npm', reasons: []};
+    vi.mocked(http.get).mockReturnValueOnce(of({errno: 0, data: {plugins: [{...plugin, status: 'inactive'}]}}) as any)
+        .mockReturnValue(of({errno: 0, data: {plugins: [{...plugin, status: 'error'}]}}) as any);
+    vi.mocked(http.post).mockReturnValue(of({errno: 0, data: {restartRequired: false, restartScheduled: true}}) as any);
+    const view = render(<MemoryRouter><PluginManagement /></MemoryRouter>);
+    fireEvent.click(view.getByRole('button', {name: '启用'}));
+    await waitFor(() => expect(message.warning).toHaveBeenCalledWith('插件启动失败，请查看错误信息'));
+    expect(message.success).not.toHaveBeenCalled();
+});

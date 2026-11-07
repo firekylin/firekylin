@@ -653,7 +653,9 @@ state start disabled; legacy migration snapshots do not enable them. Explicitly 
 An administrator can enable them in **插件管理 → 已安装插件**. Disabling a plugin keeps
 its files and configuration. Disable an active plugin before deleting it.
 
-State changes reload clustered workers. In a single-process deployment, restart Firekylin to apply them.
+After successful state changes, local npm installation, updates, and removal, Firekylin requests a ThinkJS worker reload only after the HTTP response finishes. Standard ThinkJS startup supports this even with one worker, including when its master is hosted by PM2 in fork mode, systemd, or Docker. A scheduled reload does not confirm plugin activation: check the installed plugin status and startup logs. New plugins remain disabled until explicitly enabled.
+
+Automatic reload requires a connected ThinkJS cluster worker (including its `THINK_WORKERS` marker); an arbitrary IPC channel is not sufficient. Standalone single-process/custom servers must be restarted manually. Serverless deployments must be redeployed; GitHub-managed operations only create a PR and take effect after merge and deployment. Failed/aborted responses do not trigger reload, and reload requests are never replayed at startup. If reload fails or status does not converge, restart manually and inspect the logs.
 The list shows runtime compatibility problems and links to an active plugin's settings when available.
 
 ## Extension registries
@@ -669,7 +671,7 @@ default registry can be read. Under **插件管理 → 安装插件**, administr
 from the configured Registry. Installation rechecks the selected package and version against the current Registry
 and compatibility before running the local package manager. Only official `firekylin-plugin-*` and
 `@firekylin/plugin-*` packages are supported. Restart Firekylin and enable the plugin after installation.
-The plugin market offers an update when a newer registered version of an installed npm plugin is available; restart Firekylin after a local update. Project-local plugins are not updated through the npm market.
+The plugin market offers an update when a newer registered version of an installed npm plugin is available; supported ThinkJS workers automatically request reload after a local update; otherwise restart Firekylin manually. Project-local plugins are not updated through the npm market.
 Under **外观设置 → 安装主题**, the theme market reads the configured theme Registry. Theme entries must
 include `type: "theme"`, `name`, `id` (or use `name` as the theme ID), exact `version`, a trusted HTTPS
 `download` URL for a ZIP archive (including official `firekylin/themes` GitHub Release assets), and an `integrity` value in `sha512-<base64>` format. An optional HTTPS `screenshot` URL supplies the market card preview. The archive manifest

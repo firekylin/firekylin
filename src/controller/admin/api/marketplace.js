@@ -6,6 +6,7 @@ const adminAuth = require('../../../service/admin-auth');
 const {PackageCatalog, installedPluginId} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
 const {PluginInstaller, validatePackage} = require('../../../service/plugin-installer');
+const {schedulePluginReload} = require('../../../service/plugin-reload');
 const {readSettings, fetchBuffer, fetchRegistry} = require('../../../service/extension-registry');
 const crypto = require('crypto');
 const semver = require('semver');
@@ -154,8 +155,7 @@ module.exports = class extends Base {
           if (!stat?.isFile()) throw new Error('PLUGIN_ENTRY_MISSING');
         }
         await manager.stateStore.set(id, enabled);
-        if (cluster.isWorker) process.send('think-cluster-reload-workers');
-        return this.success({restartRequired: !cluster.isWorker});
+        return this.pluginChanged();
       }
       if (operation === 'plugin.delete-local') {
         if (!connection && process.env.VERCEL) throw new Error('PACKAGE_INSTALLATION_READ_ONLY');
@@ -200,10 +200,10 @@ module.exports = class extends Base {
         if (connection) return this.success(await dispatch({
           operation: updating ? 'plugin.update' : 'plugin.install', name, version
         }));
-        return this.success(await this.pluginInstaller().install(name, version));
+        return this.pluginChanged(await this.pluginInstaller().install(name, version));
       }
       if (operation === 'plugin.install') {
-        return this.success(await this.pluginInstaller().install(this.post('name'), this.post('version')));
+        return this.pluginChanged(await this.pluginInstaller().install(this.post('name'), this.post('version')));
       }
       if (operation === 'plugin.uninstall') {
         const plugin = this.catalog().plugins().find(item => item.name === this.post('name'));
@@ -212,7 +212,7 @@ module.exports = class extends Base {
         if (connection) return this.success(await dispatch({operation: 'plugin.uninstall', name: plugin.name}));
         await global.firekylin.plugins.stateStore.set(plugin.id, false);
         const result = await this.pluginInstaller().uninstall(this.post('name'));
-        return this.success(result);
+        return this.pluginChanged(result);
       }
       return this.fail('UNSUPPORTED_MARKETPLACE_OPERATION');
     } catch (error) {
@@ -222,6 +222,10 @@ module.exports = class extends Base {
       }
       return this.fail(error.message);
     }
+  }
+
+  pluginChanged(result = {}) {
+    return this.success({...result, ...schedulePluginReload(this.ctx?.res)});
   }
 
   reloadActiveTheme(theme) {
