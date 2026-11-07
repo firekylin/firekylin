@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Alert, Button, Card, Dropdown, Form, message, Popconfirm, Select, Space, Spin, Tabs, Typography} from 'antd';
+import {Alert, Button, Card, Dropdown, Form, message, Modal, Select, Space, Spin, Tabs, Typography} from 'antd';
 import {firstValueFrom} from 'rxjs';
 import BreadCrumb from '../../components/breadcrumb';
 import {SAVED_SECRET_MASK} from '../../components/protocol/form-field';
@@ -22,6 +22,7 @@ interface Provider {
 }
 
 export default function AIConnections() {
+    const [modal, modalContext] = Modal.useModal();
     const {history} = useRouteComponentProps();
     const [providers, setProviders] = useState<Provider[]>([]);
     const [providerId, setProviderId] = useState<string>();
@@ -106,17 +107,16 @@ export default function AIConnections() {
     const savedModel = savedProvider?.models.find(item => item.selected)?.id;
     const dirty = settingsDirty || (makeDefault && (providerId !== savedProvider?.id || modelId !== savedModel));
     const connections = providers.filter(item => item.configured !== false || item.id === providerId || item.models.some(model => model.selected));
-    const removeConnection = async() => {
-        if (!provider) return;
+    const removeConnection = async(id: string) => {
         setWorking(true);
         try {
             const res = await firstValueFrom(http.post<any>('/admin/api/ai-connections',
-                {action: 'remove', provider: provider.id}, csrf));
+                {action: 'remove', provider: id}, csrf));
             if (res.errno === 0) {
-                setProviderId(undefined);
+                setProviderId(current => current === id ? undefined : current);
                 setReloadKey(key => key + 1);
                 message.success('AI 连接已删除');
-            }
+            } else throw new Error(res.errmsg || '删除连接失败');
         } finally { setWorking(false) }
     };
     const saveConnection = async () => {
@@ -170,11 +170,6 @@ export default function AIConnections() {
                     {providerId === savedProvider?.id && modelId === savedModel ? '当前默认模型'
                         : makeDefault ? '保存时设为默认模型' : '设为默认模型'}
                 </Button>
-                {provider.removable ? <Popconfirm title="删除此 AI 连接？"
-                    description="将删除连接密钥。使用此服务商的能力需要重新选择模型；插件仍会保留。"
-                    okText="删除" cancelText="取消" onConfirm={removeConnection}>
-                    <Button danger disabled={busy}>删除服务商</Button>
-                </Popconfirm> : null}
             </Space>
         </Card> : null}
         <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={busy || Boolean(formError) || !dirty || Boolean(provider && !modelId)}
@@ -194,15 +189,24 @@ export default function AIConnections() {
         </Button>
     </Dropdown>;
     return <div className="fk-content-wrap ai-settings-page">
+        {modalContext}
         <BreadCrumb />
         <div className="page-list ai-connections">
             <h3 className="page-title">AI 连接</h3>
             <Spin spinning={busy}>
                 {loadError ? <Alert type="error" showIcon title={loadError}
                     action={<Button onClick={() => setReloadKey(key => key + 1)}>重试</Button>} /> : null}
-                <Tabs className="ai-provider-tabs" activeKey={providerId} tabBarExtraContent={addProvider}
+                <Tabs type="editable-card" hideAdd locale={{removeAriaLabel: '删除服务商'}}
+                    onEdit={(key, action) => {
+                        const target = connections.find(item => item.id === key);
+                        if (action !== 'remove' || !target?.removable || busy) return;
+                        modal.confirm({title: `删除 ${target.label} 的 AI 连接？`,
+                            content: '将删除连接密钥。使用此服务商的能力需要重新选择模型；插件仍会保留。',
+                            okText: '删除', cancelText: '取消', okButtonProps: {danger: true},
+                            onOk: () => removeConnection(target.id)});
+                    }} className="ai-provider-tabs" activeKey={providerId} tabBarExtraContent={addProvider}
                     onChange={value => {setProviderId(value); setAdding(false)}}
-                    items={connections.map(item => ({key: item.id, label: item.label, disabled: busy,
+                    items={connections.map(item => ({key: item.id, label: item.label, disabled: busy, closable: Boolean(item.removable),
                         children: item.id === providerId ? tabContent : null}))} />
                 {!loading && !loadError && !connections.length ? <Typography.Paragraph type="secondary">
                     尚未配置 AI 连接，请点击“增加服务商”。

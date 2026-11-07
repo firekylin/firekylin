@@ -1,5 +1,5 @@
 import {cleanup, fireEvent, render, waitFor, within} from '@testing-library/react';
-import {message} from 'antd';
+import {ConfigProvider, message} from 'antd';
 import {of, Subject} from 'rxjs';
 import {MemoryRouter} from '../../utils/router';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
@@ -176,7 +176,7 @@ it('manages independent provider tabs, saves without replacing the default and r
     await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeDisabled());
     expect(http.post).not.toHaveBeenCalledWith('/admin/api/ai-connections', expect.anything(), expect.anything());
     expect(view.getByRole('tab', {name: 'second'})).toHaveAttribute('aria-selected', 'true');
-    fireEvent.click(view.getByRole('button', {name: '删除服务商'}));
+    fireEvent.click(within(view.getByRole('tab', {name: 'second'}).closest('.ant-tabs-tab') as HTMLElement).getByRole('button', {name: '删除服务商'}));
     fireEvent.click(await view.findByRole('button', {name: /^删\s*除$/}));
     await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/ai-connections',
         {action: 'remove', provider: 'second'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
@@ -220,4 +220,31 @@ it('retries connection and provider form failures and disables edits while loadi
     await view.findByLabelText('API Key');
     expect(view.getByRole('button', {name: '增加服务商'})).toBeEnabled();
     expect(view.queryByText('配置读取失败')).toBeNull();
+});
+
+it('confirms the tab being closed without switching the active provider and leaves cancel unchanged', async() => {
+    window.SysConfig = {pluginAdmin: [], config: {}, csrfToken: 'token', userInfo: {id: 1, name: 'Admin', type: 1}} as any;
+    let removed = false;
+    vi.mocked(http.get).mockImplementation(() => of({errno: 0, data: {providers: ['first', 'second'].map(id => ({
+        id, label: id, configured: id === 'first' || !removed, removable: true,
+        models: [{id: 'text', label: 'Text', selected: id === 'first'}]
+    }))}}) as any);
+    vi.mocked(http.post).mockImplementation(() => {removed = true; return of({errno: 0, data: {}}) as any});
+    const view = render(<ConfigProvider theme={{token: {motion: false}}}><MemoryRouter><AIConnections /></MemoryRouter></ConfigProvider>);
+    const close = () => within(view.getByRole('tab', {name: 'second'}).closest('.ant-tabs-tab') as HTMLElement)
+        .getByRole('button', {name: '删除服务商'});
+    fireEvent.click(close());
+    expect(await view.findByRole('dialog')).toHaveTextContent('删除 second 的 AI 连接？');
+    expect(view.getByRole('tab', {name: 'first'})).toHaveAttribute('aria-selected', 'true');
+    expect(http.post).not.toHaveBeenCalled();
+    fireEvent.click(view.getByRole('button', {name: /^取\s*消$/}));
+    await waitFor(() => expect(view.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(http.post).not.toHaveBeenCalled();
+    fireEvent.click(close());
+    fireEvent.click(await view.findByRole('button', {name: /^删\s*除$/}));
+    await waitFor(() => expect(http.post).toHaveBeenCalledWith('/admin/api/ai-connections',
+        {action: 'remove', provider: 'second'}, {headers: {'X-CSRF-Token': 'token'}}));
+    await waitFor(() => expect(view.queryByRole('tab', {name: 'second'})).toBeNull());
+    expect(view.getByRole('tab', {name: 'first'})).toHaveAttribute('aria-selected', 'true');
+    expect(view.getByRole('tabpanel').querySelector('.ant-btn-dangerous')).toBeNull();
 });

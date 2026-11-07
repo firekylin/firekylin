@@ -41,7 +41,8 @@ connection alone does not change the global default. Select a model and click **
 save, to change the default explicitly. Editing the model on the current default tab updates that default
 when saved. Test connections after saving configuration changes.
 
-**删除服务商** removes the connection's API key without uninstalling the plugin or deleting chat history.
+The × beside a provider tab appears on hover or keyboard focus (always visible on touch devices).
+It opens a confirmation naming the provider before removal. Confirming **删除服务商** removes the connection's API key without uninstalling the plugin or deleting chat history.
 If that provider was the global default, the default is cleared. Feature-specific bindings are retained
 and become unavailable; they never silently fall back to another provider. Reconfigure the connection or
 explicitly select a replacement in **智能内容**. For compatibility, core removes the standard plugin-scoped
