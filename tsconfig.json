@@ -30,7 +30,8 @@
     "view"
   ],
   "include": [
-    "www/static/src/**/*"
+    "www/static/src/**/*",
+    "types/images.d.ts"
   ],
   "types": [
     "typePatches"
