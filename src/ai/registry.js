@@ -67,6 +67,7 @@ class AIProviderRegistry {
       description: optionalString(definition.description, `AI provider ${id} description`),
       logo: logoUrl(definition.logo),
       models: normalizeModels(definition.models, id),
+      disconnect: typeof definition.disconnect === 'function' ? definition.disconnect : undefined,
       configured: typeof definition.configured === 'function' ? definition.configured : undefined,
       admin: admin ? Object.freeze({pluginId: owner, formId: admin.formId,
         testActionId: admin.testActionId}) : undefined,

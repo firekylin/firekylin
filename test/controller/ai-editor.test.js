@@ -146,3 +146,17 @@ test('new editor operations enforce settings and validate generated selections',
   ai.generate = async() => ({text: ' more words'});
   assert.equal((await instance.postAction()).data.text, ' more words');
 });
+test('editor availability follows per-feature selections even without a global default', async t => {
+  const {instance, ai, calls} = setup(t);
+  ai.models = async() => [];
+  ai.availableFeature = async feature => feature === 'title';
+  const settings = (await instance.getAction()).data;
+  assert.equal(settings.available, true);
+  assert.equal(settings.features.title, true);
+  assert.equal(settings.features.summary, false);
+  instance.post = () => ({operation: 'title', content: '字'.repeat(251)});
+  assert.equal((await instance.postAction()).errno, 0);
+  instance.post = () => ({operation: 'summary', content: '字'.repeat(251)});
+  assert.equal((await instance.postAction()).errno, 1);
+  assert.equal(calls.length, 1);
+});

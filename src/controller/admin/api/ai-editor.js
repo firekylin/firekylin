@@ -22,13 +22,21 @@ const instructions = {
 };
 module.exports = class extends Base {
   ai() { return global.firekylin?.plugins?.ai }
-  async available() {
+  async available(feature) {
+    if (feature && this.ai()?.availableFeature) return this.ai().availableFeature(feature);
     const providers = this.ai() ? await this.ai().models() : [];
     return providers.some(provider => provider.configured !== false &&
       provider.models.some(model => model.selected && model.capabilities.includes('text')));
   }
   async getAction() {
     const features = await editorFeatures(global.firekylin?.plugins, this.model('options'));
+    if (this.ai()?.availableFeature) {
+      for (const feature of Object.keys(features)) {
+        if (feature !== 'image') features[feature] = features[feature] && await this.available(feature);
+      }
+      const available = Object.entries(features).some(([key, value]) => key !== 'image' && value);
+      return this.success({available, features});
+    }
     return this.success({available: await this.available(), features});
   }
   async slug(value, id, type) {
@@ -52,7 +60,7 @@ module.exports = class extends Base {
     }
     const features = await editorFeatures(global.firekylin?.plugins, this.model('options'));
     if (!features[featureFor(operation)]) return this.fail('该 AI 功能尚未开启');
-    if (!await this.available()) return this.fail('请先配置支持文本生成的 AI 连接');
+    if (!await this.available(featureFor(operation))) return this.fail('请先配置支持文本生成的 AI 连接');
     const languages = [
       '英语', '简体中文', '繁体中文', '日语', '韩语', '法语', '德语', '西班牙语',
       '葡萄牙语', '意大利语', '荷兰语', '俄语', '乌克兰语', '波兰语',

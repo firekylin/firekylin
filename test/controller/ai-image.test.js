@@ -62,3 +62,28 @@ test('provider failures retain their original message', async() => {
   try {assert.deepEqual(await setup(true).postAction(), {error: 'provider unavailable'})}
   finally {delete global.firekylin}
 });
+test('cover and media generation honor the image binding without silently falling back', async t => {
+  const previous = global.firekylin;
+  t.after(() => {global.firekylin = previous});
+  let binding = {provider: 'chosen', model: 'draw'};
+  const calls = [];
+  global.firekylin = {plugins: {ai: {
+    featureSelection: async() => binding,
+    models: async() => ['default', 'chosen'].map(id => ({id, configured: true,
+      models: [{id: 'draw', capabilities: ['image'], selected: id === 'default'}]})),
+    generate: async(request, context) => {calls.push({request, context});
+      return {images: [{mimeType: 'image/png', data: 'YWJj'}]}}
+  }}};
+  const controller = setup(true);
+  for (const cover of [true, false]) {
+    controller.post = () => ({prompt: 'cat', cover});
+    await controller.postAction();
+  }
+  assert.deepEqual(calls.map(call => [call.request.provider, call.request.model, call.context.scenario]),
+    [['chosen', 'draw', 'editor.cover'], ['chosen', 'draw', 'media.image']]);
+  binding = {provider: 'missing', model: 'draw'};
+  assert.ok((await controller.postAction()).error);
+  binding = {provider: 'chosen', model: 'missing'};
+  assert.ok((await controller.postAction()).error);
+  assert.equal(calls.length, 2);
+});

@@ -51,7 +51,7 @@ test('AI connections use the ThinkJS default controller route', () => {
   assert.equal(ctx.controller, 'admin/api/ai-connections');
 });
 
-test('AI connections controller lists providers and selects or clears the default', async t => {
+test('AI connections controller lists providers and selects a replacement but refuses clearing the default', async t => {
   const calls = [];
   const previous = global.firekylin;
   t.after(() => { global.firekylin = previous });
@@ -67,8 +67,8 @@ test('AI connections controller lists providers and selects or clears the defaul
   instance.ctx.headers['X-CSRF-Token'] = adminAuth.csrfToken(instance.ctx);
   assert.deepEqual(await instance.postAction(), {errno: 0, data: {message: 'AI 连接已保存'}});
   instance.post = () => ({provider: null});
-  await instance.postAction();
-  assert.deepEqual(calls, [['select', 'deepseek', 'chat'], ['clear']]);
+  await assert.rejects(instance.postAction(), {status: 400});
+  assert.deepEqual(calls, [['select', 'deepseek', 'chat']]);
   instance.post = () => ({});
   await assert.rejects(instance.postAction(), {status: 400});
 });
@@ -80,4 +80,21 @@ test('AI connections controller requires an administrator', async t => {
   const instance = controller(2);
   await assert.rejects(instance.getAction(), {status: 403});
   await assert.rejects(instance.postAction(), {status: 403});
+});
+
+test('connection removal requires administrator and CSRF and only targets the requested provider', async t => {
+  const previous = global.firekylin;
+  t.after(() => {global.firekylin = previous});
+  const removed = [];
+  global.firekylin = {plugins: {ai: {}, disconnectAI: async id => removed.push(id)}};
+  const instance = controller();
+  instance.post = () => ({action: 'remove', provider: 'deepseek'});
+  await assert.rejects(instance.postAction(), {status: 403});
+  instance.ctx.headers['X-CSRF-Token'] = adminAuth.csrfToken(instance.ctx);
+  instance.userInfo.type = 2;
+  await assert.rejects(instance.postAction(), {status: 403});
+  assert.deepEqual(removed, []);
+  instance.userInfo.type = 1;
+  await instance.postAction();
+  assert.deepEqual(removed, ['deepseek']);
 });

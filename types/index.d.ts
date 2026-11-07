@@ -255,6 +255,8 @@ declare namespace Firekylin {
     logo?: string;
     models: AIModelDefinition[];
     configured?(): boolean | Promise<boolean>;
+    /** Remove connection credentials; used for providers with a custom credential store. */
+    disconnect?(): void | Promise<void>;
     admin?: {formId: string; testActionId: string};
     generate(request: {provider: string; model: string; capability?: string;
       messages: AIChatMessage[];
