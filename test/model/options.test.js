@@ -97,3 +97,60 @@ test('snapshot retries failed reads and refreshes after writes', async() => {
     assert.equal(await model.getCredentialValue('state'), 'new');
   });
 });
+
+test('request middleware shares reads across model instances and refreshes next request', async() => {
+  const middleware = require('../../src/middleware/options-snapshot')();
+  let selects = 0;
+  let value = 'old';
+  const makeModel = () => {
+    const model = new OptionsModel();
+    model.select = async() => { selects++; return [{key: 'title', value}] };
+    model.where = () => ({
+      count: async() => 1,
+      update: async data => { value = data.value; return 1 }
+    });
+    return model;
+  };
+  const previousModel = think.model;
+  think.model = makeModel;
+  try {
+    await middleware({}, async() => {
+      await Promise.all([makeModel().getOptions(), makeModel().getOptions()]);
+      assert.equal(selects, 1);
+      await makeModel().updateOptions('title', 'updated');
+      assert.equal((await makeModel().getOptions()).title, 'updated');
+      assert.equal(selects, 2);
+    });
+    value = 'external change';
+    await middleware({}, async() => {
+      assert.equal((await makeModel().getOptions()).title, 'external change');
+    });
+    assert.equal(selects, 3);
+    await middleware({}, async() => {});
+    assert.equal(selects, 3);
+  } finally {
+    think.model = previousModel;
+  }
+});
+
+test('concurrent request snapshots are isolated and detached tasks expire', async() => {
+  const model = new OptionsModel();
+  let selects = 0;
+  let readLater;
+  model.select = async() => [{key: 'title', value: String(++selects)}];
+  await Promise.all([1, 2].map(() => model.withReadSnapshot(async() => {
+    const first = await model.getOptions();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal((await model.getOptions()).title, first.title);
+  })));
+  assert.equal(selects, 2);
+  let release;
+  const gate = new Promise(resolve => { release = resolve });
+  await model.withReadSnapshot(async() => {
+    await model.getOptions();
+    readLater = gate.then(() => model.getOptions());
+  });
+  release();
+  await readLater;
+  assert.equal(selects, 4);
+});
