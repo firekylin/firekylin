@@ -132,9 +132,11 @@ registerMediaAbilities(pluginManager.abilities, {
   })
 });
 if (!existingPluginManager) {
-  pluginManager.load().then(() => pluginManager.events.emit('app.ready', {version: pack.version})).catch(error => {
-    console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
-  });
+  think.model('options').withReadSnapshot(() => pluginManager.load())
+    .then(() => pluginManager.events.emit('app.ready', {version: pack.version}))
+    .catch(error => {
+      console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
+    });
 }
 
 /**
