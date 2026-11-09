@@ -44,6 +44,8 @@ if (!isVercel) {
 }
 
 module.exports = [
+  // Include early MCP/OAuth/plugin routes and trace error rendering as well as controllers.
+  {handle: require('../middleware/options-request-cache')},
   {handle: require('../middleware/ai-audit')},
   {
     handle: builtinMcp

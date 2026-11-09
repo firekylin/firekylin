@@ -39,7 +39,9 @@ test('live ThinkJS OAuth login, consent, MCP calls, refresh and revocation survi
   async function start() {
     child = spawn(process.execPath, [path.resolve(__dirname, '../../bin/firekylin.js')], {
       cwd: root, detached: true, stdio: ['ignore', 'pipe', 'pipe'],
-      env: {...process.env, FIREKYLIN_PROJECT_PATH: root}
+      // This fixture exercises local OAuth/MCP, not external social providers.
+      // The admin login page must not contact the default social OAuth service.
+      env: {...process.env, FIREKYLIN_PROJECT_PATH: root, OAUTH_URL: 'http://127.0.0.1:1'}
     });
     child.stdout.on('data', chunk => {startupLog = (startupLog + chunk.toString()).slice(-4000)});
     child.stderr.on('data', chunk => {startupLog = (startupLog + chunk.toString()).slice(-4000)});

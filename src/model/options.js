@@ -1,14 +1,38 @@
 const captcha = require('../service/captcha');
 const {CREDENTIAL_PREFIX} = require('../ai/store');
+const requestCache = require('../service/options-request-cache');
+
+const observedAdapters = new WeakSet();
+const writes = ['add', 'addMany', 'update', 'delete', 'selectAdd', 'execute',
+  'startTrans', 'commit', 'rollback', 'transaction'];
 
 function isDuplicateKey(error) {
   return ['ER_DUP_ENTRY', '23505', 'SQLITE_CONSTRAINT', 'SQLITE_CONSTRAINT_PRIMARYKEY'].includes(error.code) ||
     /duplicate key|unique constraint|UNIQUE constraint failed/i.test(error.message || '');
 }
 
-module.exports = class extends think.Model {
+class OptionsModel extends think.Model {
   get pk() {
     return 'key';
+  }
+
+  db(connection) {
+    // An explicitly supplied adapter may point at a different database or
+    // transaction from this.config. Keep these reads out of the shared cache.
+    if (connection) this.hasOptionsConnection = true;
+    const adapter = super.db(connection);
+    if (connection || observedAdapters.has(adapter)) return adapter;
+    // db() is also a public escape hatch for direct adapter CRUD/transactions.
+    // Observe this instance only, without patching the shared adapter classes.
+    observedAdapters.add(adapter);
+    for (const method of writes) {
+      const original = adapter[method];
+      if (typeof original !== 'function') continue;
+      adapter[method] = function(...args) {
+        return requestCache.write(() => original.apply(this, args));
+      };
+    }
+    return adapter;
   }
 
   /**
@@ -16,10 +40,12 @@ module.exports = class extends think.Model {
    * @return {} []
    */
   async getOptions(includePrivate = false) {
-    const data = await this.select();
+    const data = await requestCache.read(this);
     const ret = {};
     data.forEach(item => {
-      ret[item.key] = item.value;
+      // Most adapters return strings; custom/JSON adapters can return objects.
+      // No caller (public or private) may mutate the cached raw configuration.
+      ret[item.key] = item.value && typeof item.value === 'object' ? structuredClone(item.value) : item.value;
     });
     if (!includePrivate) {
       delete ret.jwt_secret;
@@ -152,4 +178,17 @@ module.exports = class extends think.Model {
   async deleteCredentialValue(key) {
     await this.where({key}).delete();
   }
-};
+}
+
+// Cover direct model CRUD as well as updateOptions/ensureOption/credentials.
+// thenAdd/thenUpdate/updateMany/increment/decrement delegate to these methods.
+// Raw query() can contain writes too; conservatively invalidate for every call.
+// Transaction boundaries invalidate snapshots before and after commit/rollback.
+for (const method of [...writes, 'query']) {
+  const inherited = think.Model.prototype[method];
+  OptionsModel.prototype[method] = function(...args) {
+    return requestCache.write(() => inherited.apply(this, args));
+  };
+}
+
+module.exports = OptionsModel;
