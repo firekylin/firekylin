@@ -364,8 +364,7 @@ module.exports = class extends Base {
     page = page | 0 || 1;
     const postsListSize = Number(options.pageSize) || await this.getPostsListSize();
 
-    let field = options.field || 'id,title,pathname,create_time,summary,comment_num,options';
-    if ((await this.model('user').count()) > 0) { field += ',user_id' }
+    const field = (options.field || 'id,title,pathname,create_time,summary,comment_num,options') + ',user_id';
 
     if (options.tag || options.cate) {
       const name = options.tag ? 'tag' : 'cate';
