@@ -10,9 +10,8 @@ type InstalledTheme = {id: string; name: string; version: string};
 
 type ThemeItem = {id?: string; name: string; title?: string; version: string; description?: string; screenshot?: string};
 
-function ThemePreview({url, name}: {url?: string; name: string}) {
+function ThemePreview({url, name, onOpen}: {url?: string; name: string; onOpen: () => void}) {
     const [failed, setFailed] = useState(false);
-    const [open, setOpen] = useState(false);
     let safeUrl = '';
     try {
         const parsed = new URL(url || '');
@@ -21,14 +20,15 @@ function ThemePreview({url, name}: {url?: string; name: string}) {
     return <div className="theme-preview">
         {safeUrl && !failed ? <>
             <Image src={safeUrl} alt={`${name} 预览`} onError={() => setFailed(true)}
-                preview={{open, onOpenChange: setOpen}} />
+                preview={false} />
             <button type="button" className="theme-preview-trigger"
-                aria-label={`查看 ${name} 大图`} onClick={() => setOpen(true)} />
+                aria-label={`查看 ${name} 大图`} onClick={onOpen} />
         </> : <span>暂无预览</span>}
     </div>;
 }
 
 export default function ThemeMarket(props: any) {
+    const [previewIndex, setPreviewIndex] = useState<number | null>(null);
     const [items, setItems] = useState<ThemeItem[]>([]);
     const [installed, setInstalled] = useState<InstalledTheme[]>([]);
     const [search, setSearch] = useState('');
@@ -71,7 +71,15 @@ export default function ThemeMarket(props: any) {
             } catch (reason: any) { message.error(reason.response?.data?.errmsg || reason.message || '安装失败') }
             finally { setBusy(false) }
         }});
+    const renderInstallAction = (item: ThemeItem) => {
+        const current = installed.find(theme => theme.id === (item.id || item.name));
+        const canUpdate = current && current.name === item.name && valid(item.version) &&
+            valid(current.version) && gt(item.version, current.version);
+        return canUpdate ? <Button type="primary" disabled={busy} onClick={() => install(item, true)}>更新</Button> :
+            current ? <Tag>已安装</Tag> : <Button type="primary" disabled={busy} onClick={() => install(item)}>安装</Button>;
+    };
     const filtered = items.filter(item => `${item.title || ''} ${item.name}`.toLowerCase().includes(search.trim().toLowerCase()));
+    const previewItem = previewIndex === null ? null : filtered[previewIndex];
     return <div className="fk-content-wrap"><BreadCrumb {...props} /><div className="page-list">
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginBottom: 20}}>
             <h3 className="page-title" style={{margin: 0}}>安装主题</h3>
@@ -81,20 +89,38 @@ export default function ThemeMarket(props: any) {
             action={<Space><Link to="/options/extensions">市场设置</Link><Button onClick={() => setReload(value => value + 1)}>重试</Button></Space>} />
             : <Spin spinning={loading}>
                 {!loading && filtered.length === 0 ? <Empty description="没有找到主题" /> : <div className="theme-grid">
-                    {filtered.map(item => {
-                        const current = installed.find(theme => theme.id === (item.id || item.name));
-                        const canUpdate = current && current.name === item.name && valid(item.version) &&
-                            valid(current.version) && gt(item.version, current.version);
+                    {filtered.map((item, index) => {
                         return <div className="theme-card" key={`${item.name}@${item.version}`}>
-                        <ThemePreview key={item.screenshot || ''} url={item.screenshot} name={item.title || item.name} />
+                        <ThemePreview key={item.screenshot || ''} url={item.screenshot} name={item.title || item.name} onOpen={() => setPreviewIndex(index)} />
                         <div className="theme-card-info">
                             <div><strong>{item.title || item.name}</strong><div>版本 {item.version}</div></div>
-                            {canUpdate ? <Button type="primary" disabled={busy} onClick={() => install(item, true)}>更新</Button> :
-                                current ? <Tag>已安装</Tag> : <Button type="primary" disabled={busy} onClick={() => install(item)}>安装</Button>}
+                            {renderInstallAction(item)}
                         </div>
                         {item.description && <div className="theme-market-description">{item.description}</div>}
                     </div>})}
                 </div>}
             </Spin>}
+        <Modal open={!!previewItem} onCancel={() => setPreviewIndex(null)}
+            title={previewItem && <div className="theme-lightbox-header">
+                <span>{previewItem.title || previewItem.name}</span>
+                {renderInstallAction(previewItem)}
+            </div>} width="calc(100vw - 48px)"
+            footer={<Space>
+                <Button disabled={previewIndex === null || previewIndex <= 0}
+                    onClick={() => setPreviewIndex(index => index! - 1)}>上一主题</Button>
+                <span>{previewIndex === null ? 0 : previewIndex + 1} / {filtered.length}</span>
+                <Button disabled={previewIndex === null || previewIndex >= filtered.length - 1}
+                    onClick={() => setPreviewIndex(index => index! + 1)}>下一主题</Button>
+            </Space>}>
+            {previewItem && <>
+                <p>{previewItem.description || '暂无描述'}</p>
+                <div className="theme-lightbox-scroll" key={previewIndex}>
+                    {/^https:\/\//i.test(previewItem.screenshot || '')
+                        ? <img className="theme-lightbox-image" src={previewItem.screenshot}
+                            alt={`${previewItem.title || previewItem.name} 预览`} />
+                        : <span>暂无预览</span>}
+                </div>
+            </>}
+        </Modal>
     </div></div>;
 }

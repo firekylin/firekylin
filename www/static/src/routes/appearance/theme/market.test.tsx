@@ -67,9 +67,9 @@ it('offers an update when a newer version of the installed theme is available', 
 it('opens the full theme image in a lightbox without installing the theme', async() => {
     const view = render(<ConfigProvider theme={{token: {motion: false}}}><MemoryRouter><ThemeMarket /></MemoryRouter></ConfigProvider>);
     fireEvent.click(await view.findByRole('button', {name: '查看 Paper 大图'}));
-    await waitFor(() => expect(document.querySelector('.ant-image-preview')).toBeInTheDocument());
-    expect(document.querySelector('.ant-image-preview img')).toHaveAttribute('src', 'https://example.com/paper.png');
+    await waitFor(() => expect(view.getByRole('dialog')).toBeInTheDocument());
+    expect(document.querySelector('.theme-lightbox-image')).toHaveAttribute('src', 'https://example.com/paper.png');
     expect(axios.post).not.toHaveBeenCalled();
-    fireEvent.click(document.querySelector('.ant-image-preview-close') as HTMLElement);
+    fireEvent.click(document.querySelector('.ant-modal-close') as HTMLElement);
     await waitFor(() => expect(view.queryByRole('dialog', {name: 'Paper 预览'})).not.toBeInTheDocument());
 });
