@@ -44,7 +44,6 @@ if (!isVercel) {
 }
 
 module.exports = [
-  {handle: require('../middleware/options-snapshot')},
   {handle: require('../middleware/ai-audit')},
   {
     handle: builtinMcp

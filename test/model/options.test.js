@@ -12,6 +12,8 @@ global.think = {
 };
 
 const OptionsModel = require('../../src/model/options');
+const optionsCache = require('../../src/service/options-cache');
+test.beforeEach(() => optionsCache.entries.clear());
 
 test('options model uses the key column as its primary key', () => {
   assert.equal(new OptionsModel().pk, 'key');
@@ -58,99 +60,50 @@ test('options model only exposes comment internals to explicit callers', async()
   assert.equal(privateOptions.comment_schema_version, '1');
 });
 
-test('startup snapshot shares concurrent reads and missing keys, then expires', async() => {
-  const model = new OptionsModel();
+test('all model instances share concurrent and subsequent reads, including missing keys', async() => {
   let selects = 0;
-  model.select = async() => {
-    selects++;
-    return [{key: 'plugin_state', value: 'enabled'}, {key: 'jwt_secret', value: 'secret'}];
-  };
-  model.where = () => ({find: async() => ({key: 'plugin_state', value: 'disabled'})});
-  await model.withReadSnapshot(async() => {
-    const [options, state, missing] = await Promise.all([
-      model.getOptions(), model.getCredentialValue('plugin_state'), model.getCredentialValue('missing')
-    ]);
-    assert.equal(options.jwt_secret, undefined);
-    assert.equal(state, 'enabled');
-    assert.equal(missing, undefined);
-    assert.equal((await model.getOptions(true)).jwt_secret, 'secret');
-    assert.equal(selects, 1);
-  });
-  assert.equal(await model.getCredentialValue('plugin_state'), 'disabled');
-  await model.getOptions();
-  assert.equal(selects, 2);
-});
-
-test('snapshot retries failed reads and refreshes after writes', async() => {
-  const model = new OptionsModel();
-  let value = 'old';
-  let fail = true;
-  model.select = async() => {
-    if (fail) { fail = false; throw new Error('unavailable') }
-    return [{key: 'state', value}];
-  };
-  model.where = () => ({update: async data => { value = data.value; return 1 }});
-  await model.withReadSnapshot(async() => {
-    await assert.rejects(model.getOptions(), /unavailable/);
-    assert.equal(await model.getCredentialValue('state'), 'old');
-    await model.setCredentialValue('state', 'new');
-    assert.equal(await model.getCredentialValue('state'), 'new');
-  });
-});
-
-test('request middleware shares reads across model instances and refreshes next request', async() => {
-  const middleware = require('../../src/middleware/options-snapshot')();
-  let selects = 0;
-  let value = 'old';
   const makeModel = () => {
     const model = new OptionsModel();
-    model.select = async() => { selects++; return [{key: 'title', value}] };
-    model.where = () => ({
-      count: async() => 1,
-      update: async data => { value = data.value; return 1 }
-    });
+    model.select = async() => {
+      selects++;
+      return [{key: 'state', value: 'enabled'}, {key: 'jwt_secret', value: 'secret'}];
+    };
     return model;
   };
-  const previousModel = think.model;
-  think.model = makeModel;
-  try {
-    await middleware({}, async() => {
-      await Promise.all([makeModel().getOptions(), makeModel().getOptions()]);
-      assert.equal(selects, 1);
-      await makeModel().updateOptions('title', 'updated');
-      assert.equal((await makeModel().getOptions()).title, 'updated');
-      assert.equal(selects, 2);
-    });
-    value = 'external change';
-    await middleware({}, async() => {
-      assert.equal((await makeModel().getOptions()).title, 'external change');
-    });
-    assert.equal(selects, 3);
-    await middleware({}, async() => {});
-    assert.equal(selects, 3);
-  } finally {
-    think.model = previousModel;
-  }
+  const [options, state, missing] = await Promise.all([
+    makeModel().getOptions(), makeModel().getCredentialValue('state'), makeModel().getCredentialValue('missing')
+  ]);
+  assert.equal(options.jwt_secret, undefined);
+  assert.equal(state, 'enabled');
+  assert.equal(missing, undefined);
+  assert.equal((await makeModel().getOptions(true)).jwt_secret, 'secret');
+  assert.equal(selects, 1);
 });
 
-test('concurrent request snapshots are isolated and detached tasks expire', async() => {
-  const model = new OptionsModel();
-  let selects = 0;
-  let readLater;
-  model.select = async() => [{key: 'title', value: String(++selects)}];
-  await Promise.all([1, 2].map(() => model.withReadSnapshot(async() => {
-    const first = await model.getOptions();
-    await new Promise(resolve => setImmediate(resolve));
-    assert.equal((await model.getOptions()).title, first.title);
-  })));
-  assert.equal(selects, 2);
-  let release;
-  const gate = new Promise(resolve => { release = resolve });
-  await model.withReadSnapshot(async() => {
-    await model.getOptions();
-    readLater = gate.then(() => model.getOptions());
-  });
-  release();
-  await readLater;
-  assert.equal(selects, 4);
+test('writes invalidate globally so other model instances see updates', async() => {
+  let value = 'old';
+  const reader = new OptionsModel();
+  reader.select = async() => [{key: 'state', value}];
+  const writer = new OptionsModel();
+  writer.where = () => ({update: async data => { value = data.value; return 1 }});
+  assert.equal(await reader.getCredentialValue('state'), 'old');
+  await writer.setCredentialValue('state', 'new');
+  assert.equal(await reader.getCredentialValue('state'), 'new');
+});
+
+test('ORM write hooks preserve parent behavior and invalidate the shared cache', async() => {
+  for (const hook of ['afterAdd', 'afterUpdate', 'afterDelete']) {
+    const parent = think.Model.prototype;
+    parent[hook] = async data => data;
+    try {
+      let value = 'old';
+      const reader = new OptionsModel();
+      reader.select = async() => [{key: 'state', value}];
+      optionsCache.entries.clear();
+      assert.equal(await reader.getCredentialValue('state'), 'old');
+      value = 'new';
+      assert.equal(await new OptionsModel()[hook]('parent result'), 'parent result');
+      assert.equal(await reader.getCredentialValue('state'), 'new');
+    } finally { delete parent[hook] }
+  }
 });

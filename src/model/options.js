@@ -1,7 +1,4 @@
-const {AsyncLocalStorage} = require('node:async_hooks');
-
-const optionReads = new AsyncLocalStorage();
-
+const optionsCache = require('../service/options-cache');
 const captcha = require('../service/captcha');
 const {CREDENTIAL_PREFIX} = require('../ai/store');
 
@@ -11,34 +8,24 @@ function isDuplicateKey(error) {
 }
 
 module.exports = class extends think.Model {
-  withReadSnapshot(callback) {
-    const snapshot = {rows: null, active: true};
-    return optionReads.run(snapshot, async() => {
-      try {
-        return await callback();
-      } finally {
-        snapshot.active = false;
-        snapshot.rows = null;
-      }
-    });
+  readOptionRows() {
+    return optionsCache.read(this);
   }
 
-  async readOptionRows() {
-    const snapshot = optionReads.getStore();
-    if (!snapshot || !snapshot.active) return this.select();
-    if (!snapshot.rows) {
-      const pending = Promise.resolve().then(() => this.select());
-      snapshot.rows = pending;
-      pending.catch(() => {
-        if (snapshot.rows === pending) snapshot.rows = null;
-      });
-    }
-    return snapshot.rows;
+  invalidateOptionsCache() {
+    optionsCache.invalidate(this);
   }
 
-  invalidateReadSnapshot() {
-    const snapshot = optionReads.getStore();
-    if (snapshot) snapshot.rows = null;
+  async afterAdd(...args) {
+    try { return await super.afterAdd(...args) } finally { this.invalidateOptionsCache() }
+  }
+
+  async afterUpdate(...args) {
+    try { return await super.afterUpdate(...args) } finally { this.invalidateOptionsCache() }
+  }
+
+  async afterDelete(...args) {
+    try { return await super.afterDelete(...args) } finally { this.invalidateOptionsCache() }
   }
 
   get pk() {
@@ -131,7 +118,7 @@ module.exports = class extends think.Model {
    * @return {} []
    */
   async updateOptions(key, value) {
-    this.invalidateReadSnapshot();
+    this.invalidateOptionsCache();
     try {
       const data = think.isObject(key) ? think.extend({}, key) : {[key]: value};
       const promises = [];
@@ -155,12 +142,12 @@ module.exports = class extends think.Model {
         await postModel.updateAllPostSummaries();
       }
     } finally {
-      this.invalidateReadSnapshot();
+      this.invalidateOptionsCache();
     }
   }
 
   async ensureOption(key, value) {
-    this.invalidateReadSnapshot();
+    this.invalidateOptionsCache();
     try {
       try {
         await this.add({key, value});
@@ -170,22 +157,18 @@ module.exports = class extends think.Model {
       const row = await this.where({key}).find();
       return row.value;
     } finally {
-      this.invalidateReadSnapshot();
+      this.invalidateOptionsCache();
     }
   }
 
   async getCredentialValue(key) {
-    if (optionReads.getStore()?.active) {
-      const rows = await this.readOptionRows();
-      const row = rows.find(item => item.key === key);
-      return row ? row.value : undefined;
-    }
-    const row = await this.where({key}).find();
-    return row && row.key ? row.value : undefined;
+    const rows = await this.readOptionRows();
+    const row = rows.find(item => item.key === key);
+    return row ? row.value : undefined;
   }
 
   async setCredentialValue(key, value) {
-    this.invalidateReadSnapshot();
+    this.invalidateOptionsCache();
     try {
       // Each credential has its own primary-key row, so writes for different plugins cannot overwrite each other.
       const updated = await this.where({key}).update({value});
@@ -198,16 +181,16 @@ module.exports = class extends think.Model {
         await this.where({key}).update({value});
       }
     } finally {
-      this.invalidateReadSnapshot();
+      this.invalidateOptionsCache();
     }
   }
 
   async deleteCredentialValue(key) {
-    this.invalidateReadSnapshot();
+    this.invalidateOptionsCache();
     try {
       await this.where({key}).delete();
     } finally {
-      this.invalidateReadSnapshot();
+      this.invalidateOptionsCache();
     }
   }
 };

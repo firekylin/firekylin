@@ -132,7 +132,7 @@ registerMediaAbilities(pluginManager.abilities, {
   })
 });
 if (!existingPluginManager) {
-  think.model('options').withReadSnapshot(() => pluginManager.load())
+  pluginManager.load()
     .then(() => pluginManager.events.emit('app.ready', {version: pack.version}))
     .catch(error => {
       console.error(`[plugin] app.bootstrap failed: ${error.stack || error.message}`);
