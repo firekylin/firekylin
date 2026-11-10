@@ -12,6 +12,10 @@ export default class UserStore {
     userList: any = [];
     loading = true;
     key = '0';
+    page = 1;
+    total = 0;
+    keyword = '';
+    requestId = 0;
 
     submitting = false;
     userInfo: any = {
@@ -52,14 +56,24 @@ export default class UserStore {
     }
 
     // 获取用户列表
-    getUserList(type ?: string) {
-        http.get<any>(`/admin/api/user`, {type})
+    getUserList(type = this.key === '3' ? 'contributor' : '', page = this.page, keyword = this.keyword) {
+        this.page = page;
+        this.keyword = keyword;
+        this.setLoading(true);
+        const requestId = ++this.requestId;
+        http.get<any>(`/admin/api/user`, {type, page, keyword})
             .toPromise()
             .then(data => {
-                this.setUserList(data.data);
+                if (requestId !== this.requestId) return;
+                this.total = data.data.count;
+                this.setUserList(data.data.data);
                 this.setLoading(false);
+                if (!this.userList.length && this.page > 1) {
+                    this.getUserList(type, this.page - 1);
+                }
             })
             .catch(err => {
+                this.setLoading(false);
                 message.error('加载用户列表失败，请稍后重试');
             });
     }
@@ -81,8 +95,7 @@ export default class UserStore {
         http.post<any>(`/admin/api/user/${userId}?method=put&type=contributor`)
             .toPromise()
             .then(data => {
-                this.setUserList(data.data);
-                this.setLoading(false);
+                this.getUserList();
             })
             .catch(err => {
                 message.error('加载用户列表失败，请稍后重试');
@@ -95,7 +108,7 @@ export default class UserStore {
             .toPromise()
             .then(data => {
                 message.success('删除成功');
-                this.getUserList(this.key === 3 ? 'contributor' : '' );
+                this.getUserList(this.key === '3' ? 'contributor' : '' );
             })
             .catch(() => {
                 message.error('删除失败，请稍后重试');

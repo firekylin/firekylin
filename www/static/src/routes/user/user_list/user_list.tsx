@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from '../../../utils/router';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Tabs, Button, Space } from 'antd';
+import { Tabs, Button, Space, Input, Pagination } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { UserProps } from '../user.model';
 import { message, Modal } from 'antd';
@@ -57,7 +57,7 @@ function DefaultComponent(props: UserProps) {
     };
     legacy.handleSelect = function handleSelect(type: any) {
         legacy.userStore.setKey(type);
-        return legacy.userStore.getUserList(type === '3' ? 'contributor' : '');
+        return legacy.userStore.getUserList(type === '3' ? 'contributor' : '', 1);
     };
     legacy.deny = function deny(user: any) {
         const that = legacy;
@@ -207,6 +207,12 @@ function DefaultComponent(props: UserProps) {
                         <TabPane key="0" tab="全　部" />
                         <TabPane key="3" tab="审核中" />
                     </Tabs>
+                    <Input.Search
+                        placeholder="搜索用户名、别名或邮箱"
+                        allowClear
+                        onSearch={(keyword) => legacy.userStore.getUserList(undefined, 1, keyword)}
+                        style={{ maxWidth: 360, marginBottom: 16 }}
+                    />
                     <table className="table table-striped">
                         <thead>
                             <tr>
@@ -225,6 +231,13 @@ function DefaultComponent(props: UserProps) {
                         </thead>
                         <tbody>{legacy.getUserList()}</tbody>
                     </table>
+                    <Pagination
+                        current={legacy.userStore.page}
+                        total={legacy.userStore.total}
+                        pageSize={20}
+                        showSizeChanger={false}
+                        onChange={(page) => legacy.userStore.getUserList(undefined, page)}
+                    />
                 </div>
             </div>
         );

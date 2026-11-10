@@ -37,25 +37,45 @@ module.exports = class extends Base {
       where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
     }
 
-    const users = await modelInstance.where(where).select();
+    const paginated = this.get('page') !== undefined;
+    const page = Math.max(1, parseInt(this.get('page'), 10) || 1);
+    const pageSize = 20;
+    const keyword = String(this.get('keyword') || '').trim();
+    if (keyword) {
+      where = {
+        _complex: where,
+        'name|display_name|email': ['like', `%${keyword}%`]
+      };
+    }
+    const query = modelInstance.where(where).order('id DESC');
+    const result = paginated ? await query.page(page, pageSize).countSelect() : null;
+    const users = result ? result.data : await query.select();
+    const ids = users.map(user => user.id);
+
     const posts = await this.model('post')
-      .field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num')
+      .field('user_id, COUNT(*) as post_num')
+      .where({user_id: ['IN', ids.length ? ids : [0]]})
       .setRelation(false)
       .group('user_id')
       .select();
     const postsNum = new Map(posts.map(({user_id, post_num}) => [user_id, post_num]));
-    const commentsNum = new Map(posts.map(({user_id, comment_num}) => [user_id, comment_num]));
+    const comments = await this.model('comment')
+      .field('user_id, COUNT(*) as comment_num')
+      .where({user_id: ['IN', ids.length ? ids.map(String) : ['0']]})
+      .group('user_id')
+      .select();
+    const commentsNum = new Map(comments.map(({user_id, comment_num}) => [Number(user_id), Number(comment_num)]));
 
     users.forEach(user => {
       user.post_num = postsNum.get(user.id) || 0;
-      user.comment_num = commentsNum.get(user.id) || 0;
+      user.comment_num = commentsNum.get(Number(user.id)) || 0;
       user.social_accounts = [];
     });
     const socialAccounts = await this.service('social-auth').list(users.map(user => user.id));
     const usersById = new Map(users.map(user => [Number(user.id), user]));
     socialAccounts.forEach(account => usersById.get(Number(account.user_id))?.social_accounts.push(account));
 
-    return this.success(users);
+    return this.success(result ? {...result, data: users} : users);
   }
 
   /**
