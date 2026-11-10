@@ -3,6 +3,7 @@ import superagent from 'superagent';
 import { AppStore } from '../../app.store';
 import firekylin from '../../utils/firekylin';
 import { http } from '../../utils/http';
+import { getAllUsers } from '../../utils/users';
 import { UserEditPwdState } from './user.model';
 import { message } from 'antd';
 
@@ -35,7 +36,7 @@ export default class UserStore {
         userInfo: {}
     };
 
-    getUserList$ = (type?: string) => http.get<any>(`/admin/api/user`, {type});
+    getUserList$ = (type?: string) => getAllUsers(type);
 
     constructor(appStore: AppStore) {
         this.appStore = appStore;

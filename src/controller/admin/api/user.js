@@ -37,7 +37,6 @@ module.exports = class extends Base {
       where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
     }
 
-    const paginated = this.get('page') !== undefined;
     const page = Math.max(1, parseInt(this.get('page'), 10) || 1);
     const pageSize = Math.min(100, Math.max(1, parseInt(this.get('pageSize'), 10) || 20));
     const keyword = String(this.get('keyword') || '').trim();
@@ -48,8 +47,8 @@ module.exports = class extends Base {
       };
     }
     const query = modelInstance.where(where).order('id DESC');
-    const result = paginated ? await query.page(page, pageSize).countSelect() : null;
-    const users = result ? result.data : await query.select();
+    const result = await query.page(page, pageSize).countSelect();
+    const users = result.data;
     const ids = users.map(user => user.id);
 
     const posts = await this.model('post')
@@ -75,7 +74,7 @@ module.exports = class extends Base {
     const usersById = new Map(users.map(user => [Number(user.id), user]));
     socialAccounts.forEach(account => usersById.get(Number(account.user_id))?.social_accounts.push(account));
 
-    return this.success(result ? {...result, data: users} : users);
+    return this.success({...result, data: users});
   }
 
   /**

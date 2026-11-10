@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from './utils/http';
+import { getAllUsers } from './utils/users';
 import { Category } from './models/category.model';
 import { Tag } from './models/tag.model';
 import { Observable } from 'rxjs';
@@ -99,7 +100,7 @@ class SharedStore {
   }
 
   getUserList(type?: string) {
-    return http.get<any>(`/admin/api/user`, {type});
+    return getAllUsers(type);
   }
 
   // 获取默认分类

@@ -207,6 +207,7 @@ function DefaultComponent(props: UserProps) {
                             <Input.Search
                                 placeholder="搜索用户名、别名或邮箱"
                                 aria-label="搜索用户"
+                                defaultValue={legacy.userStore.keyword}
                                 allowClear
                                 enterButton
                                 onSearch={(keyword) => legacy.userStore.getUserList(undefined, 1, keyword)}
