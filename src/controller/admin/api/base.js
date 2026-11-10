@@ -9,8 +9,11 @@ module.exports = class extends BaseRest {
     this.allowList = [
       'api/post/put', 'api/post/post', 'api/post/delete',
       'api/markdown/post', 'api/chat/post', 'api/ai-editor/post', 'api/ai-image/post',
-      'api/file/post', 'api/file/get',
-      'api/attachment/delete'
+      'api/file/post',
+      'api/attachment/delete',
+      'api/post/get', 'api/cate/get', 'api/tag/get',
+      'api/attachment/get', 'api/user/get', 'api/options/get', 'api/system/get',
+      'api/chat/get', 'api/ai-editor/get'
     ];
   }
 
@@ -68,10 +71,12 @@ module.exports = class extends BaseRest {
     }
     // not admin
     if (type !== 1) {
-      if (action === 'get') {
+      // Theme metadata is needed by the article editor; source files and
+      // management endpoints remain administrator-only.
+      if (type === 2 && name === 'api/theme/get' && ['templateList', 'themeFields'].includes(this.get('type'))) {
         return;
       }
-      if (this.allowList.indexOf(name) > -1) {
+      if (type === 2 && this.allowList.indexOf(name) > -1) {
         return;
       }
       return this.fail('USER_NO_PERMISSION');

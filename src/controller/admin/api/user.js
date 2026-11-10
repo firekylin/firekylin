@@ -7,13 +7,17 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async getAction() {
+    const isAdministrator = Number(this.userInfo.type) === 1;
     const isCommenter = Number(this.userInfo.type) === 4;
-    if (isCommenter && (!this.id || String(this.id) !== String(this.userInfo.id))) {
+    const isSelf = this.id && String(this.id) === String(this.userInfo.id);
+    if (!isAdministrator && ((this.id && !isSelf) || (isCommenter && !this.id))) {
       return this.fail('USER_NO_PERMISSION');
     }
     let where = {};
-    const modelInstance = this.modelInstance
-      .field('id,name,display_name,email,type,status,create_time,last_login_time,app_key,app_secret');
+    let fields = 'id,name,display_name,type';
+    if (isAdministrator || isSelf) fields += ',email,status,create_time,last_login_time';
+    if (isAdministrator) fields += ',app_key,app_secret';
+    const modelInstance = this.modelInstance.field(fields);
     if (this.id) {
       where.id = this.id;
       const user = await modelInstance.where(where).find();
@@ -38,6 +42,8 @@ module.exports = class extends Base {
     }
 
     const users = await modelInstance.where(where).select();
+    // Editors need author labels, not account details or push credentials.
+    if (!isAdministrator) return this.success(users);
     const posts = await this.model('post')
       .field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num')
       .setRelation(false)
