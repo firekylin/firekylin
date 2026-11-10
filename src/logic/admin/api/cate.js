@@ -1,4 +1,4 @@
-module.exports = class extends think.Logic {
+module.exports = class extends require('./base') {
   /**
    * set cate pathname with encoding name when user haven't set.
    */

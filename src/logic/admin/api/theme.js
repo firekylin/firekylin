@@ -1,5 +1,6 @@
-module.exports = class extends think.Logic {
-  __before() {
+module.exports = class extends require('./base') {
+  async __before() {
+    if (await super.__before() === false) return false;
     if (this.isGet) {
       return true;
     }

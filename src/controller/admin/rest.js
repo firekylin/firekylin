@@ -1,5 +1,6 @@
 const path = require('path');
 const assert = require('assert');
+const {getRestId} = require('../../service/admin-rest');
 
 module.exports = class extends think.Controller {
   static get _REST() {
@@ -28,15 +29,7 @@ module.exports = class extends think.Controller {
     return filename.substr(last + 1, filename.length - last - 4);
   }
   getId() {
-    const id = this.get('id');
-    if (id && (think.isString(id) || think.isNumber(id))) {
-      return id;
-    }
-    const last = decodeURIComponent(this.ctx.path.split('/').pop());
-    if (last !== this.resource && /^(\d+,?)*$/.test(last)) {
-      return last;
-    }
-    return '';
+    return getRestId(this.get('id'), this.ctx.path, this.resource);
   }
   async getAction() {
     let data;

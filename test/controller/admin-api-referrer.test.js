@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const {isLocalReferrer} = require('../../src/controller/admin/api/referrer');
+const {isLocalReferrer} = require('../../src/service/admin-referrer');
 
 test('allows localhost referrers on any port', () => {
   assert.equal(isLocalReferrer('http://localhost:8360/admin/'), true);

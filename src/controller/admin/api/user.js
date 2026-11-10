@@ -7,12 +7,8 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async getAction() {
-    const isAdministrator = Number(this.userInfo.type) === 1;
-    const isCommenter = Number(this.userInfo.type) === 4;
+    const isAdministrator = Number(this.userInfo.type) === firekylin.USER_ADMIN;
     const isSelf = this.id && String(this.id) === String(this.userInfo.id);
-    if (!isAdministrator && ((this.id && !isSelf) || (isCommenter && !this.id))) {
-      return this.fail('USER_NO_PERMISSION');
-    }
     let where = {};
     let fields = 'id,name,display_name,type';
     if (isAdministrator || isSelf) fields += ',email,status,create_time,last_login_time';
@@ -36,9 +32,9 @@ module.exports = class extends Base {
     }
 
     if (this.get('type') === 'contributor') {
-      where = {status: 2, type: 3};
+      where = {status: firekylin.USER_DISABLED, type: firekylin.USER_CONTRIBUTOR};
     } else {
-      where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
+      where = {status: ['!=', firekylin.USER_DISABLED], type: ['!=', firekylin.USER_CONTRIBUTOR], _logic: 'OR'};
     }
 
     const users = await modelInstance.where(where).select();
@@ -113,12 +109,6 @@ module.exports = class extends Base {
   }
 
   async generateKey(self, status) {
-    const isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
-    // let isMine = this.userInfo.id === this.id;
-    if (!isAdmin) {
-      return this.fail();
-    }
-
     const app_key = think.uuid();
     const app_secret = think.uuid();
 
@@ -159,8 +149,7 @@ module.exports = class extends Base {
     }
 
     let data = this.post();
-    if (Number(this.userInfo.type) === 4) {
-      if (String(this.id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
+    if (Number(this.userInfo.type) === firekylin.USER_COMMENTER) {
       data = {display_name: data.display_name, email: data.email};
     }
     data.id = this.id;

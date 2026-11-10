@@ -42,7 +42,7 @@ module.exports = class extends Base {
     };
 
     // 非管理员只统计当前用户文章
-    const where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
+    const where = Number(this.userInfo.type) !== firekylin.USER_ADMIN ? {user_id: this.userInfo.id} : {};
 
     return this.success({
       versions: data,
@@ -57,12 +57,6 @@ module.exports = class extends Base {
   }
 
   async updateAction() {
-    if (Number(this.userInfo?.type) !== 1) return this.fail('USER_NO_PERMISSION');
-    const adminAuth = require('../../../service/admin-auth');
-    if (this.ctx.method !== 'POST' || !this.ctx.get('X-CSRF-Token') ||
-        this.ctx.get('X-CSRF-Token') !== adminAuth.csrfToken(this.ctx)) {
-      return this.ctx.throw(403, 'CSRF validation failed');
-    }
     try {
       const response = await fetchWithTimeout('https://registry.npmjs.org/firekylin/latest');
       const release = await response.json();

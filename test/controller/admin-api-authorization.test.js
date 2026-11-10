@@ -17,9 +17,18 @@ global.think = {
   isString: value => typeof value === 'string',
   isFunction: value => typeof value === 'function'
 };
-global.firekylin = {require: () => false};
+global.think.Logic = global.think.Controller;
+global.firekylin = {require: () => false, USER_ADMIN: 1, USER_EDITOR: 2, USER_CONTRIBUTOR: 3,
+  USER_COMMENTER: 4, USER_DISABLED: 2};
 
 const Base = require('../../src/controller/admin/api/base');
+const BaseLogic = require('../../src/logic/admin/api/base');
+
+const logics = {
+  options: require('../../src/logic/admin/api/options'),
+  user: require('../../src/logic/admin/api/user'),
+  system: require('../../src/logic/admin/api/system')
+};
 const Options = require('../../src/controller/admin/api/options');
 const User = require('../../src/controller/admin/api/user');
 const System = require('../../src/controller/admin/api/system');
@@ -53,6 +62,7 @@ function controller(Controller, type = 2, resource = 'options', query = {}) {
   const token = type ? auth.sign({id: 2, name: 'test-user', type}, SECRET) : '';
   const ctx = {controller: `admin/api/${resource}`, action: 'get', method: 'GET', state: {},
     cookie: () => token, referrer: () => 'https://example.invalid/admin', path: `/admin/api/${resource}`};
+  ctx.get = () => auth.csrfToken({...ctx, state: {jwtSecret: SECRET}});
   const c = new Controller(ctx);
   c.get = key => key ? query[key] : query;
   c.modelInstance = optionsModel();
@@ -61,7 +71,17 @@ function controller(Controller, type = 2, resource = 'options', query = {}) {
   c.fail = message => {throw new Error(message)};
   return c;
 }
+async function authorize(c, resourceChecks = false) {
+  const Logic = resourceChecks ? logics[c.ctx.controller.split('/').pop()] || BaseLogic : BaseLogic;
+  const logic = new Logic(c.ctx);
+  logic.get = c.get;
+  logic.model = c.model;
+  logic.fail = c.fail;
+  await logic.__before();
+  if (resourceChecks && logic[c.ctx.action + 'Action']) await logic[c.ctx.action + 'Action']();
+}
 async function dispatch(c) {
+  await authorize(c, true);
   await c.__before();
   return c.getAction();
 }
@@ -86,25 +106,25 @@ test('anonymous requests cannot read options, user or system data', async() => {
 
 test('editor reads use an explicit allowlist and new controllers fail closed', async() => {
   for (const resource of ['post', 'cate', 'tag', 'attachment', 'user', 'options', 'system', 'chat', 'ai-editor']) {
-    await controller(Base, 2, resource).__before();
+    await authorize(controller(Base, 2, resource));
   }
   for (const resource of ['page', 'comment', 'file', 'ai-image', 'ai-connections', 'ai-logs',
     'extension-settings', 'extension-github', 'marketplace', 'smart-content', 'new-private-api']) {
-    await assert.rejects(controller(Base, 2, resource).__before(), /USER_NO_PERMISSION/);
-    await controller(Base, 1, resource).__before();
+    await assert.rejects(authorize(controller(Base, 2, resource)), /USER_NO_PERMISSION/);
+    await authorize(controller(Base, 1, resource));
   }
   for (const type of ['templateList', 'themeFields']) {
-    await controller(Base, 2, 'theme', {type}).__before();
+    await authorize(controller(Base, 2, 'theme', {type}));
   }
   for (const type of [undefined, 'file', 'fileList', 'themeList']) {
-    await assert.rejects(controller(Base, 2, 'theme', {type}).__before(), /USER_NO_PERMISSION/);
+    await assert.rejects(authorize(controller(Base, 2, 'theme', {type})), /USER_NO_PERMISSION/);
   }
 });
 
 test('commenters retain only their comment and profile routes', async() => {
-  for (const resource of ['comment', 'user']) await controller(Base, 4, resource).__before();
+  for (const resource of ['comment', 'user']) await authorize(controller(Base, 4, resource));
   for (const resource of ['options', 'system', 'post', 'attachment', 'theme']) {
-    await assert.rejects(controller(Base, 4, resource).__before(), /USER_NO_PERMISSION/);
+    await assert.rejects(authorize(controller(Base, 4, resource)), /USER_NO_PERMISSION/);
   }
 });
 
@@ -179,6 +199,7 @@ const accounts = [1, 2].map(id => ({id, name: `user-${id}`, display_name: `User 
 function userController(type, id, query = {}) {
   const c = controller(User, type, 'user', query);
   c.id = id;
+  if (id !== undefined) c.ctx.path += '/' + id;
   const options = c.modelInstance;
   let fields;
   let where;
@@ -265,7 +286,7 @@ test('unsupported and tampered role claims cannot enter the REST API', async() =
     const data = `${header}.${payload}`;
     const signature = crypto.createHmac('sha256', SECRET).update(data).digest('base64url');
     c.ctx.cookie = () => `${data}.${signature}`;
-    await assert.rejects(c.__before(), /USER_NOT_LOGIN/);
+    await assert.rejects(authorize(c), /USER_NOT_LOGIN/);
   }
 });
 
@@ -276,14 +297,14 @@ test('existing editor writes and commenter profile/comment writes remain availab
     const c = controller(Base, type, resource);
     c.ctx.action = action;
     c.ctx.method = 'POST';
-    await c.__before();
+    await authorize(c);
   }
   for (const type of [2, 4]) {
     for (const resource of ['options', 'system', 'theme']) {
       const c = controller(Base, type, resource);
       c.ctx.action = 'put';
       c.ctx.method = 'POST';
-      await assert.rejects(c.__before(), /USER_NO_PERMISSION/);
+      await assert.rejects(authorize(c), /USER_NO_PERMISSION/);
     }
   }
 });
@@ -297,6 +318,7 @@ test('administrator upload and captcha settings survive a read/edit/save round t
   c.post = () => data;
   c.ctx.action = 'put';
   c.ctx.method = 'POST';
+  await authorize(c, true);
   await c.__before();
   await c.putAction();
   assert.equal(JSON.parse(saved.upload).secretAccessKey, 'synthetic-upload-secret');
