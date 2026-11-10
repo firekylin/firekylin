@@ -14,6 +14,15 @@ module.exports = class extends Base {
     const author = String(this.get('author') || '').trim();
     const where = status ? {status} : {};
     if (Number(this.userInfo.type) === 4) where.user_id = String(this.userInfo.id);
+    if (Number(this.userInfo.type) === 2) {
+      const ownedPosts = await this.model('post').where({user_id: this.userInfo.id}).field('id')
+        .select();
+      where._complex = {
+        user_id: String(this.userInfo.id),
+        ...(ownedPosts.length ? {post_id: ['IN', ownedPosts.map(post => post.id)]} : {}),
+        _logic: 'OR'
+      };
+    }
     if (keyword) where.comment = ['LIKE', `%${keyword}%`];
     if (author) {
       const pattern = `%${author}%`;
@@ -24,13 +33,16 @@ module.exports = class extends Base {
         _logic: 'OR'
       }).field('id')
         .select();
-      where._complex = {
+      const authorFilter = {
         nick: ['LIKE', pattern],
         mail: ['LIKE', pattern],
         ip: ['LIKE', pattern],
         ...(matchedUsers.length ? {user_id: ['IN', matchedUsers.map(user => String(user.id))]} : {}),
         _logic: 'OR'
       };
+      const matches = await this.model('comment').where(authorFilter).field('id')
+        .select();
+      where.id = ['IN', matches.length ? matches.map(item => item.id) : [0]];
     }
     const model = this.model('comment');
     const [total, data] = await Promise.all([
@@ -43,7 +55,8 @@ module.exports = class extends Base {
     const [users, posts] = await Promise.all([
       userIds.length ? this.model('user').where({id: ['IN', userIds]}).field('id,name,display_name,email,url,avatar')
         .select() : [],
-      postIds.length ? this.model('post').where({id: ['IN', postIds]}).field('id,title,pathname,type,create_time')
+      postIds.length ? this.model('post').where({id: ['IN', postIds]})
+        .field('id,title,pathname,type,create_time,user_id')
         .select() : []
     ]);
     const userMap = new Map(users.map(user => [String(user.id), user]));
@@ -55,6 +68,8 @@ module.exports = class extends Base {
       const postUrl = post ? permalink.generate(post.type, post, this.authOptions) : item.url;
       return {
         ...item,
+        can_moderate: Number(this.userInfo.type) === 1 ||
+          (Number(this.userInfo.type) === 2 && post && String(post.user_id) === String(this.userInfo.id)),
         author_name: user.display_name || user.name || item.nick || '匿名',
         author_email: email,
         author_link: user.url || item.link || '',
@@ -63,7 +78,7 @@ module.exports = class extends Base {
         post_url: postUrl
       };
     });
-    const features = Number(this.userInfo.type) === 4 ? {} : await require('../../../service/ai-editor-features')
+    const features = Number(this.userInfo.type) !== 1 ? {} : await require('../../../service/ai-editor-features')
       .editorFeatures(global.firekylin?.plugins, this.model('options'));
     return this.success({features, page, pageSize, total: Number(total), keyword, author, data: rows});
   }
@@ -74,8 +89,9 @@ module.exports = class extends Base {
     if (['reply', 'suggestReply'].includes(this.post('operation'))) {
       const auth = require('../../../service/admin-auth');
       const isCommenter = Number(this.userInfo.type) === 4;
-      if (Number(this.userInfo.type) !== 1 && !isCommenter) return this.ctx.throw(403);
-      if (isCommenter && this.post('operation') !== 'reply') return this.ctx.throw(403);
+      const isEditor = Number(this.userInfo.type) === 2;
+      if (Number(this.userInfo.type) !== 1 && !isCommenter && !isEditor) return this.ctx.throw(403);
+      if ((isCommenter || isEditor) && this.post('operation') !== 'reply') return this.ctx.throw(403);
       if (this.ctx.get('X-CSRF-Token') !== auth.csrfToken(this.ctx)) return this.ctx.throw(403);
       const parent = await this.model('comment').where({id}).find();
       if (!parent?.id) return this.fail('COMMENT_NOT_FOUND');
@@ -105,6 +121,8 @@ module.exports = class extends Base {
       if (typeof comment !== 'string' || !comment.trim() || comment.length > 20000) return this.fail('请输入有效回复');
       const post = await this.model('post').where({id: parent.post_id}).find();
       if (!post?.id) return this.fail('评论所属文章不存在');
+      if (isEditor && String(parent.user_id) !== String(this.userInfo.id) &&
+        String(post.user_id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
       const service = this.service('comment');
       const {core, users, tokenService, avatarService, options} = await service.create(this);
       const ctx = await service.context(this, users, core, tokenService, avatarService);
@@ -121,7 +139,7 @@ module.exports = class extends Base {
     });
     try {
       await service.moderate({
-        id, operation: this.post('operation'), comment: this.post('comment'), allowCommenter: true
+        id, operation: this.post('operation'), comment: this.post('comment'), allowCommenter: true, allowEditor: true
       }, this.userInfo);
     } catch (error) {
       if (['COMMENT_NOT_FOUND', 'INVALID_OPERATION', 'USER_NO_PERMISSION'].includes(error.message)) {

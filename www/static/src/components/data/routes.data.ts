@@ -52,7 +52,7 @@ export const InitiateRoutes = (themePages) => [{
         url: '/comment',
         icon: 'topic',
         title: '评论管理',
-        type: 1
+        type: 2
     },
     {
         url: '/media',

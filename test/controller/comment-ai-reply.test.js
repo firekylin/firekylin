@@ -135,3 +135,29 @@ test('commenter list includes all statuses and always filters by current user', 
   assert.equal(result.total, 3);
   assert.deepEqual(result.data.map(row => row.status), ['approved', 'waiting', 'spam']);
 });
+
+test('editor replies require ownership of the comment or its post', async() => {
+  const instance = new Controller();
+  instance.userInfo = {id: 12, type: 2};
+  instance.post = key => ({id: 2, operation: 'reply', comment: '回复'})[key];
+  instance.ctx = {
+    state: {jwtSecret: 'comment-reply-test-secret-at-least-32-bytes'},
+    cookie: () => '', get: () => auth.csrfToken(instance.ctx)
+  };
+  instance.success = () => ({errno: 0});
+  instance.fail = errmsg => ({errno: 1, errmsg});
+  const parent = {id: 2, post_id: 3, user_id: '99'};
+  const post = {id: 3, type: 0, pathname: 'post', user_id: 12};
+  let created = 0;
+  instance.model = name => ({where() { return this }, find: async() => name === 'comment' ? parent : post});
+  instance.service = () => ({
+    create: async() => ({options: {}, core: {comment: {create: async() => { created++ }}}}),
+    context: async() => ({}), syncCount: async() => {}
+  });
+  assert.equal((await instance.postAction()).errno, 0);
+  post.user_id = 99;
+  assert.equal((await instance.postAction()).errmsg, 'USER_NO_PERMISSION');
+  parent.user_id = '12';
+  assert.equal((await instance.postAction()).errno, 0);
+  assert.equal(created, 2);
+});

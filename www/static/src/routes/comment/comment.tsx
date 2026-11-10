@@ -180,7 +180,7 @@ export default function Comment(props: any) {
                 width: 270,
                 render: (_: any, row: any) => (
                     <Space wrap>
-                        {!isCommenter && row.status !== 'approved' && (
+                        {row.can_moderate && row.status !== 'approved' && (
                             <Button
                                 size="small"
                                 onClick={() => legacy.operate(row.id, 'approved')}
@@ -188,13 +188,18 @@ export default function Comment(props: any) {
                                 通过
                             </Button>
                         )}
-                        {!isCommenter && row.status !== 'spam' && (
+                        {row.can_moderate && row.status !== 'spam' && (
                             <Button
                                 size="small"
                                 danger
                                 onClick={() => legacy.operate(row.id, 'spam')}
                             >
                                 垃圾
+                            </Button>
+                        )}
+                        {row.can_moderate && row.status !== 'waiting' && (
+                            <Button size="small" onClick={() => legacy.operate(row.id, 'waiting')}>
+                                待审核
                             </Button>
                         )}
                         <Button

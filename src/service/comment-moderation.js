@@ -16,9 +16,14 @@ class CommentModerationService {
     this.notifyApprovedReply = notifyApprovedReply;
   }
 
-  async moderate({id, operation, comment, onlyWaiting = false, allowCommenter = false}, principal) {
+  async moderate({
+    id, operation, comment, onlyWaiting = false, allowCommenter = false, allowEditor = false
+  }, principal) {
+    const editor = principal && Number(principal.type) === 2 && allowEditor;
     const commenter = principal && Number(principal.type) === 4 && allowCommenter;
-    if (!principal || (Number(principal.type) !== 1 && !commenter)) throw new Error('Administrator required');
+    if (!principal || (Number(principal.type) !== 1 && !commenter && !editor)) {
+      throw new Error('Administrator required');
+    }
     if (commenter && !['delete', 'edit'].includes(operation)) throw new Error('USER_NO_PERMISSION');
     if (!Number.isSafeInteger(id) || id <= 0) throw new TypeError('Invalid comment ID');
     if (!['delete', 'approved', 'waiting', 'spam', 'edit'].includes(operation)) {
@@ -31,6 +36,14 @@ class CommentModerationService {
       throw new Error('USER_NO_PERMISSION');
     }
     if (!existing || !existing.id) throw new Error('COMMENT_NOT_FOUND');
+    if (editor) {
+      const post = await this.getModel('post').where({id: existing.post_id}).find();
+      const ownsPost = post && post.id && String(post.user_id) === String(principal.id);
+      const ownsComment = String(existing.user_id) === String(principal.id);
+      if (!ownsPost && (!ownsComment || !['edit', 'delete'].includes(operation))) {
+        throw new Error('USER_NO_PERMISSION');
+      }
+    }
     if (onlyWaiting && existing.status !== 'waiting') throw new Error('Only waiting comments can be approved');
     const model = this.getModel('comment').where(where);
     const event = operation === 'delete' ? 'comment.beforeDelete' : 'comment.beforeUpdate';

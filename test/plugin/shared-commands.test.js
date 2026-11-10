@@ -172,3 +172,35 @@ test('moderation persists replacement values returned by comment filters', async
     global.firekylin = previous;
   }
 });
+
+test('editors moderate comments on owned posts and only edit/delete their own comments elsewhere', async() => {
+  const principal = {id: 12, type: 2};
+  let post = {id: 9, user_id: 12};
+  let existing = {id: 7, user_id: '99', post_id: 9};
+  const changes = [];
+  const service = new CommentModerationService({
+    getModel: name => ({
+      where() { return this },
+      setRelation() { return this },
+      async find() { return name === 'post' ? post : existing },
+      async update(value) { changes.push(value) },
+      async delete() { changes.push('delete') }
+    }),
+    now: () => 'now', syncCount: async() => {}
+  });
+  const run = operation => service.moderate({id: 7, operation, comment: 'Edited', allowEditor: true}, principal);
+  for (const operation of ['approved', 'waiting', 'spam', 'edit', 'delete']) await run(operation);
+  assert.equal(changes.length, 5);
+  post = {id: 9, user_id: 99};
+  existing = {...existing, user_id: '12'};
+  await run('edit');
+  await run('delete');
+  for (const operation of ['approved', 'waiting', 'spam']) {
+    await assert.rejects(run(operation), /USER_NO_PERMISSION/);
+  }
+  existing = {...existing, user_id: '99'};
+  for (const operation of ['approved', 'waiting', 'spam', 'edit', 'delete']) {
+    await assert.rejects(run(operation), /USER_NO_PERMISSION/);
+  }
+  assert.equal(changes.length, 7);
+});
