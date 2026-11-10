@@ -128,7 +128,6 @@ module.exports = class extends Base {
 
   async generateKey(self, status) {
     const isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
-    // let isMine = this.userInfo.id === this.id;
     if (!isAdmin) {
       return this.fail();
     }
@@ -138,23 +137,40 @@ module.exports = class extends Base {
 
     await this.modelInstance.generateKey(this.id, app_key, app_secret, status);
 
-    const user = await this.modelInstance.where({id: this.id}).find();
-    const options = await this.model('options').getOptions();
-    const transporter = nodemailer.createTransport();
-    const site_url = Object.hasOwn(options, 'site_url') ? options.site_url : `http://${this.ctx.host}`;
-    transporter.sendMail({
-      from: 'no-reply@firekylin.lithub.cc',
-      to: user.email,
-      subject: `【${options.title}】网站推送申请成功`,
-      text: `你的推送申请审批通过，请将下面的信息添加到自己的博客中完成最后的推送操作。
-        网站名称：${options.title}
-        网站地址：${site_url}
-        app_key: ${app_key}
-        app_secret: ${app_secret}
-      `
-    });
+    if (status) {
+      const user = await this.modelInstance.where({id: this.id}).find();
+      const options = await this.model('options').getOptions();
+      const config = options.comment || {};
+      const host = config.smtpHost || process.env.SMTP_HOST;
+      const from = config.smtpFrom || process.env.SMTP_FROM;
+      const username = config.smtpUser || process.env.SMTP_USER;
+      if (host && from && user.email) {
+        let transporter;
+        try {
+          transporter = nodemailer.createTransport({
+            host,
+            port: Number(config.smtpPort || process.env.SMTP_PORT) || 465,
+            secure: typeof config.smtpSecure === 'boolean' ? config.smtpSecure : process.env.SMTP_SECURE !== 'false',
+            auth: username ? {user: username, pass: config.smtpPass || process.env.SMTP_PASS} : undefined,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000
+          });
+          const siteUrl = options.site_url || `http://${this.ctx.host}`;
+          await transporter.sendMail({
+            from,
+            to: user.email,
+            subject: `【${options.title}】网站推送申请成功`,
+            text: `你的推送申请审批通过。网站名称：${options.title}，网站地址：${siteUrl}。请登录后台查看 App Key 和 App Secret。`
+          });
+        } catch {
+          think.logger.warn('User approval email could not be sent');
+        } finally {
+          transporter?.close();
+        }
+      }
+    }
 
-    // if(status !== null) { this.id = null; }
     return await this.getAction(self);
   }
   /**
