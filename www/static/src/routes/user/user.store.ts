@@ -13,6 +13,7 @@ export default class UserStore {
     loading = true;
     key = '0';
     page = 1;
+    pageSize = 20;
     total = 0;
     keyword = '';
     requestId = 0;
@@ -56,12 +57,18 @@ export default class UserStore {
     }
 
     // 获取用户列表
-    getUserList(type = this.key === '3' ? 'contributor' : '', page = this.page, keyword = this.keyword) {
+    getUserList(
+        type = this.key === '3' ? 'contributor' : '',
+        page = this.page,
+        keyword = this.keyword,
+        pageSize = this.pageSize,
+    ) {
         this.page = page;
+        this.pageSize = pageSize;
         this.keyword = keyword;
         this.setLoading(true);
         const requestId = ++this.requestId;
-        http.get<any>(`/admin/api/user`, {type, page, keyword})
+        http.get<any>(`/admin/api/user`, {type, page, keyword, pageSize})
             .toPromise()
             .then(data => {
                 if (requestId !== this.requestId) return;

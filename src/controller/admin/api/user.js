@@ -39,7 +39,7 @@ module.exports = class extends Base {
 
     const paginated = this.get('page') !== undefined;
     const page = Math.max(1, parseInt(this.get('page'), 10) || 1);
-    const pageSize = 20;
+    const pageSize = Math.min(100, Math.max(1, parseInt(this.get('pageSize'), 10) || 20));
     const keyword = String(this.get('keyword') || '').trim();
     if (keyword) {
       where = {

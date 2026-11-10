@@ -203,16 +203,20 @@ function DefaultComponent(props: UserProps) {
                     <Tabs
                         defaultActiveKey={props.userStore.key.toString()}
                         onChange={(type) => legacy.handleSelect(type)}
+                        tabBarExtraContent={
+                            <Input.Search
+                                placeholder="搜索用户名、别名或邮箱"
+                                aria-label="搜索用户"
+                                allowClear
+                                enterButton
+                                onSearch={(keyword) => legacy.userStore.getUserList(undefined, 1, keyword)}
+                                style={{ width: 280, marginLeft: 10 }}
+                            />
+                        }
                     >
                         <TabPane key="0" tab="全　部" />
                         <TabPane key="3" tab="审核中" />
                     </Tabs>
-                    <Input.Search
-                        placeholder="搜索用户名、别名或邮箱"
-                        allowClear
-                        onSearch={(keyword) => legacy.userStore.getUserList(undefined, 1, keyword)}
-                        style={{ maxWidth: 360, marginBottom: 16 }}
-                    />
                     <table className="table table-striped">
                         <thead>
                             <tr>
@@ -234,9 +238,16 @@ function DefaultComponent(props: UserProps) {
                     <Pagination
                         current={legacy.userStore.page}
                         total={legacy.userStore.total}
-                        pageSize={20}
-                        showSizeChanger={false}
-                        onChange={(page) => legacy.userStore.getUserList(undefined, page)}
+                        pageSize={legacy.userStore.pageSize}
+                        showSizeChanger
+                        pageSizeOptions={[10, 20, 50, 100]}
+                        style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}
+                        onChange={(page, pageSize) => legacy.userStore.getUserList(
+                            undefined,
+                            pageSize !== legacy.userStore.pageSize ? 1 : page,
+                            undefined,
+                            pageSize,
+                        )}
                     />
                 </div>
             </div>
