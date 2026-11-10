@@ -63,7 +63,7 @@ module.exports = class extends Base {
         post_url: postUrl
       };
     });
-    const features = await require('../../../service/ai-editor-features')
+    const features = Number(this.userInfo.type) === 4 ? {} : await require('../../../service/ai-editor-features')
       .editorFeatures(global.firekylin?.plugins, this.model('options'));
     return this.success({features, page, pageSize, total: Number(total), keyword, author, data: rows});
   }
@@ -73,10 +73,15 @@ module.exports = class extends Base {
     if (!Number.isSafeInteger(id) || id <= 0) return this.fail('PARAMS_ERROR');
     if (['reply', 'suggestReply'].includes(this.post('operation'))) {
       const auth = require('../../../service/admin-auth');
-      if (Number(this.userInfo.type) !== 1) return this.ctx.throw(403);
+      const isCommenter = Number(this.userInfo.type) === 4;
+      if (Number(this.userInfo.type) !== 1 && !isCommenter) return this.ctx.throw(403);
+      if (isCommenter && this.post('operation') !== 'reply') return this.ctx.throw(403);
       if (this.ctx.get('X-CSRF-Token') !== auth.csrfToken(this.ctx)) return this.ctx.throw(403);
       const parent = await this.model('comment').where({id}).find();
       if (!parent?.id) return this.fail('COMMENT_NOT_FOUND');
+      if (isCommenter && String(parent.user_id) !== String(this.userInfo.id)) {
+        return this.fail('USER_NO_PERMISSION');
+      }
       if (this.post('operation') === 'suggestReply') {
         const features = await require('../../../service/ai-editor-features')
       .editorFeatures(global.firekylin?.plugins, this.model('options'));

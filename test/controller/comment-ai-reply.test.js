@@ -75,3 +75,63 @@ test('admin replies resolve current permalinks by parent post ID, never historic
   assert.equal((await instance.postAction()).errmsg, '评论所属文章不存在');
   assert.equal(created.length, 2);
 });
+
+test('commenters can reply to their own comments but cannot reply to others or use AI', async() => {
+  const instance = new Controller();
+  instance.userInfo = {id: 12, type: 4};
+  let operation = 'reply';
+  instance.post = key => ({id: 2, operation, comment: '补充说明'})[key];
+  instance.ctx = {
+    state: {jwtSecret: 'comment-reply-test-secret-at-least-32-bytes'},
+    cookie: () => '',
+    get: () => auth.csrfToken(instance.ctx),
+    throw: () => { throw new Error('Forbidden') }
+  };
+  instance.success = () => ({errno: 0});
+  instance.fail = errmsg => ({errno: 1, errmsg});
+  const parent = {id: 2, post_id: 3, user_id: '12'};
+  let created = 0;
+  instance.model = name => ({
+    where() { return this },
+    find: async() => name === 'comment' ? parent : {id: 3, type: 0, pathname: 'post'}
+  });
+  instance.service = () => ({
+    create: async() => ({options: {}, core: {comment: {create: async() => { created++ }}}}),
+    context: async() => ({}),
+    syncCount: async() => {}
+  });
+  assert.equal((await instance.postAction()).errno, 0);
+  parent.user_id = '99';
+  assert.equal((await instance.postAction()).errmsg, 'USER_NO_PERMISSION');
+  operation = 'suggestReply';
+  await assert.rejects(instance.postAction(), /Forbidden/);
+  assert.equal(created, 1);
+});
+
+test('commenter list includes all statuses and always filters by current user', async t => {
+  const previous = global.think;
+  t.after(() => { global.think = previous });
+  global.think = {md5: () => 'avatar'};
+  const instance = new Controller();
+  instance.userInfo = {id: 12, type: 4};
+  instance.get = () => undefined;
+  instance.success = data => data;
+  const rows = ['approved', 'waiting', 'spam'].map((status, id) => ({id, status, user_id: '12'}));
+  instance.model = name => {
+    assert.notEqual(name, 'options');
+    return {
+      where(where) {
+        if (name === 'comment') assert.deepEqual(where, {user_id: '12'});
+        return this;
+      },
+      count: async() => 3,
+      order() { return this },
+      page() { return this },
+      field() { return this },
+      select: async() => name === 'comment' ? rows : []
+    };
+  };
+  const result = await instance.getAction();
+  assert.equal(result.total, 3);
+  assert.deepEqual(result.data.map(row => row.status), ['approved', 'waiting', 'spam']);
+});
