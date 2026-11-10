@@ -66,7 +66,12 @@ module.exports = class extends BaseRest {
       if (commenterAllowList.includes(name)) return;
       return this.fail('USER_NO_PERMISSION');
     }
-    if (type === 2 && name === 'api/comment/post') return;
+    const editorActions = [
+      'api/comment/post',
+      'api/cate/post', 'api/cate/put', 'api/cate/delete',
+      'api/tag/post', 'api/tag/put', 'api/tag/delete'
+    ];
+    if (type === 2 && editorActions.includes(name)) return;
     // not admin
     if (type !== 1) {
       if (action === 'get') {
