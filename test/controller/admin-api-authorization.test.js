@@ -33,6 +33,7 @@ global.firekylin = {
 };
 
 const Base = require('../../src/controller/admin/api/base');
+const Comment = require('../../src/controller/admin/api/comment');
 const Options = require('../../src/controller/admin/api/options');
 const User = require('../../src/controller/admin/api/user');
 const System = require('../../src/controller/admin/api/system');
@@ -93,17 +94,19 @@ function assertPrivateSettingsAbsent(value) {
   }
 }
 
-test('anonymous requests cannot read options, user or system data', async() => {
-  for (const [Controller, resource] of [[Options, 'options'], [User, 'user'], [System, 'system']]) {
+test('anonymous requests cannot read options, user, system or comment data', async() => {
+  for (const [Controller, resource] of [[Options, 'options'], [User, 'user'], [System, 'system'],
+    [Comment, 'comment']]) {
     await assert.rejects(dispatch(controller(Controller, null, resource)), /USER_NOT_LOGIN/);
   }
 });
 
 test('editor reads use an explicit allowlist and new controllers fail closed', async() => {
-  for (const resource of ['post', 'cate', 'tag', 'attachment', 'user', 'options', 'system', 'chat', 'ai-editor']) {
+  for (const resource of ['post', 'cate', 'tag', 'comment', 'attachment', 'user', 'options', 'system',
+    'chat', 'ai-editor']) {
     await controller(Base, 2, resource).__before();
   }
-  for (const resource of ['page', 'comment', 'file', 'ai-image', 'ai-connections', 'ai-logs',
+  for (const resource of ['page', 'file', 'ai-image', 'ai-connections', 'ai-logs',
     'extension-settings', 'extension-github', 'marketplace', 'smart-content', 'new-private-api']) {
     await assert.rejects(controller(Base, 2, resource).__before(), /USER_NO_PERMISSION/);
     await controller(Base, 1, resource).__before();
@@ -115,6 +118,82 @@ test('editor reads use an explicit allowlist and new controllers fail closed', a
     await assert.rejects(controller(Base, 2, 'theme', {type}).__before(), /USER_NO_PERMISSION/);
   }
 });
+
+for (const ownsPosts of [true, false]) {
+  test(`editor comment reads retain ownership restrictions with owned posts: ${ownsPosts}`, async() => {
+    const query = {status: 'waiting', keyword: 'hello', page: 2, pageSize: 10};
+    const c = controller(Comment, firekylin.USER_EDITOR, 'comment', query);
+    const options = c.modelInstance;
+    const posts = [
+      {id: 10, user_id: 2, title: 'Owned post', pathname: 'owned'},
+      {id: 11, user_id: 99, title: 'Other post', pathname: 'other'}
+    ];
+    const rows = [{id: 1, user_id: '2', post_id: 11}];
+    if (ownsPosts) {
+      rows.push({id: 2, user_id: '99', post_id: 10});
+    }
+    const expectedWhere = {
+      status: 'waiting',
+      _complex: {
+        user_id: '2',
+        ...(ownsPosts ? {post_id: ['IN', [10]]} : {}),
+        _logic: 'OR'
+      },
+      comment: ['LIKE', '%hello%']
+    };
+    let commentQueries = 0;
+    c.model = name => {
+      if (name === 'options') {
+        return options;
+      }
+      let where;
+      return {
+        where(value) {
+          where = value;
+          if (name === 'comment') {
+            assert.deepEqual(where, expectedWhere);
+            commentQueries++;
+          }
+          return this;
+        },
+        field() {
+          return this;
+        },
+        order() {
+          return this;
+        },
+        page(page, pageSize) {
+          assert.equal(page, query.page);
+          assert.equal(pageSize, query.pageSize);
+          return this;
+        },
+        count: async() => rows.length,
+        select: async() => {
+          if (name === 'comment') {
+            return rows;
+          }
+          if (name === 'user') {
+            return [2, 99].map(id => ({id, avatar: '/avatar.png'}));
+          }
+          assert.equal(name, 'post');
+          if (Object.hasOwn(where, 'user_id')) {
+            assert.deepEqual(where, {user_id: 2});
+            return ownsPosts ? [posts[0]] : [];
+          }
+          assert.deepEqual(where, {id: ['IN', ownsPosts ? [11, 10] : [11]]});
+          return posts;
+        }
+      };
+    };
+    const result = await dispatch(c);
+    assert.equal(commentQueries, 2, 'both count and list queries must enforce the ownership scope');
+    assert.equal(result.total, rows.length);
+    assert.equal(result.page, query.page);
+    assert.equal(result.pageSize, query.pageSize);
+    assert.deepEqual(result.data.map(row => [row.id, row.can_moderate]),
+      ownsPosts ? [[1, false], [2, true]] : [[1, false]]);
+  });
+}
 
 test('commenters retain only their comment and profile routes', async() => {
   for (const resource of ['comment', 'user']) {
@@ -320,7 +399,8 @@ test('unsupported and tampered role claims cannot enter the REST API', async() =
 test('existing editor writes and commenter profile/comment writes remain available', async() => {
   for (const [type, resource, action] of [[2, 'post', 'post'], [2, 'post', 'put'], [2, 'post', 'delete'],
     [2, 'file', 'post'], [2, 'attachment', 'delete'], [2, 'markdown', 'post'], [2, 'chat', 'post'],
-    [2, 'ai-editor', 'post'], [2, 'ai-image', 'post'], [4, 'user', 'put'], [4, 'comment', 'post']]) {
+    [2, 'ai-editor', 'post'], [2, 'ai-image', 'post'], [firekylin.USER_EDITOR, 'comment', 'post'],
+    [4, 'user', 'put'], [4, 'comment', 'post']]) {
     const c = controller(Base, type, resource);
     c.ctx.action = action;
     c.ctx.method = 'POST';

@@ -11,7 +11,7 @@ module.exports = class extends BaseRest {
       'api/markdown/post', 'api/chat/post', 'api/ai-editor/post', 'api/ai-image/post',
       'api/file/post',
       'api/attachment/delete',
-      'api/post/get', 'api/cate/get', 'api/tag/get',
+      'api/post/get', 'api/cate/get', 'api/tag/get', 'api/comment/get',
       'api/attachment/get', 'api/user/get', 'api/options/get', 'api/system/get',
       'api/chat/get', 'api/ai-editor/get'
     ];
