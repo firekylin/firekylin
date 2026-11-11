@@ -20,13 +20,13 @@ describe('admin locale', () => {
         expect(screen.getByLabelText('draft')).toBe(input);
     });
 
-    it('skips language activation for an unchanged persisted snapshot', async () => {
+    it('skips language activation for an unchanged locale', async () => {
         await ready;
         await i18n.changeLanguage('en-US');
-        window.SysConfig = {options: {locale: 'en-US', localeRevision: 'same'}} as any;
+        window.SysConfig = {options: {locale: 'en-US'}} as any;
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: true,
-            json: async () => ({locale: 'en-US', localeRevision: 'same'}),
+            json: async () => ({locale: 'en-US'}),
         }));
         const change = vi.spyOn(i18n, 'changeLanguage');
         await refreshLocale();
@@ -41,13 +41,13 @@ describe('admin locale', () => {
         const oldResponse = new Promise(resolve => {finishOld = resolve;});
         vi.stubGlobal('fetch', vi.fn()
             .mockReturnValueOnce(oldResponse)
-            .mockResolvedValueOnce({ok: true, json: async () => ({locale: 'en-US', localeRevision: 'new'})}));
+            .mockResolvedValueOnce({ok: true, json: async () => ({locale: 'en-US'})}));
         const first = refreshLocale();
         await refreshLocale();
-        finishOld!({ok: true, json: async () => ({locale: 'zh-CN', localeRevision: 'old'})});
+        finishOld!({ok: true, json: async () => ({locale: 'zh-CN'})});
         await first;
         expect(i18n.language).toBe('en-US');
-        expect(window.SysConfig.options.localeRevision).toBe('new');
+        expect(window.SysConfig.options.locale).toBe('en-US');
         vi.unstubAllGlobals();
     });
 });
