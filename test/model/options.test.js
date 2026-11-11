@@ -12,6 +12,8 @@ global.think = {
 };
 
 const OptionsModel = require('../../src/model/options');
+const optionsCache = require('../../src/service/options-cache');
+test.beforeEach(() => optionsCache.entries.clear());
 
 test('options model uses the key column as its primary key', () => {
   assert.equal(new OptionsModel().pk, 'key');
@@ -56,4 +58,52 @@ test('options model only exposes comment internals to explicit callers', async()
   assert.equal(privateOptions.jwt_secret, 'shared-secret');
   assert.equal(privateOptions.comment_jwt_secret, 'secret');
   assert.equal(privateOptions.comment_schema_version, '1');
+});
+
+test('all model instances share concurrent and subsequent reads, including missing keys', async() => {
+  let selects = 0;
+  const makeModel = () => {
+    const model = new OptionsModel();
+    model.select = async() => {
+      selects++;
+      return [{key: 'state', value: 'enabled'}, {key: 'jwt_secret', value: 'secret'}];
+    };
+    return model;
+  };
+  const [options, state, missing] = await Promise.all([
+    makeModel().getOptions(), makeModel().getCredentialValue('state'), makeModel().getCredentialValue('missing')
+  ]);
+  assert.equal(options.jwt_secret, undefined);
+  assert.equal(state, 'enabled');
+  assert.equal(missing, undefined);
+  assert.equal((await makeModel().getOptions(true)).jwt_secret, 'secret');
+  assert.equal(selects, 1);
+});
+
+test('writes invalidate globally so other model instances see updates', async() => {
+  let value = 'old';
+  const reader = new OptionsModel();
+  reader.select = async() => [{key: 'state', value}];
+  const writer = new OptionsModel();
+  writer.where = () => ({update: async data => { value = data.value; return 1 }});
+  assert.equal(await reader.getCredentialValue('state'), 'old');
+  await writer.setCredentialValue('state', 'new');
+  assert.equal(await reader.getCredentialValue('state'), 'new');
+});
+
+test('ORM write hooks preserve parent behavior and invalidate the shared cache', async() => {
+  for (const hook of ['afterAdd', 'afterUpdate', 'afterDelete']) {
+    const parent = think.Model.prototype;
+    parent[hook] = async data => data;
+    try {
+      let value = 'old';
+      const reader = new OptionsModel();
+      reader.select = async() => [{key: 'state', value}];
+      optionsCache.entries.clear();
+      assert.equal(await reader.getCredentialValue('state'), 'old');
+      value = 'new';
+      assert.equal(await new OptionsModel()[hook]('parent result'), 'parent result');
+      assert.equal(await reader.getCredentialValue('state'), 'new');
+    } finally { delete parent[hook] }
+  }
 });
