@@ -66,7 +66,9 @@ module.exports = class extends BaseRest {
         'api/comment/get', 'api/comment/post',
         'api/user/get', 'api/user/put'
       ];
-      if (commenterAllowList.includes(name)) return;
+      if (commenterAllowList.includes(name)) {
+        return;
+      }
       return this.fail('USER_NO_PERMISSION');
     }
     const editorActions = [
@@ -74,7 +76,9 @@ module.exports = class extends BaseRest {
       'api/cate/post', 'api/cate/put', 'api/cate/delete',
       'api/tag/post', 'api/tag/put', 'api/tag/delete'
     ];
-    if (type === global.firekylin.USER_EDITOR && editorActions.includes(name)) return;
+    if (type === global.firekylin.USER_EDITOR && editorActions.includes(name)) {
+      return;
+    }
     // not admin
     if (type !== global.firekylin.USER_ADMIN) {
       // Theme metadata is needed by the article editor; source files and

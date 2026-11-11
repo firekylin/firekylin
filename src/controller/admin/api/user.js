@@ -15,8 +15,12 @@ module.exports = class extends Base {
     }
     let where = {};
     let fields = 'id,name,display_name,type';
-    if (isAdministrator || isSelf) fields += ',email,status,create_time,last_login_time';
-    if (isAdministrator) fields += ',app_key,app_secret';
+    if (isAdministrator || isSelf) {
+      fields += ',email,status,create_time,last_login_time';
+    }
+    if (isAdministrator) {
+      fields += ',app_key,app_secret';
+    }
     const modelInstance = this.modelInstance.field(fields);
     if (this.id) {
       where.id = this.id;
@@ -59,7 +63,9 @@ module.exports = class extends Base {
     const query = modelInstance.where(where).order('id DESC');
     const result = await query.page(page, pageSize).countSelect();
     // Editors need author labels, not account details or push credentials.
-    if (!isAdministrator) return this.success(result);
+    if (!isAdministrator) {
+      return this.success(result);
+    }
     const users = result.data;
     const ids = users.map(user => user.id);
 
@@ -201,7 +207,9 @@ module.exports = class extends Base {
 
     let data = this.post();
     if (Number(this.userInfo.type) === global.firekylin.USER_COMMENTER) {
-      if (String(this.id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
+      if (String(this.id) !== String(this.userInfo.id)) {
+        return this.fail('USER_NO_PERMISSION');
+      }
       data = {display_name: data.display_name, email: data.email};
     }
     data.id = this.id;

@@ -31,11 +31,13 @@ module.exports = class extends think.Controller {
     if (this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
-    let options = adminOptions(this.authOptions, Number(this.userInfo.type) === 1);
+    let options = adminOptions(this.authOptions, Number(this.userInfo.type) === global.firekylin.USER_ADMIN);
     options.analyze_code = escape(options.analyze_code);
     try {
       options.navigation = JSON.parse(options.navigation);
-    } catch (e) { options.navigation = [] }
+    } catch (e) {
+      options.navigation = []
+    }
     try {
       options.social_services = await this.service('social-auth').services();
     } catch {
@@ -66,7 +68,8 @@ module.exports = class extends think.Controller {
     this.assign('adminAssets', adminAssets);
     this.assign('csrfToken', adminAuth.csrfToken(this.ctx));
     const pluginManager = global.firekylin && global.firekylin.plugins;
-    this.assign('pluginAdmin', !think.isEmpty(this.userInfo) && (this.userInfo.type | 0) === 1 && pluginManager
+    this.assign('pluginAdmin', !think.isEmpty(this.userInfo) &&
+      (this.userInfo.type | 0) === global.firekylin.USER_ADMIN && pluginManager
       ? pluginManager.admin.manifest() : []);
 
     return this.display('admin');

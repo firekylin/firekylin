@@ -42,7 +42,7 @@ module.exports = class extends Base {
     };
 
     // 非管理员只统计当前用户文章
-    const where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
+    const where = this.userInfo.type !== global.firekylin.USER_ADMIN ? {user_id: this.userInfo.id} : {};
 
     return this.success({
       versions: data,

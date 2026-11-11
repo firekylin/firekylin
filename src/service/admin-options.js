@@ -19,7 +19,9 @@ module.exports = function adminOptions(options, isAdministrator = false) {
   delete result.ai_credentials;
   delete result.push_sites;
   for (const key of Object.keys(result)) {
-    if (key.startsWith(CREDENTIAL_PREFIX)) delete result[key];
+    if (key.startsWith(CREDENTIAL_PREFIX)) {
+      delete result[key];
+    }
   }
   if (isAdministrator) {
     result.comment = {...options.comment};

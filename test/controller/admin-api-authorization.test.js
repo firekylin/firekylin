@@ -8,9 +8,15 @@ const auth = require('../../src/service/admin-auth');
 
 global.think = {
   Controller: class {
-    constructor(ctx) {this.ctx = ctx}
-    get() {return ''}
-    model() {return {}}
+    constructor(ctx) {
+      this.ctx = ctx
+    }
+    get() {
+      return ''
+    }
+    model() {
+      return {}
+    }
   }, Model: class {}, Service: class {}, promisify,
   ROOT_PATH: path.join(__dirname, '../..'), version: 'test',
   isEmpty: value => !value || Object.keys(value).length === 0,
@@ -65,7 +71,9 @@ function controller(Controller, type = 2, resource = 'options', query = {}) {
   c.modelInstance = optionsModel();
   c.model = () => c.modelInstance;
   c.success = value => value;
-  c.fail = message => {throw new Error(message)};
+  c.fail = message => {
+    throw new Error(message)
+  };
   return c;
 }
 async function dispatch(c) {
@@ -109,7 +117,9 @@ test('editor reads use an explicit allowlist and new controllers fail closed', a
 });
 
 test('commenters retain only their comment and profile routes', async() => {
-  for (const resource of ['comment', 'user']) await controller(Base, 4, resource).__before();
+  for (const resource of ['comment', 'user']) {
+    await controller(Base, 4, resource).__before();
+  }
   for (const resource of ['options', 'system', 'post', 'attachment', 'theme']) {
     await assert.rejects(controller(Base, 4, resource).__before(), /USER_NO_PERMISSION/);
   }
@@ -166,12 +176,17 @@ for (const type of [null, 1, 2, 4]) {
     c.isAjax = () => false;
     c.service = () => ({services: async() => [{name: 'github', title: 'GitHub'}]});
     const assigned = {};
-    c.assign = (key, value) => {assigned[key] = value};
+    c.assign = (key, value) => {
+      assigned[key] = value
+    };
     c.display = async() => assigned;
     await c.__before();
     await c.__call();
-    if (type !== 1) assertPrivateSettingsAbsent(assigned.options);
-    else assert.equal(assigned.options.upload.secretAccessKey, 'synthetic-upload-secret');
+    if (type !== 1) {
+      assertPrivateSettingsAbsent(assigned.options);
+    } else {
+      assert.equal(assigned.options.upload.secretAccessKey, 'synthetic-upload-secret');
+    }
     assert.equal(assigned.options.two_factor_auth, true);
     assert.equal(assigned.options.password_salt, stored.password_salt);
     assert.equal(assigned.options.push_sites, undefined);
@@ -191,8 +206,14 @@ function userController(type, id, query = {}) {
   let where;
   const project = row => row ? Object.fromEntries(fields.split(',').map(key => [key, row[key]])) : {};
   c.modelInstance = {
-    field(value) {fields = value; return this},
-    where(value) {where = value; return this},
+    field(value) {
+      fields = value;
+      return this;
+    },
+    where(value) {
+      where = value;
+      return this;
+    },
     order() {
       return this;
     },
@@ -203,8 +224,16 @@ function userController(type, id, query = {}) {
     find: async() => project(accounts.find(user => String(user.id) === String(where.id))),
     select: async() => accounts.map(project)
   };
-  const posts = {where() {return this}, field() {return this}, setRelation() {return this}, group() {return this},
-    select: async() => [{user_id: 1, post_num: 3, comment_num: 4}]};
+  const posts = {where() {
+    return this
+  }, field() {
+    return this
+  }, setRelation() {
+    return this
+  }, group() {
+    return this
+  },
+  select: async() => [{user_id: 1, post_num: 3, comment_num: 4}]};
   c.model = name => name === 'options' ? options : posts;
   c.service = () => ({
     list: async ids => (Array.isArray(ids) ? ids : [ids]).map(user_id => ({user_id, provider: 'github'})),
@@ -229,7 +258,9 @@ for (const type of [2, 4]) {
     assert.equal(result.email, 'user-2@example.invalid');
     assert.equal(result.social_accounts[0].user_id, 2);
     assert.equal(result.social_services[0].name, 'github');
-    for (const key of ['app_key', 'app_secret', 'password']) assert.equal(Object.hasOwn(result, key), false);
+    for (const key of ['app_key', 'app_secret', 'password']) {
+      assert.equal(Object.hasOwn(result, key), false);
+    }
     await assert.rejects(dispatch(userController(type, '1')), /USER_NO_PERMISSION/);
   });
 }
@@ -258,7 +289,10 @@ for (const type of [1, 2]) {
       select: async() => assert.fail('dashboard must not read raw configuration')
     };
     const scopes = [];
-    const counter = {where(value) {scopes.push(value); return this}, count: async() => 3, sum: async() => 4};
+    const counter = {where(value) {
+      scopes.push(value);
+      return this;
+    }, count: async() => 3, sum: async() => 4};
     c.model = name => name === 'options' ? options : counter;
     c.config = () => ({type: 'sqlite'});
     const result = await dispatch(c);
@@ -307,7 +341,9 @@ test('administrator upload and captcha settings survive a read/edit/save round t
   const settings = await dispatch(c);
   const data = {upload: JSON.stringify(settings.upload), captcha: JSON.stringify(settings.captcha)};
   let saved;
-  c.modelInstance.updateOptions = async value => {saved = value};
+  c.modelInstance.updateOptions = async value => {
+    saved = value
+  };
   c.post = () => data;
   c.ctx.action = 'put';
   c.ctx.method = 'POST';
