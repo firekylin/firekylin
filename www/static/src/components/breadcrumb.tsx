@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import classnames from 'classnames';
 import { Link, useLocation } from '../utils/router';
 import * as React from 'react';
@@ -10,6 +11,7 @@ interface BreadCrumbState {
     crumb: SideBarItem[];
 }
 function BreadCrumb(props: any) {
+    const {t} = useTranslation('admin');
     const location = useLocation();
     const [state, setState] = React.useState(() => ({
         userOpen: false,
@@ -93,13 +95,13 @@ function BreadCrumb(props: any) {
             breadcrumb = (
                 <ol className="breadcrumb">
                     <li>
-                        <Link to="/dashboard">首页</Link>
+                        <Link to="/dashboard">{t('首页')}</Link>
                     </li>
                     {legacy.state.crumb.map((item, i) => {
                         if (item.url === location.pathname) {
                             return (
                                 <li key={i} className="active">
-                                    {item.title}
+                                    {t(item.title)}
                                 </li>
                             );
                         }
@@ -108,7 +110,7 @@ function BreadCrumb(props: any) {
                                 <Link
                                     to={item.children ? item.children[0].url : item.url}
                                 >
-                                    {item.title}
+                                    {t(item.title)}
                                 </Link>
                             </li>
                         );
@@ -118,7 +120,7 @@ function BreadCrumb(props: any) {
         } else {
             breadcrumb = (
                 <ol className="breadcrumb">
-                    <li>首页</li>
+                    <li>{t('首页')}</li>
                 </ol>
             );
         }
@@ -141,14 +143,14 @@ function BreadCrumb(props: any) {
                         <ul className="dropdown-menu">
                             <li>
                                 <Link to={`/user/edit/${window.SysConfig.userInfo.id}`}>
-                                    账号设置
+                                    {t('账号设置')}
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/user/edit_pwd">修改密码</Link>
+                                <Link to="/user/edit_pwd">{t('修改密码')}</Link>
                             </li>
                             <li>
-                                <a href="/admin/user/logout">退出</a>
+                                <a href="/admin/user/logout">{t('退出')}</a>
                             </li>
                         </ul>
                     </li>

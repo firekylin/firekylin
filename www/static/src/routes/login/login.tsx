@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import classnames from 'classnames';
 import {BetterCaptcha} from '@better-captcha/react';
@@ -21,6 +22,7 @@ import qqIcon from '../../assets/social/qq.svg';
 import twitterIcon from '../../assets/social/twitter.svg';
 import weiboIcon from '../../assets/social/weibo.svg';
 function LoginForm(props: LoginProps) {
+    const {t} = useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         forgot: false,
     }));
@@ -91,17 +93,17 @@ function LoginForm(props: LoginProps) {
                 <Form.Item
                     name="two_factor_auth"
                     rules={[
-                        { len: 6, message: '长度为6个字符' },
+                        { len: 6, message: t("长度为6个字符") },
                         {
                             required: true,
-                            message: '请填写二步验证码',
+                            message: t("请填写二步验证码"),
                         },
                     ]}
                 >
                     <Input
                         prefix={<SafetyOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                         type="text"
-                        placeholder="二步验证码"
+                        placeholder={t("二步验证码")}
                     />
                 </Form.Item>
             );
@@ -115,7 +117,7 @@ function LoginForm(props: LoginProps) {
                 if (captchaConfig.provider === 'recaptcha-v3') await captchaController.current.execute();
                 values.captcha = captchaController.current.getResponse();
                 if (!values.captcha) throw new Error();
-            } catch {message.error('请先完成验证码验证'); return;}
+            } catch {message.error(t("请先完成验证码验证")); return;}
         }
         props.loginStore.login(values, resetCaptcha);
     };
@@ -206,10 +208,10 @@ function LoginForm(props: LoginProps) {
                         <Form.Item
                             name="password"
                             rules={[
-                                { min: 8, max: 20, message: '密码长度为8到30个字符' },
+                                { min: 8, max: 20, message: t("密码长度为8到30个字符") },
                                 {
                                     required: true,
-                                    message: '请填写密码!',
+                                    message: t("请填写密码!"),
                                 },
                             ]}
                         >
@@ -218,7 +220,7 @@ function LoginForm(props: LoginProps) {
                                     <LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />
                                 }
                                 type="text"
-                                placeholder="请输入新密码"
+                                placeholder={t("请输入新密码")}
                             />
                         </Form.Item>
                         <Form.Item>
@@ -230,16 +232,16 @@ function LoginForm(props: LoginProps) {
                                 loading={props.loginStore.loading}
                                 size="large"
                             >
-                                设置新密码
+                                {t("设置新密码")}
                             </Button>
                         </Form.Item>
                     </Form>
                     <div className="form-footer">
                         <div className="left back-site">
-                            <a href="/">← 回到{window.SysConfig.options.title}</a>
+                            <a href="/">{t("← 回到")}{window.SysConfig.options.title}</a>
                         </div>
                         <div className="right forgot-password">
-                            <a href="/admin">重新登录</a>
+                            <a href="/admin">{t("重新登录")}</a>
                         </div>
                     </div>
                 </div>
@@ -261,11 +263,11 @@ function LoginForm(props: LoginProps) {
                     >
                         <Form.Item
                             name="user"
-                            extra="您会收到一封包含创建新密码链接的电子邮件。"
+                            extra={t("您会收到一封包含创建新密码链接的电子邮件。")}
                             rules={[
                                 {
                                     required: true,
-                                    message: '请输入您的用户名或电子邮箱地址!',
+                                    message: t("请输入您的用户名或电子邮箱地址!"),
                                 },
                             ]}
                         >
@@ -274,7 +276,7 @@ function LoginForm(props: LoginProps) {
                                     <UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />
                                 }
                                 type="text"
-                                placeholder="用户名或电子邮箱地址"
+                                placeholder={t("用户名或电子邮箱地址")}
                             />
                         </Form.Item>
                         <Form.Item>
@@ -286,20 +288,20 @@ function LoginForm(props: LoginProps) {
                                 loading={props.loginStore.loading}
                                 size="large"
                             >
-                                获取新密码
+                                {t("获取新密码")}
                             </Button>
                         </Form.Item>
                     </Form>
                     <div className="form-footer">
                         <div className="left back-site">
-                            <a href="/">← 回到{window.SysConfig.options.title}</a>
+                            <a href="/">{t("← 回到")}{window.SysConfig.options.title}</a>
                         </div>
                         <div className="right forgot-password">
                             <a
                                 href="javascript:void(0)"
                                 onClick={() => legacy.toggleForgot()}
                             >
-                                重新登录
+                                {t("重新登录")}
                             </a>
                         </div>
                     </div>
@@ -334,10 +336,10 @@ function LoginForm(props: LoginProps) {
                             <Form.Item
                                 name="username"
                                 rules={[
-                                    { min: 4, max: 30, message: '长度为4到30个字符' },
+                                    { min: 4, max: 30, message: t("长度为4到30个字符") },
                                     {
                                         required: true,
-                                        message: '请输入用户名!',
+                                        message: t("请输入用户名!"),
                                     },
                                 ]}
                             >
@@ -348,12 +350,12 @@ function LoginForm(props: LoginProps) {
                                         />
                                     }
                                     type="text"
-                                    placeholder="用户名"
+                                    placeholder={t("用户名")}
                                 />
                             </Form.Item>
                             <Form.Item
                                 name="password"
-                                rules={[{ required: true, message: '请输入密码!' }]}
+                                rules={[{ required: true, message: t("请输入密码!") }]}
                             >
                                 <Input
                                     prefix={
@@ -362,7 +364,7 @@ function LoginForm(props: LoginProps) {
                                         />
                                     }
                                     type="password"
-                                    placeholder="密码"
+                                    placeholder={t("密码")}
                                 />
                             </Form.Item>
                             {legacy.getTwoFactorAuth()}
@@ -382,7 +384,7 @@ function LoginForm(props: LoginProps) {
                                         noStyle
                                     >
                                         <Checkbox style={{ fontWeight: 'normal' }}>
-                                            自动登录
+                                            {t("自动登录")}
                                         </Checkbox>
                                     </Form.Item>
                                     <div
@@ -397,7 +399,7 @@ function LoginForm(props: LoginProps) {
                                         )}
                                     >
                                         {!window.SysConfig.options.intranet ? null : (
-                                            <a href="/admin/user/intranet">域账号登录</a>
+                                            <a href="/admin/user/intranet">{t("域账号登录")}</a>
                                         )}
                                         {!window.SysConfig.options.intranet ? null : (
                                             <a href="javascript:void(0)"> | </a>
@@ -406,7 +408,7 @@ function LoginForm(props: LoginProps) {
                                             href="javascript:void(0)"
                                             onClick={() => legacy.toggleForgot()}
                                         >
-                                            找回密码
+                                            {t("找回密码")}
                                         </a>
                                     </div>
                                 </div>
@@ -419,7 +421,7 @@ function LoginForm(props: LoginProps) {
                                     scriptOptions={captchaScriptOptions}
                                     onReady={() => setCaptchaReady(true)}
                                     onSolve={() => setCaptchaPassed(true)}
-                                    onError={() => {setCaptchaPassed(false); message.error('验证码加载或校验失败，请重试');}}
+                                    onError={() => {setCaptchaPassed(false); message.error(t("验证码加载或校验失败，请重试"));}}
                                 />}
                                 <Button
                                     block
@@ -430,14 +432,14 @@ function LoginForm(props: LoginProps) {
                                     style={{display: captchaEnabled && captchaConfig.provider === 'turnstile' && captchaConfig.hideSubmit && !captchaPassed ? 'none' : undefined}}
                                     loading={props.loginStore.loading}
                                 >
-                                    登录
+                                    {t("登录")}
                                 </Button>
                             </Form.Item>
                         </Form>
                         {legacy.getSocialLogin()}
                         <div className="form-footer">
                             <div className="left back-site">
-                                <a href="/">← 回到{window.SysConfig.options.title}</a>
+                                <a href="/">{t("← 回到")}{window.SysConfig.options.title}</a>
                             </div>
                         </div>
                     </div>

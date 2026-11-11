@@ -1,3 +1,4 @@
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import {Popover} from 'antd';
 import {MenuFoldOutlined, MenuUnfoldOutlined} from '@ant-design/icons';
@@ -33,6 +34,8 @@ const STORAGE_KEY = 'firekylin.sidebar.collapsed';
 const DEFAULT_LOGO = '/static/img/firekylin.jpg';
 
 function SidebarEntry({route, collapsed, pathname}: any) {
+    const {t} = useTranslation('admin');
+    const title = (value: string) => route.url.startsWith('/plugins/') ? value : t(value);
     const [open, setOpen] = React.useState(false);
     const trigger = React.useRef<HTMLAnchorElement>(null);
     const popup = React.useRef<HTMLDivElement>(null);
@@ -85,13 +88,13 @@ function SidebarEntry({route, collapsed, pathname}: any) {
                     <NavLink to={child.url} end={child.url === route.url}
                         onClick={() => setOpen(false)}
                         className={(child.url === route.url ? currentPath === child.url : isActive(child)) ? 'active' : ''}
-                        activeClassName="active">{child.title}</NavLink>
+                        activeClassName="active">{title(child.title)}</NavLink>
                 </li>
             ))}
         </ul>
     ) : null;
     const link = (
-        <NavLink to={route.url} aria-label={route.title}
+        <NavLink to={route.url} aria-label={title(route.title)}
             aria-expanded={collapsed ? open : undefined} aria-controls={collapsed && open ? id : undefined}
             onFocus={() => { if (collapsed && !restoringFocus.current) setOpen(true); }}
             onKeyDown={event => {
@@ -113,7 +116,7 @@ function SidebarEntry({route, collapsed, pathname}: any) {
                 'aria-hidden': true,
                 style: {display: 'inline-block', width: 35, fontSize: 16, verticalAlign: 'middle'},
             }) : null}
-            <span className="sidebar-label">{route.title}</span>
+            <span className="sidebar-label">{title(route.title)}</span>
         </NavLink>
     );
     return (
@@ -122,7 +125,7 @@ function SidebarEntry({route, collapsed, pathname}: any) {
                 open={open} onOpenChange={setOpen} mouseLeaveDelay={0.15}
                 classNames={{root: 'sidebar-popover'}}
                 content={<div className="sidebar-flyout" id={id} ref={popup} onKeyDown={event => { dismiss(event); navigatePopup(event); }}>
-                    <NavLink className={`sidebar-popup-title${active ? ' active' : ''}`} to={route.url} onClick={() => setOpen(false)}>{route.title}</NavLink>
+                    <NavLink className={`sidebar-popup-title${active ? ' active' : ''}`} to={route.url} onClick={() => setOpen(false)}>{title(route.title)}</NavLink>
                     {children}
                 </div>}>
                 {link}
