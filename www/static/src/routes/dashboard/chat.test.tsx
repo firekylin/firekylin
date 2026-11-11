@@ -261,7 +261,11 @@ it('sends actual image bytes, restores previews on refresh and removes draft ima
         fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
         await screen.findByRole('img', {name: 'red.png'});
         await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
-    fireEvent.click(screen.getByLabelText('发送消息'));
+        // Sender's ActionButton updates its submission guard in an effect after
+        // enabling the DOM button. Flush that update before the synthetic click.
+        await act(async () => {});
+        fireEvent.click(screen.getByLabelText('发送消息'));
+        await waitFor(() => expect(requests.filter(row => row.body?.operation === 'send')).toHaveLength(1));
         await screen.findByText('已收到');
         expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);
         expect(screen.queryByLabelText('移除附件 red.png')).not.toBeInTheDocument();
