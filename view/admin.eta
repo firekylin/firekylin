@@ -18,6 +18,8 @@ window.SysConfig = {
   pluginAdmin: <%~ JSON.stringify(firekylin.pluginAdmin || []) %>,
   userInfo: <%~ JSON.stringify(firekylin.userInfo) %>,
   options: <%~ JSON.stringify({
+    locale: firekylin.options.locale || 'zh-CN',
+    localeRevision: firekylin.options.localeRevision || '',
     captcha: firekylin.publicCaptcha,
     title: firekylin.options.title,
     two_factor_auth: firekylin.options.two_factor_auth,
@@ -25,7 +27,7 @@ window.SysConfig = {
     intranet: firekylin.options.intranet,
     password_salt: firekylin.options.password_salt,
     social_services: firekylin.options.social_services
-  }) %>,
+  }).replace(/</g, '\\u003c') %>,
   config: {
     disallow_file_edit: <%= firekylin.think.config('DISALLOW_FILE_EDIT') ? 'true' : 'false' %>
   }

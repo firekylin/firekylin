@@ -1,3 +1,4 @@
+const localeSettings = require('../i18n/settings');
 const captcha = require('../service/captcha');
 const {CREDENTIAL_PREFIX} = require('../ai/store');
 
@@ -35,6 +36,9 @@ module.exports = class extends think.Model {
     if (think.isEmpty(ret)) {
       return {};
     }
+
+    Object.assign(ret, localeSettings.publicSettings(localeSettings.decode(ret[localeSettings.SETTINGS_KEY])));
+    delete ret[localeSettings.SETTINGS_KEY];
 
     if (ret.comment && think.isString(ret.comment)) {
       ret.comment = JSON.parse(ret.comment);
@@ -98,9 +102,18 @@ module.exports = class extends think.Model {
    */
   async updateOptions(key, value) {
     const data = think.isObject(key) ? think.extend({}, key) : {[key]: value};
+    if (Object.hasOwn(data, 'system_locale') || Object.hasOwn(data, 'localeRevision')) {
+      throw new TypeError('Locale metadata is read-only');
+    }
+    if (Object.hasOwn(data, 'locale')) {
+      const encoded = localeSettings.encode(data.locale);
+      delete data.locale;
+      data[localeSettings.SETTINGS_KEY] = encoded;
+    }
     const promises = [];
     for (const key in data) {
       const value = data[key];
+      if (key === localeSettings.SETTINGS_KEY) continue;
       const exist = await this.where({key: key}).count('key');
       let p;
       if (Number(exist) > 0) {
@@ -111,6 +124,9 @@ module.exports = class extends think.Model {
       promises.push(p);
     }
     await Promise.all(promises);
+    if (data[localeSettings.SETTINGS_KEY]) {
+      await this.setCredentialValue(localeSettings.SETTINGS_KEY, data[localeSettings.SETTINGS_KEY]);
+    }
     await this.getOptions();
 
     // if `auto_summary` is changed, then rebuild all summaries of posts

@@ -10,6 +10,8 @@ interface Window {
             [key: string]: any;
         }>;
         options: {
+            locale?: 'zh-CN' | 'en-US';
+            localeRevision?: string;
             title: string;
             two_factor_auth: string;
             ldap_on: string;
