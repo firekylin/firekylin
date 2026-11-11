@@ -1,4 +1,6 @@
 'use strict';
+const userRoles = {USER_ADMIN: 1, USER_EDITOR: 2, USER_CONTRIBUTOR: 3, USER_COMMENTER: 4};
+global.firekylin = {...global.firekylin, ...userRoles};
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('node:module');
@@ -17,7 +19,7 @@ test('suggested replies preserve successful responses with real controller helpe
   const previous = {think: global.think, firekylin: global.firekylin};
   t.after(() => Object.assign(global, previous));
   global.think = require('../../src/extend/think');
-  global.firekylin = {plugins: {ai: {generate: async() => ({text: ' 谢谢你的评论！ '})}}};
+  global.firekylin = {...userRoles, plugins: {ai: {generate: async() => ({text: ' 谢谢你的评论！ '})}}};
   const instance = new Controller();
   instance.userInfo = {id: 1, type: 1};
   const input = {id: 2, operation: 'suggestReply'};

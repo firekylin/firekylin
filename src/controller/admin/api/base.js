@@ -58,7 +58,7 @@ module.exports = class extends BaseRest {
     this.userInfo = userInfo;
     const type = userInfo.type | 0;
     const name = this.ctx.controller.replace(/^admin\//, '') + '/' + this.ctx.action;
-    if (type === 4) {
+    if (type === global.firekylin.USER_COMMENTER) {
       const commenterAllowList = [
         'api/comment/get', 'api/comment/post',
         'api/user/get', 'api/user/put'
@@ -71,9 +71,9 @@ module.exports = class extends BaseRest {
       'api/cate/post', 'api/cate/put', 'api/cate/delete',
       'api/tag/post', 'api/tag/put', 'api/tag/delete'
     ];
-    if (type === 2 && editorActions.includes(name)) return;
+    if (type === global.firekylin.USER_EDITOR && editorActions.includes(name)) return;
     // not admin
-    if (type !== 1) {
+    if (type !== global.firekylin.USER_ADMIN) {
       if (action === 'get') {
         return;
       }

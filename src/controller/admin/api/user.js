@@ -7,7 +7,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async getAction() {
-    const isCommenter = Number(this.userInfo.type) === 4;
+    const isCommenter = Number(this.userInfo.type) === global.firekylin.USER_COMMENTER;
     if (isCommenter && (!this.id || String(this.id) !== String(this.userInfo.id))) {
       return this.fail('USER_NO_PERMISSION');
     }
@@ -31,10 +31,16 @@ module.exports = class extends Base {
       return this.success(user);
     }
 
-    if (this.get('type') === 'contributor') {
-      where = {status: 2, type: 3};
+    if (this.get('type') === 'authors') {
+      where = {type: ['!=', global.firekylin.USER_COMMENTER]};
+    } else if (this.get('type') === 'contributor') {
+      where = {status: global.firekylin.USER_DISABLED, type: global.firekylin.USER_CONTRIBUTOR};
     } else {
-      where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
+      where = {
+        status: ['!=', global.firekylin.USER_DISABLED],
+        type: ['!=', global.firekylin.USER_CONTRIBUTOR],
+        _logic: 'OR'
+      };
     }
 
     const page = Math.max(1, parseInt(this.get('page'), 10) || 1);
@@ -188,7 +194,7 @@ module.exports = class extends Base {
     }
 
     let data = this.post();
-    if (Number(this.userInfo.type) === 4) {
+    if (Number(this.userInfo.type) === global.firekylin.USER_COMMENTER) {
       if (String(this.id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
       data = {display_name: data.display_name, email: data.email};
     }

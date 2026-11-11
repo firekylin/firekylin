@@ -13,8 +13,8 @@ module.exports = class extends Base {
     const keyword = String(this.get('keyword') || '').trim();
     const author = String(this.get('author') || '').trim();
     const where = status ? {status} : {};
-    if (Number(this.userInfo.type) === 4) where.user_id = String(this.userInfo.id);
-    if (Number(this.userInfo.type) === 2) {
+    if (Number(this.userInfo.type) === global.firekylin.USER_COMMENTER) where.user_id = String(this.userInfo.id);
+    if (Number(this.userInfo.type) === global.firekylin.USER_EDITOR) {
       const ownedPosts = await this.model('post').where({user_id: this.userInfo.id}).field('id')
         .select();
       where._complex = {
@@ -68,8 +68,9 @@ module.exports = class extends Base {
       const postUrl = post ? permalink.generate(post.type, post, this.authOptions) : item.url;
       return {
         ...item,
-        can_moderate: Number(this.userInfo.type) === 1 ||
-          (Number(this.userInfo.type) === 2 && post && String(post.user_id) === String(this.userInfo.id)),
+        can_moderate: Number(this.userInfo.type) === global.firekylin.USER_ADMIN ||
+          (Number(this.userInfo.type) === global.firekylin.USER_EDITOR && post &&
+            String(post.user_id) === String(this.userInfo.id)),
         author_name: user.display_name || user.name || item.nick || '匿名',
         author_email: email,
         author_link: user.url || item.link || '',
@@ -78,8 +79,9 @@ module.exports = class extends Base {
         post_url: postUrl
       };
     });
-    const features = Number(this.userInfo.type) === 4 ? {} : await require('../../../service/ai-editor-features')
-      .editorFeatures(global.firekylin?.plugins, this.model('options'));
+    const features = Number(this.userInfo.type) === global.firekylin.USER_COMMENTER ? {}
+      : await require('../../../service/ai-editor-features')
+        .editorFeatures(global.firekylin?.plugins, this.model('options'));
     return this.success({features, page, pageSize, total: Number(total), keyword, author, data: rows});
   }
 
@@ -88,9 +90,11 @@ module.exports = class extends Base {
     if (!Number.isSafeInteger(id) || id <= 0) return this.fail('PARAMS_ERROR');
     if (['reply', 'suggestReply'].includes(this.post('operation'))) {
       const auth = require('../../../service/admin-auth');
-      const isCommenter = Number(this.userInfo.type) === 4;
-      const isEditor = Number(this.userInfo.type) === 2;
-      if (Number(this.userInfo.type) !== 1 && !isCommenter && !isEditor) return this.ctx.throw(403);
+      const isCommenter = Number(this.userInfo.type) === global.firekylin.USER_COMMENTER;
+      const isEditor = Number(this.userInfo.type) === global.firekylin.USER_EDITOR;
+      if (Number(this.userInfo.type) !== global.firekylin.USER_ADMIN && !isCommenter && !isEditor) {
+        return this.ctx.throw(403);
+      }
       if (isCommenter && this.post('operation') !== 'reply') return this.ctx.throw(403);
       if (this.ctx.get('X-CSRF-Token') !== auth.csrfToken(this.ctx)) return this.ctx.throw(403);
       const parent = await this.model('comment').where({id}).find();

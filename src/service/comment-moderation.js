@@ -19,9 +19,9 @@ class CommentModerationService {
   async moderate({
     id, operation, comment, onlyWaiting = false, allowCommenter = false, allowEditor = false
   }, principal) {
-    const editor = principal && Number(principal.type) === 2 && allowEditor;
-    const commenter = principal && Number(principal.type) === 4 && allowCommenter;
-    if (!principal || (Number(principal.type) !== 1 && !commenter && !editor)) {
+    const editor = principal && Number(principal.type) === global.firekylin.USER_EDITOR && allowEditor;
+    const commenter = principal && Number(principal.type) === global.firekylin.USER_COMMENTER && allowCommenter;
+    if (!principal || (Number(principal.type) !== global.firekylin.USER_ADMIN && !commenter && !editor)) {
       throw new Error('Administrator required');
     }
     if (commenter && !['delete', 'edit'].includes(operation)) throw new Error('USER_NO_PERMISSION');

@@ -1,4 +1,6 @@
 'use strict';
+const userRoles = {USER_ADMIN: 1, USER_EDITOR: 2, USER_CONTRIBUTOR: 3, USER_COMMENTER: 4};
+global.firekylin = {...global.firekylin, ...userRoles};
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('node:module');
