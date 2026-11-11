@@ -12,7 +12,10 @@ module.exports = class extends Base {
    */
   async getAction() {
     const type = this.get('type');
-    const isAdministrator = Number(this.userInfo.type) === firekylin.USER_ADMIN;
+    const isAdministrator = Number(this.userInfo.type) === 1;
+    if (!isAdministrator && (Number(this.userInfo.type) !== 2 || (type && type !== 'defaultCategory'))) {
+      return this.fail('USER_NO_PERMISSION');
+    }
     const model = this.model('options');
     const options = await model.getOptions(true);
 

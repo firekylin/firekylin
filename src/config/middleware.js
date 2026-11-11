@@ -93,7 +93,6 @@ module.exports = [
   {
     handle: routerREST
   },
-  {handle: require('../middleware/admin-api-logic')},
   'logic',
   {
     handle: 'controller',
