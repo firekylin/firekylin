@@ -9,8 +9,11 @@ module.exports = class extends BaseRest {
     this.allowList = [
       'api/post/put', 'api/post/post', 'api/post/delete',
       'api/markdown/post', 'api/chat/post', 'api/ai-editor/post', 'api/ai-image/post',
-      'api/file/post', 'api/file/get',
-      'api/attachment/delete'
+      'api/file/post',
+      'api/attachment/delete',
+      'api/post/get', 'api/cate/get', 'api/tag/get', 'api/comment/get',
+      'api/attachment/get', 'api/user/get', 'api/options/get', 'api/system/get',
+      'api/chat/get', 'api/ai-editor/get'
     ];
   }
 
@@ -63,7 +66,9 @@ module.exports = class extends BaseRest {
         'api/comment/get', 'api/comment/post',
         'api/user/get', 'api/user/put'
       ];
-      if (commenterAllowList.includes(name)) return;
+      if (commenterAllowList.includes(name)) {
+        return;
+      }
       return this.fail('USER_NO_PERMISSION');
     }
     const editorActions = [
@@ -71,13 +76,18 @@ module.exports = class extends BaseRest {
       'api/cate/post', 'api/cate/put', 'api/cate/delete',
       'api/tag/post', 'api/tag/put', 'api/tag/delete'
     ];
-    if (type === global.firekylin.USER_EDITOR && editorActions.includes(name)) return;
+    if (type === global.firekylin.USER_EDITOR && editorActions.includes(name)) {
+      return;
+    }
     // not admin
     if (type !== global.firekylin.USER_ADMIN) {
-      if (action === 'get') {
+      // Theme metadata is needed by the article editor; source files and
+      // management endpoints remain administrator-only.
+      if (type === global.firekylin.USER_EDITOR && name === 'api/theme/get' &&
+          ['templateList', 'themeFields'].includes(this.get('type'))) {
         return;
       }
-      if (this.allowList.indexOf(name) > -1) {
+      if (type === global.firekylin.USER_EDITOR && this.allowList.indexOf(name) > -1) {
         return;
       }
       return this.fail('USER_NO_PERMISSION');

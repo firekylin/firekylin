@@ -173,7 +173,8 @@ it('manages independent provider tabs, makes newly saved connections default and
         {apiKey: 'new-test-key'}, {headers: {'X-CSRF-Token': 'test-csrf'}}));
     await waitFor(() => expect(view.getByRole('button', {name: '保存'})).toBeDisabled());
     expect(http.post).toHaveBeenCalledWith('/admin/api/ai-connections', {provider: 'second', model: 'text'}, expect.anything());
-    expect(view.getByRole('button', {name: 'second是默认服务商'})).toHaveAttribute('aria-pressed', 'true');
+    expect(await view.findByRole('button', {name: 'second是默认服务商'}))
+        .toHaveAttribute('aria-pressed', 'true');
     expect(view.getByRole('tab', {name: 'second'})).toHaveAttribute('aria-selected', 'true');
     fireEvent.click(within(view.getByRole('tab', {name: 'second'}).closest('.ant-tabs-tab') as HTMLElement).getByRole('button', {name: '删除服务商'}));
     fireEvent.click(await view.findByRole('button', {name: /^删\s*除$/}));

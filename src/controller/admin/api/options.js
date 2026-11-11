@@ -1,4 +1,5 @@
 const captcha = require('../../../service/captcha');
+const adminOptions = require('../../../service/admin-options');
 const speakeasy = require('speakeasy');
 const PushToFirekylin = require('../../../service/push-to-firekylin');
 const Base = require('./base');
@@ -11,12 +12,16 @@ module.exports = class extends Base {
    */
   async getAction() {
     const type = this.get('type');
+    const isAdministrator = Number(this.userInfo.type) === global.firekylin.USER_ADMIN;
+    if (!isAdministrator && (Number(this.userInfo.type) !== global.firekylin.USER_EDITOR ||
+        (type && type !== 'defaultCategory'))) {
+      return this.fail('USER_NO_PERMISSION');
+    }
     const model = this.model('options');
-    const options = await model.getOptions();
-    if (Number(this.userInfo.type) === 1) options.captcha = captcha.settings(await model.getOptions(true));
+    const options = await model.getOptions(true);
 
     if (type === '2fa') {
-      if (options.two_factor_auth.length === 32) {
+      if (typeof options.two_factor_auth === 'string' && options.two_factor_auth.length === 32) {
         return this.success({
           otpauth_url: 'otpauth://totp/firekylin?secret=' + options.two_factor_auth,
           secret: options.two_factor_auth
@@ -38,7 +43,7 @@ module.exports = class extends Base {
     } else if (type === 'defaultCategory') {
       return this.success(options.defaultCategory || '');
     }
-    return this.success(options);
+    return this.success(adminOptions(options, isAdministrator));
   }
 
   async postAction() {

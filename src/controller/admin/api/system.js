@@ -3,7 +3,6 @@ const path = require('path');
 const semver = require('semver');
 const pack = require('../../../../package.json');
 const Base = require('./base');
-const {CREDENTIAL_PREFIX} = require('../../../ai/store');
 
 async function fetchWithTimeout(url) {
   const response = await fetch(url, {signal: AbortSignal.timeout(1000)});
@@ -43,20 +42,12 @@ module.exports = class extends Base {
     };
 
     // 非管理员只统计当前用户文章
-    const where = this.userInfo.type !== 1 ? {user_id: this.userInfo.id} : {};
-    const config = await this.getConfig();
-    delete config.password_salt;
-    delete config.jwt_secret;
-    delete config.comment_jwt_secret;
-    delete config.comment_schema_version;
-    delete config.ai_credentials;
-    for (const key of Object.keys(config)) {
-      if (key.startsWith(CREDENTIAL_PREFIX)) delete config[key];
-    }
+    const where = this.userInfo.type !== global.firekylin.USER_ADMIN ? {user_id: this.userInfo.id} : {};
 
     return this.success({
       versions: data,
-      config,
+      // The dashboard only needs versions and counts, not service settings.
+      config: {},
       count: {
         posts: await this.model('post').where(where).count(),
         cates: await this.model('cate').count(),
@@ -96,16 +87,5 @@ module.exports = class extends Base {
     } catch (error) {
       return this.fail(error.message);
     }
-  }
-
-  async getConfig() {
-    const items = await this.modelInstance.select();
-    const siteConfig = {};
-
-    items.forEach(item => {
-      siteConfig[item.key] = item.value;
-    });
-
-    return siteConfig;
   }
 };

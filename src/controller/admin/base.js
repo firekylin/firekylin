@@ -1,6 +1,6 @@
 const captcha = require('../../service/captcha');
 const adminAuth = require('../../service/admin-auth');
-const {CREDENTIAL_PREFIX} = require('../../ai/store');
+const adminOptions = require('../../service/admin-options');
 const {getAdminAssets} = require('../../service/admin-assets');
 
 let adminAssets;
@@ -31,25 +31,13 @@ module.exports = class extends think.Controller {
     if (this.isAjax()) {
       return this.fail('ACTION_NOT_FOUND');
     }
-    let options = {...this.authOptions};
-    delete options.jwt_secret;
-    delete options.comment_jwt_secret;
-    delete options.comment_schema_version;
-    delete options.ai_credentials;
-    for (const key of Object.keys(options)) {
-      if (key.startsWith(CREDENTIAL_PREFIX)) delete options[key];
-    }
-    options.captcha = Number(this.userInfo.type) === 1
-      ? captcha.settings(options) : captcha.publicSettings(captcha.settings(options));
-    options.comment = {...options.comment};
-    delete options.comment.smtpPass;
-    // 不显示具体的密钥
-    options.two_factor_auth = !!options.two_factor_auth;
+    let options = adminOptions(this.authOptions, Number(this.userInfo.type) === global.firekylin.USER_ADMIN);
     options.analyze_code = escape(options.analyze_code);
     try {
       options.navigation = JSON.parse(options.navigation);
-    } catch (e) { options.navigation = [] }
-    delete options.push_sites; // 不显示推送的配置，会有安全问题
+    } catch (e) {
+      options.navigation = []
+    }
     try {
       options.social_services = await this.service('social-auth').services();
     } catch {
@@ -80,7 +68,8 @@ module.exports = class extends think.Controller {
     this.assign('adminAssets', adminAssets);
     this.assign('csrfToken', adminAuth.csrfToken(this.ctx));
     const pluginManager = global.firekylin && global.firekylin.plugins;
-    this.assign('pluginAdmin', !think.isEmpty(this.userInfo) && (this.userInfo.type | 0) === 1 && pluginManager
+    this.assign('pluginAdmin', !think.isEmpty(this.userInfo) &&
+      (this.userInfo.type | 0) === global.firekylin.USER_ADMIN && pluginManager
       ? pluginManager.admin.manifest() : []);
 
     return this.display('admin');
