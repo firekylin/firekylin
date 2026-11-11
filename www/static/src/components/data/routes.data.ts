@@ -27,10 +27,10 @@ export const InitiateRoutes = (themePages) => [{
         children: [
             {url: '/post/list', title: '文章列表', activePaths: ['/post/list', '/post/edit']},
             {url: '/post/create', title: '添加文章'},
-            {url: '/cate/list', title: '分类列表', activePaths: ['/cate'], type: 1},
-            {url: '/tag/list', title: '标签列表', activePaths: ['/tag'], type: 1},
-            {url: '/cate/create', title: '添加分类', menu: false, type: 1},
-            {url: '/tag/create', title: '添加标签', menu: false, type: 1},
+            {url: '/cate/list', title: '分类列表', activePaths: ['/cate'], type: 2},
+            {url: '/tag/list', title: '标签列表', activePaths: ['/tag'], type: 2},
+            {url: '/cate/create', title: '添加分类', menu: false, type: 2},
+            {url: '/tag/create', title: '添加标签', menu: false, type: 2},
         ]
     },
     {
@@ -52,7 +52,7 @@ export const InitiateRoutes = (themePages) => [{
         url: '/comment',
         icon: 'topic',
         title: '评论管理',
-        type: 1
+        type: 2
     },
     {
         url: '/media',

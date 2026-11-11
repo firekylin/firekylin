@@ -7,7 +7,7 @@ module.exports = class extends Base {
    * @return {[type]} [description]
    */
   async getAction() {
-    const isCommenter = Number(this.userInfo.type) === 4;
+    const isCommenter = Number(this.userInfo.type) === global.firekylin.USER_COMMENTER;
     if (isCommenter && (!this.id || String(this.id) !== String(this.userInfo.id))) {
       return this.fail('USER_NO_PERMISSION');
     }
@@ -31,31 +31,56 @@ module.exports = class extends Base {
       return this.success(user);
     }
 
-    if (this.get('type') === 'contributor') {
-      where = {status: 2, type: 3};
+    if (this.get('type') === 'authors') {
+      where = {type: ['!=', global.firekylin.USER_COMMENTER]};
+    } else if (this.get('type') === 'contributor') {
+      where = {status: global.firekylin.USER_DISABLED, type: global.firekylin.USER_CONTRIBUTOR};
     } else {
-      where = {status: ['!=', 2], type: ['!=', 3], _logic: 'OR'};
+      where = {
+        status: ['!=', global.firekylin.USER_DISABLED],
+        type: ['!=', global.firekylin.USER_CONTRIBUTOR],
+        _logic: 'OR'
+      };
     }
 
-    const users = await modelInstance.where(where).select();
+    const page = Math.max(1, parseInt(this.get('page'), 10) || 1);
+    const pageSize = Math.min(100, Math.max(1, parseInt(this.get('pageSize'), 10) || 20));
+    const keyword = String(this.get('keyword') || '').trim();
+    if (keyword) {
+      where = {
+        _complex: where,
+        'name|display_name|email': ['like', `%${keyword}%`]
+      };
+    }
+    const query = modelInstance.where(where).order('id DESC');
+    const result = await query.page(page, pageSize).countSelect();
+    const users = result.data;
+    const ids = users.map(user => user.id);
+
     const posts = await this.model('post')
-      .field('user_id, COUNT(*) as post_num, SUM(comment_num) as comment_num')
+      .field('user_id, COUNT(*) as post_num')
+      .where({user_id: ['IN', ids.length ? ids : [0]]})
       .setRelation(false)
       .group('user_id')
       .select();
     const postsNum = new Map(posts.map(({user_id, post_num}) => [user_id, post_num]));
-    const commentsNum = new Map(posts.map(({user_id, comment_num}) => [user_id, comment_num]));
+    const comments = await this.model('comment')
+      .field('user_id, COUNT(*) as comment_num')
+      .where({user_id: ['IN', ids.length ? ids.map(String) : ['0']]})
+      .group('user_id')
+      .select();
+    const commentsNum = new Map(comments.map(({user_id, comment_num}) => [Number(user_id), Number(comment_num)]));
 
     users.forEach(user => {
       user.post_num = postsNum.get(user.id) || 0;
-      user.comment_num = commentsNum.get(user.id) || 0;
+      user.comment_num = commentsNum.get(Number(user.id)) || 0;
       user.social_accounts = [];
     });
     const socialAccounts = await this.service('social-auth').list(users.map(user => user.id));
     const usersById = new Map(users.map(user => [Number(user.id), user]));
     socialAccounts.forEach(account => usersById.get(Number(account.user_id))?.social_accounts.push(account));
 
-    return this.success(users);
+    return this.success({...result, data: users});
   }
 
   /**
@@ -108,7 +133,6 @@ module.exports = class extends Base {
 
   async generateKey(self, status) {
     const isAdmin = this.userInfo.type === firekylin.USER_ADMIN;
-    // let isMine = this.userInfo.id === this.id;
     if (!isAdmin) {
       return this.fail();
     }
@@ -118,23 +142,40 @@ module.exports = class extends Base {
 
     await this.modelInstance.generateKey(this.id, app_key, app_secret, status);
 
-    const user = await this.modelInstance.where({id: this.id}).find();
-    const options = await this.model('options').getOptions();
-    const transporter = nodemailer.createTransport();
-    const site_url = Object.hasOwn(options, 'site_url') ? options.site_url : `http://${this.ctx.host}`;
-    transporter.sendMail({
-      from: 'no-reply@firekylin.lithub.cc',
-      to: user.email,
-      subject: `【${options.title}】网站推送申请成功`,
-      text: `你的推送申请审批通过，请将下面的信息添加到自己的博客中完成最后的推送操作。
-        网站名称：${options.title}
-        网站地址：${site_url}
-        app_key: ${app_key}
-        app_secret: ${app_secret}
-      `
-    });
+    if (status) {
+      const user = await this.modelInstance.where({id: this.id}).find();
+      const options = await this.model('options').getOptions();
+      const config = options.comment || {};
+      const host = config.smtpHost || process.env.SMTP_HOST;
+      const from = config.smtpFrom || process.env.SMTP_FROM;
+      const username = config.smtpUser || process.env.SMTP_USER;
+      if (host && from && user.email) {
+        let transporter;
+        try {
+          transporter = nodemailer.createTransport({
+            host,
+            port: Number(config.smtpPort || process.env.SMTP_PORT) || 465,
+            secure: typeof config.smtpSecure === 'boolean' ? config.smtpSecure : process.env.SMTP_SECURE !== 'false',
+            auth: username ? {user: username, pass: config.smtpPass || process.env.SMTP_PASS} : undefined,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000
+          });
+          const siteUrl = options.site_url || `http://${this.ctx.host}`;
+          await transporter.sendMail({
+            from,
+            to: user.email,
+            subject: `【${options.title}】网站推送申请成功`,
+            text: `你的推送申请审批通过。网站名称：${options.title}，网站地址：${siteUrl}。请登录后台查看 App Key 和 App Secret。`
+          });
+        } catch {
+          think.logger.warn('User approval email could not be sent');
+        } finally {
+          transporter?.close();
+        }
+      }
+    }
 
-    // if(status !== null) { this.id = null; }
     return await this.getAction(self);
   }
   /**
@@ -153,7 +194,7 @@ module.exports = class extends Base {
     }
 
     let data = this.post();
-    if (Number(this.userInfo.type) === 4) {
+    if (Number(this.userInfo.type) === global.firekylin.USER_COMMENTER) {
       if (String(this.id) !== String(this.userInfo.id)) return this.fail('USER_NO_PERMISSION');
       data = {display_name: data.display_name, email: data.email};
     }

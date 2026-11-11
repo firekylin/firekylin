@@ -3,7 +3,7 @@ import { observer, inject } from '@admin/utils/mobx-react';
 // import { UserProps } from '../user.model';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
-import { message, Input, Select, Button, Space, Tag } from 'antd';
+import { message, Input, Select, Button, Space, Tag, Radio } from 'antd';
 import md5 from 'md5';
 import UserStore from '../user.store';
 import { RouteComponentProps } from '@admin/utils/router';
@@ -206,7 +206,7 @@ export function UserCreateForm(props: UserCreateProps) {
                             <Form.Item
                                 label="用户名"
                                 name="username"
-                                rules={[
+                                rules={legacy.id ? [] : [
                                     {
                                         min: 4,
                                         max: 20,
@@ -303,23 +303,21 @@ export function UserCreateForm(props: UserCreateProps) {
                                 <Form.Item label="用户组" name="type">
                                     <Select
                                         {...legacy.isDisabled('type')}
-                                        className="form-control"
+                                        style={{ width: '100%' }}
                                     >
                                         <Option value="2">编辑</Option>
                                         <Option value="1">管理员</Option>
                                         <Option value="3">投稿者</Option>
+                                        <Option value="4">评论者</Option>
                                     </Select>
                                 </Form.Item>
                             ) : null}
                             {!isCommenter ? (
                                 <Form.Item label="状态" name="status">
-                                    <Select
-                                        {...legacy.isDisabled('status')}
-                                        className="form-control"
-                                    >
-                                        <Option value="1">有效</Option>
-                                        <Option value="2">禁用</Option>
-                                    </Select>
+                                    <Radio.Group {...legacy.isDisabled('status')}>
+                                        <Radio value="1">有效</Radio>
+                                        <Radio value="2">禁用</Radio>
+                                    </Radio.Group>
                                 </Form.Item>
                             ) : null}
                             {/*<filedset>*/}

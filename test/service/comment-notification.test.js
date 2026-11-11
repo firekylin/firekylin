@@ -1,5 +1,16 @@
 'use strict';
 const {test} = require('node:test');
+test.beforeEach(t => {
+  const previous = global.firekylin;
+  global.firekylin = {
+    ...previous,
+    USER_ADMIN: 1,
+    USER_EDITOR: 2,
+    USER_CONTRIBUTOR: 3,
+    USER_COMMENTER: 4
+  };
+  t.after(() => { global.firekylin = previous });
+});
 const assert = require('node:assert/strict');
 global.think = {Service: class {}, logger: {error() {}}};
 const {notificationServices} = require('../../src/service/comment');

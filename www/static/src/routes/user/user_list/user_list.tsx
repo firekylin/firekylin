@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from '../../../utils/router';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Tabs, Button, Space } from 'antd';
+import { Tabs, Button, Space, Input, Pagination } from 'antd';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { UserProps } from '../user.model';
 import { message, Modal } from 'antd';
@@ -57,7 +57,7 @@ function DefaultComponent(props: UserProps) {
     };
     legacy.handleSelect = function handleSelect(type: any) {
         legacy.userStore.setKey(type);
-        return legacy.userStore.getUserList(type === '3' ? 'contributor' : '');
+        return legacy.userStore.getUserList(type === '3' ? 'contributor' : '', 1);
     };
     legacy.deny = function deny(user: any) {
         const that = legacy;
@@ -203,6 +203,17 @@ function DefaultComponent(props: UserProps) {
                     <Tabs
                         defaultActiveKey={props.userStore.key.toString()}
                         onChange={(type) => legacy.handleSelect(type)}
+                        tabBarExtraContent={
+                            <Input.Search
+                                placeholder="搜索用户名、别名或邮箱"
+                                aria-label="搜索用户"
+                                defaultValue={legacy.userStore.keyword}
+                                allowClear
+                                enterButton
+                                onSearch={(keyword) => legacy.userStore.getUserList(undefined, 1, keyword)}
+                                style={{ width: 280, marginLeft: 10 }}
+                            />
+                        }
                     >
                         <TabPane key="0" tab="全　部" />
                         <TabPane key="3" tab="审核中" />
@@ -225,6 +236,20 @@ function DefaultComponent(props: UserProps) {
                         </thead>
                         <tbody>{legacy.getUserList()}</tbody>
                     </table>
+                    <Pagination
+                        current={legacy.userStore.page}
+                        total={legacy.userStore.total}
+                        pageSize={legacy.userStore.pageSize}
+                        showSizeChanger
+                        pageSizeOptions={[10, 20, 50, 100]}
+                        style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}
+                        onChange={(page, pageSize) => legacy.userStore.getUserList(
+                            undefined,
+                            pageSize !== legacy.userStore.pageSize ? 1 : page,
+                            undefined,
+                            pageSize,
+                        )}
+                    />
                 </div>
             </div>
         );

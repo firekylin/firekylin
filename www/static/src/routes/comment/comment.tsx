@@ -84,7 +84,9 @@ export default function Comment(props: any) {
         });
     };
     legacy.operate = function operate(id: number, operation: string, comment?: string) {
-        http.post('/admin/api/comment', { id, operation, comment }).subscribe((res) => {
+        http.post('/admin/api/comment', { id, operation, comment }, {
+            headers: {'X-CSRF-Token': window.SysConfig.csrfToken},
+        }).subscribe((res) => {
             if (res.errno === 0) {
                 message.success('操作成功');
                 legacy.setState({ editing: null });
@@ -93,7 +95,7 @@ export default function Comment(props: any) {
         });
     };
     legacy.render = function render() {
-        const isCommenter = window.SysConfig.userInfo.type === 4;
+        const isCommenter = Number(window.SysConfig.userInfo.type) === 4;
         const columns: any[] = [
             {
                 title: '作者',
@@ -178,7 +180,7 @@ export default function Comment(props: any) {
                 width: 270,
                 render: (_: any, row: any) => (
                     <Space wrap>
-                        {!isCommenter && row.status !== 'approved' && (
+                        {row.can_moderate && row.status !== 'approved' && (
                             <Button
                                 size="small"
                                 onClick={() => legacy.operate(row.id, 'approved')}
@@ -186,7 +188,7 @@ export default function Comment(props: any) {
                                 通过
                             </Button>
                         )}
-                        {!isCommenter && row.status !== 'spam' && (
+                        {row.can_moderate && row.status !== 'spam' && (
                             <Button
                                 size="small"
                                 danger
@@ -195,7 +197,21 @@ export default function Comment(props: any) {
                                 垃圾
                             </Button>
                         )}
-                        {!isCommenter && <Button size="small" disabled={busy} onClick={() => {setReplyId(row.id); setReply('')}}>回复</Button>}
+                        {row.can_moderate && row.status !== 'waiting' && (
+                            <Button size="small" onClick={() => legacy.operate(row.id, 'waiting')}>
+                                待审核
+                            </Button>
+                        )}
+                        <Button
+                            size="small"
+                            disabled={busy}
+                            onClick={() => {
+                                setReplyId(row.id);
+                                setReply('');
+                            }}
+                        >
+                            回复
+                        </Button>
                         <Button
                             size="small"
                             onClick={() =>
@@ -235,7 +251,7 @@ export default function Comment(props: any) {
                         <Space>
                             <Button type="primary" disabled={busy || !reply.trim()} onClick={() => replyAction('reply')}>回复</Button>
                             <Button disabled={busy} onClick={() => setReplyId(null)}>取消</Button>
-                            {suggestEnabled && <Dropdown.Button disabled={busy} icon={<span>▾</span>}
+                            {!isCommenter && suggestEnabled && <Dropdown.Button disabled={busy} icon={<span>▾</span>}
                                 menu={{selectedKeys: [tone], items: ['亲切口吻', '专业口吻', '诙谐口吻'].map(key => ({key, label: key})), onClick: ({key}) => setTone(key)}}
                                 onClick={() => replyAction('suggestReply')}><AiSparkleIcon />建议回复</Dropdown.Button>}
                         </Space>
