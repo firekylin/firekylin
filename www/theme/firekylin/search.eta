@@ -1,12 +1,12 @@
 <% layout('./layout') %>
 <% const archive = await firekylin.widget('Widget_Archive', {type: 'search'}); const site = await firekylin.widget('Widget_Options'); %>
-<% block('title', () => { %><%= firekylin.t("站内<%= firekylin.t("搜索") %>") %> - <%= site.title() %><% }) %>
+<% block('title', () => { %><%= firekylin.t("站内搜索") %> - <%= site.title() %><% }) %>
 <% block('headers', () => { %>
 <link rel="canonical" href="<%= site.siteUrl %>/search.html<% if (archive.keyword) { %>?keyword=<%= archive.keyword %><% } %><% if (archive.pagination && archive.pagination.currentPage > 1) { %>&amp;page=<%= archive.pagination.currentPage %><% } %>" />
 <% }) %>
 <% await blockAsync('content', async () => { %>
 <article class="post detail">
-  <h1 class="title"><%= firekylin.t("站内<%= firekylin.t("搜索") %>") %></h1>
+  <h1 class="title"><%= firekylin.t("站内搜索") %></h1>
   <div class="entry-content">
     <div id="search"><form action="/search.html">
       <div class="wrapper"><input maxlength="80" placeholder="<%= firekylin.t("请输入关键字...") %>" id="keyword" name="keyword" value="<%= archive.keyword %>" type="search" required></div>
@@ -16,7 +16,7 @@
     <div id="searchResult">
       <% if (archive.pagination.count) { %><div class="info">本次<%= firekylin.t("搜索") %>找到结果 <%= archive.pagination.count %> 条</div><% } else { %>
       <div class="no-result"><%= firekylin.t("没有找到任何结果，请更换查询词试试~") %></div>
-      <div class="item"><div class="title">或者试试 Google <%= firekylin.t("站内<%= firekylin.t("搜索") %>") %>： <a target="_blank" href="https://www.google.com/#q=<%= encodeURIComponent('site:' + firekylin.ctx.hostname + ' ' + archive.keyword) %>">site:<%= firekylin.ctx.hostname %> <%= archive.keyword %></a></div></div>
+      <div class="item"><div class="title">或者试试 Google <%= firekylin.t("站内搜索") %>： <a target="_blank" href="https://www.google.com/#q=<%= encodeURIComponent('site:' + firekylin.ctx.hostname + ' ' + archive.keyword) %>">site:<%= firekylin.ctx.hostname %> <%= archive.keyword %></a></div></div>
       <% } %>
       <% while (archive.next()) { %><div class="item">
         <div class="title"><a href="<%= archive.permalink %>"><%= archive.title() %></a></div>
