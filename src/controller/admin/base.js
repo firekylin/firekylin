@@ -51,6 +51,7 @@ module.exports = class extends think.Controller {
     if (think.isEmpty(this.userInfo)) {
       options = {
         captcha: captcha.publicSettings(options.captcha),
+        locale: options.locale,
         title: options.title,
         favicon_url: options.favicon_url,
         two_factor_auth: options.two_factor_auth,

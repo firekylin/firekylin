@@ -4,6 +4,7 @@ const {CREDENTIAL_PREFIX} = require('../ai/store');
 // Only these settings are needed by the editor, profile and login UI. Do not
 // expose new plugin/service options to non-administrators by default.
 const PUBLIC_KEYS = [
+  'locale',
   'title', 'logo_url', 'favicon_url', 'site_url', 'theme', 'defaultCategory',
   'password_salt', 'ldap_on', 'ldap_whiteList', 'ldap_user_page'
 ];

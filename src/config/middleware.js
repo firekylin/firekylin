@@ -79,6 +79,9 @@ module.exports = [
     }
   },
   {
+    handle: require('../middleware/i18n')
+  },
+  {
     handle: pluginRoutes
   },
   {

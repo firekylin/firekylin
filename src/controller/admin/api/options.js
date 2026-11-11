@@ -1,3 +1,4 @@
+const {SUPPORTED_LOCALES} = require('../../../service/i18n');
 const captcha = require('../../../service/captcha');
 const adminOptions = require('../../../service/admin-options');
 const speakeasy = require('speakeasy');
@@ -86,6 +87,9 @@ module.exports = class extends Base {
       return this.fail('DATA_EMPTY');
     }
 
+    if (Object.hasOwn(data, 'locale') && !SUPPORTED_LOCALES.includes(data.locale)) {
+      return this.fail('PARAMS_ERROR');
+    }
     const model = this.model('options');
     if (Object.prototype.hasOwnProperty.call(data, 'comment')) {
       let comment;
@@ -140,7 +144,10 @@ module.exports = class extends Base {
       this.success(result);
     } else {
       const result = await model.updateOptions(data);
-      this.success(result);
+      const saved = await model.getOptions();
+      this.success(Object.hasOwn(data, 'locale') ? {
+        locale: saved.locale
+      } : result);
     }
   }
 
