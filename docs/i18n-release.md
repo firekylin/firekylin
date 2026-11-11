@@ -8,7 +8,7 @@ Regression tests exercise literal interpolation, falsy values, unsafe placeholde
 
 ## Upgrade and rollback
 
-Existing databases need no bulk rewrite: absent language state means Chinese. The persisted `system_locale` row contains both locale and a unique revision. Older releases ignore that extra option. Switching back to Chinese does not rewrite articles, theme values or plugin data. Explicit legacy comment languages remain unchanged; only missing/auto values follow the system.
+Existing databases need no bulk rewrite: absent language state means Chinese. The `locale` option stores the language string directly. Clients compare the language value; request sequencing rejects stale responses. Older releases ignore the extra locale option. Switching back to Chinese does not rewrite articles, theme values or plugin data. Explicit legacy comment languages remain unchanged; only missing/auto values follow the system.
 
 Language changes do not restart workers or rerun plugin registration. Static plugin titles require a safe plugin reload or a manually coordinated worker restart. Dynamic request text follows a request snapshot. Independent plugin tasks must enter `ctx.withLocale` explicitly.
 

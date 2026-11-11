@@ -11,7 +11,7 @@ const {themeTranslator} = require('../src/service/i18n-theme');
 test('boot locale data cannot terminate its script container', async () => {
   const source = fs.readFileSync(path.resolve('view/admin.eta'), 'utf8');
   const output = await new Eta({varName: 'firekylin'}).renderStringAsync(source, {
-    options: {title: '</script><script>alert(1)</script>', locale: 'en-US', localeRevision: 'v1'},
+    options: {title: '</script><script>alert(1)</script>', locale: 'en-US'},
     userInfo: {},
     publicCaptcha: {},
     adminAssets: {styles: [], script: '/admin.js'},
