@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {createHash} = require('node:crypto');
-const {validateDictionary, createTranslator, createSnapshot} = require('./index');
+const {validateDictionary, createTranslator, createSnapshot} = require('./i18n');
 
 function parseDictionary(source) {
   const parsed = JSON.parse(source);

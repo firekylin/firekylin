@@ -1,6 +1,5 @@
 const {randomUUID} = require('node:crypto');
-const {SUPPORTED_LOCALES, createSnapshot} = require('./index');
-const {core} = require('./resources');
+const {SUPPORTED_LOCALES, createSnapshot} = require('./i18n');
 
 const SETTINGS_KEY = 'system_locale';
 
@@ -14,12 +13,13 @@ function decode(value) {
     return createSnapshot();
   }
 }
+// Revision is an opaque equality token, not a timestamp or sortable counter.
+// Keeping it in the same row as locale makes each snapshot atomic across workers.
 function encode(locale) {
   if (!SUPPORTED_LOCALES.includes(locale)) throw new TypeError('Unsupported locale');
   return JSON.stringify({locale, revision: randomUUID()});
 }
 function publicSettings(snapshot) {
-  return {locale: snapshot.locale, localeRevision: snapshot.revision,
-    supportedLocales: SUPPORTED_LOCALES, localeResourceVersion: core.version};
+  return {locale: snapshot.locale, localeRevision: snapshot.revision};
 }
 module.exports = {SETTINGS_KEY, decode, encode, publicSettings};

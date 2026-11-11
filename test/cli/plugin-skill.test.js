@@ -86,6 +86,15 @@ test('generated plugin runs in a clean SQLite site with admin enable/disable', {
     throw new Error(`Host did not become usable: ${logs}`);
   }
   await start();
+  const localeResponse = await request('/admin/locale');
+  assert.equal(localeResponse.status, 200);
+  assert.equal(localeResponse.headers.get('cache-control'), 'no-store');
+  const localeData = await localeResponse.json();
+  assert.deepEqual(Object.keys(localeData).sort(), ['locale', 'localeRevision']);
+  assert.equal(localeData.locale, 'zh-CN');
+  const rejectedLocaleWrite = await request('/admin/locale', {method: 'POST'});
+  assert.equal(rejectedLocaleWrite.status, 405);
+  assert.equal(rejectedLocaleWrite.headers.get('allow'), 'GET');
   const route = '/api/plugins/site-message/message';
   assert.equal((await request(route)).status, 404);
   const login = await request('/admin/user/login', {method: 'POST',

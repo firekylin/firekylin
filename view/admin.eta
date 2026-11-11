@@ -17,6 +17,7 @@ window.SysConfig = {
   csrfToken: <%~ JSON.stringify(firekylin.csrfToken || '') %>,
   pluginAdmin: <%~ JSON.stringify(firekylin.pluginAdmin || []) %>,
   userInfo: <%~ JSON.stringify(firekylin.userInfo) %>,
+  <% // Escape '<' because HTML parses script end tags before JavaScript/JSON. %>
   options: <%~ JSON.stringify({
     locale: firekylin.options.locale || 'zh-CN',
     localeRevision: firekylin.options.localeRevision || '',

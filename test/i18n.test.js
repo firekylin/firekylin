@@ -3,9 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const {createTranslator, createSnapshot, runWithSnapshot, currentSnapshot} = require('../src/i18n');
-const {parseDictionary, loadResources} = require('../src/i18n/resources');
-const settings = require('../src/i18n/settings');
+const {createTranslator, createSnapshot, runWithSnapshot, currentSnapshot} = require('../src/service/i18n');
+const {parseDictionary, loadResources} = require('../src/service/i18n-resources');
+const settings = require('../src/service/i18n-settings');
 
 const translate = resources => createTranslator({namespace: 'core', snapshot: createSnapshot('en-US'), resources});
 
@@ -64,5 +64,5 @@ test('persistent locale and revision form one value, with safe legacy defaults',
   assert.equal(settings.decode('bad').locale, 'zh-CN');
   assert.throws(() => settings.encode('../../bad'));
   assert.deepEqual(Object.keys(settings.publicSettings(settings.decode(value))).sort(),
-    ['locale', 'localeResourceVersion', 'localeRevision', 'supportedLocales']);
+    ['locale', 'localeRevision']);
 });

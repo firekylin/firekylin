@@ -1,4 +1,4 @@
-const localeSettings = require('../i18n/settings');
+const localeSettings = require('../service/i18n-settings');
 const captcha = require('../service/captcha');
 const {CREDENTIAL_PREFIX} = require('../ai/store');
 

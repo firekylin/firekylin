@@ -1,4 +1,4 @@
-const {SUPPORTED_LOCALES} = require('../../../i18n');
+const {SUPPORTED_LOCALES} = require('../../../service/i18n');
 const captcha = require('../../../service/captcha');
 const adminOptions = require('../../../service/admin-options');
 const speakeasy = require('speakeasy');
@@ -148,8 +148,7 @@ module.exports = class extends Base {
       const saved = await model.getOptions();
       this.success(Object.hasOwn(data, 'locale') ? {
         locale: saved.locale,
-        localeRevision: saved.localeRevision,
-        staticTranslationsRequireReload: true
+        localeRevision: saved.localeRevision
       } : result);
     }
   }
