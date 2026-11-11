@@ -18,6 +18,7 @@ beforeEach(() => {
     vi.mocked(http.post).mockReturnValue(of({errno: 0, data: '<p>正文</p>'}) as any);
     vi.mocked(http.get).mockImplementation((url: string) => of({errno: 0, data:
         url.includes('/post/3') ? {id: 3, title: '聊天里的草稿', markdown_content: '正文', tag: [], cate: [], is_public: 1, options: {}} :
+        url.includes('/api/user') ? {data: [], count: 0, currentPage: 1, pageSize: 100, totalPages: 0} :
         url.includes('defaultCategory') ? '' : []}) as any);
 });
 afterEach(() => {cleanup(); vi.unstubAllGlobals()});
