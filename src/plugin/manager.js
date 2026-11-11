@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const {createRequire} = require('module');
 const semver = require('semver');
+const {createTranslator, createSnapshot, currentSnapshot, runWithSnapshot} = require('../i18n');
+const {loadResources} = require('../i18n/resources');
 const EventBus = require('./events');
 const RouteRegistry = require('./routes');
 const TemplateRegistry = require('./templates');
@@ -84,7 +86,8 @@ function resolveInside(root, entry, label) {
 
 class PluginManager {
   constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi,
-    aiStore, aiAudit, stateStore} = {}) {
+    aiStore, aiAudit, stateStore, localeSnapshot = async() => createSnapshot()} = {}) {
+    this.localeSnapshot = localeSnapshot;
     this.projectPath = projectPath || process.cwd();
     this.config = config || {};
     this.logger = logger || console;
@@ -199,7 +202,8 @@ class PluginManager {
     const loaded = require(entry); // eslint-disable-line import/no-dynamic-require
     const plugin = loaded && loaded.default ? loaded.default : loaded;
     if (!plugin || typeof plugin.register !== 'function') throw new Error(`Plugin ${manifest.id} must export register(ctx)`);
-    const record = {manifest, root: pluginRoot, entry, plugin, status: 'discovered'};
+    const resources = loadResources(pluginRoot);
+    const record = {manifest, root: pluginRoot, entry, plugin, resources, status: 'discovered'};
     this.plugins.set(manifest.id, record);
     return record;
   }
@@ -231,6 +235,13 @@ class PluginManager {
     const permissions = Array.isArray(record.manifest.permissions) ? record.manifest.permissions : [];
     return Object.freeze({
       id: pluginId,
+      withLocale: async callback => runWithSnapshot(await this.localeSnapshot(), callback),
+      t: (key, vars) => {
+        const snapshot = currentSnapshot() || record.localeSnapshot || createSnapshot();
+        const translate = createTranslator({namespace: `plugin:${pluginId}`, snapshot,
+          resources: record.resources?.resources || {}, defaultLocale: record.manifest.i18n?.defaultLocale || 'zh-CN'});
+        return translate(key, vars);
+      },
       manifest: Object.freeze({...record.manifest}),
       root: record.root,
       events: Object.freeze({
@@ -299,6 +310,7 @@ class PluginManager {
   async activate(record) {
     if (record.status === 'active') return;
     try {
+      record.localeSnapshot = await this.localeSnapshot();
       const ctx = this.context(record);
       await record.plugin.register(ctx);
       if (typeof record.plugin.activate === 'function') await record.plugin.activate(ctx);

@@ -184,3 +184,30 @@ test('plugin context registers and cleans up admin extensions', async() => {
   await manager.deactivate('admin-example');
   assert.deepEqual(manager.admin.manifest(), []);
 });
+
+test('plugin translators retain owners across request snapshots and static registration', async t => {
+  const {createSnapshot, runWithSnapshot} = require('../../src/i18n');
+  const root = project();
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  for (const id of ['first', 'second']) {
+    writePlugin(root, id, `module.exports = {
+      register(ctx) {
+        ctx.admin.registerPanel({id: 'panel', title: ctx.t('保存')});
+        ctx.admin.registerPage({id: 'overview', panel: 'panel', title: ctx.t('保存')});
+        ctx.templates.registerFunction(ctx.id + '.label', () => ctx.t('保存'));
+      }
+    };`);
+    fs.mkdirSync(path.join(root, 'plugins', id, 'locales'));
+    fs.writeFileSync(path.join(root, 'plugins', id, 'locales/en-US.json'), JSON.stringify({'保存': id}));
+  }
+  const manager = new PluginManager({projectPath: root, localeSnapshot: async() => createSnapshot('zh-CN')});
+  await manager.load();
+  await Promise.all(['zh-CN', 'en-US'].map(locale => runWithSnapshot(createSnapshot(locale), async() => {
+    for (const id of ['first', 'second']) {
+      assert.equal(await manager.templates.callFunction(id + '.label'), locale === 'en-US' ? id : '保存');
+    }
+  })));
+  assert.equal(manager.admin.manifest()[0].panels[0].title, '保存');
+  await manager.deactivate('first');
+  await assert.rejects(manager.templates.callFunction('first.label'));
+});

@@ -50,7 +50,7 @@ function createCommentState() {
         submitting: false,
         comment: {
             audit: Boolean(comment.audit), forceLogin: Boolean(comment.forceLogin),
-            pageSize: Number(comment.pageSize) || 10, locale: comment.locale || 'zh-CN',
+            pageSize: Number(comment.pageSize) || 10, locale: comment.locale || 'auto',
             ipQps: Number(comment.ipQps) || 60, commentSorting: comment.commentSorting || 'latest',
             dark: comment.dark || false,
             meta: Array.isArray(comment.meta) ? comment.meta : ['nick', 'mail', 'link'],
@@ -201,6 +201,7 @@ function CommentForm(props: CommentProps) {
                             >
                                 <Select
                                     options={[
+                                        { value: 'auto', label: '跟随系统' },
                                         { value: 'zh-CN', label: '简体中文' },
                                         { value: 'zh-TW', label: '繁體中文' },
                                         { value: 'en', label: 'English' },

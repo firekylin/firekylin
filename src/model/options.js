@@ -50,7 +50,7 @@ module.exports = class extends think.Model {
       audit: false,
       forceLogin: false,
       pageSize: 10,
-      locale: 'zh-CN',
+      locale: 'auto',
       ipQps: 60,
       commentSorting: 'latest',
       dark: false,

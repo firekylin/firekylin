@@ -84,3 +84,14 @@ test('comment helper forwards supported client options', () => {
   assert.match(output, /&quot;imageUploader&quot;:false/);
   assert.match(output, /&quot;noCopyright&quot;:true/);
 });
+
+test('comment auto locale follows the site without overriding explicit legacy choices', () => {
+  const service = new CommentRender();
+  const render = locale => service.render(controller({options: {
+    siteUrl: 'https://example.com', locale: 'en-US', comment: {locale}
+  }}));
+  assert.match(render('auto'), /&quot;lang&quot;:&quot;en&quot;/);
+  assert.match(render('auto'), /Loading comments/);
+  assert.match(render('jp'), /&quot;lang&quot;:&quot;jp&quot;/);
+  assert.match(render('zh-CN'), /&quot;lang&quot;:&quot;zh-CN&quot;/);
+});
