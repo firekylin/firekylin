@@ -30,6 +30,8 @@ export async function refreshLocale() {
     if (sequence !== requestSequence || !['zh-CN', 'en-US'].includes(data.locale)) return;
     await ready;
     if (sequence !== requestSequence) return;
+    if (data.localeRevision === window.SysConfig.options.localeRevision &&
+        data.locale === i18n.language) return;
     await i18n.changeLanguage(data.locale);
     window.SysConfig.options.locale = data.locale;
     window.SysConfig.options.localeRevision = data.localeRevision;

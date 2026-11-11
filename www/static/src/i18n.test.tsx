@@ -20,6 +20,21 @@ describe('admin locale', () => {
         expect(screen.getByLabelText('draft')).toBe(input);
     });
 
+    it('skips language activation for an unchanged persisted snapshot', async () => {
+        await ready;
+        await i18n.changeLanguage('en-US');
+        window.SysConfig = {options: {locale: 'en-US', localeRevision: 'same'}} as any;
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({locale: 'en-US', localeRevision: 'same'}),
+        }));
+        const change = vi.spyOn(i18n, 'changeLanguage');
+        await refreshLocale();
+        expect(change).not.toHaveBeenCalled();
+        change.mockRestore();
+        vi.unstubAllGlobals();
+    });
+
     it('ignores a late response from an earlier refresh', async () => {
         window.SysConfig = {options: {}} as any;
         let finishOld: (value: unknown) => void;
