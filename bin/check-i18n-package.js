@@ -11,10 +11,10 @@ const manifest = JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--json', 
 }));
 const files = new Set(manifest[0].files.map(file => file.path));
 for (const file of [
-  'src/i18n/index.js',
-  'src/i18n/resources.js',
-  'src/i18n/settings.js',
-  'src/i18n/theme.js',
+  'src/service/i18n.js',
+  'src/service/i18n-resources.js',
+  'src/service/i18n-settings.js',
+  'src/service/i18n-theme.js',
   'src/locales/zh-CN.json',
   'src/locales/en-US.json',
   'www/theme/firekylin/locales/zh-CN.json',

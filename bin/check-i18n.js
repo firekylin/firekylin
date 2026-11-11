@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const {parseDictionary, loadResources} = require('../src/i18n/resources');
+const {parseDictionary, loadResources} = require('../src/service/i18n-resources');
 
 const root = path.resolve(__dirname, '..');
 const owners = [path.join(root, 'src'), path.join(root, 'www/theme/firekylin')];

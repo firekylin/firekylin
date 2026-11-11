@@ -5,8 +5,8 @@ const path = require('node:path');
 const {createRequire} = require('node:module');
 const {spawnSync} = require('node:child_process');
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
-const {createSnapshot} = require('../src/i18n');
-const {themeTranslator} = require('../src/i18n/theme');
+const {createSnapshot} = require('../src/service/i18n');
+const {themeTranslator} = require('../src/service/i18n-theme');
 
 test('boot locale data cannot terminate its script container', async () => {
   const source = fs.readFileSync(path.resolve('view/admin.eta'), 'utf8');
@@ -25,8 +25,8 @@ test('boot locale data cannot terminate its script container', async () => {
 test('separate processes resolve locale independently with bundled resources', () => {
   for (const locale of ['en-US', 'zh-CN', 'en-US']) {
     const child = spawnSync(process.execPath, ['-e', `
-      const {createSnapshot} = require('./src/i18n');
-      const {coreTranslator} = require('./src/i18n/resources');
+      const {createSnapshot} = require('./src/service/i18n');
+      const {coreTranslator} = require('./src/service/i18n-resources');
       process.stdout.write(coreTranslator(createSnapshot(process.argv[1]))('保存'));
     `, locale], {cwd: path.resolve(__dirname, '..'), encoding: 'utf8'});
     assert.equal(child.status, 0, child.stderr);
