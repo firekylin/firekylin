@@ -87,8 +87,7 @@ module.exports = class extends Base {
       return this.fail('DATA_EMPTY');
     }
 
-    if (Object.hasOwn(data, 'system_locale') || Object.hasOwn(data, 'localeRevision') ||
-      (Object.hasOwn(data, 'locale') && !SUPPORTED_LOCALES.includes(data.locale))) {
+    if (Object.hasOwn(data, 'locale') && !SUPPORTED_LOCALES.includes(data.locale)) {
       return this.fail('PARAMS_ERROR');
     }
     const model = this.model('options');
@@ -147,8 +146,7 @@ module.exports = class extends Base {
       const result = await model.updateOptions(data);
       const saved = await model.getOptions();
       this.success(Object.hasOwn(data, 'locale') ? {
-        locale: saved.locale,
-        localeRevision: saved.localeRevision
+        locale: saved.locale
       } : result);
     }
   }

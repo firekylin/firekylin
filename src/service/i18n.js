@@ -28,8 +28,8 @@ function validateDictionary(dictionary) {
   return Object.freeze(result);
 }
 
-function createSnapshot(locale = 'zh-CN', revision = '') {
-  return Object.freeze({locale: SUPPORTED_LOCALES.includes(locale) ? locale : 'zh-CN', revision: String(revision)});
+function createSnapshot(locale = 'zh-CN') {
+  return Object.freeze({locale: SUPPORTED_LOCALES.includes(locale) ? locale : 'zh-CN'});
 }
 
 function createTranslator({namespace, snapshot, resources = {}, defaultLocale = 'zh-CN'}) {
@@ -64,7 +64,7 @@ function createTranslator({namespace, snapshot, resources = {}, defaultLocale = 
 }
 
 function runWithSnapshot(snapshot, callback) {
-  return context.run(createSnapshot(snapshot.locale, snapshot.revision), callback);
+  return context.run(createSnapshot(snapshot.locale), callback);
 }
 
 module.exports = {SUPPORTED_LOCALES, createSnapshot, createTranslator, validateDictionary, runWithSnapshot,

@@ -9,7 +9,7 @@ test('admin boot JSON escapes script end tags and round-trips the original title
   const title = '</script><script>alert(1)</script>';
   const output = await new Eta({varName: 'firekylin'}).renderStringAsync(
     fs.readFileSync(path.join(__dirname, '../view/admin.eta'), 'utf8'), {
-      options: {title, locale: 'en-US', localeRevision: 'v1'},
+      options: {title, locale: 'en-US'},
       userInfo: {}, publicCaptcha: {}, adminAssets: {styles: [], script: '/admin.js'},
       think: {config: () => false}
     });

@@ -20,7 +20,6 @@ window.SysConfig = {
   <% // Escape '<' because HTML parses script end tags before JavaScript/JSON. %>
   options: <%~ JSON.stringify({
     locale: firekylin.options.locale || 'zh-CN',
-    localeRevision: firekylin.options.localeRevision || '',
     captcha: firekylin.publicCaptcha,
     title: firekylin.options.title,
     two_factor_auth: firekylin.options.two_factor_auth,

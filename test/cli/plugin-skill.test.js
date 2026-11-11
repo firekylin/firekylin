@@ -90,7 +90,7 @@ test('generated plugin runs in a clean SQLite site with admin enable/disable', {
   assert.equal(localeResponse.status, 200);
   assert.equal(localeResponse.headers.get('cache-control'), 'no-store');
   const localeData = await localeResponse.json();
-  assert.deepEqual(Object.keys(localeData).sort(), ['locale', 'localeRevision']);
+  assert.deepEqual(Object.keys(localeData).sort(), ['locale']);
   assert.equal(localeData.locale, 'zh-CN');
   const rejectedLocaleWrite = await request('/admin/locale', {method: 'POST'});
   assert.equal(rejectedLocaleWrite.status, 405);
@@ -108,6 +108,19 @@ test('generated plugin runs in a clean SQLite site with admin enable/disable', {
   const csrf = /csrfToken:\s*"([^"]+)"/.exec(page)?.[1];
   assert.ok(csrf, 'Rendered admin page supplies CSRF token');
   const headers = {'Content-Type': 'application/json', Cookie: cookie, Referer: base + '/admin', 'X-CSRF-Token': csrf};
+  for (const locale of ['en-US', 'zh-CN']) {
+    const saved = await request('/admin/api/options?method=put', {
+      method: 'POST', headers, body: JSON.stringify({locale})
+    });
+    assert.deepEqual((await saved.json()).data, {locale});
+    assert.deepEqual(await (await request('/admin/locale')).json(), {locale});
+    const localeDb = new DB(path.join(root, 'data/firekylin.sqlite'));
+    try {
+      assert.equal(localeDb.prepare('SELECT value FROM fk_options WHERE key=?').get('locale').value, locale);
+    } finally {
+      localeDb.close();
+    }
+  }
   const mutation = operation => JSON.stringify({operation, id: 'site-message'});
   const unauthorized = await request('/admin/api/marketplace', {method: 'POST',
     headers: {'Content-Type': 'application/json'}, body: mutation('plugin.enable')});

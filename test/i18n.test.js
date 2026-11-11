@@ -57,12 +57,14 @@ test('concurrent tasks isolate immutable snapshots', async () => {
   assert.equal(currentSnapshot(), undefined);
 });
 
-test('persistent locale and revision form one value, with safe legacy defaults', () => {
+test('locale persists as a plain string with safe legacy defaults', () => {
   const value = settings.encode('en-US');
   assert.equal(settings.decode(value).locale, 'en-US');
-  assert.notEqual(settings.decode(value).revision, settings.decode(settings.encode('en-US')).revision);
+  assert.equal(value, 'en-US');
+  assert.equal(settings.SETTINGS_KEY, 'locale');
+  assert.deepEqual(settings.decode(value), {locale: 'en-US'});
   assert.equal(settings.decode('bad').locale, 'zh-CN');
   assert.throws(() => settings.encode('../../bad'));
   assert.deepEqual(Object.keys(settings.publicSettings(settings.decode(value))).sort(),
-    ['locale', 'localeRevision']);
+    ['locale']);
 });

@@ -38,7 +38,6 @@ module.exports = class extends think.Model {
     }
 
     Object.assign(ret, localeSettings.publicSettings(localeSettings.decode(ret[localeSettings.SETTINGS_KEY])));
-    delete ret[localeSettings.SETTINGS_KEY];
 
     if (ret.comment && think.isString(ret.comment)) {
       ret.comment = JSON.parse(ret.comment);
@@ -102,13 +101,8 @@ module.exports = class extends think.Model {
    */
   async updateOptions(key, value) {
     const data = think.isObject(key) ? think.extend({}, key) : {[key]: value};
-    if (Object.hasOwn(data, 'system_locale') || Object.hasOwn(data, 'localeRevision')) {
-      throw new TypeError('Locale metadata is read-only');
-    }
     if (Object.hasOwn(data, 'locale')) {
-      const encoded = localeSettings.encode(data.locale);
-      delete data.locale;
-      data[localeSettings.SETTINGS_KEY] = encoded;
+      data.locale = localeSettings.encode(data.locale);
     }
     const promises = [];
     for (const key in data) {
