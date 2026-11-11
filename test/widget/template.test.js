@@ -86,7 +86,7 @@ test('view adapter resolves layouts from the theme directory', async() => {
     siteUrl: 'https://example.com'
   });
   const data = {
-    t: require('../../src/i18n/resources').coreTranslator(),
+    t: require('../../src/service/i18n-resources').coreTranslator(),
     VERSION: 'test',
     currentYear: 2026,
     ctx: {hostname: 'example.com'},

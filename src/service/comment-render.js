@@ -1,8 +1,8 @@
 'use strict';
 
 const captcha = require('./captcha');
-const {coreTranslator} = require('../i18n/resources');
-const {createSnapshot} = require('../i18n');
+const {coreTranslator} = require('./i18n-resources');
+const {createSnapshot} = require('./i18n');
 
 const CLIENT_VERSION = '3.16.0';
 const DEFAULT_RESOURCE_URL = `https://cdn.jsdelivr.net/npm/@waline/client@${CLIENT_VERSION}/dist`;

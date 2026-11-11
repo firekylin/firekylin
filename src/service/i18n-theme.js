@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const {createTranslator, createSnapshot} = require('./index');
-const {loadResources} = require('./resources');
+const {createTranslator, createSnapshot} = require('./i18n');
+const {loadResources} = require('./i18n-resources');
 
 function themeTranslator(root, id, snapshot = createSnapshot()) {
   return createTranslator({namespace: `theme:${id}`, snapshot, resources: loadResources(root).resources});

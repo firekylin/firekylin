@@ -186,7 +186,7 @@ test('plugin context registers and cleans up admin extensions', async() => {
 });
 
 test('plugin translators retain owners across request snapshots and static registration', async t => {
-  const {createSnapshot, runWithSnapshot} = require('../../src/i18n');
+  const {createSnapshot, runWithSnapshot} = require('../../src/service/i18n');
   const root = project();
   t.after(() => fs.rmSync(root, {recursive: true, force: true}));
   for (const id of ['first', 'second']) {

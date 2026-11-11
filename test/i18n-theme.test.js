@@ -5,8 +5,8 @@ const os = require('node:os');
 const path = require('node:path');
 const {createRequire} = require('node:module');
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
-const {createSnapshot} = require('../src/i18n');
-const {themeTranslator, supportsAlias, translateFields} = require('../src/i18n/theme');
+const {createSnapshot} = require('../src/service/i18n');
+const {themeTranslator, supportsAlias, translateFields} = require('../src/service/i18n-theme');
 
 const root = path.resolve('www/theme/firekylin');
 

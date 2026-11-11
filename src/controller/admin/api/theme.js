@@ -1,4 +1,4 @@
-const {themeTranslator, translateFields} = require('../../../i18n/theme');
+const {themeTranslator, translateFields} = require('../../../service/i18n-theme');
 const fs = require('fs');
 const path = require('path');
 const cluster = require('cluster');
