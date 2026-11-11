@@ -41,5 +41,11 @@ jobs:
       - name: Linter test
         run: pnpm run lint
 
+      - name: Validate translation resources
+        run: pnpm check:i18n
+
+      - name: Validate packaged translation resources
+        run: pnpm check:i18n-package
+
       - name: Unit test
         run: pnpm test

@@ -20,7 +20,9 @@
     "lint-break-on-errors": "npm run lint",
     "check-extraneous-pkgs": "pnpm list --depth=0 && echo '[SUCCESS] No extraneous packages.' || (echo '[INFO] Pruning extraneous packages...\n' && pnpm prune)",
     "cron:rss": "npm start -- \"admin/cron/rss\"",
-    "test": "node --test \"test/**/*.test.js\" && vitest run --config vitest.config.ts && tsc -p test/types/tsconfig.json --noEmit"
+    "test": "node --test \"test/**/*.test.js\" && vitest run --config vitest.config.ts && tsc -p test/types/tsconfig.json --noEmit",
+    "check:i18n": "node bin/check-i18n.js",
+    "check:i18n-package": "node bin/check-i18n-package.js"
   },
   "pre-commit": [
     "lint-break-on-errors"
