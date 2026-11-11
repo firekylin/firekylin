@@ -28,7 +28,7 @@ module.exports = class extends Base {
   generateKey(userId, app_key, app_secret, status) {
     const data = { app_key, app_secret };
     if (status) { data.status = status }
-    this.where({ id: userId }).update(data);
+    return this.where({ id: userId }).update(data);
   }
 
   /**

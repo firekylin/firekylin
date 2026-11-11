@@ -19,11 +19,14 @@ it('shows article navigation, hides category/tag create entries and highlights c
     }
     expect(screen.getByRole('link', {name: '标签列表'})).toBeInTheDocument();
 });
-it('keeps admin-only category/tag/tools menus hidden from authors', () => {
+it('shows taxonomy management to editors while keeping admin tools hidden', () => {
     window.SysConfig.userInfo.type = 2;
     render(<MemoryRouter initialEntries={['/post/list']}><Sidebar history={{push: vi.fn()}} /></MemoryRouter>);
     expect(screen.getByRole('link', {name: '文章列表'})).toBeInTheDocument();
-    for (const label of ['分类列表', '标签列表', '管理工具']) expect(screen.queryByRole('link', {name: label})).toBeNull();
+    for (const label of ['分类列表', '标签列表']) {
+        expect(screen.getByRole('link', {name: label})).toBeInTheDocument();
+    }
+    expect(screen.queryByRole('link', {name: '管理工具'})).toBeNull();
 });
 it('highlights tools with a tool icon and keeps appearance pages intact', () => {
     render(<MemoryRouter initialEntries={['/tools/import']}><Sidebar history={{push: vi.fn()}} /></MemoryRouter>);

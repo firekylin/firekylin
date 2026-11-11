@@ -148,7 +148,7 @@ function SideBar(_props: any) {
             return !previous;
         });
     };
-    const userType = window.SysConfig.userInfo.type || 0;
+    const userType = Number(window.SysConfig.userInfo.type) || 0;
     let routes: any[] = userType === 4 ? [
         {url: '/comment', icon: 'topic', title: '我的评论'},
         {url: `/user/edit/${window.SysConfig.userInfo.id}`, icon: 'user', title: '账号设置'},

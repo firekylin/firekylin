@@ -17,7 +17,14 @@ global.think = {
   isString: value => typeof value === 'string',
   isFunction: value => typeof value === 'function'
 };
-global.firekylin = {require: () => false};
+global.firekylin = {
+  require: () => false,
+  USER_ADMIN: 1,
+  USER_EDITOR: 2,
+  USER_CONTRIBUTOR: 3,
+  USER_COMMENTER: 4,
+  USER_DISABLED: 2
+};
 
 const Base = require('../../src/controller/admin/api/base');
 const Options = require('../../src/controller/admin/api/options');
@@ -186,10 +193,17 @@ function userController(type, id, query = {}) {
   c.modelInstance = {
     field(value) {fields = value; return this},
     where(value) {where = value; return this},
+    order() {
+      return this;
+    },
+    page() {
+      return this;
+    },
+    countSelect: async() => ({data: accounts.map(project), count: accounts.length}),
     find: async() => project(accounts.find(user => String(user.id) === String(where.id))),
     select: async() => accounts.map(project)
   };
-  const posts = {field() {return this}, setRelation() {return this}, group() {return this},
+  const posts = {where() {return this}, field() {return this}, setRelation() {return this}, group() {return this},
     select: async() => [{user_id: 1, post_num: 3, comment_num: 4}]};
   c.model = name => name === 'options' ? options : posts;
   c.service = () => ({
@@ -202,10 +216,10 @@ function userController(type, id, query = {}) {
 test('editor author directory never includes account details or push credentials', async() => {
   for (const query of [{}, {type: 'contributor'}]) {
     const result = await dispatch(userController(2, undefined, query));
-    assert.deepEqual(result.map(user => Object.keys(user)), [
+    assert.deepEqual(result.data.map(user => Object.keys(user)), [
       ['id', 'name', 'display_name', 'type'], ['id', 'name', 'display_name', 'type']
     ]);
-    assert.equal(result[0].name, 'user-1');
+    assert.equal(result.data[0].name, 'user-1');
   }
 });
 
@@ -227,7 +241,7 @@ test('commenters cannot enumerate users', async() => {
 test('administrators retain user management, social links and push credentials', async() => {
   const user = await dispatch(userController(1, '1'));
   assert.equal(user.app_secret, 'synthetic-user-1-secret');
-  const users = await dispatch(userController(1));
+  const {data: users} = await dispatch(userController(1));
   assert.equal(users[0].app_key, 'synthetic-user-1-key');
   assert.equal(users[0].post_num, 3);
   assert.equal(users[0].social_accounts[0].provider, 'github');

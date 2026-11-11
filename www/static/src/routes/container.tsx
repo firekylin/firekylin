@@ -24,7 +24,7 @@ const Media = lazy(() => import('./media/media'));
 
 function Container(props: any) {
     useEffect(() => {
-        if (window.SysConfig.userInfo.type === 4) return;
+        if (Number(window.SysConfig.userInfo.type) === 4) return;
         const subscription = http.get('/admin/api/options').subscribe((res) => {
             if (res.errno === 0) {
                 window.SysConfig.options = res.data as any;
@@ -33,7 +33,7 @@ function Container(props: any) {
         return () => subscription.unsubscribe();
     }, []);
 
-    const isCommenter = window.SysConfig.userInfo.type === 4;
+    const isCommenter = Number(window.SysConfig.userInfo.type) === 4;
     return (
         <>
             <Sidebar {...props} />

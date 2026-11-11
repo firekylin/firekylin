@@ -61,7 +61,7 @@ module.exports = class extends BaseRest {
     this.userInfo = userInfo;
     const type = userInfo.type | 0;
     const name = this.ctx.controller.replace(/^admin\//, '') + '/' + this.ctx.action;
-    if (type === 4) {
+    if (type === global.firekylin.USER_COMMENTER) {
       const commenterAllowList = [
         'api/comment/get', 'api/comment/post',
         'api/user/get', 'api/user/put'
@@ -69,14 +69,21 @@ module.exports = class extends BaseRest {
       if (commenterAllowList.includes(name)) return;
       return this.fail('USER_NO_PERMISSION');
     }
+    const editorActions = [
+      'api/comment/post',
+      'api/cate/post', 'api/cate/put', 'api/cate/delete',
+      'api/tag/post', 'api/tag/put', 'api/tag/delete'
+    ];
+    if (type === global.firekylin.USER_EDITOR && editorActions.includes(name)) return;
     // not admin
-    if (type !== 1) {
+    if (type !== global.firekylin.USER_ADMIN) {
       // Theme metadata is needed by the article editor; source files and
       // management endpoints remain administrator-only.
-      if (type === 2 && name === 'api/theme/get' && ['templateList', 'themeFields'].includes(this.get('type'))) {
+      if (type === global.firekylin.USER_EDITOR && name === 'api/theme/get' &&
+          ['templateList', 'themeFields'].includes(this.get('type'))) {
         return;
       }
-      if (type === 2 && this.allowList.indexOf(name) > -1) {
+      if (type === global.firekylin.USER_EDITOR && this.allowList.indexOf(name) > -1) {
         return;
       }
       return this.fail('USER_NO_PERMISSION');
