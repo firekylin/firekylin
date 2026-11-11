@@ -1,13 +1,15 @@
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
-import { Input, Button, Upload, message } from 'antd';
+import { Input, Button, Upload, message, Select } from 'antd';
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import { inject, observer } from '@admin/utils/mobx-react';
 import { GeneralProps } from './general.model';
 import type { UploadChangeParam } from 'antd/es/upload/interface';
 import './general.less';
 function GeneralForm(props: GeneralProps) {
+    const {t} = useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -74,7 +76,7 @@ function GeneralForm(props: GeneralProps) {
     legacy.beforeUpload = function beforeUpload(file: File) {
         const isLt5M = file.size / 1024 / 1024 < 5;
         if (!isLt5M) {
-            message.error('图片必须小于5MB!');
+            message.error(t("图片必须小于5MB!"));
         }
         return isLt5M;
     };
@@ -123,7 +125,7 @@ function GeneralForm(props: GeneralProps) {
             <>
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="options-general-page page-list">
-                    <h3 className="page-title">基本设置</h3>
+                    <h3 className="page-title">{t("基本设置")}</h3>
                     <Form
                         ref={legacy.formRef}
                         onFinish={legacy.handleSubmit}
@@ -132,12 +134,24 @@ function GeneralForm(props: GeneralProps) {
                     >
                         <Form.Item
                             {...formItemLayout}
-                            label="站点名称"
+                            label={t('系统语言')}
+                            name="locale"
+                            initialValue={options.locale || 'zh-CN'}
+                            extra={t('插件初始化时的静态文案需要安全重载插件或重启后生效。')}
+                        >
+                            <Select options={[
+                                {value: 'zh-CN', label: '简体中文'},
+                                {value: 'en-US', label: 'English'},
+                            ]} />
+                        </Form.Item>
+                        <Form.Item
+                            {...formItemLayout}
+                            label={t("站点名称")}
                             name="title"
                             rules={[
                                 {
                                     required: true,
-                                    message: '请填写站点名称',
+                                    message: t("请填写站点名称"),
                                 },
                             ]}
                             initialValue={options.title}
@@ -173,16 +187,16 @@ function GeneralForm(props: GeneralProps) {
                                     }}
                                 />
                             </Form.Item>
-                            <p>尺寸最好为 140x140px。</p>
+                            <p>{t("尺寸最好为 140x140px。")}</p>
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="站点描述"
+                            label={t("站点描述")}
                             name="description"
                             rules={[
                                 {
                                     required: true,
-                                    message: '请填写站点描述',
+                                    message: t("请填写站点描述"),
                                 },
                             ]}
                             initialValue={options.description}
@@ -191,7 +205,7 @@ function GeneralForm(props: GeneralProps) {
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="网站地址"
+                            label={t("网站地址")}
                             name="site_url"
                             initialValue={options.site_url}
                         >
@@ -230,20 +244,20 @@ function GeneralForm(props: GeneralProps) {
                                     }}
                                 />
                             </Form.Item>
-                            <p>尺寸最好为 128x128px。</p>
+                            <p>{t("尺寸最好为 128x128px。")}</p>
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="关键词"
+                            label={t("关键词")}
                             name="keywords"
                             initialValue={options.keywords}
                         >
                             <Input />
                         </Form.Item>
-                        <p>请以半角逗号 "," 分割多个关键字.</p>
+                        <p>{t("请以半角逗号 \",\" 分割多个关键字.")}</p>
                         <Form.Item
                             {...formItemLayout}
-                            label="GitHub 地址"
+                            label={t("GitHub 地址")}
                             name="github_url"
                             initialValue={options.github_url}
                         >
@@ -251,7 +265,7 @@ function GeneralForm(props: GeneralProps) {
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="Twitter 地址"
+                            label={t("Twitter 地址")}
                             name="twitter_url"
                             initialValue={options.twitter_url}
                         >
@@ -259,7 +273,7 @@ function GeneralForm(props: GeneralProps) {
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="网站工信部备案号"
+                            label={t("网站工信部备案号")}
                             name="miitbeian"
                             initialValue={options.miitbeian}
                         >
@@ -267,7 +281,7 @@ function GeneralForm(props: GeneralProps) {
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="网站公安部备案号"
+                            label={t("网站公安部备案号")}
                             name="mpsbeian"
                             initialValue={options.mpsbeian}
                         >
@@ -279,7 +293,7 @@ function GeneralForm(props: GeneralProps) {
                                 htmlType="submit"
                                 loading={loading.submit}
                             >
-                                提交
+                                {t("提交")}
                             </Button>
                         </Form.Item>
                     </Form>

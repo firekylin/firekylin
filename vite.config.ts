@@ -60,6 +60,10 @@ export default defineConfig(({ mode }) => ({
         port: 3000,
         proxy: {
             // Proxy API and static asset requests to ThinkJS backend during development
+            '/admin/locale': {
+                target: 'http://localhost:8360',
+                changeOrigin: true,
+            },
             '/admin/api': {
                 target: 'http://localhost:8360',
                 changeOrigin: true,

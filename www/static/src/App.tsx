@@ -1,3 +1,4 @@
+import {ready, LocaleProvider} from './i18n';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { configureStores } from '@admin/utils/mobx-react';
@@ -13,4 +14,8 @@ if (Object.freeze) {
 }
 
 configureStores(store);
-createRoot(document.getElementById('app') as HTMLElement).render(routes);
+ready.then(() => {
+    createRoot(document.getElementById('app') as HTMLElement).render(
+        <LocaleProvider>{routes}</LocaleProvider>,
+    );
+});
