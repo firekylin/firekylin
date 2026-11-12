@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from './utils/http';
@@ -94,7 +95,7 @@ class SharedStore {
         },
         err => {
           this.setLoading({category: false});
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
       );
   }
@@ -128,7 +129,7 @@ class SharedStore {
         },
         err => {
           this.setLoading({tag: false});
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
       );
   }
@@ -178,12 +179,12 @@ class SharedStore {
           this.setPageList(res.data);
           this.setLoading({page: false});
         } else {
-          message.error(res.errmsg);
+          message.error(i18n.t(res.errmsg || ''));
           this.setLoading({page: false});
         }
       },
       err => {
-        message.error(err);
+        message.error(typeof err === 'string' ? i18n.t(err) : err);
         this.setLoading({page: false});
       }
     );

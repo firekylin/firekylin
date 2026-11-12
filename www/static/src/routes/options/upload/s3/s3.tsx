@@ -1,15 +1,18 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import { Form } from 'antd';
 import { Input } from 'antd';
 import { OptionsUploadItemsProps } from '../upload.model';
 
 function OptionsUploadS3FormItems(props: OptionsUploadItemsProps) {
+    useTranslation('admin');
     return (
         <>
             {/* accessKeyId */}
             <Form.Item
                 label="accessKeyId"
                 name="accessKeyId"
-                rules={[{ required: true, message: '请填写 AWS S3 的accessKeyId' }]}
+                rules={[{ required: true, message: i18n.t("请填写 AWS S3 的accessKeyId") }]}
                 initialValue={props.upload.accessKeyId || ''}
             >
                 <Input />
@@ -18,32 +21,32 @@ function OptionsUploadS3FormItems(props: OptionsUploadItemsProps) {
             <Form.Item
                 label="accessKeySecret"
                 name="accessKeySecret"
-                rules={[{ required: true, message: '请填写 AWS S3 的accessKeySecret' }]}
+                rules={[{ required: true, message: i18n.t("请填写 AWS S3 的accessKeySecret") }]}
                 initialValue={props.upload.accessKeySecret || ''}
             >
                 <Input />
             </Form.Item>
             {/* 存储桶(Bucket) */}
             <Form.Item
-                label="存储桶(Bucket)"
+                label={i18n.t("存储桶(Bucket)")}
                 name="bucket"
-                rules={[{ required: true, message: '请填写 AWS S3 的存储桶名' }]}
+                rules={[{ required: true, message: i18n.t("请填写 AWS S3 的存储桶名") }]}
                 initialValue={props.upload.bucket || ''}
             >
                 <Input />
             </Form.Item>
             {/* 服务区域/终端节点 */}
             <Form.Item
-                label="服务区域/终端节点"
+                label={i18n.t("服务区域/终端节点")}
                 name="region"
-                rules={[{ required: true, message: '请填写 S3 的服务区域或者终端节点' }]}
+                rules={[{ required: true, message: i18n.t("请填写 S3 的服务区域或者终端节点") }]}
                 initialValue={props.upload.region || ''}
             >
                 <Input />
             </Form.Item>
             {/* 路径前缀 */}
             <Form.Item
-                label="路径前缀"
+                label={i18n.t("路径前缀")}
                 name="prefix"
                 initialValue={props.upload.prefix || ''}
             >

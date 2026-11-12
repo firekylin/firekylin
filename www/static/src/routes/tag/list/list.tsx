@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React, { useCallback, useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Table, Modal, message, Space } from 'antd';
@@ -12,6 +14,7 @@ const confirm = Modal.confirm;
 const Column = Table.Column;
 
 export function TagList(props: TagProps) {
+    useTranslation('admin');
     const [loading, setLoading] = useState(false);
     const [tagList, setTagList] = useState<Tag[]>([]);
 
@@ -36,14 +39,14 @@ export function TagList(props: TagProps) {
 
     function tagDelete(id: number) {
         confirm({
-            title: '提示',
-            content: '确定删除吗?',
+            title: i18n.t("提示"),
+            content: i18n.t("确定删除吗?"),
             onOk: () => {
                 return TagAPI.tagDeleteById(id)
                 .pipe(
                     tap(res => {
                         if (res.errno === 0) {
-                            message.success('删除成功');
+                            message.success(i18n.t("删除成功"));
                             loadTags();
                         }
                     })
@@ -56,29 +59,29 @@ export function TagList(props: TagProps) {
         <div className="tag-list">
             <BreadCrumb {...props} />
             <div className="page-list">
-                <div className="list-toolbar"><Button type="primary" onClick={() => props.history.push('/tag/create')}>添加标签</Button></div>
+                <div className="list-toolbar"><Button type="primary" onClick={() => props.history.push('/tag/create')}>{i18n.t("添加标签")}</Button></div>
                 <Table 
                     dataSource={tagList}
                     loading={{spinning: loading, delay: TABLE_DELAY}}
                     rowKey={tag => tag.id.toString()}
                 >
                     <Column
-                        title="名称"
+                        title={i18n.t("名称")}
                         key="name"
                         dataIndex="name"
                     />
                     <Column
-                        title="缩略名"
+                        title={i18n.t("缩略名")}
                         dataIndex="pathname"
                         key="pathname"
                     />
                     <Column
-                        title="文章数"
+                        title={i18n.t("文章数")}
                         dataIndex="post_tag"
                         key="post_tag"
                     />
                     <Column
-                        title="操作"
+                        title={i18n.t("操作")}
                         key="action"
                         render={(tag: Tag) => (
                             <Space size="small">
@@ -88,9 +91,9 @@ export function TagList(props: TagProps) {
                                     icon={<EditOutlined />}
                                     size="small"
                                 >
-                                    编辑
+                                    {i18n.t("编辑")}
                                 </Button>
-                                <Button onClick={() => tagDelete(tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">删除</Button>
+                                <Button onClick={() => tagDelete(tag.id)} type="primary" danger icon={<DeleteOutlined />} size="small">{i18n.t("删除")}</Button>
                             </Space>
                         )}
                     />

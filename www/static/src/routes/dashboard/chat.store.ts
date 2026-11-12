@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import {makeAutoObservable, runInAction} from 'mobx';
 export async function chatApi(body?: any, session?: string) {
     const response = await fetch('/admin/api/chat' + (session ? `?session=${encodeURIComponent(session)}` : ''), {
@@ -6,7 +7,7 @@ export async function chatApi(body?: any, session?: string) {
         ...(body ? {body: JSON.stringify(body)} : {})
     });
     const result = await response.json();
-    if (!response.ok || result.errno !== 0) throw new Error(result.errmsg || '请求失败');
+    if (!response.ok || result.errno !== 0) throw new Error(i18n.t(result.errmsg || '') || i18n.t("请求失败"));
     return result.data;
 }
 export class ChatStore {
@@ -72,7 +73,7 @@ export class ChatStore {
                 headers: {'Content-Type': 'application/json', 'X-CSRF-Token': window.SysConfig.csrfToken},
                 body: JSON.stringify({operation, session: id, requestKey: crypto.randomUUID(), ...values})});
             if (!response.ok || !response.headers.get('content-type')?.includes('text/event-stream')) {
-                const result = await response.json(); throw new Error(result.errmsg || '连接失败');
+                const result = await response.json(); throw new Error(i18n.t(result.errmsg || '') || i18n.t("连接失败"));
             }
             accepted = true;
             const reader = response.body!.getReader();
@@ -115,13 +116,13 @@ export class ChatStore {
                 }
                 if (done) break;
             }
-            if (!completed) throw new Error('连接已中断，请查看对话与操作记录');
+            if (!completed) throw new Error(i18n.t("连接已中断，请查看对话与操作记录"));
         } catch (error: any) {
-            runInAction(() => { this.error = error.name === 'AbortError' ? '已停止。正在同步操作结果。' : error.message });
+            runInAction(() => { this.error = error.name === 'AbortError' ? i18n.t("已停止。正在同步操作结果。") : i18n.t(error.message || '') });
         } finally {
             runInAction(() => { this.busy = false; this.streaming = ''; this.status = ''; this.abort = null });
             try { await Promise.all([this.list(), this.open(id)]); }
-            catch { runInAction(() => { this.error = this.error || '消息状态同步失败，请刷新对话查看已保存的记录'; }); }
+            catch { runInAction(() => { this.error = this.error || i18n.t("消息状态同步失败，请刷新对话查看已保存的记录"); }); }
             finally { runInAction(() => { this.pendingMessage = null }); }
         }
         return accepted;

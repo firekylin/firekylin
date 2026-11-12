@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Alert, Button, Card, Descriptions, Divider, Dropdown, Empty, Form, Image, Input, List, Progress, Space, Statistic, Table, Tabs, Typography } from 'antd';
 import { FormField, FormFieldSchema } from './form-field';
@@ -34,6 +36,7 @@ function safeImageUrl(value: unknown): string | undefined {
 }
 
 function InlineMarkdown({children}: {children: string}) {
+    useTranslation('admin');
     const tokens = children.split(/(`[^`]+`|\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
     return <>{tokens.map((token, index) => {
         if (token.startsWith('`') && token.endsWith('`')) return <Typography.Text code key={index}>{token.slice(1, -1)}</Typography.Text>;
@@ -45,6 +48,7 @@ function InlineMarkdown({children}: {children: string}) {
 }
 
 function Markdown({content}: {content: string}) {
+    useTranslation('admin');
     const lines = String(content || '').split('\n');
     return <div>{lines.map((line, index) => {
         const heading = /^(#{1,3})\s+(.+)$/.exec(line);
@@ -61,6 +65,7 @@ function card(node: PageSection, children: React.ReactNode, extra?: React.ReactN
 }
 
 function TableAction({item, context}: {item: any; context: PageSectionContext}) {
+    useTranslation('admin');
     const type = item.type === 'primary' ? 'primary' : 'link';
     if (item.href) {
         const href = safeUrl(item.href);
@@ -73,10 +78,12 @@ function TableAction({item, context}: {item: any; context: PageSectionContext}) 
 }
 
 function TableActions({items, context}: {items: any[]; context: PageSectionContext}) {
+    useTranslation('admin');
     return <Space>{(items || []).map((item, index) => <TableAction key={index} item={item} context={context} />)}</Space>;
 }
 
 function TableSection({node, context}: {node: PageSection; context: PageSectionContext}) {
+    useTranslation('admin');
     const [keyword, setKeyword] = React.useState('');
     const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([]);
     const search = node.search && typeof node.search === 'object' ? node.search : node.search ? {} : null;
@@ -103,10 +110,10 @@ function TableSection({node, context}: {node: PageSection; context: PageSectionC
         setSelectedRowKeys([]);
     };
     const controls = search || selection || node.toolbar ? <Space wrap>
-        {search ? <Input.Search allowClear value={keyword} placeholder={search.placeholder || '搜索'}
+        {search ? <Input.Search allowClear value={keyword} placeholder={search.placeholder || i18n.t("搜索")}
             onChange={event => setKeyword(event.target.value)} style={{width: search.width || 240}} /> : null}
         {selection ? <Dropdown menu={{items: bulkItems, onClick: runBulkAction}} disabled={!selectedRowKeys.length}>
-            <Button>批量操作{selectedRowKeys.length ? `（${selectedRowKeys.length}）` : ''}</Button>
+            <Button>{i18n.t("批量操作")}{selectedRowKeys.length ? `（${selectedRowKeys.length}）` : ''}</Button>
         </Dropdown> : null}
         {node.toolbar ? <TableActions items={node.toolbar} context={context} /> : null}
     </Space> : undefined;
@@ -120,10 +127,11 @@ function TableSection({node, context}: {node: PageSection; context: PageSectionC
 
 function PluginForm({item, values, submit, form, hideSubmit, onValuesChange, clearOnDestroy, disabled}: {item: any; values: any;
     submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void; clearOnDestroy?: boolean; disabled?: boolean}) {
+    useTranslation('admin');
     const renderField = (field: FormFieldSchema) => <Form.Item key={field.name} name={field.name} label={field.label}
         hidden={field.type === 'hidden'} preserve={false}
         valuePropName={field.type === 'switch' ? 'checked' : 'value'}
-        extra={field.description} rules={[{required: field.required, message: `请填写${field.label}`}]}>
+        extra={field.description} rules={[{required: field.required, message: i18n.t("请填写{{value0}}", {value0: field.label})}]}>
         <FormField field={field} />
     </Form.Item>;
     return <Card title={item.title} style={{marginBottom: 16}}>
@@ -143,6 +151,7 @@ function PluginForm({item, values, submit, form, hideSubmit, onValuesChange, cle
 }
 
 export function ActionGroup({ids, context}: {ids?: string[]; context: PageSectionContext}) {
+    useTranslation('admin');
     const selected = ids ? context.actions.filter(action => ids.includes(action.id)) : context.actions;
     return selected.length ? <Space style={{display: 'flex', marginBottom: 16,
         marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>
@@ -168,7 +177,7 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
     markdown: ({node}) => card(node, <Markdown content={node.content} />),
     image: ({node}) => card(node, safeImageUrl(node.src)
         ? <Image src={safeImageUrl(node.src)} alt={node.alt || ''} width={node.width} />
-        : <Alert type="warning" message="图片地址无效" showIcon />),
+        : <Alert type="warning" message={i18n.t("图片地址无效")} showIcon />),
     progress: ({node}) => card(node, <Progress percent={Math.max(0, Math.min(100, node.percent || 0))}
         status={node.status} format={node.label ? () => node.label : undefined} />),
     empty: ({node}) => <Empty style={{marginBottom: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}
@@ -200,15 +209,18 @@ const pageSectionRenderers: ProtocolRendererMap<PageSection, PageSectionContext>
 };
 
 export function PageSectionRenderer({section, context}: {section: PageSection; context: PageSectionContext}) {
+    useTranslation('admin');
     return <ProtocolRenderer node={section} context={context} renderers={pageSectionRenderers} />;
 }
 
 export function PageSections({sections, context}: {sections: PageSection[]; context: PageSectionContext}) {
+    useTranslation('admin');
     return <ProtocolList nodes={sections} context={context} renderers={pageSectionRenderers} />;
 }
 
 export function PageForm({item, values, submit, form, hideSubmit, onValuesChange, clearOnDestroy, disabled}: {item: any; values: any;
     submit: PageSectionContext['submit']; form?: any; hideSubmit?: boolean; onValuesChange?: () => void; clearOnDestroy?: boolean; disabled?: boolean}) {
+    useTranslation('admin');
     return <PluginForm item={item} values={values} submit={submit} form={form} disabled={disabled}
         hideSubmit={hideSubmit} onValuesChange={onValuesChange} clearOnDestroy={clearOnDestroy} />;
 }

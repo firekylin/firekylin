@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {useEffect, useRef, useState} from 'react';
 import {Alert, Button, Card, Dropdown, Form, message, Modal, Select, Space, Spin, Tabs, Typography} from 'antd';
 import {StarFilled, StarOutlined} from '@ant-design/icons';
@@ -23,6 +25,7 @@ interface Provider {
 }
 
 export default function AIConnections() {
+    useTranslation('admin');
     const [modal, modalContext] = Modal.useModal();
     const {history} = useRouteComponentProps();
     const [providers, setProviders] = useState<Provider[]>([]);
@@ -61,7 +64,7 @@ export default function AIConnections() {
                     ? current : items.find((item: Provider) => item.models.some(model => model.selected))?.id ||
                         items.find((item: Provider) => item.configured !== false)?.id);
             }
-            else setLoadError(res.errmsg || '读取 AI 连接失败，请重试');
+            else setLoadError(i18n.t(res.errmsg || '') || i18n.t("读取 AI 连接失败，请重试"));
             setLoading(false);
         });
         return () => subscription.unsubscribe();
@@ -77,7 +80,7 @@ export default function AIConnections() {
         const {pluginId, formId} = provider.admin;
         const subscription = http.get<any>(`/admin/api/plugins/${pluginId}/forms/${formId}`).subscribe(res => {
             if (res.errno === 0) setFormValues(res.data || {});
-            else setFormError(res.errmsg || '读取服务商设置失败，请重试');
+            else setFormError(i18n.t(res.errmsg || '') || i18n.t("读取服务商设置失败，请重试"));
             setFormLoading(false);
         });
         return () => subscription.unsubscribe();
@@ -98,7 +101,7 @@ export default function AIConnections() {
         http.post<any>(`/admin/api/plugins/${provider.admin.pluginId}/actions/${provider.admin.testActionId}`,
             {model: modelId}, csrf).subscribe(res => {
             setWorking(false);
-            if (res.errno === 0) message.success((res.data as any).message || '连接成功');
+            if (res.errno === 0) message.success(i18n.t((res.data as any).message || '') || i18n.t("连接成功"));
         });
     };
     const busy = loading || working || formLoading;
@@ -114,8 +117,8 @@ export default function AIConnections() {
             if (res.errno === 0) {
                 setProviderId(current => current === id ? undefined : current);
                 setReloadKey(key => key + 1);
-                message.success('AI 连接已删除');
-            } else throw new Error(res.errmsg || '删除连接失败');
+                message.success(i18n.t("AI 连接已删除"));
+            } else throw new Error(i18n.t(res.errmsg || '') || i18n.t("删除连接失败"));
         } finally { setWorking(false) }
     };
     const saveConnection = async () => {
@@ -126,7 +129,7 @@ export default function AIConnections() {
                 const values = await providerForm.validateFields();
                 if (!hasSavedApiKey && form.fields.some(field => field.name === 'apiKey' && field.type === 'password') &&
                     (typeof values.apiKey !== 'string' || !values.apiKey.trim())) {
-                    providerForm.setFields([{name: 'apiKey', errors: ['请输入 API Key']}]);
+                    providerForm.setFields([{name: 'apiKey', errors: [i18n.t("请输入 API Key")]}]);
                     return;
                 }
                 if (hasSavedApiKey && values.apiKey === SAVED_SECRET_MASK) delete values.apiKey;
@@ -137,7 +140,7 @@ export default function AIConnections() {
             const res = provider?.configured === false || providerId === savedProvider?.id ? await firstValueFrom(http.post<any>('/admin/api/ai-connections',
                 {provider: provider?.id || null, model: modelId}, csrf)) : {errno: 0};
             if (res.errno === 0) {
-                message.success('AI 连接已保存');
+                message.success(i18n.t("AI 连接已保存"));
                 setSettingsDirty(false);
                 setReloadKey(key => key + 1);
             }
@@ -157,32 +160,32 @@ export default function AIConnections() {
             if (res.errno === 0) {
                 setProviders(items => items.map(candidate => ({...candidate, models: candidate.models.map(entry =>
                     ({...entry, selected: candidate.id === item.id && entry.id === model}))})));
-                message.success('默认模型已更新');
+                message.success(i18n.t("默认模型已更新"));
             }
         } finally {setWorking(false)}
     };
 
     const tabContent = <div className="ai-connection-panel" aria-busy={busy}>
         {formError ? <Alert type="error" showIcon title={formError}
-            action={<Button onClick={() => setFormReload(value => value + 1)}>重试</Button>} /> : null}
+            action={<Button onClick={() => setFormReload(value => value + 1)}>{i18n.t("重试")}</Button>} /> : null}
         {provider && form && displayedFormValues ? <PageForm key={provider.id} item={form} values={displayedFormValues}
             submit={() => {}} form={providerForm} disabled={busy} clearOnDestroy hideSubmit onValuesChange={() => setSettingsDirty(true)} /> : null}
         {provider && !form ? <Alert type="warning" showIcon style={{marginBottom: 16}}
-            title="该服务商没有提供连接配置表单" /> : null}
-        {provider ? <Card title="模型与连接测试">
+            title={i18n.t("该服务商没有提供连接配置表单")} /> : null}
+        {provider ? <Card title={i18n.t("模型与连接测试")}>
             <Space orientation="vertical" style={{width: '100%'}}>
-                <Select aria-label="选择 AI 模型" disabled={busy} value={modelId} onChange={setModelId}
+                <Select aria-label={i18n.t("选择 AI 模型")} disabled={busy} value={modelId} onChange={setModelId}
                     style={{width: '100%', maxWidth: 420}}
                     options={provider.models.map(item => ({label: item.label, value: item.id}))} />
-                <Button onClick={testConnection} disabled={busy || !provider.admin || !modelId || settingsDirty || provider.configured === false}>测试连接</Button>
+                <Button onClick={testConnection} disabled={busy || !provider.admin || !modelId || settingsDirty || provider.configured === false}>{i18n.t("测试连接")}</Button>
                 <Typography.Text type="secondary">
-                    {provider.models.some(item => item.selected) ? '此服务商是当前默认服务商。' : provider.configured === false ? '新增连接保存后将成为默认服务商。' : '点击 Tab 左侧星标可设为默认模型。'}
-                    修改连接配置后，请先保存再测试。
+                    {provider.models.some(item => item.selected) ? i18n.t("此服务商是当前默认服务商。") : provider.configured === false ? i18n.t("新增连接保存后将成为默认服务商。") : i18n.t("点击 Tab 左侧星标可设为默认模型。")}
+                    {i18n.t("修改连接配置后，请先保存再测试。")}
                 </Typography.Text>
             </Space>
         </Card> : null}
-        <Button type="primary" aria-label="保存" onClick={saveConnection} disabled={busy || Boolean(formError) || !dirty || Boolean(provider && !modelId)}
-            style={{marginTop: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>保存</Button>
+        <Button type="primary" aria-label={i18n.t("保存")} onClick={saveConnection} disabled={busy || Boolean(formError) || !dirty || Boolean(provider && !modelId)}
+            style={{marginTop: 16, marginInlineStart: PAGE_SECTION_CONTENT_INSET}}>{i18n.t("保存")}</Button>
     </div>;
     const addProvider = <Dropdown classNames={{root: 'ai-provider-menu'}} trigger={['click']} open={adding} onOpenChange={setAdding} autoFocus
         disabled={busy || Boolean(loadError)} menu={{onClick: ({key}) => changeProvider(key),
@@ -191,33 +194,33 @@ export default function AIConnections() {
             },
             items: [...providers.filter(item => item.configured === false && item.id !== providerId)
                 .map(item => ({key: item.id, label: item.label})),
-                {key: MORE_PROVIDERS, label: '安装更多 AI 服务商'}]}}>
+                {key: MORE_PROVIDERS, label: i18n.t("安装更多 AI 服务商")}]}}>
         <Button ref={addButton} type="text" className="ai-provider-add" disabled={busy || Boolean(loadError)}
-            aria-label="增加服务商" aria-haspopup="menu" aria-expanded={adding}>
-            <span aria-hidden="true">＋</span>增加服务商
-        </Button>
+            aria-label={i18n.t("增加服务商")}
+         aria-haspopup="menu" aria-expanded={adding}>
+            <span aria-hidden="true">＋</span>{i18n.t("增加服务商")}</Button>
     </Dropdown>;
     return <div className="fk-content-wrap ai-settings-page">
         {modalContext}
         <BreadCrumb />
         <div className="page-list ai-connections">
-            <h3 className="page-title">AI 连接</h3>
+            <h3 className="page-title">{i18n.t("AI 连接")}</h3>
             <Spin spinning={busy}>
                 {loadError ? <Alert type="error" showIcon title={loadError}
-                    action={<Button onClick={() => setReloadKey(key => key + 1)}>重试</Button>} /> : null}
-                <Tabs type="editable-card" hideAdd locale={{removeAriaLabel: '删除服务商'}}
+                    action={<Button onClick={() => setReloadKey(key => key + 1)}>{i18n.t("重试")}</Button>} /> : null}
+                <Tabs type="editable-card" hideAdd locale={{removeAriaLabel: i18n.t("删除服务商")}}
                     onEdit={(key, action) => {
                         const target = connections.find(item => item.id === key);
                         if (action !== 'remove' || !target?.removable || busy) return;
-                        modal.confirm({title: `删除 ${target.label} 的 AI 连接？`,
-                            content: '将删除连接密钥。使用此服务商的能力需要重新选择模型；插件仍会保留。',
-                            okText: '删除', cancelText: '取消', okButtonProps: {danger: true},
+                        modal.confirm({title: i18n.t("删除 {{value0}} 的 AI 连接？", {value0: target.label}),
+                            content: i18n.t("将删除连接密钥。使用此服务商的能力需要重新选择模型；插件仍会保留。"),
+                            okText: i18n.t("删除"), cancelText: i18n.t("取消"), okButtonProps: {danger: true},
                             onOk: () => removeConnection(target.id)});
                     }} className="ai-provider-tabs" activeKey={providerId} tabBarExtraContent={addProvider}
                     onChange={value => {setProviderId(value); setAdding(false)}}
                     items={connections.map(item => ({key: item.id, label: <span aria-label={item.label} className="ai-provider-label">
                         <button type="button" className={`ai-provider-star${item.id === savedProvider?.id ? ' is-default' : ''}`}
-                            aria-label={item.id === savedProvider?.id ? `${item.label}是默认服务商` : `将${item.label}设为默认模型`}
+                            aria-label={item.id === savedProvider?.id ? i18n.t("{{value0}}是默认服务商", {value0: item.label}) : i18n.t("将{{value0}}设为默认模型", {value0: item.label})}
                             aria-pressed={item.id === savedProvider?.id}
                             disabled={busy || item.configured === false || settingsDirty || item.id === savedProvider?.id}
                             onKeyDown={event => event.stopPropagation()}
@@ -227,7 +230,7 @@ export default function AIConnections() {
                     </span>, disabled: busy, closable: Boolean(item.removable),
                         children: item.id === providerId ? tabContent : null}))} />
                 {!loading && !loadError && !connections.length ? <Typography.Paragraph type="secondary">
-                    尚未配置 AI 连接，请点击“增加服务商”。
+                    {i18n.t("尚未配置 AI 连接，请点击“增加服务商”。")}
                 </Typography.Paragraph> : null}
             </Spin>
         </div>

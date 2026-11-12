@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { Input, Modal, Tabs, Upload, message, ModalProps } from 'antd';
 import type { UploadChangeParam } from 'antd/es/upload/interface';
@@ -18,6 +20,7 @@ interface EditorImageModalProps extends ModalProps {
     onUploadChange?: (id: symbol, pending: boolean) => void;
 }
 function EditorImageModalForm(props: EditorImageModalProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         loading: false,
     }));
@@ -70,7 +73,7 @@ function EditorImageModalForm(props: EditorImageModalProps) {
                 if (id) props.onUploadChange?.(id, false);
                 uploads.current.delete(info.file.uid);
                 legacy.setState({loading: false});
-                if (info.file.status === 'error') message.error('图片上传失败');
+                if (info.file.status === 'error') message.error(i18n.t("图片上传失败"));
             }
         };
     }
@@ -82,7 +85,7 @@ function EditorImageModalForm(props: EditorImageModalProps) {
     legacy.beforeUpload = function beforeUpload(file: File) {
         const isLt5M = file.size / 1024 / 1024 < 5;
         if (!isLt5M) {
-            message.error('图片必须小于5MB!');
+            message.error(i18n.t("图片必须小于5MB!"));
         }
         return isLt5M;
     };
@@ -98,7 +101,7 @@ function EditorImageModalForm(props: EditorImageModalProps) {
 
         return (
             <Modal
-                title="插入图片"
+                title={i18n.t("插入图片")}
                 open={props.open}
                 onOk={props.onOk}
                 onCancel={onCancel}
@@ -115,7 +118,7 @@ function EditorImageModalForm(props: EditorImageModalProps) {
                     items={[
                         {
                             key: '0',
-                            label: '本地上传',
+                            label: i18n.t("本地上传"),
                             children: (
                                 <Upload
                                     name="file"
@@ -139,10 +142,10 @@ function EditorImageModalForm(props: EditorImageModalProps) {
                         },
                         {
                             key: '1',
-                            label: '从网络上抓取',
+                            label: i18n.t("从网络上抓取"),
                             children: (
                                 <div style={{ padding: 20 }}>
-                                    <div style={{ marginBottom: 8 }}>链接地址：</div>
+                                    <div style={{ marginBottom: 8 }}>{i18n.t("链接地址：")}</div>
                                     <Input
                                         value={fileLink}
                                         onChange={(e: ChangeEvent<HTMLInputElement>) =>

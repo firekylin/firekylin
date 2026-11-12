@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { ThemeProps } from './theme.model';
@@ -8,6 +10,7 @@ import { Link, useLocation } from '../../../utils/router';
 import { Button, Input } from 'antd';
 import './theme.less';
 export function ThemeForm(props: ThemeProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         themeConfig: {},
         search: '',
@@ -67,7 +70,7 @@ export function ThemeForm(props: ThemeProps) {
 
         return (
             <div>
-                <h3 style={{ marginBottom: '20px' }}>{theme.name} 主题选项</h3>
+                <h3 style={{ marginBottom: '20px' }}>{theme.name}{i18n.t(" 主题选项")}</h3>
                 <Form
                     className="clearfix options-general"
                     layout="vertical"
@@ -91,7 +94,7 @@ export function ThemeForm(props: ThemeProps) {
                     ))}
                     <Form.Item>
                         <Button type="primary" htmlType="submit">
-                            保存配置
+                            {i18n.t("保存配置")}
                         </Button>
                     </Form.Item>
                 </Form>
@@ -112,27 +115,27 @@ export function ThemeForm(props: ThemeProps) {
                 <BreadCrumb {...props} />
                 <div className="appearance-theme-wrapper">
                     {isSettings ? <>
-                        <Link to="/appearance/theme">返回主题管理</Link>
-                        {legacy.renderThemeConfig() || <p>当前主题没有可配置的选项。</p>}
+                        <Link to="/appearance/theme">{i18n.t("返回主题管理")}</Link>
+                        {legacy.renderThemeConfig() || <p>{i18n.t("当前主题没有可配置的选项。")}</p>}
                     </> : <>
                     <div className="theme-header">
-                        <h3 className="theme-title">主题管理</h3>
+                        <h3 className="theme-title">{i18n.t("主题管理")}</h3>
                         <div className="theme-header-actions">
-                            <Input.Search className="theme-search" placeholder="搜索主题" value={state.search}
+                            <Input.Search className="theme-search" placeholder={i18n.t("搜索主题")} value={state.search}
                                 onChange={event => legacy.setState({search: event.target.value})} />
-                            <Button type="primary" onClick={() => props.history.push('/appearance/install-theme')}>安装主题</Button>
+                            <Button type="primary" onClick={() => props.history.push('/appearance/install-theme')}>{i18n.t("安装主题")}</Button>
                         </div>
                     </div>
                     <div className="theme-grid">
                         {filtered.map(theme => <div className="theme-card" key={theme.id}>
                             <div className="theme-preview">
-                                {theme.screenshot ? <img src={theme.screenshot} alt={`${theme.name} 预览`} /> : <span>暂无预览</span>}
+                                {theme.screenshot ? <img src={theme.screenshot} alt={i18n.t("{{value0}} 预览", {value0: theme.name})} /> : <span>{i18n.t("暂无预览")}</span>}
                             </div>
                             <div className="theme-card-info">
-                                <div><strong>{theme.name}</strong><div>版本 {theme.version}</div></div>
+                                <div><strong>{theme.name}</strong><div>{i18n.t("版本 ")}{theme.version}</div></div>
                                 {theme.id === themeStore.data.theme
-                                    ? <Link to="/appearance/theme/settings"><Button>设置</Button></Link>
-                                    : <Button type="primary" onClick={() => themeStore.themeSelect({theme: theme.id})}>启用</Button>}
+                                    ? <Link to="/appearance/theme/settings"><Button>{i18n.t("设置")}</Button></Link>
+                                    : <Button type="primary" onClick={() => themeStore.themeSelect({theme: theme.id})}>{i18n.t("启用")}</Button>}
                             </div>
                         </div>)}
                     </div>

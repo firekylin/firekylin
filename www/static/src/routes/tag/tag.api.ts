@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { http } from '../../utils/http';
 import { Tag } from '../../models/tag.model';
 import { map } from 'rxjs/operators';
@@ -47,7 +48,7 @@ function tagCreate(params: TagCreateParams) {
     .pipe(
         map(res => {
           if (res.errno === 0) {
-            message.success('创建成功');
+            message.success(i18n.t("创建成功"));
           }
           return res;
         })

@@ -45,7 +45,7 @@ class GeneralStore {
             },
             err => {
                 this.setLoading({submit: false});
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             }
         );
 

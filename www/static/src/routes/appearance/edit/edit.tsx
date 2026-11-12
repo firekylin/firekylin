@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
@@ -6,6 +8,7 @@ import { ThemeEditProps } from './edit.modal';
 import CodeEditor from './code-editor';
 const info = Modal.info;
 function Edit(props: ThemeEditProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         theme: '',
         content: '',
@@ -57,9 +60,9 @@ function Edit(props: ThemeEditProps) {
             return;
         }
         info({
-            title: '主题修改警告！',
+            title: i18n.t("主题修改警告！"),
             content:
-                '你当前使用的是默认主题，升级过程中很有可能会覆盖你的修改，如需修改请自行拷贝默认主题为新的主题来避免这个问题。',
+                i18n.t("你当前使用的是默认主题，升级过程中很有可能会覆盖你的修改，如需修改请自行拷贝默认主题为新的主题来避免这个问题。"),
         });
     };
     legacy.selectFile = function selectFile(key: string) {
@@ -84,7 +87,7 @@ function Edit(props: ThemeEditProps) {
             <div className="edit">
                 <BreadCrumb {...props} />
                 <div className="page-list">
-                    <h3 style={{ marginBottom: '20px' }}>编辑当前主题({theme})</h3>
+                    <h3 style={{ marginBottom: '20px' }}>{i18n.t("编辑当前主题(")}{theme})</h3>
                     <div className="row">
                         <div className="col-xs-9 theme-editor">
                             <CodeEditor
@@ -100,7 +103,7 @@ function Edit(props: ThemeEditProps) {
                                     type="primary"
                                     onClick={() => legacy.handleSave()}
                                 >
-                                    保存
+                                    {i18n.t("保存")}
                                 </Button>
                             </div>
                         </div>

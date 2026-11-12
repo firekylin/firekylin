@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
 class CommentStore {
@@ -9,7 +10,7 @@ class CommentStore {
         .subscribe(
             res => {
                 if (res.errno === 0) {
-                    message.success('评论设置更新成功');
+                    message.success(i18n.t("评论设置更新成功"));
                     let previous = window.SysConfig.options.comment || {};
                     if (typeof previous === 'string') previous = JSON.parse(previous);
                     const publicSettings = {...previous, ...data};

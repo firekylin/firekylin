@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import {
     Button,
@@ -18,11 +20,11 @@ import {http} from '../../../utils/http';
 import { CommentProps, CommentState } from './comment.model';
 
 const { TextArea } = Input;
-const META_OPTIONS = [
-    { value: 'nick', label: '昵称' },
-    { value: 'mail', label: '邮箱' },
-    { value: 'link', label: '网址' },
-];
+const getMetaOptions = () => ([
+    { value: 'nick', label: i18n.t("昵称") },
+    { value: 'mail', label: i18n.t("邮箱") },
+    { value: 'link', label: i18n.t("网址") },
+]);
 
 function lines(value: any): string[] {
     if (Array.isArray(value))
@@ -79,6 +81,7 @@ function createCommentState() {
 const SECTION_KEYS: Record<string, string[]> = {"basic": ["audit", "forceLogin", "pageSize", "locale", "ipQps"], "display": ["commentSorting", "dark", "meta", "requiredMeta", "wordLimit", "emoji", "reaction", "imageUploader", "highlighter", "texRenderer", "search", "noCopyright", "noRss"], "mail": ["mailNotify", "smtpHost", "smtpPort", "smtpSecure", "smtpUser", "smtpPass", "smtpFrom", "authorEmail", "mailSubjectTemplate", "mailBodyTemplate"], "security": ["forbiddenWords", "disallowIPList", "likeIncMax", "levels", "avatarProxy"]};
 
 function CommentForm(props: CommentProps) {
+    useTranslation('admin');
     const [activeTab, setActiveTab] = React.useState('basic');
     const activeTabRef = React.useRef(activeTab);
     activeTabRef.current = activeTab;
@@ -161,7 +164,7 @@ function CommentForm(props: CommentProps) {
             <>
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="page-list">
-                    <h3 className="page-title">评论设置</h3>
+                    <h3 className="page-title">{i18n.t("评论设置")}</h3>
                     <div className="option-comment-page">
                         <Form
                             ref={legacy.formRef}
@@ -169,9 +172,9 @@ function CommentForm(props: CommentProps) {
                             layout="vertical"
                         >
                             <Tabs activeKey={activeTab} onChange={setActiveTab} items={[
-                                {key: 'basic', label: '基本设置', forceRender: true, children: <>
+                                {key: 'basic', label: i18n.t("基本设置"), forceRender: true, children: <>
                             <Form.Item
-                                label="评论需要审核"
+                                label={i18n.t("评论需要审核")}
                                 name="audit"
                                 valuePropName="checked"
                                 initialValue={comment.audit}
@@ -179,7 +182,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="必须登录后评论"
+                                label={i18n.t("必须登录后评论")}
                                 name="forceLogin"
                                 valuePropName="checked"
                                 initialValue={comment.forceLogin}
@@ -187,7 +190,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="每页评论数"
+                                label={i18n.t("每页评论数")}
                                 name="pageSize"
                                 initialValue={comment.pageSize}
                                 rules={[{ required: true }]}
@@ -195,17 +198,17 @@ function CommentForm(props: CommentProps) {
                                 <InputNumber min={1} max={100} />
                             </Form.Item>
                             <Form.Item
-                                label="界面语言"
+                                label={i18n.t("界面语言")}
                                 name="locale"
                                 initialValue={comment.locale}
                             >
                                 <Select
                                     options={[
-                                        { value: 'auto', label: '跟随系统' },
-                                        { value: 'zh-CN', label: '简体中文' },
-                                        { value: 'zh-TW', label: '繁體中文' },
+                                        { value: 'auto', label: i18n.t("跟随系统") },
+                                        { value: 'zh-CN', label: i18n.t("简体中文") },
+                                        { value: 'zh-TW', label: i18n.t("繁體中文") },
                                         { value: 'en', label: 'English' },
-                                        { value: 'jp', label: '日本語' },
+                                        { value: 'jp', label: i18n.t("日本語") },
                                         { value: 'pt-BR', label: 'Português' },
                                         { value: 'ru', label: 'Русский' },
                                         { value: 'fr-FR', label: 'Français' },
@@ -214,7 +217,7 @@ function CommentForm(props: CommentProps) {
                                 />
                             </Form.Item>
                             <Form.Item
-                                label="同 IP 评论间隔（秒）"
+                                label={i18n.t("同 IP 评论间隔（秒）")}
                                 name="ipQps"
                                 initialValue={comment.ipQps}
                             >
@@ -222,67 +225,67 @@ function CommentForm(props: CommentProps) {
                             </Form.Item>
 
                                 </>},
-                                {key: 'display', label: '展示与交互', forceRender: true, children: <>
+                                {key: 'display', label: i18n.t("展示与交互"), forceRender: true, children: <>
 
                             <Form.Item
-                                label="默认排序"
+                                label={i18n.t("默认排序")}
                                 name="commentSorting"
                                 initialValue={comment.commentSorting}
                             >
                                 <Select
                                     options={[
-                                        { value: 'latest', label: '最新' },
-                                        { value: 'oldest', label: '最早' },
-                                        { value: 'hottest', label: '最热' },
+                                        { value: 'latest', label: i18n.t("最新") },
+                                        { value: 'oldest', label: i18n.t("最早") },
+                                        { value: 'hottest', label: i18n.t("最热") },
                                     ]}
                                 />
                             </Form.Item>
                             <Form.Item
-                                label="深色模式"
+                                label={i18n.t("深色模式")}
                                 name="dark"
                                 initialValue={comment.dark}
                             >
                                 <Select
                                     options={[
-                                        { value: false, label: '关闭' },
-                                        { value: 'auto', label: '跟随系统' },
+                                        { value: false, label: i18n.t("关闭") },
+                                        { value: 'auto', label: i18n.t("跟随系统") },
                                     ]}
                                 />
                             </Form.Item>
                             <Form.Item
-                                label="评论者资料栏"
+                                label={i18n.t("评论者资料栏")}
                                 name="meta"
                                 initialValue={comment.meta}
                             >
-                                <Select mode="multiple" options={META_OPTIONS} />
+                                <Select mode="multiple" options={getMetaOptions()} />
                             </Form.Item>
                             <Form.Item
-                                label="匿名评论必填资料"
+                                label={i18n.t("匿名评论必填资料")}
                                 name="requiredMeta"
                                 initialValue={comment.requiredMeta}
-                                extra="登录用户不受此项限制"
+                                extra={i18n.t("登录用户不受此项限制")}
                             >
-                                <Select mode="multiple" options={META_OPTIONS} />
+                                <Select mode="multiple" options={getMetaOptions()} />
                             </Form.Item>
                             <div className="option-comment-row">
                                 <Form.Item
-                                    label="最少字数"
+                                    label={i18n.t("最少字数")}
                                     name="wordLimitMin"
                                     initialValue={comment.wordLimitMin}
                                 >
                                     <InputNumber min={0} max={10000} />
                                 </Form.Item>
                                 <Form.Item
-                                    label="最多字数"
+                                    label={i18n.t("最多字数")}
                                     name="wordLimitMax"
                                     initialValue={comment.wordLimitMax}
-                                    extra="0 表示不限制"
+                                    extra={i18n.t("0 表示不限制")}
                                 >
                                     <InputNumber min={0} max={10000} />
                                 </Form.Item>
                             </div>
                             <Form.Item
-                                label="启用表情"
+                                label={i18n.t("启用表情")}
                                 name="emoji"
                                 valuePropName="checked"
                                 initialValue={comment.emoji}
@@ -290,15 +293,15 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="自定义表情预设地址"
+                                label={i18n.t("自定义表情预设地址")}
                                 name="emojiPresets"
                                 initialValue={comment.emojiPresets}
-                                extra="每行一个地址；留空使用 Waline 默认表情"
+                                extra={i18n.t("每行一个地址；留空使用 Waline 默认表情")}
                             >
                                 <TextArea autoSize={{ minRows: 2, maxRows: 6 }} />
                             </Form.Item>
                             <Form.Item
-                                label="启用文章互动"
+                                label={i18n.t("启用文章互动")}
                                 name="reaction"
                                 valuePropName="checked"
                                 initialValue={comment.reaction}
@@ -306,15 +309,15 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="自定义互动图片"
+                                label={i18n.t("自定义互动图片")}
                                 name="reactionImages"
                                 initialValue={comment.reactionImages}
-                                extra="每行一个图片地址，最多 6 个；留空使用默认图标"
+                                extra={i18n.t("每行一个图片地址，最多 6 个；留空使用默认图标")}
                             >
                                 <TextArea autoSize={{ minRows: 2, maxRows: 6 }} />
                             </Form.Item>
                             <Form.Item
-                                label="允许图片上传"
+                                label={i18n.t("允许图片上传")}
                                 name="imageUploader"
                                 valuePropName="checked"
                                 initialValue={comment.imageUploader}
@@ -322,7 +325,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="代码高亮"
+                                label={i18n.t("代码高亮")}
                                 name="highlighter"
                                 valuePropName="checked"
                                 initialValue={comment.highlighter}
@@ -330,7 +333,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="数学公式渲染"
+                                label={i18n.t("数学公式渲染")}
                                 name="texRenderer"
                                 valuePropName="checked"
                                 initialValue={comment.texRenderer}
@@ -338,7 +341,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="GIF 搜索"
+                                label={i18n.t("GIF 搜索")}
                                 name="search"
                                 valuePropName="checked"
                                 initialValue={comment.search}
@@ -346,7 +349,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="隐藏版权提示"
+                                label={i18n.t("隐藏版权提示")}
                                 name="noCopyright"
                                 valuePropName="checked"
                                 initialValue={comment.noCopyright}
@@ -354,7 +357,7 @@ function CommentForm(props: CommentProps) {
                                 <Switch />
                             </Form.Item>
                             <Form.Item
-                                label="隐藏评论 RSS"
+                                label={i18n.t("隐藏评论 RSS")}
                                 name="noRss"
                                 valuePropName="checked"
                                 initialValue={comment.noRss}
@@ -363,83 +366,83 @@ function CommentForm(props: CommentProps) {
                             </Form.Item>
 
                                 </>},
-                                {key: 'mail', label: '邮件通知', forceRender: true, children: <>
+                                {key: 'mail', label: i18n.t("邮件通知"), forceRender: true, children: <>
 
-                            <Form.Item label="评论邮件通知" name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra="新评论通知站长邮箱，已通过审核的回复通知被回复者">
+                            <Form.Item label={i18n.t("评论邮件通知")} name="mailNotify" valuePropName="checked" initialValue={comment.mailNotify} extra={i18n.t("新评论通知站长邮箱，已通过审核的回复通知被回复者")}>
                                 <Switch />
                             </Form.Item>
-                            <Form.Item label="SMTP 服务器" name="smtpHost" initialValue={comment.smtpHost}><Input /></Form.Item>
-                            <Form.Item label="SMTP 用户名" name="smtpUser" initialValue={comment.smtpUser}><Input /></Form.Item>
-                            <Form.Item label="发件人邮箱" name="smtpFrom" initialValue={comment.smtpFrom}><Input /></Form.Item>
-                            <Form.Item label="站长收件邮箱" name="authorEmail" initialValue={comment.authorEmail}><Input /></Form.Item>
-                            <Form.Item label="SMTP 端口" name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} placeholder="默认继承环境变量或 465" /></Form.Item>
-                            <Form.Item label="直接 TLS" name="smtpSecure" initialValue={comment.smtpSecure} extra="未设置时继承环境变量；465 开启直接 TLS，587/STARTTLS 关闭"><Select options={[{value: 'inherit', label: '继承环境变量（默认开启）'}, {value: true, label: '开启'}, {value: false, label: '关闭（STARTTLS）'}]} /></Form.Item>
-                            <Form.Item label="SMTP 密码" name="smtpPass" extra="留空保留已保存的密码；输入新值可替换"><Input.Password autoComplete="new-password" /></Form.Item>
+                            <Form.Item label={i18n.t("SMTP 服务器")} name="smtpHost" initialValue={comment.smtpHost}><Input /></Form.Item>
+                            <Form.Item label={i18n.t("SMTP 用户名")} name="smtpUser" initialValue={comment.smtpUser}><Input /></Form.Item>
+                            <Form.Item label={i18n.t("发件人邮箱")} name="smtpFrom" initialValue={comment.smtpFrom}><Input /></Form.Item>
+                            <Form.Item label={i18n.t("站长收件邮箱")} name="authorEmail" initialValue={comment.authorEmail}><Input /></Form.Item>
+                            <Form.Item label={i18n.t("SMTP 端口")} name="smtpPort" initialValue={comment.smtpPort}><InputNumber min={1} max={65535} placeholder={i18n.t("默认继承环境变量或 465")} /></Form.Item>
+                            <Form.Item label={i18n.t("直接 TLS")} name="smtpSecure" initialValue={comment.smtpSecure} extra={i18n.t("未设置时继承环境变量；465 开启直接 TLS，587/STARTTLS 关闭")}><Select options={[{value: 'inherit', label: i18n.t("继承环境变量（默认开启）")}, {value: true, label: i18n.t("开启")}, {value: false, label: i18n.t("关闭（STARTTLS）")}]} /></Form.Item>
+                            <Form.Item label={i18n.t("SMTP 密码")} name="smtpPass" extra={i18n.t("留空保留已保存的密码；输入新值可替换")}><Input.Password autoComplete="new-password" /></Form.Item>
 
-                            <Form.Item label="邮件标题模板" name="mailSubjectTemplate" initialValue={comment.mailSubjectTemplate}
-                                extra="留空使用默认标题：[{{siteName}}] {{type}}">
+                            <Form.Item label={i18n.t("邮件标题模板")} name="mailSubjectTemplate" initialValue={comment.mailSubjectTemplate}
+                                extra={i18n.t("留空使用默认标题：[{{siteName}}] {{type}}")}>
                                 <Input maxLength={500} placeholder="[{{siteName}}] {{type}}" />
                             </Form.Item>
-                            <Form.Item label="邮件正文模板（纯文本）" name="mailBodyTemplate" initialValue={comment.mailBodyTemplate}
-                                extra="留空使用默认正文。支持 {{siteName}} 站点名称、{{siteUrl}} 站点地址、{{type}} 通知类型、{{nick}} 评论者、{{comment}} 评论内容、{{url}} 评论链接、{{parentNick}} 被回复者、{{parentComment}} 原评论、{{recipient}} 收件邮箱、{{status}} 状态。变量只替换文本，不执行代码。">
+                            <Form.Item label={i18n.t("邮件正文模板（纯文本）")} name="mailBodyTemplate" initialValue={comment.mailBodyTemplate}
+                                extra={i18n.t("留空使用默认正文。支持 {{siteName}} 站点名称、{{siteUrl}} 站点地址、{{type}} 通知类型、{{nick}} 评论者、{{comment}} 评论内容、{{url}} 评论链接、{{parentNick}} 被回复者、{{parentComment}} 原评论、{{recipient}} 收件邮箱、{{status}} 状态。变量只替换文本，不执行代码。")}>
                                 <TextArea maxLength={20000} autoSize={{minRows: 5, maxRows: 15}} placeholder={'{{nick}}：\n{{comment}}\n\n{{url}}'} />
                             </Form.Item>
-                            <Form.Item label="测试收件邮箱" extra="使用当前填写的配置发送；密码留空时使用已保存的密码，无需先保存。">
+                            <Form.Item label={i18n.t("测试收件邮箱")} extra={i18n.t("使用当前填写的配置发送；密码留空时使用已保存的密码，无需先保存。")}>
                                 <Input value={testRecipient} onChange={event => setTestRecipient(event.target.value)} />
                             </Form.Item>
                             <Button loading={testing} disabled={testing} onClick={() => {
-                                if (!testRecipient.trim()) {message.error('请填写测试收件邮箱'); return;}
+                                if (!testRecipient.trim()) {message.error(i18n.t("请填写测试收件邮箱")); return;}
                                 setTesting(true); setTestResult(null);
                                 const values = legacy.formRef.current.getFieldsValue(true);
                                 const config = Object.fromEntries(SECTION_KEYS.mail.map(key => [key, values[key]]));
                                 if (config.smtpSecure === 'inherit') config.smtpSecure = null;
                                 if (!config.smtpPort) config.smtpPort = null;
                                 http.post<{message: string}>('/admin/api/options?type=testCommentMail', {config, recipient: testRecipient.trim()}, {timeout: 40000}).subscribe({
-                                    next: result => {setTesting(false); setTestResult({ok: result.errno === 0, text: result.errno === 0 ? result.data.message : String(result.errmsg || '发送失败')});},
-                                    error: () => {setTesting(false); setTestResult({ok: false, text: '请求失败或超时，请检查邮件服务和网络后重试'});},
+                                    next: result => {setTesting(false); setTestResult({ok: result.errno === 0, text: result.errno === 0 ? result.data.message : String(i18n.t(result.errmsg || '') || i18n.t("发送失败"))});},
+                                    error: () => {setTesting(false); setTestResult({ok: false, text: i18n.t("请求失败或超时，请检查邮件服务和网络后重试")});},
                                 });
-                            }}>发送测试邮件</Button>
-                            {testResult && <Alert style={{marginTop: 16}} type={testResult.ok ? 'success' : 'error'} showIcon title={testResult.ok ? '测试邮件已发送' : '测试发送失败'} description={testResult.text} />}
+                            }}>{i18n.t("发送测试邮件")}</Button>
+                            {testResult && <Alert style={{marginTop: 16}} type={testResult.ok ? 'success' : 'error'} showIcon title={testResult.ok ? i18n.t("测试邮件已发送") : i18n.t("测试发送失败")} description={testResult.text} />}
 
                                 </>},
-                                {key: 'security', label: '安全与用户', forceRender: true, children: <>
+                                {key: 'security', label: i18n.t("安全与用户"), forceRender: true, children: <>
 
                             <Form.Item
-                                label="敏感词"
+                                label={i18n.t("敏感词")}
                                 name="forbiddenWords"
                                 initialValue={comment.forbiddenWords}
-                                extra="每行一个词，命中的评论会进入垃圾评论"
+                                extra={i18n.t("每行一个词，命中的评论会进入垃圾评论")}
                             >
                                 <TextArea autoSize={{ minRows: 3, maxRows: 8 }} />
                             </Form.Item>
                             <Form.Item
-                                label="IP 黑名单"
+                                label={i18n.t("IP 黑名单")}
                                 name="disallowIPList"
                                 initialValue={comment.disallowIPList}
-                                extra="每行一个完整 IP 地址"
+                                extra={i18n.t("每行一个完整 IP 地址")}
                             >
                                 <TextArea autoSize={{ minRows: 3, maxRows: 8 }} />
                             </Form.Item>
                             <Form.Item
-                                label="单次点赞随机增量上限"
+                                label={i18n.t("单次点赞随机增量上限")}
                                 name="likeIncMax"
                                 initialValue={comment.likeIncMax}
                             >
                                 <InputNumber min={1} max={100} />
                             </Form.Item>
                             <Form.Item
-                                label="用户等级阈值"
+                                label={i18n.t("用户等级阈值")}
                                 name="levels"
                                 initialValue={comment.levels}
-                                extra="按评论数量填写，以逗号分隔，例如 0, 10, 50, 100"
+                                extra={i18n.t("按评论数量填写，以逗号分隔，例如 0, 10, 50, 100")}
                             >
                                 <Input />
                             </Form.Item>
                             <Form.Item
-                                label="头像代理地址"
+                                label={i18n.t("头像代理地址")}
                                 name="avatarProxy"
                                 initialValue={comment.avatarProxy}
-                                extra="留空表示直接加载头像；代理需接受 url 查询参数"
+                                extra={i18n.t("留空表示直接加载头像；代理需接受 url 查询参数")}
                             >
                                 <Input placeholder="https://example.com/avatar-proxy" />
                             </Form.Item>
@@ -452,7 +455,7 @@ function CommentForm(props: CommentProps) {
                                     onClick={() => legacy.formRef.current.validateFields(SECTION_KEYS[activeTab]).then(() => legacy.handleSubmit(legacy.formRef.current.getFieldsValue(true)))}
                                     loading={submitting}
                                 >
-                                    保存当前标签页
+                                    {i18n.t("保存当前标签页")}
                                 </Button>
                             </Form.Item>
                         </Form>

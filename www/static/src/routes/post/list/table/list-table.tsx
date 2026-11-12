@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import {
     CheckOutlined,
@@ -31,6 +33,7 @@ interface PostListTableState {
     userId?: number;
 }
 function PostListTable(props: PostListProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         categoryIds: [],
         tags: [],
@@ -77,25 +80,25 @@ function PostListTable(props: PostListProps) {
             }
             if (legacy.state.editAuthor) changes.user_id = legacy.state.userId;
             if (!Object.keys(changes).length) {
-                message.warning('请选择要更新的内容');
-                return Promise.reject(new Error('请选择要更新的内容'));
+                message.warning(i18n.t("请选择要更新的内容"));
+                return Promise.reject(new Error(i18n.t("请选择要更新的内容")));
             }
             if (legacy.state.editAuthor && !legacy.state.userId) {
-                message.warning('请选择作者');
-                return Promise.reject(new Error('请选择作者'));
+                message.warning(i18n.t("请选择作者"));
+                return Promise.reject(new Error(i18n.t("请选择作者")));
             }
             return new Promise<void>((resolve, reject) => {
                 const ids = props.postStore.selectedRowKeys.map(Number);
                 props.postStore.bulkPost('edit', ids, changes).subscribe(
                     (res) => {
                         if (res.errno !== 0) {
-                            const error = new Error(res.errmsg || '批量操作失败');
-                            message.error(error.message);
+                            const error = new Error(i18n.t(res.errmsg || '') || i18n.t("批量操作失败"));
+                            message.error(i18n.t(error.message || ''));
                             props.postStore.setLoading(false);
                             reject(error);
                             return;
                         }
-                        message.success(`已处理 ${ids.length} 篇文章`);
+                        message.success(i18n.t("已处理 {{value0}} 篇文章", {value0: ids.length}));
                         legacy.setState({
                             categoryIds: [],
                             tags: [],
@@ -116,7 +119,7 @@ function PostListTable(props: PostListProps) {
                         resolve();
                     },
                     (err) => {
-                        message.error(err instanceof Error ? err.message : String(err));
+                        message.error(err instanceof Error ? i18n.t(err.message || '') : String(err));
                         props.postStore.setLoading(false);
                         reject(err);
                     },
@@ -126,8 +129,8 @@ function PostListTable(props: PostListProps) {
     }
     legacy.delete = function (id: number, force: boolean = false) {
         confirm({
-            title: '提示',
-            content: `确定${force ? '彻底' : ''}删除吗?`,
+            title: i18n.t("提示"),
+            content: force ? i18n.t('确定彻底删除吗?') : i18n.t('确定删除吗?'),
             onOk: () => {
                 props.postStore.deletePostById(id, force);
             },
@@ -153,7 +156,7 @@ function PostListTable(props: PostListProps) {
                         icon={<EditOutlined />}
                         size="small"
                     >
-                        编辑
+                        {i18n.t("编辑")}
                     </Button>
                     <Button
                         onClick={() => legacy.delete(post.id)}
@@ -162,7 +165,7 @@ function PostListTable(props: PostListProps) {
                         icon={<DeleteOutlined />}
                         size="small"
                     >
-                        删除
+                        {i18n.t("删除")}
                     </Button>
                 </Space>
             );
@@ -175,7 +178,7 @@ function PostListTable(props: PostListProps) {
                         icon={<EditOutlined />}
                         size="small"
                     >
-                        撤销
+                        {i18n.t("撤销")}
                     </Button>
                     <Button
                         onClick={() => legacy.delete(post.id, true)}
@@ -184,7 +187,7 @@ function PostListTable(props: PostListProps) {
                         icon={<DeleteOutlined />}
                         size="small"
                     >
-                        删除
+                        {i18n.t("删除")}
                     </Button>
                 </Space>
             );
@@ -198,7 +201,7 @@ function PostListTable(props: PostListProps) {
                         icon={<CheckOutlined />}
                         size="small"
                     >
-                        通过
+                        {i18n.t("通过")}
                     </Button>
                     <Button
                         disabled={status === '2'}
@@ -208,7 +211,7 @@ function PostListTable(props: PostListProps) {
                         icon={<CloseOutlined />}
                         size="small"
                     >
-                        拒绝
+                        {i18n.t("拒绝")}
                     </Button>
                 </Space>
             );
@@ -237,7 +240,7 @@ function PostListTable(props: PostListProps) {
                     }}
                 >
                     <Column
-                        title="标题"
+                        title={i18n.t("标题")}
                         key="title"
                         render={(post) => (
                             <>
@@ -247,23 +250,23 @@ function PostListTable(props: PostListProps) {
                         )}
                     />
 
-                    <Column title="作者" dataIndex="author" key="author" />
+                    <Column title={i18n.t("作者")} dataIndex="author" key="author" />
 
-                    <Column title="状态" dataIndex="statusText" key="statusText" />
+                    <Column title={i18n.t("状态")} dataIndex="statusText" key="statusText" />
 
-                    <Column title="发布日期" dataIndex="create_time" key="create_time" />
+                    <Column title={i18n.t("发布日期")} dataIndex="create_time" key="create_time" />
 
                     <Column
-                        title="操作"
+                        title={i18n.t("操作")}
                         key="action"
                         render={(post) => legacy.renderActions(post)}
                     />
                 </Table>
                 <Modal
-                    title={`批量编辑 ${selectedRowKeys.length} 篇文章`}
+                    title={i18n.t("批量编辑 {{value0}} 篇文章", {value0: selectedRowKeys.length})}
                     open={bulkEditOpen}
-                    okText="更新"
-                    cancelText="取消"
+                    okText={i18n.t("更新")}
+                    cancelText={i18n.t("取消")}
                     confirmLoading={loading}
                     onCancel={() => props.postStore.setBulkEditOpen(false)}
                     onOk={legacy.runBulk}
@@ -275,7 +278,7 @@ function PostListTable(props: PostListProps) {
                                 legacy.setState({ editCategories: event.target.checked })
                             }
                         >
-                            更新分类
+                            {i18n.t("更新分类")}
                         </Checkbox>
                         <Select
                             mode="multiple"
@@ -288,7 +291,7 @@ function PostListTable(props: PostListProps) {
                                 label: cat.name,
                                 value: cat.id,
                             }))}
-                            placeholder="请选择分类"
+                            placeholder={i18n.t("请选择分类")}
                         />
                     </div>
                     <div className="bulk-edit-field">
@@ -298,7 +301,7 @@ function PostListTable(props: PostListProps) {
                                 legacy.setState({ editTags: event.target.checked })
                             }
                         >
-                            更新标签
+                            {i18n.t("更新标签")}
                         </Checkbox>
                         <Select
                             disabled={!legacy.state.editTags}
@@ -309,7 +312,7 @@ function PostListTable(props: PostListProps) {
                                 label: tag.name,
                                 value: tag.name,
                             }))}
-                            placeholder="选择或输入标签"
+                            placeholder={i18n.t("选择或输入标签")}
                             style={{ width: '100%' }}
                         />
                     </div>
@@ -320,7 +323,7 @@ function PostListTable(props: PostListProps) {
                                 legacy.setState({ editVisibility: event.target.checked })
                             }
                         >
-                            更新公开度
+                            {i18n.t("更新公开度")}
                         </Checkbox>
                         <Radio.Group
                             disabled={!legacy.state.editVisibility}
@@ -329,8 +332,8 @@ function PostListTable(props: PostListProps) {
                                 legacy.setState({ isPublic: event.target.value })
                             }
                         >
-                            <Radio value={1}>公开</Radio>
-                            <Radio value={0}>不公开</Radio>
+                            <Radio value={1}>{i18n.t("公开")}</Radio>
+                            <Radio value={0}>{i18n.t("不公开")}</Radio>
                         </Radio.Group>
                     </div>
                     <div className="bulk-edit-field">
@@ -340,20 +343,20 @@ function PostListTable(props: PostListProps) {
                                 legacy.setState({ editPassword: event.target.checked })
                             }
                         >
-                            更新访问密码
+                            {i18n.t("更新访问密码")}
                         </Checkbox>
                         <Input.Password
                             disabled={!legacy.state.editPassword}
                             value={legacy.state.postPassword}
                             maxLength={256}
-                            placeholder="输入新的访问密码"
+                            placeholder={i18n.t("输入新的访问密码")}
                             onChange={(event) =>
                                 legacy.setState({ postPassword: event.target.value })
                             }
                         />
 
                         <div className="bulk-edit-help">
-                            勾选更新后，留空将取消所选文章的密码保护。
+                            {i18n.t("勾选更新后，留空将取消所选文章的密码保护。")}
                         </div>
                     </div>
                     <div className="bulk-edit-field">
@@ -363,7 +366,7 @@ function PostListTable(props: PostListProps) {
                                 legacy.setState({ editPermission: event.target.checked })
                             }
                         >
-                            更新权限控制
+                            {i18n.t("更新权限控制")}
                         </Checkbox>
                         <Checkbox
                             className="bulk-edit-option"
@@ -375,7 +378,7 @@ function PostListTable(props: PostListProps) {
                                 })
                             }
                         >
-                            允许评论
+                            {i18n.t("允许评论")}
                         </Checkbox>
                     </div>
                     {window.SysConfig.userInfo.type === 1 && (
@@ -386,7 +389,7 @@ function PostListTable(props: PostListProps) {
                                     legacy.setState({ editAuthor: event.target.checked })
                                 }
                             >
-                                更新作者
+                                {i18n.t("更新作者")}
                             </Checkbox>
                             <Select
                                 showSearch={true}
@@ -394,7 +397,7 @@ function PostListTable(props: PostListProps) {
                                 value={legacy.state.userId}
                                 onChange={(userId) => legacy.setState({ userId })}
                                 optionFilterProp="label"
-                                placeholder="选择作者"
+                                placeholder={i18n.t("选择作者")}
                                 options={sharedStore.userList
                                     .filter((user) => Number(user.type) !== 4)
                                     .map((user) => ({

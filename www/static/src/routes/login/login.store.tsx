@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import { AppStore } from '../../app.store';
 import md5 from 'md5';
@@ -21,7 +22,7 @@ class LoginStore {
       .subscribe(
         res => {
           if (res.errno === 0) {
-            message.success('登录成功');
+            message.success(i18n.t("登录成功"));
             setTimeout(() => {
               const redirect = new URLSearchParams(location.search).get('redirect');
               if (redirect) {
@@ -40,7 +41,7 @@ class LoginStore {
         },
         err => {
           resetCaptcha?.();
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
           this.setLoading(false);
         }
       );
@@ -50,7 +51,7 @@ class LoginStore {
     .subscribe(
       res => {
         if (res.errno === 0) {
-          message.success('重置密码邮件发送成功');
+          message.success(i18n.t("重置密码邮件发送成功"));
         }
       }
     );
@@ -62,7 +63,7 @@ class LoginStore {
     .subscribe(
       res => {
         if (res.errno === 0) {
-          message.success('新密码设置成功');
+          message.success(i18n.t("新密码设置成功"));
           setTimeout(() => location.href = '/admin', 1000);
         }
       }

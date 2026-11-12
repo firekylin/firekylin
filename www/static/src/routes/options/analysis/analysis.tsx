@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { Form, FormInstance, Input, Button } from 'antd';
 import { inject, observer } from '@admin/utils/mobx-react';
@@ -5,6 +7,7 @@ import BreadCrumb from '../../../components/breadcrumb';
 import { AnalysisProps } from './analysis.model';
 const TextArea = Input.TextArea;
 function AnalysisForm(props: AnalysisProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         submitting: false,
     }));
@@ -35,7 +38,7 @@ function AnalysisForm(props: AnalysisProps) {
             <>
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="page-list">
-                    <h3 className="page-title">网站统计代码</h3>
+                    <h3 className="page-title">{i18n.t("网站统计代码")}</h3>
                     <div className="option-comment-page">
                         <Form
                             ref={legacy.formRef}
@@ -47,7 +50,7 @@ function AnalysisForm(props: AnalysisProps) {
                                 initialValue={
                                     window.SysConfig.options.analyze_code || ''
                                 }
-                                extra="直接贴入百度统计或者 Google 统计代码"
+                                extra={i18n.t("直接贴入百度统计或者 Google 统计代码")}
                             >
                                 <TextArea style={{ height: 240 }} />
                             </Form.Item>
@@ -57,7 +60,7 @@ function AnalysisForm(props: AnalysisProps) {
                                     htmlType="submit"
                                     loading={submitting}
                                 >
-                                    提交
+                                    {i18n.t("提交")}
                                 </Button>
                             </Form.Item>
                         </Form>

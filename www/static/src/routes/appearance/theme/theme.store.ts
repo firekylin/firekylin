@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from '../../../utils/http';
@@ -29,7 +30,7 @@ class ThemeStore {
                 }
             },
             err => {
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             }
         );
     }
@@ -45,7 +46,7 @@ class ThemeStore {
                 if (res.errno === 0) {
                     window.SysConfig.options.theme = params.theme;
                     this.setData({theme: params.theme});
-                    message.success('设置成功');
+                    message.success(i18n.t("设置成功"));
                 }
             }
         );
@@ -57,7 +58,7 @@ class ThemeStore {
             res => {
                 if (res.errno === 0) {
                     window.SysConfig.options.themeConfig = params.themeConfig;
-                    message.success('设置成功');
+                    message.success(i18n.t("设置成功"));
                 }
             }
         );

@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Select } from 'antd';
 const Option = Select.Option;
@@ -13,12 +15,13 @@ function ArticleControlUser({
     user: selectedUser,
     handleUserChange,
 }: ACUserProps) {
+    useTranslation('admin');
     const users = allUsers.filter((user) => Number(user.type) !== 4);
     return (
         <Select
             showSearch={true}
             style={{ width: 200 }}
-            placeholder="选择作者"
+            placeholder={i18n.t("选择作者")}
             optionFilterProp="children"
             onChange={handleUserChange}
             filterOption={(input, option) =>

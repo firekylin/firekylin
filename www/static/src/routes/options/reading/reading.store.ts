@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
@@ -26,14 +27,14 @@ class ReadingStore {
             res => {
                 if (res.errno === 0) {
                     this.setLoading(false);
-                    message.success('更新成功');
+                    message.success(i18n.t("更新成功"));
                 } else {
                     this.setLoading(false);
                 }
             },
             err => {
                 this.setLoading(false);
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             }
         );
 

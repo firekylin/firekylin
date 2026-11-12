@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { UploadOutlined } from '@ant-design/icons';
@@ -13,6 +15,7 @@ import type { RcFile } from 'antd/es/upload/interface';
 import { http } from '../../../utils/http';
 import OptionsImportRss from './import-rss/import-rss';
 function OptionsImportForm(props: OptionsImportProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         uploading: false,
         fileList: [],
@@ -32,38 +35,35 @@ function OptionsImportForm(props: OptionsImportProps) {
         });
         if (callback) queueMicrotask(callback);
     };
-    if (!legacy.__initialized) {
-        legacy.__initialized = true;
-        legacy.uploadInput = {
-            [ImportBlogsEnum.WordPress]: (
-                <p style={{ marginBottom: 0 }}>请上传 WordPress 中导出的 .xml 文件</p>
-            ),
-            [ImportBlogsEnum.Ghost]: (
-                <p>
-                    请上传 Ghost 中导出的 .json 文件，Jekyll用户请上传使用{' '}
-                    <a href="https://github.com/redwallhp/Jekyll-to-Ghost">
-                        Jekyll to Ghost 插件
-                    </a>
-                    导出后的 .json 文件
-                </p>
-            ),
-            [ImportBlogsEnum.Hexo]: (
-                <p>
-                    请上传使用{' '}
-                    <a href="https://github.com/lizheming/hexo-generator-hexo2firekylin">
-                        Hexo2Firekylin 插件
-                    </a>{' '}
-                    导出后的 .json 文件
-                </p>
-            ),
-            [ImportBlogsEnum.Hugo]: (
-                <p>请将 Hugo 站点的 content 目录打包成 .zip、.tar.gz 或 .tgz 文件上传</p>
-            ),
-            [ImportBlogsEnum.MarkDown]: (
-                <p>请将所有 Markdown 文件直接打包成 tar.gz 文件上传</p>
-            ),
-        };
-    }
+    legacy.uploadInput = {
+        [ImportBlogsEnum.WordPress]: (
+            <p style={{ marginBottom: 0 }}>{i18n.t("请上传 WordPress 中导出的 .xml 文件")}</p>
+        ),
+        [ImportBlogsEnum.Ghost]: (
+            <p>
+                {i18n.t("请上传 Ghost 中导出的 .json 文件，Jekyll用户请上传使用")}{' '}
+                <a href="https://github.com/redwallhp/Jekyll-to-Ghost">
+                    {i18n.t("Jekyll to Ghost 插件")}
+                </a>
+                {i18n.t("导出后的 .json 文件")}
+            </p>
+        ),
+        [ImportBlogsEnum.Hexo]: (
+            <p>
+                {i18n.t("请上传使用")}{' '}
+                <a href="https://github.com/lizheming/hexo-generator-hexo2firekylin">
+                    {i18n.t("Hexo2Firekylin 插件")}
+                </a>{' '}
+                {i18n.t("导出后的 .json 文件")}
+            </p>
+        ),
+        [ImportBlogsEnum.Hugo]: (
+            <p>{i18n.t("请将 Hugo 站点的 content 目录打包成 .zip、.tar.gz 或 .tgz 文件上传")}</p>
+        ),
+        [ImportBlogsEnum.MarkDown]: (
+            <p>{i18n.t("请将所有 Markdown 文件直接打包成 tar.gz 文件上传")}</p>
+        ),
+    };
     legacy.onMount = function onMount() {
         //
     };
@@ -85,17 +85,17 @@ function OptionsImportForm(props: OptionsImportProps) {
             (res) => {
                 legacy.setState({ uploading: false });
                 if (res.errno === 0) {
-                    message.success('更新成功');
+                    message.success(i18n.t("更新成功"));
                 } else {
                     message.error(
-                        typeof res.errmsg === 'string' ? res.errmsg : '上传失败',
+                        typeof res.errmsg === 'string' ? i18n.t(res.errmsg || '') : i18n.t("上传失败"),
                     );
                 }
             },
             (err) => {
                 console.log(err);
                 legacy.setState({ uploading: false });
-                message.error('上传失败');
+                message.error(i18n.t("上传失败"));
             },
         );
     };
@@ -121,10 +121,10 @@ function OptionsImportForm(props: OptionsImportProps) {
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="page-list option-import-page">
                     <Tabs className="tabs" defaultActiveKey="0" type="card">
-                        <TabPane tab="普通导入" key="0">
+                        <TabPane tab={i18n.t("普通导入")} key="0">
                             <Form layout="vertical">
                                 <Form.Item
-                                    label="请选择导入的博客平台"
+                                    label={i18n.t("请选择导入的博客平台")}
                                     name="blog"
                                     initialValue={
                                         legacy.state.uploadType ||
@@ -148,7 +148,7 @@ function OptionsImportForm(props: OptionsImportProps) {
                                         <Radio value={ImportBlogsEnum.Hexo}>Hexo</Radio>
                                         <Radio value={ImportBlogsEnum.Hugo}>Hugo</Radio>
                                         <Radio value={ImportBlogsEnum.MarkDown}>
-                                            Markdown文件
+                                            {i18n.t("Markdown文件")}
                                         </Radio>
                                     </RadioGroup>
                                 </Form.Item>
@@ -164,7 +164,7 @@ function OptionsImportForm(props: OptionsImportProps) {
                                         }
                                     >
                                         <Button>
-                                            <UploadOutlined /> 选择文件
+                                            <UploadOutlined />{i18n.t(" 选择文件")}
                                         </Button>
                                     </Upload>
                                 </Form.Item>
@@ -175,12 +175,12 @@ function OptionsImportForm(props: OptionsImportProps) {
                                         disabled={legacy.state.fileList.length === 0}
                                         loading={legacy.state.uploading}
                                     >
-                                        {legacy.state.uploading ? '上传中...' : '上传'}
+                                        {legacy.state.uploading ? i18n.t("上传中...") : i18n.t("上传")}
                                     </Button>
                                 </Form.Item>
                             </Form>
                         </TabPane>
-                        <TabPane tab="RSS导入" key="1">
+                        <TabPane tab={i18n.t("RSS导入")} key="1">
                             <OptionsImportRss />
                         </TabPane>
                     </Tabs>

@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Button, Radio } from 'antd';
@@ -6,6 +8,7 @@ const RadioGroup = Radio.Group;
 import { OptionsExportProps, OptionsExportState } from './export.model';
 import { OETypeEnum } from './export.enum';
 function OptionsExportForm(props: OptionsExportProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         exportType: OETypeEnum.MarkDown,
     }));
@@ -32,11 +35,11 @@ function OptionsExportForm(props: OptionsExportProps) {
             <>
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="page-list">
-                    <h3 className="page-title">导出设置</h3>
+                    <h3 className="page-title">{i18n.t("导出设置")}</h3>
                     <div className="option-comment-page">
                         <Form ref={legacy.formRef} layout="vertical" scrollToFirstError>
                             <Form.Item
-                                label="请选择导出的文件类型"
+                                label={i18n.t("请选择导出的文件类型")}
                                 name="push"
                                 initialValue={legacy.state.exportType}
                             >
@@ -61,7 +64,7 @@ function OptionsExportForm(props: OptionsExportProps) {
                                         legacy.state.exportType
                                     }
                                 >
-                                    下载
+                                    {i18n.t("下载")}
                                 </Button>
                             </Form.Item>
                         </Form>

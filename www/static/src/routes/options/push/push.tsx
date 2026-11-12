@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { Form, FormInstance } from 'antd';
 import { Button, Radio } from 'antd';
@@ -6,6 +8,7 @@ import BreadCrumb from '../../../components/breadcrumb';
 import { OptionsPushProps } from './push.model';
 const RadioGroup = Radio.Group;
 function PushForm(props: OptionsPushProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         options: window.SysConfig.options,
         submitting: false,
@@ -38,13 +41,13 @@ function PushForm(props: OptionsPushProps) {
             <>
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="page-list">
-                    <h3 className="page-title">推送设置</h3>
+                    <h3 className="page-title">{i18n.t("推送设置")}</h3>
                     <p>
-                        开启后他人可以通过{' '}
+                        {i18n.t("开启后他人可以通过")}{' '}
                         <a href={url} target="_blank">
                             {url}
                         </a>{' '}
-                        申请成为投稿者。
+                        {i18n.t("申请成为投稿者。")}
                     </p>
                     <div className="option-comment-page">
                         <Form
@@ -58,8 +61,8 @@ function PushForm(props: OptionsPushProps) {
                                 initialValue={legacy.state.options.push}
                             >
                                 <RadioGroup>
-                                    <Radio value="1">开启</Radio>
-                                    <Radio value="0">关闭</Radio>
+                                    <Radio value="1">{i18n.t("开启")}</Radio>
+                                    <Radio value="0">{i18n.t("关闭")}</Radio>
                                 </RadioGroup>
                             </Form.Item>
                             <Form.Item>
@@ -68,7 +71,7 @@ function PushForm(props: OptionsPushProps) {
                                     htmlType="submit"
                                     loading={submitting}
                                 >
-                                    提交
+                                    {i18n.t("提交")}
                                 </Button>
                             </Form.Item>
                         </Form>

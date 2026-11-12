@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
@@ -33,7 +34,7 @@ class TwoFactorAuthStore {
                 }
             },
             err => {
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             }
         );
     }

@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Button, Input, Modal, Select, Space, Table, Tabs, Tag, message } from 'antd';
 import BreadCrumb from '../../components/breadcrumb';
@@ -8,12 +10,13 @@ import axios from 'axios';
 import {Dropdown} from 'antd';
 import AiSparkleIcon from '../../components/ai-sparkle-icon';
 
-const COMMENT_STATUS: Record<string, { color: string; text: string }> = {
-    approved: { color: 'green', text: '已通过' },
-    waiting: { color: 'orange', text: '待审核' },
-    spam: { color: 'red', text: '垃圾评论' },
-};
+const getCommentStatus = (): Record<string, { color: string; text: string }> => ({
+    approved: { color: 'green', text: i18n.t("已通过") },
+    waiting: { color: 'orange', text: i18n.t("待审核") },
+    spam: { color: 'red', text: i18n.t("垃圾评论") },
+});
 export default function Comment(props: any) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         loading: false,
         data: [],
@@ -35,10 +38,10 @@ export default function Comment(props: any) {
         try {
             const {data} = await axios.post('/admin/api/comment', {id: replyId, operation, comment: reply, tone},
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
-            if (data.errno !== 0) throw new Error(data.errmsg || '操作失败');
+            if (data.errno !== 0) throw new Error(i18n.t(data.errmsg || '') || i18n.t("操作失败"));
             if (operation === 'suggestReply') setReply(data.data.text);
-            else {setReplyId(null); setReply(''); legacy.load(); message.success('回复成功')}
-        } catch (error: any) {message.error(error.response?.data?.errmsg || error.message || '操作失败')}
+            else {setReplyId(null); setReply(''); legacy.load(); message.success(i18n.t("回复成功"))}
+        } catch (error: any) {message.error(i18n.t(error.response?.data?.errmsg || '') || i18n.t(error.message || '') || i18n.t("操作失败"))}
         finally {setBusy(false)}
     };
     const legacyRef = React.useRef({});
@@ -88,7 +91,7 @@ export default function Comment(props: any) {
             headers: {'X-CSRF-Token': window.SysConfig.csrfToken},
         }).subscribe((res) => {
             if (res.errno === 0) {
-                message.success('操作成功');
+                message.success(i18n.t("操作成功"));
                 legacy.setState({ editing: null });
                 legacy.load();
             }
@@ -98,7 +101,7 @@ export default function Comment(props: any) {
         const isCommenter = Number(window.SysConfig.userInfo.type) === 4;
         const columns: any[] = [
             {
-                title: '作者',
+                title: i18n.t("作者"),
                 key: 'author',
                 width: 250,
                 render: (_: any, row: any) => {
@@ -145,12 +148,12 @@ export default function Comment(props: any) {
                 },
             },
             {
-                title: '内容',
+                title: i18n.t("内容"),
                 dataIndex: 'comment',
                 render: (value: string, row: any) => (
                     <div className="comment-content">
                         <div className="comment-meta">
-                            {firekylin.formatTime(row.inserted_at)} 于{' '}
+                            {firekylin.formatTime(row.inserted_at)}{i18n.t(" 于")}{' '}
                             <a
                                 href={row.post_url}
                                 target="_blank"
@@ -164,19 +167,19 @@ export default function Comment(props: any) {
                 ),
             },
             {
-                title: '状态',
+                title: i18n.t("状态"),
                 dataIndex: 'status',
                 width: 100,
                 render: (value: string) => {
-                    const status = COMMENT_STATUS[value] || {
+                    const status = getCommentStatus()[value] || {
                         color: 'default',
-                        text: '未知',
+                        text: i18n.t("未知"),
                     };
                     return <Tag color={status.color}>{status.text}</Tag>;
                 },
             },
             {
-                title: '操作',
+                title: i18n.t("操作"),
                 width: 270,
                 render: (_: any, row: any) => (
                     <Space wrap>
@@ -185,7 +188,7 @@ export default function Comment(props: any) {
                                 size="small"
                                 onClick={() => legacy.operate(row.id, 'approved')}
                             >
-                                通过
+                                {i18n.t("通过")}
                             </Button>
                         )}
                         {row.can_moderate && row.status !== 'spam' && (
@@ -194,12 +197,12 @@ export default function Comment(props: any) {
                                 danger
                                 onClick={() => legacy.operate(row.id, 'spam')}
                             >
-                                垃圾
+                                {i18n.t("垃圾")}
                             </Button>
                         )}
                         {row.can_moderate && row.status !== 'waiting' && (
                             <Button size="small" onClick={() => legacy.operate(row.id, 'waiting')}>
-                                待审核
+                                {i18n.t("待审核")}
                             </Button>
                         )}
                         <Button
@@ -210,7 +213,7 @@ export default function Comment(props: any) {
                                 setReply('');
                             }}
                         >
-                            回复
+                            {i18n.t("回复")}
                         </Button>
                         <Button
                             size="small"
@@ -218,19 +221,19 @@ export default function Comment(props: any) {
                                 legacy.setState({ editing: row, content: row.comment })
                             }
                         >
-                            编辑
+                            {i18n.t("编辑")}
                         </Button>
                         <Button
                             size="small"
                             danger
                             onClick={() =>
                                 Modal.confirm({
-                                    title: '确定删除这条评论？',
+                                    title: i18n.t("确定删除这条评论？"),
                                     onOk: () => legacy.operate(row.id, 'delete'),
                                 })
                             }
                         >
-                            删除
+                            {i18n.t("删除")}
                         </Button>
                     </Space>
                 ),
@@ -247,13 +250,13 @@ export default function Comment(props: any) {
                     expandedRowKeys: replyId === null ? [] : [replyId],
                     showExpandColumn: false,
                     expandedRowRender: () => <Space orientation="vertical" style={{width: '100%'}}>
-                        <Input.TextArea aria-label="回复内容" rows={4} disabled={busy} value={reply} onChange={event => setReply(event.target.value)} />
+                        <Input.TextArea aria-label={i18n.t("回复内容")} rows={4} disabled={busy} value={reply} onChange={event => setReply(event.target.value)} />
                         <Space>
-                            <Button type="primary" disabled={busy || !reply.trim()} onClick={() => replyAction('reply')}>回复</Button>
-                            <Button disabled={busy} onClick={() => setReplyId(null)}>取消</Button>
+                            <Button type="primary" disabled={busy || !reply.trim()} onClick={() => replyAction('reply')}>{i18n.t("回复")}</Button>
+                            <Button disabled={busy} onClick={() => setReplyId(null)}>{i18n.t("取消")}</Button>
                             {!isCommenter && suggestEnabled && <Dropdown.Button disabled={busy} icon={<span>▾</span>}
-                                menu={{selectedKeys: [tone], items: ['亲切口吻', '专业口吻', '诙谐口吻'].map(key => ({key, label: key})), onClick: ({key}) => setTone(key)}}
-                                onClick={() => replyAction('suggestReply')}><AiSparkleIcon />建议回复</Dropdown.Button>}
+                                menu={{selectedKeys: [tone], items: ['亲切口吻', '专业口吻', '诙谐口吻'].map(key => ({key, label: i18n.t(key)})), onClick: ({key}) => setTone(key)}}
+                                onClick={() => replyAction('suggestReply')}><AiSparkleIcon />{i18n.t("建议回复")}</Dropdown.Button>}
                         </Space>
                     </Space>
                 }}
@@ -284,11 +287,11 @@ export default function Comment(props: any) {
                                         legacy.setState({ searchType })
                                     }
                                 >
-                                    <Select.Option value="keyword">内容</Select.Option>
-                                    <Select.Option value="author">作者</Select.Option>
+                                    <Select.Option value="keyword">{i18n.t("内容")}</Select.Option>
+                                    <Select.Option value="author">{i18n.t("作者")}</Select.Option>
                                 </Select>
                                 <Input.Search
-                                    placeholder="请输入关键字"
+                                    placeholder={i18n.t("请输入关键字")}
                                     value={legacy.state.searchValue}
                                     onChange={(event) =>
                                         legacy.setState({
@@ -307,14 +310,14 @@ export default function Comment(props: any) {
                             legacy.load(1, status);
                         }}
                         items={[
-                            { key: 'all', label: '全部', children: table() },
-                            { key: 'waiting', label: '待审核', children: table() },
-                            { key: 'spam', label: '垃圾评论', children: table() },
+                            { key: 'all', label: i18n.t("全部"), children: table() },
+                            { key: 'waiting', label: i18n.t("待审核"), children: table() },
+                            { key: 'spam', label: i18n.t("垃圾评论"), children: table() },
                         ]}
                     />
                 </div>
                 <Modal
-                    title="编辑评论"
+                    title={i18n.t("编辑评论")}
                     open={Boolean(legacy.state.editing)}
                     onCancel={() => legacy.setState({ editing: null })}
                     onOk={() =>

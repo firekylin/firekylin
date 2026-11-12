@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import {Popover} from 'antd';
@@ -8,7 +9,7 @@ import { InitiateRoutes, InitiateThemePages } from './data/routes.data';
 function createSidebarState() {
     const themePages = [...InitiateThemePages];
     if (!window.SysConfig.config.disallow_file_edit) {
-        themePages.push({url: '/appearance/edit', title: '编辑主题'});
+        themePages.push({url: '/appearance/edit', title: i18n.t("编辑主题")});
     }
     const pluginRoutes = (window.SysConfig.pluginAdmin || []).reduce(
         (routes, plugin) => routes.concat(plugin.panels
@@ -136,6 +137,7 @@ function SidebarEntry({route, collapsed, pathname}: any) {
 }
 
 function SideBar(_props: any) {
+    useTranslation('admin');
     const {pathname} = useLocation();
     const [state] = React.useState(createSidebarState);
     const [collapsed, setCollapsed] = React.useState(() => {
@@ -153,14 +155,14 @@ function SideBar(_props: any) {
     };
     const userType = Number(window.SysConfig.userInfo.type) || 0;
     let routes: any[] = userType === 4 ? [
-        {url: '/comment', icon: 'topic', title: '我的评论'},
-        {url: `/user/edit/${window.SysConfig.userInfo.id}`, icon: 'user', title: '账号设置'},
-        {url: '/user/edit_pwd', icon: 'setting', title: '修改密码'},
+        {url: '/comment', icon: 'topic', title: i18n.t("我的评论")},
+        {url: `/user/edit/${window.SysConfig.userInfo.id}`, icon: 'user', title: i18n.t("账号设置")},
+        {url: '/user/edit_pwd', icon: 'setting', title: i18n.t("修改密码")},
     ] : state.routes.filter(item => !item.type || userType <= item.type);
     routes = routes.map(route => ({...route, children: route.children?.filter((child: any) =>
         child.menu !== false && (!child.type || userType <= child.type))}));
     return (
-        <nav className={`fk-side ps-container${collapsed ? ' is-collapsed' : ''}`} id="fk-side" aria-label="后台导航">
+        <nav className={`fk-side ps-container${collapsed ? ' is-collapsed' : ''}`} id="fk-side" aria-label={i18n.t("后台导航")}>
             <div className="sidebar-scroll">
                 <div className="mod"><div className="mod-logo"><h1>
                     <a href="/" aria-label={window.SysConfig.options.title}>
@@ -179,7 +181,7 @@ function SideBar(_props: any) {
             </div>
             <div className="sidebar-footer">
                 <button type="button" onClick={toggle} aria-expanded={!collapsed} aria-controls="sidebar-menu"
-                    aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'} title={collapsed ? '展开侧边栏' : '收起侧边栏'}>
+                    aria-label={collapsed ? i18n.t("展开侧边栏") : i18n.t("收起侧边栏")} title={collapsed ? i18n.t("展开侧边栏") : i18n.t("收起侧边栏")}>
                     {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                 </button>
             </div>

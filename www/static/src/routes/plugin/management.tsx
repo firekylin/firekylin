@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {useEffect, useRef, useState} from 'react';
 import {Subscription} from 'rxjs';
 import {Button, Input, message, Modal, Select, Space, Table, Tag} from 'antd';
@@ -20,6 +22,7 @@ function safeUrl(url: string) {
 }
 
 export default function PluginManagement(props: any) {
+    useTranslation('admin');
     const [plugins, setPlugins] = useState<Plugin[]>([]);
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('all');
@@ -51,17 +54,17 @@ export default function PluginManagement(props: any) {
                     if (res.errno !== 0) { setBusy(false); return }
                     if (res.data?.status === 'created') {
                         setBusy(false);
-                        Modal.info({title: '已创建 GitHub 更新 PR', content: <span>请查看 <a target="_blank" rel="noreferrer"
-                            href={res.data.url}>GitHub PR</a>；合并并部署后生效。</span>});
+                        Modal.info({title: i18n.t("已创建 GitHub 更新 PR"), content: <span>{i18n.t("请查看 ")}<a target="_blank" rel="noreferrer"
+                            href={res.data.url}>GitHub PR</a>{i18n.t("；合并并部署后生效。")}</span>});
                         return;
                     }
                     const stateChange = operation === 'plugin.enable' || operation === 'plugin.disable';
                     if (!stateChange || res.data?.restartRequired) {
                         load(() => setBusy(false));
                         if (res.data?.restartScheduled) {
-                            message.info('操作已保存，正在请求自动重载；请稍后刷新检查，未生效时请手动重启');
+                            message.info(i18n.t("操作已保存，正在请求自动重载；请稍后刷新检查，未生效时请手动重启"));
                         } else {
-                            message.success(res.data?.restartRequired ? '操作已保存，请重启 Firekylin 后生效（serverless 请重新部署）' : '操作成功');
+                            message.success(res.data?.restartRequired ? i18n.t("操作已保存，请重启 Firekylin 后生效（serverless 请重新部署）") : i18n.t("操作成功"));
                         }
                         return;
                     }
@@ -69,10 +72,10 @@ export default function PluginManagement(props: any) {
                     const refresh = () => load(items => {
                         const current = items.find(item => item.id === plugin.id);
                         const updated = operation === 'plugin.enable' ? current?.status === 'active' : current?.status === 'inactive';
-                        if (updated) { setBusy(false); message.success('操作成功'); return }
+                        if (updated) { setBusy(false); message.success(i18n.t("操作成功")); return }
                         if (current?.status === 'error' || ++attempts >= 20) {
                             setBusy(false);
-                            message.warning(current?.status === 'error' ? '插件启动失败，请查看错误信息' : '状态尚未更新，请稍后刷新；仍未生效时请手动重启 Firekylin（serverless 请重新部署）');
+                            message.warning(current?.status === 'error' ? i18n.t("插件启动失败，请查看错误信息") : i18n.t("状态尚未更新，请稍后刷新；仍未生效时请手动重启 Firekylin（serverless 请重新部署）"));
                             return;
                         }
                         retryTimer.current = setTimeout(refresh, 500);
@@ -82,7 +85,7 @@ export default function PluginManagement(props: any) {
             });
             requests.current.add(subscription);
         };
-        if (operation.includes('delete') || operation.includes('uninstall')) Modal.confirm({title: `删除 ${plugin.name}？`, onOk: run});
+        if (operation.includes('delete') || operation.includes('uninstall')) Modal.confirm({title: i18n.t("删除 {{value0}}？", {value0: plugin.name}), onOk: run});
         else run();
     };
     const filtered = plugins.filter(item => item.name.toLowerCase().includes(search.trim().toLowerCase()) &&
@@ -91,28 +94,28 @@ export default function PluginManagement(props: any) {
         <BreadCrumb {...props} />
         <div style={{padding: '0 20px'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, margin: '20px 0'}}>
-                <h3 style={{margin: 0}}>已安装插件</h3>
-                <Space wrap><Select aria-label="插件状态" value={status} onChange={setStatus} style={{width: 120}}
-                    options={[{value: 'all', label: '全部状态'}, {value: 'active', label: '已启用'}, {value: 'inactive', label: '未启用'}]} />
-                    <Input.Search placeholder="搜索插件名称" value={search} onChange={e => setSearch(e.target.value)} style={{width: 200}} />
-                    <Button type="primary" onClick={() => props.history.push('/plugin-management/install')}>安装插件</Button></Space>
+                <h3 style={{margin: 0}}>{i18n.t("已安装插件")}</h3>
+                <Space wrap><Select aria-label={i18n.t("插件状态")} value={status} onChange={setStatus} style={{width: 120}}
+                    options={[{value: 'all', label: i18n.t("全部状态")}, {value: 'active', label: i18n.t("已启用")}, {value: 'inactive', label: i18n.t("未启用")}]} />
+                    <Input.Search placeholder={i18n.t("搜索插件名称")} value={search} onChange={e => setSearch(e.target.value)} style={{width: 200}} />
+                    <Button type="primary" onClick={() => props.history.push('/plugin-management/install')}>{i18n.t("安装插件")}</Button></Space>
             </div>
             <Table rowKey="id" dataSource={filtered} pagination={false} columns={[
-                {title: '名称', dataIndex: 'name', render: (name: string, item: Plugin) => <>{name} {item.status === 'active' && <Tag color="green">已启用</Tag>}</>},
-                {title: '描述', render: (_: unknown, item: Plugin) => <div><div>{item.description}</div><small>
-                    版本 {item.version} {item.author && <> | {safeUrl(item.authorUrl) ? <a href={safeUrl(item.authorUrl)} target="_blank" rel="noreferrer">@{item.author}</a> : `@${item.author}`}</>}
-                    {npmUrl(item.name) && <> | <a href={npmUrl(item.name)} target="_blank" rel="noreferrer">查看详情</a></>}
+                {title: i18n.t("名称"), dataIndex: 'name', render: (name: string, item: Plugin) => <>{name} {item.status === 'active' && <Tag color="green">{i18n.t("已启用")}</Tag>}</>},
+                {title: i18n.t("描述"), render: (_: unknown, item: Plugin) => <div><div>{item.description}</div><small>
+                    {i18n.t("版本 ")}{item.version} {item.author && <> | {safeUrl(item.authorUrl) ? <a href={safeUrl(item.authorUrl)} target="_blank" rel="noreferrer">@{item.author}</a> : `@${item.author}`}</>}
+                    {npmUrl(item.name) && <> | <a href={npmUrl(item.name)} target="_blank" rel="noreferrer">{i18n.t("查看详情")}</a></>}
                 </small></div>},
-                {title: '操作', render: (_: unknown, item: Plugin) => {
+                {title: i18n.t("操作"), render: (_: unknown, item: Plugin) => {
                     const extension = (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === item.id);
                     const settings = extension?.pages.find(page => page.id === 'settings' && !page.panel);
                     return <Space wrap separator={<span aria-hidden="true">|</span>}>{item.status === 'active' ? <>
                         {settings && <Link style={{color: '#1677ff'}}
-                            to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(settings.id)}`}>配置</Link>}
-                        <button className="plugin-action plugin-action-disable" disabled={busy} onClick={() => action(item, 'plugin.disable')}>停用</button>
+                            to={`/plugins/${encodeURIComponent(item.id)}/${encodeURIComponent(settings.id)}`}>{i18n.t("配置")}</Link>}
+                        <button className="plugin-action plugin-action-disable" disabled={busy} onClick={() => action(item, 'plugin.disable')}>{i18n.t("停用")}</button>
                     </> : <>
-                        {item.reasons.length ? <span>{item.reasons.join(', ')}</span> : <button className="plugin-action plugin-action-enable" disabled={busy} onClick={() => action(item, 'plugin.enable')}>启用</button>}
-                        <button className="plugin-action plugin-action-delete" disabled={busy} onClick={() => action(item, item.source === 'npm' ? 'plugin.uninstall' : 'plugin.delete-local')}>删除</button>
+                        {item.reasons.length ? <span>{item.reasons.join(', ')}</span> : <button className="plugin-action plugin-action-enable" disabled={busy} onClick={() => action(item, 'plugin.enable')}>{i18n.t("启用")}</button>}
+                        <button className="plugin-action plugin-action-delete" disabled={busy} onClick={() => action(item, item.source === 'npm' ? 'plugin.uninstall' : 'plugin.delete-local')}>{i18n.t("删除")}</button>
                     </>}</Space>;
                 }}
             ]} />

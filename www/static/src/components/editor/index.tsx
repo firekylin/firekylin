@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 /**
  * 本项目的编辑器是由 https://github.com/leozdgao/react-markdown 该项目修改而来，感谢作者的无私奉献！
  */
@@ -44,6 +46,7 @@ const createEditorState = () => ({
     imageTabKey: '0',
 });
 function MarkDownEditor(props: MdEditorProps) {
+    useTranslation('admin');
     const mounted = React.useRef(true);
     const uploads = React.useRef(new Set<symbol>());
     const uploadChange = React.useRef(props.onUploadChange);
@@ -132,8 +135,8 @@ function MarkDownEditor(props: MdEditorProps) {
 
         if (localStorage['unsavetype' + props.info.type + 'id' + props.info.id + '']) {
             confirm({
-                title: '提示',
-                content: '检测到上次没有保存文章就退出页面，是否从缓存里恢复文章?',
+                title: i18n.t("提示"),
+                content: i18n.t("检测到上次没有保存文章就退出页面，是否从缓存里恢复文章?"),
                 onOk: () => {
                     let content =
                         localStorage[
@@ -320,10 +323,10 @@ function MarkDownEditor(props: MdEditorProps) {
                     legacy._modalLinkText(values.linkText, 'www.yourlink.com', 'url');
                 } else if (hasUrl && !hasText) {
                     // 有地址没文本：选中text
-                    legacy._modalLinkText('链接文本', values.linkUrl, 'text');
+                    legacy._modalLinkText(i18n.t("链接文本"), values.linkUrl, 'text');
                 } else {
                     // 都没输入：选中text
-                    legacy._modalLinkText('链接文本', 'www.yourlink.com', 'text');
+                    legacy._modalLinkText(i18n.t("链接文本"), 'www.yourlink.com', 'text');
                 }
 
                 legacy.linkFormRef.current?.resetFields();
@@ -337,7 +340,7 @@ function MarkDownEditor(props: MdEditorProps) {
     };
     legacy.handleImageOk = function handleImageOk() {
         if (!legacy.state.imageUrl && !legacy.state.fileLink) {
-            message.warning('请插入图片');
+            message.warning(i18n.t("请插入图片"));
             return;
         }
         const start = legacy._getCursorPos() as number;
@@ -368,7 +371,7 @@ function MarkDownEditor(props: MdEditorProps) {
         http.upload(data)
             .then((res) => {
                 if (!mounted.current) return;
-                if (res.errno !== 0) { message.error(res.errmsg); return; }
+                if (res.errno !== 0) { message.error(i18n.t(res.errmsg || '')); return; }
                 if (props.onAttachment && res.data && typeof res.data === 'object') {
                     props.onAttachment(Number(res.data.id));
                     res.data = res.data.url;
@@ -377,7 +380,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 if (!reg.test(res.data)) {
                     res.data = location.origin + res.data;
                 }
-                const text = legacy.state.fileLink ? '链接文本' : fileName;
+                const text = legacy.state.fileLink ? i18n.t("链接文本") : fileName;
                 if (text === 'alt') {
                     legacy._preInputText(`![${text}](${res.data})`, 2, 5, {
                         position: start,
@@ -390,7 +393,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 legacy.imageModalClose();
             })
             .catch((res) => {
-                message.error(res.errmsg);
+                message.error(i18n.t(res.errmsg || ''));
             }).finally(() => {
                 if (uploads.current.delete(uploadId)) uploadChange.current?.(uploadId, false);
             });
@@ -402,7 +405,7 @@ function MarkDownEditor(props: MdEditorProps) {
     };
     legacy.handleFile = function handleFile(fileInfo: UploadChangeParam) {
         if (fileInfo.file.response.errno !== 0) {
-            message.error(fileInfo.file.response.errmsg);
+            message.error(i18n.t(fileInfo.file.response.errmsg || ''));
         } else {
             legacy.fileInfo = fileInfo;
             if (props.onAttachment && fileInfo.file.response.data && typeof fileInfo.file.response.data === 'object') {
@@ -469,7 +472,7 @@ function MarkDownEditor(props: MdEditorProps) {
                             onFocus={completion.onFocus} onBlur={completion.onBlur}
                             onCompositionStart={completion.onCompositionStart} onCompositionEnd={completion.onCompositionEnd}
                             onScroll={completion.syncMirror}
-                            aria-description={completion.visible ? '按 Tab 接受建议，其他按键忽略建议' : undefined}
+                            aria-description={completion.visible ? i18n.t("按 Tab 接受建议，其他按键忽略建议") : undefined}
                             value={props.content}
                         />
                         {(completion.visible || completion.loading) && <div
@@ -496,7 +499,7 @@ function MarkDownEditor(props: MdEditorProps) {
                     href="###"
                     className="editor__resize"
                 >
-                    调整高度
+                    {i18n.t("调整高度")}
                 </a>
                 <EditorLinkModal
                     open={legacy.state.visible.link}
@@ -556,7 +559,7 @@ function MarkDownEditor(props: MdEditorProps) {
             >
                 <li className="tb-btn">
                     <a
-                        title="加粗(Ctrl + B)"
+                        title={i18n.t("加粗(Ctrl + B)")}
                         onClick={() => legacy._boldText()}
                         className="editor-toolbar"
                     >
@@ -565,7 +568,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="斜体(Ctrl + I)"
+                        title={i18n.t("斜体(Ctrl + I)")}
                         onClick={() => legacy._italicText()}
                         className="editor-toolbar"
                     >
@@ -574,7 +577,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="删除线"
+                        title={i18n.t("删除线")}
                         onClick={() => legacy._strikethroughText()}
                         className="editor-toolbar"
                     >
@@ -583,7 +586,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="下划线"
+                        title={i18n.t("下划线")}
                         onClick={() => legacy._underlineText()}
                         className="editor-toolbar"
                     >
@@ -593,7 +596,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 <li className="tb-btn spliter" />
                 <li className="tb-btn">
                     <a
-                        title="快速链接(Ctrl + K)"
+                        title={i18n.t("快速链接(Ctrl + K)")}
                         onClick={() => legacy._quickLinkText()}
                         className="editor-toolbar"
                     >
@@ -602,7 +605,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="链接(Ctrl + L)"
+                        title={i18n.t("链接(Ctrl + L)")}
                         onClick={() => legacy._linkModal()}
                         className="editor-toolbar"
                     >
@@ -611,7 +614,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="引用(Ctrl + Q)"
+                        title={i18n.t("引用(Ctrl + Q)")}
                         onClick={() => legacy._blockquoteText()}
                         className="editor-toolbar"
                     >
@@ -620,7 +623,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="行内代码(Ctrl + E)"
+                        title={i18n.t("行内代码(Ctrl + E)")}
                         onClick={() => legacy._inlineCodeText()}
                         className="editor-toolbar"
                     >
@@ -629,7 +632,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="代码段(Ctrl + Shift + E)"
+                        title={i18n.t("代码段(Ctrl + Shift + E)")}
                         onClick={() => legacy._codeText()}
                         className="editor-toolbar"
                     >
@@ -638,7 +641,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="图片(Ctrl + G)"
+                        title={i18n.t("图片(Ctrl + G)")}
                         onClick={() => legacy._pictureText()}
                         className="editor-toolbar"
                     >
@@ -647,7 +650,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="键盘按键"
+                        title={i18n.t("键盘按键")}
                         onClick={() => legacy._kbdText()}
                         className="editor-toolbar"
                     >
@@ -656,7 +659,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="行内公式(Ctrl + M)"
+                        title={i18n.t("行内公式(Ctrl + M)")}
                         onClick={() => legacy._inlineFormulaText()}
                         className="editor-toolbar"
                     >
@@ -665,7 +668,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="块级公式(Ctrl + Shift + M)"
+                        title={i18n.t("块级公式(Ctrl + Shift + M)")}
                         onClick={() => legacy._formulaText()}
                         className="editor-toolbar"
                     >
@@ -677,7 +680,7 @@ function MarkDownEditor(props: MdEditorProps) {
                         menu={{ items: legacy._alertMenuItems() }}
                         trigger={['hover']}
                     >
-                        <a title="提示框" className="editor-toolbar">
+                        <a title={i18n.t("提示框")} className="editor-toolbar">
                             {legacy._svgIcon(icons.alert)}
                         </a>
                     </Dropdown>
@@ -685,7 +688,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 <li className="tb-btn spliter" />
                 <li className="tb-btn">
                     <a
-                        title="有序列表(Ctrl + Shift + 7)"
+                        title={i18n.t("有序列表(Ctrl + Shift + 7)")}
                         onClick={() => legacy._listOlText()}
                         className="editor-toolbar"
                     >
@@ -694,7 +697,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="无序列表(Ctrl + Shift + 8)"
+                        title={i18n.t("无序列表(Ctrl + Shift + 8)")}
                         onClick={() => legacy._listUlText()}
                         className="editor-toolbar"
                     >
@@ -703,7 +706,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="标题(Ctrl + H)"
+                        title={i18n.t("标题(Ctrl + H)")}
                         onClick={() => legacy._headerText()}
                         className="editor-toolbar"
                     >
@@ -713,7 +716,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 <li className="tb-btn spliter" />
                 <li className="tb-btn">
                     <a
-                        title="分割线(Ctrl + R)"
+                        title={i18n.t("分割线(Ctrl + R)")}
                         onClick={() => legacy._insertHr()}
                         className="editor-toolbar"
                     >
@@ -722,7 +725,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 </li>
                 <li className="tb-btn">
                     <a
-                        title="插入 more 标签"
+                        title={i18n.t("插入 more 标签")}
                         onClick={() => legacy._insertMore()}
                         className="editor-toolbar"
                     >
@@ -757,7 +760,7 @@ function MarkDownEditor(props: MdEditorProps) {
                     <a
                         className={classnames(checkActive('preview'), 'editor-toolbar')}
                         onClick={legacy._changeMode('preview')}
-                        title="预览模式"
+                        title={i18n.t("预览模式")}
                     >
                         {legacy._svgIcon(icons.preview)}
                     </a>
@@ -767,7 +770,7 @@ function MarkDownEditor(props: MdEditorProps) {
                     <a
                         className={classnames(checkActive('split'), 'editor-toolbar')}
                         onClick={legacy._changeMode('split')}
-                        title="分屏模式"
+                        title={i18n.t("分屏模式")}
                     >
                         {legacy._svgIcon(icons.split)}
                     </a>
@@ -777,7 +780,7 @@ function MarkDownEditor(props: MdEditorProps) {
                     <a
                         className={classnames(checkActive('edit'), 'editor-toolbar')}
                         onClick={legacy._changeMode('edit')}
-                        title="编辑模式"
+                        title={i18n.t("编辑模式")}
                     >
                         {legacy._svgIcon(icons.edit)}
                     </a>
@@ -786,7 +789,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 {/* full-screen */}
                 <li className="tb-btn pull-right">
                     <a
-                        title="全屏模式"
+                        title={i18n.t("全屏模式")}
                         onClick={() => legacy._toggleFullScreen()}
                         className={classnames('editor-toolbar')}
                     >
@@ -798,7 +801,7 @@ function MarkDownEditor(props: MdEditorProps) {
                 {/* monospace */}
                 <li className="tb-btn pull-right">
                     <a
-                        title="等宽字符模式"
+                        title={i18n.t("等宽字符模式")}
                         onClick={() => legacy._toggleMonospace()}
                         className={classnames('editor-toolbar', {
                             'toggle-active': legacy.state.isMonospace,
@@ -879,16 +882,16 @@ function MarkDownEditor(props: MdEditorProps) {
         );
     };
     legacy._boldText = function _boldText() {
-        legacy._preInputText('**加粗文字**', 2, 6);
+        legacy._preInputText(i18n.t("**加粗文字**"), 2, 6);
     };
     legacy._italicText = function _italicText() {
-        legacy._preInputText('*斜体文字*', 1, 5);
+        legacy._preInputText(i18n.t("*斜体文字*"), 1, 5);
     };
     legacy._strikethroughText = function _strikethroughText() {
-        legacy._preInputText('~~删除线文字~~', 2, 7);
+        legacy._preInputText(i18n.t("~~删除线文字~~"), 2, 7);
     };
     legacy._underlineText = function _underlineText() {
-        legacy._preInputText('<ins>下划线文字</ins>', 5, 10);
+        legacy._preInputText(i18n.t("<ins>下划线文字</ins>"), 5, 10);
     };
     legacy._quickLinkText = function _quickLinkText() {
         const textarea = legacy.textControl as HTMLTextAreaElement;
@@ -897,16 +900,16 @@ function MarkDownEditor(props: MdEditorProps) {
         const hasSelection = start !== end;
         if (hasSelection) {
             // 选中文字时：选中内容作为链接文本，光标选中url
-            legacy._preInputText('[链接文本](www.yourlink.com)', 1, 5, {
+            legacy._preInputText(i18n.t("[链接文本](www.yourlink.com)"), 1, 5, {
                 selectAfter: [-18, -2],
             });
         } else {
             // 未选中文字时：插入后选中text
-            legacy._preInputText('[链接文本](www.yourlink.com)', 1, 5);
+            legacy._preInputText(i18n.t("[链接文本](www.yourlink.com)"), 1, 5);
         }
     };
     legacy._modalLinkText = function _modalLinkText(
-        text: string = '链接文本',
+        text: string = i18n.t("链接文本"),
         url: string = 'www.yourlink.com',
         selectAction: 'text' | 'url' | 'end' = 'end',
     ) {
@@ -927,7 +930,7 @@ function MarkDownEditor(props: MdEditorProps) {
         }
     };
     legacy._blockquoteText = function _blockquoteText() {
-        legacy._preInputText('> 引用', 2, 4);
+        legacy._preInputText(i18n.t("> 引用"), 2, 4);
     };
     legacy._inlineCodeText = function _inlineCodeText() {
         legacy._preInputText('`code`', 1, 5);
@@ -956,21 +959,21 @@ function MarkDownEditor(props: MdEditorProps) {
         });
     };
     legacy._kbdText = function _kbdText() {
-        legacy._preInputText('<kbd>键盘按键</kbd>', 5, 9);
+        legacy._preInputText(i18n.t("<kbd>键盘按键</kbd>"), 5, 9);
     };
     legacy._inlineFormulaText = function _inlineFormulaText() {
-        legacy._preInputText('`$行内公式$`', 2, 6);
+        legacy._preInputText(i18n.t("`$行内公式$`"), 2, 6);
     };
     legacy._formulaText = function _formulaText() {
-        legacy._preInputText('```math\n公式\n```', 8, 10);
+        legacy._preInputText(i18n.t("```math\n公式\n```"), 8, 10);
     };
     legacy._alertMenuItems = function _alertMenuItems() {
         const types = [
-            { key: 'NOTE', label: '说明', color: '#0969da' },
-            { key: 'TIP', label: '技巧', color: '#1a7f37' },
-            { key: 'IMPORTANT', label: '重要', color: '#8250df' },
-            { key: 'WARNING', label: '警告', color: '#9a6700' },
-            { key: 'CAUTION', label: '危险', color: '#d1242f' },
+            { key: 'NOTE', label: i18n.t("说明"), color: '#0969da' },
+            { key: 'TIP', label: i18n.t("技巧"), color: '#1a7f37' },
+            { key: 'IMPORTANT', label: i18n.t("重要"), color: '#8250df' },
+            { key: 'WARNING', label: i18n.t("警告"), color: '#9a6700' },
+            { key: 'CAUTION', label: i18n.t("危险"), color: '#d1242f' },
         ];
 
         return types.map((t) => ({
@@ -985,7 +988,7 @@ function MarkDownEditor(props: MdEditorProps) {
         }));
     };
     legacy._alertText = function _alertText(type: string) {
-        const text = `> [!${type}]\n> 提示内容`;
+        const text = i18n.t("> [!{{value0}}]\n> 提示内容", {value0: type});
         legacy._preInputText(text, type.length + 8, type.length + 12);
     };
     legacy._toggleListText = function _toggleListText(type: 'ul' | 'ol') {
@@ -1191,7 +1194,7 @@ function MarkDownEditor(props: MdEditorProps) {
         }
     };
     legacy._headerText = function _headerText() {
-        legacy._preInputText('# 标题', 2, 4);
+        legacy._preInputText(i18n.t("# 标题"), 2, 4);
     };
     legacy._insertMore = function _insertMore() {
         legacy._preInputText('<!--more-->', 11, 11);
