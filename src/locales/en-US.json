@@ -1,5 +1,7 @@
 {
   "保存": "Save",
   "保存成功": "Saved successfully",
-  "共 {{count}} 篇文章": "{{count}} posts"
+  "共 {{count}} 篇文章": "{{count}} posts",
+  "评论加载中…": "Loading comments…",
+  "评论组件加载失败，请稍后重试。": "Unable to load comments. Please try again later."
 }

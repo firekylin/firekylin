@@ -10,6 +10,6 @@ module.exports = class extends think.Controller {
       this.ctx.set('Allow', 'GET');
       return;
     }
-    this.ctx.body = publicSettings(this.ctx.state.i18n);
+    this.ctx.body = publicSettings(this.ctx.state.locale);
   }
 };

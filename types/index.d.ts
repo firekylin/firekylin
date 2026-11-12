@@ -1,4 +1,11 @@
 declare namespace Firekylin {
+  type TranslationVars = Record<string, string | number | boolean | null | undefined>;
+  type Translator = (key: string, vars?: TranslationVars) => string;
+
+  interface TranslationContext {
+    readonly t: Translator;
+  }
+
   type AdminFieldType = 'text' | 'textarea' | 'number' | 'switch' | 'select' | 'password' |
     'email' | 'url' | 'radio' | 'checkbox' | 'color' | 'code' | 'hidden';
 
@@ -498,6 +505,7 @@ declare namespace Firekylin {
   }
 
   interface TemplateContext {
+    t: Translator;
     [key: string]: any;
     widget: WidgetFunction;
     comment(options?: {className?: string; title?: string; loadingText?: string; resourceURL?: string}): string;

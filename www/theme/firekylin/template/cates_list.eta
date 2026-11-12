@@ -4,7 +4,7 @@
 <% await blockAsync('content', async () => { %>
 <% const categories = await firekylin.widget('Widget_Metas_Category_List'); %>
 <article class="post tags">
-  <h1 class="title">分类</h1>
+  <h1 class="title"><%= t("分类") %></h1>
   <div class="entry-content"><section>
     <% while (categories.next()) { %><a href="/cate/<%= categories.pathname %>" data-cate="<%= categories.name %>"><%= categories.name %>(<%= categories.count %>)</a><% } %>
   </section></div>

@@ -11,16 +11,16 @@
     </div>
     <h1 class="title"><%= archive.title() %></h1>
     <div class="entry-content"><%~ archive.content().replace(/(<img src="([^"]+)" alt="([^"]*)"\s?\/?>)/g, '<img class="lazy-load" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="$2" alt="$3"><noscript>$1</noscript>') %></div>
-    <p>本文链接：<a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= site.siteUrl + firekylin.ctx.url %></a></p>
+    <p><%= t("本文链接：") %><a href="<%= site.siteUrl + firekylin.ctx.url %>"><%= site.siteUrl + firekylin.ctx.url %></a></p>
     <p>-- <acronym title="End of File">EOF</acronym> --</p>
     <div class="post-info"><p>
       作者 <a href="/author/<%= post.user.name %>" data-user="<%= post.user.display_name %>"><code class="notebook"><%= archive.author() %></code></a>
       发表于 <i><%= archive.date() %></i>
-      <% if (post.cate.length) { %>，添加在分类
+      <% if (post.cate.length) { %>，添加在<%= t("分类") %>
         <% post.cate.forEach(cate => { %><a href="/cate/<%= cate.pathname %>" data-cate="<%= cate.name %>"><code class="notebook"><%= cate.name %></code></a><% }) %> 下
       <% } %>
       <% if (post.tag.length) { %>，并被添加「
-        <% post.tag.forEach(tag => { %><a href="/tag/<%= tag.pathname %>" data-tag="<%= tag.name %>"><code class="notebook"><%= tag.name %></code></a><% }) %> 」标签
+        <% post.tag.forEach(tag => { %><a href="/tag/<%= tag.pathname %>" data-tag="<%= tag.name %>"><code class="notebook"><%= tag.name %></code></a><% }) %> 」<%= t("标签") %>
       <% } %>
       ，最后修改于 <i><%= firekylin.think.datetime(post.update_time) %></i>
     </p>

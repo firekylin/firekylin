@@ -1,3 +1,4 @@
+const {themeTranslator} = require('../service/i18n-theme');
 
 const path = require('path');
 const pack = require('../../package.json');
@@ -42,6 +43,7 @@ module.exports = class extends think.Controller {
     // set theme view root path
     const theme = options.theme || 'firekylin';
     this.THEME_VIEW_PATH = path.join(getContext().themesPath, theme);
+    this.assign('t', themeTranslator(this.THEME_VIEW_PATH, theme, this.ctx.state.locale));
     this.widgetFactory.useTheme(getContext().themesPath, theme);
 
     this.assign('currentYear', (new Date()).getFullYear());
@@ -74,7 +76,11 @@ module.exports = class extends think.Controller {
     }
 
     const result = await this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'), {
-      viewPath: this.THEME_VIEW_PATH
+      viewPath: this.THEME_VIEW_PATH,
+      options: {
+        varName: 'firekylin',
+        functionHeader: 'const t = firekylin.t;'
+      }
     });
     await emit('theme.afterRender', {...viewContext, response: this.ctx.body});
     return result;

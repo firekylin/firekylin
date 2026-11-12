@@ -98,6 +98,10 @@ const pluginManager = existingPluginManager || new PluginManager({
   version: pack.version,
   logger: console,
   packageApi,
+  getLocale: async() => {
+    const {SETTINGS_KEY, decode} = require('../service/i18n-settings');
+    return decode(await think.model('options').getCredentialValue(SETTINGS_KEY));
+  },
   stateStore: new PluginStateStore({
     getCredentialValue: key => think.model('options').getCredentialValue(key),
     setCredentialValue: (key, value) => think.model('options').setCredentialValue(key, value)

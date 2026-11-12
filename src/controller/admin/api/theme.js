@@ -1,3 +1,4 @@
+const {themeTranslator, translateFields} = require('../../../service/i18n-theme');
 const fs = require('fs');
 const path = require('path');
 const cluster = require('cluster');
@@ -140,6 +141,9 @@ module.exports = class extends Base {
       try {
         /* let stat = */await statsAsync(infoFile);
         const infoData = JSON.parse(await readFileAsync(infoFile));
+        const t = themeTranslator(path.join(THEME_DIR, theme), theme, this.ctx?.state?.locale);
+        infoData.configElements = translateFields(infoData.configElements, t);
+        infoData.themeFields = translateFields(infoData.themeFields, t);
         const preview = ['screenshot.png', 'screenshot.jpg', 'screenshot.webp']
           .find(file => fs.existsSync(path.join(THEME_DIR, theme, file)));
         const base = process.env.FIREKYLIN_PROJECT_PATH ? 'themes' : 'theme';
@@ -190,6 +194,8 @@ module.exports = class extends Base {
     } catch {
       // A missing or invalid manifest has no declared fields.
     }
-    return this.success(fields);
+    if (!fields.length) return this.success(fields);
+    const t = themeTranslator(path.join(THEME_DIR, theme), theme, this.ctx?.state?.locale);
+    return this.success(translateFields(fields, t));
   }
 };

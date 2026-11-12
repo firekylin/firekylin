@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {createHash} = require('node:crypto');
-const {validateDictionary, createTranslator, createSnapshot} = require('./i18n');
+const {validateDictionary, createTranslator} = require('./i18n');
 
 function parseDictionary(source) {
   const parsed = JSON.parse(source);
@@ -40,7 +40,7 @@ function loadResources(root) {
 }
 
 const core = loadResources(path.join(__dirname, '..'));
-function coreTranslator(snapshot = createSnapshot()) {
-  return createTranslator({namespace: 'core', snapshot, resources: core.resources});
+function coreTranslator(locale = 'zh-CN') {
+  return createTranslator({namespace: 'core', locale, resources: core.resources});
 }
 module.exports = {parseDictionary, loadResources, core, coreTranslator};

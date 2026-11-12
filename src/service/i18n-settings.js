@@ -1,9 +1,9 @@
-const {SUPPORTED_LOCALES, createSnapshot} = require('./i18n');
+const {SUPPORTED_LOCALES} = require('./i18n');
 
 const SETTINGS_KEY = 'locale';
 
 function decode(value) {
-  return createSnapshot(value);
+  return SUPPORTED_LOCALES.includes(value) ? value : 'zh-CN';
 }
 
 function encode(locale) {
@@ -11,8 +11,8 @@ function encode(locale) {
   return locale;
 }
 
-function publicSettings(snapshot) {
-  return {locale: snapshot.locale};
+function publicSettings(locale) {
+  return {locale};
 }
 
 module.exports = {SETTINGS_KEY, decode, encode, publicSettings};
