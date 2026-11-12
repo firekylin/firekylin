@@ -135,18 +135,6 @@ function GeneralForm(props: GeneralProps) {
                     >
                         <Form.Item
                             {...formItemLayout}
-                            label={t('系统语言')}
-                            name="locale"
-                            initialValue={options.locale || 'zh-CN'}
-                            extra={t('插件初始化时的静态文案需要安全重载插件或重启后生效。')}
-                        >
-                            <Select options={[
-                                {value: 'zh-CN', label: i18n.t("简体中文")},
-                                {value: 'en-US', label: 'English'},
-                            ]} />
-                        </Form.Item>
-                        <Form.Item
-                            {...formItemLayout}
                             label={t("站点名称")}
                             name="title"
                             rules={[
@@ -211,6 +199,18 @@ function GeneralForm(props: GeneralProps) {
                             initialValue={options.site_url}
                         >
                             <Input />
+                        </Form.Item>
+                        <Form.Item
+                            {...formItemLayout}
+                            label={t('系统语言')}
+                            name="locale"
+                            initialValue={options.locale || 'zh-CN'}
+                            extra={t('插件初始化时的静态文案需要安全重载插件或重启后生效。')}
+                        >
+                            <Select options={[
+                                {value: 'zh-CN', label: i18n.t("简体中文")},
+                                {value: 'en-US', label: 'English'},
+                            ]} />
                         </Form.Item>
                         <Form.Item {...formItemLayout} label={i18n.t("Favicon 地址")}>
                             <Upload
