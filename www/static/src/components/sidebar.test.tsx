@@ -250,3 +250,33 @@ it('does not expose built-in plugin tools to editors', () => {
     expect(screen.queryByRole('link', {name: '管理工具'})).toBeNull();
     expect(screen.queryByRole('link', {name: '评论导入'})).toBeNull();
 });
+
+it.each([
+    ['dashboard', '站点概览'], ['post', '文章管理'], ['page', '页面管理'],
+    ['comment', '评论管理'], ['media', '媒体管理'], ['user', '用户管理'],
+    ['push', '推送管理'], ['plugin-management', '插件管理'],
+    ['appearance', '外观设置'], ['options', '系统设置'], ['tools', '管理工具'],
+])('mounts pages under %s in expanded and collapsed navigation', async(target, title) => {
+    window.SysConfig.pluginAdmin = [{id: 'demo', panels: [], pages: [
+        {id: 'entry', builtinPanel: target, title: '插件入口'},
+    ]}] as any;
+    renderSidebar('/plugins/demo/entry');
+    expect(screen.getAllByRole('link', {name: title})[0]).toHaveClass('active');
+    expect(screen.getByRole('link', {name: '插件入口'})).toHaveClass('active');
+    if (['dashboard', 'comment', 'media'].includes(target)) {
+        expect(screen.getAllByRole('link', {name: title})[1]).toHaveAttribute('href', `/${target}`);
+    }
+    fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
+    fireEvent.focus(screen.getByRole('link', {name: title}));
+    expect(await screen.findByRole('link', {name: '插件入口'})).toHaveClass('active');
+});
+
+it.each([2, 3])('keeps plugin entries admin-only within visible menus for role %s', type => {
+    window.SysConfig.userInfo.type = type;
+    window.SysConfig.pluginAdmin = [{id: 'demo', panels: [], pages: [
+        {id: 'entry', builtinPanel: 'post', title: '插件入口'},
+    ]}] as any;
+    renderSidebar('/post/list');
+    expect(screen.getByRole('link', {name: '文章管理'})).toBeInTheDocument();
+    expect(screen.queryByRole('link', {name: '插件入口'})).toBeNull();
+});

@@ -190,3 +190,15 @@ test('registers built-in tools pages without a plugin panel and validates target
   unregister();
   assert.equal(admin.manifest()[0].pages.length, 1);
 });
+
+test('accepts every built-in sidebar target', () => {
+  const admin = new AdminRegistry();
+  const targets = [
+    'dashboard', 'post', 'page', 'comment', 'media', 'user', 'push',
+    'plugin-management', 'appearance', 'options', 'tools'
+  ];
+  for (const builtinPanel of targets) {
+    admin.registerPage({id: builtinPanel, title: builtinPanel, builtinPanel}, 'example');
+  }
+  assert.deepEqual(admin.manifest()[0].pages.map(page => page.builtinPanel), targets);
+});

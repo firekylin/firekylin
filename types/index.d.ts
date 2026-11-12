@@ -74,7 +74,8 @@ declare namespace Firekylin {
     /** Omit to expose this page through plugin configuration without adding a sidebar item. */
     panel?: string;
     /** Built-in sidebar group; mutually exclusive with panel. */
-    builtinPanel?: 'tools';
+    builtinPanel?: 'dashboard' | 'post' | 'page' | 'comment' | 'media' | 'user' | 'push'
+      | 'plugin-management' | 'appearance' | 'options' | 'tools';
     title: string;
     description?: string;
     order?: number;

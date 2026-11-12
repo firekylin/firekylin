@@ -30,18 +30,23 @@ function createSidebarState() {
         [],
     );
     const builtinPages = (window.SysConfig.pluginAdmin || []).flatMap(plugin =>
-        plugin.pages.filter(page => page.builtinPanel === 'tools' && page.menu !== false)
+        plugin.pages.filter(page => page.builtinPanel && page.menu !== false)
             .map(page => ({
                 url: `/plugins/${plugin.id}/${page.id}`,
                 title: page.title,
+                builtinPanel: page.builtinPanel,
                 order: page.order ?? 100,
                 type: 1,
             })),
     ).sort((a, b) => a.order - b.order);
-    const routes = InitiateRoutes(themePages).map(route => route.url === '/tools' ? {
-        ...route,
-        children: [...route.children, ...builtinPages],
-    } : route);
+    const routes = InitiateRoutes(themePages).map(route => {
+        const pages = builtinPages.filter(page => page.builtinPanel === route.id);
+        if (!pages.length) {
+            return route;
+        }
+        const children = route.children || [{url: route.url, title: route.title}];
+        return {...route, children: [...children, ...pages]};
+    });
     return {routes: [...routes, ...pluginRoutes], isActive: {}};
 }
 const STORAGE_KEY = 'firekylin.sidebar.collapsed';

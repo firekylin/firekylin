@@ -189,7 +189,10 @@ class AdminRegistry {
     const panel = definition.panel === undefined ? undefined : identifier(definition.panel, `Admin page ${id} panel`);
     if (panel && !this.panels.has(this.key(pluginId, panel))) throw new Error(`Unknown admin panel: ${panel}`);
     const builtinPanel = definition.builtinPanel;
-    if (builtinPanel !== undefined && builtinPanel !== 'tools') {
+    if (builtinPanel !== undefined && ![
+      'dashboard', 'post', 'page', 'comment', 'media', 'user', 'push',
+      'plugin-management', 'appearance', 'options', 'tools'
+    ].includes(builtinPanel)) {
       throw new TypeError(`Unknown built-in admin panel: ${builtinPanel}`);
     }
     if (panel && builtinPanel) {

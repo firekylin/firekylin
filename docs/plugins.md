@@ -696,10 +696,10 @@ GitHub plugin dependency changes require that the website repository does not tr
 the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
 created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.
 
-### 将插件页面放入管理工具
+### 将插件页面放入内置菜单
 
 使用 `builtinPanel: 'tools'` 将页面添加到内置的“管理工具”子菜单，无需调用
-`registerPanel`。目前支持的内置目标为 `tools`；`builtinPanel` 与 `panel` 不能同时使用。
+`registerPanel`。支持下表中的内置目标；`builtinPanel` 与 `panel` 不能同时使用。
 
 ```js
 ctx.admin.registerPage({
@@ -711,6 +711,25 @@ ctx.admin.registerPage({
 });
 ```
 
-插件页面追加在内置工具之后，按 `order` 从小到大排列（默认 100）。
+插件页面追加在目标菜单的内置子项之后，按 `order` 从小到大排列（默认 100）。
 `menu: false` 可以隐藏入口，页面地址仍为 `/admin/plugins/<pluginId>/<pageId>`。
 入口和插件页面继续仅向管理员开放。原有 `panel` 仍引用本插件注册的独立菜单。
+
+
+| ID | 内置菜单 |
+| --- | --- |
+| `dashboard` | 站点概览 |
+| `post` | 文章管理 |
+| `page` | 页面管理 |
+| `comment` | 评论管理 |
+| `media` | 媒体管理 |
+| `user` | 用户管理 |
+| `push` | 推送管理 |
+| `plugin-management` | 插件管理 |
+| `appearance` | 外观设置 |
+| `options` | 系统设置 |
+| `tools` | 管理工具 |
+
+目标 ID 与显示语言无关。没有子菜单的入口会保留原始入口为第一个子项，
+再追加插件页面；收起侧边栏后仍可通过浮层访问原始入口。
+父菜单保留原有权限，挂载的插件页面仍仅对管理员显示，不会向编辑或作者开放插件权限。
