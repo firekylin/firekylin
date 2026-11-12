@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import axios from 'axios';
 import AIImage, {saveImage} from '../../components/ai-image';
 import * as React from 'react';
@@ -25,6 +27,7 @@ interface Attachment {
     };
 }
 export default function Media(props: any) {
+    useTranslation('admin');
     const [open, setOpen] = React.useState(false), [tab, setTab] = React.useState('local');
     const [enabled, setEnabled] = React.useState(false), [busy, setBusy] = React.useState(false);
     const [link, setLink] = React.useState(''), [selected, setSelected] = React.useState<any>(null);
@@ -75,21 +78,21 @@ export default function Media(props: any) {
         });
     };
     legacy.copy = function copy(value: string) {
-        navigator.clipboard.writeText(value).then(() => message.success('链接已复制'));
+        navigator.clipboard.writeText(value).then(() => message.success(i18n.t("链接已复制")));
     };
     legacy.remove = function remove(item: Attachment) {
         Modal.confirm({
-            title: `确定删除“${item.title}”？`,
+            title: i18n.t("确定删除“{{value0}}”？", {value0: item.title}),
             content:
                 item.attachment.storage === 'local'
-                    ? '附件记录和本地文件都会被删除，此操作无法撤销。'
-                    : '附件记录会被删除；远程存储中的文件需在存储服务中另行删除。',
+                    ? i18n.t("附件记录和本地文件都会被删除，此操作无法撤销。")
+                    : i18n.t("附件记录会被删除；远程存储中的文件需在存储服务中另行删除。"),
             onOk: () =>
                 http
                     .post(`/admin/api/attachment/${item.id}?method=delete`)
                     .subscribe((res) => {
                         if (res.errno === 0) {
-                            message.success('删除成功');
+                            message.success(i18n.t("删除成功"));
                             legacy.load();
                         }
                     }),
@@ -115,17 +118,17 @@ export default function Media(props: any) {
                 actions={[
                     <CopyOutlined
                         key="copy"
-                        title="复制文件链接"
+                        title={i18n.t("复制文件链接")}
                         onClick={() => legacy.copy(media.url)}
                     />,
                     <LinkOutlined
                         key="page"
-                        title="访问附件页面"
+                        title={i18n.t("访问附件页面")}
                         onClick={() => window.open(item.url, '_blank')}
                     />,
                     <DeleteOutlined
                         key="delete"
-                        title="删除"
+                        title={i18n.t("删除")}
                         onClick={() => legacy.remove(item)}
                     />,
                 ]}
@@ -134,7 +137,7 @@ export default function Media(props: any) {
                     title={item.title}
                     description={
                         <>
-                            {media.mime || '未知类型'}
+                            {media.mime || i18n.t("未知类型")}
                             {media.size ? ` · ${(media.size / 1024).toFixed(1)} KB` : ''}
                         </>
                     }
@@ -149,7 +152,7 @@ export default function Media(props: any) {
                 <div className="media-page">
                     <Space className="media-toolbar" wrap style={{display: 'flex', justifyContent: 'flex-end'}}>
                         <Input.Search
-                            placeholder="按文件名搜索"
+                            placeholder={i18n.t("按文件名搜索")}
                             allowClear
                             enterButton
                             value={legacy.state.keyword}
@@ -160,21 +163,21 @@ export default function Media(props: any) {
                                 legacy.setState({ page: 1 }, () => legacy.load(1))
                             }
                         />
-                        <Button type="primary" onClick={() => {setSelected(null); setLink(''); setTab('local'); setOpen(true)}}>新增媒体</Button>
+                        <Button type="primary" onClick={() => {setSelected(null); setLink(''); setTab('local'); setOpen(true)}}>{i18n.t("新增媒体")}</Button>
                     </Space>
-                    <Modal title="新增媒体" open={open} destroyOnHidden confirmLoading={busy} closable={!busy} mask={{closable: !busy}} keyboard={!busy} onCancel={() => {if (!busy) setOpen(false)}} okButtonProps={{disabled: busy || (tab === 'ai' && !selected)}} onOk={async() => {
+                    <Modal title={i18n.t("新增媒体")} open={open} destroyOnHidden confirmLoading={busy} closable={!busy} mask={{closable: !busy}} keyboard={!busy} onCancel={() => {if (!busy) setOpen(false)}} okButtonProps={{disabled: busy || (tab === 'ai' && !selected)}} onOk={async() => {
                         setBusy(true);
                         try {
                             if (tab === 'ai') await saveImage(selected);
                             if (tab === 'network') {
-                                if (!link.trim()) throw new Error('请输入图片地址');
+                                if (!link.trim()) throw new Error(i18n.t("请输入图片地址"));
                                 const res = await axios.post('/admin/api/file', {fileUrl: link});
-                                if (res.data.errno !== 0) throw new Error(res.data.errmsg || '抓取失败');
+                                if (res.data.errno !== 0) throw new Error(i18n.t(res.data.errmsg || '') || i18n.t("抓取失败"));
                             }
                             setOpen(false); legacy.load(1);
-                        } catch(e: any) {message.error(e.message)} finally {setBusy(false)}
+                        } catch(e: any) {message.error(i18n.t(e.message || ''))} finally {setBusy(false)}
                     }}><Tabs activeKey={tab} onChange={key => {if (!busy) setTab(key)}} items={[
-                        {key: 'local', label: '本地上传', children: <Upload.Dragger
+                        {key: 'local', label: i18n.t("本地上传"), children: <Upload.Dragger
                             accept="image/*" name="file"
                             action="/admin/api/file"
                             showUploadList={false}
@@ -182,23 +185,23 @@ export default function Media(props: any) {
                             onChange={(info) => {
                                 if (info.file.status === 'done') {
                                     if (info.file.response.errno === 0) {
-                                        message.success(`${info.file.name} 上传成功`);
+                                        message.success(i18n.t("{{value0}} 上传成功", {value0: info.file.name}));
                                         legacy.load(1);
-                                    } else message.error(info.file.response.errmsg);
+                                    } else message.error(i18n.t(info.file.response.errmsg || ''));
                                 }
                             }}
                         >
-                            <InboxOutlined /> 点击或拖放文件到这里上传
+                            <InboxOutlined />{i18n.t(" 点击或拖放文件到这里上传")}
                         </Upload.Dragger>},
-                        {key: 'network', label: '从网络上抓取', children: <><p>链接地址：</p><Input value={link} onChange={e => setLink(e.target.value)}/></>},
-                        ...(enabled ? [{key: 'ai', label: 'AI 生成', children: <AIImage onSelect={setSelected} onBusy={setBusy}/>}]: [])
+                        {key: 'network', label: i18n.t("从网络上抓取"), children: <><p>{i18n.t("链接地址：")}</p><Input value={link} onChange={e => setLink(e.target.value)}/></>},
+                        ...(enabled ? [{key: 'ai', label: i18n.t("AI 生成"), children: <AIImage onSelect={setSelected} onBusy={setBusy}/>}]: [])
                     ]}/></Modal>
                     {legacy.state.data.length ? (
                         <div className="media-grid">
                             {legacy.state.data.map((item) => legacy.renderCard(item))}
                         </div>
                     ) : (
-                        <Empty description="暂无附件" />
+                        <Empty description={i18n.t("暂无附件")} />
                     )}
                     <Pagination
                         current={legacy.state.page}

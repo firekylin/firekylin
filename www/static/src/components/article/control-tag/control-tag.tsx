@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Select } from 'antd';
 import { Tag } from '../../../models/tag.model';
@@ -11,12 +13,13 @@ interface ACTagProps {
 }
 
 function ArticleControlTag({ tagList, tag, handleTagChange, disabled }: ACTagProps) {
+    useTranslation('admin');
     return (
         <Select
             disabled={disabled}
             mode="tags"
             showSearch={true}
-            placeholder="请输入标签"
+            placeholder={i18n.t("请输入标签")}
             style={{ width: '100%' }}
             onChange={handleTagChange}
             value={tag}

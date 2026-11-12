@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {openArticlePreview} from './preview';
 import {CoverAI} from '../ai-image';
 import React from 'react';
@@ -35,6 +37,7 @@ import ArticleControlAttachments from './control-attachments/control-attachments
 
 const DatePicker = generatePicker<Dayjs>(dayjsGenerateConfig);
 function Article(props: ArticleProps) {
+    useTranslation('admin');
     const sidebarRef = React.useRef<HTMLDivElement>(null);
     React.useLayoutEffect(() => {
         const measureSidebar = () => {
@@ -185,7 +188,7 @@ function Article(props: ArticleProps) {
         const { articleInfo } = props.articleStore;
 
         if (props.articleStore.pendingUploads.size) {
-            message.warning('图片正在上传，请等待上传完成后再保存');
+            message.warning(i18n.t("图片正在上传，请等待上传完成后再保存"));
             return;
         }
 
@@ -210,12 +213,12 @@ function Article(props: ArticleProps) {
             });
         }
         if (!legacy.state.customFieldsValid) {
-            message.error('自定义字段名称不能重复');
+            message.error(i18n.t("自定义字段名称不能重复"));
             return;
         }
 
         if (legacy.state.passwordMode && !legacy.state.postPassword && !articleInfo.options.passwordProtected) {
-            message.error('请设置访问密码'); return;
+            message.error(i18n.t("请设置访问密码")); return;
         }
         const params: any = {};
         if (legacy.articleId) {
@@ -231,7 +234,7 @@ function Article(props: ArticleProps) {
         params.summary = articleInfo.summary || '';
 
         if (params.status === ArticleEnum.SAVE && !params.markdown_content) {
-            message.error('没有内容不能提交呢！');
+            message.error(i18n.t("没有内容不能提交呢！"));
             props.articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
             return;
         }
@@ -284,17 +287,17 @@ function Article(props: ArticleProps) {
                     props.articleStore.getArticleInfoById(params.id, legacy.type);
                     message.success(
                         <>
-                            发布成功, &nbsp;&nbsp;
+                            {i18n.t("发布成功,   ")}   
                             <a
                                 href={`/${type}/${articleInfo.pathname}.html`}
                                 target="_blank"
                             >
-                                {legacy.isPage() ? '点此查看页面' : '点此查看文章'}
+                                {legacy.isPage() ? i18n.t("点此查看页面") : i18n.t("点此查看文章")}
                             </a>
                         </>,
                     );
                 } else {
-                    message.success('保存成功');
+                    message.success(i18n.t("保存成功"));
                 }
             } else {
                 props.articleStore.setArticleInfo({ status: ArticleEnum.DRAFT });
@@ -409,20 +412,20 @@ function Article(props: ArticleProps) {
                         />
 
                         <section className="release-date">
-                            <h5>发布日期</h5>
+                            <h5>{i18n.t("发布日期")}</h5>
                             <DatePicker
                                 className="release-date-picker"
                                 showTime={true}
                                 allowClear={false}
                                 format="YYYY-MM-DD HH:mm:ss"
                                 value={dayjs(articleInfo.create_time)}
-                                placeholder="请选择日期"
+                                placeholder={i18n.t("请选择日期")}
                                 onChange={(date) => legacy.onDateChange(date)}
                             />
                         </section>
                         {legacy.isPage() ? null : (
                             <section className="category">
-                                <h5>分类 <AIButton operation="category" minimum={250} label="智能分类选择" /></h5>
+                                <h5>{i18n.t("分类 ")}<AIButton operation="category" minimum={250} label={i18n.t("智能分类选择")} /></h5>
                                 <ArticleControlCategory
                                     disabled={ai.busy === 'category'}
                                     catInitial={
@@ -435,7 +438,7 @@ function Article(props: ArticleProps) {
                         )}
                         {legacy.isPage() ? null : (
                             <section className="category">
-                                <h5>标签 <AIButton operation="tags" minimum={250} label="智能标签选择" /></h5>
+                                <h5>{i18n.t("标签 ")}<AIButton operation="tags" minimum={250} label={i18n.t("智能标签选择")} /></h5>
                                 <ArticleControlTag
                                     disabled={ai.busy === 'tags'}
                                     tag={articleInfo.tag}
@@ -447,24 +450,24 @@ function Article(props: ArticleProps) {
                             </section>
                         )}
                         <section className="category">
-                            <h5>封面图片 <CoverAI article={articleInfo} onChange={value => legacy.handleImageChange({target: {value}})} /></h5>
+                            <h5>{i18n.t("封面图片 ")}<CoverAI article={articleInfo} onChange={value => legacy.handleImageChange({target: {value}})} /></h5>
                             <ArticleControlImage
                                 imageUrl={articleInfo.options.featuredImage}
                                 handleImageChange={(e) => legacy.handleImageChange(e)}
                             />
                         </section>
                         <section className="category">
-                            <h5>内容摘要 <AIButton operation="summary" minimum={250} label="AI生成摘要" /></h5>
-                            <Input.TextArea aria-label="内容摘要" autoSize={{minRows: 4}} disabled={ai.busy === 'summary'}
+                            <h5>{i18n.t("内容摘要 ")}<AIButton operation="summary" minimum={250} label={i18n.t("AI生成摘要")} /></h5>
+                            <Input.TextArea aria-label={i18n.t("内容摘要")} autoSize={{minRows: 4}} disabled={ai.busy === 'summary'}
                                 value={articleInfo.summary || ''}
-                                placeholder="留空则从正文自动生成摘要"
+                                placeholder={i18n.t("留空则从正文自动生成摘要")}
                                 onChange={e => articleStore.setArticleInfo({summary: e.target.value})} />
                         </section>
                         <AdvancedControls>
                         {legacy.isPage() ||
                         window.SysConfig.userInfo.type !== 1 ? null : (
                             <section className="category">
-                                <h5>选择作者</h5>
+                                <h5>{i18n.t("选择作者")}</h5>
                                 <ArticleControlUser
                                     user={articleInfo.user_id}
                                     users={props.userStore.userList}
@@ -476,7 +479,7 @@ function Article(props: ArticleProps) {
                         )}
 
                         <section className="category">
-                            <h5>公开度</h5>
+                            <h5>{i18n.t("公开度")}</h5>
                             <ArticleControlPublic
                                 allowPassword={true}
                                 isPublic={legacy.state.passwordMode || (articleInfo.options.passwordProtected && !legacy.state.clearPostPassword) ? 'password' : articleInfo.is_public}
@@ -485,10 +488,10 @@ function Article(props: ArticleProps) {
                         </section>
                         {(legacy.state.passwordMode || (articleInfo.options.passwordProtected && !legacy.state.clearPostPassword)) ? (
                             <section className="category">
-                                <h5>访问密码</h5>
+                                <h5>{i18n.t("访问密码")}</h5>
                                 <Input.Password
                                     value={legacy.state.postPassword}
-                                    placeholder={articleInfo.options.passwordProtected ? '留空则保持原密码' : '请输入访问密码'}
+                                    placeholder={articleInfo.options.passwordProtected ? i18n.t("留空则保持原密码") : i18n.t("请输入访问密码")}
                                     maxLength={256}
                                     onChange={(e) =>
                                         legacy.setState({
@@ -501,7 +504,7 @@ function Article(props: ArticleProps) {
                             </section>
                         ) : null}
                         <section className="category">
-                            <h5>权限控制</h5>
+                            <h5>{i18n.t("权限控制")}</h5>
                             <Checkbox
                                 onChange={(e) =>
                                     articleStore.setArticleInfo({
@@ -510,11 +513,11 @@ function Article(props: ArticleProps) {
                                 }
                                 checked={articleInfo.allow_comment}
                             >
-                                允许评论
+                                {i18n.t("允许评论")}
                             </Checkbox>
                         </section>
                         <section className="category custom-fields">
-                            <h5>自定义字段</h5>
+                            <h5>{i18n.t("自定义字段")}</h5>
                             <ArticleControlFields
                                 fields={Object.fromEntries(
                                     Object.entries(
@@ -548,7 +551,7 @@ function Article(props: ArticleProps) {
                         </section>
                         {legacy.isPage() ? (
                             <section className="category">
-                                <h5>自定义模版</h5>
+                                <h5>{i18n.t("自定义模版")}</h5>
                                 <ArticleControlTemplate
                                     template={articleInfo.options.template}
                                     templateList={templateList}
@@ -566,7 +569,7 @@ function Article(props: ArticleProps) {
                         />}
                         {themeFields.length > 0 ? (
                             <section className="category theme-fields">
-                                <h5>主题字段</h5>
+                                <h5>{i18n.t("主题字段")}</h5>
                                 <ArticleControlThemeFields
                                     fields={themeFields}
                                     values={articleInfo.options.fields || {}}

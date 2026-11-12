@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
 // import { UserProps } from '../user.model';
@@ -12,6 +14,7 @@ interface UserCreateProps extends RouteComponentProps<any> {
     userStore: UserStore;
 }
 export function UserCreateForm(props: UserCreateProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -63,7 +66,7 @@ export function UserCreateForm(props: UserCreateProps) {
             legacy.userStore.saveUser(
                 values,
                 () => {
-                    message.success(legacy.id ? '保存成功' : '添加成功');
+                    message.success(legacy.id ? i18n.t("保存成功") : i18n.t("添加成功"));
                     legacy.userStore.setSubmitting(false);
                     const target =
                         window.SysConfig.userInfo.type === 4
@@ -72,14 +75,14 @@ export function UserCreateForm(props: UserCreateProps) {
                     setTimeout(() => props.history.push(target), 1000);
                 },
                 () => {
-                    message.error('保存失败');
+                    message.error(i18n.t("保存失败"));
                     legacy.userStore.setSubmitting(false);
                 },
             );
         };
         legacy.compareToFirstPassword = (rule, value, callback) => {
             if (value && value !== legacy.formRef.current?.getFieldValue('password')) {
-                callback('两次输入密码不一致!');
+                callback(i18n.t("两次输入密码不一致!"));
             } else {
                 callback();
             }
@@ -172,20 +175,20 @@ export function UserCreateForm(props: UserCreateProps) {
                 <div className="fk-content-wrap">
                     <BreadCrumb {...props} />
                     <div className="manage-container">
-                        <h3 style={{ marginBottom: '20px' }}>LDAP提示</h3>
+                        <h3 style={{ marginBottom: '20px' }}>{i18n.t("LDAP提示")}</h3>
                         <p>
-                            本系统已开启LDAP认证服务，LDAP服务开启后，本系统不能新增用户，且用户的用户名、密码、邮箱、别名均由LDAP统一管理，本系统不能修改。
+                            {i18n.t("本系统已开启LDAP认证服务，LDAP服务开启后，本系统不能新增用户，且用户的用户名、密码、邮箱、别名均由LDAP统一管理，本系统不能修改。")}
                         </p>
                         <div className="alert alert-warning" role="alert">
-                            如需要修改，请使用给本系统提供LDAP服务的
+                            {i18n.t("如需要修改，请使用给本系统提供LDAP服务的")}
                             {ldap_user_page ? (
                                 <a href={ldap_user_page} target="_blank">
-                                    用户管理服务
+                                    {i18n.t("用户管理服务")}
                                 </a>
                             ) : (
-                                '用户管理服务'
+                                i18n.t("用户管理服务")
                             )}
-                            ，或者联系系统管理员。
+                            {i18n.t("，或者联系系统管理员。")}
                         </div>
                     </div>
                 </div>
@@ -204,78 +207,78 @@ export function UserCreateForm(props: UserCreateProps) {
                     >
                         <div className="pull-left">
                             <Form.Item
-                                label="用户名"
+                                label={i18n.t("用户名")}
                                 name="username"
                                 rules={legacy.id ? [] : [
                                     {
                                         min: 4,
                                         max: 20,
-                                        message: '长度为4到20个字符',
+                                        message: i18n.t("长度为4到20个字符"),
                                     },
                                     {
                                         required: true,
-                                        message: '请输入用户名!',
+                                        message: i18n.t("请输入用户名!"),
                                     },
                                 ]}
                             >
                                 <Input
                                     {...legacy.isDisabled('name')}
-                                    placeholder="4-20个字符"
+                                    placeholder={i18n.t("4-20个字符")}
                                 />
                             </Form.Item>
-                            <p className="help-block">登录时所用的名称，不能重复。</p>
+                            <p className="help-block">{i18n.t("登录时所用的名称，不能重复。")}</p>
                             <Form.Item
-                                label="邮箱"
+                                label={i18n.t("邮箱")}
                                 name="email"
                                 rules={[
                                     {
                                         required: true,
-                                        message: '请输入邮箱!',
+                                        message: i18n.t("请输入邮箱!"),
                                     },
                                     {
                                         type: 'email',
-                                        message: '邮箱格式错误!',
+                                        message: i18n.t("邮箱格式错误!"),
                                     },
                                 ]}
                             >
                                 <Input
                                     {...legacy.isDisabled('email')}
                                     autoComplete="email"
-                                    placeholder="输入邮箱"
+                                    placeholder={i18n.t("输入邮箱")}
                                 />
                             </Form.Item>
-                            <p className="help-block">用户主要联系方式，不能重复。</p>
+                            <p className="help-block">{i18n.t("用户主要联系方式，不能重复。")}</p>
                             <Form.Item
-                                label="密码"
+                                label={i18n.t("密码")}
                                 name="password"
                                 rules={[
                                     {
                                         required: !legacy.id,
-                                        message: '请输入密码!',
+                                        message: i18n.t("请输入密码!"),
                                     },
                                     {
                                         min: 8,
                                         max: 30,
-                                        message: '长度为8到30个字符',
+                                        message: i18n.t("长度为8到30个字符"),
                                     },
                                 ]}
                             >
                                 <Input
                                     {...legacy.isDisabled('password')}
                                     type="password"
-                                    placeholder="长度为8到30个字符"
+                                    placeholder={i18n.t("长度为8到30个字符")}
                                 />
                             </Form.Item>
                             <p className="help-block">
-                                建议使用特殊字符与字母、数字的混编方式，增加安全性。
+                                {i18n.t("建议使用特殊字符与字母、数字的混编方式，增加安全性。")}
                             </p>
                             <Form.Item
-                                label="确认密码"
+                                label={i18n.t("确认密码")}
                                 name="repassword"
                                 rules={[
                                     {
                                         required: !legacy.id,
-                                        message: '请再次确认密码!',
+                                        message: i18n.t("请再次确认密码!"),
                                     },
                                     {
                                         validator: legacy.compareToFirstPassword,
@@ -285,38 +288,38 @@ export function UserCreateForm(props: UserCreateProps) {
                                 <Input
                                     {...legacy.isDisabled('repassword')}
                                     type="password"
-                                    placeholder="请再次输入密码"
+                                    placeholder={i18n.t("请再次输入密码")}
                                 />
                             </Form.Item>
                             <button type="submit" {...formProps} className="btn btn-primary">
-                                {legacy.userStore.submitting ? '提交中...' : '提交'}
+                                {legacy.userStore.submitting ? i18n.t("提交中...") : i18n.t("提交")}
                             </button>
                         </div>
                         <div className="pull-left">
-                            <Form.Item label="别名" name="display_name">
+                            <Form.Item label={i18n.t("别名")} name="display_name">
                                 <Input
                                     {...legacy.isDisabled('display_name')}
-                                    placeholder="显示名称"
+                                    placeholder={i18n.t("显示名称")}
                                 />
                             </Form.Item>
                             {!isCommenter ? (
-                                <Form.Item label="用户组" name="type">
+                                <Form.Item label={i18n.t("用户组")} name="type">
                                     <Select
                                         {...legacy.isDisabled('type')}
                                         style={{ width: '100%' }}
                                     >
-                                        <Option value="2">编辑</Option>
-                                        <Option value="1">管理员</Option>
-                                        <Option value="3">投稿者</Option>
-                                        <Option value="4">评论者</Option>
+                                        <Option value="2">{i18n.t("编辑")}</Option>
+                                        <Option value="1">{i18n.t("管理员")}</Option>
+                                        <Option value="3">{i18n.t("投稿者")}</Option>
+                                        <Option value="4">{i18n.t("评论者")}</Option>
                                     </Select>
                                 </Form.Item>
                             ) : null}
                             {!isCommenter ? (
-                                <Form.Item label="状态" name="status">
+                                <Form.Item label={i18n.t("状态")} name="status">
                                     <Radio.Group {...legacy.isDisabled('status')}>
-                                        <Radio value="1">有效</Radio>
-                                        <Radio value="2">禁用</Radio>
+                                        <Radio value="1">{i18n.t("有效")}</Radio>
+                                        <Radio value="2">{i18n.t("禁用")}</Radio>
                                     </Radio.Group>
                                 </Form.Item>
                             ) : null}
@@ -324,7 +327,7 @@ export function UserCreateForm(props: UserCreateProps) {
                             {!isCommenter ? (
                                 <>
                                     <legend>
-                                        认证
+                                        {i18n.t("认证")}
                                         <button
                                             type="button"
                                             className="btn btn-primary"
@@ -335,7 +338,7 @@ export function UserCreateForm(props: UserCreateProps) {
                                             }}
                                             onClick={() => legacy.generateKey()}
                                         >
-                                            重新生成
+                                            {i18n.t("重新生成")}
                                         </button>
                                     </legend>
                                     <div className="form-group">
@@ -363,7 +366,7 @@ export function UserCreateForm(props: UserCreateProps) {
                             {String(window.SysConfig.userInfo.id) ===
                             String(legacy.id) ? (
                                 <div className="form-group">
-                                    <legend>社交账号</legend>
+                                    <legend>{i18n.t("社交账号")}</legend>
                                     <Space direction="vertical" align="start">
                                         {(userInfo.social_services || []).map(
                                             (service) => {
@@ -395,7 +398,7 @@ export function UserCreateForm(props: UserCreateProps) {
                                                                     )
                                                                 }
                                                             >
-                                                                解绑
+                                                                {i18n.t("解绑")}
                                                             </Button>
                                                         ) : (
                                                             <Button
@@ -406,7 +409,7 @@ export function UserCreateForm(props: UserCreateProps) {
                                                                     )
                                                                 }
                                                             >
-                                                                绑定
+                                                                {i18n.t("绑定")}
                                                             </Button>
                                                         )}
                                                     </Space>

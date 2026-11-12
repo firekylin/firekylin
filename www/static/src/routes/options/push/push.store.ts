@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
 class OptionsPushStore {
@@ -7,7 +8,7 @@ class OptionsPushStore {
         .subscribe(
             res => {
                 if (res.errno === 0) {
-                    message.success('更新成功');
+                    message.success(i18n.t("更新成功"));
                     window.SysConfig.options.push = data.push;
                 }
             }

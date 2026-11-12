@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Link } from '../../../utils/router';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
@@ -7,6 +9,7 @@ import { UserProps } from '../user.model';
 import { message, Modal } from 'antd';
 import BreadCrumb from '../../../components/breadcrumb';
 function DefaultComponent(props: UserProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -37,18 +40,18 @@ function DefaultComponent(props: UserProps) {
     legacy.handleDelete = function handleDelete(user: any) {
         if (user.post_num > 0) {
             return Modal.error({
-                title: '无法删除',
+                title: i18n.t("无法删除"),
                 content: (
                     <div>
-                        <p>当前用户的文章数不为0，请先删除该用户下的所有文章!</p>
+                        <p>{i18n.t("当前用户的文章数不为0，请先删除该用户下的所有文章!")}</p>
                     </div>
                 ),
             });
         }
         const that = legacy;
         return Modal.confirm({
-            title: '确定删除该用户吗？',
-            content: '删除后无法恢复',
+            title: i18n.t("确定删除该用户吗？"),
+            content: i18n.t("删除后无法恢复"),
             onOk() {
                 // message.success('删除成功');
                 that.userStore.deleteUser(user.id);
@@ -62,19 +65,19 @@ function DefaultComponent(props: UserProps) {
     legacy.deny = function deny(user: any) {
         const that = legacy;
         return Modal.confirm({
-            title: '拒绝该用户的申请后会直接删除该账号',
-            content: '删除后无法恢复',
+            title: i18n.t("拒绝该用户的申请后会直接删除该账号"),
+            content: i18n.t("删除后无法恢复"),
             onOk() {
                 that.userStore.deleteUser(
                     user.id,
                     () => {
-                        message.success('删除成功');
+                        message.success(i18n.t("删除成功"));
                         that.userStore.getUserList(
                             that.userStore.key === 3 ? 'contributor' : '',
                         );
                     },
                     () => {
-                        message.success('删除失败，请稍后重试');
+                        message.success(i18n.t("删除失败，请稍后重试"));
                     },
                 );
             },
@@ -83,13 +86,13 @@ function DefaultComponent(props: UserProps) {
     legacy.getUserType = function getUserType(user: any) {
         switch (user.type) {
             case 1:
-                return '管理员';
+                return i18n.t("管理员");
             case 2:
-                return '编辑';
+                return i18n.t("编辑");
             case 3:
-                return '投稿者';
+                return i18n.t("投稿者");
             case 4:
-                return '评论者';
+                return i18n.t("评论者");
             default:
                 return '';
         }
@@ -99,7 +102,7 @@ function DefaultComponent(props: UserProps) {
             return (
                 <tr>
                     <td className="center" colSpan="11">
-                        加载中……
+                        {i18n.t("加载中……")}
                     </td>
                 </tr>
             );
@@ -108,7 +111,7 @@ function DefaultComponent(props: UserProps) {
             return (
                 <tr>
                     <td className="center" colSpan="11">
-                        无相关用户
+                        {i18n.t("无相关用户")}
                     </td>
                 </tr>
             );
@@ -131,15 +134,15 @@ function DefaultComponent(props: UserProps) {
                                 </span>
                             ))
                         ) : (
-                            <span className="gray">未绑定</span>
+                            <span className="gray">{i18n.t("未绑定")}</span>
                         )}
                     </td>
                     <td>{legacy.getUserType(item)}</td>
                     <td>
                         {item.status === 1 ? (
-                            <span className="label label-success">有效</span>
+                            <span className="label label-success">{i18n.t("有效")}</span>
                         ) : (
-                            <span className="label label-warning">禁用</span>
+                            <span className="label label-warning">{i18n.t("禁用")}</span>
                         )}
                     </td>
                     <td>{item.post_num}</td>
@@ -155,7 +158,7 @@ function DefaultComponent(props: UserProps) {
                                         icon={<EditOutlined />}
                                         size="small"
                                     >
-                                        编辑
+                                        {i18n.t("编辑")}
                                     </Button>
                                 </Link>
                             ) : (
@@ -165,7 +168,7 @@ function DefaultComponent(props: UserProps) {
                                     onClick={legacy.pass.bind(null, item)}
                                 >
                                     <span className="glyphicon glyphicon-ok" />
-                                    通过
+                                    {i18n.t("通过")}
                                 </button>
                             )}
                             {legacy.userStore.key === '0' ? (
@@ -176,7 +179,7 @@ function DefaultComponent(props: UserProps) {
                                     icon={<DeleteOutlined />}
                                     size="small"
                                 >
-                                    删除
+                                    {i18n.t("删除")}
                                 </Button>
                             ) : (
                                 <button
@@ -185,7 +188,7 @@ function DefaultComponent(props: UserProps) {
                                     onClick={legacy.deny.bind(null, item)}
                                 >
                                     <span className="glyphicon glyphicon-remove" />
-                                    拒绝
+                                    {i18n.t("拒绝")}
                                 </button>
                             )}
                         </Space>
@@ -205,8 +208,8 @@ function DefaultComponent(props: UserProps) {
                         onChange={(type) => legacy.handleSelect(type)}
                         tabBarExtraContent={
                             <Input.Search
-                                placeholder="搜索用户名、别名或邮箱"
-                                aria-label="搜索用户"
+                                placeholder={i18n.t("搜索用户名、别名或邮箱")}
+                                aria-label={i18n.t("搜索用户")}
                                 defaultValue={legacy.userStore.keyword}
                                 allowClear
                                 enterButton
@@ -215,23 +218,23 @@ function DefaultComponent(props: UserProps) {
                             />
                         }
                     >
-                        <TabPane key="0" tab="全　部" />
-                        <TabPane key="3" tab="审核中" />
+                        <TabPane key="0" tab={i18n.t("全　部")} />
+                        <TabPane key="3" tab={i18n.t("审核中")} />
                     </Tabs>
                     <table className="table table-striped">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>用户名</th>
-                                <th>邮箱</th>
-                                <th>社交账号</th>
-                                <th>用户组</th>
-                                <th>有效</th>
-                                <th>文章数</th>
-                                <th>评论数</th>
-                                <th>注册时间</th>
-                                <th>最后登录时间</th>
-                                <th>操作</th>
+                                <th>{i18n.t("用户名")}</th>
+                                <th>{i18n.t("邮箱")}</th>
+                                <th>{i18n.t("社交账号")}</th>
+                                <th>{i18n.t("用户组")}</th>
+                                <th>{i18n.t("有效")}</th>
+                                <th>{i18n.t("文章数")}</th>
+                                <th>{i18n.t("评论数")}</th>
+                                <th>{i18n.t("注册时间")}</th>
+                                <th>{i18n.t("最后登录时间")}</th>
+                                <th>{i18n.t("操作")}</th>
                             </tr>
                         </thead>
                         <tbody>{legacy.getUserList()}</tbody>

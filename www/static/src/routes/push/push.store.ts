@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { AppStore } from '../../app.store';
 import { message } from 'antd';
 import { http } from '../../utils/http';
@@ -54,7 +55,7 @@ export default class PushStore {
             .toPromise()
             .then(
                 () => {
-                    message.success(data.id ? '保存成功' : '添加成功');
+                    message.success(data.id ? i18n.t("保存成功") : i18n.t("添加成功"));
                     this.setPushCreateParam({ submitting: false });
                 },
                 () => {
@@ -67,11 +68,11 @@ export default class PushStore {
         http.post(`/admin/api/options?method=delete&type=push&key=${id}`)
             .toPromise()
             .then(() => {
-                message.success('删除成功');
+                message.success(i18n.t("删除成功"));
                 this.setLoading(true);
                 this.getPushList();
             },    (err) => {
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             });
     }
 }

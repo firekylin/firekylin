@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { Button, Input } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -43,6 +45,7 @@ function duplicateFieldNames(rows: CustomFieldRow[]) {
     return new Set(Object.keys(counts).filter((name) => counts[name] > 1));
 }
 export default function ArticleControlFields(props: ArticleControlFieldsProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({
         rows: fieldsToRows(props.fields),
     }));
@@ -116,8 +119,8 @@ export default function ArticleControlFields(props: ArticleControlFieldsProps) {
                         <React.Fragment key={row.id}>
                             <div className="custom-field-row">
                                 <Input
-                                    aria-label="字段名"
-                                    placeholder="字段名"
+                                    aria-label={i18n.t("字段名")}
+                                    placeholder={i18n.t("字段名")}
                                     status={duplicate ? 'error' : undefined}
                                     value={row.name}
                                     onChange={(event) =>
@@ -130,8 +133,8 @@ export default function ArticleControlFields(props: ArticleControlFieldsProps) {
                                 />
 
                                 <Input
-                                    aria-label="字段值"
-                                    placeholder="字段值"
+                                    aria-label={i18n.t("字段值")}
+                                    placeholder={i18n.t("字段值")}
                                     value={row.value}
                                     onChange={(event) =>
                                         legacy.updateField(
@@ -143,13 +146,13 @@ export default function ArticleControlFields(props: ArticleControlFieldsProps) {
                                 />
 
                                 <Button
-                                    aria-label="删除字段"
+                                    aria-label={i18n.t("删除字段")}
                                     icon={<DeleteOutlined />}
                                     onClick={() => legacy.removeField(row.id)}
                                 />
                             </div>
                             {duplicate ? (
-                                <div className="custom-field-error">字段名不能重复</div>
+                                <div className="custom-field-error">{i18n.t("字段名不能重复")}</div>
                             ) : null}
                         </React.Fragment>
                     );
@@ -159,7 +162,7 @@ export default function ArticleControlFields(props: ArticleControlFieldsProps) {
                     icon={<PlusOutlined />}
                     onClick={legacy.addField}
                 >
-                    添加字段
+                    {i18n.t("添加字段")}
                 </Button>
             </div>
         );

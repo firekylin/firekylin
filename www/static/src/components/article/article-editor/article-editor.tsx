@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import './article-editor.less';
 import MarkDownEditor from '../../editor';
@@ -9,6 +11,7 @@ import { ArticleTypeEnum } from '../../../enums/article-type.enum';
 
 
 export function ArticleEditor(props: any) {
+    useTranslation('admin');
     const active = React.useRef(true);
     React.useEffect(() => {
         active.current = true;
@@ -100,15 +103,15 @@ export function ArticleEditor(props: any) {
                 />
                 <p style={{ lineHeight: '30px' }}>
                     <span className="pull-left">
-                        文章使用 markdown 格式，格式说明请见
+                        {i18n.t("文章使用 markdown 格式，格式说明请见")}
                         <a
                             href="https://guides.github.com/features/mastering-markdown/"
                             target="_blank"
                         >
-                            这里
+                            {i18n.t("这里")}
                         </a>
                     </span>
-                    <span className="pull-right">字数：{legacy.state.wordCount}</span>
+                    <span className="pull-right">{i18n.t("字数：")}{legacy.state.wordCount}</span>
                 </p>
             </div>
         );

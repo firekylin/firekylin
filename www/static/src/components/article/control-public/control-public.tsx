@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Radio } from 'antd';
 const RadioGroup = Radio.Group;
@@ -10,6 +12,7 @@ interface ACPublicProps {
 }
 
 function ArticleControlPublic({ handlePublicChange, isPublic, allowPassword = true }: ACPublicProps) {
+    useTranslation('admin');
     const radioStyle = {
         display: 'flex',
         alignItems: 'center',
@@ -19,11 +22,11 @@ function ArticleControlPublic({ handlePublicChange, isPublic, allowPassword = tr
     return (
         <RadioGroup onChange={handlePublicChange} value={isPublic}>
             <Radio style={radioStyle} value={'1'}>
-                公开
+                {i18n.t("公开")}
             </Radio>
-            {allowPassword && <Radio style={radioStyle} value={'password'}>密码访问</Radio>}
+            {allowPassword && <Radio style={radioStyle} value={'password'}>{i18n.t("密码访问")}</Radio>}
             <Radio style={radioStyle} value={'0'}>
-                不公开
+                {i18n.t("不公开")}
             </Radio>
         </RadioGroup>
     );

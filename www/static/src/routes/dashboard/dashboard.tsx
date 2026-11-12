@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import './dashboard.less';
 import { observer, inject } from '@admin/utils/mobx-react';
@@ -9,15 +11,16 @@ import { Modal } from 'antd';
 const confirm = Modal.confirm;
 import Chat from './chat';
 
-const UPDATE_STEPS = [
-    [1, '正在下载 Firekylin 最新版本...', 'Firekylin 下载成功！'],
-    [2, '正在解压更新文件...', '文件更新成功！'],
-    [3, '正在重新安装依赖...', '依赖安装成功！'],
-    [4, '正在重启程序...', '程序重启成功，将在 %d 秒后刷新页面！'],
-];
+const UPDATE_STEPS = () => ([
+    [1, i18n.t("正在下载 Firekylin 最新版本..."), i18n.t("Firekylin 下载成功！")],
+    [2, i18n.t("正在解压更新文件..."), i18n.t("文件更新成功！")],
+    [3, i18n.t("正在重新安装依赖..."), i18n.t("依赖安装成功！")],
+    [4, i18n.t("正在重启程序..."), i18n.t("程序重启成功，将在 %d 秒后刷新页面！")],
+]);
 
 const COUNT_DOWN = 3;
 export function DashBoard(props: DashBoardProps) {
+    useTranslation('admin');
     const [chatting, setChatting] = React.useState(false);
     const [state, setState] = React.useState(() => ({
         posts: [],
@@ -70,14 +73,14 @@ export function DashBoard(props: DashBoardProps) {
                             >
                                 <span aria-hidden="true">×</span>
                             </button>
-                            <h4 className="modal-title">在线更新</h4>
+                            <h4 className="modal-title">{i18n.t("在线更新")}</h4>
                         </div>
                         <div className="modal-body">
                             <div className="dialog-panel anim-modal ">
                                 <a href="###" className="close-btn" />
                                 <div className="dialog-content">
                                     <ul className="update-step">
-                                        {UPDATE_STEPS.map((step) => (
+                                        {UPDATE_STEPS().map((step) => (
                                             <li
                                                 key={step[0]}
                                                 className={
@@ -120,33 +123,33 @@ export function DashBoard(props: DashBoardProps) {
     };
     legacy.renderUpdateConfirm = function renderUpdateConfirm() {
         confirm({
-            title: '更新 Firekylin',
-            content: '使用扩展设置中的安装方式：本地更新依赖并重启服务；连接 GitHub 时创建升级 PR。更新前请备份数据。',
+            title: i18n.t("更新 Firekylin"),
+            content: i18n.t("使用扩展设置中的安装方式：本地更新依赖并重启服务；连接 GitHub 时创建升级 PR。更新前请备份数据。"),
             onOk: () => new Promise<void>((resolve, reject) => {
                 props.sharedStore.updateSystem(1).subscribe({
                     next: (res: any) => {
-                        if (res.errno !== 0) { reject(new Error(res.errmsg || '更新失败')); return; }
+                        if (res.errno !== 0) { reject(new Error(i18n.t(res.errmsg || '') || i18n.t("更新失败"))); return; }
                         const result = res.data;
                         if (result.url) {
-                            Modal.success({ title: '升级 PR 已创建', content: <a href={result.url} target="_blank" rel="noreferrer">查看 PR</a> });
+                            Modal.success({ title: i18n.t("升级 PR 已创建"), content: <a href={result.url} target="_blank" rel="noreferrer">{i18n.t("查看 PR")}</a> });
                         } else if (result.restartRequired) {
-                            Modal.info({ title: '依赖已更新，请手动重启服务' });
+                            Modal.info({ title: i18n.t("依赖已更新，请手动重启服务") });
                         } else {
-                            Modal.success({ title: '依赖已更新，服务正在重启', onOk: () => location.reload() });
+                            Modal.success({ title: i18n.t("依赖已更新，服务正在重启"), onOk: () => location.reload() });
                         }
                         resolve();
                     },
-                    error: (error: any) => { Modal.error({ title: '更新失败', content: String(error.message || error) }); reject(error); },
+                    error: (error: any) => { Modal.error({ title: i18n.t("更新失败"), content: String(i18n.t(error.message || '') || error) }); reject(error); },
                 });
             }),
         });
     };
     legacy.render = function render() {
         const links = [
-            { url: '/post/create', title: '撰写新文章', type: 2 },
-            { url: '/page/create', title: '创建页面', type: 1 },
-            { url: '/appearance/theme', title: '更改外观', type: 1 },
-            { url: '/options/general', title: '系统设置', type: 1 },
+            { url: '/post/create', title: i18n.t("撰写新文章"), type: 2 },
+            { url: '/page/create', title: i18n.t("创建页面"), type: 1 },
+            { url: '/appearance/theme', title: i18n.t("更改外观"), type: 1 },
+            { url: '/options/general', title: i18n.t("系统设置"), type: 1 },
         ].filter((link) => link.type >= window.SysConfig.userInfo.type);
 
         const { versions, count } = props.dashBoardStore.systemInfo;
@@ -155,7 +158,7 @@ export function DashBoard(props: DashBoardProps) {
                     <hr />
                     <div className="row">
                         <div className="col-md-5">
-                            <h4>最近发布的文章</h4>
+                            <h4>{i18n.t("最近发布的文章")}</h4>
                             <ul>
                                 {(posts as any[]).map((post) => (
                                     <li key={post.id}>
@@ -173,39 +176,39 @@ export function DashBoard(props: DashBoardProps) {
                             </ul>
                         </div>
                         <div className="col-md-3">
-                            <h4>系统概况</h4>
+                            <h4>{i18n.t("系统概况")}</h4>
                             <ul>
                                 <li>
-                                    <label>服务器系统：</label>
+                                    <label>{i18n.t("服务器系统：")}</label>
                                     {versions.platform}
                                 </li>
                                 <li>
-                                    <label>Node.js版本：</label>
+                                    <label>{i18n.t("Node.js版本：")}</label>
                                     {versions.nodeVersion}
                                 </li>
                                 <li>
-                                    <label>V8引擎版本：</label>
+                                    <label>{i18n.t("V8引擎版本：")}</label>
                                     {versions.v8Version}
                                 </li>
                                 <li>
-                                    <label>数据库版本：</label>
+                                    <label>{i18n.t("数据库版本：")}</label>
                                     {versions.mysqlVersion}
                                 </li>
                                 <li>
-                                    <label>ThinkJS版本：</label>
+                                    <label>{i18n.t("ThinkJS版本：")}</label>
                                     {versions.thinkjsVersion}
                                 </li>
                                 <li>
-                                    <label>FireKylin版本：</label>
+                                    <label>{i18n.t("FireKylin版本：")}</label>
                                     {versions.firekylinVersion}
                                 </li>
                             </ul>
                         </div>
                         <div className="col-md-4">
-                            <h4>关于我们</h4>
+                            <h4>{i18n.t("关于我们")}</h4>
                             <ul>
                                 <li>
-                                    <label>项目主页：</label>
+                                    <label>{i18n.t("项目主页：")}</label>
                                     <a
                                         href="https://firekylin.lithub.cc/"
                                         target="_blank"
@@ -214,13 +217,13 @@ export function DashBoard(props: DashBoardProps) {
                                     </a>
                                 </li>
                                 <li>
-                                    <label>项目源码：</label>
+                                    <label>{i18n.t("项目源码：")}</label>
                                     <a href="https://github.com/firekylin/firekylin">
                                         https://github.com/firekylin/firekylin
                                     </a>
                                 </li>
                                 <li>
-                                    <label>帮助文档：</label>
+                                    <label>{i18n.t("帮助文档：")}</label>
                                     <a
                                         href="https://github.com/firekylin/firekylin/wiki"
                                         target="_blank"
@@ -229,13 +232,13 @@ export function DashBoard(props: DashBoardProps) {
                                     </a>
                                 </li>
                                 <li>
-                                    <label>问题反馈：</label>
+                                    <label>{i18n.t("问题反馈：")}</label>
                                     <a href="https://github.com/firekylin/firekylin/issues">
                                         https://github.com/firekylin/firekylin/issues
                                     </a>
                                 </li>
                                 <li>
-                                    <label>开发成员：</label>
+                                    <label>{i18n.t("开发成员：")}</label>
                                     <a href="https://github.com/welefen">welefen</a>、
                                     <a href="https://github.com/lizheming">lizheming</a>
                                     、
@@ -260,16 +263,16 @@ export function DashBoard(props: DashBoardProps) {
                             >
                                 {versions.needUpdate}
                             </a>{' '}
-                            已经发布，请更新依赖版本，如果是源码安装可{' '}
+                            {i18n.t("已经发布，请更新依赖版本，如果是源码安装可")}{' '}
                             <a href="http://firekylin.lithub.cc/release/v1/latest.tar.gz">
-                                下载更新
+                                {i18n.t("下载更新")}
                             </a>{' '}
-                            或者使用{' '}
+                            {i18n.t("或者使用")}{' '}
                             <a
                                 href="javascript:void(0)"
                                 onClick={() => legacy.renderUpdateConfirm()}
                             >
-                                在线更新
+                                {i18n.t("在线更新")}
                             </a>
                             ！
                         </p>
@@ -278,12 +281,15 @@ export function DashBoard(props: DashBoardProps) {
                             <Chat onConversationChange={setChatting}>{overviewDetails}</Chat>
                     ) : (
                         <>
-                            <h3 style={{ marginBottom: '30px' }}>网站概要</h3>
+                            <h3 style={{ marginBottom: '30px' }}>{i18n.t("网站概要")}</h3>
                             <p>
-                                目前有 {count.posts} 篇文章, 并有 {count.comments}{' '}
-                                条关于你的评论在 {count.cates} 个分类中.{' '}
+                                {i18n.t('目前有 {{posts}} 篇文章，{{comments}} 条评论，分布在 {{categories}} 个分类中。', {
+                                    posts: count.posts,
+                                    comments: count.comments,
+                                    categories: count.cates,
+                                })}
                             </p>
-                            <p>点击下面的链接快速开始:</p>
+                            <p>{i18n.t("点击下面的链接快速开始:")}</p>
                             <div className="quick-link">
                                 {links.map((link) => (
                                     <NavLink key={link.url} to={link.url}>

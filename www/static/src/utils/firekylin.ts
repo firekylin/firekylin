@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 /* eslint eqeqeq:0 */
 import dayjs from 'dayjs';
 // import TipActions from '../action/tip';
@@ -47,7 +48,7 @@ let firekylin = {
         text = JSON.parse(text);
         if (text.errno !== 0) {
           // TipActions.fail(text.errmsg);
-          return deferred.reject(new Error(text.errmsg));
+          return deferred.reject(new Error(i18n.t(text.errmsg || '')));
         }
         deferred.resolve(text.data || {});
       } catch (err) {
@@ -278,7 +279,7 @@ let firekylin = {
   },
 
   formatTime(str: string) {
-    return str ? dayjs(str).format('YYYY年MM月DD日 HH:mm') : '';
+    return str ? dayjs(str).format(i18n.t("YYYY年MM月DD日 HH:mm")) : '';
   }
 };
 

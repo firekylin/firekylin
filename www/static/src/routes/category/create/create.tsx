@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
 import { Form, FormInstance } from 'antd';
@@ -7,6 +9,7 @@ import { CategoryCreateProps } from './create.model';
 
 const Option = Select.Option;
 function CategoryCreate(props: CategoryCreateProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -106,12 +109,12 @@ function CategoryCreate(props: CategoryCreateProps) {
                     >
                         <Form.Item
                             {...formItemLayout}
-                            label="分类名称"
+                            label={i18n.t("分类名称")}
                             name="name"
                             rules={[
                                 {
                                     required: true,
-                                    message: '请填写分类名称',
+                                    message: i18n.t("请填写分类名称"),
                                 },
                             ]}
                         >
@@ -119,20 +122,20 @@ function CategoryCreate(props: CategoryCreateProps) {
                         </Form.Item>
                         <Form.Item
                             {...formItemLayout}
-                            label="分类描述"
+                            label={i18n.t("分类描述")}
                             name="description"
                         >
                             <Input.TextArea
                                 rows={4}
-                                placeholder="用于说明这个分类，并显示在分类页面"
+                                placeholder={i18n.t("用于说明这个分类，并显示在分类页面")}
                             />
                         </Form.Item>
-                        <Form.Item {...formItemLayout} label="缩略名" name="pathname">
+                        <Form.Item {...formItemLayout} label={i18n.t("缩略名")} name="pathname">
                             <Input />
                         </Form.Item>
-                        <Form.Item {...formItemLayout} label="父级分类" name="pid">
-                            <Select placeholder="请选择分类">
-                                <Option value={0}>不选择</Option>
+                        <Form.Item {...formItemLayout} label={i18n.t("父级分类")} name="pid">
+                            <Select placeholder={i18n.t("请选择分类")}>
+                                <Option value={0}>{i18n.t("不选择")}</Option>
                                 {rootCategoryList
                                     .filter((cate) =>
                                         categoryInfo
@@ -153,7 +156,7 @@ function CategoryCreate(props: CategoryCreateProps) {
                         </Form.Item>
                         <Form.Item {...tailFormItemLayout}>
                             <Button type="primary" htmlType="submit">
-                                提交
+                                {i18n.t("提交")}
                             </Button>
                         </Form.Item>
                     </Form>

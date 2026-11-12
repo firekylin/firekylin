@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Form, FormInstance, Input, Modal, Tabs, Select, ModalProps } from 'antd';
 const { Option } = Select;
@@ -10,6 +12,7 @@ interface EditorLinkModalProps extends ModalProps {
     onFormReady?: (formRef: React.RefObject<FormInstance>) => void;
 }
 function EditorLinkModalForm(props: EditorLinkModalProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -52,7 +55,7 @@ function EditorLinkModalForm(props: EditorLinkModalProps) {
         };
         return (
             <Modal
-                title="插入链接"
+                title={i18n.t("插入链接")}
                 open={props.open}
                 onOk={() => onCreate(legacy.formRef)}
                 onCancel={onCancel}
@@ -65,19 +68,19 @@ function EditorLinkModalForm(props: EditorLinkModalProps) {
                     items={[
                         {
                             key: '0',
-                            label: '插入外链',
+                            label: i18n.t("插入外链"),
                             children: (
                                 <Form ref={legacy.formRef}>
                                     <Form.Item
                                         {...formItemLayout}
-                                        label="链接文本："
+                                        label={i18n.t("链接文本：")}
                                         name="linkText"
                                     >
                                         <Input />
                                     </Form.Item>
                                     <Form.Item
                                         {...formItemLayout}
-                                        label="链接地址："
+                                        label={i18n.t("链接地址：")}
                                         name="linkUrl"
                                     >
                                         <Input />
@@ -87,23 +90,23 @@ function EditorLinkModalForm(props: EditorLinkModalProps) {
                         },
                         {
                             key: '1',
-                            label: '插入内链',
+                            label: i18n.t("插入内链"),
                             children: (
                                 <Form>
                                     <Form.Item
                                         {...formItemLayout}
-                                        label="链接文本："
+                                        label={i18n.t("链接文本：")}
                                         name="innerLinkText"
                                     >
                                         <Select
                                             showSearch={true}
-                                            placeholder="请输入文章标题"
+                                            placeholder={i18n.t("请输入文章标题")}
                                             defaultActiveFirstOption={false}
                                             showArrow={false}
                                             filterOption={false}
                                             onSearch={props.fetchData}
                                             onChange={legacy.handleChange}
-                                            notFoundContent="未找到文章"
+                                            notFoundContent={i18n.t("未找到文章")}
                                         >
                                             {innerLinks.map((d: any) => (
                                                 <Option key={d.id} value={d.title}>
@@ -114,7 +117,7 @@ function EditorLinkModalForm(props: EditorLinkModalProps) {
                                     </Form.Item>
                                     <Form.Item
                                         {...formItemLayout}
-                                        label="链接地址："
+                                        label={i18n.t("链接地址：")}
                                         name="innerLinkUrl"
                                     >
                                         <Input />

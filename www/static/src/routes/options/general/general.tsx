@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import BreadCrumb from '../../../components/breadcrumb';
@@ -55,7 +56,7 @@ function GeneralForm(props: GeneralProps) {
         type: 'logo' | 'favicon',
     ) {
         if (fileInfo.file.response.errno !== 0) {
-            message.error(fileInfo.file.response.errmsg);
+            message.error(i18n.t(fileInfo.file.response.errmsg || ''));
         } else {
             const url = fileInfo.file.response.data;
             if (type === 'logo') {
@@ -140,7 +141,7 @@ function GeneralForm(props: GeneralProps) {
                             extra={t('插件初始化时的静态文案需要安全重载插件或重启后生效。')}
                         >
                             <Select options={[
-                                {value: 'zh-CN', label: '简体中文'},
+                                {value: 'zh-CN', label: i18n.t("简体中文")},
                                 {value: 'en-US', label: 'English'},
                             ]} />
                         </Form.Item>
@@ -158,7 +159,7 @@ function GeneralForm(props: GeneralProps) {
                         >
                             <Input />
                         </Form.Item>
-                        <Form.Item {...formItemLayout} label="LOGO 地址">
+                        <Form.Item {...formItemLayout} label={i18n.t("LOGO 地址")}>
                             <Upload
                                 name="file"
                                 listType="picture-card"
@@ -211,7 +212,7 @@ function GeneralForm(props: GeneralProps) {
                         >
                             <Input />
                         </Form.Item>
-                        <Form.Item {...formItemLayout} label="Favicon 地址">
+                        <Form.Item {...formItemLayout} label={i18n.t("Favicon 地址")}>
                             <Upload
                                 name="file"
                                 listType="picture-card"

@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import AppearanceStore from '../appearance.store';
 import { http } from '../../../utils/http';
@@ -80,7 +81,7 @@ class EditStore {
         })
         .subscribe(
             () => {
-                message.success('保存成功');
+                message.success(i18n.t("保存成功"));
             }
         );
     }

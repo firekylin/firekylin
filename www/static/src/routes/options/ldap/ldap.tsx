@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React from 'react';
 import { Button, Modal, Alert, message } from 'antd';
 import { inject, observer } from '@admin/utils/mobx-react';
@@ -12,6 +14,7 @@ enum LDAPEnum {
     OFF = '0',
 }
 function LDAPForm(props: LDAPProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -45,24 +48,24 @@ function LDAPForm(props: LDAPProps) {
             ldap_on: LDAPEnum.OFF,
         };
         confirm({
-            title: '确定关闭吗？',
+            title: i18n.t("确定关闭吗？"),
             content: (
                 <>
                     <p className="gray">
-                        关闭后，白名单内账号登录操作无影响，管理员账号可进行用户的增删改密码重置；
+                        {i18n.t("关闭后，白名单内账号登录操作无影响，管理员账号可进行用户的增删改密码重置；")}
                     </p>
                     <p className="gray">
-                        已登录过的LDAP账号所有数据均保留，但是密码不正确，需要用户找回密码或者白名单内管理员账号重置密码；
+                        {i18n.t("已登录过的LDAP账号所有数据均保留，但是密码不正确，需要用户找回密码或者白名单内管理员账号重置密码；")}
                     </p>
                     <p className="gray">
-                        关闭后，可再次打开LDAP服务，系统自动保存上次配置。
+                        {i18n.t("关闭后，可再次打开LDAP服务，系统自动保存上次配置。")}
                     </p>
                 </>
             ),
             onOk: () => {
                 props.ldapStore.ldapClose(data).subscribe((res) => {
                     if (res.errno === 0) {
-                        message.success('关闭成功');
+                        message.success(i18n.t("关闭成功"));
                         const newOptions = Object.assign({}, options, {
                             ldap_on: LDAPEnum.OFF,
                         });
@@ -84,7 +87,7 @@ function LDAPForm(props: LDAPProps) {
         props.ldapStore.ldapSave(data).subscribe(
             (res) => {
                 if (res.errno === 0) {
-                    message.success('操作成功');
+                    message.success(i18n.t("操作成功"));
                     const newOptions = Object.assign({}, options, data);
                     props.ldapStore.setData({
                         options: newOptions,
@@ -93,22 +96,22 @@ function LDAPForm(props: LDAPProps) {
                 }
             },
             (err) => {
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             },
         );
     };
     legacy.step0 = function step0() {
         return (
             <div>
-                <p>LDAP服务已开启</p>
+                <p>{i18n.t("LDAP服务已开启")}</p>
                 <br />
                 <Button type="primary" onClick={() => legacy.closeLdap()}>
-                    关闭LDAP
+                    {i18n.t("关闭LDAP")}
                 </Button>
                 <br />
                 <br />
                 <Button type="primary" onClick={() => legacy.changeLdap()}>
-                    更新LDAP配置
+                    {i18n.t("更新LDAP配置")}
                 </Button>
             </div>
         );
@@ -117,27 +120,24 @@ function LDAPForm(props: LDAPProps) {
         return (
             <div>
                 <p>
-                    LDAP是 Light weight Directory Access
-                    Protocol（轻量级目录访问协议）的缩写。
+                    {i18n.t("LDAP是 Light weight Directory Access Protocol（轻量级目录访问协议）的缩写。")}
                 </p>
                 <p>
-                    LDAP可以为各种应用系统提供一个标准的认证机制，所有系统就可以不再用独有的用户管理方法，
-                    而是通过这种统一的认证机制进行用户认证，这样就解决了目前很多企业遇到的多平台软件管理时，身份认证的不统一和不安全的问题。
+                    {i18n.t("LDAP可以为各种应用系统提供一个标准的认证机制，所有系统就可以不再用独有的用户管理方法， 而是通过这种统一的认证机制进行用户认证，这样就解决了目前很多企业遇到的多平台软件管理时，身份认证的不统一和不安全的问题。")}
                 </p>
-                <p>开启LDAP服务后，该平台可以使用LDAP账号密码登录系统后台；</p>
+                <p>{i18n.t("开启LDAP服务后，该平台可以使用LDAP账号密码登录系统后台；")}</p>
                 <p>
-                    此时后台管理员不能进行用户的<code>新增</code>、<code>删除</code>、
-                    <code>密码修改</code>操作，
-                    这些均由LDAP统一管理，每次登录更新该用户最新的用户数据到平台；平台可编辑用户的"用户组"、"状态"。
+                    {i18n.t("此时后台管理员不能进行用户的")}<code>{i18n.t("新增")}</code>、<code>{i18n.t("删除")}</code>、
+                    <code>{i18n.t("密码修改")}</code>{i18n.t("操作， 这些均由LDAP统一管理，每次登录更新该用户最新的用户数据到平台；平台可编辑用户的\"用户组\"、\"状态\"。")}
                 </p>
                 <Alert
-                    message="如果在系统使用一段时间后开启LDAP服务，若登录用户名已存在则更新用户数据，文章等数据保持不变；如登录用户不存在，则平台会用LDAP账号信息新建账号"
+                    message={i18n.t("如果在系统使用一段时间后开启LDAP服务，若登录用户名已存在则更新用户数据，文章等数据保持不变；如登录用户不存在，则平台会用LDAP账号信息新建账号")}
                     type="warning"
                     style={{ marginBottom: 20 }}
                 />
 
                 <Button type="primary" onClick={() => legacy.updateStep(2)}>
-                    下一步
+                    {i18n.t("下一步")}
                 </Button>
             </div>
         );
@@ -167,7 +167,7 @@ function LDAPForm(props: LDAPProps) {
                 <BreadCrumb className="breadcrumb" {...props} />
                 <div className="page-list">
                     <div className="option-ldap-page">
-                        <h3 className="page-title">LDAP服务</h3>
+                        <h3 className="page-title">{i18n.t("LDAP服务")}</h3>
                         {legacy.getContent()}
                     </div>
                 </div>

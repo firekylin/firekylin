@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { Link } from '../../../utils/router';
 import { Modal } from 'antd';
@@ -5,6 +7,7 @@ import { observer, inject } from '@admin/utils/mobx-react';
 import { PushProps } from '../push.model';
 import BreadCrumb from '../../../components/breadcrumb';
 function PushList(props: PushProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -30,8 +33,8 @@ function PushList(props: PushProps) {
     };
     legacy.handleDeletePush = function handleDeletePush(appKey: string) {
         Modal.confirm({
-            title: '提示',
-            content: '确定删除嘛',
+            title: i18n.t("提示"),
+            content: i18n.t("确定删除嘛"),
             onOk: () => {
                 // message.success('删除成功');
                 legacy.pushStore.deletePush(appKey);
@@ -43,7 +46,7 @@ function PushList(props: PushProps) {
             return (
                 <tr>
                     <td colSpan="8" className="center">
-                        加载中……
+                        {i18n.t("加载中……")}
                     </td>
                 </tr>
             );
@@ -52,7 +55,7 @@ function PushList(props: PushProps) {
             return (
                 <tr>
                     <td colSpan="8" className="center">
-                        暂无记录
+                        {i18n.t("暂无记录")}
                     </td>
                 </tr>
             );
@@ -72,7 +75,7 @@ function PushList(props: PushProps) {
                         <Link to={`/push/edit/${item.appKey}`} title={item.title}>
                             <button type="button" className="btn btn-primary btn-xs">
                                 <span className="glyphicon glyphicon-edit"></span>
-                                编辑
+                                {i18n.t("编辑")}
                             </button>
                         </Link>
                         <span> </span>
@@ -82,7 +85,7 @@ function PushList(props: PushProps) {
                             onClick={legacy.handleDeletePush.bind(null, item.appKey)}
                         >
                             <span className="glyphicon glyphicon-trash"></span>
-                            删除
+                            {i18n.t("删除")}
                         </button>
                     </td>
                 </tr>
@@ -97,11 +100,11 @@ function PushList(props: PushProps) {
                     <table className="table table-striped">
                         <thead>
                             <tr>
-                                <th>网站名称</th>
-                                <th>网站地址</th>
-                                <th>推送公钥</th>
-                                <th>推送秘钥</th>
-                                <th>操作</th>
+                                <th>{i18n.t("网站名称")}</th>
+                                <th>{i18n.t("网站地址")}</th>
+                                <th>{i18n.t("推送公钥")}</th>
+                                <th>{i18n.t("推送秘钥")}</th>
+                                <th>{i18n.t("操作")}</th>
                             </tr>
                         </thead>
                         <tbody>{legacy.getPushList()}</tbody>

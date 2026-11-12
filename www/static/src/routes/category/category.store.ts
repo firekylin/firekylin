@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { message } from 'antd';
 import { http } from '../../utils/http';
 import { AppStore } from '../../app.store';
@@ -26,12 +27,12 @@ class CategoryStore {
       .subscribe(
         res => {
           if (res.errno === 0) {
-              message.success('删除成功');
+              message.success(i18n.t("删除成功"));
               this.appStore.sharedStore.getCategoryList();
           }
         },
         err => {
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
       );
   }
@@ -41,7 +42,7 @@ class CategoryStore {
       .pipe(
         map(res => {
           if (res.errno === 0) {
-            message.success('创建成功');
+            message.success(i18n.t("创建成功"));
           }
           return res;
         })
@@ -53,9 +54,9 @@ class CategoryStore {
       .pipe(
         tap(res => {
           if (res.errno === 0) {
-            message.success('更新分类成功');
+            message.success(i18n.t("更新分类成功"));
           } else {
-            message.error(res.errmsg);
+            message.error(i18n.t(res.errmsg || ''));
           }
         })
       );
@@ -65,11 +66,11 @@ class CategoryStore {
     http.post<any>('/admin/api/options?type=defaultCategory&method=put', {id})
       .subscribe(
         res => {
-            message.success('设置默认分类成功');
+            message.success(i18n.t("设置默认分类成功"));
             this.appStore.sharedStore.getDefaultCategory();
         },
         err => {
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
       );
   }
@@ -79,13 +80,13 @@ class CategoryStore {
       .subscribe(
         res => {
           if (res.errno !== 0) {
-            message.error(res.errmsg.name);
+            message.error(i18n.t(res.errmsg.name));
           } else {
             this.setCurrentCatInfo(res.data);
           }
         },
         err => {
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
       );
   }
@@ -99,7 +100,7 @@ class CategoryStore {
           }
         },
         err => {
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
       );
   }

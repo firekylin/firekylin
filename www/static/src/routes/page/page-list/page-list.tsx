@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Table, Button, message, Space } from 'antd';
@@ -10,6 +12,7 @@ import { TABLE_DELAY } from '../../../config';
 
 const confirm = Modal.confirm;
 function PageList(props: PageListProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -37,12 +40,12 @@ function PageList(props: PageListProps) {
     };
     legacy.delete = function (id: string) {
         confirm({
-            title: '提示',
-            content: '确定删除吗?',
+            title: i18n.t("提示"),
+            content: i18n.t("确定删除吗?"),
             onOk: () => {
                 props.pageStore.pageDeleteById(id).subscribe((res) => {
                     if (res.errno === 0) {
-                        message.success('删除成功');
+                        message.success(i18n.t("删除成功"));
                         props.sharedStore.getPageList(props.pageStore.page);
                     }
                 });
@@ -69,7 +72,7 @@ function PageList(props: PageListProps) {
                     }}
                 >
                     <Column
-                        title="标题"
+                        title={i18n.t("标题")}
                         key="title"
                         render={(page) => (
                             <>
@@ -88,12 +91,12 @@ function PageList(props: PageListProps) {
                         )}
                     />
 
-                    <Column title="作者" dataIndex="author" key="author" />
-                    <Column title="状态" dataIndex="statusText" key="statusText" />
-                    <Column title="创建日期" dataIndex="create_time" key="create_time" />
-                    <Column title="修改日期" dataIndex="update_time" key="update_time" />
+                    <Column title={i18n.t("作者")} dataIndex="author" key="author" />
+                    <Column title={i18n.t("状态")} dataIndex="statusText" key="statusText" />
+                    <Column title={i18n.t("创建日期")} dataIndex="create_time" key="create_time" />
+                    <Column title={i18n.t("修改日期")} dataIndex="update_time" key="update_time" />
                     <Column
-                        title="操作"
+                        title={i18n.t("操作")}
                         key="action"
                         render={(page) => (
                             <Space size="small">
@@ -105,7 +108,7 @@ function PageList(props: PageListProps) {
                                     icon={<EditOutlined />}
                                     size="small"
                                 >
-                                    编辑
+                                    {i18n.t("编辑")}
                                 </Button>
                                 <Button
                                     onClick={() => legacy.delete(page.id)}
@@ -114,7 +117,7 @@ function PageList(props: PageListProps) {
                                     icon={<DeleteOutlined />}
                                     size="small"
                                 >
-                                    删除
+                                    {i18n.t("删除")}
                                 </Button>
                             </Space>
                         )}

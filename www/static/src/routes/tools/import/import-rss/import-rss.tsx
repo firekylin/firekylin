@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Input, Divider, Button, message, Select } from 'antd';
 import React from 'react';
@@ -17,6 +19,7 @@ function createImportRssState() {
     };
 }
 function OptionsImportRss(props: any) {
+    useTranslation('admin');
     const [state, setState] = React.useState(createImportRssState);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -76,7 +79,7 @@ function OptionsImportRss(props: any) {
                 }
             })
             .catch((err) => {
-                message.error('加载用户列表失败，请稍后重试');
+                message.error(i18n.t("加载用户列表失败，请稍后重试"));
             });
     };
     legacy.normalRow = function normalRow(rss: any, i: number) {
@@ -100,7 +103,7 @@ function OptionsImportRss(props: any) {
                         size="small"
                         icon={<EditOutlined />}
                     >
-                        编辑
+                        {i18n.t("编辑")}
                     </Button>
                     <Divider type="vertical" />
                     <Button
@@ -113,7 +116,7 @@ function OptionsImportRss(props: any) {
                         size="small"
                         icon={<DeleteOutlined />}
                     >
-                        删除
+                        {i18n.t("删除")}
                     </Button>
                 </td>
             </tr>
@@ -181,7 +184,7 @@ function OptionsImportRss(props: any) {
                             }
                         }}
                     >
-                        保存
+                        {i18n.t("保存")}
                     </a>
                     <Divider type="vertical" />
                     <a
@@ -189,7 +192,7 @@ function OptionsImportRss(props: any) {
                             legacy.setState({ editingRow: -1, editingRSS: null });
                         }}
                     >
-                        取消
+                        {i18n.t("取消")}
                     </a>
                 </td>
             </tr>
@@ -224,7 +227,7 @@ function OptionsImportRss(props: any) {
             .subscribe(
                 (res) => {
                     if (res.errno === 0) {
-                        message.success('更新成功');
+                        message.success(i18n.t("更新成功"));
                         window.SysConfig.options.rssImportList = rssImportList;
                         legacy.setState({
                             rssImportList,
@@ -232,7 +235,7 @@ function OptionsImportRss(props: any) {
                     }
                 },
                 (err) => {
-                    message.error(err);
+                    message.error(typeof err === 'string' ? i18n.t(err) : err);
                 },
             );
     };
@@ -304,7 +307,7 @@ function OptionsImportRss(props: any) {
                         size="small"
                         icon={<PlusOutlined />}
                     >
-                        新增
+                        {i18n.t("新增")}
                     </Button>
                 </td>
             </tr>,
@@ -314,17 +317,16 @@ function OptionsImportRss(props: any) {
                 <table className="ant-table" style={{ width: '100%' }}>
                     <thead className="ant-table-thead">
                         <tr>
-                            <th style={{ width: '40%' }}>RSS地址</th>
-                            <th>导入至用户</th>
-                            <th>导入至分类</th>
-                            <th style={{ width: '20%' }}>操作</th>
+                            <th style={{ width: '40%' }}>{i18n.t("RSS地址")}</th>
+                            <th>{i18n.t("导入至用户")}</th>
+                            <th>{i18n.t("导入至分类")}</th>
+                            <th style={{ width: '20%' }}>{i18n.t("操作")}</th>
                         </tr>
                     </thead>
                     <tbody className="ant-table-tbody" children={rows} />
                 </table>
                 <span>
-                    注：后台会每隔1小时自动抓取 RSS
-                    列表新增内容导入到对应的用户和分类下。
+                    {i18n.t("注：后台会每隔1小时自动抓取 RSS 列表新增内容导入到对应的用户和分类下。")}
                 </span>
             </div>
         );

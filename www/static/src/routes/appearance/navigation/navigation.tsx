@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {
     ArrowDownOutlined,
     ArrowUpOutlined,
@@ -29,6 +31,7 @@ function createNavigationState() {
     };
 }
 function Navigation(props: any) {
+    useTranslation('admin');
     const [state, setState] = React.useState(createNavigationState);
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -100,7 +103,7 @@ function Navigation(props: any) {
                         size="small"
                         icon={<ArrowUpOutlined />}
                     >
-                        上移
+                        {i18n.t("上移")}
                     </Button>
                     <Divider type="vertical" />
                     <Button
@@ -111,7 +114,7 @@ function Navigation(props: any) {
                         size="small"
                         icon={<ArrowDownOutlined />}
                     >
-                        下移
+                        {i18n.t("下移")}
                     </Button>
                     <Divider type="vertical" />
                     <Button
@@ -125,7 +128,7 @@ function Navigation(props: any) {
                         size="small"
                         icon={<EditOutlined />}
                     >
-                        编辑
+                        {i18n.t("编辑")}
                     </Button>
                     <Divider type="vertical" />
                     <Button
@@ -135,7 +138,7 @@ function Navigation(props: any) {
                         size="small"
                         icon={<DeleteOutlined />}
                     >
-                        删除
+                        {i18n.t("删除")}
                     </Button>
                 </td>
             </tr>
@@ -218,7 +221,7 @@ function Navigation(props: any) {
                             }
                         }}
                     >
-                        保存
+                        {i18n.t("保存")}
                     </a>
                     <Divider type="vertical" />
                     <a
@@ -226,7 +229,7 @@ function Navigation(props: any) {
                             legacy.setState({ editingRow: -1, editingNav: null });
                         }}
                     >
-                        取消
+                        {i18n.t("取消")}
                     </a>
                 </td>
             </tr>
@@ -236,17 +239,17 @@ function Navigation(props: any) {
         let c = legacy.state.list[a];
         legacy.state.list[a] = legacy.state.list[b];
         legacy.state.list[b] = c;
-        legacy.updateNav('移动成功');
+        legacy.updateNav(i18n.t("移动成功"));
     };
     legacy.edit = function edit(idx: any, nav: any) {
         const { list } = legacy.state;
         list[idx] = nav;
-        legacy.updateNav('保存成功');
+        legacy.updateNav(i18n.t("保存成功"));
     };
     legacy.delete = function (key: number) {
         const list = legacy.state.list.filter((item) => item.key !== key.toString());
 
-        legacy.updateNav('删除成功', list);
+        legacy.updateNav(i18n.t("删除成功"), list);
     };
     legacy.add = function add() {
         if (
@@ -258,7 +261,7 @@ function Navigation(props: any) {
             return;
         }
         legacy.state.list.push(legacy.state.row);
-        legacy.updateNav('添加成功');
+        legacy.updateNav(i18n.t("添加成功"));
         legacy.resetRow();
     };
     legacy.resetRow = function resetRow() {
@@ -293,7 +296,7 @@ function Navigation(props: any) {
                 }
             },
             (err) => {
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             },
         );
     };
@@ -382,7 +385,7 @@ function Navigation(props: any) {
                         size="small"
                         icon={<PlusOutlined />}
                     >
-                        新增
+                        {i18n.t("新增")}
                     </Button>
                 </td>
             </tr>,
@@ -397,10 +400,10 @@ function Navigation(props: any) {
                     >
                         <thead className="ant-table-thead">
                             <tr>
-                                <th>菜单文本</th>
-                                <th>菜单地址</th>
-                                <th>菜单属性</th>
-                                <th>操作</th>
+                                <th>{i18n.t("菜单文本")}</th>
+                                <th>{i18n.t("菜单地址")}</th>
+                                <th>{i18n.t("菜单属性")}</th>
+                                <th>{i18n.t("操作")}</th>
                             </tr>
                         </thead>
                         <tbody className="ant-table-tbody" children={rows} />

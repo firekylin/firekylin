@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import './list.less';
 import { observer, inject } from '@admin/utils/mobx-react';
@@ -8,6 +10,7 @@ import BreadCrumb from '../../../components/breadcrumb';
 const TabPane = Tabs.TabPane;
 const Option = Select.Option;
 function PostListForm(props: PostListProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -28,11 +31,13 @@ function PostListForm(props: PostListProps) {
         legacy.bulkDelete = () => {
             const { postStore } = props;
             const ids = postStore.selectedRowKeys.map(Number);
-            if (!ids.length) return message.warning('请先选择文章');
+            if (!ids.length) return message.warning(i18n.t("请先选择文章"));
             const force = String(postStore.plReqParams.status) === '4';
             Modal.confirm({
-                title: '提示',
-                content: `确定${force ? '永久删除' : '将'}选中的 ${ids.length} 篇文章${force ? '' : '移入回收站'}吗？`,
+                title: i18n.t("提示"),
+                content: force
+                    ? i18n.t('确定永久删除选中的 {{count}} 篇文章吗？', {count: ids.length})
+                    : i18n.t('确定将选中的 {{count}} 篇文章移入回收站吗？', {count: ids.length}),
                 onOk: () =>
                     new Promise<void>((resolve, reject) => {
                         postStore
@@ -40,12 +45,12 @@ function PostListForm(props: PostListProps) {
                             .subscribe(
                                 (res) => {
                                     if (res.errno !== 0) {
-                                        message.error(res.errmsg || '批量删除失败');
+                                        message.error(i18n.t(res.errmsg || '') || i18n.t("批量删除失败"));
                                         postStore.setLoading(false);
-                                        reject(new Error(res.errmsg || '批量删除失败'));
+                                        reject(new Error(i18n.t(res.errmsg || '') || i18n.t("批量删除失败")));
                                         return;
                                     }
-                                    message.success(`已处理 ${ids.length} 篇文章`);
+                                    message.success(i18n.t("已处理 {{value0}} 篇文章", {value0: ids.length}));
                                     postStore.setSelectedRowKeys([]);
                                     postStore.getPostList();
                                     resolve();
@@ -53,7 +58,7 @@ function PostListForm(props: PostListProps) {
                                 (error) => {
                                     message.error(
                                         error instanceof Error
-                                            ? error.message
+                                            ? i18n.t(error.message || '')
                                             : String(error),
                                     );
                                     postStore.setLoading(false);
@@ -91,22 +96,22 @@ function PostListForm(props: PostListProps) {
                                 disabled={String(postStore.plReqParams.status) === '4'}
                                 onClick={() => postStore.setBulkEditOpen(true)}
                             >
-                                批量编辑
+                                {i18n.t("批量编辑")}
                             </Button>
                             <Button danger onClick={legacy.bulkDelete}>
-                                批量删除
+                                {i18n.t("批量删除")}
                             </Button>
                         </Space>
                     )}
                     <Select
                         defaultValue=""
                         style={{ width: 120 }}
-                        placeholder="请选择分类"
+                        placeholder={i18n.t("请选择分类")}
                         onChange={(selectedValue: string) =>
                             postStore.setPlReqParams({ cate: selectedValue, page: 1 })
                         }
                     >
-                        <Option value="">全部分类</Option>
+                        <Option value="">{i18n.t("全部分类")}</Option>
                         {sharedStore.categoryList.map((cat, key) => (
                             <Option key={key.toString()} value={cat.id}>
                                 {cat.name}
@@ -114,14 +119,14 @@ function PostListForm(props: PostListProps) {
                         ))}
                     </Select>
                     <Search
-                        placeholder="请输入关键字"
+                        placeholder={i18n.t("请输入关键字")}
                         onSearch={(keyword) =>
                             props.postStore.setPlReqParams({ keyword, page: 1 })
                         }
                         enterButton={true}
                         style={{ width: 200, marginLeft: 10 }}
                     />
-                    <Button type="primary" style={{ marginLeft: 10 }} onClick={() => props.history.push('/post/create')}>添加文章</Button>
+                    <Button type="primary" style={{ marginLeft: 10 }} onClick={() => props.history.push('/post/create')}>{i18n.t("添加文章")}</Button>
                 </Form.Item>
             </>
         );
@@ -141,22 +146,22 @@ function PostListForm(props: PostListProps) {
                         }}
                         tabBarExtraContent={legacy.getOperations()}
                     >
-                        <TabPane tab="全部" key="">
+                        <TabPane tab={i18n.t("全部")} key="">
                             <PostListTable {...props} />
                         </TabPane>
-                        <TabPane tab="草稿" key="0">
+                        <TabPane tab={i18n.t("草稿")} key="0">
                             <PostListTable {...props} />
                         </TabPane>
-                        <TabPane tab="已发布" key="3">
+                        <TabPane tab={i18n.t("已发布")} key="3">
                             <PostListTable {...props} />
                         </TabPane>
-                        <TabPane tab="审核中" key="1">
+                        <TabPane tab={i18n.t("审核中")} key="1">
                             <PostListTable {...props} />
                         </TabPane>
-                        <TabPane tab="已拒绝" key="2">
+                        <TabPane tab={i18n.t("已拒绝")} key="2">
                             <PostListTable {...props} />
                         </TabPane>
-                        <TabPane tab="回收站" key="4">
+                        <TabPane tab={i18n.t("回收站")} key="4">
                             <PostListTable {...props} />
                         </TabPane>
                     </Tabs>

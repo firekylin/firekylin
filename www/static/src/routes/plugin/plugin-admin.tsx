@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
@@ -11,6 +13,7 @@ function extension(pluginId: string) {
 }
 
 function PluginAdmin(props: any) {
+    useTranslation('admin');
     const {pluginId, pageId} = props.match.params;
     const search = props.location.search || '';
     const descriptor = extension(pluginId);
@@ -43,14 +46,14 @@ function PluginAdmin(props: any) {
     if (pluginId === 'ai-content' && pageId === 'settings' && props.location.pathname.includes('/plugins/')) {
         return <Redirect to="/options/smart-content" />;
     }
-    if (!descriptor || !page) return <Alert type="error" message="插件后台页面不存在或已停用" showIcon />;
+    if (!descriptor || !page) return <Alert type="error" message={i18n.t("插件后台页面不存在或已停用")} showIcon />;
 
     const submit = (formId: string, values: any) => http.post<any>(
         `/admin/api/plugins/${pluginId}/forms/${formId}`, values, writeConfig
     )
         .subscribe(res => {
             if (res.errno === 0) {
-                message.success((res.data as any).message || '保存成功');
+                message.success(i18n.t((res.data as any).message || '') || i18n.t("保存成功"));
                 setReloadKey(key => key + 1);
             }
         });
@@ -60,7 +63,7 @@ function PluginAdmin(props: any) {
         )
             .subscribe(res => {
                 if (res.errno === 0) {
-                    message.success((res.data as any).message || '操作成功');
+                    message.success(i18n.t((res.data as any).message || '') || i18n.t("操作成功"));
                     setReloadKey(key => key + 1);
                 }
             });

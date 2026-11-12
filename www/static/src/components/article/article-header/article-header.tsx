@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {AIContext, AIButton} from '../ai-editor';
 import * as React from 'react';
 import { Form, FormInstance } from 'antd';
@@ -5,6 +7,7 @@ import { Input } from 'antd';
 import './article-header.less';
 import classNames from 'classnames';
 function ArticleHeaderForm(props: any) {
+    useTranslation('admin');
     const ai = React.useContext(AIContext);
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
@@ -38,22 +41,22 @@ function ArticleHeaderForm(props: any) {
         return (
             <div className="article-header">
                 <div className="article-header-title">
-                    <h5>{`${legacy.id ? '编辑' : '撰写'}${type ? '页面' : '文章'}`}</h5>
+                    <h5>{`${legacy.id ? i18n.t("编辑") : i18n.t("撰写")}${type ? i18n.t("页面") : i18n.t("文章")}`}</h5>
                     <Form ref={legacy.formRef}>
                         <Form.Item
                             name="title"
                             rules={[
                                 {
                                     required: true,
-                                    message: '请输入标题',
+                                    message: i18n.t("请输入标题"),
                                 },
                             ]}
                         >
                             <Input
                                 disabled={ai?.busy === 'title'}
-                                suffix={<AIButton operation="title" minimum={250} label="AI生成标题" />}
+                                suffix={<AIButton operation="title" minimum={250} label={i18n.t("AI生成标题")} />}
                                 onChange={(e) => props.handleTitle(e)}
-                                placeholder="标题"
+                                placeholder={i18n.t("标题")}
                                 className={classNames({
                                     'has-error': props.hasError.title,
                                 })}
@@ -68,7 +71,7 @@ function ArticleHeaderForm(props: any) {
                             'has-error': props.hasError.pathname,
                         })}
                         disabled={ai?.busy === 'slug' || (props.status === 3 && !ai?.features?.slug)}
-                        suffix={<AIButton operation="slug" minimum={250} label="智能 Slug" />}
+                        suffix={<AIButton operation="slug" minimum={250} label={i18n.t("智能 Slug")} />}
                         value={props.pathname}
                         onChange={(e) => props.handlePath(e)}
                     />
@@ -80,7 +83,7 @@ function ArticleHeaderForm(props: any) {
                         </a>
                     ) : null}
                     <a
-                        title="预览"
+                        title={i18n.t("预览")}
                         style={{ marginLeft: 8 }}
                         onClick={() => props.preview()}
                     >

@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import { message } from 'antd';
 import { http } from '../../utils/http';
@@ -109,7 +110,7 @@ class PostStore {
           this.setLoading(false);
         },
         err => {
-          message.error(err instanceof Error ? err.message : String(err));
+          message.error(err instanceof Error ? i18n.t(err.message || '') : String(err));
           this.setLoading(false);
         }
       );
@@ -127,12 +128,12 @@ class PostStore {
     handle.subscribe(
       res => {
         if (res.errno === 0) {
-            message.success('删除成功');
+            message.success(i18n.t("删除成功"));
             this.getPostList();
         }
       },
       err => {
-        message.error(err);
+        message.error(typeof err === 'string' ? i18n.t(err) : err);
       }
     );
   }
@@ -142,12 +143,12 @@ class PostStore {
       .subscribe(
         res => {
           if (res.errno === 0) {
-              message.success('通过成功');
+              message.success(i18n.t("通过成功"));
               this.getPostList();
           }
         },
         err => {
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
     );
   }
@@ -158,12 +159,12 @@ class PostStore {
       .subscribe(
         res => {
           if (res.errno === 0) {
-              message.success('拒绝成功');
+              message.success(i18n.t("拒绝成功"));
               this.getPostList();
           }
         },
         err => {
-          message.error(err);
+          message.error(typeof err === 'string' ? i18n.t(err) : err);
         }
     );
   }
@@ -173,12 +174,12 @@ class PostStore {
     .subscribe(
       res => {
         if(res.errno === 0) {
-          message.success('撤销删除成功');
+          message.success(i18n.t("撤销删除成功"));
           this.getPostList();
         }
       },
       err => {
-        message.error(err);
+        message.error(typeof err === 'string' ? i18n.t(err) : err);
       }
     );
   }

@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 /**
  * https://github.com/lepture/editor/blob/master/src/intro.js#L327-L341
  * The right word count in respect for CJK.
@@ -21,19 +22,19 @@ function wordCount(data: string): number {
 
 const isFuture = time => time && (new Date(time)).getTime() > Date.now();
 function getStatusText(status: number, createTime?: Date) {
-    let statusText = '未知';
+    let statusText = i18n.t("未知");
     switch (status) {
-      case 0: statusText = '草稿'; break;
-      case 1: statusText = '待审核'; break;
-      case 2: statusText = '已拒绝'; break;
+      case 0: statusText = i18n.t("草稿"); break;
+      case 1: statusText = i18n.t("待审核"); break;
+      case 2: statusText = i18n.t("已拒绝"); break;
       case 3:
         if (createTime) {
-            statusText = isFuture(createTime) ? '即将发布' : '已发布';
+            statusText = isFuture(createTime) ? i18n.t("即将发布") : i18n.t("已发布");
         } else {
-            statusText = '已发布';
+            statusText = i18n.t("已发布");
         }
         break;
-      case 4: statusText = '已删除'; break;
+      case 4: statusText = i18n.t("已删除"); break;
       default:
     }
     return statusText;

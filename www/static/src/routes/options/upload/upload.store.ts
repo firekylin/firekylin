@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { http } from '../../../utils/http';
 import { message } from 'antd';
 import { makeAutoObservable } from 'mobx';
@@ -36,7 +37,7 @@ class OptionsUploadStore {
         .subscribe(
             res => {
                 if (res.errno === 0) {
-                    message.success('上传设置更新成功');
+                    message.success(i18n.t("上传设置更新成功"));
                     window.SysConfig.options.upload = JSON.stringify(data);
                 }
             }

@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
 import { DeleteOutlined, EditOutlined, StarOutlined } from '@ant-design/icons';
@@ -10,6 +12,7 @@ import { Category } from '../../../models/category.model';
 import { TABLE_DELAY } from '../../../config';
 const confirm = Modal.confirm;
 function CategoryList(props: CategoryListProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -34,8 +37,8 @@ function CategoryList(props: CategoryListProps) {
     };
     legacy.delete = function (id: number) {
         confirm({
-            title: '提示',
-            content: '确定删除吗?',
+            title: i18n.t("提示"),
+            content: i18n.t("确定删除吗?"),
             onOk: () => {
                 props.categoryStore.deleteCategoryId(id);
             },
@@ -51,20 +54,20 @@ function CategoryList(props: CategoryListProps) {
             <div className="category-list">
                 <BreadCrumb {...props} />
                 <div className="page-list">
-                    <div className="list-toolbar"><Button type="primary" onClick={() => props.history.push('/cate/create')}>添加分类</Button></div>
+                    <div className="list-toolbar"><Button type="primary" onClick={() => props.history.push('/cate/create')}>{i18n.t("添加分类")}</Button></div>
                     <Table
                         dataSource={categoryList}
                         loading={{ spinning: loading.category, delay: TABLE_DELAY }}
                         rowKey={(category) => category.id.toString()}
                     >
-                        <Column title="名称" key="name" dataIndex="name" />
+                        <Column title={i18n.t("名称")} key="name" dataIndex="name" />
 
-                        <Column title="缩略名" dataIndex="pathname" key="pathname" />
+                        <Column title={i18n.t("缩略名")} dataIndex="pathname" key="pathname" />
 
-                        <Column title="文章数" dataIndex="post_cate" key="post_cate" />
+                        <Column title={i18n.t("文章数")} dataIndex="post_cate" key="post_cate" />
 
                         <Column
-                            title="操作"
+                            title={i18n.t("操作")}
                             key="action"
                             render={(post: Category) => (
                                 <Space size="small">
@@ -80,7 +83,7 @@ function CategoryList(props: CategoryListProps) {
                                         icon={<StarOutlined />}
                                         size="small"
                                     >
-                                        默认
+                                        {i18n.t("默认")}
                                     </Button>
                                     <Button
                                         onClick={() =>
@@ -90,7 +93,7 @@ function CategoryList(props: CategoryListProps) {
                                         icon={<EditOutlined />}
                                         size="small"
                                     >
-                                        编辑
+                                        {i18n.t("编辑")}
                                     </Button>
                                     <Button
                                         onClick={() => legacy.delete(post.id)}
@@ -99,7 +102,7 @@ function CategoryList(props: CategoryListProps) {
                                         icon={<DeleteOutlined />}
                                         size="small"
                                     >
-                                        删除
+                                        {i18n.t("删除")}
                                     </Button>
                                 </Space>
                             )}

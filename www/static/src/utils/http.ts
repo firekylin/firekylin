@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { Observable, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -31,7 +32,7 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
 // 业务错误统一处理（Vite CJS→ESM 转换导致 axios 拦截器失效，改用 pipe 处理）
 function handleBusinessError<T>(res: IResult<T, any>): IResult<T, any> {
     if (res.errno !== 0 && typeof res.errmsg === 'string') {
-        message.error(res.errmsg);
+        message.error(i18n.t(res.errmsg || ''));
     }
     return res;
 }
@@ -57,7 +58,7 @@ class HttpClient {
                 catchError((error: AxiosResponse | undefined) => {
                     console.log(error);
                     if (error === undefined) {
-                        message.error('请求出错');
+                        message.error(i18n.t("请求出错"));
                         return of({} as any);
                     }
                     this.error$ = of(error);
@@ -80,7 +81,7 @@ class HttpClient {
                     catchError((error: AxiosResponse | undefined) => {
                         console.log(error);
                         if (error === undefined) {
-                            message.error('请求出错');
+                            message.error(i18n.t("请求出错"));
                             return of({} as any);
                         }
                         this.error$ = of(error);
@@ -97,7 +98,7 @@ class HttpClient {
                 map(res => handleBusinessError(res)),
                 catchError((error: AxiosResponse | undefined) => {
                     if (error === undefined) {
-                        message.error('请求出错');
+                        message.error(i18n.t("请求出错"));
                     } else {
                         this.error$ = of(error);
                         this.handleError();

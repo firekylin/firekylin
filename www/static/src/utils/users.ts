@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { map } from 'rxjs/operators';
 import { http } from './http';
 
@@ -9,7 +10,7 @@ export function getAuthorUsers() {
         pageSize: 100,
     }).pipe(map(response => {
         if (!response || response.errno !== 0) {
-            throw new Error(response?.errmsg || '加载作者列表失败');
+            throw new Error(i18n.t(response?.errmsg || '') || i18n.t("加载作者列表失败"));
         }
         return { ...response, data: response.data.data };
     }));

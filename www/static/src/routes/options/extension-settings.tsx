@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, Input, message, Spin} from 'antd';
 import axios from 'axios';
@@ -7,6 +9,7 @@ import ExtensionGitHub from './extension-github';
 type Settings = {pluginRegistry: string; themeRegistry: string};
 
 export default function ExtensionSettings(props: any) {
+    useTranslation('admin');
     const [form] = Form.useForm<Settings>();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -14,9 +17,9 @@ export default function ExtensionSettings(props: any) {
     useEffect(() => {
         const controller = new AbortController();
         axios.get('/admin/api/extension-settings', {signal: controller.signal}).then(response => {
-            if (response.data.errno !== 0) throw new Error(response.data.errmsg || '读取设置失败');
+            if (response.data.errno !== 0) throw new Error(i18n.t(response.data.errmsg || '') || i18n.t("读取设置失败"));
             form.setFieldsValue(response.data.data.settings);
-        }).catch(reason => { if (!controller.signal.aborted) setError(reason.message || '读取设置失败') })
+        }).catch(reason => { if (!controller.signal.aborted) setError(reason.message || i18n.t("读取设置失败")) })
             .finally(() => { if (!controller.signal.aborted) setLoading(false) });
         return () => controller.abort();
     }, [form]);
@@ -25,25 +28,25 @@ export default function ExtensionSettings(props: any) {
         try {
             const response = await axios.post('/admin/api/extension-settings', {settings},
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
-            if (response.data.errno !== 0) throw new Error(response.data.errmsg || '保存设置失败');
+            if (response.data.errno !== 0) throw new Error(i18n.t(response.data.errmsg || '') || i18n.t("保存设置失败"));
             form.setFieldsValue(response.data.data.settings);
-            message.success('扩展设置已保存');
-        } catch (reason: any) { message.error(reason.response?.data?.message || reason.message || '保存设置失败') }
+            message.success(i18n.t("扩展设置已保存"));
+        } catch (reason: any) { message.error(reason.response?.data?.message || reason.message || i18n.t("保存设置失败")) }
         finally { setSaving(false) }
     };
     return <div className="fk-content-wrap"><BreadCrumb {...props} /><div className="page-list">
-        <h3 className="page-title">扩展设置</h3>
+        <h3 className="page-title">{i18n.t("扩展设置")}</h3>
         {error ? <Alert type="error" showIcon title={error} /> : <Spin spinning={loading}>
-            <Card title="市场 Registry">
+            <Card title={i18n.t("市场 Registry")}>
                 <Form form={form} layout="vertical" onFinish={save} disabled={loading || saving}>
-                    <Form.Item label="插件市场" name="pluginRegistry" rules={[{required: true, type: 'url'}]}>
+                    <Form.Item label={i18n.t("插件市场")} name="pluginRegistry" rules={[{required: true, type: 'url'}]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item label="主题市场" name="themeRegistry" rules={[{required: true, type: 'url'}]}>
+                    <Form.Item label={i18n.t("主题市场")} name="themeRegistry" rules={[{required: true, type: 'url'}]}>
                         <Input />
                     </Form.Item>
-                    <p>Registry 支持官方 firekylin/plugins、firekylin/themes 仓库和 firekylin.lithub.cc/plugins 下的 HTTPS 地址。</p>
-                    <Button type="primary" htmlType="submit" loading={saving}>保存</Button>
+                    <p>{i18n.t("Registry 支持官方 firekylin/plugins、firekylin/themes 仓库和 firekylin.lithub.cc/plugins 下的 HTTPS 地址。")}</p>
+                    <Button type="primary" htmlType="submit" loading={saving}>{i18n.t("保存")}</Button>
                 </Form>
             </Card>
             <ExtensionGitHub />

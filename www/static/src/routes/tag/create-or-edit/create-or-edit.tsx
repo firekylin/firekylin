@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import React, { useState, useEffect, useRef } from 'react';
 import { Form } from 'antd';
 import { Input, Button, message } from 'antd';
@@ -25,6 +27,7 @@ const tailFormItemLayout = {
     },
 };
 function TagCreateOrEditForm(props: TagCreateOrEditProps) {
+    useTranslation('admin');
     const id = props.match.params.id;
     const [loading, setLoading] = useState(false);
     const [tag, setTag] = useState<Tag>({
@@ -77,10 +80,10 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
             .subscribe(
                 res => {
                     if (res.errno === 0) {
-                        message.success('更新标签成功');
+                        message.success(i18n.t("更新标签成功"));
                         props.history.push('/tag/list');
                     } else {
-                        message.error(res.errmsg);
+                        message.error(i18n.t(res.errmsg || ''));
                     }
                 }
             );
@@ -104,23 +107,23 @@ function TagCreateOrEditForm(props: TagCreateOrEditProps) {
                 <Form form={form} onFinish={handleSubmit} scrollToFirstError>
                     <Form.Item
                         {...formItemLayout}
-                        label="标签名称"
+                        label={i18n.t("标签名称")}
                         name="name"
                         rules={[{
-                            required: true, message: '请填写标签名称',
+                            required: true, message: i18n.t("请填写标签名称"),
                         }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         {...formItemLayout}
-                        label="缩略名"
+                        label={i18n.t("缩略名")}
                         name="pathname"
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item {...tailFormItemLayout}>
-                        <Button type="primary" htmlType="submit" loading={loading}>提交</Button>
+                        <Button type="primary" htmlType="submit" loading={loading}>{i18n.t("提交")}</Button>
                     </Form.Item>
                 </Form>
             </div>

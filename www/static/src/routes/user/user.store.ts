@@ -1,3 +1,4 @@
+import i18n from '@admin/i18n';
 import { makeAutoObservable } from 'mobx';
 import superagent from 'superagent';
 import { AppStore } from '../../app.store';
@@ -82,7 +83,7 @@ export default class UserStore {
             })
             .catch(err => {
                 this.setLoading(false);
-                message.error('加载用户列表失败，请稍后重试');
+                message.error(i18n.t("加载用户列表失败，请稍后重试"));
             });
     }
 
@@ -94,7 +95,7 @@ export default class UserStore {
                 this.setUserInfo(data.data);
             })
             .catch(err => {
-                message.error('加载用户信息失败，请稍后重试');
+                message.error(i18n.t("加载用户信息失败，请稍后重试"));
             });
     }
 
@@ -106,7 +107,7 @@ export default class UserStore {
                 this.getUserList();
             })
             .catch(err => {
-                message.error('加载用户列表失败，请稍后重试');
+                message.error(i18n.t("加载用户列表失败，请稍后重试"));
             });
     }
 
@@ -115,11 +116,11 @@ export default class UserStore {
         http.post<any>(`/admin/api/user/${userId}?method=delete`)
             .toPromise()
             .then(data => {
-                message.success('删除成功');
+                message.success(i18n.t("删除成功"));
                 this.getUserList(this.key === '3' ? 'contributor' : '' );
             })
             .catch(() => {
-                message.error('删除失败，请稍后重试');
+                message.error(i18n.t("删除失败，请稍后重试"));
             });
     }
 
@@ -148,7 +149,7 @@ export default class UserStore {
                 this.setUserInfo(data.data);
             })
             .catch(err => {
-                message.error(err);
+                message.error(typeof err === 'string' ? i18n.t(err) : err);
             });
     }
 
@@ -156,22 +157,22 @@ export default class UserStore {
         http.delete<any>(`/api/comment/social/${encodeURIComponent(provider)}`)
             .toPromise()
             .then(() => {
-                message.success('解绑成功');
+                message.success(i18n.t("解绑成功"));
                 this.getUserInfo(String(this.userInfo.id));
             })
-            .catch(() => message.error('解绑失败，请稍后重试'));
+            .catch(() => message.error(i18n.t("解绑失败，请稍后重试")));
     }
 
     savePwd(data: any) {
         http.post<any>(`/admin/user/password`, data)
             .toPromise()
             .then(() => {
-                message.success('更新成功');
+                message.success(i18n.t("更新成功"));
                 this.setUserEditPwdState({submitting: false});
             })
             .catch(err => {
                 this.setUserEditPwdState({submitting: false});
-                message.error('更新失败，请稍后重试');
+                message.error(i18n.t("更新失败，请稍后重试"));
             });
     }
 }

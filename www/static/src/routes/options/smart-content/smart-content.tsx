@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import {useEffect, useState} from 'react';
 import {Alert, Button, Card, Form, message, Select, Spin, Switch} from 'antd';
 import axios from 'axios';
@@ -5,20 +7,21 @@ import BreadCrumb from '../../../components/breadcrumb';
 import '../ai-settings.less';
 import './smart-content.less';
 
-export const CONTENT_FEATURES = [
-    {name: 'image', label: '图片生成和编辑', description: '根据文章生成 16:9 封面，或在媒体管理中通过提示词生成、优化图片，确认后上传到媒体库。'},
-    {name: 'commentModeration', label: '评论审核', description: '将非管理员的新评论发送给 AI 识别垃圾评论；识别失败时保留待审核状态。'},
-    {name: 'commentReply', label: '建议回复', description: '根据文章和当前评论生成建议回复，支持亲切、专业和诙谐口吻，确认后手动发送。'},
-    {name: 'summary', label: '生成摘要', description: '正文超过 250 个字时，概括全文生成摘要并填入内容摘要，可继续编辑。'},
-    {name: 'title', label: '生成标题', description: '正文超过 250 个字时，生成标题建议，支持编辑、重新生成和确认使用。'},
-    {name: 'rewrite', label: '智能审阅', description: '正文超过 100 个字时，检查表达和结构，逐处展示差异与修改建议，支持接受、拒绝或手动合并。'},
-    {name: 'translate', label: '翻译文章', description: '正文超过 10 个字时翻译全文，每次翻译时选择目标语言，并可同时翻译标题。'},
-    {name: 'slug', label: '生成 Slug', description: '正文超过 250 个字时，生成可编辑的英文 URL 标识，使用时自动检查重名。'},
-    {name: 'category', label: '智能分类', description: '正文超过 250 个字时，分别从已有分类和标签中选择适合文章的选项并回填。'},
-    {name: 'autocomplete', label: '内容自动建议', description: '写作暂停时，在光标处提示后续内容；按 Tab 接受，继续输入或按 Esc 忽略。'},
-];
+export const getContentFeatures = () => ([
+    {name: 'image', label: i18n.t("图片生成和编辑"), description: i18n.t("根据文章生成 16:9 封面，或在媒体管理中通过提示词生成、优化图片，确认后上传到媒体库。")},
+    {name: 'commentModeration', label: i18n.t("评论审核"), description: i18n.t("将非管理员的新评论发送给 AI 识别垃圾评论；识别失败时保留待审核状态。")},
+    {name: 'commentReply', label: i18n.t("建议回复"), description: i18n.t("根据文章和当前评论生成建议回复，支持亲切、专业和诙谐口吻，确认后手动发送。")},
+    {name: 'summary', label: i18n.t("生成摘要"), description: i18n.t("正文超过 250 个字时，概括全文生成摘要并填入内容摘要，可继续编辑。")},
+    {name: 'title', label: i18n.t("生成标题"), description: i18n.t("正文超过 250 个字时，生成标题建议，支持编辑、重新生成和确认使用。")},
+    {name: 'rewrite', label: i18n.t("智能审阅"), description: i18n.t("正文超过 100 个字时，检查表达和结构，逐处展示差异与修改建议，支持接受、拒绝或手动合并。")},
+    {name: 'translate', label: i18n.t("翻译文章"), description: i18n.t("正文超过 10 个字时翻译全文，每次翻译时选择目标语言，并可同时翻译标题。")},
+    {name: 'slug', label: i18n.t("生成 Slug"), description: i18n.t("正文超过 250 个字时，生成可编辑的英文 URL 标识，使用时自动检查重名。")},
+    {name: 'category', label: i18n.t("智能分类"), description: i18n.t("正文超过 250 个字时，分别从已有分类和标签中选择适合文章的选项并回填。")},
+    {name: 'autocomplete', label: i18n.t("内容自动建议"), description: i18n.t("写作暂停时，在光标处提示后续内容；按 Tab 接受，继续输入或按 Esc 忽略。")},
+]);
 
 export default function SmartContentSettings(props) {
+    useTranslation('admin');
     const [form] = Form.useForm();
     const enabledFeatures = Form.useWatch('features', form) || {};
     const [providers, setProviders] = useState<Array<{id: string; label: string; configured?: boolean;
@@ -28,7 +31,7 @@ export default function SmartContentSettings(props) {
         const models = data.models || {};
         setBindings(models);
         const modelValues: Record<string, string> = {};
-        for (const field of CONTENT_FEATURES) {
+        for (const field of getContentFeatures()) {
             modelValues[field.name] = models[field.name] ? JSON.stringify([models[field.name].provider, models[field.name].model]) : '';
         }
         form.setFieldsValue({features: data.features, models: modelValues});
@@ -40,11 +43,11 @@ export default function SmartContentSettings(props) {
         setLoading(true); setError('');
         axios.get('/admin/api/smart-content', {signal: controller.signal}).then(response => {
             if (controller.signal.aborted) return;
-            if (response.data.errno !== 0) throw new Error(response.data.errmsg || '读取设置失败');
+            if (response.data.errno !== 0) throw new Error(i18n.t(response.data.errmsg || '') || i18n.t("读取设置失败"));
             applyValues(response.data.data);
             setProviders(response.data.data.providers || []);
         }).catch(error => {
-            if (!controller.signal.aborted) setError(error.response?.data?.errmsg || error.message || '读取设置失败');
+            if (!controller.signal.aborted) setError(i18n.t(error.response?.data?.errmsg || '') || i18n.t(error.message || '') || i18n.t("读取设置失败"));
         }).finally(() => {if (!controller.signal.aborted) setLoading(false)});
         return () => controller.abort();
     }, [form, reload]);
@@ -59,21 +62,21 @@ export default function SmartContentSettings(props) {
         try {
             const response = await axios.post('/admin/api/smart-content', {features: values.features, models},
                 {headers: {'X-CSRF-Token': window.SysConfig.csrfToken}});
-            if (response.data.errno !== 0) throw new Error(response.data.errmsg || '保存设置失败');
+            if (response.data.errno !== 0) throw new Error(i18n.t(response.data.errmsg || '') || i18n.t("保存设置失败"));
             applyValues(response.data.data);
-            message.success('智能内容设置已保存。');
-        } catch (error: any) { message.error(error.response?.data?.errmsg || error.message || '保存设置失败') }
+            message.success(i18n.t("智能内容设置已保存。"));
+        } catch (error: any) { message.error(i18n.t(error.response?.data?.errmsg || '') || i18n.t(error.message || '') || i18n.t("保存设置失败")) }
         finally { setSaving(false) }
     };
     return <div className="fk-content-wrap ai-settings-page">
         <BreadCrumb {...props}/>
         <div className="page-list">
-            <h3 className="page-title">智能内容</h3>
-            <p>文章及启用功能所需的评论内容会发送到“AI 连接”中配置的服务。生成结果只写入编辑器，请审阅后再保存或发布。</p>
-            {error ? <Alert type="error" showIcon title={error} action={<Button onClick={() => setReload(value => value + 1)}>重试</Button>} />
-                : <Spin spinning={loading}><Card title="功能与模型">
+            <h3 className="page-title">{i18n.t("智能内容")}</h3>
+            <p>{i18n.t("文章及启用功能所需的评论内容会发送到“AI 连接”中配置的服务。生成结果只写入编辑器，请审阅后再保存或发布。")}</p>
+            {error ? <Alert type="error" showIcon title={error} action={<Button onClick={() => setReload(value => value + 1)}>{i18n.t("重试")}</Button>} />
+                : <Spin spinning={loading}><Card title={i18n.t("功能与模型")}>
                     <Form form={form} layout="vertical" onFinish={save} disabled={loading || saving}>
-                        {CONTENT_FEATURES.map(field => {
+                        {getContentFeatures().map(field => {
                             const capability = field.name === 'image' ? 'image' : 'text';
                             const groups = providers.filter(provider => provider.configured !== false).map(provider => ({
                                 label: provider.label,
@@ -98,18 +101,18 @@ export default function SmartContentSettings(props) {
                                             const retainedWhileDisabled = !form.getFieldValue(['features', field.name]) && value === savedValue;
                                             const available = groups.some(group => group.options.some(option => option.value === value));
                                             return !value || retainedWhileDisabled || available ? Promise.resolve()
-                                                : Promise.reject(new Error('请选择可用模型或恢复默认'));
+                                                : Promise.reject(new Error(i18n.t("请选择可用模型或恢复默认")));
                                         }}]}>
-                                        <Select aria-label={`${field.label}使用的模型`} options={[
-                                            {label: field.name === 'image' ? '自动选择已配置的图片模型' : '使用全局默认模型', value: ''},
-                                            ...(unavailable ? [{label: `${saved.provider} / ${saved.model}（不可用，请重新选择）`, value: savedValue}] : []),
+                                        <Select aria-label={i18n.t("{{value0}}使用的模型", {value0: field.label})} options={[
+                                            {label: field.name === 'image' ? i18n.t("自动选择已配置的图片模型") : i18n.t("使用全局默认模型"), value: ''},
+                                            ...(unavailable ? [{label: i18n.t("{{value0}} / {{value1}}（不可用，请重新选择）", {value0: saved.provider, value1: saved.model}), value: savedValue}] : []),
                                             ...groups
                                         ]} />
                                     </Form.Item>
                                 </div>
                             </div>;
                         })}
-                        <Button type="primary" htmlType="submit" disabled={loading} loading={saving}>保存</Button>
+                        <Button type="primary" htmlType="submit" disabled={loading} loading={saving}>{i18n.t("保存")}</Button>
                     </Form>
                 </Card></Spin>}
         </div>

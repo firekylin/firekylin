@@ -1,15 +1,18 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import { Form } from 'antd';
 import { Input } from 'antd';
 import { OptionsUploadItemsProps } from '../upload.model';
 
 function OptionsUploadTencentFormItems(props: OptionsUploadItemsProps) {
+    useTranslation('admin');
     return (
         <>
             {/* SecretId */}
             <Form.Item
                 label="SecretId"
                 name="secretId"
-                rules={[{ required: true, message: '请填写腾讯云的SecretId' }]}
+                rules={[{ required: true, message: i18n.t("请填写腾讯云的SecretId") }]}
                 initialValue={props.upload.secretId || ''}
             >
                 <Input />
@@ -18,41 +21,41 @@ function OptionsUploadTencentFormItems(props: OptionsUploadItemsProps) {
             <Form.Item
                 label="SecretKey"
                 name="secretKey"
-                rules={[{ required: true, message: '请填写腾讯云的SecretKeyt' }]}
+                rules={[{ required: true, message: i18n.t("请填写腾讯云的SecretKeyt") }]}
                 initialValue={props.upload.secretKey || ''}
             >
                 <Input />
             </Form.Item>
             {/* 存储桶(Bucket) */}
             <Form.Item
-                label="存储桶(Bucket)"
+                label={i18n.t("存储桶(Bucket)")}
                 name="bucket"
-                rules={[{ required: true, message: '请填写腾讯云的存储桶名称' }]}
+                rules={[{ required: true, message: i18n.t("请填写腾讯云的存储桶名称") }]}
                 initialValue={props.upload.bucket || ''}
             >
                 <Input />
             </Form.Item>
             {/* 所属地域 */}
             <Form.Item
-                label="所属地域"
+                label={i18n.t("所属地域")}
                 name="region"
-                rules={[{ required: true, message: '请填写腾讯云存储桶的所属地域' }]}
+                rules={[{ required: true, message: i18n.t("请填写腾讯云存储桶的所属地域") }]}
                 initialValue={props.upload.region || ''}
             >
                 <Input />
             </Form.Item>
             {/* 访问域名 */}
             <Form.Item
-                label="访问域名"
+                label={i18n.t("访问域名")}
                 name="origin"
-                rules={[{ required: true, message: '请填写腾讯云存储桶的访问域名' }]}
+                rules={[{ required: true, message: i18n.t("请填写腾讯云存储桶的访问域名") }]}
                 initialValue={props.upload.origin || ''}
             >
                 <Input />
             </Form.Item>
             {/* 路径前缀 */}
             <Form.Item
-                label="路径前缀"
+                label={i18n.t("路径前缀")}
                 name="prefix"
                 initialValue={props.upload.prefix || ''}
             >

@@ -1,3 +1,5 @@
+import i18n from '@admin/i18n';
+import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { observer, inject } from '@admin/utils/mobx-react';
 import BreadCrumb from '../../../components/breadcrumb';
@@ -10,6 +12,7 @@ interface UserEditPWDProps {
     userStore: UserStore;
 }
 export function UserEditPwdForm(props: UserEditPWDProps) {
+    useTranslation('admin');
     const [state, setState] = React.useState(() => ({}));
     const legacyRef = React.useRef({});
     const legacy = legacyRef.current as any;
@@ -40,7 +43,7 @@ export function UserEditPwdForm(props: UserEditPWDProps) {
         };
         legacy.compareToFirstPassword = (rule, value, callback) => {
             if (value && value !== legacy.formRef.current?.getFieldValue('password')) {
-                callback('两次输入密码不一致!');
+                callback(i18n.t("两次输入密码不一致!"));
             } else {
                 callback();
             }
@@ -68,20 +71,20 @@ export function UserEditPwdForm(props: UserEditPWDProps) {
                 <div className="fk-content-wrap">
                     <BreadCrumb {...props} />
                     <div className="manage-container">
-                        <h3 style={{ marginBottom: '20px' }}>LDAP提示</h3>
+                        <h3 style={{ marginBottom: '20px' }}>{i18n.t("LDAP提示")}</h3>
                         <p>
-                            本系统已开启LDAP认证服务，LDAP服务开启后用户的用户名、密码、邮箱、别名均由LDAP统一管理，本系统不能修改。
+                            {i18n.t("本系统已开启LDAP认证服务，LDAP服务开启后用户的用户名、密码、邮箱、别名均由LDAP统一管理，本系统不能修改。")}
                         </p>
                         <div className="alert alert-warning" role="alert">
-                            如需要修改，请使用给本系统提供LDAP服务的
+                            {i18n.t("如需要修改，请使用给本系统提供LDAP服务的")}
                             {ldap_user_page ? (
                                 <a href={ldap_user_page} target="_blank">
-                                    用户管理服务
+                                    {i18n.t("用户管理服务")}
                                 </a>
                             ) : (
-                                '用户管理服务'
+                                i18n.t("用户管理服务")
                             )}
-                            ，或者联系系统管理员。
+                            {i18n.t("，或者联系系统管理员。")}
                         </div>
                     </div>
                 </div>
@@ -100,33 +103,33 @@ export function UserEditPwdForm(props: UserEditPWDProps) {
                     >
                         <div className="pull-left">
                             <Form.Item
-                                label="密码"
+                                label={i18n.t("密码")}
                                 name="password"
                                 rules={[
-                                    { required: true, message: '请输入密码!' },
+                                    { required: true, message: i18n.t("请输入密码!") },
                                     {
                                         min: 8,
                                         max: 30,
-                                        message: '长度为8到30个字符',
+                                        message: i18n.t("长度为8到30个字符"),
                                     },
                                 ]}
                             >
-                                <Input type="password" placeholder="长度为8到30个字符" />
+                                <Input type="password" placeholder={i18n.t("长度为8到30个字符")} />
                             </Form.Item>
                             <p className="help-block">
-                                建议使用特殊字符与字母、数字的混编方式，增加安全性。
+                                {i18n.t("建议使用特殊字符与字母、数字的混编方式，增加安全性。")}
                             </p>
                             <Form.Item
-                                label="确认密码"
+                                label={i18n.t("确认密码")}
                                 name="repassword"
                                 rules={[
-                                    { required: true, message: '请再次确认密码!' },
+                                    { required: true, message: i18n.t("请再次确认密码!") },
                                     {
                                         validator: legacy.compareToFirstPassword,
                                     },
                                 ]}
                             >
-                                <Input type="password" placeholder="请再次输入密码" />
+                                <Input type="password" placeholder={i18n.t("请再次输入密码")} />
                             </Form.Item>
                             <button
                                 type="submit"
@@ -134,8 +137,8 @@ export function UserEditPwdForm(props: UserEditPWDProps) {
                                 className="btn btn-primary"
                             >
                                 {legacy.userStore.userEditPwdState.submitting
-                                    ? '提交中...'
-                                    : '提交'}
+                                    ? i18n.t("提交中...")
+                                    : i18n.t("提交")}
                             </button>
                         </div>
                     </Form>
