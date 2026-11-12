@@ -5,7 +5,6 @@ const path = require('node:path');
 const {createRequire} = require('node:module');
 const {spawnSync} = require('node:child_process');
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
-const {createSnapshot} = require('../src/service/i18n');
 const {themeTranslator} = require('../src/service/i18n-theme');
 
 test('boot locale data cannot terminate its script container', async () => {
@@ -25,9 +24,8 @@ test('boot locale data cannot terminate its script container', async () => {
 test('separate processes resolve locale independently with bundled resources', () => {
   for (const locale of ['en-US', 'zh-CN', 'en-US']) {
     const child = spawnSync(process.execPath, ['-e', `
-      const {createSnapshot} = require('./src/service/i18n');
       const {coreTranslator} = require('./src/service/i18n-resources');
-      process.stdout.write(coreTranslator(createSnapshot(process.argv[1]))('保存'));
+      process.stdout.write(coreTranslator(process.argv[1])('保存'));
     `, locale], {cwd: path.resolve(__dirname, '..'), encoding: 'utf8'});
     assert.equal(child.status, 0, child.stderr);
     assert.equal(child.stdout, locale === 'en-US' ? 'Save' : '保存');
@@ -40,6 +38,6 @@ test('async includes retain the caller translator when templates are cached', as
   eta.loadTemplate('@child', '<%= t("分类") %>', {async: true});
   eta.loadTemplate('@parent', '<%~ await includeAsync("@child") %>', {async: true});
   const outputs = await Promise.all(['en-US', 'zh-CN', 'en-US'].map(locale =>
-    eta.renderAsync('@parent', {t: themeTranslator(root, 'firekylin', createSnapshot(locale))})));
+    eta.renderAsync('@parent', {t: themeTranslator(root, 'firekylin', locale)})));
   assert.deepEqual(outputs, ['Categories', '分类', 'Categories']);
 });

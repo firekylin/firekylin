@@ -4,13 +4,13 @@
 
 Run `pnpm test`, `pnpm lint`, `pnpm build`, `pnpm check:i18n` and `pnpm check:i18n-package` before release. CI validates resource structure and package contents after the production build. Dictionary validation includes duplicate keys, exact placeholder equality and owner-local fallback. Build output contains the React dictionaries; npm packages contain core and bundled-theme dictionaries.
 
-Regression tests exercise literal interpolation, falsy values, unsafe placeholders, escaping, public boot data, independent processes, request snapshots, plugin owner isolation, static registration behavior, theme response copies, comment-language compatibility, Eta caching and asynchronous includes. Existing HTTP/SQLite/plugin/worker tests also run as part of the full suite.
+Regression tests exercise literal interpolation, falsy values, unsafe placeholders, escaping, public boot data, independent processes, request locale isolation, plugin owner isolation, static registration behavior, theme response copies, comment-language compatibility, Eta caching and asynchronous includes. Existing HTTP/SQLite/plugin/worker tests also run as part of the full suite.
 
 ## Upgrade and rollback
 
 Existing databases need no bulk rewrite: absent language state means Chinese. The `locale` option stores the language string directly. Clients compare the language value; request sequencing rejects stale responses. Older releases ignore the extra locale option. Switching back to Chinese does not rewrite articles, theme values or plugin data. Explicit legacy comment languages remain unchanged; only missing/auto values follow the system.
 
-Language changes do not restart workers or rerun plugin registration. Static plugin titles require a safe plugin reload or a manually coordinated worker restart. Dynamic request text follows a request snapshot. Independent plugin tasks must enter `ctx.withLocale` explicitly.
+Language changes do not restart workers or rerun plugin registration. Static plugin titles require a safe plugin reload or a manually coordinated worker restart. Dynamic request text uses the locale selected at request entry. Independent plugin tasks must enter `ctx.withLocale` explicitly.
 
 ## Release gates still open
 
