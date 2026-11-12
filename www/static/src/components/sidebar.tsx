@@ -29,7 +29,20 @@ function createSidebarState() {
             })),
         [],
     );
-    return {routes: [...InitiateRoutes(themePages), ...pluginRoutes], isActive: {}};
+    const builtinPages = (window.SysConfig.pluginAdmin || []).flatMap(plugin =>
+        plugin.pages.filter(page => page.builtinPanel === 'tools' && page.menu !== false)
+            .map(page => ({
+                url: `/plugins/${plugin.id}/${page.id}`,
+                title: page.title,
+                order: page.order ?? 100,
+                type: 1,
+            })),
+    ).sort((a, b) => a.order - b.order);
+    const routes = InitiateRoutes(themePages).map(route => route.url === '/tools' ? {
+        ...route,
+        children: [...route.children, ...builtinPages],
+    } : route);
+    return {routes: [...routes, ...pluginRoutes], isActive: {}};
 }
 const STORAGE_KEY = 'firekylin.sidebar.collapsed';
 const DEFAULT_LOGO = '/static/img/firekylin.jpg';
@@ -89,7 +102,7 @@ function SidebarEntry({route, collapsed, pathname}: any) {
                     <NavLink to={child.url} end={child.url === route.url}
                         onClick={() => setOpen(false)}
                         className={(child.url === route.url ? currentPath === child.url : isActive(child)) ? 'active' : ''}
-                        activeClassName="active">{title(child.title)}</NavLink>
+                        activeClassName="active">{child.url.startsWith('/plugins/') ? child.title : title(child.title)}</NavLink>
                 </li>
             ))}
         </ul>

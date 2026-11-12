@@ -222,3 +222,31 @@ it('does not expose article creation to commenters', () => {
     fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
     expect(screen.queryByRole('link', {name: '文章管理'})).toBeNull();
 });
+
+it('mounts plugin tools in the existing group, orders them and hides private entries', async() => {
+    window.SysConfig.pluginAdmin = [{id: 'importer', panels: [], pages: [
+        {id: 'late', builtinPanel: 'tools', title: '后置工具', order: 90},
+        {id: 'import', builtinPanel: 'tools', title: '评论导入', order: 10},
+        {id: 'hidden', builtinPanel: 'tools', title: '隐藏工具', menu: false},
+    ]}] as any;
+    renderSidebar('/plugins/importer/import');
+    const tools = screen.getByRole('link', {name: '管理工具'});
+    expect(tools).toHaveClass('active');
+    const entry = screen.getByRole('link', {name: '评论导入'});
+    expect(entry).toHaveClass('active');
+    expect(entry.closest('li')!.nextElementSibling).toContainElement(screen.getByRole('link', {name: '后置工具'}));
+    expect(screen.queryByRole('link', {name: '隐藏工具'})).toBeNull();
+    fireEvent.click(screen.getByRole('button', {name: '收起侧边栏'}));
+    fireEvent.focus(screen.getByRole('link', {name: '管理工具'}));
+    expect(await screen.findByRole('link', {name: '评论导入'})).toHaveClass('active');
+});
+
+it('does not expose built-in plugin tools to editors', () => {
+    window.SysConfig.userInfo.type = 2;
+    window.SysConfig.pluginAdmin = [{id: 'importer', panels: [], pages: [
+        {id: 'import', builtinPanel: 'tools', title: '评论导入'},
+    ]}] as any;
+    renderSidebar('/plugins/importer/import');
+    expect(screen.queryByRole('link', {name: '管理工具'})).toBeNull();
+    expect(screen.queryByRole('link', {name: '评论导入'})).toBeNull();
+});

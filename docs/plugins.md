@@ -695,3 +695,22 @@ write permissions. Review and merge the PR, then deploy the site; plugin activat
 GitHub plugin dependency changes require that the website repository does not track a lockfile. If it does,
 the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
 created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.
+
+### 将插件页面放入管理工具
+
+使用 `builtinPanel: 'tools'` 将页面添加到内置的“管理工具”子菜单，无需调用
+`registerPanel`。目前支持的内置目标为 `tools`；`builtinPanel` 与 `panel` 不能同时使用。
+
+```js
+ctx.admin.registerPage({
+  id: 'import',
+  builtinPanel: 'tools',
+  title: '评论导入',
+  order: 75,
+  load: async() => ({sections: []})
+});
+```
+
+插件页面追加在内置工具之后，按 `order` 从小到大排列（默认 100）。
+`menu: false` 可以隐藏入口，页面地址仍为 `/admin/plugins/<pluginId>/<pageId>`。
+入口和插件页面继续仅向管理员开放。原有 `panel` 仍引用本插件注册的独立菜单。
