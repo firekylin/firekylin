@@ -2,7 +2,7 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const middleware = require('../src/middleware/i18n');
-const {currentSnapshot} = require('../src/service/i18n');
+const {currentLocale} = require('../src/service/i18n');
 
 class Controller {
   constructor() {
@@ -32,13 +32,13 @@ test('unconfigured and empty databases still reach the homepage installation red
       const controller = new BaseController();
       controller.getWidget = async () => { throw error; };
       await middleware()(controller.ctx, async () => {
-        assert.deepEqual(currentSnapshot(), {locale: 'zh-CN'});
+        assert.equal(currentLocale(), 'zh-CN');
         assert.equal(controller.ctx.state.t('保存'), '保存');
         await controller.__before();
       });
       assert.equal(controller.ctx.status, 302);
       assert.equal(controller.ctx.redirectTo, '/index/install');
-      assert.equal(currentSnapshot(), undefined);
+      assert.equal(currentLocale(), undefined);
     }
   }
 });
@@ -57,7 +57,7 @@ test('the first successful request uses persisted language even before installat
   global.think.model = () => ({getCredentialValue: async () => 'en-US'});
   const ctx = {path: '/', state: {}};
   await middleware()(ctx, async () => {
-    assert.equal(currentSnapshot().locale, 'en-US');
+    assert.equal(currentLocale(), 'en-US');
     assert.equal(ctx.state.t('保存'), 'Save');
   });
 });

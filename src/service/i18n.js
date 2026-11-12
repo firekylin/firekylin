@@ -28,18 +28,14 @@ function validateDictionary(dictionary) {
   return Object.freeze(result);
 }
 
-function createSnapshot(locale = 'zh-CN') {
-  return Object.freeze({locale: SUPPORTED_LOCALES.includes(locale) ? locale : 'zh-CN'});
-}
-
-function createTranslator({namespace, snapshot, resources = {}, defaultLocale = 'zh-CN'}) {
+function createTranslator({namespace, locale = 'zh-CN', resources = {}, defaultLocale = 'zh-CN'}) {
   if (!/^(core|admin|(?:theme|plugin):[A-Za-z0-9_.-]+)$/.test(namespace)) throw new TypeError('Invalid namespace');
   const dictionaries = Object.create(null);
   for (const [locale, dictionary] of Object.entries(resources)) {
     if (!/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(locale)) throw new TypeError('Invalid locale');
     dictionaries[locale] = validateDictionary(dictionary);
   }
-  const candidates = [...new Set([snapshot.locale, snapshot.locale.split('-')[0], defaultLocale])];
+  const candidates = [...new Set([locale, locale.split('-')[0], defaultLocale])];
   return (key, vars = {}) => {
     if (typeof key !== 'string') throw new TypeError('Translation key must be a string');
     placeholders(key);
@@ -63,9 +59,9 @@ function createTranslator({namespace, snapshot, resources = {}, defaultLocale = 
   };
 }
 
-function runWithSnapshot(snapshot, callback) {
-  return context.run(createSnapshot(snapshot.locale), callback);
+function runWithLocale(locale, callback) {
+  return context.run(locale, callback);
 }
 
-module.exports = {SUPPORTED_LOCALES, createSnapshot, createTranslator, validateDictionary, runWithSnapshot,
-  currentSnapshot: () => context.getStore()};
+module.exports = {SUPPORTED_LOCALES, createTranslator, validateDictionary, runWithLocale,
+  currentLocale: () => context.getStore()};

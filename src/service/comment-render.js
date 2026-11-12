@@ -2,7 +2,6 @@
 
 const captcha = require('./captcha');
 const {coreTranslator} = require('./i18n-resources');
-const {createSnapshot} = require('./i18n');
 
 const CLIENT_VERSION = '3.16.0';
 const DEFAULT_RESOURCE_URL = `https://cdn.jsdelivr.net/npm/@waline/client@${CLIENT_VERSION}/dist`;
@@ -47,8 +46,8 @@ module.exports = class extends think.Service {
     if (cannotComment) return '';
     if (controller.commentRendered) return '';
 
-    const snapshot = controller.ctx?.state?.i18n || createSnapshot(controller.options.locale);
-    const t = coreTranslator(snapshot);
+    const locale = controller.ctx?.state?.locale || controller.options.locale;
+    const t = coreTranslator(locale);
     const settings = controller.options.comment || {};
     const captchaConfig = captcha.publicSettings(captcha.settings(controller.options));
     const captchaEnabled = captcha.enabled(captchaConfig, 'comment');
@@ -60,7 +59,7 @@ module.exports = class extends think.Service {
       recaptchaV3Key: captchaEnabled && captchaConfig.provider === 'recaptcha-v3' ? captchaConfig.siteKey : '',
       pageSize: Number(settings.pageSize) || 10,
       lang: !settings.locale || settings.locale === 'auto'
-        ? (snapshot.locale === 'en-US' ? 'en' : 'zh-CN') : settings.locale,
+        ? (locale === 'en-US' ? 'en' : 'zh-CN') : settings.locale,
       login: settings.forceLogin ? 'force' : 'enable',
       commentSorting: ['latest', 'oldest', 'hottest'].includes(settings.commentSorting)
         ? settings.commentSorting : 'latest',

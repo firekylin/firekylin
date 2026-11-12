@@ -3,11 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const {createTranslator, createSnapshot, runWithSnapshot, currentSnapshot} = require('../src/service/i18n');
+const {createTranslator, runWithLocale, currentLocale} = require('../src/service/i18n');
 const {parseDictionary, loadResources} = require('../src/service/i18n-resources');
 const settings = require('../src/service/i18n-settings');
 
-const translate = resources => createTranslator({namespace: 'core', snapshot: createSnapshot('en-US'), resources});
+const translate = resources => createTranslator({namespace: 'core', locale: 'en-US', resources});
 
 test('exact matching, empty values and namespace-local fallback', () => {
   const t = translate({'en-US': {'a.b:c': ''}, en: {'基础': 'Base'}, 'zh-CN': {'默认': 'Default'}});
@@ -48,22 +48,20 @@ test('resource loader confines symlinks and enforces size limits', t => {
   assert.throws(() => loadResources(root));
 });
 
-test('concurrent tasks isolate immutable snapshots', async () => {
-  await Promise.all(['en-US', 'zh-CN'].map(locale => runWithSnapshot(createSnapshot(locale), async () => {
+test('concurrent tasks isolate locales', async () => {
+  await Promise.all(['en-US', 'zh-CN'].map(locale => runWithLocale(locale, async () => {
     await new Promise(resolve => setImmediate(resolve));
-    assert.equal(currentSnapshot().locale, locale);
-    assert.ok(Object.isFrozen(currentSnapshot()));
+    assert.equal(currentLocale(), locale);
   })));
-  assert.equal(currentSnapshot(), undefined);
+  assert.equal(currentLocale(), undefined);
 });
 
 test('locale persists as a plain string with safe legacy defaults', () => {
   const value = settings.encode('en-US');
-  assert.equal(settings.decode(value).locale, 'en-US');
+  assert.equal(settings.decode(value), 'en-US');
   assert.equal(value, 'en-US');
   assert.equal(settings.SETTINGS_KEY, 'locale');
-  assert.deepEqual(settings.decode(value), {locale: 'en-US'});
-  assert.equal(settings.decode('bad').locale, 'zh-CN');
+  assert.equal(settings.decode('bad'), 'zh-CN');
   assert.throws(() => settings.encode('../../bad'));
   assert.deepEqual(Object.keys(settings.publicSettings(settings.decode(value))).sort(),
     ['locale']);

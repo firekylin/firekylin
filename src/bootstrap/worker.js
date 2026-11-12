@@ -98,7 +98,7 @@ const pluginManager = existingPluginManager || new PluginManager({
   version: pack.version,
   logger: console,
   packageApi,
-  localeSnapshot: async() => {
+  getLocale: async() => {
     const {SETTINGS_KEY, decode} = require('../service/i18n-settings');
     return decode(await think.model('options').getCredentialValue(SETTINGS_KEY));
   },

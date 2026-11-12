@@ -1,10 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const {createTranslator, createSnapshot} = require('./i18n');
+const {createTranslator} = require('./i18n');
 const {loadResources} = require('./i18n-resources');
 
-function themeTranslator(root, id, snapshot = createSnapshot()) {
-  return createTranslator({namespace: `theme:${id}`, snapshot, resources: loadResources(root).resources});
+function themeTranslator(root, id, locale = 'zh-CN') {
+  return createTranslator({namespace: `theme:${id}`, locale, resources: loadResources(root).resources});
 }
 
 // Be conservative: any existing t identifier inside template code disables the

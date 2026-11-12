@@ -5,14 +5,13 @@ const os = require('node:os');
 const path = require('node:path');
 const {createRequire} = require('node:module');
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
-const {createSnapshot} = require('../src/service/i18n');
 const {themeTranslator, supportsAlias, translateFields} = require('../src/service/i18n-theme');
 
 const root = path.resolve('www/theme/firekylin');
 
 test('theme field projection preserves submitted values and source objects', () => {
   const source = [{name: '分类', label: '分类', default: '分类', options: ['分类']}];
-  const t = themeTranslator(root, 'firekylin', createSnapshot('en-US'));
+  const t = themeTranslator(root, 'firekylin', 'en-US');
   const result = translateFields(source, t);
   assert.equal(result[0].label, 'Categories');
   assert.equal(result[0].name, '分类');
@@ -25,7 +24,7 @@ test('Eta cached templates bind translators per render and escape variables once
   const eta = new Eta({varName: 'firekylin', functionHeader: 'const t = firekylin.t;', cache: true});
   const template = eta.compile('<%= t("分类") %> <%= t("{{value}}", {value: firekylin.value}) %>');
   for (const locale of ['en-US', 'zh-CN', 'en-US']) {
-    const result = eta.render(template, {t: themeTranslator(root, 'firekylin', createSnapshot(locale)), value: '<script>'});
+    const result = eta.render(template, {t: themeTranslator(root, 'firekylin', locale), value: '<script>'});
     assert.equal(result, (locale === 'en-US' ? 'Categories' : '分类') + ' &lt;script&gt;');
   }
 });

@@ -185,8 +185,8 @@ test('plugin context registers and cleans up admin extensions', async() => {
   assert.deepEqual(manager.admin.manifest(), []);
 });
 
-test('plugin translators retain owners across request snapshots and static registration', async t => {
-  const {createSnapshot, runWithSnapshot} = require('../../src/service/i18n');
+test('plugin translators retain owners across request locales and static registration', async t => {
+  const {runWithLocale} = require('../../src/service/i18n');
   const root = project();
   t.after(() => fs.rmSync(root, {recursive: true, force: true}));
   for (const id of ['first', 'second']) {
@@ -200,9 +200,9 @@ test('plugin translators retain owners across request snapshots and static regis
     fs.mkdirSync(path.join(root, 'plugins', id, 'locales'));
     fs.writeFileSync(path.join(root, 'plugins', id, 'locales/en-US.json'), JSON.stringify({'保存': id}));
   }
-  const manager = new PluginManager({projectPath: root, localeSnapshot: async() => createSnapshot('zh-CN')});
+  const manager = new PluginManager({projectPath: root, getLocale: async() => 'zh-CN'});
   await manager.load();
-  await Promise.all(['zh-CN', 'en-US'].map(locale => runWithSnapshot(createSnapshot(locale), async() => {
+  await Promise.all(['zh-CN', 'en-US'].map(locale => runWithLocale(locale, async() => {
     for (const id of ['first', 'second']) {
       assert.equal(await manager.templates.callFunction(id + '.label'), locale === 'en-US' ? id : '保存');
     }
