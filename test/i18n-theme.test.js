@@ -1,11 +1,10 @@
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 const {createRequire} = require('node:module');
 const {Eta} = createRequire(require.resolve('think-view-eta'))('eta');
-const {themeTranslator, supportsAlias, translateFields} = require('../src/service/i18n-theme');
+const {themeTranslator, translateFields} = require('../src/service/i18n-theme');
 
 const root = path.resolve('www/theme/firekylin');
 
@@ -29,10 +28,15 @@ test('Eta cached templates bind translators per render and escape variables once
   }
 });
 
-test('legacy t identifiers disable only the short alias', t => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'fk-theme-'));
-  t.after(() => fs.rmSync(directory, {recursive: true, force: true}));
-  fs.writeFileSync(path.join(directory, 'index.eta'), '<% const t = 1; %>');
-  assert.equal(supportsAlias(directory), false);
-  assert.equal(supportsAlias(root), true);
+test('bundled pagination renders with the template translation function', () => {
+  const eta = new Eta({varName: 'firekylin', functionHeader: 'const t = firekylin.t;', cache: true});
+  const template = eta.compile(fs.readFileSync(path.join(root, 'inc/pagination.eta'), 'utf8'));
+  for (const locale of ['en-US', 'zh-CN']) {
+    const output = eta.render(template, {
+      t: themeTranslator(root, 'firekylin', locale),
+      pagination: {currentPage: 2, totalPages: 3},
+      ctx: {url: '/?page=2'}
+    });
+    assert.match(output, locale === 'en-US' ? /Next/ : /下一页/);
+  }
 });

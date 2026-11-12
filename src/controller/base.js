@@ -1,4 +1,4 @@
-const {themeTranslator, supportsAlias} = require('../service/i18n-theme');
+const {themeTranslator} = require('../service/i18n-theme');
 
 const path = require('path');
 const pack = require('../../package.json');
@@ -79,7 +79,7 @@ module.exports = class extends think.Controller {
       viewPath: this.THEME_VIEW_PATH,
       options: {
         varName: 'firekylin',
-        functionHeader: supportsAlias(this.THEME_VIEW_PATH) ? 'const t = firekylin.t;' : ''
+        functionHeader: 'const t = firekylin.t;'
       }
     });
     await emit('theme.afterRender', {...viewContext, response: this.ctx.body});

@@ -94,7 +94,10 @@ test('view adapter resolves layouts from the theme directory', async() => {
   };
   const adapter = new ThinkViewEta(path.join(root, 'tag.eta'), data, {
     viewPath: root,
-    options: {varName: 'firekylin'}
+    options: {
+      varName: 'firekylin',
+      functionHeader: 'const t = firekylin.t;'
+    }
   });
 
   const output = await adapter.render();

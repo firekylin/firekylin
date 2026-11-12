@@ -1,32 +1,8 @@
-const fs = require('node:fs');
-const path = require('node:path');
 const {createTranslator} = require('./i18n');
 const {loadResources} = require('./i18n-resources');
 
 function themeTranslator(root, id, locale = 'zh-CN') {
   return createTranslator({namespace: `theme:${id}`, locale, resources: loadResources(root).resources});
-}
-
-// Be conservative: any existing t identifier inside template code disables the
-// short alias for the entire theme, including includes and layouts.
-function supportsAlias(root) {
-  const base = fs.realpathSync(root);
-  let count = 0;
-  function scan(directory) {
-    for (const entry of fs.readdirSync(directory, {withFileTypes: true})) {
-      if (++count > 1000 || entry.isSymbolicLink()) return false;
-      const file = path.join(directory, entry.name);
-      if (entry.isDirectory() && !scan(file)) return false;
-      if (entry.isFile() && entry.name.endsWith('.eta')) {
-        const source = fs.readFileSync(file, 'utf8');
-        for (const code of source.match(/<%[\s\S]*?%>/g) || []) {
-          if (/\bt\b/.test(code.replace(/firekylin\.t\b/g, ''))) return false;
-        }
-      }
-    }
-    return true;
-  }
-  return scan(base);
 }
 
 function translateFields(fields, t) {
@@ -49,4 +25,4 @@ function translateFields(fields, t) {
     return copy;
   });
 }
-module.exports = {themeTranslator, supportsAlias, translateFields};
+module.exports = {themeTranslator, translateFields};
