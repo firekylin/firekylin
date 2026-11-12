@@ -74,6 +74,8 @@ npx firekylin new existing-blog --skip-initialize --db-type postgresql
 
 升级前备份数据库、配置、主题、插件和上传文件。在独立项目中更新 `firekylin` 依赖，使用该项目的包管理器安装，然后重启并验证站点和后台。核心依赖升级不会覆盖项目中的默认主题副本；主题更新是单独的操作，先保存自定义修改。不要对已有站点重新运行初始化来代替升级。
 
+包含文章搜索保护迁移的版本会在启动时新增并回填文章的保护状态。升级时先停止所有旧版本实例及写入任务，再启动新版本；不要让旧版本继续修改已迁移的文章。公开搜索只包含已确认无密码保护的文章，未完成回填或选项格式损坏的文章默认不可搜索。应用内新增、修改和清除文章密码会同步维护此状态；自定义插件或导入工具应使用文章模型写入，不要直接通过 SQL 修改文章选项。
+
 旧源码布局仍保留 `production.js`、`development.js` 和网页安装流程。已有部署应先确认目录布局再升级，不能直接套用独立项目的路径。后台多实例认证和旧密钥迁移见 [JWT 认证](admin-jwt.md)。
 
 核心开发请按照仓库 `package.json` 的 `packageManager` 安装工具，使用 `pnpm install --frozen-lockfile`、`pnpm run build`，再运行 `pnpm start`。安装的 npm 版本与仓库源码可能不同，先用 `npx --no-install firekylin --version` 和 `--help` 核对所用 CLI。

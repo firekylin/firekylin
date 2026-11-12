@@ -61,6 +61,9 @@ test('public reads always enforce publication and visibility', async() => {
   }
   assert.equal(calls[1].where.id, 5);
   assert.deepEqual(calls[2].where['title|content'], ['LIKE', '%Node.js%']);
+  assert.equal(calls[2].where.is_password_protected, 0);
+  assert.equal(calls[0].where.is_password_protected, undefined);
+  assert.equal(calls[1].where.is_password_protected, undefined);
 });
 
 test('public reads redact password-protected article content', async() => {
