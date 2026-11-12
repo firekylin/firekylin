@@ -9,6 +9,12 @@ let sessions: any[];
 let messages: any[];
 let actions: any[];
 let requests: any[];
+async function waitForSendReady() {
+    await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+    // Sender's ActionButton updates its submission guard in an effect after
+    // enabling the DOM button. Flush that update before the synthetic click.
+    await act(async() => {});
+}
 beforeEach(() => {
     sessions = []; messages = []; actions = []; requests = [];
     vi.stubGlobal('ResizeObserver', class {observe() {} unobserve() {} disconnect() {}});
@@ -221,11 +227,11 @@ it('selects, previews, removes and sends text attachments without an additional 
     expect(screen.queryByText('附件正文')).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
     await screen.findByLabelText('移除附件 notes.md');
-    await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+    await waitForSendReady();
     fireEvent.click(screen.getByLabelText('发送消息'));
     await screen.findByText('已收到');
     expect(requests.find(row => row.body?.operation === 'send').body.attachments).toEqual([{name: 'notes.md', content: '附件正文', size: 12}]);
-    expect(screen.queryByLabelText('移除附件 notes.md')).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByLabelText('移除附件 notes.md')).not.toBeInTheDocument());
     expect(screen.getByText('notes.md · 12 B · 文本附件')).toBeInTheDocument();
 });
 it('keeps files and prompt when the server rejects a send', async() => {
@@ -260,15 +266,12 @@ it('sends actual image bytes, restores previews on refresh and removes draft ima
         expect(screen.queryByRole('img', {name: 'red.png'})).not.toBeInTheDocument();
         fireEvent.change(screen.getByLabelText('选择聊天附件'), {target: {files: [file]}});
         await screen.findByRole('img', {name: 'red.png'});
-        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
-        // Sender's ActionButton updates its submission guard in an effect after
-        // enabling the DOM button. Flush that update before the synthetic click.
-        await act(async () => {});
+        await waitForSendReady();
         fireEvent.click(screen.getByLabelText('发送消息'));
         await waitFor(() => expect(requests.filter(row => row.body?.operation === 'send')).toHaveLength(1));
         await screen.findByText('已收到');
         expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);
-        expect(screen.queryByLabelText('移除附件 red.png')).not.toBeInTheDocument();
+        await waitFor(() => expect(screen.queryByLabelText('移除附件 red.png')).not.toBeInTheDocument());
         unmount();
         render(<MemoryRouter initialEntries={['/dashboard/one']}><Chat /></MemoryRouter>);
         expect(await screen.findByRole('img', {name: 'red.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
@@ -319,7 +322,7 @@ it('pastes clipboard images as draft attachments and sends actual bytes', async(
         expect(fireEvent.paste(input, {clipboardData: {files: [file], getData: () => ''}})).toBe(false);
         expect(await screen.findByRole('img', {name: 'clipboard.png'})).toHaveAttribute('src', `data:image/png;base64,${png}`);
         expect(requests.some(row => row.body?.operation === 'send')).toBe(false);
-        await waitFor(() => expect(screen.getByLabelText('发送消息')).toBeEnabled());
+        await waitForSendReady();
         fireEvent.click(screen.getByLabelText('发送消息'));
         await screen.findByText('已收到');
         expect(requests.find(row => row.body?.operation === 'send').body.attachments[0].data).toBe(png);

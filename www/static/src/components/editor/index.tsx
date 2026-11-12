@@ -882,30 +882,36 @@ function MarkDownEditor(props: MdEditorProps) {
         );
     };
     legacy._boldText = function _boldText() {
-        legacy._preInputText(i18n.t("**加粗文字**"), 2, 6);
+        const text = i18n.t("**加粗文字**");
+        legacy._preInputText(text, 2, text.length - 2);
     };
     legacy._italicText = function _italicText() {
-        legacy._preInputText(i18n.t("*斜体文字*"), 1, 5);
+        const text = i18n.t("*斜体文字*");
+        legacy._preInputText(text, 1, text.length - 1);
     };
     legacy._strikethroughText = function _strikethroughText() {
-        legacy._preInputText(i18n.t("~~删除线文字~~"), 2, 7);
+        const text = i18n.t("~~删除线文字~~");
+        legacy._preInputText(text, 2, text.length - 2);
     };
     legacy._underlineText = function _underlineText() {
-        legacy._preInputText(i18n.t("<ins>下划线文字</ins>"), 5, 10);
+        const text = i18n.t("<ins>下划线文字</ins>");
+        legacy._preInputText(text, 5, text.length - 6);
     };
     legacy._quickLinkText = function _quickLinkText() {
         const textarea = legacy.textControl as HTMLTextAreaElement;
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const hasSelection = start !== end;
+        const text = i18n.t("[链接文本](www.yourlink.com)");
+        const placeholderEnd = text.length - "](www.yourlink.com)".length;
         if (hasSelection) {
             // 选中文字时：选中内容作为链接文本，光标选中url
-            legacy._preInputText(i18n.t("[链接文本](www.yourlink.com)"), 1, 5, {
+            legacy._preInputText(text, 1, placeholderEnd, {
                 selectAfter: [-18, -2],
             });
         } else {
             // 未选中文字时：插入后选中text
-            legacy._preInputText(i18n.t("[链接文本](www.yourlink.com)"), 1, 5);
+            legacy._preInputText(text, 1, placeholderEnd);
         }
     };
     legacy._modalLinkText = function _modalLinkText(
@@ -930,7 +936,8 @@ function MarkDownEditor(props: MdEditorProps) {
         }
     };
     legacy._blockquoteText = function _blockquoteText() {
-        legacy._preInputText(i18n.t("> 引用"), 2, 4);
+        const text = i18n.t("> 引用");
+        legacy._preInputText(text, 2, text.length);
     };
     legacy._inlineCodeText = function _inlineCodeText() {
         legacy._preInputText('`code`', 1, 5);
@@ -959,13 +966,16 @@ function MarkDownEditor(props: MdEditorProps) {
         });
     };
     legacy._kbdText = function _kbdText() {
-        legacy._preInputText(i18n.t("<kbd>键盘按键</kbd>"), 5, 9);
+        const text = i18n.t("<kbd>键盘按键</kbd>");
+        legacy._preInputText(text, 5, text.length - 6);
     };
     legacy._inlineFormulaText = function _inlineFormulaText() {
-        legacy._preInputText(i18n.t("`$行内公式$`"), 2, 6);
+        const text = i18n.t("`$行内公式$`");
+        legacy._preInputText(text, 2, text.length - 2);
     };
     legacy._formulaText = function _formulaText() {
-        legacy._preInputText(i18n.t("```math\n公式\n```"), 8, 10);
+        const text = i18n.t("```math\n公式\n```");
+        legacy._preInputText(text, 8, text.length - 4);
     };
     legacy._alertMenuItems = function _alertMenuItems() {
         const types = [
@@ -989,7 +999,7 @@ function MarkDownEditor(props: MdEditorProps) {
     };
     legacy._alertText = function _alertText(type: string) {
         const text = i18n.t("> [!{{value0}}]\n> 提示内容", {value0: type});
-        legacy._preInputText(text, type.length + 8, type.length + 12);
+        legacy._preInputText(text, type.length + 8, text.length);
     };
     legacy._toggleListText = function _toggleListText(type: 'ul' | 'ol') {
         const textarea = legacy.textControl as HTMLTextAreaElement;
@@ -1194,7 +1204,8 @@ function MarkDownEditor(props: MdEditorProps) {
         }
     };
     legacy._headerText = function _headerText() {
-        legacy._preInputText(i18n.t("# 标题"), 2, 4);
+        const text = i18n.t("# 标题");
+        legacy._preInputText(text, 2, text.length);
     };
     legacy._insertMore = function _insertMore() {
         legacy._preInputText('<!--more-->', 11, 11);
