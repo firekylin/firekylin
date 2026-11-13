@@ -243,7 +243,7 @@ importers:
         version: 2.6.0
       files-sdk:
         specifier: ^3.1.0
-        version: 3.1.0(@aws-sdk/client-s3@3.1150.0)(@aws-sdk/s3-presigned-post@3.1150.0)(@aws-sdk/s3-request-presigner@3.1150.0)(@vercel/blob@2.8.1)(hono@4.13.13)(koa@3.2.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.7)
+        version: 3.1.0(@aws-sdk/client-s3@3.1150.0)(@aws-sdk/s3-presigned-post@3.1150.0)(@aws-sdk/s3-request-presigner@3.1150.0)(@vercel/blob@2.8.1)(hono@4.13.18)(koa@3.2.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.7)
       fs-extra:
         specifier: ^11.4.1
         version: 11.4.1
@@ -3326,8 +3326,8 @@ packages:
   hmacsha1@1.0.0:
     resolution: {integrity: sha512-4FP6J0oI8jqb6gLLl9tSwVdosWJ/AKSGJ+HwYf6Ixe4MUcEkst4uWzpVQrNOCin0fzTRQbXV8ePheU8WiiDYBw==}
 
-  hono@4.13.13:
-    resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
+  hono@4.13.18:
+    resolution: {integrity: sha512-H9q/E1XizaWstJxUW881dmLxEj+t/TrGGnyxINkm4+sK0qUwsMtFdo2BWI9Vs3cIS19MU6b6iCijoUoEf4f3DA==}
     engines: {node: '>=16.9.0'}
 
   hookified@1.15.1:
@@ -5823,9 +5823,9 @@ snapshots:
     optionalDependencies:
       '@noble/hashes': 1.8.0
 
-  '@hono/node-server@2.1.4(hono@4.13.13)':
+  '@hono/node-server@2.1.4(hono@4.13.18)':
     dependencies:
-      hono: 4.13.13
+      hono: 4.13.18
     optional: true
 
   '@humanfs/core@0.19.2':
@@ -6086,7 +6086,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.32.1(zod@4.6.7)':
     dependencies:
-      '@hono/node-server': 2.1.4(hono@4.13.13)
+      '@hono/node-server': 2.1.4(hono@4.13.18)
       ajv: 8.20.0
       ajv-formats: 3.0.1
       content-type: 1.0.5
@@ -6096,7 +6096,7 @@ snapshots:
       eventsource-parser: 3.1.1
       express: 5.3.0
       express-rate-limit: 8.7.1(express@5.3.0)
-      hono: 4.13.13
+      hono: 4.13.18
       jose: 6.2.12
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -7908,7 +7908,7 @@ snapshots:
     dependencies:
       flat-cache: 6.1.23
 
-  files-sdk@3.1.0(@aws-sdk/client-s3@3.1150.0)(@aws-sdk/s3-presigned-post@3.1150.0)(@aws-sdk/s3-request-presigner@3.1150.0)(@vercel/blob@2.8.1)(hono@4.13.13)(koa@3.2.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.7):
+  files-sdk@3.1.0(@aws-sdk/client-s3@3.1150.0)(@aws-sdk/s3-presigned-post@3.1150.0)(@aws-sdk/s3-request-presigner@3.1150.0)(@vercel/blob@2.8.1)(hono@4.13.18)(koa@3.2.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.7):
     dependencies:
       aws4fetch: 1.0.20
       commander: 15.0.0
@@ -7923,7 +7923,7 @@ snapshots:
       '@aws-sdk/s3-request-presigner': 3.1150.0
       '@modelcontextprotocol/sdk': 1.32.1(zod@4.6.7)
       '@vercel/blob': 2.8.1
-      hono: 4.13.13
+      hono: 4.13.18
       koa: 3.2.1
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
@@ -8111,7 +8111,7 @@ snapshots:
 
   hmacsha1@1.0.0: {}
 
-  hono@4.13.13:
+  hono@4.13.18:
     optional: true
 
   hookified@1.15.1: {}
