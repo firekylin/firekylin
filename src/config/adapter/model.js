@@ -1,6 +1,5 @@
 const mysql = require('think-model-mysql2');
 const pgsql = require('think-model-postgresql');
-const sqlite = require('think-model-sqlite');
 const {getContext} = require('../../../lib/project-context');
 
 const isDev = think.env === 'development';
@@ -75,10 +74,11 @@ module.exports = {
     port: msc.port,
     prefix: msc.prefix,
     connectionLimit: 1,
+    max: msc.max ?? 1,
     ssl: msc.ssl ? { rejectUnauthorized: false } : false,
   },
   sqlite: {
-    handle: sqlite,
+    handle: type === 'sqlite' ? require('think-model-sqlite') : undefined,
     path: process.env.FIREKYLIN_PROJECT_PATH && msc.path
       ? require('path').dirname(require('path').resolve(process.env.FIREKYLIN_PROJECT_PATH, msc.path))
       : msc.path,
