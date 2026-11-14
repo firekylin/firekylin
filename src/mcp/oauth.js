@@ -64,22 +64,26 @@ function registrationAllowed(uris) {
     new Set(uris).size === uris.length;
 }
 
-function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => adminAuth.currentUser(ctx)}) {
+function buildOAuthHandler({
+  origin, store, getUser, getCurrentUser = ctx => adminAuth.currentUser(ctx),
+  resourcePath = '/mcp', endpointPrefix = '/oauth', metadataSuffix = '',
+  supportedScopes = allowedScopes, scopePolicy = authorizable
+}) {
   // Best-effort local abuse limit; deploy behind a shared/proxy rate limiter as well.
   const registrations = new Map();
-  const resource = origin + '/mcp';
+  const resource = origin + resourcePath;
   const issuer = origin;
   const metadata = {
-    issuer, authorization_endpoint: origin + '/oauth/authorize',
-    token_endpoint: origin + '/oauth/token',
-    registration_endpoint: origin + '/oauth/register',
-    revocation_endpoint: origin + '/oauth/revoke',
+    issuer, authorization_endpoint: origin + endpointPrefix + '/authorize',
+    token_endpoint: origin + endpointPrefix + '/token',
+    registration_endpoint: origin + endpointPrefix + '/register',
+    revocation_endpoint: origin + endpointPrefix + '/revoke',
     response_types_supported: ['code'],
     grant_types_supported: ['authorization_code', 'refresh_token'],
     token_endpoint_auth_methods_supported: ['none'],
     code_challenge_methods_supported: ['S256'],
     authorization_response_iss_parameter_supported: true,
-    scopes_supported: [...allowedScopes],
+    scopes_supported: [...supportedScopes],
     registration_endpoint_auth_methods_supported: ['none']
   };
 
@@ -97,17 +101,18 @@ function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => admi
   }
 
   return async function oauth(ctx, next) {
-    const pathname = ctx.path;
-    if (pathname === '/.well-known/oauth-protected-resource' ||
-        pathname === '/.well-known/oauth-protected-resource/mcp') {
+    const pathname = ctx.path.startsWith(endpointPrefix + '/')
+      ? '/oauth/' + ctx.path.slice(endpointPrefix.length + 1) : ctx.path;
+    if ((!metadataSuffix && pathname === '/.well-known/oauth-protected-resource') ||
+        pathname === '/.well-known/oauth-protected-resource' + resourcePath) {
       if (ctx.method !== 'GET') return oauthError(ctx, 'invalid_request', 405);
       return json(ctx, {
         resource, authorization_servers: [issuer],
         bearer_methods_supported: ['header'],
-        scopes_supported: [...allowedScopes]
+        scopes_supported: [...supportedScopes]
       });
     }
-    if (pathname === '/.well-known/oauth-authorization-server') {
+    if (pathname === '/.well-known/oauth-authorization-server' + metadataSuffix) {
       if (ctx.method !== 'GET') return oauthError(ctx, 'invalid_request', 405);
       return json(ctx, metadata);
     }
@@ -169,7 +174,7 @@ function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => admi
         return;
       }
       const user = await getUser(Number(identity.id));
-      if (!user || Number(user.status) !== 1 || !authorizable(scopes, user)) {
+      if (!user || Number(user.status) !== 1 || !scopePolicy(scopes, user)) {
         return oauthError(ctx, 'access_denied', 403);
       }
       if (ctx.method === 'GET') {
@@ -243,7 +248,7 @@ function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => admi
         const used = await store.consume('code', data.code);
         if (!used) return oauthError(ctx, 'invalid_grant');
         const user = await getUser(Number(row.user_id));
-        if (!user || Number(user.status) !== 1 || !authorizable(scopeList(row.scopes), user)) {
+        if (!user || Number(user.status) !== 1 || !scopePolicy(scopeList(row.scopes), user)) {
           return oauthError(ctx, 'invalid_grant');
         }
         return issueTokens(ctx, {userId: Number(row.user_id), clientId, scopes: scopeList(row.scopes)});
@@ -255,7 +260,7 @@ function buildOAuthHandler({origin, store, getUser, getCurrentUser = ctx => admi
         if (!consumed) return oauthError(ctx, 'invalid_grant');
         const user = await getUser(Number(row.user_id));
         if (!user || Number(user.status) !== 1 ||
-            !authorizable(scopeList(row.scopes), user)) return oauthError(ctx, 'invalid_grant');
+            !scopePolicy(scopeList(row.scopes), user)) return oauthError(ctx, 'invalid_grant');
         return issueTokens(ctx, {userId: Number(row.user_id), clientId, scopes: scopeList(row.scopes)});
       }
       return oauthError(ctx, 'unsupported_grant_type');
