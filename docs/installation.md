@@ -77,3 +77,13 @@ npx firekylin new existing-blog --skip-initialize --db-type postgresql
 旧源码布局仍保留 `production.js`、`development.js` 和网页安装流程。已有部署应先确认目录布局再升级，不能直接套用独立项目的路径。后台多实例认证和旧密钥迁移见 [JWT 认证](admin-jwt.md)。
 
 核心开发请按照仓库 `package.json` 的 `packageManager` 安装工具，使用 `pnpm install --frozen-lockfile`、`pnpm run build`，再运行 `pnpm start`。安装的 npm 版本与仓库源码可能不同，先用 `npx --no-install firekylin --version` 和 `--help` 核对所用 CLI。
+
+### 单进程体验环境中的插件安装
+
+明确由单个进程处理全部请求的体验环境（例如 Playground）可以设置
+`FIREKYLIN_PLUGIN_LIVE_INSTALL=1`。首次安装的 npm 插件会通过现有插件管理器加载并激活，
+无需重启服务；数据库、登录状态和已加载插件不受重启影响。已禁用的插件保持禁用。
+
+此选项默认关闭，不适用于多实例部署。ThinkJS cluster、带 IPC 的进程和 Vercel 环境
+不会使用动态安装。已有插件升级、卸载和动态激活失败仍沿用原有重启提示或 worker 重启流程。
+动态加载不会补发启动时的 `app.ready` 事件；插件应在 `register` / `activate` 中完成自身初始化。
