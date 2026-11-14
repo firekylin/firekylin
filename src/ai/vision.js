@@ -1,7 +1,5 @@
 'use strict';
 
-const sharp = require('sharp');
-
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
 const MAX_IMAGES = 12;
@@ -32,7 +30,7 @@ function decode(value) {
 async function normalizeImage(value) {
   const buffer = decode(value);
   try {
-    const image = sharp(buffer, {failOn: 'warning', limitInputPixels: 16777216, animated: true});
+    const image = require('sharp')(buffer, {failOn: 'warning', limitInputPixels: 16777216, animated: true});
     const metadata = await image.metadata();
     if (metadata.format !== FORMATS[value.mimeType] || (metadata.pages || 1) !== 1
         || !metadata.width || !metadata.height || metadata.width > 4096 || metadata.height > 4096) {
