@@ -17,6 +17,7 @@ const pack = require('../../package.json');
 const {PackageCatalog} = require('../service/package-catalog');
 const {ThemeInstaller} = require('../service/theme-installer');
 const {PluginInstaller} = require('../service/plugin-installer');
+const {installPlugin} = require('../service/plugin-live-install');
 const {AIStore} = require('../ai/store');
 const {Audit} = require('../service/ai-audit');
 
@@ -76,7 +77,7 @@ const packageApi = {
     firekylinVersion: pack.version}).check(manifest),
   installPlugin: async(name, version) => {
     await requireLocalPackageManagement();
-    return packageRuntime.pluginInstaller.install(name, version);
+    return installPlugin(packageRuntime.pluginInstaller, global.firekylin.plugins, name, version);
   },
   uninstallPlugin: async name => {
     await requireLocalPackageManagement();
