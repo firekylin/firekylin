@@ -6,6 +6,7 @@ const adminAuth = require('../../../service/admin-auth');
 const {PackageCatalog, installedPluginId} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
 const {PluginInstaller, validatePackage} = require('../../../service/plugin-installer');
+const {installPlugin, activateInstalledPlugin} = require('../../../service/plugin-live-install');
 const {schedulePluginReload} = require('../../../service/plugin-reload');
 const {readSettings, fetchBuffer, fetchRegistry} = require('../../../service/extension-registry');
 const crypto = require('crypto');
@@ -155,7 +156,8 @@ module.exports = class extends Base {
           if (!stat?.isFile()) throw new Error('PLUGIN_ENTRY_MISSING');
         }
         await manager.stateStore.set(id, enabled);
-        return this.pluginChanged();
+        const result = enabled ? await activateInstalledPlugin(manager, matches[0].root) : {};
+        return this.pluginChanged(result);
       }
       if (operation === 'plugin.delete-local') {
         if (!connection && process.env.VERCEL) throw new Error('PACKAGE_INSTALLATION_READ_ONLY');
@@ -200,10 +202,14 @@ module.exports = class extends Base {
         if (connection) return this.success(await dispatch({
           operation: updating ? 'plugin.update' : 'plugin.install', name, version
         }));
-        return this.pluginChanged(await this.pluginInstaller().install(name, version));
+        return this.pluginChanged(await installPlugin(
+          this.pluginInstaller(), global.firekylin?.plugins, name, version
+        ));
       }
       if (operation === 'plugin.install') {
-        return this.pluginChanged(await this.pluginInstaller().install(this.post('name'), this.post('version')));
+        return this.pluginChanged(await installPlugin(
+          this.pluginInstaller(), global.firekylin?.plugins, this.post('name'), this.post('version')
+        ));
       }
       if (operation === 'plugin.uninstall') {
         const plugin = this.catalog().plugins().find(item => item.name === this.post('name'));
@@ -225,6 +231,7 @@ module.exports = class extends Base {
   }
 
   pluginChanged(result = {}) {
+    if (result.restartRequired === false) return this.success(result);
     return this.success({...result, ...schedulePluginReload(this.ctx?.res)});
   }
 
