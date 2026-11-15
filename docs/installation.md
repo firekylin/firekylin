@@ -80,7 +80,7 @@ npx firekylin new existing-blog --skip-initialize --db-type postgresql
 
 ### 新插件安装后立即生效
 
-直接运行的单进程环境（例如 Playground）和 ThinkJS `workers: 1` 模式自动加载并激活首次安装的 npm 插件，无需设置额外环境变量。已禁用的插件保持禁用。
+直接运行的单进程环境（例如 Playground）和 ThinkJS `workers: 1` 模式支持新插件免重启启用，无需设置额外环境变量。新插件安装后默认禁用，管理员明确点击启用后才加载并激活；已有启用状态的新安装插件可以直接激活。已禁用的插件不会因安装而自动启用。
 
 多个 worker、通用 IPC、PM2 和 Vercel 环境保留原有重启流程。已有插件升级、卸载和动态激活失败也仍沿用原有重启提示或 worker 重启流程。
 动态加载不会补发启动时的 `app.ready` 事件；插件应在 `register` / `activate` 中完成自身初始化。

@@ -78,3 +78,56 @@ test('one connected ThinkJS worker activates without an environment switch', asy
   assert.equal((await installPlugin(installer, manager, 'live-demo', '1.0.0', options)).restartRequired, false);
   assert.equal(manager.plugins.get('live-demo').status, 'active');
 });
+
+test('real state store keeps installation disabled until explicit marketplace enable', async t => {
+  const {PluginStateStore} = require('../../src/plugin/state-store');
+  const {manager, installer, options} = await fixture(t);
+  const values = new Map();
+  manager.stateStore = new PluginStateStore({
+    getCredentialValue: async key => values.get(key),
+    setCredentialValue: async(key, value) => values.set(key, value)
+  });
+  await installPlugin(installer, manager, 'live-demo', '1.0.0', options);
+  assert.equal(await manager.stateStore.enabled('live-demo'), false);
+  assert.equal(manager.plugins.size, 0);
+  const previous = global.firekylin;
+  const previousThink = global.think;
+  global.think = {...global.think, Controller: class {}};
+  const Controller = require('../../src/controller/admin/api/marketplace');
+  global.firekylin = {plugins: manager};
+  t.after(() => {
+    global.firekylin = previous;
+    global.think = previousThink;
+  });
+  const controller = Object.create(Controller.prototype);
+  controller.githubConnection = async() => null;
+  controller.post = key => ({id: 'live-demo'})[key];
+  controller.catalog = () => ({check: () => ({compatible: true})});
+  controller.success = data => data;
+  controller.fail = message => { throw new Error(message); };
+  const result = await controller.mutate('plugin.enable');
+  assert.equal(result.restartRequired, false);
+  assert.equal(await manager.stateStore.enabled('live-demo'), true);
+  assert.equal(manager.routes.match('GET', '/api/plugins/live-demo/hello').handler(), 'hello');
+});
+
+test('pnpm symlink installation produces a single active catalog entry', async t => {
+  const {PackageCatalog} = require('../../src/service/package-catalog');
+  const {manager, installer, options} = await fixture(t);
+  const install = installer.install;
+  installer.install = async() => {
+    const result = await install();
+    const link = path.join(manager.projectPath, 'node_modules/live-demo');
+    const real = path.join(manager.projectPath, 'node_modules/.pnpm/live-demo');
+    fs.mkdirSync(path.dirname(real), {recursive: true});
+    fs.renameSync(link, real);
+    fs.symlinkSync(real, link, 'dir');
+    return result;
+  };
+  assert.equal((await installPlugin(installer, manager, 'live-demo', '1.0.0', options)).restartRequired, false);
+  const catalog = new PackageCatalog({pluginManager: manager, firekylinVersion: '2.19.0'});
+  const entries = catalog.plugins().filter(item => item.name === 'live-demo');
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].status, 'active');
+  assert.equal(manager.plugins.get('live-demo').root, manager.discover()[0]);
+});

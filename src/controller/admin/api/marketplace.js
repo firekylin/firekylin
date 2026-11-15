@@ -6,7 +6,7 @@ const adminAuth = require('../../../service/admin-auth');
 const {PackageCatalog, installedPluginId} = require('../../../service/package-catalog');
 const {ThemeInstaller} = require('../../../service/theme-installer');
 const {PluginInstaller, validatePackage} = require('../../../service/plugin-installer');
-const {installPlugin} = require('../../../service/plugin-live-install');
+const {installPlugin, activateInstalledPlugin} = require('../../../service/plugin-live-install');
 const {schedulePluginReload} = require('../../../service/plugin-reload');
 const {readSettings, fetchBuffer, fetchRegistry} = require('../../../service/extension-registry');
 const crypto = require('crypto');
@@ -156,7 +156,8 @@ module.exports = class extends Base {
           if (!stat?.isFile()) throw new Error('PLUGIN_ENTRY_MISSING');
         }
         await manager.stateStore.set(id, enabled);
-        return this.pluginChanged();
+        const result = enabled ? await activateInstalledPlugin(manager, matches[0].root) : {};
+        return this.pluginChanged(result);
       }
       if (operation === 'plugin.delete-local') {
         if (!connection && process.env.VERCEL) throw new Error('PACKAGE_INSTALLATION_READ_ONLY');
