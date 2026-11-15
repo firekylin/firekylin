@@ -30,7 +30,7 @@ async function fixture(t, {enabled = true, broken = false} = {}) {
     `);
     return {restartRequired: true};
   }};
-  const options = {runtime: {env: {FIREKYLIN_PLUGIN_LIVE_INSTALL: '1'}}, worker: false};
+  const options = {runtime: {env: {}}, worker: false};
   return {manager, installer, options};
 }
 
@@ -56,10 +56,10 @@ test('broken plugin retains restart guidance after successful installation', asy
   assert.equal((await installPlugin(installer, manager, 'live-demo', '1.0.0', options)).restartRequired, true);
 });
 
-for (const mode of ['default', 'worker', 'ipc', 'vercel', 'workers']) {
+for (const mode of ['worker', 'ipc', 'vercel', 'workers', 'pm2']) {
   test(`${mode} runtime retains existing restart behavior`, async t => {
     const {manager, installer, options} = await fixture(t);
-    if (mode === 'default') options.runtime.env = {};
+    if (mode === 'pm2') options.runtime.env.NODE_APP_INSTANCE = '0';
     if (mode === 'worker') options.worker = true;
     if (mode === 'ipc') options.runtime.send = () => {};
     if (mode === 'vercel') options.runtime.env.VERCEL = '1';
@@ -68,3 +68,13 @@ for (const mode of ['default', 'worker', 'ipc', 'vercel', 'workers']) {
     assert.equal(manager.plugins.size, 0);
   });
 }
+
+test('one connected ThinkJS worker activates without an environment switch', async t => {
+  const {manager, installer, options} = await fixture(t);
+  options.worker = true;
+  options.runtime.env.THINK_WORKERS = '1';
+  options.runtime.connected = true;
+  options.runtime.send = () => {};
+  assert.equal((await installPlugin(installer, manager, 'live-demo', '1.0.0', options)).restartRequired, false);
+  assert.equal(manager.plugins.get('live-demo').status, 'active');
+});

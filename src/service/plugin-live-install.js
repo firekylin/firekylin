@@ -3,12 +3,13 @@
 const cluster = require('node:cluster');
 const {readManifest} = require('../plugin/manager');
 
-// Explicit opt-in: a local activation cannot synchronize multiple server processes.
+// Activate locally only when this is the sole request-serving process.
 async function installPlugin(installer, manager, name, version, {
   runtime = process, worker = cluster.isWorker, logger = global.think?.logger
 } = {}) {
-  const live = runtime.env.FIREKYLIN_PLUGIN_LIVE_INSTALL === '1' &&
-    !runtime.env.VERCEL && !runtime.env.THINK_WORKERS && !worker && !runtime.send;
+  const standalone = !worker && !runtime.send && !runtime.env.THINK_WORKERS;
+  const singleWorker = worker && runtime.env.THINK_WORKERS === '1' && runtime.connected === true;
+  const live = !runtime.env.VERCEL && !runtime.env.NODE_APP_INSTANCE && (standalone || singleWorker);
   let fresh = false;
   if (live && manager) {
     // Inspect before mutation: upgrades must never replace a running module in place.
