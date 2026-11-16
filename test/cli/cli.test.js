@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
+const {createRequire} = require('node:module');
 const packageInfo = require('../../package.json');
 const {build: buildVercelStatic} = require('../../lib/vercel-static');
 const {PasswordHash} = require('phpass');
@@ -135,6 +136,26 @@ test('hashes administrator passwords in the same format as the browser login', (
     .digest('hex');
   assert.equal(new PasswordHash().checkPassword(browserPassword, stored), true);
   assert.equal(new PasswordHash().checkPassword('secret-password', stored), false);
+});
+
+test('reinitializing a migrated database keeps the welcome article searchable', async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'firekylin-search-install-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  const config = projectConfig(options());
+  const site = {
+    title: 'Synthetic Test', siteUrl: 'https://example.invalid', username: 'admin',
+    password: 'synthetic-password', email: 'admin@example.invalid'
+  };
+  await initialize(root, config, site);
+  const SQLite = createRequire(require.resolve('think-model-sqlite'))('better-sqlite3');
+  const db = new SQLite(path.join(root, config.database.path));
+  t.after(() => db.close());
+  db.exec('ALTER TABLE fk_post ADD COLUMN is_password_protected INTEGER DEFAULT NULL');
+  db.exec('DELETE FROM fk_post WHERE pathname = \'hello-world-via-firekylin\'');
+  await initialize(root, config, site);
+  const welcome = db.prepare('SELECT is_password_protected FROM fk_post WHERE pathname = \'hello-world-via-firekylin\'')
+    .get();
+  assert.equal(welcome.is_password_protected, 0);
 });
 
 test('scaffolds an isolated project and only resumes marked directories', t => {

@@ -57,7 +57,8 @@ class PostQueryService {
 
   async searchPublic({query, limit = 10}) {
     const posts = await this.getModel().where(this.publicWhere({
-      'title|content': ['LIKE', '%' + query + '%']
+      'title|content': ['LIKE', '%' + query + '%'],
+      is_password_protected: 0
     })).field('id,title,pathname,summary,create_time,update_time,options')
       .setRelation(false)
       .order('create_time DESC')

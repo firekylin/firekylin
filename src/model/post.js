@@ -1,6 +1,7 @@
 const {renderMarkdown} = require('../service/markdown');
 const Base = require('./base');
 const {emit, filter} = require('../plugin/runtime');
+const {passwordProtectionState} = require('../service/post-protection-state');
 
 function redactProtectedPosts(posts) {
   return posts.map(post => {
@@ -120,6 +121,22 @@ module.exports = class extends Base {
       .setRelation(false)
       .order('create_time DESC')
       .select();
+  }
+
+  beforeAdd(data) {
+    data.is_password_protected = passwordProtectionState(data.options);
+    return data;
+  }
+
+  beforeUpdate(data) {
+    // Never accept a caller-supplied search flag or reset it during unrelated
+    // updates. Changing options and its derived flag must be one atomic write.
+    if (Object.hasOwn(data, 'options')) {
+      data.is_password_protected = passwordProtectionState(data.options);
+    } else {
+      delete data.is_password_protected;
+    }
+    return data;
   }
 
   async afterUpdate(data, options) {
@@ -518,7 +535,10 @@ module.exports = class extends Base {
    * @return {[type]}         [description]
    */
   async getPostSearch(keyword, page) {
-    let where = {'title|content': ['LIKE', `%${keyword}%`]};
+    let where = {
+      'title|content': ['LIKE', `%${keyword}%`],
+      is_password_protected: 0
+    };
     where = this.getWhereCondition(where);
     const result = await this.where(where)
       .page(page, await this.getPostsListSize())
