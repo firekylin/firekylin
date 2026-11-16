@@ -16,11 +16,13 @@ export const InitiateThemePages = [
 ];
 
 export const InitiateRoutes = (themePages) => [{
+        id: 'dashboard',
         url: '/dashboard',
         icon: 'home',
         title: '站点概览'
     },
     {
+        id: 'post',
         url: '/post',
         icon: FileTextOutlined,
         title: '文章管理',
@@ -34,6 +36,7 @@ export const InitiateRoutes = (themePages) => [{
         ]
     },
     {
+        id: 'page',
         url: '/page',
         icon: 'reply',
         title: '页面管理',
@@ -49,17 +52,20 @@ export const InitiateRoutes = (themePages) => [{
         ]
     },
     {
+        id: 'comment',
         url: '/comment',
         icon: 'topic',
         title: '评论管理',
         type: 2
     },
     {
+        id: 'media',
         url: '/media',
         icon: 'image',
         title: '媒体管理'
     },
     {
+        id: 'user',
         url: '/user',
         icon: 'user',
         title: '用户管理',
@@ -79,6 +85,7 @@ export const InitiateRoutes = (themePages) => [{
         ]
     },
     {
+        id: 'push',
         url: '/push',
         icon: 'share-v',
         title: '推送管理',
@@ -94,11 +101,13 @@ export const InitiateRoutes = (themePages) => [{
         ]
     },
     {
+        id: 'plugin-management',
         url: '/plugin-management', icon: ApiOutlined, title: '插件管理', type: 1,
         children: [{url: '/plugin-management', title: '已安装插件'},
             {url: '/plugin-management/install', title: '安装插件'}]
     },
     {
+        id: 'appearance',
         url: '/appearance',
         icon: 'list',
         title: '外观设置',
@@ -106,6 +115,7 @@ export const InitiateRoutes = (themePages) => [{
         children: themePages
     },
     {
+        id: 'options',
         url: '/options',
         icon: 'setting',
         title: '系统设置',
@@ -161,6 +171,7 @@ export const InitiateRoutes = (themePages) => [{
         ]
     },
     {
+        id: 'tools',
         url: '/tools',
         icon: ToolOutlined,
         title: '管理工具',

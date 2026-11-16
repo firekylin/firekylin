@@ -172,3 +172,33 @@ test('standalone pages are routable without a panel and can own forms', async() 
   assert.deepEqual((await admin.loadPage('example', 'preferences', {})).content, {});
   assert.deepEqual(await admin.submitForm('example', 'form', {value: 'ok'}, {}), {value: 'ok'});
 });
+
+test('registers built-in tools pages without a plugin panel and validates targets', () => {
+  const admin = new AdminRegistry();
+  const unregister = admin.registerPage({id: 'import', title: 'Import', builtinPanel: 'tools'}, 'importer');
+  admin.registerPage({id: 'hidden', title: 'Hidden', builtinPanel: 'tools', menu: false}, 'importer');
+  const manifest = admin.manifest()[0];
+  assert.deepEqual(manifest.panels, []);
+  assert.equal(manifest.pages[0].builtinPanel, 'tools');
+  assert.notEqual(manifest.pages[0].menu, false);
+  assert.equal(manifest.pages[1].menu, false);
+  assert.throws(() => admin.registerPage({id: 'bad', title: 'Bad', builtinPanel: 'missing'}), /Unknown built-in/);
+  admin.registerPanel({id: 'tools', title: 'Plugin tools'}, 'importer');
+  assert.throws(() => admin.registerPage({
+    id: 'both', title: 'Both', panel: 'tools', builtinPanel: 'tools'
+  }, 'importer'), /both/);
+  unregister();
+  assert.equal(admin.manifest()[0].pages.length, 1);
+});
+
+test('accepts every built-in sidebar target', () => {
+  const admin = new AdminRegistry();
+  const targets = [
+    'dashboard', 'post', 'page', 'comment', 'media', 'user', 'push',
+    'plugin-management', 'appearance', 'options', 'tools'
+  ];
+  for (const builtinPanel of targets) {
+    admin.registerPage({id: builtinPanel, title: builtinPanel, builtinPanel}, 'example');
+  }
+  assert.deepEqual(admin.manifest()[0].pages.map(page => page.builtinPanel), targets);
+});

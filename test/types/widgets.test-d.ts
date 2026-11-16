@@ -70,3 +70,15 @@ imageContext.streamResponse(new Response(''));
 imageContext.streamResponse(new Response(''), 'anthropic');
 // @ts-expect-error async parsers do not own the stream lifecycle
 imageContext.streamResponse(new Response(''), {format: 'sse', parse: async () => ({done: true})});
+
+const builtinToolsPage: Firekylin.AdminPageDefinition = {
+  id: 'import',
+  title: 'Comment import',
+  builtinPanel: 'tools'
+};
+const invalidBuiltinPage: Firekylin.AdminPageDefinition = {
+  id: 'invalid',
+  title: 'Invalid',
+  // @ts-expect-error Unknown built-in panels must be rejected.
+  builtinPanel: 'missing'
+};

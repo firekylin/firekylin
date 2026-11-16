@@ -31,6 +31,7 @@ function publicPage(page) {
     id: page.id,
     title: page.title,
     panel: page.panel,
+    ...(page.builtinPanel ? {builtinPanel: page.builtinPanel} : {}),
     description: page.description,
     order: page.order,
     ...(page.menu === false ? {menu: false} : {})
@@ -187,16 +188,27 @@ class AdminRegistry {
     const id = identifier(definition.id, 'Admin page id');
     const panel = definition.panel === undefined ? undefined : identifier(definition.panel, `Admin page ${id} panel`);
     if (panel && !this.panels.has(this.key(pluginId, panel))) throw new Error(`Unknown admin panel: ${panel}`);
+    const builtinPanel = definition.builtinPanel;
+    if (builtinPanel !== undefined && ![
+      'dashboard', 'post', 'page', 'comment', 'media', 'user', 'push',
+      'plugin-management', 'appearance', 'options', 'tools'
+    ].includes(builtinPanel)) {
+      throw new TypeError(`Unknown built-in admin panel: ${builtinPanel}`);
+    }
+    if (panel && builtinPanel) {
+      throw new TypeError('Admin page cannot specify both panel and builtinPanel');
+    }
     const key = this.key(pluginId, id);
     if (this.pages.has(key)) throw new Error(`Admin page already registered: ${id}`);
     const page = {
       pluginId,
       id,
       panel,
+      builtinPanel,
       title: requiredString(definition.title, `Admin page ${id} title`),
       description: typeof definition.description === 'string' ? definition.description : undefined,
       order: Number.isFinite(definition.order) ? definition.order : 100,
-      menu: Boolean(panel) && definition.menu !== false,
+      menu: Boolean(panel || builtinPanel) && definition.menu !== false,
       load: typeof definition.load === 'function' ? definition.load : async() => ({})
     };
     this.pages.set(key, page);
