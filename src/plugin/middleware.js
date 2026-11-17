@@ -41,7 +41,9 @@ async function handleAdminExtension(manager, ctx) {
   return auditContext.run(store, async() => {
     let result;
     if (resource === 'pages' && ctx.method === 'GET') {
-      result = await manager.admin.loadPage(pluginId, resourceId, context);
+      result = await manager.admin.loadPage(pluginId, resourceId, context, {
+        includeForms: ctx.query?.includeForms === '1'
+      });
     }
     if (resource === 'forms' && ctx.method === 'GET') {
       result = await manager.admin.loadForm(pluginId, resourceId, context);

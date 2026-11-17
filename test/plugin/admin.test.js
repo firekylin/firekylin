@@ -172,3 +172,35 @@ test('standalone pages are routable without a panel and can own forms', async() 
   assert.deepEqual((await admin.loadPage('example', 'preferences', {})).content, {});
   assert.deepEqual(await admin.submitForm('example', 'form', {value: 'ok'}, {}), {value: 'ok'});
 });
+
+test('page bundles load current page forms with the same request context and preserve existing value filtering', async() => {
+  const admin = new AdminRegistry();
+  registerExample(admin);
+  const context = {ctx: {query: {id: 'record-2'}}, user: {id: 1}};
+  admin.registerPage({id: 'other', title: 'Other'}, 'example');
+  admin.registerForm({id: 'other', page: 'other', title: 'Other', fields: [{name: 'value', label: 'Value'}],
+    load: () => { throw new Error('Other page must not be loaded'); }, submit() {}}, 'example');
+  admin.registerForm({id: 'added-after-login', page: 'settings', title: 'Added',
+    fields: [{name: 'id', label: 'ID'}, {name: 'token', label: 'Token', type: 'password'}],
+    load: async received => {
+      assert.equal(received, context);
+      return {id: received.ctx.query.id, token: 'secret'};
+    }, submit() {}}, 'example');
+  const result = await admin.loadPage('example', 'settings', context, {includeForms: true});
+  assert.deepEqual(result.forms.map(form => form.id), ['preferences', 'added-after-login']);
+  assert.deepEqual(result.actions.map(action => action.id), ['rebuild']);
+  assert.deepEqual(result.formValues['added-after-login'], {id: 'record-2'});
+  assert.equal(result.formValues.preferences.secret, undefined);
+  assert.deepEqual(await admin.loadForm('example', 'added-after-login', context), {id: 'record-2'});
+  assert.equal((await admin.loadPage('example', 'settings', context)).forms, undefined);
+  assert.equal(await admin.loadPage('example', 'missing', context, {includeForms: true}), null);
+});
+
+test('page bundles reject failed form loads instead of returning writable empty settings', async() => {
+  const admin = new AdminRegistry();
+  registerExample(admin);
+  admin.registerForm({id: 'broken', page: 'settings', title: 'Broken',
+    fields: [{name: 'value', label: 'Value'}],
+    load: async() => { throw new Error('Storage unavailable'); }, submit() {}}, 'example');
+  await assert.rejects(admin.loadPage('example', 'settings', {}, {includeForms: true}), /Storage unavailable/);
+});

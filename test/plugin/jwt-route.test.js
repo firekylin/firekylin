@@ -53,7 +53,10 @@ test('declarative admin endpoints require an administrator and CSRF on writes', 
     routes: {match: () => null},
     admin: {
       manifest: () => [{id: 'demo'}],
-      async loadPage() { return {content: {}} },
+      async loadPage(pluginId, pageId, context, options) {
+        calls.push({pluginId, pageId, query: context.ctx.query, options});
+        return {content: {}};
+      },
       async loadForm() { return {} },
       async submitForm(pluginId, formId, body) { calls.push({pluginId, formId, body}); return {message: 'saved'} },
       async runAction() { return {} }
@@ -71,6 +74,15 @@ test('declarative admin endpoints require an administrator and CSRF on writes', 
   cookies.set(auth.COOKIE_NAME, auth.sign({id: 1, name: 'admin', type: 1}, secret));
   await middleware(ctx, () => {});
   assert.equal(ctx.body.data[0].id, 'demo');
+  ctx.path = '/admin/api/plugins/demo/pages/settings';
+  ctx.query = {id: '7', includeForms: '1'};
+  await middleware(ctx, () => {});
+  assert.deepEqual(calls.pop(), {pluginId: 'demo', pageId: 'settings',
+    query: {id: '7', includeForms: '1'}, options: {includeForms: true}});
+  ctx.query = {};
+  await middleware(ctx, () => {});
+  assert.deepEqual(calls.pop().options, {includeForms: false});
+
 
   ctx.method = 'POST';
   ctx.path = '/admin/api/plugins/demo/forms/settings';

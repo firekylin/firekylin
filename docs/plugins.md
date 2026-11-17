@@ -695,3 +695,15 @@ write permissions. Review and merge the PR, then deploy the site; plugin activat
 GitHub plugin dependency changes require that the website repository does not track a lockfile. If it does,
 the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
 created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.
+
+### 后台页面的聚合加载
+
+通用插件后台通过 `GET /admin/api/plugins/<plugin-id>/pages/<page-id>?includeForms=1`
+一次加载页面内容、当前已注册的 `forms`/`actions` 描述及 `formValues`（按表单 ID 索引）。
+页面查询参数也会传递给加载器，例如编辑页的 `id`。同一次请求内页面和所有表单的加载器
+共享同一个上下文对象，插件可用 `WeakMap` 按上下文复用读取 Promise，避免重复读取配置；
+不要用跨请求的全局配置缓存替代它，否则保存后可能继续显示旧值。
+
+不传 `includeForms=1` 时页面接口保持原来的 `{page, content}` 响应。
+各表单的独立 GET/POST 接口继续可用，保存仍按表单提交并执行原有的字段过滤及权限校验。
+聚合加载中任一表单读取失败会使页面加载失败，后台显示错误及重试按钮，不展示空白可保存的设置表单。

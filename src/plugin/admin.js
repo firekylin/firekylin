@@ -273,7 +273,7 @@ class AdminRegistry {
     return [...plugins.values()].filter(plugin => plugin.pages.length || plugin.forms.length || plugin.actions.length);
   }
 
-  async loadPage(pluginId, pageId, context) {
+  async loadPage(pluginId, pageId, context, {includeForms = false} = {}) {
     const page = this.pages.get(this.key(pluginId, pageId));
     if (!page) return null;
     const loaded = await page.load(context);
@@ -282,7 +282,15 @@ class AdminRegistry {
       throw new TypeError(`Admin page ${pageId} load() must return an object`);
     }
     if (typeof content.sections !== 'undefined') validateSections(content.sections, this, pluginId, pageId);
-    return {page: publicPage(page), content};
+    const result = {page: publicPage(page), content};
+    if (includeForms) {
+      const descriptor = this.manifest().find(plugin => plugin.id === pluginId);
+      result.forms = descriptor.forms.filter(form => form.page === pageId);
+      result.actions = descriptor.actions.filter(action => action.page === pageId);
+      result.formValues = Object.fromEntries(await Promise.all(result.forms.map(async form =>
+        [form.id, await this.loadForm(pluginId, form.id, context)])));
+    }
+    return result;
   }
 
   async loadForm(pluginId, formId, context) {

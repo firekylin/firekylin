@@ -2,24 +2,21 @@ import i18n from '@admin/i18n';
 import {useTranslation} from 'react-i18next';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Alert, message, Modal, Space, Spin, Typography } from 'antd';
+import { Alert, Button, message, Modal, Space, Spin, Typography } from 'antd';
 import { ActionGroup, hasLayoutReferences, PAGE_SECTION_CONTENT_INSET, PageForm, PageSections, PageSectionContext } from '../../components/protocol/page-section';
 import { http } from '../../utils/http';
 import {Redirect} from '../../utils/router';
 import BreadCrumb from '../../components/breadcrumb';
 
-function extension(pluginId: string) {
-    return (window.SysConfig.pluginAdmin || []).find(plugin => plugin.id === pluginId);
-}
-
 function PluginAdmin(props: any) {
     useTranslation('admin');
     const {pluginId, pageId} = props.match.params;
     const search = props.location.search || '';
-    const descriptor = extension(pluginId);
-    const page = descriptor && descriptor.pages.find(item => item.id === pageId);
-    const forms = descriptor ? descriptor.forms.filter(item => item.page === pageId) : [];
-    const actions = descriptor ? descriptor.actions.filter(item => item.page === pageId) : [];
+    const [pageData, setPageData] = useState<any>(null);
+    const [loadError, setLoadError] = useState('');
+    const page = pageData?.page;
+    const forms = pageData?.forms || [];
+    const actions = pageData?.actions || [];
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [formValues, setFormValues] = useState<Record<string, any>>({});
@@ -30,23 +27,35 @@ function PluginAdmin(props: any) {
         setContent(null);
         setFormValues({});
         setLoading(true);
-        if (!descriptor || !page) {
-            setLoading(false);
-            return;
-        }
-        const subscriptions = [http.get<any>(`/admin/api/plugins/${pluginId}/pages/${pageId}`).subscribe(res => {
-            if (res.errno === 0) setContent((res.data as any).content || {});
-            setLoading(false);
-        }), ...forms.map(item => http.get<any>(`/admin/api/plugins/${pluginId}/forms/${item.id}${search}`).subscribe(res => {
-            if (res.errno === 0) setFormValues(values => ({...values, [item.id]: res.data || {}}));
-        }))];
-        return () => subscriptions.forEach(subscription => subscription.unsubscribe());
+        setPageData(null);
+        setLoadError('');
+        const query = new URLSearchParams(search);
+        query.set('includeForms', '1');
+        const subscription = http.get<any>(`/admin/api/plugins/${pluginId}/pages/${pageId}?${query}`).subscribe({
+            next: res => {
+                if (res.errno === 0) {
+                    setPageData(res.data);
+                    setContent(res.data.content || {});
+                    setFormValues(res.data.formValues || {});
+                } else {
+                    setLoadError(res.errmsg || i18n.t("插件后台页面不存在或已停用"));
+                }
+                setLoading(false);
+            },
+            error: error => {
+                setLoadError(error.message || i18n.t("插件后台页面不存在或已停用"));
+                setLoading(false);
+            }
+        });
+        return () => subscription.unsubscribe();
     }, [pluginId, pageId, search, reloadKey]);
 
     if (pluginId === 'ai-content' && pageId === 'settings' && props.location.pathname.includes('/plugins/')) {
         return <Redirect to="/options/smart-content" />;
     }
-    if (!descriptor || !page) return <Alert type="error" message={i18n.t("插件后台页面不存在或已停用")} showIcon />;
+    if (loadError) return <Alert type="error" message={loadError} showIcon
+        action={<Button onClick={() => setReloadKey(key => key + 1)}>{i18n.t("重试")}</Button>} />;
+    if (!page) return <Spin spinning={loading} />;
 
     const submit = (formId: string, values: any) => http.post<any>(
         `/admin/api/plugins/${pluginId}/forms/${formId}`, values, writeConfig
