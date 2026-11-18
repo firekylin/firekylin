@@ -108,15 +108,13 @@ module.exports = class extends Base {
    */
   async serviceUpload(service, file, config) {
     try {
-      const sdkServices = ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel'];
-      const serviceName = sdkServices.includes(service) ? 'files-sdk' : service;
-      const uploader = think.service(`upload/${serviceName}`);
-      const result = await uploader.run(file, config);
-      const attachment = await this.createAttachment(result, config.file, service);
+      const {url: result, id} = await require('../../../service/media-upload').uploadMedia({
+        file: {...config.file, path: file}, config: {...config, type: service}, userId: this.userInfo.id
+      });
       // Existing upload consumers expect a URL string. Editors may opt in to
       // the attachment ID so a newly created page can retain its uploads.
       if (this.post('attachmentInfo') === '1') {
-        return this.success({url: result, id: attachment.id});
+        return this.success({url: result, id});
       }
       return this.success(result);
     } catch (e) {
@@ -125,22 +123,9 @@ module.exports = class extends Base {
       }
 
       console.log(e); // eslint-disable-line no-console
-      return this.fail(e.message || 'FILE_UPLOAD_ERROR');
+      return this.fail(e.message || 'FILE_UPLOAD_ERROR', e.code === 'MEDIA_REGISTRATION_FAILED'
+        ? {code: e.code, uploadedUrl: e.uploadedUrl, retryable: false} : undefined);
     }
-  }
-
-  /**
-   * 将上传结果登记为可复用的附件内容。保持上传接口原有的 URL 返回值，
-   * 以兼容编辑器、站点图标等现有调用方。
-   */
-  async createAttachment(url, file, storage) {
-    return require('../../../service/media-attachment').createAttachment({
-      url, file, storage, userId: this.userInfo.id
-    }, {
-      getModel: () => this.model('post'),
-      now: () => think.datetime(),
-      uuid: () => think.uuid(20)
-    });
   }
 
   /**

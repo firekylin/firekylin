@@ -63,13 +63,15 @@ test('media upload requires explicit media:write privilege', async() => {
 
 test('configured providers use their actual upload service identifiers', async() => {
   const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
-  for (const type of ['local', 'qiniu', 'upyun', 'aliyun', 'tencent', 's3', 'r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel']) {
+  for (const type of ['local', 'qiniu', 'upyun', 'aliyun', 'tencent', 's3',
+    'r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel']) {
     const registry = new ToolRegistry();
     registerMediaTools(registry, {
     createAttachment: async() => ({id: 42}),
       getUploadConfig: async() => ({type}),
       getUploader: actual => {
-        assert.equal(actual, ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel'].includes(type) ? 'files-sdk' : type);
+        assert.equal(actual, ['r2', 'minio', 'backblaze', 'wasabi', 'digitalocean', 'vercel']
+          .includes(type) ? 'files-sdk' : type);
         return {run: async() => 'uploaded'};
       }
     });
@@ -127,7 +129,7 @@ test('upload or media registration errors propagate and temporary files are remo
     });
     await assert.rejects(registry.execute('media.upload', {name: 'image', format: 'png', base64: png}, {
       principal: {id: 7, type: 2}, authorize: () => true
-    }), new RegExp(failure + ' failed'));
+    }), failure === 'upload' ? /upload failed/ : /MEDIA_REGISTRATION_FAILED/);
     assert.equal(registrations, failure === 'upload' ? 0 : 1);
     await assert.rejects(fs.access(filename), {code: 'ENOENT'});
   }

@@ -3,6 +3,7 @@
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
+const {uploadMedia} = require('../../service/media-upload');
 
 const FORMATS = {
   png: {mime: 'image/png', extension: '.png'},
@@ -73,10 +74,8 @@ function registerMediaAbilities(registry, {getUploadConfig, getUploader, createA
         const uploadConfig = {...config, name: input.name, file: {
           name: input.name + format.extension, path: filename, size: bytes.length, type: format.mime
         }};
-        const service = sdkServices.includes(config.type) ? 'files-sdk' : config.type;
-        const url = await getUploader(service).run(filename, uploadConfig);
-        await createAttachment({url, file: uploadConfig.file, storage: config.type,
-          userId: Number(context.principal.id)});
+        const {url} = await uploadMedia({file: uploadConfig.file, config: uploadConfig,
+          userId: Number(context.principal.id)}, {getUploader, createAttachment});
         return url;
       } finally {
         await fs.rm(temporary, {recursive: true, force: true});

@@ -20,6 +20,7 @@ const {PluginInstaller} = require('../service/plugin-installer');
 const {installPlugin} = require('../service/plugin-live-install');
 const {AIStore} = require('../ai/store');
 const {Audit} = require('../service/ai-audit');
+const {createPluginMediaApi} = require('../service/plugin-media');
 
 const existingPluginManager = global.firekylin && global.firekylin.plugins instanceof PluginManager
   ? global.firekylin.plugins
@@ -93,12 +94,22 @@ const packageApi = {
     return packageRuntime.themeInstaller.rollback(backup);
   }
 };
+const mediaApi = createPluginMediaApi({
+  getUploadConfig: async() => (await think.model('options').getOptions()).upload,
+  getUser: id => think.model('user').where({id}).field('id,type,status')
+    .setRelation(false)
+    .find(),
+  canOwnMedia: user => Number(user.status) === firekylin.USER_AVAILABLE &&
+    [firekylin.USER_ADMIN, firekylin.USER_EDITOR, firekylin.USER_CONTRIBUTOR].includes(Number(user.type)),
+  audit: entry => think.logger.info('[media] ' + JSON.stringify(entry))
+});
 const pluginManager = existingPluginManager || new PluginManager({
   projectPath: projectContext.projectPath,
   config: projectContext.config || {},
   version: pack.version,
   logger: console,
   packageApi,
+  mediaApi,
   getLocale: async() => {
     const {SETTINGS_KEY, decode} = require('../service/i18n-settings');
     return decode(await think.model('options').getCredentialValue(SETTINGS_KEY));
@@ -117,6 +128,7 @@ const pluginManager = existingPluginManager || new PluginManager({
   })
 });
 pluginManager.packageApi = packageApi;
+pluginManager.mediaApi = mediaApi;
 global.firekylin.plugins = pluginManager;
 registerContentAbilities(pluginManager.abilities, {
   getModel: () => think.model('post'),
