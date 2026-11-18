@@ -26,6 +26,7 @@ const existingPluginManager = global.firekylin && global.firekylin.plugins insta
   : null;
 
 global.firekylin = {
+  uploadMedia: require('../service/media-upload').uploadMedia,
   POST_PUBLIC: 1,
   POST_ALLOW_COMMENT: 1,
   POST_ARTICLE: 0,

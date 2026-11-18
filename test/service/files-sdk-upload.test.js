@@ -80,3 +80,36 @@ test('uploads local files through files-sdk and keeps the original extension', a
     await fs.rm(tempDirectory, {recursive: true});
   }
 });
+
+test('unified upload registers local audio once and retains stored bytes when registration fails', async() => {
+  const {uploadMedia} = require('../../src/service/media-upload');
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'firekylin-media-integration-'));
+  global.think.UPLOAD_PATH = path.join(root, 'stored');
+  const service = new FilesSdkUpload();
+  service.formatNow = () => '20261118';
+  let registrations = 0;
+  try {
+    for (const fail of [false, true]) {
+      const name = fail ? 'failed.ogg' : 'voice.ogg';
+      const filename = path.join(root, name);
+      await fs.writeFile(filename, 'OggS-audio');
+      const operation = uploadMedia({file: {path: filename, name, size: 10, type: 'audio/ogg'},
+        config: {type: 'local', name}, userId: 18}, {
+        getUploader: () => service,
+        createAttachment: async input => {
+          registrations++;
+          assert.equal(input.userId, 18);
+          assert.equal(input.file.type, 'audio/ogg');
+          if (fail) throw new Error('database unavailable');
+          return {id: 33};
+        }
+      });
+      if (fail) await assert.rejects(operation, {code: 'MEDIA_REGISTRATION_FAILED'});
+      else assert.deepEqual(await operation, {url: '/uploads/20261118/voice.ogg', id: 33});
+      assert.equal(await fs.readFile(path.join(root, 'stored', '20261118', name), 'utf8'), 'OggS-audio');
+    }
+    assert.equal(registrations, 2);
+  } finally {
+    await fs.rm(root, {recursive: true, force: true});
+  }
+});

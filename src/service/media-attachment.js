@@ -2,7 +2,7 @@
 
 const path = require('node:path');
 
-// Both the admin uploader and media ability must register the stored file.
+// Persist the stored file metadata supplied by the unified upload service.
 async function createAttachment({url, file, storage, userId}, {getModel, now, uuid}) {
   const timestamp = now();
   const name = file.name || path.basename(url);

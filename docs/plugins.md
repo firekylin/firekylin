@@ -695,3 +695,26 @@ write permissions. Review and merge the PR, then deploy the site; plugin activat
 GitHub plugin dependency changes require that the website repository does not track a lockfile. If it does,
 the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
 created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.
+
+### Server-side media upload
+
+Trusted plugins can feature-detect `global.firekylin.uploadMedia` and call
+`await firekylin.uploadMedia({file, config, userId})`. `file` contains `path`,
+`name`, `size`, and `type` (MIME); `config` is the site's upload configuration
+with optional `name`. The result is `{url, id}` for the stored file and its
+media attachment. Pass the authenticated/configured author's positive ID;
+there is no administrator default. Callers still enforce authorization, file
+content, type and size limits. This API supports all configured providers,
+including files-sdk; storage adapters themselves only transfer bytes.
+
+An upload failure propagates without creating an attachment. If uploading
+succeeds but registration fails, the API throws `MEDIA_REGISTRATION_FAILED`
+with `uploadedUrl`, `storage`, `retryable: false` and `cause`. The remote object
+is retained. Do not automatically replay the upload or insert: database hooks
+may fail after a commit. Inspect the URL and database before reconciling it.
+The operation is not a distributed transaction or a cross-request idempotency
+API; a new request can upload again. Existing historical files are not backfilled.
+
+This capability first ships with the release containing this change; an older
+version number alone does not establish support. Upgrade core before deploying
+plugins that require media registration.
