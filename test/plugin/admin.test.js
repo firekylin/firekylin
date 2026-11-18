@@ -24,7 +24,7 @@ function registerExample(admin) {
         visibleWhen: {field: 'color', values: ['red']}},
       {name: 'secret', type: 'password', label: '密钥'}
     ],
-    load: async() => ({id: 'record-1', enabled: true, color: 'blue', secret: 'do-not-return'}),
+    load: async() => ({id: 'record-1', enabled: true, color: 'blue', secret: 'saved-secret'}),
     submit: async values => ({saved: values})
   }, 'example');
   admin.registerAction({
@@ -50,7 +50,7 @@ test('admin registry exposes a serializable manifest and executes handlers', asy
       {type: 'actions', ids: ['rebuild']}
     ]}
   });
-  assert.deepEqual(await admin.loadForm('example', 'preferences', {}), {id: 'record-1', enabled: true, color: 'blue'});
+  assert.deepEqual(await admin.loadForm('example', 'preferences', {}), {id: 'record-1', enabled: true, color: 'blue', secret: 'saved-secret'});
   assert.deepEqual(await admin.submitForm('example', 'preferences', {
     enabled: false, color: 'blue', caption: 'discarded while hidden', injected: 'discarded'
   }, {}), {saved: {enabled: false, color: 'blue'}});
@@ -80,7 +80,7 @@ test('admin registry exposes forms and actions without a plugin page', async() =
   const admin = new AdminRegistry();
   admin.registerForm({
     id: 'settings', title: 'Settings', fields: [{name: 'key', label: 'Key', type: 'password'}],
-    load: () => ({key: 'hidden'}), submit: values => values
+    load: () => ({key: 'saved-key'}), submit: values => values
   }, 'provider');
   admin.registerAction({id: 'test', label: 'Test', handler: () => ({ok: true})}, 'provider');
   const [plugin] = admin.manifest();
@@ -88,7 +88,7 @@ test('admin registry exposes forms and actions without a plugin page', async() =
   assert.deepEqual(plugin.pages, []);
   assert.equal(plugin.forms[0].id, 'settings');
   assert.equal(plugin.actions[0].id, 'test');
-  assert.deepEqual(await admin.loadForm('provider', 'settings', {}), {});
+  assert.deepEqual(await admin.loadForm('provider', 'settings', {}), {key: 'saved-key'});
   assert.deepEqual(await admin.submitForm('provider', 'settings', {key: 'new'}, {}), {key: 'new'});
   assert.deepEqual(await admin.runAction('provider', 'test', {}, {}), {ok: true});
   admin.removePlugin('provider');
@@ -171,4 +171,33 @@ test('standalone pages are routable without a panel and can own forms', async() 
   assert.equal(descriptor.pages[0].menu, false);
   assert.deepEqual((await admin.loadPage('example', 'preferences', {})).content, {});
   assert.deepEqual(await admin.submitForm('example', 'form', {value: 'ok'}, {}), {value: 'ok'});
+});
+
+
+test('password settings load, round-trip and reload without losing saved credentials', async() => {
+  const admin = new AdminRegistry();
+  let stored = {appId: 'app-example', secret: 'saved-secret', token: '', enabled: true};
+  admin.registerForm({
+    id: 'credentials', title: 'Credentials',
+    fields: [
+      {name: 'appId', type: 'text', label: 'App ID'},
+      {name: 'secret', type: 'password', label: 'Secret'},
+      {name: 'token', type: 'password', label: 'Token'},
+      {name: 'enabled', type: 'switch', label: 'Enabled'}
+    ],
+    load: () => stored,
+    submit: values => {
+      stored = {...stored, ...values};
+      return {};
+    }
+  }, 'example');
+  const values = await admin.loadForm('example', 'credentials', {});
+  assert.deepEqual(values, stored);
+  values.enabled = false;
+  assert.equal(stored.enabled, true);
+  await admin.submitForm('example', 'credentials', values, {});
+  assert.equal(stored.secret, 'saved-secret');
+  await admin.submitForm('example', 'credentials', {...values, secret: 'updated-secret'}, {});
+  assert.equal((await admin.loadForm('example', 'credentials', {})).secret, 'updated-secret');
+  assert.equal(admin.manifest()[0].forms[0].fields[1].type, 'password');
 });
