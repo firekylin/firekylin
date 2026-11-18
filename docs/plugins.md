@@ -696,25 +696,53 @@ GitHub plugin dependency changes require that the website repository does not tr
 the operation fails rather than leaving an outdated lockfile. The CLI ignores common lockfiles in newly
 created website projects. Direct package-management APIs and theme rollback are unavailable in GitHub mode.
 
-### Server-side media upload
+### Plugin media upload
 
-Trusted plugins can feature-detect `global.firekylin.uploadMedia` and call
-`await firekylin.uploadMedia({file, config, userId})`. `file` contains `path`,
-`name`, `size`, and `type` (MIME); `config` is the site's upload configuration
-with optional `name`. The result is `{url, id}` for the stored file and its
-media attachment. Pass the authenticated/configured author's positive ID;
-there is no administrator default. Callers still enforce authorization, file
-content, type and size limits. This API supports all configured providers,
-including files-sdk; storage adapters themselves only transfer bytes.
+The host optionally supplies `ctx.media.upload({data, filename, mime, ownerId})`
+to `register(ctx)`. `data` is a nonempty Node Buffer (maximum 20 MB), `filename`
+is an original basename, `mime` a MIME type, and `ownerId` an explicit positive
+user ID. The Promise returns `{url, id}` after both storage and attachment
+registration. Plugins do not receive storage credentials or select the storage
+provider. Each call reads current site configuration and uses a unique storage
+name while retaining the original attachment filename.
 
-An upload failure propagates without creating an attachment. If uploading
-succeeds but registration fails, the API throws `MEDIA_REGISTRATION_FAILED`
-with `uploadedUrl`, `storage`, `retryable: false` and `cause`. The remote object
-is retained. Do not automatically replay the upload or insert: database hooks
-may fail after a commit. Inspect the URL and database before reconciling it.
-The operation is not a distributed transaction or a cross-request idempotency
-API; a new request can upload again. Existing historical files are not backfilled.
+The plugin must declare `media:write`. When the host supports media, the API is
+present even without that permission: a call rejects rather than pretending the
+host is old. The manager binds plugin identity and activation generation. Calls
+require an active plugin and, when configured, enabled persisted plugin state.
+The owner must exist, be enabled, and be an administrator, editor or contributor.
+This grant permits a trusted plugin to upload for eligible authors; it is not a
+per-user OAuth scope or an ownership mapping for external accounts. Derive the
+owner from protected plugin configuration or authenticated server context, never
+an unverified webhook field. Plugins must validate webhook signatures and sender
+allowlists themselves. Node plugins remain trusted code, not a security sandbox.
 
-This capability first ships with the release containing this change; an older
-version number alone does not establish support. Upgrade core before deploying
-plugins that require media registration.
+Bind the method during registration and pass it to plugin business code. No
+request user is captured in lifecycle ctx. Bytes and owner are snapshotted before
+awaits, so concurrent jobs cannot overwrite another call's identity. Checks run
+again immediately before transfer; deactivation or activation failure invalidates
+old handles, including after reactivation. Calls during register/activate itself
+are rejected until activation completes. Already-started transfers finish media
+registration after stop rather than leaving orphaned objects. No queue, durable
+idempotency, or cross-process cancellation is implied. A delayed job must supply
+its owner again and pass current checks at execution.
+
+The host validates size, filename, MIME syntax and author; it does not decode all
+media formats. Callers retain their own file-signature/type restrictions. Admin
+extension allowlists and the PNG/JPEG/GIF, 5 MB base64 `media.upload` Ability
+contract are unchanged. All paths reuse the internal media-upload service;
+storage adapters transfer bytes only. Do not call internal adapters from new plugins.
+
+An upload failure creates no attachment. If registration fails after upload,
+`MEDIA_REGISTRATION_FAILED` carries `uploadedUrl`, `storage`, `retryable: false`
+and `cause`. Do not automatically retry or delete the remote object: a database
+hook may have failed after commit. Reconcile storage and media records first.
+Host audit entries contain plugin ID, owner ID, outcome and a safe error code,
+never URLs, credentials or raw exception details. Temporary files are cleaned up.
+Historical uploads are not backfilled.
+
+Feature-detect `ctx.media`, since this capability ships with the release containing
+this change, not every package with the current version number. Existing plugins
+and ctx fields remain compatible. A legacy fallback, if needed, belongs in one
+compatibility module and must never run after an existing media API rejects.
+There is no new global.firekylin.uploadMedia API in this change.

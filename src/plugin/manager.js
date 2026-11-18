@@ -86,7 +86,7 @@ function resolveInside(root, entry, label) {
 
 class PluginManager {
   constructor({projectPath, config = {}, logger, version = '0.0.0', eventBus, packageApi,
-    aiStore, aiAudit, stateStore, getLocale = async() => 'zh-CN'} = {}) {
+    aiStore, aiAudit, stateStore, mediaApi, getLocale = async() => 'zh-CN'} = {}) {
     this.getLocale = getLocale;
     this.projectPath = projectPath || process.cwd();
     this.config = config || {};
@@ -107,6 +107,7 @@ class PluginManager {
     this.plugins = new Map();
     this.states = new Map();
     this.packageApi = packageApi;
+    this.mediaApi = mediaApi;
     this.stateStore = stateStore;
   }
 
@@ -233,8 +234,21 @@ class PluginManager {
   context(record) {
     const pluginId = record.manifest.id;
     const permissions = Array.isArray(record.manifest.permissions) ? record.manifest.permissions : [];
+    const generation = record.mediaGeneration;
+    const assertActive = async() => {
+      const valid = () => generation && record.mediaGeneration === generation && record.status === 'active' &&
+        this.plugins.get(pluginId) === record && Array.isArray(record.manifest.permissions) &&
+        record.manifest.permissions.includes('media:write');
+      if (!valid() || (this.stateStore && !await this.stateStore.enabled(pluginId)) || !valid()) {
+        throw Object.assign(new Error('Plugin media permission denied or plugin inactive'),
+          {code: 'PLUGIN_MEDIA_DENIED'});
+      }
+    };
     return Object.freeze({
       id: pluginId,
+      ...(this.mediaApi ? {media: Object.freeze({
+        upload: input => this.mediaApi.upload(input, {pluginId, assertActive})
+      })} : {}),
       withLocale: async callback => runWithLocale(await this.getLocale(), callback),
       t: (key, vars) => {
         const locale = currentLocale() || record.locale || 'zh-CN';
@@ -311,12 +325,14 @@ class PluginManager {
     if (record.status === 'active') return;
     try {
       record.locale = await this.getLocale();
+      record.mediaGeneration = Symbol('plugin media activation');
       const ctx = this.context(record);
       await record.plugin.register(ctx);
       if (typeof record.plugin.activate === 'function') await record.plugin.activate(ctx);
       record.status = 'active';
       await this.events.emit('plugin.activated', {pluginId: record.manifest.id});
     } catch (error) {
+      record.mediaGeneration = null;
       record.status = 'error';
       this.events.removePlugin(record.manifest.id);
       this.routes.removePlugin(record.manifest.id);
@@ -332,6 +348,8 @@ class PluginManager {
   async deactivate(id) {
     const record = this.plugins.get(id);
     if (!record || record.status !== 'active') return false;
+    record.mediaGeneration = null;
+    record.status = 'deactivating';
     try {
       if (typeof record.plugin.deactivate === 'function') await record.plugin.deactivate(this.context(record));
     } finally {
