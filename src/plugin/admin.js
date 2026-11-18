@@ -292,7 +292,6 @@ class AdminRegistry {
     if (!values || typeof values !== 'object' || Array.isArray(values)) {
       throw new TypeError(`Admin form ${formId} load() must return an object`);
     }
-    for (const field of form.fields) if (field.type === 'password') delete values[field.name];
     return values;
   }
 

@@ -554,6 +554,9 @@ Markdown 不接受原始 HTML；链接和图片只允许站内地址及受支持
 `url`、`radio`、`checkbox`、`color` 和 `code`。字段还可以
 声明 `description`、`placeholder`、`required`；`select`、`radio` 和 `checkbox` 必须提供 `options`。
 使用 `visibleWhen: {field: 'type', values: ['image']}` 可以仅在另一个字段匹配指定值时显示并提交该字段。
+`password` 字段会保留 `load()` 返回的实际值并回填到密码输入框，显示时由浏览器遮挡；
+宿主不会自动删除或替换为占位符。插件如需只写不读的凭据，应自行在 `load()` 中省略对应值。
+清空字段后的保存行为由插件的 `submit()` 决定。
 动作的 `type`
 支持 `default`、`primary` 和 `danger`。所有返回内容都作为数据由宿主渲染和转义。
 
