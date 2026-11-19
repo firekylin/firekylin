@@ -146,13 +146,33 @@ async function renderMarkdown(value) {
   return markdown.render(String(value));
 }
 
+function explicitCommentPath(url) {
+  const query = String(url || '').split('#', 1)[0].slice('/path'.length);
+  try {
+    // URLSearchParams tolerates malformed escapes; reject them before decoding.
+    decodeURIComponent(query.replace(/\+/g, ' '));
+    const params = new URLSearchParams(query);
+    const pathname = params.get('pathname');
+    if (params.getAll('pathname').length !== 1 || !pathname || !pathname.trim() || pathname.includes('\0')) return null;
+    const target = {pathname};
+    if (params.has('type')) {
+      const type = params.get('type');
+      if (params.getAll('type').length !== 1 || !/^(0|[1-9]\d*)$/.test(type) || !Number.isSafeInteger(Number(type))) return null;
+      target.type = Number(type);
+    }
+    return target;
+  } catch {
+    return null;
+  }
+}
+
 function pathnameFromUrl(url, options) {
   const path = String(url || '').split(/[?#]/, 1)[0];
-  const match = path.match(/^\/(post|page|says)\/(.+?)\/?$/);
+  if (path === '/path') return explicitCommentPath(url);
+  const match = path.match(/^\/(post|page)\/(.+?)\/?$/);
   if (match) {
     try {
-      // Say paths use the stored pathname verbatim; .html is a legacy post/page suffix.
-      const pathname = match[1] === 'says' ? match[2] : match[2].replace(/\.html$/, '');
+      const pathname = match[2].replace(/\.html$/, '');
       return {pathname: decodeURIComponent(pathname)};
     } catch {
       return null;
@@ -167,6 +187,8 @@ function pathnameFromUrl(url, options) {
 function commentTargets(url, options) {
   const direct = pathnameFromUrl(url, options);
   if (direct) return [direct];
+  // Invalid explicit targets must never fall back to a configured permalink.
+  if (String(url || '').split(/[?#]/, 1)[0] === '/path') return [];
   return permalink.match(String(url || '').split(/[?#]/, 1)[0], options)
     .map(candidate => candidate.params.slug ? {pathname: candidate.params.slug} : {
       id: Number(candidate.params.id) || 0

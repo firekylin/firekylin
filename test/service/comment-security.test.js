@@ -121,31 +121,31 @@ function targetController(rows, options = {}) {
 
 const published = {id: 21, type: 3, pathname: 'say-example', status: 3, is_public: 1, allow_comment: 1};
 
-test('Say pathnames use the same native target for reads and writes without a type filter', async() => {
+test('Explicit pathnames use the same native target for reads and writes without a type filter', async() => {
   const controller = targetController([published]);
   const service = new CommentService();
-  for (const url of ['/says/say-example', '/says/say-example/?page=2#comments', '/post/say-example.html']) {
+  for (const url of ['/path?pathname=say-example', '/path?pathname=say-example#comments', '/post/say-example.html']) {
     assert.equal(await resolveCommentPostId(controller, url), 21);
     assert.equal((await service.validateCommentTarget(controller, url)).id, 21);
   }
   assert.ok(controller.queries.every(query => !Object.hasOwn(query.where, 'type')));
 });
 
-test('Say paths preserve literal html suffixes and decode once without treating IDs as pathnames', async() => {
-  assert.deepEqual(pathnameFromUrl('/says/%E4%B8%AD%E6%96%87.html'), {pathname: '中文.html'});
-  assert.deepEqual(pathnameFromUrl('/says/a%252Fb'), {pathname: 'a%2Fb'});
+test('Explicit paths preserve literal html suffixes and decode once without treating IDs as pathnames', async() => {
+  assert.deepEqual(pathnameFromUrl('/path?pathname=%E4%B8%AD%E6%96%87.html'), {pathname: '中文.html'});
+  assert.deepEqual(pathnameFromUrl('/path?pathname=a%252Fb'), {pathname: 'a%2Fb'});
   const controller = targetController([published]);
-  assert.equal(await resolveCommentPostId(controller, '/says/21'), null);
-  assert.equal(await resolveCommentPostId(controller, '/says/%E4'), null);
-  await assert.rejects(new CommentService().validateCommentTarget(controller, '/says/%E4'),
+  assert.equal(await resolveCommentPostId(controller, '/path?pathname=21'), null);
+  assert.equal(await resolveCommentPostId(controller, '/path?pathname=%E4'), null);
+  await assert.rejects(new CommentService().validateCommentTarget(controller, '/path?pathname=%E4'),
     error => error.code === 'INVALID_PATH');
 });
 
 test('duplicate public pathnames reject reads and writes even across types or comment flags', async() => {
   for (const allow_comment of [0, 1]) {
     const controller = targetController([published, {...published, id: 22, type: 0, allow_comment}]);
-    assert.equal(await resolveCommentPostId(controller, '/says/say-example'), null);
-    await assert.rejects(new CommentService().validateCommentTarget(controller, '/says/say-example'),
+    assert.equal(await resolveCommentPostId(controller, '/path?pathname=say-example'), null);
+    await assert.rejects(new CommentService().validateCommentTarget(controller, '/path?pathname=say-example'),
       error => error.code === 'INVALID_PATH' && error.status === 409);
   }
 });
@@ -153,8 +153,8 @@ test('duplicate public pathnames reject reads and writes even across types or co
 test('unpublished and private plugin targets stay inaccessible', async() => {
   for (const patch of [{status: 0}, {is_public: 0}]) {
     const controller = targetController([{...published, ...patch}]);
-    assert.equal(await resolveCommentPostId(controller, '/says/say-example'), null);
-    await assert.rejects(new CommentService().validateCommentTarget(controller, '/says/say-example'),
+    assert.equal(await resolveCommentPostId(controller, '/path?pathname=say-example'), null);
+    await assert.rejects(new CommentService().validateCommentTarget(controller, '/path?pathname=say-example'),
       error => error.code === 'COMMENT_DISABLED');
   }
 });
@@ -163,7 +163,7 @@ test('closed and password-protected plugin targets still reject comment submissi
   const service = new CommentService();
   for (const patch of [{allow_comment: 0}, {options: {postPasswordHash: 'protected'}}]) {
     const controller = targetController([{...published, ...patch}]);
-    await assert.rejects(service.validateCommentTarget(controller, '/says/say-example'),
+    await assert.rejects(service.validateCommentTarget(controller, '/path?pathname=say-example'),
       error => error.code === 'COMMENT_DISABLED');
   }
 });
@@ -189,12 +189,55 @@ test('overlapping custom permalink candidates reject different records', async()
 test('comment count synchronization uses the same pathname and ID resolution and skips ambiguity', async() => {
   global.think.cache = async() => {};
   const service = new CommentService();
-  for (const url of ['/says/say-example', '/entry/21']) {
+  for (const url of ['/path?pathname=say-example', '/entry/21']) {
     const controller = targetController([published], {post_permalink: '/entry/{id}'});
     await service.syncCount(controller, url);
     assert.deepEqual(controller.updates, [{where: {id: 21}, patch: {comment_num: 4}}]);
   }
   const controller = targetController([published, {...published, id: 22}]);
-  await service.syncCount(controller, '/says/say-example');
+  await service.syncCount(controller, '/path?pathname=say-example');
   assert.deepEqual(controller.updates, []);
+});
+
+test('explicit type disambiguates pathnames and constrains reads, writes and counts', async() => {
+  const controller = targetController([published, {...published, id: 22, type: 0}]);
+  const service = new CommentService();
+  for (const [type, id] of [[3, 21], [0, 22]]) {
+    const url = `/path?pathname=say-example&type=${type}`;
+    assert.equal(await resolveCommentPostId(controller, url), id);
+    assert.equal((await service.validateCommentTarget(controller, url)).id, id);
+    await service.syncCount(controller, url);
+    assert.equal(controller.updates.at(-1).where.id, id);
+  }
+  assert.equal(await resolveCommentPostId(controller, '/path?pathname=say-example&type=1'), null);
+  await assert.rejects(service.validateCommentTarget(controller, '/path?pathname=say-example&type=1'),
+    error => error.code === 'COMMENT_DISABLED');
+  const duplicate = targetController([published, {...published, id: 23}]);
+  assert.equal(await resolveCommentPostId(duplicate, '/path?pathname=say-example&type=3'), null);
+});
+
+test('invalid explicit parameters cannot fall back to an ordinary permalink', async() => {
+  const options = {post_permalink: '/{slug}'};
+  const controller = targetController([{...published, pathname: 'path'}], options);
+  for (const url of [
+    '/path', '/path?pathname=', '/path?pathname=%20', '/path?pathname=%00',
+    '/path?pathname=%E4', '/path?pathname=%ZZ', '/path?pathname=a&pathname=b',
+    '/path?pathname=a&type=', '/path?pathname=a&type=-1', '/path?pathname=a&type=1.5',
+    '/path?pathname=a&type=abc', '/path?pathname=a&type=9007199254740992',
+    '/path?pathname=a&type=3&type=0'
+  ]) {
+    assert.equal(pathnameFromUrl(url, options), null, url);
+    assert.equal(await resolveCommentPostId(controller, url, options), null, url);
+    await assert.rejects(new CommentService().validateCommentTarget(controller, url),
+      error => error.code === 'INVALID_PATH');
+  }
+  assert.equal(controller.queries.length, 0);
+});
+
+test('explicit pathnames preserve encoded delimiters and do not imply plugin routing', async() => {
+  assert.deepEqual(pathnameFromUrl('/path?type=3&pathname=a%2Fb%3Fc%23d%26e%2Bf'),
+    {pathname: 'a/b?c#d&e+f', type: 3});
+  const controller = targetController([published]);
+  assert.equal(pathnameFromUrl('/says/say-example'), null);
+  assert.equal(await resolveCommentPostId(controller, '/says/say-example'), null);
 });
