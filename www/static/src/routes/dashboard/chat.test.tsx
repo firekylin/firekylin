@@ -1,6 +1,7 @@
 import React from 'react';
+import {setImmediate as nextSchedulerTurn} from 'node:timers';
 import {render, screen, fireEvent, waitFor, cleanup, within, act} from '@testing-library/react';
-import {afterEach, beforeEach, expect, it, vi} from 'vitest';
+import {afterAll, afterEach, beforeEach, expect, it, vi} from 'vitest';
 import Chat from './chat';
 import {MemoryRouter, Link} from '../../utils/router';
 vi.mock('../../utils/http', () => ({http: {get: vi.fn()}}));
@@ -35,7 +36,15 @@ beforeEach(() => {
         return {ok: true, json: async() => ({errno: 0, data})};
     }));
 });
-afterEach(() => {cleanup(); vi.unstubAllGlobals()});
+afterEach(async() => {
+    await act(async() => { cleanup() });
+    vi.unstubAllGlobals();
+});
+afterAll(async() => {
+    // Drain Node Scheduler callbacks after all cleanup/act scopes have closed,
+    // including the shared setup's afterEach, before jsdom destroys window.
+    await new Promise<void>(resolve => nextSchedulerTurn(resolve));
+});
 it('shows overview chat entry, sends first message, persists route and renders Markdown', async() => {
     render(<MemoryRouter initialEntries={['/dashboard']}><Chat><div>概览下方三栏</div></Chat></MemoryRouter>);
     expect(screen.getByText('今天想写点什么？')).toBeInTheDocument();
