@@ -195,8 +195,8 @@ function pathnameFromUrl(url, options) {
   return {pathname: pathnames[0]};
 }
 
-function commentTargets(url, options) {
-  const direct = pathnameFromUrl(url, options);
+function commentTargets(url, options, fallback = false) {
+  const direct = fallback ? null : pathnameFromUrl(url, options);
   if (direct) return [direct];
   // Invalid explicit targets must never fall back to a configured permalink.
   if (hasExplicitCommentTarget(url)) return [];
@@ -207,21 +207,28 @@ function commentTargets(url, options) {
 }
 
 async function findCommentTarget(controller, url, options) {
-  const targets = commentTargets(url, options);
+  const batches = [commentTargets(url, options)];
+  if (!hasExplicitCommentTarget(url) && pathnameFromUrl(url, options)) {
+    batches.push(commentTargets(url, options, true));
+  }
   const posts = new Map();
   const queried = new Set();
-  for (const target of targets) {
-    const key = JSON.stringify(target);
-    if (queried.has(key)) continue;
-    queried.add(key);
-    const rows = await controller.model('post').where({
-      ...target, status: firekylin.POST_PUBLISH, is_public: firekylin.POST_PUBLIC
-    }).limit(2)
-      .select();
-    for (const row of rows) posts.set(Number(row.id), row);
-    if (posts.size > 1) return {valid: true, ambiguous: true};
+  for (const targets of batches) {
+    for (const target of targets) {
+      const key = JSON.stringify(target);
+      if (queried.has(key)) continue;
+      queried.add(key);
+      const rows = await controller.model('post').where({
+        ...target, status: firekylin.POST_PUBLISH, is_public: firekylin.POST_PUBLIC
+      }).limit(2)
+        .select();
+      for (const row of rows) posts.set(Number(row.id), row);
+      if (posts.size > 1) return {valid: true, ambiguous: true};
+    }
+    // Preserve direct pathname precedence; only a miss can use permalink fallback.
+    if (posts.size) return {valid: true, post: posts.values().next().value};
   }
-  return {valid: targets.length > 0, post: posts.values().next().value};
+  return {valid: batches.some(targets => targets.length > 0)};
 }
 
 async function resolveCommentPostId(controller, url, options) {

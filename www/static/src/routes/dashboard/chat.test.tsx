@@ -1,4 +1,5 @@
 import React from 'react';
+import {setImmediate as nextSchedulerTurn} from 'node:timers';
 import {render, screen, fireEvent, waitFor, cleanup, within, act} from '@testing-library/react';
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import Chat from './chat';
@@ -35,7 +36,15 @@ beforeEach(() => {
         return {ok: true, json: async() => ({errno: 0, data})};
     }));
 });
-afterEach(() => {cleanup(); vi.unstubAllGlobals()});
+afterEach(async() => {
+    await act(async() => {
+        cleanup();
+        // React's Scheduler uses setImmediate in Node. Let already queued host
+        // callbacks finish while jsdom and the request mocks still exist.
+        await new Promise<void>(resolve => nextSchedulerTurn(resolve));
+    });
+    vi.unstubAllGlobals();
+});
 it('shows overview chat entry, sends first message, persists route and renders Markdown', async() => {
     render(<MemoryRouter initialEntries={['/dashboard']}><Chat><div>概览下方三栏</div></Chat></MemoryRouter>);
     expect(screen.getByText('今天想写点什么？')).toBeInTheDocument();

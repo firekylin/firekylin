@@ -255,3 +255,33 @@ test('explicit query parameters override URL routing regardless of prefix', asyn
   assert.deepEqual(pathnameFromUrl('/path', {post_permalink: '/{slug}'}), {pathname: 'path'});
   assert.equal(pathnameFromUrl('/post/article.html?type=3'), null);
 });
+
+test('legacy post/page URLs fall back to configured ID permalinks when pathname is absent', async() => {
+  const service = new CommentService();
+  global.think.cache = async() => {};
+  for (const prefix of ['post', 'page']) {
+    const options = {[`${prefix}_permalink`]: `/${prefix}/{id}.html`};
+    const controller = targetController([published], options);
+    const url = `/${prefix}/21.html`;
+    assert.equal(await resolveCommentPostId(controller, url, options), 21);
+    assert.equal((await service.validateCommentTarget(controller, url)).id, 21);
+    await service.syncCount(controller, url);
+    assert.deepEqual(controller.updates, [{where: {id: 21}, patch: {comment_num: 4}}]);
+  }
+});
+
+test('legacy fallback preserves direct matches and never rescues ambiguous or explicit targets', async() => {
+  const options = {post_permalink: '/post/{id}.html'};
+  const direct = {...published, id: 22, pathname: '21'};
+  const controller = targetController([published, direct], options);
+  assert.equal(await resolveCommentPostId(controller, '/post/21.html', options), 22);
+  assert.equal((await new CommentService().validateCommentTarget(controller, '/post/21.html')).id, 22);
+  const duplicate = targetController([published, direct, {...direct, id: 23}], options);
+  assert.equal(await resolveCommentPostId(duplicate, '/post/21.html', options), null);
+  await assert.rejects(new CommentService().validateCommentTarget(duplicate, '/post/21.html'),
+    error => error.code === 'INVALID_PATH' && error.status === 409);
+  for (const url of ['/post/21.html?pathname=missing&type=3', '/post/21.html?pathname=&type=3']) {
+    assert.equal(await resolveCommentPostId(controller, url, options), null);
+    await assert.rejects(new CommentService().validateCommentTarget(controller, url));
+  }
+});
