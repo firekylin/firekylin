@@ -146,8 +146,19 @@ async function renderMarkdown(value) {
   return markdown.render(String(value));
 }
 
+function explicitCommentQuery(url) {
+  const value = String(url || '').split('#', 1)[0];
+  const index = value.indexOf('?');
+  return index < 0 ? '' : value.slice(index + 1);
+}
+
+function hasExplicitCommentTarget(url) {
+  const params = new URLSearchParams(explicitCommentQuery(url));
+  return params.has('pathname') || params.has('type');
+}
+
 function explicitCommentPath(url) {
-  const query = String(url || '').split('#', 1)[0].slice('/path'.length);
+  const query = explicitCommentQuery(url);
   try {
     // URLSearchParams tolerates malformed escapes; reject them before decoding.
     decodeURIComponent(query.replace(/\+/g, ' '));
@@ -168,7 +179,7 @@ function explicitCommentPath(url) {
 
 function pathnameFromUrl(url, options) {
   const path = String(url || '').split(/[?#]/, 1)[0];
-  if (path === '/path') return explicitCommentPath(url);
+  if (hasExplicitCommentTarget(url)) return explicitCommentPath(url);
   const match = path.match(/^\/(post|page)\/(.+?)\/?$/);
   if (match) {
     try {
@@ -188,7 +199,7 @@ function commentTargets(url, options) {
   const direct = pathnameFromUrl(url, options);
   if (direct) return [direct];
   // Invalid explicit targets must never fall back to a configured permalink.
-  if (String(url || '').split(/[?#]/, 1)[0] === '/path') return [];
+  if (hasExplicitCommentTarget(url)) return [];
   return permalink.match(String(url || '').split(/[?#]/, 1)[0], options)
     .map(candidate => candidate.params.slug ? {pathname: candidate.params.slug} : {
       id: Number(candidate.params.id) || 0

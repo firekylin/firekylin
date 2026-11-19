@@ -220,7 +220,7 @@ test('invalid explicit parameters cannot fall back to an ordinary permalink', as
   const options = {post_permalink: '/{slug}'};
   const controller = targetController([{...published, pathname: 'path'}], options);
   for (const url of [
-    '/path', '/path?pathname=', '/path?pathname=%20', '/path?pathname=%00',
+    '/path?type=3', '/path?pathname=', '/path?pathname=%20', '/path?pathname=%00',
     '/path?pathname=%E4', '/path?pathname=%ZZ', '/path?pathname=a&pathname=b',
     '/path?pathname=a&type=', '/path?pathname=a&type=-1', '/path?pathname=a&type=1.5',
     '/path?pathname=a&type=abc', '/path?pathname=a&type=9007199254740992',
@@ -240,4 +240,18 @@ test('explicit pathnames preserve encoded delimiters and do not imply plugin rou
   const controller = targetController([published]);
   assert.equal(pathnameFromUrl('/says/say-example'), null);
   assert.equal(await resolveCommentPostId(controller, '/says/say-example'), null);
+});
+
+test('explicit query parameters override URL routing regardless of prefix', async() => {
+  const controller = targetController([published]);
+  for (const prefix of ['/says', '/says1', '/anything/nested', '/post/other.html', '/page/other.html']) {
+    const url = `${prefix}?pathname=say-example&type=3#comments`;
+    assert.deepEqual(pathnameFromUrl(url), {pathname: 'say-example', type: 3});
+    assert.equal(await resolveCommentPostId(controller, url), 21);
+    assert.equal((await new CommentService().validateCommentTarget(controller, url)).id, 21);
+    assert.equal(await resolveCommentPostId(controller, `${prefix}?pathname=&type=3`), null);
+  }
+  assert.deepEqual(pathnameFromUrl('/post/article.html?page=2'), {pathname: 'article'});
+  assert.deepEqual(pathnameFromUrl('/path', {post_permalink: '/{slug}'}), {pathname: 'path'});
+  assert.equal(pathnameFromUrl('/post/article.html?type=3'), null);
 });
