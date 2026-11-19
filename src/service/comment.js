@@ -147,39 +147,53 @@ async function renderMarkdown(value) {
 }
 
 function pathnameFromUrl(url, options) {
-  const match = String(url || '').match(/^\/(post|page)\/(.+?)(?:\.html)?\/?$/);
+  const path = String(url || '').split(/[?#]/, 1)[0];
+  const match = path.match(/^\/(post|page|says)\/(.+?)\/?$/);
   if (match) {
     try {
-      return {type: match[1] === 'page' ? 1 : 0, pathname: decodeURIComponent(match[2].replace(/\.html$/, ''))};
+      // Say paths use the stored pathname verbatim; .html is a legacy post/page suffix.
+      const pathname = match[1] === 'says' ? match[2] : match[2].replace(/\.html$/, '');
+      return {pathname: decodeURIComponent(pathname)};
     } catch {
       return null;
     }
   }
-  const candidates = permalink.match(String(url || '').split(/[?#]/, 1)[0], options);
-  if (candidates.length !== 1 || !candidates[0].params.slug) return null;
-  return {type: candidates[0].type, pathname: candidates[0].params.slug};
+  const candidates = permalink.match(path, options);
+  const pathnames = [...new Set(candidates.map(candidate => candidate.params.slug).filter(Boolean))];
+  if (pathnames.length !== 1 || candidates.some(candidate => !candidate.params.slug)) return null;
+  return {pathname: pathnames[0]};
+}
+
+function commentTargets(url, options) {
+  const direct = pathnameFromUrl(url, options);
+  if (direct) return [direct];
+  return permalink.match(String(url || '').split(/[?#]/, 1)[0], options)
+    .map(candidate => candidate.params.slug ? {pathname: candidate.params.slug} : {
+      id: Number(candidate.params.id) || 0
+    });
+}
+
+async function findCommentTarget(controller, url, options) {
+  const targets = commentTargets(url, options);
+  const posts = new Map();
+  const queried = new Set();
+  for (const target of targets) {
+    const key = JSON.stringify(target);
+    if (queried.has(key)) continue;
+    queried.add(key);
+    const rows = await controller.model('post').where({
+      ...target, status: firekylin.POST_PUBLISH, is_public: firekylin.POST_PUBLIC
+    }).limit(2)
+      .select();
+    for (const row of rows) posts.set(Number(row.id), row);
+    if (posts.size > 1) return {valid: true, ambiguous: true};
+  }
+  return {valid: targets.length > 0, post: posts.values().next().value};
 }
 
 async function resolveCommentPostId(controller, url, options) {
-  const target = pathnameFromUrl(url, options);
-  let post = target ? await controller.model('post').where({...target, status: 3, is_public: 1})
-    .field('id')
-    .find() : {};
-  if (think.isEmpty(post)) {
-    for (const candidate of permalink.match(String(url || '').split(/[?#]/, 1)[0], options)) {
-      const where = candidate.params.slug
-        ? {type: candidate.type, pathname: candidate.params.slug}
-        : {type: candidate.type, id: Number(candidate.params.id) || 0};
-      const found = await controller.model('post').where({...where, status: 3, is_public: 1})
-        .field('id')
-        .find();
-      if (!think.isEmpty(found)) {
-        if (!think.isEmpty(post) && post.id !== found.id) return null;
-        post = found;
-      }
-    }
-  }
-  return post && post.id ? Number(post.id) : null;
+  const result = await findCommentTarget(controller, url, options);
+  return result.post ? Number(result.post.id) : null;
 }
 
 function stringList(value) {
@@ -350,26 +364,14 @@ module.exports = class extends think.Service {
 
   async validateCommentTarget(controller, url) {
     const options = await controller.model('options').getOptions();
-    const direct = pathnameFromUrl(url, options);
-    const targets = direct ? [direct] : permalink.match(String(url || '').split(/[?#]/, 1)[0], options)
-      .map(candidate => candidate.params.slug ? {type: candidate.type, pathname: candidate.params.slug} : {
-        type: candidate.type, id: Number(candidate.params.id) || 0
-      });
-    if (!targets.length) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
-    let post = {};
-    for (const target of targets) {
-      const current = await controller.model('post').where({
-        ...target, status: 3, is_public: 1, allow_comment: 1
-      }).find();
-      if (!think.isEmpty(current)) {
-        if (!think.isEmpty(post) && post.id !== current.id) {
-          throw new CommentError('INVALID_PATH', 409, 'Comment target is ambiguous');
-        }
-        post = current;
-      }
+    const result = await findCommentTarget(controller, url, options);
+    if (!result.valid) throw new CommentError('INVALID_PATH', 400, 'Comment target does not exist');
+    if (result.ambiguous) throw new CommentError('INVALID_PATH', 409, 'Comment target is ambiguous');
+    const post = result.post;
+    if (!post || Number(post.allow_comment) !== firekylin.POST_ALLOW_COMMENT ||
+      !this.canAccessProtectedComments(controller, post)) {
+      throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     }
-    if (think.isEmpty(post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
-    if (!this.canAccessProtectedComments(controller, post)) throw new CommentError('COMMENT_DISABLED', 403, 'Comment is disabled');
     return post;
   }
 
@@ -407,11 +409,7 @@ module.exports = class extends think.Service {
     let postId = Number(target.post_id || target.id || target);
     if (!postId && typeof target === 'string') {
       const options = await controller.model('options').getOptions();
-      const path = pathnameFromUrl(target, options);
-      const post = path ? await controller.model('post').where(path)
-        .field('id')
-        .find() : {};
-      postId = Number(post.id);
+      postId = await resolveCommentPostId(controller, target, options);
     }
     if (!postId) return;
     const count = await controller.model('comment').where({post_id: postId, status: ['NOT IN', ['waiting', 'spam']]}).count();

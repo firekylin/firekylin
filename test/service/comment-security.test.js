@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 global.think = {Service: class {}};
+global.firekylin = {POST_PUBLISH: 3, POST_PUBLIC: 1, POST_ALLOW_COMMENT: 1};
 const CommentService = require('../../src/service/comment');
 const {pathnameFromUrl, renderMarkdown, resolveCommentPostId} = require('../../src/service/comment');
 
@@ -41,8 +42,8 @@ test('comment markdown automatically links safe bare URLs', async() => {
 });
 
 test('comment paths decode browser-encoded post pathnames', () => {
-  assert.deepEqual(pathnameFromUrl('/post/%E4%B8%AD%E6%96%87.html'), {type: 0, pathname: '中文'});
-  assert.deepEqual(pathnameFromUrl('/page/about.html'), {type: 1, pathname: 'about'});
+  assert.deepEqual(pathnameFromUrl('/post/%E4%B8%AD%E6%96%87.html'), {pathname: '中文'});
+  assert.deepEqual(pathnameFromUrl('/page/about.html'), {pathname: 'about'});
   assert.equal(pathnameFromUrl('/post/%E4.html'), null);
 });
 
@@ -57,8 +58,9 @@ test('comment URL resolution ignores unpublished permalink collisions', async() 
     return {
       where(value) { where = value; return this },
       field() { return this },
-      async find() {
-        return rows.find(row => Object.entries(where).every(([key, value]) => row[key] === value)) || {};
+      limit() { return this },
+      async select() {
+        return rows.filter(row => Object.entries(where).every(([key, value]) => row[key] === value));
       }
     };
   }};
@@ -77,4 +79,122 @@ test('comment input enforces configured length and anonymous metadata', () => {
   assert.throws(() => service.validateCommentInput({comment: 'hello', nick: 'A'}, anonymous, config),
     error => error.code === 'VALIDATION_ERROR' && error.details.field === 'mail');
   assert.doesNotThrow(() => service.validateCommentInput({comment: 'hello'}, signedIn, config));
+});
+
+function targetController(rows, options = {}) {
+  const queries = [];
+  const updates = [];
+  return {
+    queries,
+    updates,
+    ctx: {},
+    model(name) {
+      if (name === 'options') return {getOptions: async() => options};
+      let where;
+      let limit;
+      return {
+        where(value) {
+          where = value;
+          queries.push({name, where});
+          return this;
+        },
+        limit(value) {
+          limit = value;
+          return this;
+        },
+        async select() {
+          return rows.filter(row => Object.entries(where).every(([key, value]) => row[key] === value)).slice(0, limit);
+        },
+        async count() {
+          return 4;
+        },
+        async update(patch) {
+          updates.push({where, patch});
+        }
+      };
+    },
+    service() {
+      return {hasCommentAccess: () => false};
+    }
+  };
+}
+
+const published = {id: 21, type: 3, pathname: 'say-example', status: 3, is_public: 1, allow_comment: 1};
+
+test('Say pathnames use the same native target for reads and writes without a type filter', async() => {
+  const controller = targetController([published]);
+  const service = new CommentService();
+  for (const url of ['/says/say-example', '/says/say-example/?page=2#comments', '/post/say-example.html']) {
+    assert.equal(await resolveCommentPostId(controller, url), 21);
+    assert.equal((await service.validateCommentTarget(controller, url)).id, 21);
+  }
+  assert.ok(controller.queries.every(query => !Object.hasOwn(query.where, 'type')));
+});
+
+test('Say paths preserve literal html suffixes and decode once without treating IDs as pathnames', async() => {
+  assert.deepEqual(pathnameFromUrl('/says/%E4%B8%AD%E6%96%87.html'), {pathname: '中文.html'});
+  assert.deepEqual(pathnameFromUrl('/says/a%252Fb'), {pathname: 'a%2Fb'});
+  const controller = targetController([published]);
+  assert.equal(await resolveCommentPostId(controller, '/says/21'), null);
+  assert.equal(await resolveCommentPostId(controller, '/says/%E4'), null);
+  await assert.rejects(new CommentService().validateCommentTarget(controller, '/says/%E4'),
+    error => error.code === 'INVALID_PATH');
+});
+
+test('duplicate public pathnames reject reads and writes even across types or comment flags', async() => {
+  for (const allow_comment of [0, 1]) {
+    const controller = targetController([published, {...published, id: 22, type: 0, allow_comment}]);
+    assert.equal(await resolveCommentPostId(controller, '/says/say-example'), null);
+    await assert.rejects(new CommentService().validateCommentTarget(controller, '/says/say-example'),
+      error => error.code === 'INVALID_PATH' && error.status === 409);
+  }
+});
+
+test('unpublished and private plugin targets stay inaccessible', async() => {
+  for (const patch of [{status: 0}, {is_public: 0}]) {
+    const controller = targetController([{...published, ...patch}]);
+    assert.equal(await resolveCommentPostId(controller, '/says/say-example'), null);
+    await assert.rejects(new CommentService().validateCommentTarget(controller, '/says/say-example'),
+      error => error.code === 'COMMENT_DISABLED');
+  }
+});
+
+test('closed and password-protected plugin targets still reject comment submission', async() => {
+  const service = new CommentService();
+  for (const patch of [{allow_comment: 0}, {options: {postPasswordHash: 'protected'}}]) {
+    const controller = targetController([{...published, ...patch}]);
+    await assert.rejects(service.validateCommentTarget(controller, '/says/say-example'),
+      error => error.code === 'COMMENT_DISABLED');
+  }
+});
+
+test('custom slug and numeric ID permalinks locate plugin records without requiring article type', async() => {
+  const service = new CommentService();
+  for (const [post_permalink, url] of [['/notes/{slug}', '/notes/say-example'], ['/entry/{id}', '/entry/21']]) {
+    const options = {post_permalink};
+    const controller = targetController([published], options);
+    assert.equal(await resolveCommentPostId(controller, url, options), 21);
+    assert.equal((await service.validateCommentTarget(controller, url)).id, 21);
+  }
+});
+
+test('overlapping custom permalink candidates reject different records', async() => {
+  const options = {post_permalink: '/entry/{slug}', page_permalink: '/entry/{id}'};
+  const controller = targetController([published, {...published, id: 22, pathname: '21'}], options);
+  assert.equal(await resolveCommentPostId(controller, '/entry/21', options), null);
+  await assert.rejects(new CommentService().validateCommentTarget(controller, '/entry/21'),
+    error => error.code === 'INVALID_PATH' && error.status === 409);
+});
+
+test('comment count synchronization uses the same pathname and ID resolution and skips ambiguity', async() => {
+  global.think.cache = async() => {};
+  const service = new CommentService();
+  for (const url of ['/says/say-example', '/entry/21']) {
+    const controller = targetController([published], {post_permalink: '/entry/{id}'});
+    await service.syncCount(controller, url);
+    assert.deepEqual(controller.updates, [{where: {id: 21}, patch: {comment_num: 4}}]);
+  }
+  const controller = targetController([published, {...published, id: 22}]);
+  await service.syncCount(controller, '/says/say-example');
+  assert.deepEqual(controller.updates, []);
 });
