@@ -122,6 +122,13 @@ module.exports = class extends Base {
       .select();
   }
 
+  async beforeUpdate(data, options) {
+    const prepared = await super.beforeUpdate(data, options);
+    // Every writer, including the web admin and plugins, advances the desktop baseline.
+    prepared.revision = ['exp', 'revision + 1'];
+    return prepared;
+  }
+
   async afterUpdate(data, options) {
     await super.afterUpdate(data, options);
     return this.clearCache();

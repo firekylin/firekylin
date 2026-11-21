@@ -128,6 +128,86 @@ test('live ThinkJS OAuth login, consent, MCP calls, refresh and revocation survi
       client_id: client.client_id, resource: params.resource, refresh_token: tokens.refresh_token}))).status, 400);
     await fetch(origin + '/oauth/revoke', form({token: refreshed.access_token}));
     assert.equal((await mcp('tools/list', {}, refreshed.access_token)).status, 401);
+    // The desktop resource has an independent grant and never accepts MCP tokens.
+    const discovery = await fetch(origin + '/desktop/v1/discovery');
+    assert.equal((await discovery.json()).apiVersion, 1);
+    assert.equal((await fetch(origin + '/desktop/v1/identity', {
+      headers: {authorization: 'Bearer ' + tokens.access_token}
+    })).status, 401);
+    const desktopRegistration = await fetch(origin + '/desktop/oauth/register', {method: 'POST',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({client_name: 'Native desktop test', redirect_uris: ['http://127.0.0.1:4001/callback']})});
+    assert.equal(desktopRegistration.status, 201);
+    const desktopClient = await desktopRegistration.json();
+    const desktopParams = {...params, client_id: desktopClient.client_id,
+      redirect_uri: desktopClient.redirect_uris[0], resource: origin + '/desktop/v1', scope: 'desktop:content'};
+    const desktopConsent = await fetch(origin + '/desktop/oauth/authorize?' + new URLSearchParams(desktopParams), {
+      headers: {cookie}
+    });
+    const desktopCSRF = /name="csrf" value="([^"<>]+)"/.exec(await desktopConsent.text())[1];
+    const desktopApproved = await fetch(origin + '/desktop/oauth/authorize', {
+      ...form({...desktopParams, csrf: desktopCSRF, decision: 'allow'}), headers: {...form({}).headers, cookie}
+    });
+    const desktopCode = new URL(desktopApproved.headers.get('location')).searchParams.get('code');
+    const desktopExchange = await fetch(origin + '/desktop/oauth/token', form({grant_type: 'authorization_code',
+      client_id: desktopClient.client_id, redirect_uri: desktopParams.redirect_uri, resource: desktopParams.resource,
+      code: desktopCode, code_verifier: verifier}));
+    assert.equal(desktopExchange.status, 200);
+    const desktopTokens = await desktopExchange.json();
+    assert.equal((await mcp('tools/list', {}, desktopTokens.access_token)).status, 401);
+    async function desktop(route, method = 'GET', input, key = crypto.randomUUID()) {
+      const response = await fetch(origin + '/desktop/v1/' + route, {method,
+        headers: {authorization: 'Bearer ' + desktopTokens.access_token, 'content-type': 'application/json',
+          'idempotency-key': key}, body: input === undefined ? undefined : JSON.stringify(input)});
+      return {status: response.status, body: await response.json()};
+    }
+    const identity = await desktop('identity');
+    assert.equal(identity.body.id, '1');
+    assert.equal(identity.body.capabilities.publish, true);
+    const createKey = crypto.randomUUID();
+    const articleInput = {title: 'Desktop article', pathname: 'desktop-article', body: '**Native content**',
+      visibility: 1, comments: 1, action: 'publish'};
+    const article = await desktop('articles', 'POST', articleInput, createKey);
+    assert.equal(article.status, 200, JSON.stringify(article.body));
+    assert.equal(article.body.status, 3);
+    assert.equal((await desktop('articles', 'POST', articleInput, createKey)).body.id, article.body.id);
+    assert.equal((await desktop('pages/' + article.body.id)).status, 404);
+    const revised = await desktop('articles/' + article.body.id, 'PUT', {
+      revision: article.body.revision, body: 'Updated from desktop', action: 'update'});
+    assert.equal(revised.status, 200, JSON.stringify(revised.body));
+    assert.equal((await desktop('articles/' + article.body.id, 'PUT', {
+      revision: article.body.revision, body: 'Must not overwrite', action: 'update'})).status, 409);
+    const page = await desktop('pages', 'POST', {title: 'Desktop page', pathname: 'desktop-page', body: 'Page body'});
+    assert.equal(page.status, 200, JSON.stringify(page.body));
+    assert.equal(page.body.kind, 'page');
+    assert.equal((await desktop('pages?keyword=Desktop')).body.items.length, 1);
+    const timestamp = '2026-11-14 12:00:00';
+    const commentId = Number(db.prepare(`INSERT INTO fk_comment
+      (post_id, url, comment, nick, status, inserted_at, created_at, updated_at, pid, rid)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '')`).run(article.body.id,
+      '/post/desktop-article.html', 'Pending reader comment', 'Reader', 'waiting', timestamp, timestamp, timestamp).lastInsertRowid);
+    assert.equal((await desktop('comments?status=waiting')).body.items.some(row => row.id === commentId), true);
+    const moderation = await desktop('comments/' + commentId, 'POST', {action: 'approved'});
+    assert.equal(moderation.status, 200, JSON.stringify(moderation.body));
+    assert.equal(moderation.body.status, 'approved');
+    const replyKey = crypto.randomUUID();
+    const reply = await desktop('comments/' + commentId, 'POST', {action: 'reply', body: 'Thanks for reading'}, replyKey);
+    assert.equal(reply.status, 200, JSON.stringify(reply.body));
+    assert.equal((await desktop('comments/' + commentId, 'POST', {action: 'reply', body: 'Thanks for reading'}, replyKey)).body.id,
+      reply.body.id);
+    const uploaded = await desktop('media', 'POST', {name: 'notes.txt', mime: 'text/html',
+      base64: Buffer.from('A small attachment').toString('base64')});
+    assert.equal(uploaded.status, 200, JSON.stringify(uploaded.body));
+    assert.equal(uploaded.body.mime, 'text/plain');
+    assert.match(uploaded.body.url, /^http:\/\/127\.0\.0\.1:/);
+    assert.equal((await desktop('media/' + uploaded.body.id, 'DELETE', {})).body.storedFileRetained, true);
+    await stop(child);
+    await start();
+    assert.equal((await desktop('operations/' + createKey)).body.result.id, article.body.id);
+    assert.equal((await desktop('articles', 'POST', articleInput, createKey)).body.id, article.body.id);
+    assert.equal((await desktop('pages/' + page.body.id, 'DELETE', {revision: page.body.revision})).body.deleted, true);
+    await fetch(origin + '/desktop/oauth/revoke', form({token: desktopTokens.access_token}));
+    assert.equal((await desktop('identity')).status, 401);
     db.prepare('UPDATE fk_user SET status=2 WHERE id=1').run();
     assert.equal((await mcp('tools/list', {})).status, 401);
   } finally {
