@@ -70,3 +70,14 @@ imageContext.streamResponse(new Response(''));
 imageContext.streamResponse(new Response(''), 'anthropic');
 // @ts-expect-error async parsers do not own the stream lifecycle
 imageContext.streamResponse(new Response(''), {format: 'sse', parse: async () => ({done: true})});
+
+async function checkSiteRoute(context: Firekylin.SiteRouteContext) {
+  const html: string | undefined = await context.renderTheme('list', {say: {items: []}});
+  // @ts-expect-error view data must be an object
+  context.renderTheme('list', 'invalid');
+  return html;
+}
+
+async function checkPluginRoute(context: Firekylin.PluginRouteContext) {
+  if (context.renderTheme) return context.renderTheme('detail');
+}

@@ -410,6 +410,51 @@ ctx.routes.register({
 
 Action handler 接收 `{ctx, params, query, body, plugin}`，返回值自动作为 HTTP 响应体。路由冲突会在注册时拒绝，插件停用时自动移除路由。
 
+### 使用活动主题渲染站点页面
+
+`scope: 'site'` 的 handler 额外收到请求级 `renderTheme(name, data)`。它只在调用时
+初始化前台渲染上下文，查找当前主题的 `plugins/<plugin-id>/<name>.eta`，返回
+`Promise<string | undefined>`。例如插件 ID 为 `say` 时：
+
+```js
+ctx.routes.register({
+  scope: 'site',
+  path: '/says',
+  async handler({ctx: requestContext, renderTheme}) {
+    const model = await loadPublicSayPage(); // 插件负责查询、权限及分页
+    const html = await renderTheme('list', {say: model});
+    requestContext.type = 'text/html; charset=utf-8';
+    return html === undefined ? renderDefaultPage(model) : html;
+  }
+});
+```
+
+主题可以创建 `plugins/say/list.eta`：
+
+```eta
+<% layout('../../layout') %>
+<% const site = await firekylin.widget('Widget_Options'); %>
+<h1><%= site.title() %></h1>
+<%~ await includeAsync('./items', {say: firekylin.say}) %>
+```
+
+附加数据进入正常的 `firekylin` 视图对象（这里是 `firekylin.say`），不能覆盖核心
+视图变量或已注册的辅助函数。数据必须是普通对象。模板可以复用当前主题的 Widget、
+`layout`、相对路径 include、翻译 `t`、`firekylin.plugin`、filters、slots 和 comment。
+渲染会触发正常的 `theme.beforeRender` / `theme.afterRender` Hook，后者的 `response`
+是渲染结果字符串。HTML 默认仍按 Eta 的规则转义，只有可信 HTML 才使用 `<%~ ... %>`。
+
+- `name` 必须是插件代码选定的固定名称，仅允许字母、数字、下划线和连字符，并以
+  字母或数字开头，不包含扩展名或路径。不要直接使用请求参数作为模板名。
+- 模板路径固定在活动主题内，不会查找根目录同名模板或其他主题，也不允许通过符号链接越过主题根目录。
+- 仅当对应的可选模板不存在时返回 `undefined`，包括活动主题目录尚未安装的情况。
+  空字符串是有效渲染结果。语法、执行、权限以及缺失 include/layout 等错误会拒绝 Promise，
+  插件不应捕获所有错误再退回默认页面。
+- 该 API 仅返回 HTML，不修改响应体、状态码、Content-Type，不根据 `.json` URL 自动输出数据。
+  插件继续负责响应类型、缓存策略、内容权限和默认页面；不会改变其他路由或普通 API 的行为。
+- 面向旧 core 的插件可先检测 `typeof renderTheme === 'function'`，不可用时保留原有页面。
+  插件 API 命名空间路由（默认 `scope: 'plugin'`）不会收到此 helper。
+
 ## 后台 UI 扩展
 
 插件可以用声明式 API 增加管理员侧栏面板、页面、表单和动作。后台外观、路由、权限和
