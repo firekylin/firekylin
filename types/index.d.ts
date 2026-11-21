@@ -2,6 +2,25 @@ declare namespace Firekylin {
   type TranslationVars = Record<string, string | number | boolean | null | undefined>;
   type Translator = (key: string, vars?: TranslationVars) => string;
 
+  /** Render an optional plugins/<pluginId>/<name>.eta template in the active theme.
+   * Returns undefined only when the override is absent; rendering errors reject.
+   */
+  type RenderTheme = (name: string, data?: Record<string, unknown>) => Promise<string | undefined>;
+
+  interface PluginRouteContext {
+    ctx: any;
+    params: Record<string, string>;
+    query: Record<string, unknown>;
+    body: unknown;
+    plugin: string;
+    /** Only provided to handlers registered with scope: 'site'. */
+    renderTheme?: RenderTheme;
+  }
+
+  interface SiteRouteContext extends PluginRouteContext {
+    renderTheme: RenderTheme;
+  }
+
   interface TranslationContext {
     readonly t: Translator;
   }

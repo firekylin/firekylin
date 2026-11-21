@@ -14,13 +14,16 @@ module.exports = class extends think.Controller {
   /**
    * some base method in here
    */
-  async __before() {
+  initViewContext() {
     this.widgetFactory = new WidgetFactory(this);
     const widget = this.widgetFactory.widget.bind(this.widgetFactory);
     widget.destroy = this.widgetFactory.destroy.bind(this.widgetFactory);
     this.assign('widget', widget);
     if (firekylin.plugins) this.assign(firekylin.plugins.templateContext(this));
+  }
 
+  async __before() {
+    this.initViewContext();
     let options;
     try {
       const optionsWidget = await this.getWidget('Widget_Options');
@@ -36,6 +39,10 @@ module.exports = class extends think.Controller {
       return this.redirect('/index/install');
     }
 
+    this.prepareThemeView(options);
+  }
+
+  prepareThemeView(options) {
     this.options = options;
     this.assign('comment', renderOptions => this.service('comment-render').render(this, renderOptions));
     this.assign('VERSION', pack.version);
@@ -47,6 +54,25 @@ module.exports = class extends think.Controller {
     this.widgetFactory.useTheme(getContext().themesPath, theme);
 
     this.assign('currentYear', (new Date()).getFullYear());
+  }
+
+  themeViewConfig() {
+    return {
+      viewPath: this.THEME_VIEW_PATH,
+      options: {
+        varName: 'firekylin',
+        functionHeader: 'const t = firekylin.t;'
+      }
+    };
+  }
+
+  // Render HTML without changing the response or interpreting a .json URL.
+  async renderThemeView(name) {
+    const viewContext = {controller: this, name, theme: this.options && this.options.theme};
+    await emit('theme.beforeRender', viewContext);
+    const html = await this.render(path.join(this.THEME_VIEW_PATH, name + '.eta'), this.themeViewConfig());
+    await emit('theme.afterRender', {...viewContext, response: html});
+    return html;
   }
 
   getWidget(name, params = {}) {
@@ -75,13 +101,7 @@ module.exports = class extends think.Controller {
       return true;
     }
 
-    const result = await this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'), {
-      viewPath: this.THEME_VIEW_PATH,
-      options: {
-        varName: 'firekylin',
-        functionHeader: 'const t = firekylin.t;'
-      }
-    });
+    const result = await this.display(path.join(this.THEME_VIEW_PATH, name + '.eta'), this.themeViewConfig());
     await emit('theme.afterRender', {...viewContext, response: this.ctx.body});
     return result;
   }

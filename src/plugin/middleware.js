@@ -82,7 +82,10 @@ module.exports = function pluginRoutes() {
     const params = {};
     route.names.forEach((name, index) => { params[name] = decodeURIComponent(match[index + 1]) });
     const result = await route.handler({
-      ctx, params, query: ctx.query, body: requestBody(ctx), plugin: route.pluginId
+      ctx, params, query: ctx.query, body: requestBody(ctx), plugin: route.pluginId,
+      ...(route.scope === 'site' ? {
+        renderTheme: (name, data) => require('./theme-render')(ctx, route.pluginId, name, data)
+      } : {})
     });
     if (typeof result !== 'undefined') ctx.body = result;
   };
